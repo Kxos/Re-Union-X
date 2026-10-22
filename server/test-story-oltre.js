@@ -405,6 +405,16 @@ for (const k of ['KHUX_BGM_OLTRE', 'KHUX_STAGE_113', 'KHUX_WIKI_QUESTS', 'KHUX_O
   clearUpTo(979);
   r = call(t.respondStageList);
   check(r.newStageId === 991001, `979 finite -> il tour 991001 dopo la storia (${r.newStageId})`);
+  // I-201: completata = playStatus 2 anche senza obiettivi; tutto completato (anche i tour) -> newStageId 0
+  check(r.stories.filter((x) => x.stageId !== 991001).every((x) => x.playStatus === 2), 'storia superata: playStatus 2');
+  p.clearMissions[sidOf(979)] = [2, 3];
+  r = call(t.respondStageList);
+  const e979 = r.stories.find((x) => x.stageId === sidOf(979));
+  check(e979.playStatus === 2 && JSON.stringify(e979.clearMissionIds) === '[2,3]', `979 con 2 obiettivi: ${JSON.stringify(e979)}`);
+  for (const x of out) if (x.stageKind === 1) p.stageScores[x.stageId] = 1;
+  r = call(t.respondStageList);
+  check(r.newStageId === 0 && r.stories.every((x) => x.playStatus === 2), `tutto superato: newStageId ${r.newStageId}`);
+  delete p.clearMissions[sidOf(979)];
   // storia superata fino alla 979 (lastStoryStageId, Beginner 30, shop): non piu' ferma alla 525
   clearUpTo(600);
   check(quiet(() => t.stageNumber(t.lastStoryStageId())) === 600, `storia fino alla 600: ${quiet(() => t.stageNumber(t.lastStoryStageId()))}`);

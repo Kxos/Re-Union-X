@@ -129,6 +129,35 @@ check(t.ownedKeyblades().some((k) => k.keybladeId === 8000), 'Sleeping Lion dall
   const b = call(t.respondStageClear, { getPoint: { lux: 0 }, clearMissionIds: [1, 2, 3] });
   check(b.clearMissionIds.length === 3 && p.clearMissions[r801.stageId].length === 3, '801: tutti e tre insieme');
 }
+// I-201: elenco come l'originale. playStatus 2 per ogni Proud superata, con 0, 1, 2 o 3 obiettivi (il COMPLETE
+// della Proud non dipende dagli obiettivi); clearMissionIds = gli obiettivi compiuti (le spunte sotto la casella)
+{
+  const lst = call(t.respondProudList);
+  const of = (q) => lst.stories.find((x) => x.stageId === byQ.get(q).stageId);
+  check(of(1).playStatus === 2 && JSON.stringify(of(1).clearMissionIds) === '[1,2]', `Proud 1 (2 obiettivi su 3): ${JSON.stringify(of(1))}`);
+  check(of(2).playStatus === 2 && of(2).clearMissionIds.length === 0, `Proud 2 (nessun obiettivo): ${JSON.stringify(of(2))}`);
+  check(lst.stories.filter((x) => x.playStatus !== 2).length === 1 && lst.stories[lst.stories.length - 1].playStatus === 0,
+    'solo la prossima Proud senza playStatus 2');
+  // 801 superata con 2 obiettivi su 3 «tutti insieme»: completata, ma nessuna spunta; poi tutti e tre: tre spunte
+  const r801 = byQ.get(801);
+  const keep = { ...p.stageScores }, keepM = { ...p.clearMissions };
+  for (const x of rows) if (x.id - 1000000 < 801) p.stageScores[x.stageId] = p.stageScores[x.stageId] || 1;
+  delete p.clearMissions[r801.stageId];
+  p.currentStageId = r801.stageId; p.stageInProgress = true;
+  call(t.respondStageClear, { getPoint: { lux: 0 }, clearMissionIds: [1, 2] });
+  let e = call(t.respondProudList).stories.find((x) => x.stageId === r801.stageId);
+  check(e && e.playStatus === 2 && e.clearMissionIds.length === 0, `801 con 2 su 3: completata senza spunte ${JSON.stringify(e)}`);
+  p.currentStageId = r801.stageId; p.stageInProgress = true;
+  call(t.respondStageClear, { getPoint: { lux: 0 }, clearMissionIds: [1, 2, 3] });
+  e = call(t.respondProudList).stories.find((x) => x.stageId === r801.stageId);
+  check(e && e.playStatus === 2 && JSON.stringify(e.clearMissionIds) === '[1,2,3]', `801 tutti insieme: tre spunte ${JSON.stringify(e)}`);
+  // tutte le Proud superate: newStageId 0 (COMPLETE anche sull'ultima, «Coming Soon!» dopo)
+  for (const x of rows) p.stageScores[x.stageId] = p.stageScores[x.stageId] || 1;
+  const all = call(t.respondProudList);
+  check(all.newStageId === 0 && all.stories.length === rows.length && all.stories.every((x) => x.playStatus === 2),
+    `tutte le Proud superate: newStageId ${all.newStageId}, ${all.stories.length}/${rows.length}`);
+  p.stageScores = keep; p.clearMissions = keepM;
+}
 // Q555 Proud, variante dell'Unione 2: riga 1018300, mappa 18301
 check(t.stageRowOf(1018301)?.stageId === 1018300 && t.poiStageId(1018301) === 18301, 'Q555 Proud: variante 1018301 -> riga 1018300, mappa 18301');
 

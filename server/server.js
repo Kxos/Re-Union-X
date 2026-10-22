@@ -3745,7 +3745,14 @@ function respondPvp(res, p, method, body) {
   // /pvp/entry, /pvp/lock, /pvp/clear (194, non analizzata) e altro: il solo involucro
   return send(res, 200, { ret: ret() });
 }
+// playStatus di un elemento di stories[] (verificato sul client, I-201): 0 = mai completata (badge «NEW» nell'elenco
+// Story), 2 = completata (timbro «COMPLETE» sul riquadro TARGET della Story). Il timbro dipende solo dal completamento,
+// non dagli obiettivi: le tre spunte sotto la casella vengono da clearMissionIds. Nella Proud il timbro e «NEW» vengono
+// invece da newStageId (COMPLETE = stage prima di newStageId, o newStageId 0).
 const STAGE_CLEARED = Number(process.env.KHUX_STAGE_CLEARED || 2);
+// newStageId quando tutte le missioni dell'elenco sono completate: 0 (il client mette il cursore sull'ultima, mostra
+// «Coming Soon!» nelle caselle chiuse e, nella Proud, COMPLETE anche sull'ultima)
+const ALL_CLEARED_NEW_STAGE = 0;
 
 // prima missione di storia non ancora finita, nell'ordine di respondStageList
 function nextStoryRow() {
@@ -3759,7 +3766,7 @@ function respondStageList(res) {
   // newStageId, luxRank, openRankingId (uint).
   // Gli stage completati (player.stageScores: stageId -> record di Lux) e poi il primo
   // non ancora completato, nell'ordine del numero di missione (campo id della tabella
-  // stage). playStatus: 0 = nuovo, STAGE_CLEARED (2, da verificare) = completato.
+  // stage). playStatus: 0 = nuovo, STAGE_CLEARED (2) = completato; newStageId 0 se sono tutte completate.
   const stages = masterRows('stage').filter((r) => r.stageKind === 1).sort((a, b) => a.id - b.id);
   const scores = player.stageScores || {};
   const stories = [];
@@ -3774,7 +3781,10 @@ function respondStageList(res) {
       break;
     }
   }
-  if (!stories.length) stories.push({ stageId: START_STAGE_ID, useAp: 0, score: 0, playStatus: 0, clearMissionIds: [] });
+  if (!stories.length) {
+    stories.push({ stageId: START_STAGE_ID, useAp: 0, score: 0, playStatus: 0, clearMissionIds: [] });
+    next = { stageId: START_STAGE_ID };
+  }
   // Prova automatica delle missioni (tools/ldplayer/smoke_quests.ps1): se esiste
   // save/smoke.json {"stageId": N} l'elenco contiene solo quella missione, nuova;
   // {"stageIds": [N, ...]} (es. i tour 991001-991008) contiene solo quelle, tutte nuove
@@ -3792,7 +3802,7 @@ function respondStageList(res) {
   send(res, 200, {
     ret: ret(),
     stories,
-    newStageId: next ? next.stageId : stories[stories.length - 1].stageId,
+    newStageId: next ? next.stageId : ALL_CLEARED_NEW_STAGE,
     luxRank: 0,
     openRankingId: 0,
   });
@@ -3851,7 +3861,7 @@ function respondProudList(res) {
   send(res, 200, {
     ret: ret(),
     stories,
-    newStageId: next ? next.stageId : stories.length ? stories[stories.length - 1].stageId : 0,
+    newStageId: next ? next.stageId : ALL_CLEARED_NEW_STAGE, // chiusa (stories []) = 0 anche lei
     luxRank: 0,
     openRankingId: 0,
   });
