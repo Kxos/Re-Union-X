@@ -641,11 +641,17 @@ JP_LWF += ['lwf/character/npc/%d/wait' % n for n in NPC_JP]
 # al posto delle nostre di make_pet_training_fx.py (come le LWF della guilt, I-163)
 JP_LWF += ['lwf/medal/Kakusei/Kakusei_Get1', 'lwf/medal/Kakusei/Kakusei_Get2']
 JP_LWF += ['lwf/medal/Kakusei/Kakusei_Icon%04d' % n for n in (10, 20, 30, 40, 50, 60, 61, 70, 80, 90, 100)]
+# RESULTS di una quest «Must clear all together» (Proud 801+, combinedSubmissionFlag 1, I-202): con tutti e tre gli
+# obiettivi compiuti insieme il client mostra questa animazione unica al posto delle tre Result_Clear_On_eff; senza il
+# file la salta e non si vede nessuna spunta (banco 22-10, Proud 979). La sua texture (Result_Clear_Challenge_On) sta
+# solo in Result_Clear_On_eff: riempimento da LWF_FILL
+JP_LWF += ['lwf/battleresult/Result_Clear_On_eff_all']
 # Texture citate dal LWF ma assenti dall'estrazione JP: il nome e' <cartella>_<nome originale in
 # esadecimale>.png e lo stesso nome originale (effetti KeyBlade_ef*, png_ef0*, star01, 進化_KeyBlade_
 # ef*) sta in altre LWF. Senza, il client non disegna quei pezzi: «COMPLET» senza la seconda E
 # (banco 14-10). Prima le LWF JP, poi la Result_Reward servita (gia' BTF, estratta in layouts\orig).
 LWF_FILL = [os.path.join(JP_ROOT, 'lwf', 'battleresult', 'Result_Reward'),
+            os.path.join(JP_ROOT, 'lwf', 'battleresult', 'Result_Clear_On_eff'),
             os.path.join(JP_ROOT, 'lwf', 'adventure', 'Colosseum_Open'),
             os.path.join(JP_ROOT, 'lwf', 'battle', 'Burst_Medal_Change'),
             os.path.join(D, 'layouts', 'orig', 'lwf', 'battleresult', 'Result_Reward')]

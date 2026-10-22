@@ -787,7 +787,13 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   medals by name and rarity; medal rewards with `submissionSkillType 1 / SkillLv 1` like 1001010.
 - **Must clear all together**: `combinedSubmissionFlag 1` from 801 (`proudall`; the «Proud Mode» page says «from 800» but
   Q800 has no flag). The client shows the badge (106150400) but reports each objective alone: `respondStageClear` keeps the
-  objectives of a run only if all of them are there.
+  objectives of a run only if all of them are there. RESULTS of such a quest (I-202, bench 22-10): when the three
+  objectives are cleared together for the first time, the screen plays one combined animation,
+  `lwf/battleresult/Result_Clear_On_eff_all` (label `MickeyStart`, sound `ui2_se_000085`), on the widget
+  `Area_Point_SubClear_all` of `BattleResultScene_ver270`, instead of the three per-objective `Result_Clear_On_eff`.
+  The WW resources do not have it (JP 4.3.1 does): without it nothing is shown as cleared, even with a correct
+  response (`clearMissionIds [1,2,3]`). Imported by `import_jp_coco.py` (texture `Result_Clear_Challenge_On` from
+  `Result_Clear_On_eff`). The server response is the same as for a normal quest.
 - **Friends / continue**: `disableContinue 1` (popup line 103000017). `noPartner` stays 0 as in 1001010: the Proud start
   flow has no friend step.
 - **Keyblades** (decision 5): `holdKeyblade` = series id (keybladeId of the lv 0 row); the client uses the player's own

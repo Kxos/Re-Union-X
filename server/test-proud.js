@@ -129,6 +129,39 @@ check(t.ownedKeyblades().some((k) => k.keybladeId === 8000), 'Sleeping Lion dall
   const b = call(t.respondStageClear, { getPoint: { lux: 0 }, clearMissionIds: [1, 2, 3] });
   check(b.clearMissionIds.length === 3 && p.clearMissions[r801.stageId].length === 3, '801: tutti e tre insieme');
 }
+// 979 «Must clear all together» come al banco (22-10): corpo con i tre obiettivi e `conditions`. RESULTS anima il
+// completamento unico solo per gli obiettivi nuovi della partita (assenti da startStageData.clearMissionIds) se ci sono
+// tutti e tre; la risposta deve riportarli tutti e tre, con i tre premi una volta sola
+{
+  const r979 = byQ.get(979);
+  const keepM = { ...p.clearMissions };
+  delete p.clearMissions[r979.stageId];
+  const s = call(t.respondStageStart, { stageId: r979.stageId, userKeybladeId: 1 });
+  check(s.startStageData.clearMissionIds.length === 0, `979: obiettivi gia' compiuti allo start ${s.startStageData.clearMissionIds}`);
+  const have = (id) => p.materials[id] || 0;
+  const items = r979.submissionItemId.map((id) => [id, have(id)]);
+  const body = { getPoint: { lux: 0 }, clearMissionIds: [1, 2, 3], conditions: { '7_1': 1, '10_1': 1, '10_2': 1 } };
+  const c = call(t.respondStageClear, body);
+  check(r979.combinedSubmissionFlag === 1, '979: combinedSubmissionFlag 1');
+  check(JSON.stringify(c.clearMissionIds) === '[1,2,3]' && Array.isArray(c.clearTimeMissionIds) && c.clearTimeMissionIds.length === 0,
+    `979: risposta ${JSON.stringify({ clearMissionIds: c.clearMissionIds, clearTimeMissionIds: c.clearTimeMissionIds })}`);
+  check(JSON.stringify(p.clearMissions[r979.stageId]) === '[1,2,3]', '979: obiettivi salvati');
+  const want = {};
+  r979.submissionItemId.forEach((id, i) => { if (r979.submissionRewardType[i] === 5) want[id] = (want[id] || 0) + r979.submissionItemNum[i]; });
+  check(Object.keys(want).length === 3 && items.every(([id, n]) => have(id) === n + want[id]),
+    `979: premi degli obiettivi ${JSON.stringify(want)} ${JSON.stringify(items.map(([id, n]) => [id, n, have(id)]))}`);
+  // rigiocata: stesse spunte nella risposta, premi non ripetuti, start con i tre gia' compiuti (nessuna animazione nuova)
+  const before = items.map(([id]) => have(id));
+  const s2 = call(t.respondStageStart, { stageId: r979.stageId, userKeybladeId: 1 });
+  check(JSON.stringify(s2.startStageData.clearMissionIds) === '[1,2,3]', `979 rigiocata: start ${s2.startStageData.clearMissionIds}`);
+  const c2 = call(t.respondStageClear, body);
+  check(JSON.stringify(c2.clearMissionIds) === '[1,2,3]' && c2.firstClearFlag === 0, '979 rigiocata: risposta');
+  check(items.every(([id], i) => have(id) === before[i]), '979 rigiocata: premi ripetuti');
+  p.clearMissions = keepM;
+}
+// l'animazione unica di RESULTS (lwf/battleresult/Result_Clear_On_eff_all) non e' nelle risorse WW: la importa il JP
+check(/'lwf\/battleresult\/Result_Clear_On_eff_all'/.test(fs.readFileSync(path.join(__dirname, '..', 'recon', 'tools', 'import_jp_coco.py'), 'utf8')),
+  'Result_Clear_On_eff_all non importata (RESULTS senza spunte nelle quest «tutti insieme»)');
 // I-201: elenco come l'originale. playStatus 2 per ogni Proud superata, con 0, 1, 2 o 3 obiettivi (il COMPLETE
 // della Proud non dipende dagli obiettivi); clearMissionIds = gli obiettivi compiuti (le spunte sotto la casella)
 {
