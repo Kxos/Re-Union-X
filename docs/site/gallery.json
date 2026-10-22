@@ -1,1 +1,14 @@
-[]
+[
+  { "file": "story-quest-555.jpg", "caption": "Story quest 555: the Story continues past 525, with Proud Mode" },
+  { "file": "battle-hades-chamber.jpg", "caption": "A Story battle in Hades' Chamber on the restored server" },
+  { "file": "quest-categories.jpg", "caption": "The Quests menu with all its categories back" },
+  { "file": "shop-banners.jpg", "caption": "The Shop with original banners back in rotation" },
+  { "file": "banner-catalog.jpg", "caption": "Banner Catalog: the original banners with their dates" },
+  { "file": "notices.jpg", "caption": "In-game Notices explaining updates and differences" },
+  { "file": "medal-details.jpg", "caption": "Medal details with level up" },
+  { "file": "keyblade-level-up.jpg", "caption": "Keyblade strengthening with gems" },
+  { "file": "login-bonus.jpg", "caption": "Daily and total Login Bonus restored" },
+  { "file": "missions.jpg", "caption": "Beginner, Daily and Weekly Missions" },
+  { "file": "avatar-board.jpg", "caption": "Avatar Boards unlocked with Avatar Coins" },
+  { "file": "spirit-training.jpg", "caption": "Spirit training, ranks and tricks" }
+]
