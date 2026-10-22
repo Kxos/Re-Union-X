@@ -10,6 +10,8 @@
 #   +absent-ok   texture assenti ovunque tollerate (mai con il 9-slice: quello ferma sempre)
 #   graft=a,b    solo per un layout WW servito: innesta i widget a, b della revisione JP (rev=) sotto lo
 #                stesso genitore, il resto resta WW (eccezione alla regola dei nomi serviti)
+#   restyle=a,b  solo per un layout WW servito: le texture dei widget a, b dalla revisione JP, testi e
+#                posizioni restano WW (la revisione WW servita e' piu' vecchia di quella vista nel Global)
 # «? Nome  # motivo» = da decidere: non si importa, compare solo nel rapporto.
 #
 # Controllo fatto il 13-10-2026 (jp_coco_widgets.py sul decompilato attorno ai caricatori,
@@ -243,3 +245,8 @@ ActMapTimeAttack_TimePanel.json
 # StartDeckProud_Panel_KB(_Ad)_ver230), Panel04_pm, Plate11_pm, Plate18_pm, Deck_Panel_StartDeck_pm (9-slice,
 # crash 0x2c), PMode_Rule_Logo, PMode_Rule_Panel_A, Charge_CloseBut_Off/On; cursore Cursor_Anim_Proud con JP_ARM
 StartDeckProudScene_ver260.json
+# Optimize (Button_Auto) arancione come Equipment negli screenshot Global (reference/proud_mode, optimize,
+# equipment): la revisione WW servita dei tre StartDeck*_Button_ToDeck_ver260 ha But10 (rosso), il JP 4.3.1 But06 (I-203)
+StartDeckProud_Button_ToDeck_ver260.json  restyle=Button_Auto
+StartDeckEdit2_Button_ToDeck_ver260.json  restyle=Button_Auto
+StartDeckMulti_Button_ToDeck_ver260.json  restyle=Button_Auto

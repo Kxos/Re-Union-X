@@ -152,6 +152,8 @@ for ln, line in enumerate(open(args.list, encoding='utf-8'), 1):
                 opts.setdefault('clone', []).append(m.groups())
         elif p.startswith('graft='):            # graft=W1,W2: widget del JP (rev=) innestati nel layout WW servito
             opts.setdefault('graft', []).extend(x for x in p[6:].split(',') if x)
+        elif p.startswith('restyle='):          # restyle=W1,W2: texture dei widget dalla revisione JP (layout WW servito)
+            opts.setdefault('restyle', []).extend(x for x in p[8:].split(',') if x)
         elif p.startswith('set='):              # set=Widget.opzione=valore[,...]: ritocco del layout JP
             for c in p[4:].split(','):
                 m = re.match(r'^([^.=]+)\.([^.=]+)=(.+)$', c)
@@ -375,6 +377,37 @@ def graft_widget(data, jp_file, name):
     return None
 
 
+TEX_KEYS = ('normalData', 'pressedData', 'disabledData', 'fileNameData', 'backGroundImageData')
+
+
+def restyle_widget(data, jp_file, name):
+    """Opzione restyle= (solo radici WW servite): le texture del widget name (pulsante, immagine) prese
+    dalla revisione JP, tutto il resto (testi, posizioni) resta WW. Per i layout WW serviti in una
+    revisione piu' vecchia di quella che il client Global mostrava (es. Button_Auto di
+    StartDeck*_Button_ToDeck_ver260: But10 rosso nel WW, But06 arancione nel JP e negli screenshot)."""
+    if not jp_file:
+        return None, 'revisione JP assente'
+
+    def find(d):
+        return [w for w in walk_widgets(d.get('widgetTree') or {}) if (w.get('options') or {}).get('name') == name]
+    ww, jp = find(data), find(load_json(jp_file))
+    if len(ww) != 1 or len(jp) != 1:
+        return None, 'widget %s: %d nel WW, %d nel JP (serve uno solo)' % (name, len(ww), len(jp))
+    o, oj = ww[0]['options'], jp[0]['options']
+    done = []
+    for k in TEX_KEYS:
+        if isinstance(oj.get(k), dict) and oj[k].get('path') and (o.get(k) or {}).get('path') != oj[k]['path']:
+            done.append('%s %s -> %s' % (k, (o.get(k) or {}).get('path'), oj[k]['path']))
+            o[k] = dict(oj[k])
+    pngs = data.get('texturesPng')
+    if isinstance(pngs, list):
+        for k in TEX_KEYS:
+            t = (o.get(k) or {}).get('path')
+            if t and t not in pngs:
+                pngs.append(t)
+    return done, None
+
+
 # ---- analisi di un layout ---------------------------------------------------------------------
 def scan(data):
     """(sotto-layout, texture [(nome, 9-slice)], plist, nomi dei widget, testi [(dict, chiave)])."""
@@ -482,10 +515,16 @@ for root, opts in roots:
                 r['block'].append('%s: graft %s: %s' % (root, g, err))
             else:
                 r['warn'].append('widget %s innestato dal JP (rev %s)' % (g, PIN.get(root, 'corrente')))
+        for w in opts.get('restyle', []):
+            done, err = restyle_widget(pre[root][1], jp_path(root), w)
+            if err:
+                r['block'].append('%s: restyle %s: %s' % (root, w, err))
+            elif done:
+                r['warn'].append('texture di %s dal JP: %s' % (w, '; '.join(done)))
         plan[root] = ('jp', src, pre[root][1])
         todo = [(root, 'pre')]
-    elif opts.get('graft'):
-        r['block'].append('graft= solo per un layout WW servito')
+    elif opts.get('graft') or opts.get('restyle'):
+        r['block'].append('graft=/restyle= solo per un layout WW servito')
         todo = []
     elif jp_path(root):
         r['kind'] = 'jp'

@@ -814,6 +814,28 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   10 textures (`Deck_Panel_StartDeck_pm` 9-slice included), `Cursor_Anim_Proud` on the slot `ActMapTreasureBoxExAnim0`;
   `PMode_Rule_Logo` JP reads «RULE» (global «CONDITION»: to redraw); needs a new resources version.
 
+<a id="proud-start-popup-check"></a>
+### Start popup compared with the Global screenshots (I-203, 23-10)
+
+- **Skip** (bottom left: Skip button, Skip Ticket icon and count, objective marks): the panel is in the scene and imported;
+  the client shows it only when the player has Skip Tickets, i.e. `userData.userPoint.stageSkipTicket` > 0 (or
+  `superSkipTicket` > 0; with both > 0 the round button next to the count switches between the two kinds, as in the
+  screenshot of Q974). In Proud there is no other condition; the button itself is greyed until the quest is cleared.
+  The Story popup uses the same rule plus «quest already cleared». The test saves `proud979`/`proudall` have no
+  `stageSkipTicket`, so the server sends 0 and the panel is hidden: **correct, nothing to fix**. Tickets come from the
+  Beginner missions (reward type 26). Open: the server echoes `stageSkip` of `/stage/start` but does not spend a ticket.
+- **Optimize** (`Button_Auto` of `StartDeck{Proud,Edit2,Multi}_Button_ToDeck_ver260`): the WW revision served in our
+  resources uses the red button texture `But10`; the JP 4.3.1 revision and every Global screenshot (Proud, Story
+  «Select a Keyblade.») use the orange `But06`, like Equipment. Fix: new option `restyle=` of `import_jp_coco.py`
+  (only for served WW layouts: the widget's textures from the JP revision, texts and positions stay WW) on the three
+  layouts. Needs a new resources version.
+- **Objectives**: Proud 979 «Complete within 3 turns / Complete without having to continue» x 2 is what the khuxwiki page
+  lists in both the NA and the JP fields; 19 Proud pages repeat an objective (66, 142, 904, 909, 925, 963-974, 977, 979).
+  The /Archive pages show that an official update replaced early objectives (e.g. «Defeat N or more enemies» -> «Collect
+  N or more Lux»), which is how Q66 got two identical Lux objectives. No other source disagrees, so the generator keeps
+  them (the master already matches the wiki: `submissionRequire [7,10,10]`). Checked: no Proud row maps two different
+  wiki texts to the same objective (167 and 244 differ by enemy id).
+
 ### What we served before 22-10
 
 - `/stage/hard` has no route: the generic answer from `api_responses_auto_ww431.json` (`stories: []`, `newStageId 0`, ...).
