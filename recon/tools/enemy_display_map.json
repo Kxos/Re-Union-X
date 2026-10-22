@@ -1,0 +1,675 @@
+{
+ "Fat Bandit": {
+  "displayId": 5002,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Gilet arancio, pantaloni verdi, turbante: identico a Fat Bandit KHX"
+ },
+ "Yellow Opera": {
+  "displayId": 5003,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Famiglia Opera: corpo giallo"
+ },
+ "Red Nocturne": {
+  "displayId": 5004,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Famiglia Opera: corpo rosso"
+ },
+ "Blue Rhapsody": {
+  "displayId": 5005,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Famiglia Opera: corpo blu"
+ },
+ "Large Body": {
+  "displayId": 5007,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Corpo blu/viola con lacci, come KHX"
+ },
+ "Bandit": {
+  "displayId": 5008,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Scimitarra, turbante bianco"
+ },
+ "Air Soldier": {
+  "displayId": 5009,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Casco da aviatore con occhialoni, ali da pipistrello, artigli rossi"
+ },
+ "Wizard": {
+  "displayId": 5010,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Cappello viola a punta, bastone con pipistrello"
+ },
+ "Possessor": {
+  "displayId": 5011,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Batuffolo nero con corna viola"
+ },
+ "Possessors": {
+  "displayId": 5011,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Gruppo di Possessor: stessa grafica del singolo (KHUX lo mostra come sciame)"
+ },
+ "Flower Rider": {
+  "displayId": 5013,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Fiore viola con ali-petali verde acqua"
+ },
+ "Large Armor": {
+  "displayId": 5014,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Corpo con elmo, bracciali magenta/oro"
+ },
+ "Armored Archer": {
+  "displayId": 5015,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Elmo grigio, braccia viola, arco rosa (5042 e' una variante: Paralysis Archer DR)"
+ },
+ "Red Bandit": {
+  "displayId": 5016,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Scimitarra rossa, abiti rossi"
+ },
+ "Minute Bomb": {
+  "displayId": 5017,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Bomba blu con occhi gialli e fiamme; non in elenco nemici DR, forma non identica (punta arancio invece della miccia a '?')"
+ },
+ "Creeper Plant": {
+  "displayId": 5018,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Pianta con petali rosa/verdi; nella famiglia Plant DR e' l'unica restante (KHX Creeper Plant ha petali gialli)"
+ },
+ "Fire Plant": {
+  "displayId": 5019,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Petali arancio/rossi"
+ },
+ "Gift Shadow": {
+  "displayId": 5020,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Shadow con cappellino da festa e pacco regalo"
+ },
+ "Chomper Egg": {
+  "displayId": 5021,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Guscio a mezzaluna, ali da pipistrello viola"
+ },
+ "Red Rose": {
+  "displayId": 5022,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Rosa rossa"
+ },
+ "White Rose": {
+  "displayId": 5023,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Rosa bianca (stessa struttura di 5022)"
+ },
+ "Morning Star": {
+  "displayId": 5024,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Sfera chiodata oro/marrone con emblema"
+ },
+ "Eggcognito": {
+  "displayId": 5025,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Uovo bianco/blu a zigzag"
+ },
+ "Growth Egg": {
+  "displayId": 5025,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Usa l'uovo Eggcognito: guscio di colore diverso (KHX grigio/argento)"
+ },
+ "Munny Egg": {
+  "displayId": 5025,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Usa l'uovo Eggcognito: guscio di colore diverso (KHX giallo)"
+ },
+ "Prize Egg": {
+  "displayId": 5025,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Usa l'uovo Eggcognito: guscio di colore diverso (KHX rosso/oro a strisce)"
+ },
+ "Gargoyle": {
+  "displayId": 5026,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Ali viola, corpo rosso, artigli gialli"
+ },
+ "High Wizard": {
+  "displayId": 5027,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Cappello a bocciolo verde/oro, corpo verde acqua, bastone"
+ },
+ "Wyvern": {
+  "displayId": 5028,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Drago rosso con ali e artigli"
+ },
+ "Invisible": {
+  "displayId": 5029,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Armatura blu scura, spada, ali (5064 e' la variante rossa Ogre)"
+ },
+ "Aeroplane": {
+  "displayId": 5031,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Aereo con elica, pilota con casco blu e occhialoni"
+ },
+ "Ice Plant": {
+  "displayId": 5032,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Petali bianco/azzurri"
+ },
+ "Dark Plant": {
+  "displayId": 5033,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Petali viola"
+ },
+ "Powerwild": {
+  "displayId": 5034,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Testa da scimmia grigio-blu con orecchie tonde, coda, parti rosa"
+ },
+ "Nimble Bee": {
+  "displayId": 5035,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Ali di cristallo, pungiglione a righe rosso/giallo"
+ },
+ "Stinging Bee": {
+  "displayId": 5036,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Come 5035 ma pungiglione viola e corpo rosa"
+ },
+ "Gold Tricholoma": {
+  "displayId": 5038,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Cappello dorato a spirale, scintillii"
+ },
+ "Storming Sheep": {
+  "displayId": 5043,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Testa di lana bianca con corna a ricciolo; nessuna immagine di riferimento sul wiki e non e' nell'elenco nemici DR"
+ },
+ "Defender": {
+  "displayId": 5051,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Scudo con muso di cane, corpo viola"
+ },
+ "Armed Warrior": {
+  "displayId": 5065,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "5065 e' Eliminator (DR): Defender rosso; Armed Warrior KHX e' anch'esso rosso con scudo-ingranaggio ma la testa e' diversa"
+ },
+ "Wicked Watermelon": {
+  "displayId": 5052,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Anguria piccola"
+ },
+ "Large Watermelon": {
+  "displayId": 5053,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Anguria grande: 5053 ha foglie e fiori come Huge Watermelon; non esiste una versione DR senza fiori"
+ },
+ "Huge Watermelon": {
+  "displayId": 5053,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Anguria con foglie e fiori gialli"
+ },
+ "Gummi Hammer": {
+  "displayId": 5056,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Corpo poliedrico multicolore, martello arancio con emblema"
+ },
+ "Darkball": {
+  "displayId": 5059,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Sfera viola-blu con spirali rosa"
+ },
+ "Gigas Shadow": {
+  "displayId": 5062,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Shadow grande (pezzo max 133x178, tra Shadow 42x59 e Mega-Shadow 168x236); 5037 e' una taglia intermedia"
+ },
+ "Tornado Step": {
+  "displayId": 5061,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Cappello verde acqua con spirale oro, gambe verde acqua"
+ },
+ "Jack O' Lantern": {
+  "displayId": 5067,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Opera con corpo a zucca"
+ },
+ "Pumpkin Soldier": {
+  "displayId": 5068,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Testa di zucca con cappello da strega, vestito viola"
+ },
+ "Terrible Tomte": {
+  "displayId": 5071,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Cappello da Babbo Natale, barba bianca, piccola Shadow con regalo"
+ },
+ "Strange Tree": {
+  "displayId": 5072,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Albero di Natale"
+ },
+ "Large Snowman": {
+  "displayId": 5073,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Pupazzo di neve con renna-elmo e muffole rosse"
+ },
+ "Huge Snowman": {
+  "displayId": 5073,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Stessa grafica di Large Snowman (anche in KHX identici)"
+ },
+ "Hook Bat": {
+  "displayId": 5078,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Pipistrello blu con uncino rosso"
+ },
+ "Search Ghost": {
+  "displayId": 5079,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Testa a teschio, occhio a spirale giallo, lanterna, artigli grigi"
+ },
+ "Bag O' Jewels": {
+  "displayId": 5080,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Sacco con gemme"
+ },
+ "Bag O' Coins": {
+  "displayId": 5080,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Stesso sacco di Bag O' Jewels; il contenuto sono gemme, non monete"
+ },
+ "Bag O' Coal": {
+  "displayId": 5080,
+  "confidence": "bassa",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Stesso sacco di Bag O' Jewels; KHX ha carbone ardente e colori diversi"
+ },
+ "Bad Dog": {
+  "displayId": 5081,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Collare rosso chiodato, parti blu a spirale; pochi pezzi grandi, ma Bad Dog e' nell'elenco nemici DR"
+ },
+ "Cerberus": {
+  "displayId": 5085,
+  "confidence": "alta",
+  "anims": [
+   "atk1_o",
+   "atkSp",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Teste di lupo nere con fumo (boss DR)"
+ },
+ "Hades": {
+  "displayId": 5086,
+  "confidence": "media",
+  "anims": [
+   "atk1_o",
+   "atkSp",
+   "dead",
+   "knockback",
+   "wait"
+  ],
+  "note": "Tunica nera con bordi rossi e fiamme (boss DR); fiamme gialle nei pezzi, probabilmente tinte dall'animazione"
+ }
+}

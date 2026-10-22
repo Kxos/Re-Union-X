@@ -1,0 +1,5346 @@
+[
+ {
+  "petPartsId": 303001,
+  "name": "Pink Kitstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303002,
+  "name": "Blue Kitstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303003,
+  "name": "Rainbow Kitstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303004,
+  "name": "Pink Pupstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303005,
+  "name": "Blue Pupstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303006,
+  "name": "Rainbow Pupstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303007,
+  "name": "Pink Bunstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303008,
+  "name": "Blue Bunstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303009,
+  "name": "Rainbow Bunstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303010,
+  "name": "Yellow Pigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303011,
+  "name": "Purple Pigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303012,
+  "name": "Black Pigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303013,
+  "name": "Green Reinstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303014,
+  "name": "Blue Reinstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303015,
+  "name": "Gold Reinstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303016,
+  "name": "Blue Moonpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303017,
+  "name": "Orange Moonpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303018,
+  "name": "Black Moonpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303019,
+  "name": "Pink Hamstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303020,
+  "name": "Purple Hamstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303021,
+  "name": "Chocolate Hamstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303022,
+  "name": "Pink Monstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303023,
+  "name": "Green Monstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303024,
+  "name": "Rainbow Monstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303025,
+  "name": "Green Lambstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303026,
+  "name": "Gray Lambstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303027,
+  "name": "Black Lambstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303029,
+  "name": "Green Foxstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303030,
+  "name": "Red Foxstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303031,
+  "name": "White Foxstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303032,
+  "name": "Purple Horstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303033,
+  "name": "Brown Horstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303034,
+  "name": "Rainbow Horstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303038,
+  "name": "Orange Otterstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303039,
+  "name": "Blue Otterstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303040,
+  "name": "Black Otterstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303041,
+  "name": "Pink Giraffestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303042,
+  "name": "Gray Giraffestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303043,
+  "name": "Yellow Giraffestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303044,
+  "name": "Black Flowerkit Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303045,
+  "name": "Purple Flowerkit Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303046,
+  "name": "Spooky Flowerkit Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303050,
+  "name": "Purple Snowpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303051,
+  "name": "Orange Snowpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303052,
+  "name": "Silver Snowpup Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303053,
+  "name": "White Cubstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303054,
+  "name": "Brown Cubstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303055,
+  "name": "Black Cubstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303056,
+  "name": "Yellow Coonstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303057,
+  "name": "Green Coonstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303058,
+  "name": "Brown Coonstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303059,
+  "name": "Red Lionstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303060,
+  "name": "Yellow Lionstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303061,
+  "name": "Gray Lionstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303062,
+  "name": "Purple Moonbun Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303063,
+  "name": "Orange Moonbun Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303064,
+  "name": "Silver Moonbun Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303065,
+  "name": "Blue Wolfstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303066,
+  "name": "Pink Wolfstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303067,
+  "name": "Black Wolfstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303068,
+  "name": "White Alpacastar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303069,
+  "name": "Green Alpacastar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303070,
+  "name": "Black Alpacastar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303071,
+  "name": "Purple Hedgestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303072,
+  "name": "Gray Hedgestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303073,
+  "name": "White Hedgestar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303074,
+  "name": "Green Squirrelstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303075,
+  "name": "Yellow Squirrelstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303076,
+  "name": "Red Squirrelstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303077,
+  "name": "White Mummystar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303081,
+  "name": "[unidentified goat/sheep-like species, gray] Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303082,
+  "name": "[unidentified goat/sheep-like species, black-faced] Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303083,
+  "name": "[unidentified dog-like species, white with wings] Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303084,
+  "name": "Blue Fenstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303085,
+  "name": "Gray Fenstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303086,
+  "name": "Orange Fenstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303087,
+  "name": "Pink Axolstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303088,
+  "name": "Gray Axolstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303089,
+  "name": "Black Axolstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303090,
+  "name": "Yellow Tigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303091,
+  "name": "Brown Tigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303092,
+  "name": "Rainbow Tigstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303093,
+  "name": "Brown Weaselstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303094,
+  "name": "White Weaselstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 303095,
+  "name": "Red Weaselstar Ears",
+  "partsType": 3,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304001,
+  "name": "Pink Kitstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304002,
+  "name": "Blue Kitstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304003,
+  "name": "Rainbow Kitstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304004,
+  "name": "Pink Pupstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304005,
+  "name": "Blue Pupstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304006,
+  "name": "Rainbow Pupstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304007,
+  "name": "Pink Bunstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304008,
+  "name": "Blue Bunstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304009,
+  "name": "Rainbow Bunstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304010,
+  "name": "Yellow Pigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304011,
+  "name": "Purple Pigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304012,
+  "name": "Black Pigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304013,
+  "name": "Green Reinstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304014,
+  "name": "Blue Reinstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304015,
+  "name": "Gold Reinstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304016,
+  "name": "Blue Moonpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304017,
+  "name": "Orange Moonpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304018,
+  "name": "Black Moonpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304019,
+  "name": "Pink Hamstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304020,
+  "name": "Purple Hamstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304021,
+  "name": "Chocolate Hamstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304022,
+  "name": "Pink Monstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304023,
+  "name": "Green Monstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304024,
+  "name": "Rainbow Monstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304025,
+  "name": "Green Lambstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304026,
+  "name": "Gray Lambstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304027,
+  "name": "Black Lambstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304029,
+  "name": "Green Foxstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304030,
+  "name": "Red Foxstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304031,
+  "name": "White Foxstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304032,
+  "name": "Purple Horstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304033,
+  "name": "Brown Horstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304034,
+  "name": "Rainbow Horstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304035,
+  "name": "Purple Tortoistar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304036,
+  "name": "Orange Tortoistar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304037,
+  "name": "Green Tortoistar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304038,
+  "name": "Orange Otterstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304039,
+  "name": "Blue Otterstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304040,
+  "name": "Black Otterstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304041,
+  "name": "Pink Giraffestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304042,
+  "name": "Gray Giraffestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304043,
+  "name": "Yellow Giraffestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304044,
+  "name": "Black Flowerkit Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304045,
+  "name": "Purple Flowerkit Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304046,
+  "name": "Spooky Flowerkit Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304047,
+  "name": "Pink Chameleostar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304048,
+  "name": "Rainbow Chameleostar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304049,
+  "name": "Black Chameleostar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304050,
+  "name": "Purple Snowpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304051,
+  "name": "Orange Snowpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304052,
+  "name": "Silver Snowpup Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304053,
+  "name": "White Cubstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304054,
+  "name": "Brown Cubstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304055,
+  "name": "Black Cubstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304056,
+  "name": "Yellow Coonstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304057,
+  "name": "Green Coonstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304058,
+  "name": "Brown Coonstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304059,
+  "name": "Red Lionstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304060,
+  "name": "Yellow Lionstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304061,
+  "name": "Gray Lionstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304062,
+  "name": "Purple Moonbun Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304063,
+  "name": "Orange Moonbun Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304064,
+  "name": "Silver Moonbun Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304065,
+  "name": "Blue Wolfstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304066,
+  "name": "Pink Wolfstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304067,
+  "name": "Black Wolfstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304068,
+  "name": "White Alpacastar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304069,
+  "name": "Green Alpacastar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304070,
+  "name": "Black Alpacastar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304071,
+  "name": "Purple Hedgestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304072,
+  "name": "Gray Hedgestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304073,
+  "name": "White Hedgestar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304074,
+  "name": "Green Squirrelstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304075,
+  "name": "Yellow Squirrelstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304076,
+  "name": "Red Squirrelstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304077,
+  "name": "White Mummystar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304078,
+  "name": "Brown Mummystar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304081,
+  "name": "[unidentified goat/sheep-like species, gray] Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304082,
+  "name": "[unidentified goat/sheep-like species, black-faced] Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304083,
+  "name": "[unidentified dog-like species, white with wings] Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304084,
+  "name": "Blue Fenstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304085,
+  "name": "Gray Fenstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304086,
+  "name": "Orange Fenstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304087,
+  "name": "Pink Axolstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304088,
+  "name": "Gray Axolstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304089,
+  "name": "Black Axolstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304090,
+  "name": "Yellow Tigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304091,
+  "name": "Brown Tigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304092,
+  "name": "Rainbow Tigstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304093,
+  "name": "Brown Weaselstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304094,
+  "name": "White Weaselstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 304095,
+  "name": "Red Weaselstar Head",
+  "partsType": 4,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306001,
+  "name": "Pink Kitstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306002,
+  "name": "Blue Kitstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306003,
+  "name": "Rainbow Kitstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306004,
+  "name": "Pink Pupstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306005,
+  "name": "Blue Pupstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306006,
+  "name": "Rainbow Pupstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306007,
+  "name": "Pink Bunstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306008,
+  "name": "Blue Bunstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306009,
+  "name": "Rainbow Bunstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306010,
+  "name": "Yellow Pigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306011,
+  "name": "Purple Pigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306012,
+  "name": "Black Pigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306013,
+  "name": "Green Reinstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306014,
+  "name": "Blue Reinstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306015,
+  "name": "Gold Reinstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306016,
+  "name": "Blue Moonpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306017,
+  "name": "Orange Moonpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306018,
+  "name": "Black Moonpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306019,
+  "name": "Pink Hamstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306020,
+  "name": "Purple Hamstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306021,
+  "name": "Chocolate Hamstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306022,
+  "name": "Pink Monstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306023,
+  "name": "Green Monstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306024,
+  "name": "Rainbow Monstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306025,
+  "name": "Green Lambstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306026,
+  "name": "Gray Lambstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306027,
+  "name": "Black Lambstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306029,
+  "name": "Green Foxstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306030,
+  "name": "Red Foxstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306031,
+  "name": "White Foxstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306032,
+  "name": "Purple Horstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306033,
+  "name": "Brown Horstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306034,
+  "name": "Rainbow Horstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306035,
+  "name": "Purple Tortoistar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306036,
+  "name": "Orange Tortoistar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306037,
+  "name": "Green Tortoistar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306038,
+  "name": "Orange Otterstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306039,
+  "name": "Blue Otterstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306040,
+  "name": "Black Otterstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306041,
+  "name": "Pink Giraffestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306042,
+  "name": "Gray Giraffestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306043,
+  "name": "Yellow Giraffestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306044,
+  "name": "Black Flowerkit Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306045,
+  "name": "Purple Flowerkit Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306046,
+  "name": "Spooky Flowerkit Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306047,
+  "name": "Pink Chameleostar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306048,
+  "name": "Rainbow Chameleostar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306049,
+  "name": "Black Chameleostar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306050,
+  "name": "Purple Snowpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306051,
+  "name": "Orange Snowpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306052,
+  "name": "Silver Snowpup Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306053,
+  "name": "White Cubstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306054,
+  "name": "Brown Cubstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306055,
+  "name": "Black Cubstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306056,
+  "name": "Yellow Coonstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306057,
+  "name": "Green Coonstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306058,
+  "name": "Brown Coonstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306059,
+  "name": "Red Lionstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306060,
+  "name": "Yellow Lionstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306061,
+  "name": "Gray Lionstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306062,
+  "name": "Purple Moonbun Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306063,
+  "name": "Orange Moonbun Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306064,
+  "name": "Silver Moonbun Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306065,
+  "name": "Blue Wolfstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306066,
+  "name": "Pink Wolfstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306067,
+  "name": "Black Wolfstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306068,
+  "name": "White Alpacastar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306069,
+  "name": "Green Alpacastar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306070,
+  "name": "Black Alpacastar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306071,
+  "name": "Purple Hedgestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306072,
+  "name": "Gray Hedgestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306073,
+  "name": "White Hedgestar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306074,
+  "name": "Green Squirrelstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306075,
+  "name": "Yellow Squirrelstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306076,
+  "name": "Red Squirrelstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306077,
+  "name": "White Mummystar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306078,
+  "name": "Brown Mummystar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306079,
+  "name": "Gingerbread Dog Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306080,
+  "name": "Gingerbread Cat Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306081,
+  "name": "[unidentified goat/sheep-like species, gray] Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306082,
+  "name": "[unidentified goat/sheep-like species, black-faced] Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306083,
+  "name": "[unidentified dog-like species, white with wings] Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306084,
+  "name": "Blue Fenstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306085,
+  "name": "Gray Fenstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306086,
+  "name": "Orange Fenstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306087,
+  "name": "Pink Axolstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306088,
+  "name": "Gray Axolstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306089,
+  "name": "Black Axolstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306090,
+  "name": "Yellow Tigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306091,
+  "name": "Brown Tigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306092,
+  "name": "Rainbow Tigstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306093,
+  "name": "Brown Weaselstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306094,
+  "name": "White Weaselstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 306095,
+  "name": "Red Weaselstar Legs",
+  "partsType": 6,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308001,
+  "name": "Pink Kitstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308002,
+  "name": "Blue Kitstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308003,
+  "name": "Rainbow Kitstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308004,
+  "name": "Pink Pupstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308005,
+  "name": "Blue Pupstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308006,
+  "name": "Rainbow Pupstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308007,
+  "name": "Pink Bunstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308008,
+  "name": "Blue Bunstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308009,
+  "name": "Rainbow Bunstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308010,
+  "name": "Yellow Pigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308011,
+  "name": "Purple Pigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308012,
+  "name": "Black Pigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308013,
+  "name": "Green Reinstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308014,
+  "name": "Blue Reinstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308015,
+  "name": "Gold Reinstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308016,
+  "name": "Blue Moonpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308017,
+  "name": "Orange Moonpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308018,
+  "name": "Black Moonpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308019,
+  "name": "Pink Hamstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308020,
+  "name": "Purple Hamstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308021,
+  "name": "Chocolate Hamstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308022,
+  "name": "Pink Monstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308023,
+  "name": "Green Monstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308024,
+  "name": "Rainbow Monstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308025,
+  "name": "Green Lambstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308026,
+  "name": "Gray Lambstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308027,
+  "name": "Black Lambstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308028,
+  "name": "Dragon Maleficent: Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308029,
+  "name": "Green Foxstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308030,
+  "name": "Red Foxstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308031,
+  "name": "White Foxstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308032,
+  "name": "Purple Horstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308033,
+  "name": "Brown Horstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308034,
+  "name": "Rainbow Horstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308035,
+  "name": "Purple Tortoistar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308036,
+  "name": "Orange Tortoistar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308037,
+  "name": "Green Tortoistar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308038,
+  "name": "Orange Otterstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308039,
+  "name": "Blue Otterstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308040,
+  "name": "Black Otterstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308041,
+  "name": "Pink Giraffestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308042,
+  "name": "Gray Giraffestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308043,
+  "name": "Yellow Giraffestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308044,
+  "name": "Black Flowerkit Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308045,
+  "name": "Purple Flowerkit Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308046,
+  "name": "Spooky Flowerkit Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308047,
+  "name": "Pink Chameleostar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308048,
+  "name": "Rainbow Chameleostar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308049,
+  "name": "Black Chameleostar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308050,
+  "name": "Purple Snowpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308051,
+  "name": "Orange Snowpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308052,
+  "name": "Silver Snowpup Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308053,
+  "name": "White Cubstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308054,
+  "name": "Brown Cubstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308055,
+  "name": "Black Cubstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308056,
+  "name": "Yellow Coonstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308057,
+  "name": "Green Coonstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308058,
+  "name": "Brown Coonstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308059,
+  "name": "Red Lionstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308060,
+  "name": "Yellow Lionstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308061,
+  "name": "Gray Lionstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308062,
+  "name": "Purple Moonbun Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308063,
+  "name": "Orange Moonbun Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308064,
+  "name": "Silver Moonbun Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308065,
+  "name": "Blue Wolfstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308066,
+  "name": "Pink Wolfstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308067,
+  "name": "Black Wolfstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308068,
+  "name": "White Alpacastar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308069,
+  "name": "Green Alpacastar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308070,
+  "name": "Black Alpacastar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308071,
+  "name": "Purple Hedgestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308072,
+  "name": "Gray Hedgestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308073,
+  "name": "White Hedgestar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308074,
+  "name": "Green Squirrelstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308075,
+  "name": "Yellow Squirrelstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308076,
+  "name": "Red Squirrelstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308077,
+  "name": "White Mummystar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308078,
+  "name": "Brown Mummystar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308079,
+  "name": "Gingerbread Dog Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308080,
+  "name": "Gingerbread Cat Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308081,
+  "name": "[unidentified goat/sheep-like species, gray] Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308082,
+  "name": "[unidentified goat/sheep-like species, black-faced] Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308083,
+  "name": "[unidentified dog-like species, white with wings] Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308084,
+  "name": "Blue Fenstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308085,
+  "name": "Gray Fenstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308086,
+  "name": "Orange Fenstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308087,
+  "name": "Pink Axolstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308088,
+  "name": "Gray Axolstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308089,
+  "name": "Black Axolstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308090,
+  "name": "Yellow Tigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308091,
+  "name": "Brown Tigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308092,
+  "name": "Rainbow Tigstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308093,
+  "name": "Brown Weaselstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308094,
+  "name": "White Weaselstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 308095,
+  "name": "Red Weaselstar Body",
+  "partsType": 8,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309001,
+  "name": "Pink Kitstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309002,
+  "name": "Blue Kitstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309003,
+  "name": "Rainbow Kitstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309004,
+  "name": "Pink Pupstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309005,
+  "name": "Blue Pupstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309006,
+  "name": "Rainbow Pupstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309007,
+  "name": "Pink Bunstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309008,
+  "name": "Blue Bunstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309009,
+  "name": "Rainbow Bunstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309010,
+  "name": "Yellow Pigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309011,
+  "name": "Purple Pigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309012,
+  "name": "Black Pigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309013,
+  "name": "Green Reinstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309014,
+  "name": "Blue Reinstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309015,
+  "name": "Gold Reinstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309016,
+  "name": "Blue Moonpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309017,
+  "name": "Orange Moonpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309018,
+  "name": "Black Moonpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309019,
+  "name": "Pink Hamstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309020,
+  "name": "Purple Hamstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309021,
+  "name": "Chocolate Hamstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309022,
+  "name": "Pink Monstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309023,
+  "name": "Green Monstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309024,
+  "name": "Rainbow Monstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309025,
+  "name": "Green Lambstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309026,
+  "name": "Gray Lambstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309027,
+  "name": "Black Lambstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309029,
+  "name": "Green Foxstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309030,
+  "name": "Red Foxstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309031,
+  "name": "White Foxstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309032,
+  "name": "Purple Horstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309033,
+  "name": "Brown Horstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309034,
+  "name": "Rainbow Horstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309035,
+  "name": "Purple Tortoistar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309036,
+  "name": "Orange Tortoistar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309037,
+  "name": "Green Tortoistar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309038,
+  "name": "Orange Otterstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309039,
+  "name": "Blue Otterstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309040,
+  "name": "Black Otterstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309041,
+  "name": "Pink Giraffestar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309042,
+  "name": "Gray Giraffestar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309043,
+  "name": "Yellow Giraffestar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309044,
+  "name": "Black Flowerkit Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309045,
+  "name": "Purple Flowerkit Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309046,
+  "name": "Spooky Flowerkit Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309047,
+  "name": "Pink Chameleostar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309048,
+  "name": "Rainbow Chameleostar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309049,
+  "name": "Black Chameleostar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309050,
+  "name": "Purple Snowpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309051,
+  "name": "Orange Snowpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309052,
+  "name": "Silver Snowpup Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309053,
+  "name": "White Cubstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309054,
+  "name": "Brown Cubstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309055,
+  "name": "Black Cubstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309056,
+  "name": "Yellow Coonstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309057,
+  "name": "Green Coonstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309058,
+  "name": "Brown Coonstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309059,
+  "name": "Red Lionstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309060,
+  "name": "Yellow Lionstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309061,
+  "name": "Gray Lionstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309062,
+  "name": "Purple Moonbun Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309063,
+  "name": "Orange Moonbun Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309064,
+  "name": "Silver Moonbun Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309065,
+  "name": "Blue Wolfstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309066,
+  "name": "Pink Wolfstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309067,
+  "name": "Black Wolfstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309068,
+  "name": "White Alpacastar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309069,
+  "name": "Green Alpacastar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309070,
+  "name": "Black Alpacastar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309074,
+  "name": "Green Squirrelstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309075,
+  "name": "Yellow Squirrelstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309076,
+  "name": "Red Squirrelstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309079,
+  "name": "Gingerbread Dog Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309080,
+  "name": "Gingerbread Cat Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309081,
+  "name": "[unidentified goat/sheep-like species, gray] Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309082,
+  "name": "[unidentified goat/sheep-like species, black-faced] Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309083,
+  "name": "[unidentified dog-like species, white with wings] Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309084,
+  "name": "Blue Fenstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309085,
+  "name": "Gray Fenstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309086,
+  "name": "Orange Fenstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309087,
+  "name": "Pink Axolstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309088,
+  "name": "Gray Axolstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309089,
+  "name": "Black Axolstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309090,
+  "name": "Yellow Tigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309091,
+  "name": "Brown Tigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309092,
+  "name": "Rainbow Tigstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309093,
+  "name": "Brown Weaselstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309094,
+  "name": "White Weaselstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 309095,
+  "name": "Red Weaselstar Tail",
+  "partsType": 9,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401001,
+  "name": "Red Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401002,
+  "name": "Round Glasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401003,
+  "name": "Furry Eyebrows",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401004,
+  "name": "Santa Brows",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401005,
+  "name": "Heart-Shaped Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401006,
+  "name": "KH 3D Sora: Funny Glasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401007,
+  "name": "Sleep Mask",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401008,
+  "name": "Starry Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401009,
+  "name": "Pirate Eye Patch",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401012,
+  "name": "Illusionist: Mask",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401013,
+  "name": "Clover Glasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401014,
+  "name": "Fungus's Glasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401015,
+  "name": "Carnival Mask",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401016,
+  "name": "Mickey Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401017,
+  "name": "Donald Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401018,
+  "name": "Daisy Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401019,
+  "name": "Butterfly Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401020,
+  "name": "Heart-Shaped Eye Patch",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402001,
+  "name": "Baby Bonnet",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402002,
+  "name": "Red Ribbon",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402003,
+  "name": "Black Afro",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402004,
+  "name": "Red Mushroom Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402005,
+  "name": "Black Knit Cap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402006,
+  "name": "Hamburger",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402007,
+  "name": "Santa Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402008,
+  "name": "Lion Dancer",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402009,
+  "name": "Bamboo Decoration",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402010,
+  "name": "Donut Cap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402011,
+  "name": "Cupcake Cap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402012,
+  "name": "KH 3D Sora: Party Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402013,
+  "name": "Dragon Maleficent: Head",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402014,
+  "name": "Nightcap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402015,
+  "name": "Chirithy Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402016,
+  "name": "Baseball Cap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402017,
+  "name": "Soccer Ball",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402018,
+  "name": "Unicorn Style",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402019,
+  "name": "Mickey Visor",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402020,
+  "name": "Minnie Visor",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402023,
+  "name": "Pirate Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402024,
+  "name": "Sailor Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402025,
+  "name": "Swim Snorkel",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402026,
+  "name": "Swim Cap & Goggles",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402030,
+  "name": "Halloween Pointy Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402031,
+  "name": "Pumpkinhead",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402032,
+  "name": "Fantasia Mickey Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402033,
+  "name": "Dancing Mushroom Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402034,
+  "name": "Magic Broom Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402036,
+  "name": "Black Festive Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402037,
+  "name": "Green Festive Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402038,
+  "name": "Turkey Leg",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402039,
+  "name": "Illusionist: Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402040,
+  "name": "Pizza Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402042,
+  "name": "Woody Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402043,
+  "name": "Macaroon Tower Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402044,
+  "name": "Patissier's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402045,
+  "name": "Patissiere's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402046,
+  "name": "Clover Crown",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402047,
+  "name": "Cherry Blossom Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402048,
+  "name": "Red Lionstar Style",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402049,
+  "name": "[unidentified pink fluffy wig]",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402050,
+  "name": "[unidentified white starry hair]",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402051,
+  "name": "Tadashi's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402052,
+  "name": "Blue Spring Bunny Cowl",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402053,
+  "name": "Pink Spring Bunny Cowl",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402054,
+  "name": "Royal Tiara",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402055,
+  "name": "Pascal Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402056,
+  "name": "Fire Samurai: Helm",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402057,
+  "name": "Water Samurai: Helm",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402058,
+  "name": "Monsters, Inc. Helmet",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402059,
+  "name": "[unidentified black starry wig]",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402061,
+  "name": "KH III Sora Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402062,
+  "name": "White Hydrangea: Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402063,
+  "name": "Black Hydrangea: Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402064,
+  "name": "KH III Kairi Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402065,
+  "name": "KH III Kairi Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402066,
+  "name": "Jessie Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402067,
+  "name": "KH III Riku Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402068,
+  "name": "KH III Riku Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402069,
+  "name": "Chirithy Head",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402070,
+  "name": "Moogle Head",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402071,
+  "name": "Argyle Mickey Headband",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402072,
+  "name": "Pepita Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402074,
+  "name": "Mickey Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402075,
+  "name": "Minnie Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402076,
+  "name": "Floral Headband",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402077,
+  "name": "Terra Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402078,
+  "name": "Terra Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402079,
+  "name": "Gingerbread Dog Head",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402080,
+  "name": "Gingerbread Cat Head",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402081,
+  "name": "Bernard's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402082,
+  "name": "Bianca's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402083,
+  "name": "Puppy Mask",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402084,
+  "name": "New Year's Chirithy Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402085,
+  "name": "Chocolate Cake Headpiece",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402086,
+  "name": "Valentine Rouge: Headband",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402087,
+  "name": "Double Cookie Headband",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402088,
+  "name": "Aqua Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402089,
+  "name": "Aqua Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402090,
+  "name": "Donald's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402091,
+  "name": "Goofy's Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402093,
+  "name": "Rice Ball Helmet",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402094,
+  "name": "Cool Sunglasses",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402095,
+  "name": "XIII Replica Hood",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402096,
+  "name": "Summer Donald Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402097,
+  "name": "Summer Daisy Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402098,
+  "name": "Atlantica Donald Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402099,
+  "name": "Roxas Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402100,
+  "name": "Roxas Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402101,
+  "name": "Sebastian Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402102,
+  "name": "Flounder Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402103,
+  "name": "Naminé Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402104,
+  "name": "Naminé Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402105,
+  "name": "Magic Lamp",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402106,
+  "name": "Iago Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402107,
+  "name": "Fabergé Egg Tiara",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402108,
+  "name": "Fabergé Egg Item",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402109,
+  "name": "Fabergé Egg Helm",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402110,
+  "name": "Anubis Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402111,
+  "name": "Cobra Tiara",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402112,
+  "name": "Scales",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402113,
+  "name": "Navy Aviator Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402114,
+  "name": "Beige Aviator Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402115,
+  "name": "Red Knit Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402116,
+  "name": "Lux-Pattern Knit Cap",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402117,
+  "name": "Starlight Headpiece",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402120,
+  "name": "Axel Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402121,
+  "name": "Axel Ornament B",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402123,
+  "name": "Fortune Fedora",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402124,
+  "name": "Celebration Ribbon",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402125,
+  "name": "New Year's Mickey Ears",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402127,
+  "name": "Red Heart-Shaped Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405001,
+  "name": "Red Bowtie",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405002,
+  "name": "Yellow Scarf",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405003,
+  "name": "[unidentified orange striped scarf]",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405004,
+  "name": "Wreath",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405005,
+  "name": "Collar",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405006,
+  "name": "Furoshiki Cloth",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405007,
+  "name": "Rose Necklace",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405008,
+  "name": "Chirithy Pouch",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405009,
+  "name": "Sailor Collar",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405010,
+  "name": "KH II Pence: Bandanna",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405011,
+  "name": "KH II Olette: Necklace",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405012,
+  "name": "Halloween Cravat",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405013,
+  "name": "Ruffle Collar",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405014,
+  "name": "Festive Ribbon",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405015,
+  "name": "Festive Fur",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405016,
+  "name": "Chef's Neckerchief",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405017,
+  "name": "Cherry Necklace",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405018,
+  "name": "Starry Ribbon",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405019,
+  "name": "Starry Necklace",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405020,
+  "name": "Moogle Ribbon",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405021,
+  "name": "Argyle Mickey Pouch",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405022,
+  "name": "Argyle Minnie Pouch",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405023,
+  "name": "Collar & Tie",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405024,
+  "name": "Valentine Rouge: Choker",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405025,
+  "name": "Staff Pass",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405026,
+  "name": "Analog Watch",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405027,
+  "name": "[unidentified gold chain with blue pendant]",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405028,
+  "name": "[unidentified Egyptian collar]",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405029,
+  "name": "Chirithy Scarf",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 405030,
+  "name": "Collar of Hearts",
+  "partsType": 5,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407001,
+  "name": "Angel Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407002,
+  "name": "Colorful Balloon",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407003,
+  "name": "Red Backpack",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407005,
+  "name": "New Year Decoration",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407007,
+  "name": "Rose Flower Basket",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407008,
+  "name": "Dragon Maleficent: Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407010,
+  "name": "Chirithy Cape",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407013,
+  "name": "Balloon Pumbaa",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407014,
+  "name": "Paraglider",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407016,
+  "name": "Balloon Figaro",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407017,
+  "name": "Balloon Lucifer",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407018,
+  "name": "Balloon Magic Broom",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407019,
+  "name": "Festive Sled",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407020,
+  "name": "Balloon Olaf & Sven",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407021,
+  "name": "Illusionist: Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407022,
+  "name": "Balloon Huey, Dewey & Louie",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407023,
+  "name": "Balloon Scrooge",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407027,
+  "name": "Balloon KH III Sora",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407028,
+  "name": "Balloon KH III Kairi",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407029,
+  "name": "Buzz Lightyear Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407031,
+  "name": "Balloon KH III Riku",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407032,
+  "name": "Balloon Pegasus",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407033,
+  "name": "Balloon Blimp Chirithy",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407034,
+  "name": "Halloween Crow: Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407035,
+  "name": "Balloon Sugar Skull",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407037,
+  "name": "Balloon Bianca & Bernard",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407038,
+  "name": "Balloon Gingerbread House",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407040,
+  "name": "Balloon Roxas",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407041,
+  "name": "Flotsam & Jetsam",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407042,
+  "name": "Balloon Naminé",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407044,
+  "name": "Balloon Genie",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407045,
+  "name": "Fabergé Egg Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407046,
+  "name": "Gold-Rimmed Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407048,
+  "name": "Heart-Themed Balloons",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407049,
+  "name": "Mickey & Minnie Glove Balloons",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410001,
+  "name": "Heart",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410002,
+  "name": "Autumn Leaves",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410004,
+  "name": "Rose Flower Petals",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410005,
+  "name": "Fluffy Heart",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410006,
+  "name": "Fireworks",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410008,
+  "name": "Word Bubble: Sea-Salt Ice Cream",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410009,
+  "name": "Word Bubble: Watermelon",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410011,
+  "name": "Floating Trick or Treat",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410015,
+  "name": "Swirling Hearts",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410017,
+  "name": "Word Bubble: I Love Sora",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410018,
+  "name": "Word Bubble: Ukulele",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411001,
+  "name": "Mustache",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411002,
+  "name": "Santa Beard",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411003,
+  "name": "Pirate Mustache",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411004,
+  "name": "Dwarf Beard",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411005,
+  "name": "Toast",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 411006,
+  "name": "Letter",
+  "partsType": 11,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ }
+]

@@ -1,0 +1,119 @@
+# ---------------------------------------------------------------------------
+# Materiale proprietario Square Enix — NON deve MAI finire nel repository.
+# Sono file che l'utente si procura da sé; qui vivono solo in locale.
+# ---------------------------------------------------------------------------
+recon/dl/
+recon/ext/
+recon/web/blobs/
+recon/web/parts/
+recon/web/*.html
+recon/web/*.zip
+
+*.apk
+*.xapk
+*.ipa
+*.obb
+*.so
+*.dylib
+*.wasm
+*.jsc
+*.unity3d
+*.dat
+*.bin
+
+# Dump di stringhe estratte dai binari: opere derivate, e rigenerabili
+# in pochi secondi con recon/tools/strings.py
+recon/out/strings_*.txt
+recon/out/field_candidates_*.txt
+
+# Nota sul confine, perche' la riga sopra e quella sotto sembrano simili.
+# `master_classes_*` e `master_fields_*` SONO versionati di proposito: sono lo
+# *schema* — nomi di tabella e di colonna — cioe' la descrizione d'interfaccia
+# che serve a reinterfacciarsi col servizio dismesso. Il master data vero
+# (statistiche, drop table, costi) non entra qui ne' ora ne' mai.
+# `field_candidates_*` invece e' lo scarto grezzo di una ricerca, non uno schema.
+
+# ---------------------------------------------------------------------------
+# Progetti di reverse engineering
+#
+# Il progetto Ghidra contiene una copia del binario importato, e il decompilato
+# e' opera derivata da codice Square Enix: resta tutto in locale.
+# ---------------------------------------------------------------------------
+recon/ghidra/project/
+recon/ghidra/out/
+*.gpr
+*.rep/
+ghidra_*/
+ghidra_*.zip
+.ghidra/
+
+# ---------------------------------------------------------------------------
+# Server / sviluppo
+# ---------------------------------------------------------------------------
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+*.crt
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Sistema / editor
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*~
+
+# ---------------------------------------------------------------------------
+# Server: segreti e log di runtime
+# ---------------------------------------------------------------------------
+server/certs/
+server/logs/
+# dati master serviti al client: sono (o derivano da) dati di Square Enix
+server/master_data/
+# pacchetti di risorse serviti al client: sono (o derivano da) risorse di Square Enix
+server/resource_data/
+# salvataggio del giocatore (dati personali di gioco)
+server/save/
+# kept private, outside the public repository (recon/tools/private_tools.py)
+tools/ldplayer/armtrace/
+recon/tools/memdump/
+recon/tools/bgad_extract.py
+recon/tools/bgi_keyhunt.py
+recon/tools/pack_keyhunt.py
+recon/tools/spriters/
+tools/segdl.ps1
+tools/patch-apk.sh
+recon/tools/remote_zip.py
+recon/tools/remote_zip_ls.py
+recon/ghidra/
+tools/bin/
+server/game_data/
+
+# area di lavoro dei piani (superpowers)
+.superpowers/
+*.stackdump
+
+# generated at build time by recon/tools/empty_lwf.py (never versioned)
+recon/tools/empty.lwf
+# generated locally by server/make-keyblade-levels.js --table-only from the local wiki dump (never versioned)
+server/tables/keyblade_levels.json
+recon/tools/master_types.py
+recon/tools/response_schema.py
+recon/tools/batch_schema.py

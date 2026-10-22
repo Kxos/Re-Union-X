@@ -1,0 +1,211 @@
+# Missioni Limited originali (khuxwiki, reference/missions/limited_all_khuxwiki.tsv): campagne mensili dei Lux (M..)
+# e campagne brevi completabili (W..). conditionId: 4 Lux del periodo, 33 Lux totali, 30 storia fino alla quest N,
+# 1 quest completate, 50 nemici sconfitti. Le Story Quest oltre la 525 (non giocabili) sono tolte. make-limited-missions.js
+group	dates	missionName	conditionId	target	reward
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Gray Lambstar Body
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Gray Lambstar Legs
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Gray Lambstar Tail
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Gray Lambstar Head
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Gray Lambstar Ears
+M01	04/01/18 - 04/30/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Sleep Mask
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Red Foxstar Body
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Red Foxstar Legs
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Red Foxstar Tail
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Red Foxstar Head
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Red Foxstar Ears
+M02	05/01/18 - 05/31/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Red Sunglasses
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Brown Horstar Head
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Brown Horstar Ears
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Brown Horstar Body
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Brown Horstar Legs
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Brown Horstar Tail
+M03	06/01/18 - 06/30/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Chirithy Pouch
+M04	07/01/18 - 07/31/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Orange Tortoistar Head
+M04	07/01/18 - 07/31/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Orange Tortoirstar Body
+M04	07/01/18 - 07/31/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Orange Tortoistar Legs
+M04	07/01/18 - 07/31/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Orange Tortoistar Tail
+M04	07/01/18 - 07/31/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Mickey Visor
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Orange Otterstar Head
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Orange Otterstar Ears
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Orange Otterstar Body
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Orange Otterstar Legs
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Orange Otterstar Tail
+M05	08/01/18 - 08/31/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Swim Snorkel
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Yellow Giraffestar Head
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Yellow Giraffestar Ears
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Yellow Giraffestar Body
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Yellow Giraffestar Legs
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Yellow Giraffestar Tail
+M06	09/01/18 - 09/30/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Starlight Bow
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Black Flowerkit Head
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Black Flowerkit Ears
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Black Flowerkit Body
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Black Flowerkit Legs
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Black Flowerkit Tail
+M07	10/01/18 - 10/31/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Balloon Lucifer
+M08	11/01/18 - 11/30/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Pink Chameleostar Head
+M08	11/01/18 - 11/30/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Pink Chameleostar Body
+M08	11/01/18 - 11/30/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Pink Chameleostar Legs
+M08	11/01/18 - 11/30/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Pink Chameleostar Tail
+M08	11/01/18 - 11/30/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Magic Broom Ornament
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Purple Snowpup Head
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Purple Snowpup Ears
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Purple Snowpup Body
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Purple Snowpup Legs
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Purple Snowpup Tail
+M09	12/01/18 - 12/31/18	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Black Festive Hat
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	White Cubstar Head
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	White Cubstar Ears
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	White Cubstar Body
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	White Cubstar Legs
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	White Cubstar Tail
+M10	01/01/19 - 01/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Pizza Hat
+W01	01/25/19 - 02/05/19	Complete quest x 1	1	1	Platinum Ticket
+W01	01/25/19 - 02/05/19	Complete quest x 2	1	2	Platinum Ticket
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Yellow Coonstar Head
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Yellow Coonstar Ears
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Yellow Coonstar Body
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Yellow Coonstar Legs
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Yellow Coonstar Tail
+M11	02/01/19 - 02/28/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Macaroon Tower Hat
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Pink Hamstar Head
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Pink Hamstar Ears
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Pink Hamstar Body
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Pink Hamstar Legs
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Pink Hamstar Tail
+M12	03/01/19 - 03/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Balloon Scrooge
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Purple Moonbun Head
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Purple Moonbun Ears
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Purple Moonbun Body
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Purple Moonbun Legs
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Purple Moonbun Tail
+M13	04/01/19 - 04/30/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Blue Spring Bunny Cowl
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Blue Wolfstar Head
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Blue Wolfstar Ears
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Blue Wolfstar Body
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Blue Wolfstar Legs
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Blue Wolfstar Tail
+M14	05/01/19 - 05/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Balloon Baymax & Mochi
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Alpacastar Head
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Green Alpacastar Ears
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Alpacastar Body
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Alpacastar Legs
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Alpacastar Tail
+M15	06/01/19 - 06/30/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Royal Tiara
+W02	06/27/19 - 07/31/19	Nearly 10M downloads! Complete a quest for a gift!	1	1	Draw Ticket x100
+M16	07/01/19 - 07/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Tortoistar Head
+M16	07/01/19 - 07/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Tortoistar Body
+M16	07/01/19 - 07/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Tortoistar Legs
+M16	07/01/19 - 07/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Tortoistar Tail
+M16	07/01/19 - 07/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	KH III Sora Ornament A
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Yellow Squirrelstar Head
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Yellow Squirrelstar Ears
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Yellow Squirrelstar Body
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Yellow Squirrelstar Legs
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Yellow Squirrelstar Tail
+M17	08/01/19 - 08/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Balloon KH III Riku
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Yellow Lionstar Head
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Yellow Lionstar Ears
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Yellow Lionstar Body
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Yellow Lionstar Legs
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Yellow Lionstar Tail
+M18	09/01/19 - 09/30/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Argyle Mickey Pouch
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Lambstar Head
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Green Lambstar Ears
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Lambstar Body
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Lambstar Legs
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Lambstar Tail
+M19	10/01/19 - 10/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Clover Crown
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Pink Wolfstar Head
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 20,000,000 Lux	4	20000000	Pink Wolfstar Ears
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Pink Wolfstar Body
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Pink Wolfstar Legs
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Pink Wolfstar Tail
+M20	11/01/19 - 11/30/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Balloon Aliens
+W03	11/22/19 - 11/30/19	Limited-Time Special Mission: Obtain a total of 10000000000 Lux	33	10000000000	Jewel x 100
+M21	12/01/19 - 12/31/19	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Gingerbread Dog Head
+M21	12/01/19 - 12/31/19	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Gingerbread Dog Body
+M21	12/01/19 - 12/31/19	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Gingerbread Dog Legs
+M21	12/01/19 - 12/31/19	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Gingerbread Dog Tail
+M22	01/01/20 - 01/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Gray Hedgestar Head
+M22	01/01/20 - 01/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Gray Hedgestar Body
+M22	01/01/20 - 01/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Gray Hedgestar Legs
+M22	01/01/20 - 01/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Gray Hedgestar Ears
+M23	02/01/20 - 02/29/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Black Otterstar Head
+M23	02/01/20 - 02/29/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Black Otterstar Ears
+M23	02/01/20 - 02/29/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Black Otterstar Body
+M23	02/01/20 - 02/29/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Black Otterstar Legs
+M23	02/01/20 - 02/29/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Black Otterstar Tail
+M24	03/01/20 - 03/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Orange Fenstar Head
+M24	03/01/20 - 03/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Orange Fenstar Ears
+M24	03/01/20 - 03/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Orange Fenstar Body
+M24	03/01/20 - 03/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Orange Fenstar Legs
+M24	03/01/20 - 03/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Orange Fenstar Tail
+M25	04/01/20 - 04/30/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Monstar Head
+M25	04/01/20 - 04/30/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Monstar Ears
+M25	04/01/20 - 04/30/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Monstar Body
+M25	04/01/20 - 04/30/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Monstar Legs
+M25	04/01/20 - 04/30/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Green Monstar Tail
+W04	04/10/20 - 04/30/20	Special Campaign: Defeat 100 enemies!	50	100	7★ SN++ - FF7R Aerith
+M26	05/01/20 - 05/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Pink Axolstar Head
+M26	05/01/20 - 05/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Pink Axolstar Ears
+M26	05/01/20 - 05/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Pink Axolstar Body
+M26	05/01/20 - 05/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Pink Axolstar Legs
+M26	05/01/20 - 05/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Pink Axolstar Tail
+M27	06/01/20 - 06/30/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Pink Giraffestar Head
+M27	06/01/20 - 06/30/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Pink Giraffestar Ears
+M27	06/01/20 - 06/30/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Pink Giraffestar Body
+M27	06/01/20 - 06/30/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Pink Giraffestar Legs
+M27	06/01/20 - 06/30/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Pink Giraffestar Tail
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 30	30	30	Power Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 60	30	60	Speed Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 100	30	100	Magic Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 150	30	150	Power Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 200	30	200	Speed Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 250	30	250	Magic Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 300	30	300	Power Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 350	30	350	Speed Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 400	30	400	Magic Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 450	30	450	Power Gem x3
+W05	06/09/20 - 06/21/20	Story Quest Campaign: Complete up to story quest 500	30	500	Speed Gem x3
+M28	07/01/20 - 07/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Purple Flowerkit Head
+M28	07/01/20 - 07/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Purple Flowerkit Ears
+M28	07/01/20 - 07/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Purple Flowerkit Body
+M28	07/01/20 - 07/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Purple Flowerkit Legs
+M28	07/01/20 - 07/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Purple Flowerkit Tail
+M29	08/01/20 - 08/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Yellow Tigstar Head
+M29	08/01/20 - 08/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Yellow Tigstar Ears
+M29	08/01/20 - 08/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Yellow Tigstar Body
+M29	08/01/20 - 08/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Yellow Tigstar Legs
+M29	08/01/20 - 08/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Yellow Tigstar Tail
+M30	09/01/20 - 09/30/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Orange Snowpup Head
+M30	09/01/20 - 09/30/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Orange Snowpup Ears
+M30	09/01/20 - 09/30/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Orange Snowpup Body
+M30	09/01/20 - 09/30/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Orange Snowpup Legs
+M30	09/01/20 - 09/30/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Orange Snowpup Tail
+M31	10/01/20 - 10/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Foxstar Head
+M31	10/01/20 - 10/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Foxstar Ears
+M31	10/01/20 - 10/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Foxstar Body
+M31	10/01/20 - 10/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Foxstar Legs
+M31	10/01/20 - 10/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Green Foxstar Tail
+M32	11/01/20 - 11/30/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Green Squirrelstar Head
+M32	11/01/20 - 11/30/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Green Squirrelstar Ears
+M32	11/01/20 - 11/30/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Green Squirrelstar Body
+M32	11/01/20 - 11/30/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Green Squirrelstar Legs
+M32	11/01/20 - 11/30/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Green Squirrelstar Tail
+M33	12/01/20 - 12/31/20	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	White Alpacastar Head
+M33	12/01/20 - 12/31/20	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	White Alpacastar Ears
+M33	12/01/20 - 12/31/20	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	White Alpacastar Body
+M33	12/01/20 - 12/31/20	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	White Alpacastar Legs
+M33	12/01/20 - 12/31/20	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	White Alpacastar Tail
+M34	01/01/21 - 01/31/21	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Brown Weaselstar Head
+M34	01/01/21 - 01/31/21	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Brown Weaselstar Ears
+M34	01/01/21 - 01/31/21	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Brown Weaselstar Body
+M34	01/01/21 - 01/31/21	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Brown Weaselstar Legs
+M34	01/01/21 - 01/31/21	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Brown Weaselstar Tail
+M35	02/01/21 - 02/28/21	[Monthly] Limited time! Obtain a total of 4,000,000 Lux	4	4000000	Blue Fenstar Head
+M35	02/01/21 - 02/28/21	[Monthly] Limited time! Obtain a total of 100,000,000 Lux	4	100000000	Blue Fenstar Ears
+M35	02/01/21 - 02/28/21	[Monthly] Limited time! Obtain a total of 500,000,000 Lux	4	500000000	Blue Fenstar Body
+M35	02/01/21 - 02/28/21	[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux	4	2500000000	Blue Fenstar Legs
+M35	02/01/21 - 02/28/21	[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux	4	10000000000	Blue Fenstar Tail
+W06	02/25/21 - 05/30/21	Limited-time! Obtain a total of 100000000000 Lux	33	100000000000	 Title

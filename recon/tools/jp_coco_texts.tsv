@@ -1,0 +1,3 @@
+# Testi inglesi per etichette dei layout originali (JP o WW) che il codice non scrive e il cui testo
+# giapponese non coincide con un id di text/ui (import_jp_coco.py). layout<TAB>widget<TAB>testo (\n = a capo)
+MedalInfo_ReleaseWindow.json	Txt_Title_Label	Unequip this Medal from where it is set.

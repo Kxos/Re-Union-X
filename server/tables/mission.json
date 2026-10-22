@@ -1,0 +1,11113 @@
+[
+ {
+  "id": 1001,
+  "missionType": 1,
+  "sortId": 1,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Complete story quest 6",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   6
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1002,
+  "missionType": 1,
+  "sortId": 2,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Complete story quest 14",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   14
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1003,
+  "missionType": 1,
+  "sortId": 3,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Complete story quest 24",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   24
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1004,
+  "missionType": 1,
+  "sortId": 4,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Complete story quest 34",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   34
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1005,
+  "missionType": 1,
+  "sortId": 5,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Complete story quest 130",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   130
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1006,
+  "missionType": 1,
+  "sortId": 6,
+  "conditionId": 31,
+  "page": 10,
+  "missionName": "Raise your equipment's total power to 30000",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   30000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1007,
+  "missionType": 1,
+  "sortId": 7,
+  "conditionId": 31,
+  "page": 10,
+  "missionName": "Raise your equipment's total power to 50000",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1008,
+  "missionType": 1,
+  "sortId": 8,
+  "conditionId": 31,
+  "page": 10,
+  "missionName": "Raise your equipment's total power to 120000",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   120000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1009,
+  "missionType": 1,
+  "sortId": 9,
+  "conditionId": 35,
+  "page": 10,
+  "missionName": "Draw Medal x 3",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   3
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 26,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 5,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1010,
+  "missionType": 1,
+  "sortId": 10,
+  "conditionId": 35,
+  "page": 10,
+  "missionName": "Draw Medal x 7",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   7
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 26,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 10,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1011,
+  "missionType": 1,
+  "sortId": 11,
+  "conditionId": 36,
+  "page": 10,
+  "missionName": "Complete special quest for EXP Medals of all attributes x 5",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   5
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1012,
+  "missionType": 1,
+  "sortId": 12,
+  "conditionId": 37,
+  "page": 10,
+  "missionName": "Complete special quest for materials for all Keyblades x 5",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   5
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1013,
+  "missionType": 1,
+  "sortId": 13,
+  "conditionId": 38,
+  "page": 10,
+  "missionName": "Complete event \"Proud Quest\" of all attributes x 1",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1014,
+  "missionType": 1,
+  "sortId": 14,
+  "conditionId": 38,
+  "page": 10,
+  "missionName": "Complete event \"Proud Quest\" of all attributes x 10",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1015,
+  "missionType": 1,
+  "sortId": 15,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Starlight Keyblade to +4",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   1
+  ],
+  "targetNum": [
+   4
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1016,
+  "missionType": 1,
+  "sortId": 16,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Starlight Keyblade to +11",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   1
+  ],
+  "targetNum": [
+   11
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1017,
+  "missionType": 1,
+  "sortId": 17,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Starlight Keyblade to +21",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   1
+  ],
+  "targetNum": [
+   21
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1018,
+  "missionType": 1,
+  "sortId": 18,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Treasure Trove Keyblade to +5",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   201
+  ],
+  "targetNum": [
+   5
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1019,
+  "missionType": 1,
+  "sortId": 19,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Lady Luck Keyblade to +5",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   301
+  ],
+  "targetNum": [
+   5
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1020,
+  "missionType": 1,
+  "sortId": 20,
+  "conditionId": 32,
+  "page": 10,
+  "missionName": "Strengthen Three Wishes Keyblade to +5",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   401
+  ],
+  "targetNum": [
+   5
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1021,
+  "missionType": 1,
+  "sortId": 21,
+  "conditionId": 33,
+  "page": 10,
+  "missionName": "Obtain a total of 500000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1022,
+  "missionType": 1,
+  "sortId": 22,
+  "conditionId": 33,
+  "page": 10,
+  "missionName": "Obtain a total of 2000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1023,
+  "missionType": 1,
+  "sortId": 23,
+  "conditionId": 3,
+  "page": 10,
+  "missionName": "Defeat Raid Boss x 3",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   3
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1024,
+  "missionType": 1,
+  "sortId": 24,
+  "conditionId": 3,
+  "page": 10,
+  "missionName": "Defeat Raid Boss x 10",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1025,
+  "missionType": 1,
+  "sortId": 25,
+  "conditionId": 34,
+  "page": 10,
+  "missionName": "Max out the SP Attack Bonus of Medal x 1",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1026,
+  "missionType": 1,
+  "sortId": 26,
+  "conditionId": 34,
+  "page": 10,
+  "missionName": "Max out the SP Attack Bonus of Medal x 2",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1027,
+  "missionType": 1,
+  "sortId": 27,
+  "conditionId": 39,
+  "page": 10,
+  "missionName": "Raise Nova attack to LV 20",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1028,
+  "missionType": 1,
+  "sortId": 28,
+  "conditionId": 39,
+  "page": 10,
+  "missionName": "Raise Nova attack to LV 50",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1029,
+  "missionType": 1,
+  "sortId": 29,
+  "conditionId": 40,
+  "page": 10,
+  "missionName": "Raise a Spirit's rank to 2",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1030,
+  "missionType": 1,
+  "sortId": 30,
+  "conditionId": 40,
+  "page": 10,
+  "missionName": "Raise a Spirit's rank to 3",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   3
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1031,
+  "missionType": 1,
+  "sortId": 31,
+  "conditionId": 41,
+  "page": 10,
+  "missionName": "Complete up to story quest 3 in Proud Mode",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1032,
+  "missionType": 1,
+  "sortId": 32,
+  "conditionId": 42,
+  "page": 10,
+  "missionName": "Complete event quest x 10",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1033,
+  "missionType": 1,
+  "sortId": 33,
+  "conditionId": 43,
+  "page": 24,
+  "missionName": "Complete Coliseum round x 10",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 1034,
+  "missionType": 1,
+  "sortId": 34,
+  "conditionId": 44,
+  "page": 16,
+  "missionName": "Complete Union Cross quest x 10",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 50,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2001,
+  "missionType": 2,
+  "sortId": 1,
+  "conditionId": 28,
+  "page": 24,
+  "missionName": "Participate in the Coliseum (PVP) 1 times",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2002,
+  "missionType": 2,
+  "sortId": 2,
+  "conditionId": 28,
+  "page": 24,
+  "missionName": "Participate in the Coliseum (PVP) 2 times",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2003,
+  "missionType": 2,
+  "sortId": 3,
+  "conditionId": 28,
+  "page": 24,
+  "missionName": "Participate in the Coliseum (PVP) 3 times",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   3
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2004,
+  "missionType": 2,
+  "sortId": 4,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Complete 1 quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2005,
+  "missionType": 2,
+  "sortId": 5,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Complete 2 quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2006,
+  "missionType": 2,
+  "sortId": 6,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Complete 3 quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   3
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2007,
+  "missionType": 2,
+  "sortId": 7,
+  "conditionId": 3,
+  "page": 10,
+  "missionName": "Defeat a total of 1 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2008,
+  "missionType": 2,
+  "sortId": 8,
+  "conditionId": 4,
+  "page": 10,
+  "missionName": "Obtain a total of 100 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2009,
+  "missionType": 2,
+  "sortId": 9,
+  "conditionId": 4,
+  "page": 10,
+  "missionName": "Obtain a total of 1000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 2010,
+  "missionType": 2,
+  "sortId": 10,
+  "conditionId": 4,
+  "page": 10,
+  "missionName": "Obtain a total of 10000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 30,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3001,
+  "missionType": 3,
+  "sortId": 1,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 10 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3002,
+  "missionType": 3,
+  "sortId": 2,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 50 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3003,
+  "missionType": 3,
+  "sortId": 3,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 150 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   150
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3004,
+  "missionType": 3,
+  "sortId": 4,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 5000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   5000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3005,
+  "missionType": 3,
+  "sortId": 5,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 50000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3006,
+  "missionType": 3,
+  "sortId": 6,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 100000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3007,
+  "missionType": 3,
+  "sortId": 7,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 300000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   300000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3008,
+  "missionType": 3,
+  "sortId": 8,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 20 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3009,
+  "missionType": 3,
+  "sortId": 9,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 40 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   40
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3010,
+  "missionType": 3,
+  "sortId": 10,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 80 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   80
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3011,
+  "missionType": 3,
+  "sortId": 1,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 10 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3012,
+  "missionType": 3,
+  "sortId": 2,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 50 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3013,
+  "missionType": 3,
+  "sortId": 3,
+  "conditionId": 6,
+  "page": 10,
+  "missionName": "Defeat a party total of 150 Raid Bosses",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   150
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3014,
+  "missionType": 3,
+  "sortId": 4,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 5000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   5000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3015,
+  "missionType": 3,
+  "sortId": 5,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 50000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   50000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3016,
+  "missionType": 3,
+  "sortId": 6,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 100000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3017,
+  "missionType": 3,
+  "sortId": 7,
+  "conditionId": 9,
+  "page": 10,
+  "missionName": "Obtain a party total of 300000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   300000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3018,
+  "missionType": 3,
+  "sortId": 8,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 20 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3019,
+  "missionType": 3,
+  "sortId": 9,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 40 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   40
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 3020,
+  "missionType": 3,
+  "sortId": 10,
+  "conditionId": 12,
+  "page": 16,
+  "missionName": "Complete a party total of 80 Union Cross quests",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   80
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-05 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4001,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308026,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4002,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306026,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4003,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309026,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4004,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304026,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4005,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303026,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4006,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 401007,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4007,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308030,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4008,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306030,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4009,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309030,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4010,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304030,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4011,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303030,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4012,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 401001,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4013,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304033,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4014,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303033,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4015,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308033,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4016,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306033,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4017,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309033,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4018,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 405008,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4019,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304036,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4020,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308036,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4021,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306036,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4022,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309036,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4023,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4024,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304038,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4025,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303038,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4026,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308038,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4027,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306038,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4028,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309038,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4029,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4030,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4031,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4032,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4033,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4034,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4035,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402117,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4036,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304044,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4037,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303044,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4038,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308044,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4039,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306044,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4040,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309044,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4041,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 407017,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4042,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304047,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4043,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308047,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4044,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306047,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4045,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309047,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4046,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402034,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4047,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304050,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4048,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303050,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4049,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308050,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4050,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306050,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4051,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309050,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4052,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402036,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4053,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304053,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4054,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303053,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4055,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308053,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4056,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306053,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4057,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309053,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4058,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4059,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Complete quest x 1",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 40,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4060,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Complete quest x 2",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 40,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4061,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304056,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4062,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303056,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4063,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308056,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4064,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306056,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4065,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309056,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4066,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402043,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4067,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4068,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4069,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4070,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4071,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309019,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4072,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 407023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4073,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304062,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4074,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303062,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4075,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308062,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4076,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306062,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4077,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309062,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4078,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402052,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4079,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304065,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4080,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303065,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4081,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308065,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4082,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306065,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4083,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309065,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4084,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 407002,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4085,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304069,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4086,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303069,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4087,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308069,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4088,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306069,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4089,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309069,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4090,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402054,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4091,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 1,
+  "page": 10,
+  "missionName": "Nearly 10M downloads! Complete a quest for a gift!",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 41,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4092,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304037,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4093,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308037,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4094,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306037,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4095,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309037,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4096,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402061,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4097,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304075,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4098,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303075,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4099,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308075,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4100,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306075,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4101,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309075,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4102,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 407031,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4103,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304060,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4104,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303060,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4105,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308060,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4106,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306060,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4107,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309060,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4108,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 405021,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4109,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4110,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4111,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4112,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4113,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309025,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4114,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402046,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4115,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304066,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4116,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 20,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   20000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303066,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4117,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308066,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4118,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306066,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4119,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309066,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4120,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 407032,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4121,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 33,
+  "page": 0,
+  "missionName": "Limited-Time Special Mission: Obtain a total of 10000000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 2,
+  "itemId": 0,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 100,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4122,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 402079,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4123,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308079,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4124,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306079,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4125,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309079,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4126,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304072,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4127,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308072,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4128,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306072,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4129,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303072,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4130,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4131,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4132,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4133,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4134,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309040,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4135,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304086,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4136,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303086,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4137,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308086,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4138,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306086,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4139,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309086,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4140,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4141,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4142,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4143,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4144,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309023,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4145,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 50,
+  "page": 0,
+  "missionName": "Special Campaign: Defeat 100 enemies!",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 3,
+  "itemId": 301965,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4146,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304087,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4147,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303087,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4148,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308087,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4149,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306087,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4150,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309087,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4151,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304041,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4152,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303041,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4153,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308041,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4154,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306041,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4155,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309041,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4156,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 30",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   30
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 48,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4157,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 60",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   60
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 49,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4158,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 100",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   100
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 50,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4159,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 150",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   150
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 48,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4160,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 200",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   200
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 49,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4161,
+  "missionType": 4,
+  "sortId": 6,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 250",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   250
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 50,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4162,
+  "missionType": 4,
+  "sortId": 7,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 300",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   300
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 48,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4163,
+  "missionType": 4,
+  "sortId": 8,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 350",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   350
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 49,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4164,
+  "missionType": 4,
+  "sortId": 9,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 400",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   400
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 50,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4165,
+  "missionType": 4,
+  "sortId": 10,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 450",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   450
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 48,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4166,
+  "missionType": 4,
+  "sortId": 11,
+  "conditionId": 30,
+  "page": 10,
+  "missionName": "Story Quest Campaign: Complete up to story quest 500",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   500
+  ],
+  "targetNum": [
+   1
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 5,
+  "itemId": 49,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 3,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4167,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304045,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4168,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303045,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4169,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308045,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4170,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306045,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4171,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309045,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4172,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304090,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4173,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303090,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4174,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308090,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4175,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306090,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4176,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309090,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4177,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304051,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4178,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303051,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4179,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308051,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4180,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306051,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4181,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309051,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4182,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304029,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4183,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303029,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4184,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308029,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4185,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306029,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4186,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309029,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4187,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304074,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4188,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303074,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4189,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308074,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4190,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306074,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4191,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309074,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4192,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304068,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4193,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303068,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4194,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308068,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4195,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306068,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4196,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309068,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4197,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304093,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4198,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303093,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4199,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308093,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4200,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306093,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4201,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309093,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4202,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 4,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   4000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 304084,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4203,
+  "missionType": 4,
+  "sortId": 2,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 100,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 303084,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4204,
+  "missionType": 4,
+  "sortId": 3,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 308084,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4205,
+  "missionType": 4,
+  "sortId": 4,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 2,500,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   2500000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 306084,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4206,
+  "missionType": 4,
+  "sortId": 5,
+  "conditionId": 4,
+  "page": 0,
+  "missionName": "[Monthly] Limited time! Obtain a total of 10,000,000,000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   10000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 33,
+  "itemId": 309084,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ },
+ {
+  "id": 4207,
+  "missionType": 4,
+  "sortId": 1,
+  "conditionId": 33,
+  "page": 0,
+  "missionName": "Limited-time! Obtain a total of 100000000000 Lux",
+  "validTarget": 1,
+  "targetType": [
+   0
+  ],
+  "targetId": [
+   0
+  ],
+  "targetNum": [
+   100000000000
+  ],
+  "validStages": 0,
+  "targetStageType": [
+   0,
+   0
+  ],
+  "targetStageStartId": [
+   0,
+   0
+  ],
+  "targetStageEndId": [
+   0,
+   0
+  ],
+  "rewardType": 7,
+  "itemId": 12601,
+  "skillType": 0,
+  "skillId": 0,
+  "skillLv": 0,
+  "burstUpperNumber": 0,
+  "itemNum": 1,
+  "startDate": "2015-01-01 08:00:00",
+  "endDate": "2099-12-31 23:59:59",
+  "rewardEndTime": "2099-12-31 23:59:59"
+ }
+]

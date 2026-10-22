@@ -1,0 +1,99 @@
+name: Bug report
+description: Report a bug or a crash of the restored game (please be as descriptive as possible).
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing! The game is a work in progress: bugs and crashes are expected and every report helps.
+        Setup guide and troubleshooting: [docs/SETUP.md](https://github.com/Re-Union-X/Re-Union-X/blob/main/docs/SETUP.md).
+        Please never attach Square Enix files (APK, OBB, game data).
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One line describing the problem.
+      placeholder: e.g. Game crashes when opening Evolve on a 6★ medal
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where (screen / quest number)
+      placeholder: e.g. Medal List > Evolve; or Quest 670
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps, starting from a screen we can reach (e.g. the home screen).
+      placeholder: |
+        1. e.g. Open MENU > Medal List
+        2. e.g. Tap Evolve, pick Chill Ripper
+        3. e.g. Tap OK on the confirmation
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      placeholder: e.g. the evolve animation plays and the medal gets +1★
+    validations:
+      required: false
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened (exact error text)
+      description: Copy the exact text of any error message.
+      placeholder: e.g. black screen, then back to the LDPlayer home
+    validations:
+      required: true
+  - type: dropdown
+    id: every-time
+    attributes:
+      label: Every time?
+      options:
+        - "yes"
+        - "no"
+        - sometimes
+    validations:
+      required: false
+  - type: input
+    id: when
+    attributes:
+      label: Date and time (with time zone)
+      placeholder: e.g. 2026-10-22 21:40 CEST
+    validations:
+      required: false
+  - type: input
+    id: versions
+    attributes:
+      label: Resources version / master revision
+      description: The first lines of logs\server.log say "risorse versione N"; the master revision is the -Revision used (default in run-server.ps1).
+      placeholder: e.g. resources 58 / revision 178
+    validations:
+      required: false
+  - type: input
+    id: emulator
+    attributes:
+      label: Emulator + version
+      placeholder: e.g. LDPlayer 9.5.37, Android 9
+    validations:
+      required: false
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: e.g. Windows 11 Pro 24H2
+    validations:
+      required: false
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments (screenshot / video / logs\server.log)
+      description: Drag files here. The server log is D:\Progetto_Restauro_KH_UX\logs\server.log with the session scripts (it contains your player name and your PC's IP).
+      placeholder: e.g. screenshot attached, server.log attached
+    validations:
+      required: false

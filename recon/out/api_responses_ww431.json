@@ -1,0 +1,489 @@
+{
+  "_doc": "Schemi delle risposte di gioco (interfaccia, non dati): percorso API -> azione, parser e campi obbligatori con il tipo. Ricavati con recon/tools/action_case.py + response_schema.py. 'x[]' = elementi dell'array x (assenti nella risposta minima). 'values' (facoltativo) = valori diversi dal default per alcuni percorsi. Il server genera da qui la risposta minima per le rotte che non gestisce a mano.",
+  "/party": {
+    "action": 83,
+    "note": "Con partyId nella richiesta il ramo legge invece party e partyLeader, vedi optional. Senza, 'party' serve solo se userParty.partyId != 0.",
+    "fields": {
+      "userParty": "object",
+      "userParty.userId": "uint64",
+      "userParty.partyId": "uint64",
+      "userParty.isJoin": "int",
+      "userParty.isLeader": "int",
+      "userParty.isAdmin": "int",
+      "userParty.flagFirstReward": "int",
+      "userParty.joinDate": "datetime"
+    },
+    "optional": {
+      "party": {
+        "partyId": "uint64",
+        "unionId": "int",
+        "rank": "int",
+        "name": "string",
+        "playStyle": "int",
+        "agreeType": "int",
+        "message": "string",
+        "memberCount": "int",
+        "leaderUserId": "uint64",
+        "adminUserIds": "array",
+        "leaderAppointDate": "datetime",
+        "newcomerDate": "datetime",
+        "chatId": "uint",
+        "chatEndpointUrl": "string"
+      },
+      "partyLeader": {
+        "supportUserId": "uint64",
+        "level": "int",
+        "unionId": "int",
+        "userName": "string",
+        "titleLeftId": "int",
+        "titleRightId": "int",
+        "titlePlateId": "int",
+        "addKizunaPoint": "int",
+        "keybladeId": "int",
+        "partyId": "uint",
+        "isParty": "int",
+        "isGuilt": "int",
+        "isLinkThumbnail": "int",
+        "userAvatar": "object",
+        "lastActionDatetime": "datetime",
+        "earnLuxRank": "int"
+      }
+    }
+  },
+  "/user/theater/available": {
+    "action": 185,
+    "fields": {
+      "availableTheaterIds": "array"
+    }
+  },
+  "/stage/support/list": {
+    "action": 111,
+    "note": "Prima della scelta del deck (Begin su una missione). Elementi: vedi optional.partyLeader di /party.",
+    "fields": {
+      "supportUsers": "array"
+    }
+  },
+  "/stage/pickup": {
+    "action": 250,
+    "note": "La chiave e' scritta cosi' nel binario: pisckupStages.",
+    "fields": {
+      "pisckupStages": "array"
+    }
+  },
+  "/stage/achievements": {
+    "action": 169,
+    "fields": {
+      "stageAchievement": "object",
+      "stageAchievement.mainNumerator": "int",
+      "stageAchievement.mainDenominator": "int",
+      "stageAchievement.strengthNumerator": "int",
+      "stageAchievement.strengthDenominator": "int",
+      "stageAchievement.eventNumerator": "int",
+      "stageAchievement.eventDenominator": "int",
+      "stageAchievement.multiNumerator": "int",
+      "stageAchievement.multiDenominator": "int",
+      "stageAchievement.colosseumRank": "int",
+      "stageAchievement.pvpRanking": "object",
+      "stageAchievement.pvpRanking.rankingStatus": "int",
+      "stageAchievement.pvpRanking.userPvpRanking": "object",
+      "stageAchievement.pvpRanking.userPvpRanking.rank": "uint",
+      "stageAchievement.pvpRanking.userPvpRanking.class": "uint",
+      "stageAchievement.pvpRanking.userPvpRanking.point": "uint"
+    }
+  },
+  "/mypage": {
+    "action": 59,
+    "note": "backgroundId: riga di mypageBackground (150911 = sfondo predefinito); senza riga il client va in crash.",
+    "fields": {
+      "adminMypageTexts": "array",
+      "openBanners": "array",
+      "userPresentCount": "int",
+      "isChangeCoordinate": "int",
+      "rankingRewards": "object",
+      "rankingRewards.rankingColosseum": "int",
+      "rankingRewards.rankingParty": "int",
+      "rankingRewards.rankingLuxWeekly": "int",
+      "rankingRewards.rankingLuxMonthly": "int",
+      "rankingRewards.rankingLux": "int",
+      "rankingRewards.rankingHighScore": "int",
+      "rankingRewards.rankingPvp": "int",
+      "backgroundId": "uint",
+      "isNewAlbumChallenge": "uint",
+      "isMissionReward": "bool"
+    },
+    "values": {
+      "backgroundId": 150911
+    }
+  },
+  "/party/notice": {
+    "action": 81,
+    "fields": {
+      "hasNewOffer": "int",
+      "isApply": "int",
+      "hasNewApplicant": "int",
+      "isNewLeader": "int",
+      "newcomerUsers": "array"
+    }
+  },
+  "/party/lux_up_time": {
+    "action": 105,
+    "fields": {
+      "luxUp": "object",
+      "luxUp.magnification": "uint",
+      "luxUp.available": "bool",
+      "luxUp.restrictionKind": "uint"
+    }
+  },
+  "/party/member/list": {
+    "action": 86,
+    "note": "Corpo {getDetail, platformType}. Con getDetail != 0 partyUserList viene riletta elemento per elemento: se non e' un array il ramo fallisce. Con partyId nella richiesta il ramo legge invece party e poi partyUserList. Elementi non ancora ricavati: senza party bastano [].",
+    "fields": {
+      "userParty": "object",
+      "userParty.userId": "uint64",
+      "userParty.partyId": "uint64",
+      "userParty.isJoin": "int",
+      "userParty.isLeader": "int",
+      "userParty.isAdmin": "int",
+      "userParty.flagFirstReward": "int",
+      "userParty.joinDate": "datetime",
+      "partyUserList": "array"
+    }
+  },
+  "/user/stone": {
+    "action": 7,
+    "fields": {
+      "userStone": "object",
+      "userStone.freeStone": "int",
+      "userStone.payStone": "int"
+    }
+  },
+  "/user/shop": {
+    "action": 8,
+    "fields": {
+      "userBenefits": "array",
+      "userBenefits[].benefitId": "int",
+      "userBenefits[].endDatetime": "datetime"
+    }
+  },
+  "/user/birthday": {
+    "action": 9,
+    "fields": {
+      "birthday": "int"
+    }
+  },
+  "/user/sphere": {
+    "action": 10,
+    "fields": {
+      "userSphere": "object",
+      "userSphere.userSphereDatas": "array",
+      "userSphere.notChargedSphereBoardIds": "array"
+    }
+  },
+  "/user/sphere/check/170119": {
+    "action": 61,
+    "note": "Il ramo mette i checkTypes della richiesta in un insieme. Con 3 legge invece closeEventSphereBoardIds (int[]): la risposta li porta entrambi.",
+    "fields": {
+      "userSphere": "object",
+      "userSphere.userSphereDatas": "array",
+      "userSphere.notChargedSphereBoardIds": "array",
+      "closeEventSphereBoardIds": "array"
+    }
+  },
+  "/user/notice": {
+    "action": 241,
+    "fields": {
+      "raidNotice": "object",
+      "raidNotice.isSelfRaid": "uint",
+      "raidNotice.isOthersRaid": "uint"
+    }
+  },
+  "/user/keyblade": {
+    "action": 11,
+    "fields": {
+      "userKeyblades": "array"
+    }
+  },
+  "/user/deck": {
+    "action": 12,
+    "fields": {
+      "userDecks": "array"
+    }
+  },
+  "/user/skill": {
+    "action": 13,
+    "fields": {
+      "userSkills": "array"
+    }
+  },
+  "/user/item": {
+    "action": 14,
+    "note": "ramo predefinito: basta ret",
+    "fields": {}
+  },
+  "/user/medal": {
+    "action": 15,
+    "fields": {
+      "userMedals": "array"
+    }
+  },
+  "/user/material": {
+    "action": 16,
+    "fields": {
+      "userMaterials": "array"
+    }
+  },
+  "/user/album/161102": {
+    "action": 17,
+    "fields": {
+      "userAlbum": "object",
+      "userAlbum.albumMedals": "array",
+      "userAlbum.albumMedals[].medalId": "uint",
+      "userAlbum.albumMedals[].guiltStatus": "uint",
+      "userAlbum.allMedalCount": "int"
+    }
+  },
+  "/user/title": {
+    "action": 18,
+    "fields": {
+      "userTitles": "array",
+      "userTitles[].userTitleId": "uint64",
+      "userTitles[].titleId": "int"
+    }
+  },
+  "/user/support": {
+    "action": 19,
+    "fields": {
+      "supportUser": "object",
+      "supportUser.supportUserId": "uint64",
+      "supportUser.level": "int",
+      "supportUser.partyId": "uint64",
+      "supportUser.userName": "string",
+      "supportUser.titleLeftId": "int",
+      "supportUser.titleRightId": "int",
+      "supportUser.titlePlateId": "int",
+      "supportUser.userKeybladeId": "uint64",
+      "supportUser.keybladeId": "int",
+      "supportUser.userMedalId": "uint64",
+      "supportUser.medalId": "int",
+      "supportUser.lastActionDatetime": "datetime"
+    }
+  },
+  "/user/present": {
+    "action": 20,
+    "fields": {
+      "userPresent": "object",
+      "userPresent.userPresentDatas": "array",
+      "userPresent.presentCount": "int",
+      "userPresent.presentCountMax": "int",
+      "userPresent.stonePresentCount": "int",
+      "userPresent.stonePresentCountMax": "int"
+    }
+  },
+  "/user/avatar": {
+    "action": 21,
+    "fields": {
+      "userAvatar": "object",
+      "userAvatar.myCoordinateNo": "int",
+      "userAvatar.gender": "int",
+      "userAvatar.hairPartsId": "int",
+      "userAvatar.hairColorPartsId": "int",
+      "userAvatar.facePartsId": "int",
+      "userAvatar.bodyPartsId": "int",
+      "userAvatar.skinPartsId": "int",
+      "userAvatar.accessoriesPartsIds": "array"
+    }
+  },
+  "/user/avatar/all": {
+    "action": 22,
+    "fields": {
+      "userAvatars": "array"
+    }
+  },
+  "/user/avatar/parts": {
+    "action": 23,
+    "fields": {
+      "userAvatarParts": "array"
+    }
+  },
+  "/payment/info": {
+    "action": 24,
+    "fields": {
+      "paymentInfo": "object",
+      "paymentInfo.cesaLimitAge": "int",
+      "paymentInfo.chargeMoneyThisMonth": "int",
+      "paymentInfo.lastchargeMoneyThisMonth": "int"
+    }
+  },
+  "/system/need/url": {
+    "action": 25,
+    "fields": {
+      "support": "string",
+      "register": "string",
+      "update": "string",
+      "help": "string",
+      "staff": "string",
+      "agreement": "string",
+      "license": "string",
+      "shikin": "string",
+      "tokutei": "string",
+      "store": "string",
+      "odds": "string",
+      "petOdds": "string",
+      "appUpdate": "string",
+      "officialSite": "string",
+      "officialTwitter": "string",
+      "movie": "string",
+      "beginnersGuide": "string",
+      "passiveSettingList": "string",
+      "darkHelp": "string",
+      "darkOdds": "string",
+      "officialTwitterCustom": "string"
+    }
+  },
+  "/user/option": {
+    "action": 149,
+    "fields": {
+      "userOption": "object",
+      "userOption.isNoticeAp": "int",
+      "userOption.isNoticeHelp": "int",
+      "userOption.isNoticeEvent": "int",
+      "userOption.isNoticeLuxUp": "int",
+      "userOption.isNoticePet": "int",
+      "userOption.isTwitterThumbnail": "int"
+    }
+  },
+  "/user/mission": {
+    "action": 187,
+    "fields": {
+      "id": "uint",
+      "day": "uint",
+      "isFinish": "bool"
+    }
+  },
+  "/passive/list": {
+    "action": 249,
+    "fields": {
+      "newPassiveSettingIds": "array",
+      "passiveSettingIds": "array"
+    }
+  },
+  "/emblem/list": {
+    "action": 188,
+    "fields": {
+      "emblemIds": "array"
+    }
+  },
+  "/keyblade/subslot": {
+    "action": 191,
+    "fields": {
+      "subslotMaxNum": "uint",
+      "userKeybladeSubslots": "array"
+    }
+  },
+  "/user/mission/list": {
+    "action": 189,
+    "fields": {
+      "missions": "array",
+      "beginnerLimitTime": "datetime"
+    }
+  },
+  "/pvp": {
+    "action": 195,
+    "fields": {
+      "pvp": "object",
+      "pvp.pvpId": "uint",
+      "pvp.playNumber": "uint",
+      "pvp.pvpPoint": "uint",
+      "pvp.pvpClass": "uint",
+      "pvp.pvpRank": "uint",
+      "pvp.openRankingId": "uint64",
+      "pvp.numParticipant": "uint"
+    }
+  },
+  "/pvp/keyblade": {
+    "action": 196,
+    "fields": {
+      "pvp": "object",
+      "pvp.keybladeIds": "array",
+      "pvp.userDecks": "array"
+    }
+  },
+  "/pvp/vs_list": {
+    "action": 198,
+    "fields": {
+      "vsUsers": "array"
+    }
+  },
+  "/user/link": {
+    "action": 152,
+    "fields": {
+      "linkInfos": "array",
+      "linkInfos[].platformType": "uint",
+      "linkInfos[].linkPlatformId": "string"
+    }
+  },
+  "/multi/status": {
+    "action": 158,
+    "fields": {
+      "serverAddress": "string",
+      "multiEvents": "array"
+    }
+  },
+  "/multi/talk": {
+    "action": 159,
+    "fields": {
+      "multiTalkIds": "array"
+    }
+  },
+  "/playtime/bp": {
+    "action": 311,
+    "fields": {
+      "diffBp": "uint",
+      "accumulatedBp": "uint",
+      "key": "string"
+    }
+  },
+  "/refund/info": {
+    "action": 320,
+    "fields": {
+      "nativeTagName": "string",
+      "payStone": "uint",
+      "refund": "string",
+      "endDate": "string",
+      "refundTermFlag": "uint",
+      "userId": "uint64"
+    }
+  },
+  "/stage/160310": {
+    "action": 108,
+    "fields": {
+      "stories": "array",
+      "newStageId": "uint",
+      "luxRank": "uint",
+      "openRankingId": "uint"
+    }
+  },
+  "/user/chat": {
+    "action": 6,
+    "fields": {
+      "userData": "object",
+      "userData.userChat": "object",
+      "userData.userChat.stampIds": "array",
+      "userData.userChat.userId": "uint64",
+      "userData.userChat.tagName": "string",
+      "userData.userChat.userEndpointUrl": "string",
+      "authToken": "string",
+      "userToken": "string"
+    }
+  },
+  "/user/create": {
+    "action": 253,
+    "note": "Gestita a mano in server.js (respondUserCreate): newcomerKhux va a false.",
+    "fields": {
+      "systemLogin": "object",
+      "systemLogin.newcomerKhux": "bool",
+      "gameLogin": "object",
+      "gameLogin.acquirableLoginBonus": "bool"
+    }
+  }
+}

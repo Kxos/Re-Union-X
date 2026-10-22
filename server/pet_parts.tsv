@@ -1,0 +1,674 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Spirit part names derived from KH Wiki (khwiki.com, CC BY-SA 4.0) and KHUX Wiki (khuxwiki.com) pages;
+# attribution: the KH Wiki and KHUX Wiki contributors. Not covered by the MIT licence (THIRD_PARTY_NOTICES.md).
+# Parti dello Spirit: id della grafica JP 4.3.1, nome inglese (khuxwiki; metodo e confidenza in
+# reference/pet/spirit_parts_names.md fuori dal repo). Generata da make-pet-parts.js -> tables/petParts.json
+petPartsId	name
+303001	Pink Kitstar Ears
+303002	Blue Kitstar Ears
+303003	Rainbow Kitstar Ears
+303004	Pink Pupstar Ears
+303005	Blue Pupstar Ears
+303006	Rainbow Pupstar Ears
+303007	Pink Bunstar Ears
+303008	Blue Bunstar Ears
+303009	Rainbow Bunstar Ears
+303010	Yellow Pigstar Ears
+303011	Purple Pigstar Ears
+303012	Black Pigstar Ears
+303013	Green Reinstar Ears
+303014	Blue Reinstar Ears
+303015	Gold Reinstar Ears
+303016	Blue Moonpup Ears
+303017	Orange Moonpup Ears
+303018	Black Moonpup Ears
+303019	Pink Hamstar Ears
+303020	Purple Hamstar Ears
+303021	Chocolate Hamstar Ears
+303022	Pink Monstar Ears
+303023	Green Monstar Ears
+303024	Rainbow Monstar Ears
+303025	Green Lambstar Ears
+303026	Gray Lambstar Ears
+303027	Black Lambstar Ears
+303029	Green Foxstar Ears
+303030	Red Foxstar Ears
+303031	White Foxstar Ears
+303032	Purple Horstar Ears
+303033	Brown Horstar Ears
+303034	Rainbow Horstar Ears
+303038	Orange Otterstar Ears
+303039	Blue Otterstar Ears
+303040	Black Otterstar Ears
+303041	Pink Giraffestar Ears
+303042	Gray Giraffestar Ears
+303043	Yellow Giraffestar Ears
+303044	Black Flowerkit Ears
+303045	Purple Flowerkit Ears
+303046	Spooky Flowerkit Ears
+303050	Purple Snowpup Ears
+303051	Orange Snowpup Ears
+303052	Silver Snowpup Ears
+303053	White Cubstar Ears
+303054	Brown Cubstar Ears
+303055	Black Cubstar Ears
+303056	Yellow Coonstar Ears
+303057	Green Coonstar Ears
+303058	Brown Coonstar Ears
+303059	Red Lionstar Ears
+303060	Yellow Lionstar Ears
+303061	Gray Lionstar Ears
+303062	Purple Moonbun Ears
+303063	Orange Moonbun Ears
+303064	Silver Moonbun Ears
+303065	Blue Wolfstar Ears
+303066	Pink Wolfstar Ears
+303067	Black Wolfstar Ears
+303068	White Alpacastar Ears
+303069	Green Alpacastar Ears
+303070	Black Alpacastar Ears
+303071	Purple Hedgestar Ears
+303072	Gray Hedgestar Ears
+303073	White Hedgestar Ears
+303074	Green Squirrelstar Ears
+303075	Yellow Squirrelstar Ears
+303076	Red Squirrelstar Ears
+303077	White Mummystar Ears
+303081	[unidentified goat/sheep-like species, gray] Ears
+303082	[unidentified goat/sheep-like species, black-faced] Ears
+303083	[unidentified dog-like species, white with wings] Ears
+303084	Blue Fenstar Ears
+303085	Gray Fenstar Ears
+303086	Orange Fenstar Ears
+303087	Pink Axolstar Ears
+303088	Gray Axolstar Ears
+303089	Black Axolstar Ears
+303090	Yellow Tigstar Ears
+303091	Brown Tigstar Ears
+303092	Rainbow Tigstar Ears
+303093	Brown Weaselstar Ears
+303094	White Weaselstar Ears
+303095	Red Weaselstar Ears
+304001	Pink Kitstar Head
+304002	Blue Kitstar Head
+304003	Rainbow Kitstar Head
+304004	Pink Pupstar Head
+304005	Blue Pupstar Head
+304006	Rainbow Pupstar Head
+304007	Pink Bunstar Head
+304008	Blue Bunstar Head
+304009	Rainbow Bunstar Head
+304010	Yellow Pigstar Head
+304011	Purple Pigstar Head
+304012	Black Pigstar Head
+304013	Green Reinstar Head
+304014	Blue Reinstar Head
+304015	Gold Reinstar Head
+304016	Blue Moonpup Head
+304017	Orange Moonpup Head
+304018	Black Moonpup Head
+304019	Pink Hamstar Head
+304020	Purple Hamstar Head
+304021	Chocolate Hamstar Head
+304022	Pink Monstar Head
+304023	Green Monstar Head
+304024	Rainbow Monstar Head
+304025	Green Lambstar Head
+304026	Gray Lambstar Head
+304027	Black Lambstar Head
+304029	Green Foxstar Head
+304030	Red Foxstar Head
+304031	White Foxstar Head
+304032	Purple Horstar Head
+304033	Brown Horstar Head
+304034	Rainbow Horstar Head
+304035	Purple Tortoistar Head
+304036	Orange Tortoistar Head
+304037	Green Tortoistar Head
+304038	Orange Otterstar Head
+304039	Blue Otterstar Head
+304040	Black Otterstar Head
+304041	Pink Giraffestar Head
+304042	Gray Giraffestar Head
+304043	Yellow Giraffestar Head
+304044	Black Flowerkit Head
+304045	Purple Flowerkit Head
+304046	Spooky Flowerkit Head
+304047	Pink Chameleostar Head
+304048	Rainbow Chameleostar Head
+304049	Black Chameleostar Head
+304050	Purple Snowpup Head
+304051	Orange Snowpup Head
+304052	Silver Snowpup Head
+304053	White Cubstar Head
+304054	Brown Cubstar Head
+304055	Black Cubstar Head
+304056	Yellow Coonstar Head
+304057	Green Coonstar Head
+304058	Brown Coonstar Head
+304059	Red Lionstar Head
+304060	Yellow Lionstar Head
+304061	Gray Lionstar Head
+304062	Purple Moonbun Head
+304063	Orange Moonbun Head
+304064	Silver Moonbun Head
+304065	Blue Wolfstar Head
+304066	Pink Wolfstar Head
+304067	Black Wolfstar Head
+304068	White Alpacastar Head
+304069	Green Alpacastar Head
+304070	Black Alpacastar Head
+304071	Purple Hedgestar Head
+304072	Gray Hedgestar Head
+304073	White Hedgestar Head
+304074	Green Squirrelstar Head
+304075	Yellow Squirrelstar Head
+304076	Red Squirrelstar Head
+304077	White Mummystar Head
+304078	Brown Mummystar Head
+304081	[unidentified goat/sheep-like species, gray] Head
+304082	[unidentified goat/sheep-like species, black-faced] Head
+304083	[unidentified dog-like species, white with wings] Head
+304084	Blue Fenstar Head
+304085	Gray Fenstar Head
+304086	Orange Fenstar Head
+304087	Pink Axolstar Head
+304088	Gray Axolstar Head
+304089	Black Axolstar Head
+304090	Yellow Tigstar Head
+304091	Brown Tigstar Head
+304092	Rainbow Tigstar Head
+304093	Brown Weaselstar Head
+304094	White Weaselstar Head
+304095	Red Weaselstar Head
+306001	Pink Kitstar Legs
+306002	Blue Kitstar Legs
+306003	Rainbow Kitstar Legs
+306004	Pink Pupstar Legs
+306005	Blue Pupstar Legs
+306006	Rainbow Pupstar Legs
+306007	Pink Bunstar Legs
+306008	Blue Bunstar Legs
+306009	Rainbow Bunstar Legs
+306010	Yellow Pigstar Legs
+306011	Purple Pigstar Legs
+306012	Black Pigstar Legs
+306013	Green Reinstar Legs
+306014	Blue Reinstar Legs
+306015	Gold Reinstar Legs
+306016	Blue Moonpup Legs
+306017	Orange Moonpup Legs
+306018	Black Moonpup Legs
+306019	Pink Hamstar Legs
+306020	Purple Hamstar Legs
+306021	Chocolate Hamstar Legs
+306022	Pink Monstar Legs
+306023	Green Monstar Legs
+306024	Rainbow Monstar Legs
+306025	Green Lambstar Legs
+306026	Gray Lambstar Legs
+306027	Black Lambstar Legs
+306029	Green Foxstar Legs
+306030	Red Foxstar Legs
+306031	White Foxstar Legs
+306032	Purple Horstar Legs
+306033	Brown Horstar Legs
+306034	Rainbow Horstar Legs
+306035	Purple Tortoistar Legs
+306036	Orange Tortoistar Legs
+306037	Green Tortoistar Legs
+306038	Orange Otterstar Legs
+306039	Blue Otterstar Legs
+306040	Black Otterstar Legs
+306041	Pink Giraffestar Legs
+306042	Gray Giraffestar Legs
+306043	Yellow Giraffestar Legs
+306044	Black Flowerkit Legs
+306045	Purple Flowerkit Legs
+306046	Spooky Flowerkit Legs
+306047	Pink Chameleostar Legs
+306048	Rainbow Chameleostar Legs
+306049	Black Chameleostar Legs
+306050	Purple Snowpup Legs
+306051	Orange Snowpup Legs
+306052	Silver Snowpup Legs
+306053	White Cubstar Legs
+306054	Brown Cubstar Legs
+306055	Black Cubstar Legs
+306056	Yellow Coonstar Legs
+306057	Green Coonstar Legs
+306058	Brown Coonstar Legs
+306059	Red Lionstar Legs
+306060	Yellow Lionstar Legs
+306061	Gray Lionstar Legs
+306062	Purple Moonbun Legs
+306063	Orange Moonbun Legs
+306064	Silver Moonbun Legs
+306065	Blue Wolfstar Legs
+306066	Pink Wolfstar Legs
+306067	Black Wolfstar Legs
+306068	White Alpacastar Legs
+306069	Green Alpacastar Legs
+306070	Black Alpacastar Legs
+306071	Purple Hedgestar Legs
+306072	Gray Hedgestar Legs
+306073	White Hedgestar Legs
+306074	Green Squirrelstar Legs
+306075	Yellow Squirrelstar Legs
+306076	Red Squirrelstar Legs
+306077	White Mummystar Legs
+306078	Brown Mummystar Legs
+306079	Gingerbread Dog Legs
+306080	Gingerbread Cat Legs
+306081	[unidentified goat/sheep-like species, gray] Legs
+306082	[unidentified goat/sheep-like species, black-faced] Legs
+306083	[unidentified dog-like species, white with wings] Legs
+306084	Blue Fenstar Legs
+306085	Gray Fenstar Legs
+306086	Orange Fenstar Legs
+306087	Pink Axolstar Legs
+306088	Gray Axolstar Legs
+306089	Black Axolstar Legs
+306090	Yellow Tigstar Legs
+306091	Brown Tigstar Legs
+306092	Rainbow Tigstar Legs
+306093	Brown Weaselstar Legs
+306094	White Weaselstar Legs
+306095	Red Weaselstar Legs
+308001	Pink Kitstar Body
+308002	Blue Kitstar Body
+308003	Rainbow Kitstar Body
+308004	Pink Pupstar Body
+308005	Blue Pupstar Body
+308006	Rainbow Pupstar Body
+308007	Pink Bunstar Body
+308008	Blue Bunstar Body
+308009	Rainbow Bunstar Body
+308010	Yellow Pigstar Body
+308011	Purple Pigstar Body
+308012	Black Pigstar Body
+308013	Green Reinstar Body
+308014	Blue Reinstar Body
+308015	Gold Reinstar Body
+308016	Blue Moonpup Body
+308017	Orange Moonpup Body
+308018	Black Moonpup Body
+308019	Pink Hamstar Body
+308020	Purple Hamstar Body
+308021	Chocolate Hamstar Body
+308022	Pink Monstar Body
+308023	Green Monstar Body
+308024	Rainbow Monstar Body
+308025	Green Lambstar Body
+308026	Gray Lambstar Body
+308027	Black Lambstar Body
+308028	Dragon Maleficent: Body
+308029	Green Foxstar Body
+308030	Red Foxstar Body
+308031	White Foxstar Body
+308032	Purple Horstar Body
+308033	Brown Horstar Body
+308034	Rainbow Horstar Body
+308035	Purple Tortoistar Body
+308036	Orange Tortoistar Body
+308037	Green Tortoistar Body
+308038	Orange Otterstar Body
+308039	Blue Otterstar Body
+308040	Black Otterstar Body
+308041	Pink Giraffestar Body
+308042	Gray Giraffestar Body
+308043	Yellow Giraffestar Body
+308044	Black Flowerkit Body
+308045	Purple Flowerkit Body
+308046	Spooky Flowerkit Body
+308047	Pink Chameleostar Body
+308048	Rainbow Chameleostar Body
+308049	Black Chameleostar Body
+308050	Purple Snowpup Body
+308051	Orange Snowpup Body
+308052	Silver Snowpup Body
+308053	White Cubstar Body
+308054	Brown Cubstar Body
+308055	Black Cubstar Body
+308056	Yellow Coonstar Body
+308057	Green Coonstar Body
+308058	Brown Coonstar Body
+308059	Red Lionstar Body
+308060	Yellow Lionstar Body
+308061	Gray Lionstar Body
+308062	Purple Moonbun Body
+308063	Orange Moonbun Body
+308064	Silver Moonbun Body
+308065	Blue Wolfstar Body
+308066	Pink Wolfstar Body
+308067	Black Wolfstar Body
+308068	White Alpacastar Body
+308069	Green Alpacastar Body
+308070	Black Alpacastar Body
+308071	Purple Hedgestar Body
+308072	Gray Hedgestar Body
+308073	White Hedgestar Body
+308074	Green Squirrelstar Body
+308075	Yellow Squirrelstar Body
+308076	Red Squirrelstar Body
+308077	White Mummystar Body
+308078	Brown Mummystar Body
+308079	Gingerbread Dog Body
+308080	Gingerbread Cat Body
+308081	[unidentified goat/sheep-like species, gray] Body
+308082	[unidentified goat/sheep-like species, black-faced] Body
+308083	[unidentified dog-like species, white with wings] Body
+308084	Blue Fenstar Body
+308085	Gray Fenstar Body
+308086	Orange Fenstar Body
+308087	Pink Axolstar Body
+308088	Gray Axolstar Body
+308089	Black Axolstar Body
+308090	Yellow Tigstar Body
+308091	Brown Tigstar Body
+308092	Rainbow Tigstar Body
+308093	Brown Weaselstar Body
+308094	White Weaselstar Body
+308095	Red Weaselstar Body
+309001	Pink Kitstar Tail
+309002	Blue Kitstar Tail
+309003	Rainbow Kitstar Tail
+309004	Pink Pupstar Tail
+309005	Blue Pupstar Tail
+309006	Rainbow Pupstar Tail
+309007	Pink Bunstar Tail
+309008	Blue Bunstar Tail
+309009	Rainbow Bunstar Tail
+309010	Yellow Pigstar Tail
+309011	Purple Pigstar Tail
+309012	Black Pigstar Tail
+309013	Green Reinstar Tail
+309014	Blue Reinstar Tail
+309015	Gold Reinstar Tail
+309016	Blue Moonpup Tail
+309017	Orange Moonpup Tail
+309018	Black Moonpup Tail
+309019	Pink Hamstar Tail
+309020	Purple Hamstar Tail
+309021	Chocolate Hamstar Tail
+309022	Pink Monstar Tail
+309023	Green Monstar Tail
+309024	Rainbow Monstar Tail
+309025	Green Lambstar Tail
+309026	Gray Lambstar Tail
+309027	Black Lambstar Tail
+309029	Green Foxstar Tail
+309030	Red Foxstar Tail
+309031	White Foxstar Tail
+309032	Purple Horstar Tail
+309033	Brown Horstar Tail
+309034	Rainbow Horstar Tail
+309035	Purple Tortoistar Tail
+309036	Orange Tortoistar Tail
+309037	Green Tortoistar Tail
+309038	Orange Otterstar Tail
+309039	Blue Otterstar Tail
+309040	Black Otterstar Tail
+309041	Pink Giraffestar Tail
+309042	Gray Giraffestar Tail
+309043	Yellow Giraffestar Tail
+309044	Black Flowerkit Tail
+309045	Purple Flowerkit Tail
+309046	Spooky Flowerkit Tail
+309047	Pink Chameleostar Tail
+309048	Rainbow Chameleostar Tail
+309049	Black Chameleostar Tail
+309050	Purple Snowpup Tail
+309051	Orange Snowpup Tail
+309052	Silver Snowpup Tail
+309053	White Cubstar Tail
+309054	Brown Cubstar Tail
+309055	Black Cubstar Tail
+309056	Yellow Coonstar Tail
+309057	Green Coonstar Tail
+309058	Brown Coonstar Tail
+309059	Red Lionstar Tail
+309060	Yellow Lionstar Tail
+309061	Gray Lionstar Tail
+309062	Purple Moonbun Tail
+309063	Orange Moonbun Tail
+309064	Silver Moonbun Tail
+309065	Blue Wolfstar Tail
+309066	Pink Wolfstar Tail
+309067	Black Wolfstar Tail
+309068	White Alpacastar Tail
+309069	Green Alpacastar Tail
+309070	Black Alpacastar Tail
+309074	Green Squirrelstar Tail
+309075	Yellow Squirrelstar Tail
+309076	Red Squirrelstar Tail
+309079	Gingerbread Dog Tail
+309080	Gingerbread Cat Tail
+309081	[unidentified goat/sheep-like species, gray] Tail
+309082	[unidentified goat/sheep-like species, black-faced] Tail
+309083	[unidentified dog-like species, white with wings] Tail
+309084	Blue Fenstar Tail
+309085	Gray Fenstar Tail
+309086	Orange Fenstar Tail
+309087	Pink Axolstar Tail
+309088	Gray Axolstar Tail
+309089	Black Axolstar Tail
+309090	Yellow Tigstar Tail
+309091	Brown Tigstar Tail
+309092	Rainbow Tigstar Tail
+309093	Brown Weaselstar Tail
+309094	White Weaselstar Tail
+309095	Red Weaselstar Tail
+401001	Red Sunglasses
+401002	Round Glasses
+401003	Furry Eyebrows
+401004	Santa Brows
+401005	Heart-Shaped Sunglasses
+401006	KH 3D Sora: Funny Glasses
+401007	Sleep Mask
+401008	Starry Sunglasses
+401009	Pirate Eye Patch
+401012	Illusionist: Mask
+401013	Clover Glasses
+401014	Fungus's Glasses
+401015	Carnival Mask
+401016	Mickey Sunglasses
+401017	Donald Sunglasses
+401018	Daisy Sunglasses
+401019	Butterfly Sunglasses
+401020	Heart-Shaped Eye Patch
+402001	Baby Bonnet
+402002	Red Ribbon
+402003	Black Afro
+402004	Red Mushroom Hat
+402005	Black Knit Cap
+402006	Hamburger
+402007	Santa Hat
+402008	Lion Dancer
+402009	Bamboo Decoration
+402010	Donut Cap
+402011	Cupcake Cap
+402012	KH 3D Sora: Party Hat
+402013	Dragon Maleficent: Head
+402014	Nightcap
+402015	Chirithy Hat
+402016	Baseball Cap
+402017	Soccer Ball
+402018	Unicorn Style
+402019	Mickey Visor
+402020	Minnie Visor
+402023	Pirate Hat
+402024	Sailor Hat
+402025	Swim Snorkel
+402026	Swim Cap & Goggles
+402030	Halloween Pointy Hat
+402031	Pumpkinhead
+402032	Fantasia Mickey Hat
+402033	Dancing Mushroom Ornament
+402034	Magic Broom Ornament
+402036	Black Festive Hat
+402037	Green Festive Hat
+402038	Turkey Leg
+402039	Illusionist: Hat
+402040	Pizza Hat
+402042	Woody Hat
+402043	Macaroon Tower Hat
+402044	Patissier's Hat
+402045	Patissiere's Hat
+402046	Clover Crown
+402047	Cherry Blossom Hat
+402048	Red Lionstar Style
+402049	[unidentified pink fluffy wig]
+402050	[unidentified white starry hair]
+402051	Tadashi's Hat
+402052	Blue Spring Bunny Cowl
+402053	Pink Spring Bunny Cowl
+402054	Royal Tiara
+402055	Pascal Ornament
+402056	Fire Samurai: Helm
+402057	Water Samurai: Helm
+402058	Monsters, Inc. Helmet
+402059	[unidentified black starry wig]
+402061	KH III Sora Ornament B
+402062	White Hydrangea: Hat
+402063	Black Hydrangea: Hat
+402064	KH III Kairi Ornament A
+402065	KH III Kairi Ornament B
+402066	Jessie Hat
+402067	KH III Riku Ornament A
+402068	KH III Riku Ornament B
+402069	Chirithy Head
+402070	Moogle Head
+402071	Argyle Mickey Headband
+402072	Pepita Ornament
+402074	Mickey Ornament
+402075	Minnie Ornament
+402076	Floral Headband
+402077	Terra Ornament A
+402078	Terra Ornament B
+402079	Gingerbread Dog Head
+402080	Gingerbread Cat Head
+402081	Bernard's Hat
+402082	Bianca's Hat
+402083	Puppy Mask
+402084	New Year's Chirithy Hat
+402085	Chocolate Cake Headpiece
+402086	Valentine Rouge: Headband
+402087	Double Cookie Headband
+402088	Aqua Ornament A
+402089	Aqua Ornament B
+402090	Donald's Hat
+402091	Goofy's Hat
+402093	Rice Ball Helmet
+402094	Cool Sunglasses
+402095	XIII Replica Hood
+402096	Summer Donald Ornament
+402097	Summer Daisy Ornament
+402098	Atlantica Donald Ornament
+402099	Roxas Ornament A
+402100	Roxas Ornament B
+402101	Sebastian Ornament
+402102	Flounder Ornament
+402103	Naminé Ornament A
+402104	Naminé Ornament B
+402105	Magic Lamp
+402106	Iago Ornament
+402107	Fabergé Egg Tiara
+402108	Fabergé Egg Item
+402109	Fabergé Egg Helm
+402110	Anubis Ornament
+402111	Cobra Tiara
+402112	Scales
+402113	Navy Aviator Hat
+402114	Beige Aviator Hat
+402115	Red Knit Hat
+402116	Lux-Pattern Knit Cap
+402117	Starlight Headpiece
+402120	Axel Ornament A
+402121	Axel Ornament B
+402123	Fortune Fedora
+402124	Celebration Ribbon
+402125	New Year's Mickey Ears
+402127	Red Heart-Shaped Hat
+405001	Red Bowtie
+405002	Yellow Scarf
+405003	[unidentified orange striped scarf]
+405004	Wreath
+405005	Collar
+405006	Furoshiki Cloth
+405007	Rose Necklace
+405008	Chirithy Pouch
+405009	Sailor Collar
+405010	KH II Pence: Bandanna
+405011	KH II Olette: Necklace
+405012	Halloween Cravat
+405013	Ruffle Collar
+405014	Festive Ribbon
+405015	Festive Fur
+405016	Chef's Neckerchief
+405017	Cherry Necklace
+405018	Starry Ribbon
+405019	Starry Necklace
+405020	Moogle Ribbon
+405021	Argyle Mickey Pouch
+405022	Argyle Minnie Pouch
+405023	Collar & Tie
+405024	Valentine Rouge: Choker
+405025	Staff Pass
+405026	Analog Watch
+405027	[unidentified gold chain with blue pendant]
+405028	[unidentified Egyptian collar]
+405029	Chirithy Scarf
+405030	Collar of Hearts
+407001	Angel Wings
+407002	Colorful Balloon
+407003	Red Backpack
+407005	New Year Decoration
+407007	Rose Flower Basket
+407008	Dragon Maleficent: Wings
+407010	Chirithy Cape
+407013	Balloon Pumbaa
+407014	Paraglider
+407016	Balloon Figaro
+407017	Balloon Lucifer
+407018	Balloon Magic Broom
+407019	Festive Sled
+407020	Balloon Olaf & Sven
+407021	Illusionist: Wings
+407022	Balloon Huey, Dewey & Louie
+407023	Balloon Scrooge
+407027	Balloon KH III Sora
+407028	Balloon KH III Kairi
+407029	Buzz Lightyear Wings
+407031	Balloon KH III Riku
+407032	Balloon Pegasus
+407033	Balloon Blimp Chirithy
+407034	Halloween Crow: Wings
+407035	Balloon Sugar Skull
+407037	Balloon Bianca & Bernard
+407038	Balloon Gingerbread House
+407040	Balloon Roxas
+407041	Flotsam & Jetsam
+407042	Balloon Naminé
+407044	Balloon Genie
+407045	Fabergé Egg Wings
+407046	Gold-Rimmed Wings
+407048	Heart-Themed Balloons
+407049	Mickey & Minnie Glove Balloons
+410001	Heart
+410002	Autumn Leaves
+410004	Rose Flower Petals
+410005	Fluffy Heart
+410006	Fireworks
+410008	Word Bubble: Sea-Salt Ice Cream
+410009	Word Bubble: Watermelon
+410011	Floating Trick or Treat
+410015	Swirling Hearts
+410017	Word Bubble: I Love Sora
+410018	Word Bubble: Ukulele
+411001	Mustache
+411002	Santa Beard
+411003	Pirate Mustache
+411004	Dwarf Beard
+411005	Toast
+411006	Letter

@@ -1,0 +1,5282 @@
+{
+ "lux": [
+  [
+   350,
+   "STR +100"
+  ],
+  [
+   355,
+   "DEF +10"
+  ],
+  [
+   360,
+   "DEF +100"
+  ],
+  [
+   365,
+   "HP +50"
+  ],
+  [
+   370,
+   "HP +100"
+  ],
+  [
+   375,
+   "STR +10"
+  ],
+  [
+   380,
+   "STR +100"
+  ],
+  [
+   385,
+   "DEF +10"
+  ],
+  [
+   390,
+   "HP +50"
+  ],
+  [
+   395,
+   "STR +10"
+  ],
+  [
+   400,
+   "STR +200"
+  ],
+  [
+   405,
+   "DEF +10"
+  ],
+  [
+   410,
+   "DEF +100"
+  ],
+  [
+   415,
+   "HP +50"
+  ],
+  [
+   420,
+   "HP +100"
+  ],
+  [
+   425,
+   "STR +10"
+  ],
+  [
+   430,
+   "DEF +100"
+  ],
+  [
+   435,
+   "HP +50"
+  ],
+  [
+   440,
+   "STR +10"
+  ],
+  [
+   445,
+   "DEF +10"
+  ],
+  [
+   450,
+   "STR +100"
+  ],
+  [
+   452,
+   "HP +50"
+  ],
+  [
+   454,
+   "STR +10"
+  ],
+  [
+   456,
+   "DEF +10"
+  ],
+  [
+   458,
+   "HP +50"
+  ],
+  [
+   460,
+   "DEF +100"
+  ],
+  [
+   462,
+   "STR +10"
+  ],
+  [
+   464,
+   "DEF +10"
+  ],
+  [
+   466,
+   "HP +50"
+  ],
+  [
+   468,
+   "STR +10"
+  ],
+  [
+   470,
+   "HP +100"
+  ],
+  [
+   472,
+   "DEF +10"
+  ],
+  [
+   474,
+   "STR +10"
+  ],
+  [
+   476,
+   "DEF +10"
+  ],
+  [
+   478,
+   "HP +50"
+  ],
+  [
+   480,
+   "STR +100"
+  ],
+  [
+   482,
+   "HP +50"
+  ],
+  [
+   484,
+   "DEF +10"
+  ],
+  [
+   486,
+   "STR +10"
+  ],
+  [
+   488,
+   "HP +50"
+  ],
+  [
+   490,
+   "DEF +100"
+  ],
+  [
+   492,
+   "STR +10"
+  ],
+  [
+   494,
+   "DEF +10"
+  ],
+  [
+   496,
+   "HP +100"
+  ],
+  [
+   498,
+   "DEF +10"
+  ],
+  [
+   500,
+   "STR +200"
+  ],
+  [
+   502,
+   "DEF +10"
+  ],
+  [
+   504,
+   "HP +50"
+  ],
+  [
+   506,
+   "STR +10"
+  ],
+  [
+   508,
+   "HP +50"
+  ],
+  [
+   510,
+   "DEF +100"
+  ],
+  [
+   512,
+   "STR +10"
+  ],
+  [
+   514,
+   "STR +10"
+  ],
+  [
+   516,
+   "HP +50"
+  ],
+  [
+   518,
+   "DEF +10"
+  ],
+  [
+   520,
+   "HP +100"
+  ],
+  [
+   522,
+   "DEF +10"
+  ],
+  [
+   524,
+   "HP +50"
+  ],
+  [
+   526,
+   "STR +10"
+  ],
+  [
+   528,
+   "DEF +10"
+  ],
+  [
+   530,
+   "STR +100"
+  ],
+  [
+   532,
+   "HP +50"
+  ],
+  [
+   534,
+   "STR +10"
+  ],
+  [
+   536,
+   "DEF +10"
+  ],
+  [
+   538,
+   "HP +50"
+  ],
+  [
+   540,
+   "DEF +100"
+  ],
+  [
+   542,
+   "STR +10"
+  ],
+  [
+   544,
+   "DEF +10"
+  ],
+  [
+   546,
+   "HP +50"
+  ],
+  [
+   548,
+   "DEF +10"
+  ],
+  [
+   550,
+   "STR +100"
+  ],
+  [
+   551,
+   "DEF +10"
+  ],
+  [
+   552,
+   "HP +50"
+  ],
+  [
+   553,
+   "STR +10"
+  ],
+  [
+   554,
+   "DEF +10"
+  ],
+  [
+   555,
+   "SP ATK Gauge +1"
+  ],
+  [
+   556,
+   "STR +10"
+  ],
+  [
+   557,
+   "DEF +10"
+  ],
+  [
+   558,
+   "DEF +10"
+  ],
+  [
+   559,
+   "STR +10"
+  ],
+  [
+   560,
+   "DEF +100"
+  ],
+  [
+   561,
+   "HP +50"
+  ],
+  [
+   562,
+   "STR +10"
+  ],
+  [
+   563,
+   "DEF +10"
+  ],
+  [
+   564,
+   "HP +100"
+  ],
+  [
+   565,
+   "STR +10"
+  ],
+  [
+   566,
+   "DEF +10"
+  ],
+  [
+   567,
+   "HP +50"
+  ],
+  [
+   568,
+   "STR +10"
+  ],
+  [
+   569,
+   "DEF +10"
+  ],
+  [
+   570,
+   "HP +100"
+  ],
+  [
+   571,
+   "DEF +10"
+  ],
+  [
+   572,
+   "DEF +10"
+  ],
+  [
+   573,
+   "HP +50"
+  ],
+  [
+   574,
+   "STR +10"
+  ],
+  [
+   575,
+   "DEF +10"
+  ],
+  [
+   576,
+   "HP +50"
+  ],
+  [
+   577,
+   "STR +10"
+  ],
+  [
+   578,
+   "DEF +10"
+  ],
+  [
+   579,
+   "HP +50"
+  ],
+  [
+   580,
+   "STR +100"
+  ],
+  [
+   581,
+   "DEF +10"
+  ],
+  [
+   582,
+   "DEF +10"
+  ],
+  [
+   583,
+   "STR +10"
+  ],
+  [
+   584,
+   "DEF +10"
+  ],
+  [
+   585,
+   "HP +100"
+  ],
+  [
+   586,
+   "STR +10"
+  ],
+  [
+   587,
+   "DEF +10"
+  ],
+  [
+   588,
+   "DEF +10"
+  ],
+  [
+   589,
+   "STR +10"
+  ],
+  [
+   590,
+   "DEF +100"
+  ],
+  [
+   591,
+   "HP +50"
+  ],
+  [
+   592,
+   "STR +10"
+  ],
+  [
+   593,
+   "DEF +10"
+  ],
+  [
+   594,
+   "HP +50"
+  ],
+  [
+   595,
+   "STR +10"
+  ],
+  [
+   596,
+   "DEF +10"
+  ],
+  [
+   597,
+   "HP +100"
+  ],
+  [
+   598,
+   "STR +10"
+  ],
+  [
+   599,
+   "DEF +10"
+  ],
+  [
+   600,
+   "STR +200"
+  ],
+  [
+   601,
+   "DEF +10"
+  ],
+  [
+   602,
+   "HP +50"
+  ],
+  [
+   603,
+   "DEF +10"
+  ],
+  [
+   604,
+   "DEF +10"
+  ],
+  [
+   605,
+   "HP +50"
+  ],
+  [
+   606,
+   "STR +10"
+  ],
+  [
+   607,
+   "DEF +10"
+  ],
+  [
+   608,
+   "HP +50"
+  ],
+  [
+   609,
+   "STR +10"
+  ],
+  [
+   610,
+   "DEF +100"
+  ],
+  [
+   611,
+   "DEF +10"
+  ],
+  [
+   612,
+   "STR +10"
+  ],
+  [
+   613,
+   "DEF +10"
+  ],
+  [
+   614,
+   "HP +50"
+  ],
+  [
+   615,
+   "STR +10"
+  ],
+  [
+   616,
+   "DEF +10"
+  ],
+  [
+   617,
+   "HP +50"
+  ],
+  [
+   618,
+   "STR +10"
+  ],
+  [
+   619,
+   "DEF +10"
+  ],
+  [
+   620,
+   "HP +100"
+  ],
+  [
+   621,
+   "DEF +10"
+  ],
+  [
+   622,
+   "HP +50"
+  ],
+  [
+   623,
+   "DEF +10"
+  ],
+  [
+   624,
+   "HP +50"
+  ],
+  [
+   625,
+   "DEF +10"
+  ],
+  [
+   626,
+   "STR +10"
+  ],
+  [
+   627,
+   "DEF +10"
+  ],
+  [
+   628,
+   "HP +50"
+  ],
+  [
+   629,
+   "DEF +10"
+  ],
+  [
+   630,
+   "STR +100"
+  ],
+  [
+   631,
+   "DEF +10"
+  ],
+  [
+   632,
+   "HP +50"
+  ],
+  [
+   633,
+   "DEF +10"
+  ],
+  [
+   634,
+   "STR +10"
+  ],
+  [
+   635,
+   "DEF +10"
+  ],
+  [
+   636,
+   "HP +100"
+  ],
+  [
+   637,
+   "DEF +10"
+  ],
+  [
+   638,
+   "STR +10"
+  ],
+  [
+   639,
+   "DEF +10"
+  ],
+  [
+   640,
+   "DEF +100"
+  ],
+  [
+   641,
+   "HP +50"
+  ],
+  [
+   642,
+   "DEF +10"
+  ],
+  [
+   643,
+   "STR +10"
+  ],
+  [
+   644,
+   "DEF +10"
+  ],
+  [
+   645,
+   "HP +50"
+  ],
+  [
+   646,
+   "DEF +10"
+  ],
+  [
+   647,
+   "STR +10"
+  ],
+  [
+   648,
+   "DEF +10"
+  ],
+  [
+   649,
+   "HP +50"
+  ],
+  [
+   650,
+   "STR +100"
+  ],
+  [
+   651,
+   "DEF +10"
+  ],
+  [
+   652,
+   "DEF +10"
+  ],
+  [
+   653,
+   "STR +10"
+  ],
+  [
+   654,
+   "DEF +10"
+  ],
+  [
+   655,
+   "HP +50"
+  ],
+  [
+   656,
+   "STR +10"
+  ],
+  [
+   657,
+   "DEF +10"
+  ],
+  [
+   658,
+   "HP +50"
+  ],
+  [
+   659,
+   "STR +10"
+  ],
+  [
+   660,
+   "DEF +100"
+  ],
+  [
+   661,
+   "HP +50"
+  ],
+  [
+   662,
+   "STR +10"
+  ],
+  [
+   663,
+   "DEF +10"
+  ],
+  [
+   664,
+   "HP +100"
+  ],
+  [
+   665,
+   "STR +10"
+  ],
+  [
+   666,
+   "SP ATK Gauge +1"
+  ],
+  [
+   667,
+   "DEF +10"
+  ],
+  [
+   668,
+   "HP +50"
+  ],
+  [
+   669,
+   "STR +10"
+  ],
+  [
+   670,
+   "HP +100"
+  ],
+  [
+   671,
+   "DEF +10"
+  ],
+  [
+   672,
+   "HP +50"
+  ],
+  [
+   673,
+   "STR +10"
+  ],
+  [
+   674,
+   "DEF +10"
+  ],
+  [
+   675,
+   "HP +50"
+  ],
+  [
+   676,
+   "STR +10"
+  ],
+  [
+   677,
+   "DEF +10"
+  ],
+  [
+   678,
+   "HP +50"
+  ],
+  [
+   679,
+   "DEF +10"
+  ],
+  [
+   680,
+   "STR +100"
+  ],
+  [
+   681,
+   "DEF +10"
+  ],
+  [
+   682,
+   "HP +50"
+  ],
+  [
+   683,
+   "STR +10"
+  ],
+  [
+   684,
+   "DEF +10"
+  ],
+  [
+   685,
+   "HP +50"
+  ],
+  [
+   686,
+   "DEF +10"
+  ],
+  [
+   687,
+   "DEF +10"
+  ],
+  [
+   688,
+   "HP +50"
+  ],
+  [
+   689,
+   "STR +10"
+  ],
+  [
+   690,
+   "DEF +100"
+  ],
+  [
+   691,
+   "DEF +10"
+  ],
+  [
+   692,
+   "STR +10"
+  ],
+  [
+   693,
+   "DEF +10"
+  ],
+  [
+   694,
+   "HP +100"
+  ],
+  [
+   695,
+   "STR +10"
+  ],
+  [
+   696,
+   "DEF +10"
+  ],
+  [
+   697,
+   "HP +50"
+  ],
+  [
+   698,
+   "STR +10"
+  ],
+  [
+   699,
+   "DEF +10"
+  ],
+  [
+   700,
+   "STR +200"
+  ],
+  [
+   701,
+   "DEF +10"
+  ],
+  [
+   702,
+   "HP +100"
+  ],
+  [
+   703,
+   "DEF +10"
+  ],
+  [
+   704,
+   "DEF +10"
+  ],
+  [
+   705,
+   "HP +100"
+  ],
+  [
+   706,
+   "STR +10"
+  ],
+  [
+   707,
+   "DEF +10"
+  ],
+  [
+   708,
+   "DEF +10"
+  ],
+  [
+   709,
+   "STR +10"
+  ],
+  [
+   710,
+   "DEF +100"
+  ],
+  [
+   711,
+   "HP +100"
+  ],
+  [
+   712,
+   "STR +10"
+  ],
+  [
+   713,
+   "DEF +10"
+  ],
+  [
+   714,
+   "DEF +10"
+  ],
+  [
+   715,
+   "STR +10"
+  ],
+  [
+   716,
+   "DEF +10"
+  ],
+  [
+   717,
+   "DEF +10"
+  ],
+  [
+   718,
+   "STR +10"
+  ],
+  [
+   719,
+   "DEF +10"
+  ],
+  [
+   720,
+   "HP +100"
+  ],
+  [
+   721,
+   "STR +10"
+  ],
+  [
+   722,
+   "DEF +10"
+  ],
+  [
+   723,
+   "DEF +10"
+  ],
+  [
+   724,
+   "STR +10"
+  ],
+  [
+   725,
+   "DEF +10"
+  ],
+  [
+   726,
+   "HP +100"
+  ],
+  [
+   727,
+   "STR +10"
+  ],
+  [
+   728,
+   "DEF +10"
+  ],
+  [
+   729,
+   "DEF +10"
+  ],
+  [
+   730,
+   "STR +100"
+  ],
+  [
+   731,
+   "DEF +10"
+  ],
+  [
+   732,
+   "HP +100"
+  ],
+  [
+   733,
+   "DEF +10"
+  ],
+  [
+   734,
+   "DEF +10"
+  ],
+  [
+   735,
+   "HP +100"
+  ],
+  [
+   736,
+   "STR +10"
+  ],
+  [
+   737,
+   "DEF +10"
+  ],
+  [
+   738,
+   "HP +100"
+  ],
+  [
+   739,
+   "STR +10"
+  ],
+  [
+   740,
+   "DEF +100"
+  ],
+  [
+   741,
+   "DEF +10"
+  ],
+  [
+   742,
+   "STR +10"
+  ],
+  [
+   743,
+   "DEF +10"
+  ],
+  [
+   744,
+   "DEF +10"
+  ],
+  [
+   745,
+   "STR +10"
+  ],
+  [
+   746,
+   "DEF +10"
+  ],
+  [
+   747,
+   "DEF +10"
+  ],
+  [
+   748,
+   "STR +10"
+  ],
+  [
+   749,
+   "DEF +10"
+  ],
+  [
+   750,
+   "STR +100"
+  ],
+  [
+   751,
+   "DEF +10"
+  ],
+  [
+   752,
+   "DEF +10"
+  ],
+  [
+   753,
+   "STR +10"
+  ],
+  [
+   754,
+   "DEF +10"
+  ],
+  [
+   755,
+   "DEF +10"
+  ],
+  [
+   756,
+   "STR +10"
+  ],
+  [
+   757,
+   "DEF +10"
+  ],
+  [
+   758,
+   "HP +100"
+  ],
+  [
+   759,
+   "STR +10"
+  ],
+  [
+   760,
+   "DEF +100"
+  ],
+  [
+   761,
+   "DEF +10"
+  ],
+  [
+   762,
+   "STR +10"
+  ],
+  [
+   763,
+   "DEF +10"
+  ],
+  [
+   764,
+   "DEF +10"
+  ],
+  [
+   765,
+   "STR +10"
+  ],
+  [
+   766,
+   "DEF +10"
+  ],
+  [
+   767,
+   "DEF +10"
+  ],
+  [
+   768,
+   "STR +10"
+  ],
+  [
+   769,
+   "DEF +10"
+  ],
+  [
+   770,
+   "HP +100"
+  ],
+  [
+   771,
+   "STR +10"
+  ],
+  [
+   772,
+   "DEF +10"
+  ],
+  [
+   773,
+   "DEF +10"
+  ],
+  [
+   774,
+   "STR +10"
+  ],
+  [
+   775,
+   "DEF +10"
+  ],
+  [
+   776,
+   "DEF +10"
+  ],
+  [
+   777,
+   "SP ATK Gauge +1"
+  ],
+  [
+   778,
+   "STR +10"
+  ],
+  [
+   779,
+   "DEF +10"
+  ],
+  [
+   780,
+   "DEF +100"
+  ],
+  [
+   781,
+   "DEF +10"
+  ],
+  [
+   782,
+   "STR +10"
+  ],
+  [
+   783,
+   "DEF +10"
+  ],
+  [
+   784,
+   "DEF +10"
+  ],
+  [
+   785,
+   "STR +10"
+  ],
+  [
+   786,
+   "DEF +10"
+  ],
+  [
+   787,
+   "DEF +10"
+  ],
+  [
+   788,
+   "STR +10"
+  ],
+  [
+   789,
+   "DEF +10"
+  ],
+  [
+   790,
+   "HP +100"
+  ],
+  [
+   791,
+   "DEF +10"
+  ],
+  [
+   792,
+   "STR +10"
+  ],
+  [
+   793,
+   "DEF +10"
+  ],
+  [
+   794,
+   "DEF +10"
+  ],
+  [
+   795,
+   "DEF +10"
+  ],
+  [
+   796,
+   "STR +10"
+  ],
+  [
+   797,
+   "DEF +10"
+  ],
+  [
+   798,
+   "HP +100"
+  ],
+  [
+   799,
+   "DEF +10"
+  ],
+  [
+   800,
+   "STR +200"
+  ],
+  [
+   801,
+   "DEF +10"
+  ],
+  [
+   802,
+   "DEF +10"
+  ],
+  [
+   803,
+   "HP +10"
+  ],
+  [
+   804,
+   "HP +10"
+  ],
+  [
+   805,
+   "STR +10"
+  ],
+  [
+   806,
+   "DEF +10"
+  ],
+  [
+   807,
+   "DEF +10"
+  ],
+  [
+   808,
+   "HP +10"
+  ],
+  [
+   809,
+   "HP +10"
+  ],
+  [
+   810,
+   "STR +10"
+  ],
+  [
+   811,
+   "DEF +10"
+  ],
+  [
+   812,
+   "DEF +10"
+  ],
+  [
+   813,
+   "HP +10"
+  ],
+  [
+   814,
+   "HP +10"
+  ],
+  [
+   815,
+   "STR +10"
+  ],
+  [
+   816,
+   "DEF +10"
+  ],
+  [
+   817,
+   "DEF +10"
+  ],
+  [
+   818,
+   "HP +10"
+  ],
+  [
+   819,
+   "HP +10"
+  ],
+  [
+   820,
+   "STR +10"
+  ],
+  [
+   821,
+   "DEF +10"
+  ],
+  [
+   822,
+   "DEF +10"
+  ],
+  [
+   823,
+   "HP +10"
+  ],
+  [
+   824,
+   "HP +10"
+  ],
+  [
+   825,
+   "STR +10"
+  ],
+  [
+   826,
+   "DEF +10"
+  ],
+  [
+   827,
+   "DEF +10"
+  ],
+  [
+   828,
+   "HP +10"
+  ],
+  [
+   829,
+   "HP +10"
+  ],
+  [
+   830,
+   "STR +10"
+  ],
+  [
+   831,
+   "DEF +10"
+  ],
+  [
+   832,
+   "DEF +10"
+  ],
+  [
+   833,
+   "HP +10"
+  ],
+  [
+   834,
+   "HP +10"
+  ],
+  [
+   835,
+   "STR +10"
+  ],
+  [
+   836,
+   "DEF +10"
+  ],
+  [
+   837,
+   "DEF +10"
+  ],
+  [
+   838,
+   "HP +10"
+  ],
+  [
+   839,
+   "HP +10"
+  ],
+  [
+   840,
+   "STR +10"
+  ],
+  [
+   841,
+   "DEF +10"
+  ],
+  [
+   842,
+   "DEF +10"
+  ],
+  [
+   843,
+   "HP +10"
+  ],
+  [
+   844,
+   "HP +10"
+  ],
+  [
+   845,
+   "STR +10"
+  ],
+  [
+   846,
+   "DEF +10"
+  ],
+  [
+   847,
+   "DEF +10"
+  ],
+  [
+   848,
+   "HP +10"
+  ],
+  [
+   849,
+   "HP +10"
+  ],
+  [
+   850,
+   "STR +100"
+  ],
+  [
+   851,
+   "DEF +10"
+  ],
+  [
+   852,
+   "DEF +10"
+  ],
+  [
+   853,
+   "HP +10"
+  ],
+  [
+   854,
+   "HP +10"
+  ],
+  [
+   855,
+   "STR +10"
+  ],
+  [
+   856,
+   "DEF +10"
+  ],
+  [
+   857,
+   "DEF +10"
+  ],
+  [
+   858,
+   "HP +10"
+  ],
+  [
+   859,
+   "HP +10"
+  ],
+  [
+   860,
+   "STR +10"
+  ],
+  [
+   861,
+   "DEF +10"
+  ],
+  [
+   862,
+   "DEF +10"
+  ],
+  [
+   863,
+   "HP +10"
+  ],
+  [
+   864,
+   "HP +10"
+  ],
+  [
+   865,
+   "STR +10"
+  ],
+  [
+   866,
+   "DEF +10"
+  ],
+  [
+   867,
+   "DEF +10"
+  ],
+  [
+   868,
+   "HP +10"
+  ],
+  [
+   869,
+   "HP +10"
+  ],
+  [
+   870,
+   "STR +10"
+  ],
+  [
+   871,
+   "DEF +10"
+  ],
+  [
+   872,
+   "DEF +10"
+  ],
+  [
+   873,
+   "HP +10"
+  ],
+  [
+   874,
+   "HP +10"
+  ],
+  [
+   875,
+   "STR +10"
+  ],
+  [
+   876,
+   "DEF +10"
+  ],
+  [
+   877,
+   "DEF +10"
+  ],
+  [
+   878,
+   "HP +10"
+  ],
+  [
+   879,
+   "HP +10"
+  ],
+  [
+   880,
+   "STR +10"
+  ],
+  [
+   881,
+   "DEF +10"
+  ],
+  [
+   882,
+   "DEF +10"
+  ],
+  [
+   883,
+   "HP +10"
+  ],
+  [
+   884,
+   "HP +10"
+  ],
+  [
+   885,
+   "STR +10"
+  ],
+  [
+   886,
+   "DEF +10"
+  ],
+  [
+   887,
+   "DEF +10"
+  ],
+  [
+   888,
+   "HP +10"
+  ],
+  [
+   889,
+   "HP +10"
+  ],
+  [
+   890,
+   "STR +10"
+  ],
+  [
+   891,
+   "DEF +10"
+  ],
+  [
+   892,
+   "DEF +10"
+  ],
+  [
+   893,
+   "HP +10"
+  ],
+  [
+   894,
+   "HP +10"
+  ],
+  [
+   895,
+   "STR +10"
+  ],
+  [
+   896,
+   "DEF +10"
+  ],
+  [
+   897,
+   "DEF +10"
+  ],
+  [
+   898,
+   "HP +10"
+  ],
+  [
+   899,
+   "HP +10"
+  ],
+  [
+   900,
+   "STR +100"
+  ],
+  [
+   901,
+   "DEF +10"
+  ],
+  [
+   902,
+   "DEF +10"
+  ],
+  [
+   903,
+   "HP +10"
+  ],
+  [
+   904,
+   "HP +10"
+  ],
+  [
+   905,
+   "STR +10"
+  ],
+  [
+   906,
+   "DEF +10"
+  ],
+  [
+   907,
+   "DEF +10"
+  ],
+  [
+   908,
+   "HP +10"
+  ],
+  [
+   909,
+   "HP +10"
+  ],
+  [
+   910,
+   "STR +10"
+  ],
+  [
+   911,
+   "DEF +10"
+  ],
+  [
+   912,
+   "DEF +10"
+  ],
+  [
+   913,
+   "HP +10"
+  ],
+  [
+   914,
+   "HP +10"
+  ],
+  [
+   915,
+   "STR +10"
+  ],
+  [
+   916,
+   "DEF +10"
+  ],
+  [
+   917,
+   "DEF +10"
+  ],
+  [
+   918,
+   "HP +10"
+  ],
+  [
+   919,
+   "HP +10"
+  ],
+  [
+   920,
+   "STR +10"
+  ],
+  [
+   921,
+   "DEF +10"
+  ],
+  [
+   922,
+   "DEF +10"
+  ],
+  [
+   923,
+   "HP +10"
+  ],
+  [
+   924,
+   "HP +10"
+  ],
+  [
+   925,
+   "STR +10"
+  ],
+  [
+   926,
+   "DEF +10"
+  ],
+  [
+   927,
+   "DEF +10"
+  ],
+  [
+   928,
+   "HP +10"
+  ],
+  [
+   929,
+   "HP +10"
+  ],
+  [
+   930,
+   "STR +10"
+  ],
+  [
+   931,
+   "DEF +10"
+  ],
+  [
+   932,
+   "DEF +10"
+  ],
+  [
+   933,
+   "HP +10"
+  ],
+  [
+   934,
+   "HP +10"
+  ],
+  [
+   935,
+   "STR +10"
+  ],
+  [
+   936,
+   "DEF +10"
+  ],
+  [
+   937,
+   "DEF +10"
+  ],
+  [
+   938,
+   "HP +10"
+  ],
+  [
+   939,
+   "HP +10"
+  ],
+  [
+   940,
+   "STR +10"
+  ],
+  [
+   941,
+   "DEF +10"
+  ],
+  [
+   942,
+   "DEF +10"
+  ],
+  [
+   943,
+   "HP +10"
+  ],
+  [
+   944,
+   "HP +10"
+  ],
+  [
+   945,
+   "STR +10"
+  ],
+  [
+   946,
+   "DEF +10"
+  ],
+  [
+   947,
+   "DEF +10"
+  ],
+  [
+   948,
+   "HP +10"
+  ],
+  [
+   949,
+   "HP +10"
+  ],
+  [
+   950,
+   "STR +100"
+  ],
+  [
+   951,
+   "DEF +10"
+  ],
+  [
+   952,
+   "DEF +10"
+  ],
+  [
+   953,
+   "HP +10"
+  ],
+  [
+   954,
+   "HP +10"
+  ],
+  [
+   955,
+   "STR +10"
+  ],
+  [
+   956,
+   "DEF +10"
+  ],
+  [
+   957,
+   "DEF +10"
+  ],
+  [
+   958,
+   "HP +10"
+  ],
+  [
+   959,
+   "HP +10"
+  ],
+  [
+   960,
+   "STR +10"
+  ],
+  [
+   961,
+   "DEF +10"
+  ],
+  [
+   962,
+   "DEF +10"
+  ],
+  [
+   963,
+   "HP +10"
+  ],
+  [
+   964,
+   "HP +10"
+  ],
+  [
+   965,
+   "STR +10"
+  ],
+  [
+   966,
+   "DEF +10"
+  ],
+  [
+   967,
+   "DEF +10"
+  ],
+  [
+   968,
+   "HP +10"
+  ],
+  [
+   969,
+   "HP +10"
+  ],
+  [
+   970,
+   "STR +10"
+  ],
+  [
+   971,
+   "DEF +10"
+  ],
+  [
+   972,
+   "DEF +10"
+  ],
+  [
+   973,
+   "HP +10"
+  ],
+  [
+   974,
+   "HP +10"
+  ],
+  [
+   975,
+   "STR +10"
+  ],
+  [
+   976,
+   "DEF +10"
+  ],
+  [
+   977,
+   "DEF +10"
+  ],
+  [
+   978,
+   "HP +10"
+  ],
+  [
+   979,
+   "HP +10"
+  ],
+  [
+   980,
+   "STR +10"
+  ],
+  [
+   981,
+   "DEF +10"
+  ],
+  [
+   982,
+   "DEF +10"
+  ],
+  [
+   983,
+   "HP +10"
+  ],
+  [
+   984,
+   "HP +10"
+  ],
+  [
+   985,
+   "STR +10"
+  ],
+  [
+   986,
+   "DEF +10"
+  ],
+  [
+   987,
+   "DEF +10"
+  ],
+  [
+   988,
+   "HP +10"
+  ],
+  [
+   989,
+   "HP +10"
+  ],
+  [
+   990,
+   "STR +10"
+  ],
+  [
+   991,
+   "DEF +10"
+  ],
+  [
+   992,
+   "DEF +10"
+  ],
+  [
+   993,
+   "HP +10"
+  ],
+  [
+   994,
+   "HP +10"
+  ],
+  [
+   995,
+   "STR +10"
+  ],
+  [
+   996,
+   "DEF +10"
+  ],
+  [
+   997,
+   "DEF +10"
+  ],
+  [
+   998,
+   "HP +10"
+  ],
+  [
+   999,
+   "STR +100"
+  ]
+ ],
+ "keyblades": {
+  "Starlight": [
+   [
+    35,
+    "Upright S Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    38,
+    "Upright S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +100"
+   ],
+   [
+    40.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43,
+    "Upright M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    50,
+    "S Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    54,
+    "Upright S Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    60,
+    "M Medal STR +200"
+   ]
+  ],
+  "Treasure Trove": [
+   [
+    35,
+    "Upright P Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36,
+    "Upright P Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    37,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    38,
+    "Upright P Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    39,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    40,
+    "P Medal Str +200"
+   ],
+   [
+    40.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    41,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42,
+    "Upright P Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    43,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44,
+    "Upright P Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    45,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    46,
+    "Upright P Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    47,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48,
+    "Upright P Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    49,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    50,
+    "P Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    60,
+    "P Medal STR +200"
+   ]
+  ],
+  "Lady Luck": [
+   [
+    35,
+    "Upright S Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    36,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    37,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    38,
+    "Upright S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    39,
+    "Upright S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    40,
+    "S Medal Str +200"
+   ],
+   [
+    40.5,
+    "Reverse S Medal STR +50"
+   ],
+   [
+    41,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42,
+    "Upright S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    43,
+    "Upright S Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    45,
+    "Upright S Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46,
+    "Upright S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    47,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48,
+    "Upright S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    49,
+    "Upright S Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    50,
+    "S Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    60,
+    "S Medal STR +200"
+   ]
+  ],
+  "Three Wishes": [
+   [
+    35,
+    "Upright M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    36,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37,
+    "Upright M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    38,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    39,
+    "Upright M Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +200"
+   ],
+   [
+    40.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    41,
+    "Upright M Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    42,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43,
+    "Upright M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    44,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    45,
+    "Upright M Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    47,
+    "Upright M Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    48,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49,
+    "Upright M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    50,
+    "M Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    60,
+    "M Medal STR +200"
+   ]
+  ],
+  "Olympia": [
+   [
+    35,
+    "Upright S Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39,
+    "Upright S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    40,
+    "P Medal STR +100"
+   ],
+   [
+    40.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43,
+    "Upright S Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45,
+    "Upright S Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49,
+    "Upright S Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    50,
+    "S Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    51,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Upright S Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    55,
+    "Upright S Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    59,
+    "Upright S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    60,
+    "P Medal STR +200"
+   ]
+  ],
+  "Divine Rose": [
+   [
+    35,
+    "Upright M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    38,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +100"
+   ],
+   [
+    40.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    41,
+    "Upright M Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    45.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    47,
+    "Upright M Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    50,
+    "S Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    55,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    60,
+    "S Medal STR +200"
+   ]
+  ],
+  "Moogle O' Glory": [
+   [
+    35,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    38,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +100"
+   ],
+   [
+    40.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    46,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    50,
+    "P Medal STR +200"
+   ],
+   [
+    50.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52,
+    "Upright P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54,
+    "Upright P Medal STR +50"
+   ],
+   [
+    54.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    56,
+    "Upright P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58,
+    "Upright P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    60,
+    "M Medal STR +200"
+   ]
+  ],
+  "Sleeping Lion": [
+   [
+    35,
+    "Upright S Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    38,
+    "Upright S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    39,
+    "Upright S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    40,
+    "U Medal STR +200"
+   ],
+   [
+    40.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41,
+    "Upright S Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    42,
+    "Upright S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    43,
+    "Upright S Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    45,
+    "Upright S Medal STR +50"
+   ],
+   [
+    45.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    46,
+    "Upright S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    48,
+    "Upright S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    49,
+    "Upright S Medal STR +50"
+   ],
+   [
+    49.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    50,
+    "U Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    52,
+    "Upright S Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    53,
+    "Upright S Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    54,
+    "Upright S Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    55,
+    "Upright S Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    56,
+    "Upright S Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57,
+    "Upright S Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    58,
+    "Upright S Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    59,
+    "Upright S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    60,
+    "U Medal STR +200"
+   ]
+  ],
+  "Counterpoint": [
+   [
+    35,
+    "Upright M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    37,
+    "Upright M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    39,
+    "Upright M Medal STR +50"
+   ],
+   [
+    39.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    40,
+    "U Medal STR +200"
+   ],
+   [
+    40.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    41,
+    "Upright M Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    43,
+    "Upright M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    45,
+    "Upright M Medal STR +50"
+   ],
+   [
+    45.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    47,
+    "Upright M Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    49,
+    "Upright M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    50,
+    "U Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52,
+    "Upright M Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    53,
+    "Upright M Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54,
+    "Upright M Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    56,
+    "Upright M Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58,
+    "Upright M Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    59,
+    "Upright M Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    60,
+    "U Medal STR +200"
+   ]
+  ],
+  "Stroke of Midnight": [
+   [
+    35,
+    "Upright P Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    36,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    37,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    39,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +100"
+   ],
+   [
+    40.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    41,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    43,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    45,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    47,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    49,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49.5,
+    "Upright M Medal STR +50"
+   ],
+   [
+    50,
+    "P Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    51,
+    "Upright M Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Upright M Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    55,
+    "Upright M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Upright M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    59,
+    "Upright M Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    60,
+    "M Medal STR +200"
+   ]
+  ],
+  "Fenrir": [
+   [
+    35,
+    "Upright P Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    36,
+    "Upright P Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37,
+    "Upright P Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    38,
+    "Upright P Medal STR +50"
+   ],
+   [
+    38.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39,
+    "Upright P Medal STR +50"
+   ],
+   [
+    39.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    40,
+    "U Medal STR +200"
+   ],
+   [
+    40.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    42,
+    "Upright P Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    44,
+    "Upright P Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    46,
+    "Upright P Medal STR +50"
+   ],
+   [
+    46.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    48,
+    "Upright P Medal STR +50"
+   ],
+   [
+    48.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49,
+    "Upright P Medal STR +50"
+   ],
+   [
+    49.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    50,
+    "U Medal STR +200"
+   ],
+   [
+    50.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    51,
+    "Upright P Medal STR +50"
+   ],
+   [
+    51.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    52,
+    "Upright P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    54,
+    "Upright P Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    55,
+    "Upright P Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    56,
+    "Upright P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    58,
+    "Upright P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    59,
+    "Upright P Medal STR +50"
+   ],
+   [
+    59.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    60,
+    "U Medal STR +200"
+   ]
+  ],
+  "Darkgnaw": [
+   [
+    35,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    40,
+    "R Medal STR +200"
+   ],
+   [
+    40.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    41,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    47,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    50,
+    "R Medal STR +200"
+   ],
+   [
+    50.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    54.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    60,
+    "R Medal STR +200"
+   ]
+  ],
+  "Missing Ache": [
+   [
+    35,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    40,
+    "R Medal STR +200"
+   ],
+   [
+    40.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    41,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    47,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    50,
+    "R Medal STR +200"
+   ],
+   [
+    50.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    56.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    60,
+    "R Medal STR +200"
+   ]
+  ],
+  "Fairy Stars": [
+   [
+    35,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    36.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    37.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    39,
+    "Upright S Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    40,
+    "S Medal STR +100"
+   ],
+   [
+    40.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    41,
+    "Upright P Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    42.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    44.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46,
+    "Upright S Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    47,
+    "Upright S Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    48,
+    "Upright P Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    50,
+    "M Medal STR +200"
+   ],
+   [
+    50.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    51,
+    "Upright S Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    52,
+    "Upright S Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    53,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    54.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Upright S Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    56.5,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    58,
+    "Upright S Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59,
+    "Upright S Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed P Medal STR +50"
+   ],
+   [
+    60,
+    "S Medal STR +200"
+   ]
+  ],
+  "Diamond Dust": [
+   [
+    35,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    35.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    36,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    36.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    37.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    38.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    39,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    39.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    40,
+    "R Medal STR +200"
+   ],
+   [
+    40.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    41,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    41.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    42,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    42.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    43.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    44.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    45,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    45.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    46.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    47,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    47.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    48.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    49.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    50,
+    "R Medal STR +200"
+   ],
+   [
+    50.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    51,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    51.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    52,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    52.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    53.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    54.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    55,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    55.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    56,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    56.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    57.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    58.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    59.5,
+    "Reversed M Medal STR +50"
+   ],
+   [
+    60,
+    "R Medal STR +200"
+   ]
+  ],
+  "Bad Guy Breaker": [
+   [
+    35,
+    "Upright S Medal STR +50"
+   ],
+   [
+    36,
+    "Upright S Medal STR +50"
+   ],
+   [
+    37,
+    "Upright P Medal STR +50"
+   ],
+   [
+    38,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    39,
+    "Upright S Medal STR +50"
+   ],
+   [
+    40,
+    "M Medal STR +100"
+   ],
+   [
+    41,
+    "Upright S Medal STR +50"
+   ],
+   [
+    42,
+    "Upright P Medal STR +50"
+   ],
+   [
+    43,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    44,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    45,
+    "Upright S Medal STR +50"
+   ],
+   [
+    46,
+    "Upright P Medal STR +50"
+   ],
+   [
+    47,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    48,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    49,
+    "Upright S Medal STR +50"
+   ],
+   [
+    50,
+    "P Medal STR +200"
+   ],
+   [
+    51,
+    "Upright S Medal STR +50"
+   ],
+   [
+    52,
+    "Upright P Medal STR +50"
+   ],
+   [
+    53,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    54,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    55,
+    "Upright S Medal STR +50"
+   ],
+   [
+    56,
+    "Upright P Medal STR +50"
+   ],
+   [
+    57,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    58,
+    "Reversed S Medal STR +50"
+   ],
+   [
+    59,
+    "Upright S Medal STR +50"
+   ],
+   [
+    60,
+    "M Medal STR +200"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,11 @@
+%s/%lx.%lx.%lx%s
+%s/%s.ExportJson
+%s/%s.png
+%s/%s@%s
+%s/chat/message/%d
+%s/chat/message/%d/%d
+%s/chat/message/report
+%s/user
+%s/user/block
+%s/user/block/%s
+%s/user/chat/%d

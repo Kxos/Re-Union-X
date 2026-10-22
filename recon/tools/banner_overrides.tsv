@@ -1,0 +1,182 @@
+row_id	field	value	source
+B0036	price	1000	notice 19884
+B0036	draw_size	x5	notice 19884
+B0036	rarity_mix	5★:1	notice 19884 (5 Medals, una 5★ garantita; le altre non sono dette)
+B0153	price	1st: 3000 2nd: 2500 3rd: 2200 4th: 2000 5th: 1900	notice 31346
+B0153	draw_size	x10	notice 31346
+B0153	rarity_mix	6★:1 5★:9	TSV B0155 (serie gemella, rarity_mix 6★:1 5★:9); prezzo e dimensione: notice 31346
+B0158	price	1st: 3000 2nd: 2500 3rd: 2200 4th: 2000 5th: 1900	notice 31413
+B0158	draw_size	x10	notice 31413
+B0158	rarity_mix	6★:1 5★:9	TSV B0154 (serie gemella, rarity_mix 6★:1 5★:9); prezzo e dimensione: notice 31413
+B0166	draw_size	x10	notice 32026
+B0182	price	1st: 3000 2nd: 2500 3rd: 2200 4th: 2000 5th: 1900	notice 33005
+B0182	draw_size	x10	notice 33005
+B0182	rarity_mix	6★:1 5★:9	TSV B0180 (serie gemella, rarity_mix 6★:1 5★:9); prezzo e dimensione: notice 33005
+B0204	price	1st: 3000 2nd: 2500 3rd: 2200 4th: 2000 5th: 1900	notice 34471
+B0204	draw_size	x10	notice 34471
+B0204	rarity_mix	6★:1 5★:9	TSV B0212 (serie gemella, rarity_mix 6★:1 5★:9); prezzo e dimensione: notice 34471
+B0205	draw_size	x10	notice 34475
+B0220	price	Free	notice 35148 (una estrazione gratis al giorno; i 1000 Jewels sono il premio per medaglia)
+B0220	draw_size	x1	notice 35148
+B0255	draw_size	x4	notice 37765
+B0274	price	Free	notice 38663 (una estrazione gratis al giorno; i 1000 Jewels sono il premio per medaglia)
+B0274	draw_size	x1	notice 38663
+B0277	draw_size	x4	notice 38880
+B0287	draw_size	x4	notice 39404
+B0305	draw_size	x4	notice 40318
+B0310	draw_size	x10	notice 40734
+B0313	draw_size	x4	notice 40725
+B0340	price	1200	notice 41617
+B0340	draw_size	x5	notice 41617
+B0340	rarity_mix	7★:5	notice 41617
+B0497	price	Free	notice 52165 (una estrazione gratis al giorno; i Jewels sono premi del sorteggio, non un prezzo)
+B0497	draw_size	x1	notice 52165
+B0549	price	1500	notice 55473
+B0549	draw_size	x5	notice 55473
+B0549	rarity_mix	7★:5	notice 55473
+B0199	start_pt	2017-11-24	notice 34475 ([EX] Foreteller Medal Deals: Nov. 24 - Dec. 4, 2017; decisione 9 del 2b)
+B0199	end_pt	2017-12-04	notice 34475 (periodo della campagna; la fine del TSV, 23/11, precede il nuovo inizio)
+B0200	start_pt	2017-11-24	notice 34475 ([EX] Foreteller Medal Deals: Nov. 24 - Dec. 4, 2017; decisione 9 del 2b)
+B0200	end_pt	2017-12-04	notice 34475 (periodo della campagna; la fine del TSV, 23/11, precede il nuovo inizio)
+B0201	start_pt	2017-11-24	notice 34475 ([EX] Foreteller Medal Deals: Nov. 24 - Dec. 4, 2017; decisione 9 del 2b)
+B0201	end_pt	2017-12-04	notice 34475 (periodo della campagna; la fine del TSV, 23/11, precede il nuovo inizio)
+B0202	start_pt	2017-11-24	notice 34475 ([EX] Foreteller Medal Deals: Nov. 24 - Dec. 4, 2017; decisione 9 del 2b)
+B0202	end_pt	2017-12-04	notice 34475 (periodo della campagna; la fine del TSV, 23/11, precede il nuovo inizio)
+B0203	start_pt	2017-11-24	notice 34475 ([EX] Foreteller Medal Deals: Nov. 24 - Dec. 4, 2017; decisione 9 del 2b)
+B0203	end_pt	2017-12-04	notice 34475 (periodo della campagna; la fine del TSV, 23/11, precede il nuovo inizio)
+B0306	preset	slots=0;dots=max;guilt=max	notice 40734 (B0310): [notice text kept locally] (deal di HD Axel, Illustrated Aqua A, Illustrated Ventus)
+B0307	preset	slots=0;dots=max;guilt=max	notice 40734 (B0310): [notice text kept locally] (deal di HD Axel, Illustrated Aqua A, Illustrated Ventus)
+B0308	preset	slots=0;dots=max;guilt=max	notice 40734 (B0310): [notice text kept locally] (deal di HD Axel, Illustrated Aqua A, Illustrated Ventus)
+B0523	pity_label	Medal that can be upgraded to Supernova+	I-153, notice 53775: [notice text kept locally]
+B0526	pity_label	Medal that can be upgraded to Supernova+	I-153, notice 53777: [notice text kept locally]
+B0545	pity_label	Medal that can be upgraded to Supernova+	I-153, notice 55231: [notice text kept locally]
+B0548	pity_label	Tier 8 or Tier 9 Medal that can be upgraded to Supernova+	I-153, notice 55474: [notice text kept locally] (bersagli della pity: 7★ di Tier 8-9)
+B0637	pity_label	SN or higher Medal	I-153, notice 62458: [notice text kept locally]
+B0638	pity_label	SN or higher Medal	I-153, notice 62458: [notice text kept locally]
+B0646	pity_label	SN or higher Medal	I-153, notice 63619: [notice text kept locally]
+B0678	pity_label	SN or higher Medal	I-153, derivata dai pityNames (tutte SN, Supernova, SN+, SN++): nessun notice della pity nell'audit dei notice (sp2b)
+B0771	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 72830 dice solo [notice text kept locally]
+B0778	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 72837 dice solo [notice text kept locally]
+B0781	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 72842 dice solo [notice text kept locally]
+B0788	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 73700 dice solo [notice text kept locally]
+B0792	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 73868 dice solo [notice text kept locally]
+B0797	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 73879 dice solo [notice text kept locally]
+B0803	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 74464 dice solo [notice text kept locally]
+B0807	pity_label	boosted SN++ Medal	I-153, derivata dai pityNames: tutte SN++ e boosted ([notice text kept locally] nei Guarantees della wiki); il notice 74610 dice solo [notice text kept locally]
+B0774	medal_date	SN++ - Axel B	notice 72833 (New Year Deal 01/01/2021: prima uscita EN; la wiki dice 01/12/2020)
+B0774	medal_date	SN++ - Roxas	notice 72833 (New Year Deal 01/01/2021: prima uscita EN; la wiki dice 01/12/2020)
+B0046	slot	0:names=xaldin a|saïx a|xigbar a|demyx a|luxord a|lexaeus a|marluxia a|larxene a|vexen a|zexion a	notice 20865 ([notice text kept locally]; elenco: Xaldin ... Zexion; [notice text kept locally])
+B0046	boosted	slots=0;str=1000;def=0;chance=small	notice 20865 ([notice text kept locally])
+B0047	slot	0:names=xaldin a|saïx a|xigbar a|demyx a|luxord a|lexaeus a|marluxia a|larxene a|vexen a|zexion a	notice 20865 ([notice text kept locally]; stesso elenco)
+B0047	boosted	slots=0;str=1000;def=0;chance=small	notice 20865 (versione rara +1000 STR, frase comune ai due deal)
+B0120	slot	0:tier=4-5	notice 28243 ([notice text kept locally])
+B0139	slot	0:tier=4-5	notice 29799 ([notice text kept locally])
+B0141	slot	0:tier=4-5	notice 30123 ([notice text kept locally])
+B0146	slot	0:tier=4-5	notice 30707 ([notice text kept locally])
+B0154	slot	0:names=illustrated kh ii kairi|illustrated kh ii sora|illustrated roxas|hd naminé|key art #6|key art #7|kh 0.2 aqua|kh 0.2 king mickey a|key art #8|maleficent (dragon)|terra-xehanort a|kh 0.2 riku|sp vanitas|illustrated terra b|kh 0.2 kairi|hd ventus|sp ansem	notice 31346 ([notice text kept locally]; i 17 nomi dell elenco [notice text kept locally] dello stesso notice, chiavi del catalogo)
+B0170	slot	0:tier=5-6	notice 32512 ([notice text kept locally])
+B0181	slot	0:tier=5-6	notice 33003 ([notice text kept locally])
+B0066	slot	new@2x1/5:names=isa|lea|xion a|hd sora	notice 23113 ([notice text kept locally]; le due 6★ con 3 pallini sono casuali, [notice text kept locally]: la garanzia sta sulla prima posizione 5★, dove HD Sora (solo 6★) non entra); grafica 6★ x2 + 5★ x8
+B0068	slot	new@2x1/5:names=terra|ventus|aqua|illustrated xemnas	notice 23538 ([notice text kept locally]), come B0066; grafica 6★ x2 + 5★ x8
+B0079	slot	new@2x1/5:names=atlantica sora|atlantica donald|atlantica goofy	notice 24587 ([notice text kept locally]), dopo le due 6★ Tier 3+
+B0082	slot	new@0x1/6:names=world of ff cloud|world of ff squall|world of ff lightning|world of ff sephiroth|world of ff yuna|tama|world of ff sora	notice 24593 ([notice text kept locally]); grafica 6★ x2 (con pallini) + 6★ x1 + 5★ x7: la WoFF e la 6★ x1 senza pallini
+B0082	preset	replace;slots=1,2;dots=3	notice 24593 ([notice text kept locally]): le due 6★ della grafica, non la terza (WoFF)
+B0084	slot	new@2x1/5:names=seifer|fuu|rai|key art #1	notice 24843 ([notice text kept locally]: Key Art #2 (nel master [notice text kept locally], D1), Seifer, Fuu, Rai), come B0066; grafica 6★ x2 + 5★ x8
+B0068	medal_date	Terra	notice 23538 (nuova medaglia del Winter Holiday Deal, 09/12/2016; il catalogo diceva 12/12)
+B0068	medal_date	Ventus	notice 23538 (nuova medaglia del Winter Holiday Deal, 09/12/2016; il catalogo diceva 12/12)
+B0068	medal_date	Aqua	notice 23538 (nuova medaglia del Winter Holiday Deal, 09/12/2016; il catalogo diceva 12/12)
+B0079	medal_date	Atlantica Sora	notice 24587 (nuova medaglia garantita dall EMC del 12/01/2017; il catalogo diceva 19/01)
+B0079	medal_date	Atlantica Donald	notice 24587 (nuova medaglia garantita dall EMC del 12/01/2017; il catalogo diceva 19/01)
+B0079	medal_date	Atlantica Goofy	notice 24587 (nuova medaglia garantita dall EMC del 12/01/2017; il catalogo diceva 19/01)
+B0084	medal_date	Seifer	notice 24843 (nuova medaglia del Lunar New Year s Deal, 28/01/2017; il catalogo diceva 02/02)
+B0084	medal_date	Fuu	notice 24843 (nuova medaglia del Lunar New Year s Deal, 28/01/2017; il catalogo diceva 02/02)
+B0084	medal_date	Rai	notice 24843 (nuova medaglia del Lunar New Year s Deal, 28/01/2017; il catalogo diceva 02/02)
+B0082	boosted	names=world of ff sora;str=1000;def=1000;chance=small	notice 24593 ([notice text kept locally]; nel TSV la frase e troncata)
+B0066	preset	replace;slots=0,1;dots=3	notice 23113 ([notice text kept locally]): le due posizioni 6★ della grafica, non le 5★ promosse a 6★
+B0068	preset	replace;slots=0,1;dots=3	notice 23538 ([notice text kept locally]): le due posizioni 6★ della grafica, non le 5★ promosse a 6★
+B0084	preset	replace;slots=0,1;dots=3	notice 24843 ([notice text kept locally]): le due posizioni 6★ della grafica, non le 5★ promosse a 6★
+B0079	rarity_mix	6★:2 5★:1 4★:7	grafica originale del banner (5★+ x3, 4★+ x7; stessa immagine dell EMC B0058, riusata per la riedizione) + notice 24587: delle tre 5★+ due sono le 6★ Tier 3+ garantite, la terza l Atlantica 5★; la wiki (6★:2 5★:8) contraddice la grafica. Decisione dell utente 19-10: il banner fa fede
+B0212	bonus	3,300948,1	notice 35138 ([notice text kept locally]; grafica Magic Broom x1; la wiki non lo dice)
+B0035	day_limit	3	notice 19882 ([notice text kept locally])
+B0255	day_limit	3	notice 37765/38880/39404 ([notice text kept locally])
+B0277	day_limit	3	notice 37765/38880/39404 ([notice text kept locally])
+B0287	day_limit	3	notice 37765/38880/39404 ([notice text kept locally])
+B0304	day_limit	1	notice 40169 ([notice text kept locally])
+B0334	day_limit	3	notice 41615 ([notice text kept locally])
+B0335	day_limit	3	notice 41615 ([notice text kept locally])
+B0336	day_limit	3	notice 41615 ([notice text kept locally])
+B0337	day_limit	3	notice 41615 ([notice text kept locally])
+B0338	day_limit	3	notice 41615 ([notice text kept locally])
+B0339	day_limit	1	notice 41617 ([notice text kept locally])
+B0413	day_limit	5	notice 46013 ([notice text kept locally])
+B0242	day_limit	1	wiki [notice text kept locally]; le [notice text kept locally] della nota <ref> sono solo le campagne di marzo-aprile 2018 (B0255, B0277, B0287, notice 37765/38880/39404)
+B0145	preset	names=kh 0.2 kairi;dots=3	notice 30703 [notice text kept locally]
+B0157	preset	names=world of ff lann,world of ff reynn;dots=3	notice 31354 ([notice text kept locally])
+B0184	preset	names=riku art [ex],illustrated aqua b;dots=3	notice 33505 ([notice text kept locally])
+B0190	preset	names=illustrated neku;dots=3	notice 33593 ([notice text kept locally])
+B0195	preset	names=illustrated kh ii sora & riku [ex],illustrated auron;dots=3	notice 33883 ([notice text kept locally])
+B0199	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=3	notice 34475 ([notice text kept locally])
+B0200	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=3	notice 34475 ([notice text kept locally])
+B0201	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=3	notice 34475 ([notice text kept locally])
+B0202	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=3	notice 34475 ([notice text kept locally])
+B0203	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=3	notice 34475 ([notice text kept locally])
+B0207	preset	names=dual wield roxas [ex];dots=3	notice 34669 ([notice text kept locally])
+B0212	preset	names=hd king mickey [ex];dots=3	notice 35138 ([notice text kept locally]; nota del TSV troncata)
+B0204	slot	new@0x1/6:tier=4-	notice 34471 ([notice text kept locally])
+B0204	preset	slots=0;dots=1-3 || names=illustrated kairi [ex];dots=3	notice 34471 (Tier 4+ con 1-3 pallini; [notice text kept locally])
+B0204	boosted	names=illustrated kairi [ex];str=1000;def=1000;chance=small	notice 34471 ([notice text kept locally])
+B0204	featured	illustrated kairi [ex]	notice 34471 ([notice text kept locally])
+B0223	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=0	notice 35521 ([notice text kept locally])
+B0224	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=0	notice 35521 ([notice text kept locally])
+B0225	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=0	notice 35521 ([notice text kept locally])
+B0226	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=0	notice 35521 ([notice text kept locally])
+B0227	preset	names=hd ira [ex],hd invi [ex],hd aced [ex],hd gula [ex],hd ava [ex];dots=0	notice 35521 ([notice text kept locally])
+B0273	preset	names=hd vanitas [ex+];dots=0	notice 38662 ([notice text kept locally])
+B0279	preset	names=key art #16 [ex+];dots=0	notice 39396 ([notice text kept locally])
+B0284	preset	names=sephiroth [ex+];dots=0	notice 39400 ([notice text kept locally])
+B0288	preset	names=kh ii cloud [ex+];dots=0	notice 39402 ([notice text kept locally])
+B0083	preset	replace;slots=0,1;dots=3	notice 24597 ([notice text kept locally]): due copie, non tutte e cinque
+B0353	pity	5;star=6;slot=2	notice 42156 ([notice text kept locally]): 6★, fra le [notice text kept locally] (lo slot 1 e' quello della Trait Medal #23)
+B0353	preset	pity;dots=5	notice 42156 ([notice text kept locally]): solo la copia della pity
+B0374	pity	5;star=6;slot=2	notice 43561 ([notice text kept locally]): 6★, fra le [notice text kept locally]
+B0374	preset	pity;dots=5 || slots=0;dots=max;guilt=max	notice 43561 ([notice text kept locally] sulla copia della pity; [notice text kept locally], regola G1)
+B0435	pity	5;names=prime - chernabog;star=7;slot=2	notice 48299 ([notice text kept locally]): la 7★ prende una delle [notice text kept locally], la 6★ resta
+B0435	max_skill	pity;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 48299 ([notice text kept locally]), regola G2
+B0452	pity	5;names=prime - chernabog;star=7;slot=2	notice 48298 ([notice text kept locally] nella colonna Standard; [notice text kept locally])
+B0452	max_skill	pity;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 48298 (stessa frase delle abilita' al massimo di 48299), regola G2
+B0447	pity	5;names=illustrated rai|illustrated seifer|illustrated fuu	notice 48293 ([notice text kept locally])
+B0645	pity	5;names=sn++ - kh iii pooh;star=7	notice 63324 ([notice text kept locally])
+B0584	pity	5;mode=every	notice 56838 ([notice text kept locally])
+B0770	pity	10;mode=every	notice 72828 ([notice text kept locally])
+B0704	end_pt	2020-09-01	notice 69285 ([notice text kept locally]; rimborsati e sostituiti da B0708-B0710 il 03-09)
+B0705	end_pt	2020-09-01	notice 69285 ([notice text kept locally]; rimborsati e sostituiti da B0708-B0710 il 03-09)
+B0706	end_pt	2020-09-01	notice 69285 ([notice text kept locally]; rimborsati e sostituiti da B0708-B0710 il 03-09)
+B0507	exclude	duplicate	notice 52345 (Imitation Medal Deal! (04/15), 15-19/04/2019, once per day) = B0500, che ha gia' quel periodo e il limite giornaliero; B0507 e' la riga del notice senza dati
+B0319	max_skill	slots=0;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 40736 ([notice text kept locally] sulla 7★ Tier 4 garantita), regola G2
+B0490	max_skill	slots=0,1;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 51532 ([notice text kept locally]): le due 7★ dello slot garantito, regola G2
+B0491	max_skill	slots=0,1,2,3;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 51532 (stessa frase, VIP: le quattro 7★ dello slot garantito), regola G2
+B0494	max_skill	slots=0,1;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52166 ([notice text kept locally]), regola G2
+B0495	max_skill	slots=0,1,2,3;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52166 (stessa frase, VIP), regola G2
+B0498	max_skill	slots=0,1;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52167 ([notice text kept locally]), regola G2
+B0499	max_skill	slots=0,1,2,3;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52167 (stessa frase, VIP), regola G2
+B0502	max_skill	names=supernova - hd terra|supernova - hd ventus|supernova - hd aqua;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52657 ([notice text kept locally]), regola G2
+B0503	max_skill	names=supernova - hd terra|supernova - hd ventus|supernova - hd aqua;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52657 (stessa frase), regola G2
+B0504	max_skill	names=supernova - hd terra|supernova - hd ventus|supernova - hd aqua;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52657 (stessa frase), regola G2
+B0508	max_skill	names=sn - kh iii youth in white|sn - kh iii youth in black|supernova - key art #20|supernova - kh iii kairi;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52654 ([notice text kept locally]), regola G2
+B0509	max_skill	names=sn - kh iii youth in white|sn - kh iii youth in black|supernova - key art #20|supernova - kh iii kairi;skills=attack boost vi max|defense boost i max|defense boost ii max|defense boost iii max|atk b v max & ga 1|atk b v max & lux+|triple threat ii	notice 52654 (stessa frase, VIP), regola G2
+B0126	rarity_mix	6★:1 5★:9	D3, grafica N28251 (Illustrated Cloud x1, 5★+ x9, Magic Mirror x5) e notice 28251
+B0126	slot	new@0x1/6:names=illustrated cloud	D3, notice 28251 ([notice text kept locally])
+B0126	bonus	3,90156,5	D3, notice 28251 ([notice text kept locally])
+B0126	day_limit	3	D3, notice 28251 ([notice text kept locally])
+B0267	rarity_mix	6★:1 5★:9	D3, grafica N38258 (Tier 6+ x1 con pallini, 5★+ x9, Magic Mirror x3) e notice 38258 ([notice text kept locally]); prima 6★ x3 da B0558
+B0267	slot	new@0x1/6:tier=6-	D3, notice 38258 ([notice text kept locally])
+B0267	preset	names=sephiroth [ex+];dots=5 || slots=0;dots=1-3	D3, notice 38258 ([notice text kept locally]; slot Tier 6+ a 1-3 pallini)
+B0267	boosted	names=sephiroth [ex+];str=1000;def=1000;chance=small	D3, notice 38258 ([notice text kept locally])
+B0267	bonus	3,90156,3	D3, notice 38258 ([notice text kept locally])
+B0267	featured	sephiroth [ex+]	D3, notice 38258 (Sephiroth [EX+] e' la medaglia del deal)
+B0126	not_reproduced	epic	D3, notice 28251 ([notice text kept locally]), grafica [notice text kept locally]: le Epic non sono piu nei dati (Notices, Differences)
+B0430	slot	0:names=prime - kristoff|prime - anna|prime - olaf|supernova - elsa;up	D5 (scelta dell utente 19-10), notice 47814 ([notice text kept locally]) e Guarantees della wiki ([notice text kept locally]): 6★ con la salita dello slot normale a 7★ (Elsa solo 7★)
+B0431	slot	0:names=prime - kristoff|prime - anna|prime - olaf|supernova - elsa;up	D5 (scelta dell utente 19-10), notice 47814 ([notice text kept locally]) e Guarantees della wiki ([notice text kept locally]): 6★ con la salita dello slot normale a 7★ (Elsa solo 7★)
+B0590	pity	5;names=supernova - kh iii lea (axel)|sn - blitz form sora|sn - kh iii ventus|sn - ultimate form sora|supernova+ - key art #21	D8, notice 57597 ritrovato (tmp\sp2c\d8): [notice text kept locally]
+B0591	pity	10;names=supernova+ - key art #21	D8, notice 57597: [notice text kept locally]
+B0618	pity	3;mode=every	D8, notice 59825: [notice text kept locally]

@@ -1,0 +1,912 @@
+# Originali al posto delle nostre ricostruzioni (I-170; import_originals.py, in build-resources.ps1 dopo i generatori).
+# destinazione	fonti	[sorgente]	# nota.  Le righe dopo vincono: prima JP, poi il 2016 inglese dove c'e'.
+
+# 1. Miniature dell'elenco Story (al posto di make_quest_thumbs.py, ritagli delle mappe di Roboloid): 96/96 nel 2016
+img/adventure/stage/stage_select_ico_*.png	jp
+img/adventure/stage/stage_select_ico_*.png	b16
+
+# 2. Icone dei Tier dello Special Attack Bonus (al posto di make_textures.py: icone della khuxwiki e 9-10 disegnate)
+img/ui/guilt/*.png	jp
+img/ui/guilt/*.png	b16
+cocostudio/publish/MedalInfo_Guilt*.png	jp
+img/ui/guilt/MedalInfo_Guilt9.png	jp	cocostudio/publish/MedalInfo_Guilt9.png
+img/ui/guilt/MedalInfo_Guilt10.png	jp	cocostudio/publish/MedalInfo_Guilt10.png
+
+# 3. Icone dei materiali (al posto di fetch_material_icons.py, khuxwiki): 44/44 nel JP, 39 nel 2016
+img/material/material_*.png	jp
+img/material/material_*.png	b16
+
+# 4. NPC delle storie (wait.lwf vuote dal 9-10: invisibili): 41 completi nel 2016. Restano vuoti 7002, 8004, 9005,
+#    9007, 9010-9018: assenti dal 2016, nel JP mancano texture dai nomi generici («ビットマップ N», diverse per NPC)
+lwf/character/npc/3002/wait/	b16
+lwf/character/npc/3003/wait/	b16
+lwf/character/npc/3014/wait/	b16
+lwf/character/npc/3015/wait/	b16
+lwf/character/npc/3016/wait/	b16
+lwf/character/npc/3017/wait/	b16
+lwf/character/npc/3018/wait/	b16
+lwf/character/npc/3019/wait/	b16
+lwf/character/npc/4002/wait/	b16
+lwf/character/npc/4003/wait/	b16
+lwf/character/npc/4004/wait/	b16
+lwf/character/npc/4005/wait/	b16
+lwf/character/npc/4006/wait/	b16
+lwf/character/npc/4007/wait/	b16
+lwf/character/npc/4009/wait/	b16
+lwf/character/npc/4018/wait/	b16
+lwf/character/npc/4025/wait/	b16
+lwf/character/npc/5001/wait/	b16
+lwf/character/npc/5002/wait/	b16
+lwf/character/npc/5003/wait/	b16
+lwf/character/npc/5004/wait/	b16
+lwf/character/npc/5005/wait/	b16
+lwf/character/npc/5006/wait/	b16
+lwf/character/npc/5007/wait/	b16
+lwf/character/npc/5008/wait/	b16
+lwf/character/npc/5009/wait/	b16
+lwf/character/npc/5010/wait/	b16
+lwf/character/npc/5016/wait/	b16
+lwf/character/npc/5017/wait/	b16
+lwf/character/npc/5019/wait/	b16
+lwf/character/npc/5020/wait/	b16
+lwf/character/npc/5530/wait/	b16
+lwf/character/npc/5531/wait/	b16
+lwf/character/npc/8000/wait/	b16
+lwf/character/npc/8002/wait/	b16
+lwf/character/npc/9000/wait/	b16
+lwf/character/npc/9001/wait/	b16
+lwf/character/npc/9002/wait/	b16
+lwf/character/npc/9003/wait/	b16
+lwf/character/npc/9004/wait/	b16
+lwf/character/npc/9009/wait/	b16
+#    I-185 (21-10): 992, 999, 3001, 4015, 5528, 5529 completi nel 2016 ma riempiti da import_jp_coco.py con le texture
+#    dai nomi generici di un altro NPC (5529 = fulmini, servito come faccia e mano: «mano» nella quest 16180)
+lwf/character/npc/992/wait/	b16
+lwf/character/npc/999/wait/	b16
+lwf/character/npc/3001/wait/	b16
+lwf/character/npc/4015/wait/	b16
+lwf/character/npc/5528/wait/	b16
+lwf/character/npc/5529/wait/	b16
+
+# 5. Moogle del Moogle Shop (I-021, era la LWF vuota: invisibile) e suono dell'animazione del training (I-082): JP completi
+lwf/mogshop/mog_wait/	jp
+lwf/pet/demo/training_SE/	jp
+
+# 6. Potenziamento ed evoluzione del keyblade (I-057/I-067: LWF vuote e KeyBlade_Evolution di make_kb_evolution_lwf.py):
+#    tutte complete nel 2016 (inglese)
+lwf/keyblade/KeyEvo/KeyEvo_eff/	b16
+lwf/keyblade/KeyEvo/KeyEvo_Medal_01/	b16
+lwf/keyblade/KeyEvo/KeyEvo_Medal_01B/	b16
+lwf/keyblade/KeyEvo/KeyEvo_Medal_02/	b16
+lwf/keyblade/KeyEvo/medal_blank_slot1/	b16
+lwf/keyblade/KeyEvo/medal_blank_slot2/	b16
+lwf/keyblade/KeyEvo/medal_blank_slot3/	b16
+lwf/memudemo/KeyBlade_StepUp/	b16
+lwf/memudemo/KeyBlade_Evolution/	b16
+
+# 7. Immagini dei keyblade nei popup (make_keyblade_images.py, dalla bitmap delle LWF): 64/64 (JP 58, 2016 21)
+img/keyBlade/KeyBlade_*.png	jp
+img/keyBlade/KeyBlade_*.png	b16
+
+# 8. Grafica del deck per keyblade (make_keyblade_decks.py, copie ricolorate della 001): 60/61 nel JP;
+#    DeckMedalNumUI_pvp_001 senza originale resta nostra
+img/carouselDeck/*.png	jp
+img/carouselDeck/*.png	b16
+
+# 9. Bagliori di deck e slot (make_keyblade_decks.py, make_medaltype_lwf.py): Type1/2 completi nel 2016, MedalType01
+#    completo nel JP; MedalDeck_Type01 (texture da riempire) e Type11/21/31 (nessun originale) restano nostri
+lwf/medal/medaldeck/MedalDeck_Type1/	b16
+lwf/medal/medaldeck/MedalDeck_Type2/	b16
+lwf/medal/medaltype/MedalType1/	b16
+lwf/medal/medaltype/MedalType2/	b16
+lwf/medal/medaltype/MedalType01/	jp
+
+# 13. Transizioni fra le aree (I-027: copie di wipe_1): 2-8 originali; 9, 10, 10000, 10001 senza originale
+img/wipe/wipe_[2-8].png	jp
+img/wipe/wipe_[2-8].png	b16
+
+# 14. Biglietti col segno provvisorio «仮» (I-135): grafica finale JP. Star7_Ticket_39 resta quella della piastra
+#     Banner Catalog (make_shop_art.py): scelta dell'utente in sospeso
+img/incentive/draw_Ticket_40.png	jp
+img/incentive/draw_Ticket_41.png	jp
+img/incentive/Star7_Ticket_38.png	jp
+
+# 15. Armature delle Avatar Board (gen_sphere_armatures.py, linee sottili): originali con barre e sfera «START»
+cocostudio/publish/Z_SpRoute_*	jp
+cocostudio/publish/Z_SpRoute_*	b16
+cocostudio/publish/SphereAnimation*	jp
+cocostudio/publish/SphereAnimation*	b16
+cocostudio/publish/Z_SpCursor*	jp
+cocostudio/publish/Z_SpCursor*	b16
+
+# 17-23. Texture minori ricostruite da make_textures.py / copie di make_layouts.py (audit I-170 righe 17-23)
+cocostudio/publish/Av_Panel1.png	b16,jp
+cocostudio/publish/Av_Panel2.png	b16,jp
+cocostudio/publish/Ico_Param_HP.png	b16,jp
+cocostudio/publish/Av_Panel_Colosseum.png	b16,jp
+cocostudio/publish/AvInfo_PetInfoPanel.png	b16,jp
+cocostudio/publish/MyMission_Category_On.png	jp	img/ui/MyMission_Category_On.png
+cocostudio/publish/MyMission_Category_Off.png	jp	img/ui/MyMission_Category_Off.png
+cocostudio/publish/MyMission_GroupIcon1.png	jp	img/ui/MyMission_GroupIcon1.png
+img/ui/MyMission_Category_On.png	jp
+img/ui/MyMission_Category_Off.png	jp
+img/ui/MyMission_GroupIcon1.png	jp
+img/ui/MyMission_GroupIcon2.png	jp
+cocostudio/publish/Mogshop_plate1.png	jp	img/ui/Mogshop_plate1.png
+img/ui/Mogshop_plate1.png	jp
+img/ui/Subslot_MedalSlot*01.png	jp
+cocostudio/publish/Complete_icon1.png	jp	img/ui/Complete_icon1.png
+img/ui/Complete_icon1.png	jp
+img/ui/Complete_icon2.png	jp
+img/ui/But15_On.png	b16
+cocostudio/publish/ShopBut_Lock.png	jp
+img/ui/ShopBut_Lock.png	jp
+img/ui/ShopBut_Lock_Disable.png	jp
+img/ui/But07_Disable.png	b16,jp
+img/ui/But06_Disable.png	b16,jp
+img/ui/Deck_Slot_Num_4.png	b16,jp
+img/ui/Deck_Slot_Num_5.png	b16,jp
+img/ui/Deck_Slot_Num_6.png	b16,jp
+cocostudio/publish/Panel07.png	b16,jp
+cocostudio/publish/Plate21.png	b16,jp
+
+# 11. Risultato di Level Up (2-5 materiali) ed Evolve (1-5) (I-024; make_layouts.py _lwf_copy: copie rinominate di
+#     card_strength_result_01, una carta sola): originali del 2016 complete di texture; le Medal_D_* che caricano sono
+#     in lwf/raisedraw/medal (raisedraw_gen)
+lwf/medal/compose/strength/card_strength_result_02/	b16
+lwf/medal/compose/strength/card_strength_result_03/	b16
+lwf/medal/compose/strength/card_strength_result_04/	b16
+lwf/medal/compose/strength/card_strength_result_05/	b16
+lwf/medal/compose/evolution/card_evolution_result_01/	b16
+lwf/medal/compose/evolution/card_evolution_result_02/	b16
+lwf/medal/compose/evolution/card_evolution_result_03/	b16
+lwf/medal/compose/evolution/card_evolution_result_04/	b16
+lwf/medal/compose/evolution/card_evolution_result_05/	b16
+
+# 24. Icone delle Union (make_textures.py: Union_L ridotte): WW originali dell'IPA 4.4.0 (estratte con res_get.py in
+#     catalog\ipa440_extract, vedi build-resources.ps1)
+img/union/Union_0*.png	i440
+
+# 31. Popup di selezione dell'account (make_layouts.py: copia di dark_MenuDialog_account_select_ver401): WW 4.4.0,
+#     con i pulsanti Apple ID / Facebook / SQEX Bridge
+cocostudio/publish/MenuDialog_account_select_ver401.json	i440
+cocostudio/publish/appleid_button_2x.png	i440
+cocostudio/publish/facebook_button_2x.png	i440
+cocostudio/publish/SQEXBridge_button_2x.png	i440
+
+# 16. Texture dei layout JP lasciati in sospeso perche' «assenti ovunque» (jp_coco_layouts.txt): ci sono nel 2016.
+#     Rank_Result_Deco e SphereMap_Complete sono 1x1 (00_Dummy) anche nell'originale. World_Ico7A/7B/8A/8B del 2016
+#     sono segnaposto (= World_Ico1A): i pulsanti Events/Colosseum restano nostri
+cocostudio/publish/Rank_Title_3.png	b16
+img/ranking/Rank_Title_3.png	b16
+cocostudio/publish/Rank_Result_Deco.png	b16
+cocostudio/publish/SphereMap_Complete.png	b16
+cocostudio/publish/Camp_Balloon3.png	b16,jp
+
+# 12. Logo «SPECIAL ATTACK BONUS» di GuiltBonus_max/_result (import_jp_raisedraw.py usava «GUILT BONUS»,
+#     png_logo_guilt_bonus): texture inglese del 2016, 455x35 in uno spazio dichiarato 336x35 come nell'originale
+lwf/medal/guilt_bonus/GuiltBonus_max/GuiltBonus_max_706e675f6c6f676f5f6775696c745f626f6e7573322e706e67.png	b16
+lwf/medal/guilt_bonus/GuiltBonus_result/GuiltBonus_result_706e675f6c6f676f5f6775696c745f626f6e7573322e706e67.png	b16
+
+# 33. Login bonus (I-176): scena, pannelli e popup speciale (LBonus*_ver131 e inclusi), texture, cifre dell'AtlasLabel
+#     (Result_Num) e i tre LWF di lwf/loginbonus: tutti assenti dalle risorse WW 5.0.1/4.3.1, completi nel 2016 (nel JP
+#     LoginBonus_Welcome e _Stamp hanno texture mancanti). Testi in text/ui 104500001-008 (gia' serviti)
+cocostudio/publish/LBonus*.json	b16
+cocostudio/publish/LoginBonus_*.png	b16
+cocostudio/publish/Result_Num.png	b16
+cocostudio/publish/LBonusAnimation*	b16
+lwf/loginbonus/LoginBonus_BG/	b16
+lwf/loginbonus/LoginBonus_Welcome/	b16
+lwf/loginbonus/LoginBonus_Stamp/	b16
+#     timbro piccolo nell'angolo (screenshot 2020-21): LWF JP piu' recente (rev. 00191275, scala 0.439), le 5 texture
+#     restano quelle del 2016 (il JP non ha png_KeyBlade_ef1); suono del timbro (codice della scena)
+lwf/loginbonus/LoginBonus_Stamp/LoginBonus_Stamp.lwf	jp
+audio/509100630.akb	b16,jp
+
+# 34. Effetti dei Tricks del pet (I-137): 0xe Esuna/HP Recovery -> pet_eff_0004, 0xf P/S/M Attack Boost -> pet_eff_0005
+#     (codice - 10); senza il LWF crash NULL (banco 20-10, speciale di Naminé). Dal JP 4.3.1; 6 texture
+#     assenti dall'estrazione JP sono copie di quelle di pet_eff_0005/0006 (stessi offset nel 2016)
+lwf/ability/hit_effect/pet_eff_0004/	jp
+lwf/ability/hit_effect/pet_eff_0005/	jp
+lwf/ability/hit_effect/pet_eff_0006/	jp
+lwf/ability/hit_effect/pet_eff_0004/pet_eff_0004_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0005/pet_eff_0005_e38393e38383e38388e3839ee38383e3839720382e706e67.png
+lwf/ability/hit_effect/pet_eff_0004/pet_eff_0004_e38393e38383e38388e3839ee38383e383972031352e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0006/pet_eff_0006_e38393e38383e38388e3839ee38383e3839720392e706e67.png
+lwf/ability/hit_effect/pet_eff_0004/pet_eff_0004_e38393e38383e38388e3839ee38383e383972031372e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0006/pet_eff_0006_e38393e38383e38388e3839ee38383e383972031312e706e67.png
+lwf/ability/hit_effect/pet_eff_0005/pet_eff_0005_e38393e38383e38388e3839ee38383e383972031312e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0006/pet_eff_0006_e38393e38383e38388e3839ee38383e3839720392e706e67.png
+lwf/ability/hit_effect/pet_eff_0005/pet_eff_0005_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0006/pet_eff_0006_e38393e38383e38388e3839ee38383e383972031302e706e67.png
+lwf/ability/hit_effect/pet_eff_0005/pet_eff_0005_e38393e38383e38388e3839ee38383e383972031332e706e67.png	jp	lwf/ability/hit_effect/pet_eff_0006/pet_eff_0006_e38393e38383e38388e3839ee38383e383972031312e706e67.png
+
+# 35. Numero del deck nel popup di Optimize («Optimize Medals for <keyblade>?», I-179): carica
+#     img/ui/Deck_But%02d_On.png (N = deck attivo + 1), assente da WW 5.0.1, JP 4.3.1 e 2016: restava l'immagine del
+#     layout (Deck_But01_On, StartDeckEdit2_Popup_AutoChangeCheck_ver260), quindi sempre «1» anche col deck 2 o 3 (banco
+#     20-10). Stesse texture dei pulsanti 1/2/3 (cocostudio/publish), sotto il nome che il codice cerca
+img/ui/Deck_But01_On.png	b16	cocostudio/publish/Deck_But01_On.png
+img/ui/Deck_But02_On.png	b16	cocostudio/publish/Deck_But02_On.png
+img/ui/Deck_But03_On.png	b16	cocostudio/publish/Deck_But03_On.png
+
+# 36. Animazioni degli attacchi speciali (server/burst-anim-fix.js, reference/burst_anim/mapping_final.json): motion,
+#     effetti e SE delle righe scelte; 2016 dove c'e' (cartelle complete), altrimenti JP 4.3.1 completo. Banco 20-10:
+#     SN++ Illus. KH III Terra «Ars Solum EX» mostrava 2 colpi su 13 (motion generica 10095)
+lwf/burst/effect/eff_10011/	b16
+lwf/burst/effect/eff_10015/	b16
+lwf/burst/effect/eff_10016/	b16
+lwf/burst/effect/eff_10021/	b16
+lwf/burst/effect/eff_10023/	b16
+lwf/burst/effect/eff_10025/	b16
+lwf/burst/effect/eff_10026/	b16
+lwf/burst/effect/eff_10031/	b16
+lwf/burst/effect/eff_10033/	b16
+lwf/burst/effect/eff_10035/	b16
+lwf/burst/effect/eff_10036/	b16
+lwf/burst/effect/eff_10041/	b16
+lwf/burst/effect/eff_10043/	b16
+lwf/burst/effect/eff_10045/	b16
+lwf/burst/effect/eff_10046/	b16
+lwf/burst/effect/eff_10051/	b16
+lwf/burst/effect/eff_10053/	b16
+lwf/burst/effect/eff_10055/	b16
+lwf/burst/effect/eff_10056/	b16
+lwf/burst/effect/eff_10061/	b16
+lwf/burst/effect/eff_10063/	b16
+lwf/burst/effect/eff_10065/	b16
+lwf/burst/effect/eff_10066/	b16
+lwf/burst/effect/eff_10071/	b16
+lwf/burst/effect/eff_10073/	b16
+lwf/burst/effect/eff_10075/	b16
+lwf/burst/effect/eff_10076/	b16
+lwf/burst/effect/eff_10081/	b16
+lwf/burst/effect/eff_10083/	b16
+lwf/burst/effect/eff_10085/	b16
+lwf/burst/effect/eff_10086/	b16
+lwf/burst/effect/eff_10093/	b16
+lwf/burst/effect/eff_10096/	b16
+lwf/burst/effect/eff_10105/	b16
+lwf/burst/effect/eff_10106/	b16
+lwf/burst/effect/eff_10115/	b16
+lwf/burst/effect/eff_10116/	b16
+lwf/burst/effect/eff_10123/	b16
+lwf/burst/effect/eff_10126/	b16
+lwf/burst/effect/eff_10131/	b16
+lwf/burst/effect/eff_10133/	b16
+lwf/burst/effect/eff_10135/	b16
+lwf/burst/effect/eff_10136/	b16
+lwf/burst/effect/eff_10143/	b16
+lwf/burst/effect/eff_10146/	b16
+lwf/burst/effect/eff_10151/	b16
+lwf/burst/effect/eff_10153/	b16
+lwf/burst/effect/eff_10155/	b16
+lwf/burst/effect/eff_10156/	b16
+lwf/burst/effect/eff_10166/	b16
+lwf/burst/effect/eff_10173/	b16
+lwf/burst/effect/eff_10175/	b16
+lwf/burst/effect/eff_10176/	b16
+lwf/burst/effect/eff_10183/	b16
+lwf/burst/effect/eff_10185/	b16
+lwf/burst/effect/eff_10186/	b16
+lwf/burst/effect/eff_10191/	b16
+lwf/burst/effect/eff_10193/	b16
+lwf/burst/effect/eff_10195/	b16
+lwf/burst/effect/eff_10196/	b16
+lwf/burst/effect/eff_10201/	b16
+lwf/burst/effect/eff_10203/	b16
+lwf/burst/effect/eff_10205/	b16
+lwf/burst/effect/eff_10206/	b16
+lwf/burst/effect/eff_10215/	b16
+lwf/burst/effect/eff_10216/	b16
+lwf/burst/effect/eff_10221/	b16
+lwf/burst/effect/eff_10223/	b16
+lwf/burst/effect/eff_10225/	b16
+lwf/burst/effect/eff_10226/	b16
+lwf/burst/effect/eff_10233/	b16
+lwf/burst/effect/eff_10235/	b16
+lwf/burst/effect/eff_10236/	b16
+lwf/burst/effect/eff_10245/	b16
+lwf/burst/effect/eff_10246/	b16
+lwf/burst/effect/eff_10251/	b16
+lwf/burst/effect/eff_10253/	b16
+lwf/burst/effect/eff_10255/	b16
+lwf/burst/effect/eff_10256/	b16
+lwf/burst/effect/eff_10263/	b16
+lwf/burst/effect/eff_10265/	b16
+lwf/burst/effect/eff_10266/	b16
+lwf/burst/effect/eff_10273/	b16
+lwf/burst/effect/eff_10275/	b16
+lwf/burst/effect/eff_10276/	b16
+lwf/burst/effect/eff_10285/	b16
+lwf/burst/effect/eff_10286/	b16
+lwf/burst/effect/eff_10291/	b16
+lwf/burst/effect/eff_10293/	b16
+lwf/burst/effect/eff_10295/	b16
+lwf/burst/effect/eff_10296/	b16
+lwf/burst/effect/eff_10301/	b16
+lwf/burst/effect/eff_10303/	b16
+lwf/burst/effect/eff_10305/	b16
+lwf/burst/effect/eff_10306/	b16
+lwf/burst/effect/eff_10315/	b16
+lwf/burst/effect/eff_10316/	b16
+lwf/burst/effect/eff_10321/	b16
+lwf/burst/effect/eff_10323/	b16
+lwf/burst/effect/eff_10325/	b16
+lwf/burst/effect/eff_10326/	b16
+lwf/burst/effect/eff_10333/	b16
+lwf/burst/effect/eff_10335/	b16
+lwf/burst/effect/eff_10336/	b16
+lwf/burst/effect/eff_10345/	b16
+lwf/burst/effect/eff_10346/	b16
+lwf/burst/effect/eff_10353/	b16
+lwf/burst/effect/eff_10355/	b16
+lwf/burst/effect/eff_10356/	b16
+lwf/burst/effect/eff_10361/	b16
+lwf/burst/effect/eff_10363/	b16
+lwf/burst/effect/eff_10366/	b16
+lwf/burst/effect/eff_10375/	b16
+lwf/burst/effect/eff_10376/	b16
+lwf/burst/effect/eff_10383/	b16
+lwf/burst/effect/eff_10385/	b16
+lwf/burst/effect/eff_10386/	b16
+lwf/burst/effect/eff_10393/	b16
+lwf/burst/effect/eff_10395/	b16
+lwf/burst/effect/eff_10396/	b16
+lwf/burst/effect/eff_10405/	b16
+lwf/burst/effect/eff_10406/	b16
+lwf/burst/effect/eff_10411/	b16
+lwf/burst/effect/eff_10416/	b16
+lwf/burst/effect/eff_10426/	b16
+lwf/burst/effect/eff_10433/	b16
+lwf/burst/effect/eff_10436/	b16
+lwf/burst/effect/eff_10446/	b16
+lwf/burst/effect/eff_10451/	b16
+lwf/burst/effect/eff_10453/	b16
+lwf/burst/effect/eff_10455/	b16
+lwf/burst/effect/eff_10456/	b16
+lwf/burst/effect/eff_10465/	b16
+lwf/burst/effect/eff_10466/	b16
+lwf/burst/effect/eff_10476/	b16
+lwf/burst/effect/eff_10485/	b16
+lwf/burst/effect/eff_10486/	b16
+lwf/burst/effect/eff_10491/	b16
+lwf/burst/effect/eff_10495/	b16
+lwf/burst/effect/eff_10496/	b16
+lwf/burst/effect/eff_10505/	b16
+lwf/burst/effect/eff_10506/	b16
+lwf/burst/effect/eff_10513/	b16
+lwf/burst/effect/eff_10515/	b16
+lwf/burst/effect/eff_10516/	b16
+lwf/burst/effect/eff_10535/	b16
+lwf/burst/effect/eff_10536/	b16
+lwf/burst/effect/eff_10545/	b16
+lwf/burst/effect/eff_10546/	b16
+lwf/burst/effect/eff_10556/	b16
+lwf/burst/effect/eff_10563/	b16
+lwf/burst/effect/eff_10565/	b16
+lwf/burst/effect/eff_10566/	b16
+lwf/burst/effect/eff_10575/	b16
+lwf/burst/effect/eff_10576/	b16
+lwf/burst/effect/eff_10586/	b16
+lwf/burst/effect/eff_10595/	b16
+lwf/burst/effect/eff_10596/	b16
+lwf/burst/effect/eff_10601/	b16
+lwf/burst/effect/eff_10606/	b16
+lwf/burst/effect/eff_10613/	b16
+lwf/burst/effect/eff_10615/	b16
+lwf/burst/effect/eff_10616/	b16
+lwf/burst/effect/eff_10625/	b16
+lwf/burst/effect/eff_10626/	b16
+lwf/burst/effect/eff_10633/	b16
+lwf/burst/effect/eff_10635/	b16
+lwf/burst/effect/eff_10636/	b16
+lwf/burst/effect/eff_10645/	b16
+lwf/burst/effect/eff_10646/	b16
+lwf/burst/effect/eff_10655/	b16
+lwf/burst/effect/eff_10656/	b16
+lwf/burst/effect/eff_10666/	b16
+lwf/burst/effect/eff_10671/	b16
+lwf/burst/effect/eff_10673/	b16
+lwf/burst/effect/eff_10675/	b16
+lwf/burst/effect/eff_10676/	b16
+lwf/burst/effect/eff_10683/	b16
+lwf/burst/effect/eff_10685/	b16
+lwf/burst/effect/eff_10686/	b16
+lwf/burst/effect/eff_10695/	b16
+lwf/burst/effect/eff_10696/	b16
+lwf/burst/effect/eff_10705/	b16
+lwf/burst/effect/eff_10706/	b16
+lwf/burst/effect/eff_10713/	b16
+lwf/burst/effect/eff_10715/	b16
+lwf/burst/effect/eff_10716/	b16
+lwf/burst/effect/eff_10726/	b16
+lwf/burst/effect/eff_10735/	b16
+lwf/burst/effect/eff_10736/	b16
+lwf/burst/effect/eff_10745/	b16
+lwf/burst/effect/eff_10746/	b16
+lwf/burst/effect/eff_10756/	b16
+lwf/burst/effect/eff_10765/	b16
+lwf/burst/effect/eff_10766/	b16
+lwf/burst/effect/eff_10775/	b16
+lwf/burst/effect/eff_10776/	b16
+lwf/burst/effect/eff_10796/	b16
+lwf/burst/effect/eff_10805/	b16
+lwf/burst/effect/eff_10806/	b16
+lwf/burst/effect/eff_10815/	b16
+lwf/burst/effect/eff_10816/	b16
+lwf/burst/effect/eff_10835/	b16
+lwf/burst/effect/eff_10836/	b16
+lwf/burst/effect/eff_10846/	b16
+lwf/burst/effect/eff_10855/	b16
+lwf/burst/effect/eff_10856/	b16
+lwf/burst/effect/eff_10865/	b16
+lwf/burst/effect/eff_10866/	b16
+lwf/burst/effect/eff_10876/	b16
+lwf/burst/effect/eff_10886/	b16
+lwf/burst/effect/eff_10925/	b16
+lwf/burst/effect/eff_10926/	b16
+lwf/burst/effect/eff_10955/	b16
+lwf/burst/effect/eff_10956/	b16
+lwf/burst/effect/eff_10986/	b16
+lwf/burst/effect/eff_11035/	b16
+lwf/burst/effect/eff_11036/	b16
+lwf/burst/effect/eff_11085/	b16
+lwf/burst/effect/eff_11086/	b16
+lwf/burst/effect/eff_11136/	b16
+lwf/burst/effect/eff_11145/	b16
+lwf/burst/effect/eff_11146/	b16
+lwf/burst/effect/eff_11155/	b16
+lwf/burst/effect/eff_11156/	b16
+lwf/burst/effect/eff_11226/	jp
+lwf/burst/effect/eff_15021/	b16
+lwf/burst/motion/abl_10011/	b16
+lwf/burst/motion/abl_10015/	b16
+lwf/burst/motion/abl_10016/	b16
+lwf/burst/motion/abl_10021/	b16
+lwf/burst/motion/abl_10023/	b16
+lwf/burst/motion/abl_10025/	b16
+lwf/burst/motion/abl_10026/	b16
+lwf/burst/motion/abl_10031/	b16
+lwf/burst/motion/abl_10033/	b16
+lwf/burst/motion/abl_10035/	b16
+lwf/burst/motion/abl_10036/	b16
+lwf/burst/motion/abl_10041/	b16
+lwf/burst/motion/abl_10043/	b16
+lwf/burst/motion/abl_10045/	b16
+lwf/burst/motion/abl_10046/	b16
+lwf/burst/motion/abl_10051/	b16
+lwf/burst/motion/abl_10053/	b16
+lwf/burst/motion/abl_10055/	b16
+lwf/burst/motion/abl_10056/	b16
+lwf/burst/motion/abl_10061/	b16
+lwf/burst/motion/abl_10063/	b16
+lwf/burst/motion/abl_10065/	b16
+lwf/burst/motion/abl_10066/	b16
+lwf/burst/motion/abl_10071/	b16
+lwf/burst/motion/abl_10073/	b16
+lwf/burst/motion/abl_10075/	b16
+lwf/burst/motion/abl_10076/	b16
+lwf/burst/motion/abl_10081/	b16
+lwf/burst/motion/abl_10083/	b16
+lwf/burst/motion/abl_10085/	b16
+lwf/burst/motion/abl_10086/	b16
+lwf/burst/motion/abl_10093/	b16
+lwf/burst/motion/abl_10096/	b16
+lwf/burst/motion/abl_10105/	b16
+lwf/burst/motion/abl_10106/	b16
+lwf/burst/motion/abl_10115/	b16
+lwf/burst/motion/abl_10116/	b16
+lwf/burst/motion/abl_10123/	b16
+lwf/burst/motion/abl_10126/	b16
+lwf/burst/motion/abl_10131/	b16
+lwf/burst/motion/abl_10133/	b16
+lwf/burst/motion/abl_10135/	b16
+lwf/burst/motion/abl_10136/	b16
+lwf/burst/motion/abl_10143/	b16
+lwf/burst/motion/abl_10146/	b16
+lwf/burst/motion/abl_10151/	b16
+lwf/burst/motion/abl_10153/	b16
+lwf/burst/motion/abl_10155/	b16
+lwf/burst/motion/abl_10156/	b16
+lwf/burst/motion/abl_10166/	b16
+lwf/burst/motion/abl_10173/	b16
+lwf/burst/motion/abl_10175/	b16
+lwf/burst/motion/abl_10176/	b16
+lwf/burst/motion/abl_10183/	b16
+lwf/burst/motion/abl_10185/	b16
+lwf/burst/motion/abl_10186/	b16
+lwf/burst/motion/abl_10191/	b16
+lwf/burst/motion/abl_10193/	b16
+lwf/burst/motion/abl_10195/	b16
+lwf/burst/motion/abl_10196/	b16
+lwf/burst/motion/abl_10201/	b16
+lwf/burst/motion/abl_10203/	b16
+lwf/burst/motion/abl_10205/	b16
+lwf/burst/motion/abl_10206/	b16
+lwf/burst/motion/abl_10215/	b16
+lwf/burst/motion/abl_10216/	b16
+lwf/burst/motion/abl_10221/	b16
+lwf/burst/motion/abl_10223/	b16
+lwf/burst/motion/abl_10225/	b16
+lwf/burst/motion/abl_10226/	b16
+lwf/burst/motion/abl_10233/	b16
+lwf/burst/motion/abl_10235/	b16
+lwf/burst/motion/abl_10236/	b16
+lwf/burst/motion/abl_10245/	b16
+lwf/burst/motion/abl_10246/	b16
+lwf/burst/motion/abl_10251/	b16
+lwf/burst/motion/abl_10253/	b16
+lwf/burst/motion/abl_10255/	b16
+lwf/burst/motion/abl_10256/	b16
+lwf/burst/motion/abl_10263/	b16
+lwf/burst/motion/abl_10265/	b16
+lwf/burst/motion/abl_10266/	b16
+lwf/burst/motion/abl_10273/	b16
+lwf/burst/motion/abl_10275/	b16
+lwf/burst/motion/abl_10276/	b16
+lwf/burst/motion/abl_10285/	b16
+lwf/burst/motion/abl_10286/	b16
+lwf/burst/motion/abl_10291/	b16
+lwf/burst/motion/abl_10293/	b16
+lwf/burst/motion/abl_10295/	b16
+lwf/burst/motion/abl_10296/	b16
+lwf/burst/motion/abl_10301/	b16
+lwf/burst/motion/abl_10303/	b16
+lwf/burst/motion/abl_10305/	b16
+lwf/burst/motion/abl_10306/	b16
+lwf/burst/motion/abl_10315/	b16
+lwf/burst/motion/abl_10316/	b16
+lwf/burst/motion/abl_10321/	b16
+lwf/burst/motion/abl_10323/	b16
+lwf/burst/motion/abl_10325/	b16
+lwf/burst/motion/abl_10326/	b16
+lwf/burst/motion/abl_10333/	b16
+lwf/burst/motion/abl_10335/	b16
+lwf/burst/motion/abl_10336/	b16
+lwf/burst/motion/abl_10345/	b16
+lwf/burst/motion/abl_10346/	b16
+lwf/burst/motion/abl_10353/	b16
+lwf/burst/motion/abl_10355/	b16
+lwf/burst/motion/abl_10356/	b16
+lwf/burst/motion/abl_10361/	b16
+lwf/burst/motion/abl_10363/	b16
+lwf/burst/motion/abl_10366/	b16
+lwf/burst/motion/abl_10375/	b16
+lwf/burst/motion/abl_10376/	b16
+lwf/burst/motion/abl_10383/	b16
+lwf/burst/motion/abl_10385/	b16
+lwf/burst/motion/abl_10386/	b16
+lwf/burst/motion/abl_10393/	b16
+lwf/burst/motion/abl_10395/	b16
+lwf/burst/motion/abl_10396/	b16
+lwf/burst/motion/abl_10405/	b16
+lwf/burst/motion/abl_10406/	b16
+lwf/burst/motion/abl_10411/	b16
+lwf/burst/motion/abl_10416/	b16
+lwf/burst/motion/abl_10426/	b16
+lwf/burst/motion/abl_10433/	b16
+lwf/burst/motion/abl_10436/	b16
+lwf/burst/motion/abl_10446/	b16
+lwf/burst/motion/abl_10451/	b16
+lwf/burst/motion/abl_10453/	b16
+lwf/burst/motion/abl_10455/	b16
+lwf/burst/motion/abl_10456/	b16
+lwf/burst/motion/abl_10465/	b16
+lwf/burst/motion/abl_10466/	b16
+lwf/burst/motion/abl_10476/	b16
+lwf/burst/motion/abl_10485/	b16
+lwf/burst/motion/abl_10486/	b16
+lwf/burst/motion/abl_10491/	b16
+lwf/burst/motion/abl_10495/	b16
+lwf/burst/motion/abl_10496/	b16
+lwf/burst/motion/abl_10505/	b16
+lwf/burst/motion/abl_10506/	b16
+lwf/burst/motion/abl_10513/	b16
+lwf/burst/motion/abl_10515/	b16
+lwf/burst/motion/abl_10516/	b16
+lwf/burst/motion/abl_10535/	b16
+lwf/burst/motion/abl_10536/	b16
+lwf/burst/motion/abl_10545/	b16
+lwf/burst/motion/abl_10546/	b16
+lwf/burst/motion/abl_10556/	b16
+lwf/burst/motion/abl_10563/	b16
+lwf/burst/motion/abl_10565/	b16
+lwf/burst/motion/abl_10566/	b16
+lwf/burst/motion/abl_10575/	b16
+lwf/burst/motion/abl_10576/	b16
+lwf/burst/motion/abl_10586/	b16
+lwf/burst/motion/abl_10595/	b16
+lwf/burst/motion/abl_10596/	b16
+lwf/burst/motion/abl_10601/	b16
+lwf/burst/motion/abl_10606/	b16
+lwf/burst/motion/abl_10613/	b16
+lwf/burst/motion/abl_10615/	b16
+lwf/burst/motion/abl_10616/	b16
+lwf/burst/motion/abl_10625/	b16
+lwf/burst/motion/abl_10626/	b16
+lwf/burst/motion/abl_10633/	b16
+lwf/burst/motion/abl_10635/	b16
+lwf/burst/motion/abl_10636/	b16
+lwf/burst/motion/abl_10645/	b16
+lwf/burst/motion/abl_10646/	b16
+lwf/burst/motion/abl_10655/	b16
+lwf/burst/motion/abl_10656/	b16
+lwf/burst/motion/abl_10666/	b16
+lwf/burst/motion/abl_10671/	b16
+lwf/burst/motion/abl_10673/	b16
+lwf/burst/motion/abl_10675/	b16
+lwf/burst/motion/abl_10676/	b16
+lwf/burst/motion/abl_10683/	b16
+lwf/burst/motion/abl_10685/	b16
+lwf/burst/motion/abl_10686/	b16
+lwf/burst/motion/abl_10695/	b16
+lwf/burst/motion/abl_10696/	b16
+lwf/burst/motion/abl_10705/	b16
+lwf/burst/motion/abl_10706/	b16
+lwf/burst/motion/abl_10713/	b16
+lwf/burst/motion/abl_10715/	b16
+lwf/burst/motion/abl_10716/	b16
+lwf/burst/motion/abl_10726/	b16
+lwf/burst/motion/abl_10735/	b16
+lwf/burst/motion/abl_10736/	b16
+lwf/burst/motion/abl_10745/	b16
+lwf/burst/motion/abl_10746/	b16
+lwf/burst/motion/abl_10756/	b16
+lwf/burst/motion/abl_10765/	b16
+lwf/burst/motion/abl_10766/	b16
+lwf/burst/motion/abl_10775/	b16
+lwf/burst/motion/abl_10776/	b16
+lwf/burst/motion/abl_10805/	b16
+lwf/burst/motion/abl_10806/	b16
+lwf/burst/motion/abl_10815/	b16
+lwf/burst/motion/abl_10816/	b16
+lwf/burst/motion/abl_10835/	b16
+lwf/burst/motion/abl_10836/	b16
+lwf/burst/motion/abl_10846/	b16
+lwf/burst/motion/abl_10855/	b16
+lwf/burst/motion/abl_10856/	b16
+lwf/burst/motion/abl_10865/	b16
+lwf/burst/motion/abl_10866/	b16
+lwf/burst/motion/abl_10925/	b16
+lwf/burst/motion/abl_10926/	b16
+lwf/burst/motion/abl_10955/	b16
+lwf/burst/motion/abl_10956/	b16
+lwf/burst/motion/abl_10966/	jp
+lwf/burst/motion/abl_10986/	b16
+lwf/burst/motion/abl_11035/	b16
+lwf/burst/motion/abl_11036/	b16
+lwf/burst/motion/abl_11085/	b16
+lwf/burst/motion/abl_11086/	b16
+lwf/burst/motion/abl_11136/	b16
+lwf/burst/motion/abl_11145/	b16
+lwf/burst/motion/abl_11146/	b16
+lwf/burst/motion/abl_11155/	b16
+lwf/burst/motion/abl_11156/	b16
+lwf/burst/motion/abl_11226/	jp
+lwf/burst/motion/abl_15001/	b16
+lwf/burst/motion/abl_15011/	b16
+lwf/burst/motion/abl_15021/	b16
+audio/503000011.akb	b16,jp
+audio/503000015.akb	b16,jp
+audio/503000016.akb	b16,jp
+audio/503000021.akb	b16,jp
+audio/503000023.akb	b16,jp
+audio/503000025.akb	b16,jp
+audio/503000026.akb	b16,jp
+audio/503000031.akb	b16,jp
+audio/503000033.akb	b16,jp
+audio/503000035.akb	b16,jp
+audio/503000036.akb	b16,jp
+audio/503000041.akb	b16,jp
+audio/503000043.akb	b16,jp
+audio/503000045.akb	b16,jp
+audio/503000046.akb	b16,jp
+audio/503000051.akb	b16,jp
+audio/503000053.akb	b16,jp
+audio/503000055.akb	b16,jp
+audio/503000056.akb	b16,jp
+audio/503000061.akb	b16,jp
+audio/503000063.akb	b16,jp
+audio/503000065.akb	b16,jp
+audio/503000066.akb	b16,jp
+audio/503000071.akb	b16,jp
+audio/503000073.akb	b16,jp
+audio/503000075.akb	b16,jp
+audio/503000076.akb	b16,jp
+audio/503000081.akb	b16,jp
+audio/503000083.akb	b16,jp
+audio/503000085.akb	b16,jp
+audio/503000086.akb	b16,jp
+audio/503000093.akb	b16,jp
+audio/503000096.akb	b16,jp
+audio/503000105.akb	b16,jp
+audio/503000106.akb	b16,jp
+audio/503000115.akb	b16,jp
+audio/503000116.akb	b16,jp
+audio/503000123.akb	b16,jp
+audio/503000126.akb	b16,jp
+audio/503000131.akb	b16,jp
+audio/503000133.akb	b16,jp
+audio/503000135.akb	b16,jp
+audio/503000136.akb	b16,jp
+audio/503000143.akb	b16,jp
+audio/503000146.akb	b16,jp
+audio/503000151.akb	b16,jp
+audio/503000153.akb	b16,jp
+audio/503000155.akb	b16,jp
+audio/503000156.akb	b16,jp
+audio/503000166.akb	b16,jp
+audio/503000173.akb	b16,jp
+audio/503000175.akb	b16,jp
+audio/503000176.akb	b16,jp
+audio/503000183.akb	b16,jp
+audio/503000185.akb	b16,jp
+audio/503000186.akb	b16,jp
+audio/503000191.akb	b16,jp
+audio/503000193.akb	b16,jp
+audio/503000195.akb	b16,jp
+audio/503000196.akb	b16,jp
+audio/503000201.akb	b16,jp
+audio/503000203.akb	b16,jp
+audio/503000205.akb	b16,jp
+audio/503000206.akb	b16,jp
+audio/503000215.akb	b16,jp
+audio/503000216.akb	b16,jp
+audio/503000221.akb	b16,jp
+audio/503000223.akb	b16,jp
+audio/503000225.akb	b16,jp
+audio/503000226.akb	b16,jp
+audio/503000233.akb	b16,jp
+audio/503000235.akb	b16,jp
+audio/503000236.akb	b16,jp
+audio/503000245.akb	b16,jp
+audio/503000246.akb	b16,jp
+audio/503000251.akb	b16,jp
+audio/503000253.akb	b16,jp
+audio/503000255.akb	b16,jp
+audio/503000256.akb	b16,jp
+audio/503000263.akb	b16,jp
+audio/503000265.akb	b16,jp
+audio/503000266.akb	b16,jp
+audio/503000273.akb	b16,jp
+audio/503000275.akb	b16,jp
+audio/503000276.akb	b16,jp
+audio/503000285.akb	b16,jp
+audio/503000286.akb	b16,jp
+audio/503000291.akb	b16,jp
+audio/503000293.akb	b16,jp
+audio/503000295.akb	b16,jp
+audio/503000296.akb	b16,jp
+audio/503000301.akb	b16,jp
+audio/503000303.akb	b16,jp
+audio/503000305.akb	b16,jp
+audio/503000306.akb	b16,jp
+audio/503000315.akb	b16,jp
+audio/503000316.akb	b16,jp
+audio/503000321.akb	b16,jp
+audio/503000323.akb	b16,jp
+audio/503000325.akb	b16,jp
+audio/503000326.akb	b16,jp
+audio/503000333.akb	b16,jp
+audio/503000335.akb	b16,jp
+audio/503000336.akb	b16,jp
+audio/503000345.akb	b16,jp
+audio/503000346.akb	b16,jp
+audio/503000353.akb	b16,jp
+audio/503000355.akb	b16,jp
+audio/503000356.akb	b16,jp
+audio/503000361.akb	b16,jp
+audio/503000363.akb	b16,jp
+audio/503000366.akb	b16,jp
+audio/503000375.akb	b16,jp
+audio/503000376.akb	b16,jp
+audio/503000383.akb	b16,jp
+audio/503000385.akb	b16,jp
+audio/503000386.akb	b16,jp
+audio/503000393.akb	b16,jp
+audio/503000395.akb	b16,jp
+audio/503000396.akb	b16,jp
+audio/503000405.akb	b16,jp
+audio/503000406.akb	b16,jp
+audio/503000411.akb	b16,jp
+audio/503000416.akb	b16,jp
+audio/503000426.akb	b16,jp
+audio/503000433.akb	b16,jp
+audio/503000436.akb	b16,jp
+audio/503000446.akb	b16,jp
+audio/503000451.akb	b16,jp
+audio/503000453.akb	b16,jp
+audio/503000455.akb	b16,jp
+audio/503000456.akb	b16,jp
+audio/503000465.akb	b16,jp
+audio/503000466.akb	b16,jp
+audio/503000476.akb	b16,jp
+audio/503000485.akb	b16,jp
+audio/503000486.akb	b16,jp
+audio/503000491.akb	b16,jp
+audio/503000495.akb	b16,jp
+audio/503000496.akb	b16,jp
+audio/503000505.akb	b16,jp
+audio/503000506.akb	b16,jp
+audio/503000513.akb	b16,jp
+audio/503000515.akb	b16,jp
+audio/503000516.akb	b16,jp
+audio/503000535.akb	b16,jp
+audio/503000536.akb	b16,jp
+audio/503000545.akb	b16,jp
+audio/503000546.akb	b16,jp
+audio/503000555.akb	b16,jp
+audio/503000556.akb	b16,jp
+audio/503000563.akb	b16,jp
+audio/503000565.akb	b16,jp
+audio/503000566.akb	b16,jp
+audio/503000575.akb	b16,jp
+audio/503000576.akb	b16,jp
+audio/503000586.akb	b16,jp
+audio/503000595.akb	b16,jp
+audio/503000596.akb	b16,jp
+audio/503000601.akb	b16,jp
+audio/503000606.akb	b16,jp
+audio/503000613.akb	b16,jp
+audio/503000615.akb	b16,jp
+audio/503000616.akb	b16,jp
+audio/503000625.akb	b16,jp
+audio/503000626.akb	b16,jp
+audio/503000633.akb	b16,jp
+audio/503000635.akb	b16,jp
+audio/503000636.akb	b16,jp
+audio/503000645.akb	b16,jp
+audio/503000646.akb	b16,jp
+audio/503000745.akb	b16,jp
+audio/503000746.akb	b16,jp
+audio/503000765.akb	b16,jp
+audio/503000766.akb	b16,jp
+audio/503000775.akb	b16,jp
+audio/503000776.akb	b16,jp
+audio/503000805.akb	b16,jp
+audio/503000806.akb	b16,jp
+audio/503000815.akb	b16,jp
+audio/503000816.akb	b16,jp
+audio/503000835.akb	b16,jp
+audio/503000836.akb	b16,jp
+audio/503000846.akb	b16,jp
+audio/503000855.akb	b16,jp
+audio/503000856.akb	b16,jp
+audio/503000925.akb	b16,jp
+audio/503000926.akb	b16,jp
+audio/503000955.akb	b16,jp
+audio/503000956.akb	b16,jp
+audio/503000966.akb	b16,jp
+audio/503000986.akb	b16,jp
+audio/503001035.akb	b16,jp
+audio/503001036.akb	b16,jp
+audio/503001085.akb	b16,jp
+audio/503001086.akb	b16,jp
+audio/503001138.akb	b16,jp
+audio/503001155.akb	b16,jp
+audio/503001156.akb	b16,jp
+audio/503001226.akb	b16,jp
+audio/503001227.akb	b16,jp
+
+# 37. Avviso «Coerce» dei nemici (I-183, smoke 21-10: 1160, 11170, 15050, 15340 crashavano all'avvio, GUIReader in
+# con cocostudio/publish/ActionMapCoerceEnmAnim.ExportJson assente; armature Coerce_Alert/Coerce_EF01)
+cocostudio/publish/ActionMapCoerceEnmAnim.ExportJson	b16,jp
+cocostudio/publish/ActionMapCoerceEnmAnim0.plist	b16,jp
+cocostudio/publish/ActionMapCoerceEnmAnim0.png	b16,jp
+
+# 38. Pioggia delle stanze (I-184, smoke 21-10: 2140 e 10400 dei Dwarf Woodlands crashavano dopo il filmato):
+# caso 1 apre lwf/map/hole_rain/hole_rain.lwf e non controlla il NULL. Completa nel 2016.
+#     hole_thunder (caso 4): nel JP solo la LWF, texture assenti ovunque: non servita finche' una stanza non la chiede.
+lwf/map/hole_rain/	b16,jp
+
+# 39. Musiche delle missioni non servite (I-188, utente 21-10: quest 493 senza musica di battaglia): 501005002 battaglia del
+#     Corridor of Darkness (491-500), 501000630 musica dei capi (bgmBoss) di 426-487
+audio/501005002.akb	b16,jp
+audio/501000630.akb	b16
+
+# 40. Transizioni fra le parti delle missioni nei mondi di Ralph (I-009, D-C): righe world 11-14 NL/HD/CS/SR
+#     (server/make-story-oltre.js) -> img/wipe/wipe_<worldId>.png (worldId dal prefisso della stanza):
+#     martello 11 Niceland, Cy-Bug 12 Hero's Duty, stella 13 Game Central Station, coppa 14 Sugar Rush. Solo nel JP
+img/wipe/wipe_1[1-4].png	jp
+
+# 41. Trofei di Bad Guy Breaker (I-009, 21-10: righe material 61-63 di server/make-trophy-materials.js, premi del terzo
+#     obiettivo di 880-915): material_61 coppa in pixel art Niceland, _62 Cy-Bug Sector, _63 Candy Kingdom. Solo nel JP
+#     (gia' coperte dal glob della sezione 3: righe esplicite perche' un originale che sparisce non passi in silenzio)
+img/material/material_61.png	jp
+img/material/material_62.png	jp
+img/material/material_63.png	jp

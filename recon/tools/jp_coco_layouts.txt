@@ -1,0 +1,245 @@
+# Layout originali dai dati JP 4.3.1 (cartella di riferimento locale) al posto dei nostri generati: import_jp_coco.py
+# (lanciato da build-resources.ps1 dopo make_layouts/make_textures). I-117,
+# docs/notes/risorse_layout.md#jp-originali.
+#
+# Una riga = un layout radice (con la sua chiusura: sotto-layout delle scene, texture).
+# Togliere (o commentare) una riga = al build successivo torna il layout generato.
+# Opzioni dopo il nome:
+#   rev=N        revisione JP fissata (0 = file senza suffisso; predefinita: entry id piu' alto)
+#   need=a,b     widget che il codice cerca senza controllo: se l'originale non li ha, la radice si ferma
+#   +absent-ok   texture assenti ovunque tollerate (mai con il 9-slice: quello ferma sempre)
+#   graft=a,b    solo per un layout WW servito: innesta i widget a, b della revisione JP (rev=) sotto lo
+#                stesso genitore, il resto resta WW (eccezione alla regola dei nomi serviti)
+# «? Nome  # motivo» = da decidere: non si importa, compare solo nel rapporto.
+#
+# Controllo fatto il 13-10-2026 (jp_coco_widgets.py sul decompilato attorno ai caricatori,
+# widget_lookup.py; commenti di make_layouts.py; classi dei widget): per le righe attive
+# l'originale ha i widget che il codice cerca, o il codice li controlla (null) prima di usarli.
+
+# --- Presents (I-035, I-096) ---
+PresentBOXScene.json
+PresentBOX_Base_ver400.json
+# la revisione 00265720 locale e' un pannello di icone (33 widget, nessuno di quelli cercati
+#/): si usa la prima, con i nomi del codice
+PresentBOX_Panel_ver131.json            rev=0 need=Panel_Present,Txt_Gift_Name_Label,Txt_Storage_Date_Label,Button,Txt_Receive
+PresentBOX_IconPanel_ver131.json        need=LuxBoard,AVT,Incentive,Medal,KB,Stamp
+
+# --- Medal List, vendita, Level Up, Evolve, Sort ---
+# finestra «Choose a trait to replace» dei trait in sospeso (I-084 A, azione 57; assente dalle risorse WW): widget
+# cercati dal decompilato (tmp/trait/re/skillchange.c); i testi li scrive il client
+MedalInfo_SkillChangeWindow.json        need=Button_OK,Button_NO,SkillPanel,kakusei_Icon,Txt_KakuseiSkill,Txt_KakuseiSkill_Taitl,Txt_SkillTitle,Txt_Skill_Num,KakuseiSkill_Window
+MedalListScene_ver130.json
+MedalSellScene_ver350.json
+PopupNormal_MedalSell_Check_ver350.json need=Alert_Area
+PopupNormal_MedalSell_Ok_ver350.json
+PopupNormal_MedalMix_RareCaution.json   need=Alert_Area,Txt_Wording3
+PopupNormal_MedalMix_RareCaution_Panel.json
+# Camp_Balloon3 (fumetto della campagna) ha giapponese disegnato: non importata, fumetto vuoto
+PopupNormal_Guilt_ver130.json           +absent-ok
+MedalInfo_MaxEnhanced_ver340.json
+MedalEvoScene_ver320.json
+MedalInfo_Evo_Medal.json                need=Medal_S,Possession,Label_9,Num_Label
+# Messaggio del popup del Nova (Unlocked/Maxed out; sp. 2b task 8): usa solo Panel03.png, gia' servita
+MedalInfo_Burst_Info.json
+# WW servito con i testi giapponesi: torna l'originale WW, Panel07 (9-slice, I-049) arriva da JP
+MedalInfo_ReleaseWindow.json
+PopupNormal_SortButton_ver350.json
+SlideMedalInfoScene_ver341.json
+PopupNormal_MedalOver.json
+PopupNormal_Cost_Over.json
+DeckEdit_Cost_Over_ver131.json
+
+# --- Subslot (I-066, I-101) ---
+DeckEditSubSlotScene_ver340.json
+DeckEdit_SubSlot_Set_Medal_ver340.json
+DeckEdit_SubSlot_Select_Medal_ver310.json
+DeckEdit_Subslot_Caution_ver260.json
+DeckEdit_SubSlotMedal_ver260.json       need=Medale,MedalBase,Slot,SlotNum,InfoPanel,TYpe,Icon_Type,Icon_Type_1,Medal_S,Txt_Mag_Label,Guilt_Icon,Cursor
+DeckEdit_SubSlot_MedalInfo_ver260.json
+
+# --- Moogle Shop e Sell Materials (I-021, I-102, I-103) ---
+MoogleShopScene_ver410.json
+MoogleShop_Traits_Panel_ver410.json     need=Count,Count_Rare,SkillPanel,SkillPanel_Rare,Panel,Panel_Rare
+? MoogleShop_Item_Panel.json  # l'unica revisione JP non ha i widget del client WW (ImageButton_Buy1, ImageButton_LockMask, Row_Base, Name_Plate): crash 0x2c all'apertura del Moogle Shop (banco 13-10, r34)
+MoogleShop_IconPanel.json               need=LuxBoard,AVT,Incentive,Medal,KB,Stamp
+MoogleShop_Traits_MedalSelect_Pop_ver410.json
+MoogleShop_Traits_AddCheck.json
+MoogleShop_Traits_OverwriteCheck_ver410.json
+EquipSellScene.json
+EquipSell_Block.json                    need=EquipSellBlock,MaterialSellIcon,Txt_Material_Name,Panel_On,PanelMask
+EquipSell_Dialog_Step1.json
+EquipSell_Dialog_Step2.json
+EquipSell_Medal_Step1_ver131.json
+
+# --- Avatar Boards ---
+SphereBoardScene_ver310.json
+# LB_Charge assente anche in JP (non 9-slice): targhetta invisibile, come nel nostro
+SphereBoard_Select_Icon_ver130.json     +absent-ok
+SphereScene_ver310.json
+Sphere_Incentive.json                   need=Get,Txt_Incentive_Label,Txt_Price_Label
+Sphere_Incentive_ver240.json
+PopupNormal_SphereCoinCheck_ver310.json
+
+# --- Profilo, home, missioni, Other ---
+AvatarInfoScene_A_ver131.json
+AvatarInfo_Oneself_ver131.json
+AvatarInfo_User_ver260.json
+AvatarInfo_Txt2.json
+AvatarInfo_Comment_ver132.json
+AvatarInfo_Comment_U13_ver132.json
+AvatarInfo_PlayStyle.json
+AvatarTitle_Base.json
+# Boosters del Profilo (I-123): assenti da ogni risorsa WW, crash dopo PUT /emblem/list.
+# (Emblem_Base: Close_Button, Scroll_Area, Txt_None 106120213), cella
+# (Emblem_Panel, caricato sempre all'init della lista)
+Emblem_Base.json                        need=Close_Button,Scroll_Area,Txt_None
+Emblem_Panel.json                       need=Emblem_Base,Panel_Emblem,Txt_Emblem_Name_Label,Area_Ticker_Emblem_Name,mask,Txt_Emblem_Detail_Label,Txt_Storage_Date_Label,Txt_Storage_Date_Title
+TresCommu_CommunicationUser.json
+TresCommu_CommunicationOther.json
+# nuvoletta di Chirithy: il JP chiede Cinema_Calligraphy_Web.ttf (assente: il «!» usciva come «/», banco 16-10);
+# font delle nuvolette WW (MyPage_AvatarBaloon_ver240 servito)
+MyPage_ChirishiBaloon.json  set=Txt_Name.fontName=DFPSoGei-W5.TTF
+MyPageMission_Base_ver320.json
+MyPageMission_Panel.json                need=Panel_Present,Gauge_Base,Gauge,Button_Challenge,Button_Receive
+MenuDialog_ver300.json
+
+# --- Pet (I-082) ---
+PetInfoScene_ver320.json
+PetInfo_PetSkill_Panel_ver230.json      need=PetSkill_Panel,Txt_PetSkill,Icon_New
+PetInfo_Rename_ver230.json
+PetInfo_TrainingEdit_ver320.json        need=MedalArea,Win_under
+PetInfo_TrainingProduction.json         need=1Pet,2Pet,3Pet,4Pet
+PetInfo_TrainingRestartPop_ver320.json
+PetEditScene_ver230.json
+PetEdit_Panel_ver230.json
+PetEdit_Check2_ver230.json
+
+# --- Risultati e popup di battaglia ---
+BattleResult_KB.json
+BattleResult_LB_ver120.json
+BattleResult_Skill_ver130.json          need=Txt_GetItem_Label
+PopupNormal_Continue.json
+PopupNormal_AP_Recovery.json
+PopupNormal_Ability_MAX.json
+AdventureTop2_EV_Banner_ver220.json     need=Image_3
+
+# --- Da decidere (restano i generati) ---
+? MedalInfo_Information_R1.json         # WW servito senza Panel_MixResult_Area/Tap_Screen_Area (crash dopo Evolve); JP non ha Tap_Screen_Area
+? PetInfo_TrainingSlotCheck_ver320.json # l'originale non ha Win_under, che il client usa senza controllo
+? Sphere_Popup_Get_ver240.json          # l'originale JP non ha Button_Ok/Txt_Ok, che il client usa senza controllo (crash al nodo sbloccato)
+? Sphere_Popup_Comp_ver310.json         # SphereMap_Complete assente ovunque; cornice diversa dal riferimento WW (ab_ref_title_popup_01)
+? PvP_SelectWindow.json                 # QuestBut6_Title/QuestBut7_Title con giapponese disegnato («VS エネミー»): da ridisegnare
+? AdventureTop2_EV_Button.json          # World_Ico7A/7B assenti ovunque: pulsante senza icona (il nostro usa World_Ico10)
+? AdventureTop2_Colosseum_Button.json   # World_Ico8A/8B assenti ovunque: pulsante senza icona
+? AdventureTop2_Colosseum_Panel.json    # le celle cercano Avatar/Story/SubClear* assenti nell'originale; Colosseo non provabile offline
+? AdventureTop2_Raid_Button.json        # Button_Last_Member cercato dal client e assente nell'originale; Raid non provabile offline
+
+# --- Other e Shop: crash senza richieste al server (I-107, I-109, I-100; 14-10) ---
+# Transfer Unions: carica Information2_TakeoverCheck senza controllo
+Information2_TakeoverCheck.json
+# Legal Information:
+Legal.json
+# Increase Storage: popup del limite delle medaglie e conferma
+# set=: i testi WW (Current capacity: N / (Max: 3000 slots)) sono piu' lunghi dei JP e le due
+# etichette (310 e 230 di area, 240..550 e 489..719) si sovrapponevano (banco 14-10): spostate ai lati, font 24
+PopupNormal_MedalPossessed1_ver350.json  set=Txt_UpperLimit1.x=-310,Txt_UpperLimit1.width=330,Txt_UpperLimit1.areaWidth=330,Txt_UpperLimit1.fontSize=24,Txt_UpperLimit2.x=310,Txt_UpperLimit2.width=280,Txt_UpperLimit2.areaWidth=280,Txt_UpperLimit2.fontSize=24
+PopupNormal_MedalPossessed2.json
+
+# --- Party e classifiche (I-006, I-106, I-113, I-114; 14-10) ---
+# PartyTopScene_ver131 assente da ogni risorsa WW: GUIReader null, SIGSEGV a 0x170 aprendo
+# Party / Party Search (dopo POST /party/login). Classifiche: Ranking_MainPanel_ver230,
+# RankingPartyScene_ver1301 e le altre scene/pannelli che il client WW cita. Controllo
+# import_jp_coco.py --check: tutte ok tranne 4 con texture assenti ovunque (sotto, da decidere).
+PartyTopScene.json
+PartyTopScene_ver131.json
+PartyTop_AlertRequest_ver120.json
+PartyTop_Edit.json
+PartyTop_InfoRequest_ver120.json
+PartyTop_InfoRequest_ver131.json
+PartyTop_Initial.json
+PartyTop_InitialManagement_Scene_ver210.json
+PartyTop_InitialPanel.json
+PartyTop_InitialRequest_Scene_ver130.json
+PartyTop_Invitation_Scene_ver130.json
+PartyTop_Join.json
+PartyTop_JoinPanel.json
+PartyTop_MemberCheck_Scene_ver130.json
+PartyTop_MemberList_ver240.json
+PartyTop_info.json
+PartyTop_right1_ver131.json
+PartyTop_right2_ver131.json
+PartyTop_right3_ver131.json
+PartyTop_right4_ver131.json
+# Manage del party (15-10): PartyTop_JoinManagement_Scene_ver150 (servita) cita publish/PartyTop_JoinManagement_Right.json,
+# assente nel WW: GUIReader su documento vuoto, strlen(NULL) cercando useMergedTexture
+PartyTop_JoinManagement_Right.json
+PopupNormal_PartySearch_Approvalmethod.json
+PopupNormal_PartySearch_Level_ver230.json
+PopupNormal_PartySearch_Lux.json
+PopupNormal_PartySearch_Membernumber.json
+PopupNormal_PartySearch_PartyRank.json
+PopupNormal_PartySearch_Style.json
+PopupNormal_PartySearch_Timezone.json
+PopupNormal_Party_General.json
+PopupNormal_Party_IDSearch.json
+PopupNormal_Party_Jewel.json
+PopupNormal_Party_JoinNew.json
+PopupNormal_Party_JoinRequest.json
+RankingColosseumScene_ver1301.json
+RankingHiScoreScene.json
+RankingPartyScene_ver1301.json
+RankingPvPScene.json
+Ranking_Balloon_ver140.json
+Ranking_IconPanel_ver131.json
+Ranking_MainPanel_ver230.json
+Ranking_PartyPanel.json
+Ranking_RewardPanel.json
+Ranking_RewardPanel2_ver130.json
+Ranking_TacticalPanel_ver260.json
+Ranking_preparation.json
+TresLSI_RankingPanel.json
+TresLSI_RankingScene_ver310.json
+Ranking_Result.json                     +absent-ok  # Rank_Result_Deco (1x1) e Rank_Title_3 dal 2016 (originals.tsv, I-170)
+Ranking_Result_PvP.json                 +absent-ok  # Rank_Result_Deco (1x1) dal 2016 (originals.tsv, I-170)
+Ranking_Reward_ver1301.json             +absent-ok  # Rank_Title_3 dal 2016 (originals.tsv, I-170)
+RankingRewardScene_ver1301.json         +absent-ok  # Rank_Title_3 dal 2016 (originals.tsv, I-170; img/ranking/Rank_Title_%d.png)
+
+# --- Other: Notices e Album (I-104, I-105; 14-10) ---
+# delle notizie (se il flag dark e' spento): uguale al WW 4.4.0
+Information2_Base.json
+# Album: scena, sfide e cella
+# . La cella WW cerca Txt_Medal_Label («?» sulle medaglie non possedute) senza controllo
+# e il layout JP non l'ha: clone=Origine>Nuovo[@Rif] copia un widget (alla posizione di Rif)
+AlbumScene_ver130.json
+Album_Medal_ver140.json                 clone=Txt_Medal_Num_Label>Txt_Medal_Label@Medal_S
+Album_Challenge_ver112.json
+Album_Challenge_Panel_ver112.json
+Album_Reward_Set_ver112.json
+Album_Challenge_Receive_ver112.json
+# Transfer Unions (I-107, banco 14-10): Other -> il client
+# carica Union_Popup2.json (cambio di Union, non trasferimento dell account), assente: crash. L originale ha Button_Close/OK, Txt_Wording1/2, Txt_10Line_Label_0_1
+Union_Popup2.json
+# Filter della lista della storia (15-10, segnalazione dell'utente): AdventureTop2_FilterButton_ver106 servito, il popup
+# AdventureTop2_Filter_ver106 no (GUIReader su documento vuoto, crash al tocco di Filter)
+AdventureTop2_Filter_ver106.json
+# Segnalino «Medal STR/DEF +N» sotto gli HP (BaseBuff, I-155, docs/notes/battaglia.md#basebuff):
+# carica ActionMap_BaseBuff_Avt/_Enm e _eff (assenti dalle risorse WW) solo se esistono li aggancia
+# ai nodi BaseBuff_Avt_Null1/2 dell'HUD (controlla il null). I due nodi ci sono solo nella revisione JP 00360289
+# del layout dell'HUD: il resto e' uguale al WW, quindi si innestano nel WW servito (122,20 e 96,-6 sotto Panel_8)
+ActionMap_BaseBuff_Avt.json
+ActionMap_BaseBuff_Enm.json
+ActionMap_BaseBuff_eff.json
+ActionMap_PlayerStatusField_new.json    rev=360289 graft=BaseBuff_Avt_Null1,BaseBuff_Avt_Null2
+# Lato nemico: cerca BaseBuff_Enm1/2 nella barra del nemico. Il WW li ha solo in
+# RaidBattle_EnemyStatusField_S e _S_Raid; nelle revisioni JP ci sono anche in _L, _L_Multi e _S_Boss
+RaidBattle_EnemyStatusField_L.json         rev=438800 graft=BaseBuff_Enm1,BaseBuff_Enm2
+RaidBattle_EnemyStatusField_L_Multi.json   rev=376985 graft=BaseBuff_Enm1,BaseBuff_Enm2
+RaidBattle_EnemyStatusField_S_Boss.json    rev=376981 graft=BaseBuff_Enm1,BaseBuff_Enm2
+# pannello del tempo delle missioni a tempo: il client lo carica nelle 699-704 (Hidden Staircase), assente -> crash in GUIReader (banco 22-10)
+ActMapTimeAttack_TimePanel.json
+# Proud Mode (I-200, docs/notes/mappe_storia.md#proud-mode): popup di partenza StartDeckProudScene_ver260,
+# servita dal WW senza i suoi sotto-layout StartDeckProud_Base/Button_Skip/Button_Start/Rules_ver131 e
+# AdventureTop2_Proud_RaidInfo_Start (anche), ne' le texture rosse Win01_pm, Panel03_pm (9-slice, anche
+# StartDeckProud_Panel_KB(_Ad)_ver230), Panel04_pm, Plate11_pm, Plate18_pm, Deck_Panel_StartDeck_pm (9-slice,
+# crash 0x2c), PMode_Rule_Logo, PMode_Rule_Panel_A, Charge_CloseBut_Off/On; cursore Cursor_Anim_Proud con JP_ARM
+StartDeckProudScene_ver260.json

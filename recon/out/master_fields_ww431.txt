@@ -1,0 +1,1953 @@
+== Achievement (6 campi)
+   titleId
+   os
+   achievementId
+   category
+   targetId
+   num
+
+== Advertisement (14 campi)
+   advertisementId
+   display
+   appearLimit
+   initialPosition
+   type
+   id
+   assignSkillType
+   assignSkillId
+   assignSkillLv
+   burstUpperNumber
+   num
+   odds
+   startDatetime
+   endDatetime
+
+== AvatarParts (14 campi)
+   avatarPartsId
+   name
+   partsType
+   gender
+   combinationType
+   combinationFlag
+   position
+   luxCategory
+   luxAddRate
+   setKind
+   fixedFlag
+   validSetCloth
+   setCloth
+   status
+
+== Badstatus (6 campi)
+   badstatusId
+   name
+   iconId
+   effect
+   target
+   power
+
+== Base (0 campi)
+
+== BattleMisc (2 campi)
+   battleMiscId
+   value
+
+== BenefitResource (4 campi)
+   fileId
+   fileName
+   startTime
+   endTime
+
+== Buff (6 campi)
+   buffId
+   grade
+   name
+   iconId
+   effect
+   addPower
+
+== Burst (135 campi)
+   burstId
+   motionId
+   effectId
+   distance
+   effectDirectionFix
+   name
+   description
+   maxEnhanceCount
+   attribute
+   attributeChange
+   imitation
+   target
+   hitCount
+   gauge
+   penetrate
+   critical
+   criticalPower
+   displayPower
+   displayPowerPerEnforce
+   displayMaxPower
+   displayMaxPowerPerEnforce
+   basePower
+   basePowerPerEnforce
+   damageType
+   specialPowerType
+   sp1
+   sp2
+   sp1PerEnforce
+   sp2PerEnforce
+   addTurn
+   addCount
+   bufAttack
+   debufAttack
+   debufAttackAll
+   bufDefense
+   debufDefense
+   debufDefenseAll
+   bufAttackPower
+   debufAttackPower
+   debufAttackPowerAll
+   bufDefensePower
+   debufDefensePower
+   debufDefensePowerAll
+   bufAttackSpeed
+   debufAttackSpeed
+   debufAttackSpeedAll
+   bufDefenseSpeed
+   debufDefenseSpeed
+   debufDefenseSpeedAll
+   bufAttackMagic
+   debufAttackMagic
+   debufAttackMagicAll
+   bufDefenseMagic
+   debufDefenseMagic
+   debufDefenseMagicAll
+   bufAttackUpright
+   debufAttackUpright
+   debufAttackUprightAll
+   bufDefenseUpright
+   debufDefenseUpright
+   debufDefenseUprightAll
+   bufAttackReverse
+   debufAttackReverse
+   debufAttackReverseAll
+   bufDefenseReverse
+   debufDefenseReverse
+   debufDefenseReverseAll
+   resetBufAtttack
+   resetDebufAttack
+   resetDebufAttackAll
+   resetBufDefense
+   resetDebufDefense
+   resetDebufDefenseAll
+   resetBufAtttackPower
+   resetDebufAttackPower
+   resetDebufAttackPowerAll
+   resetBufDefensePower
+   resetDebufDefensePower
+   resetDebufDefensePowerAll
+   resetBufAtttackSpeed
+   resetDebufAttackSpeed
+   resetDebufAttackSpeedAll
+   resetBufDefenseSpeed
+   resetDebufDefenseSpeed
+   resetDebufDefenseSpeedAll
+   resetBufAtttackMagic
+   resetDebufAttackMagic
+   resetDebufAttackMagicAll
+   resetBufDefenseMagic
+   resetDebufDefenseMagic
+   resetDebufDefenseMagicAll
+   resetBufAtttackUpright
+   resetDebufAttackUpright
+   resetDebufAttackUprightAll
+   resetBufDefenseUpright
+   resetDebufDefenseUpright
+   resetDebufDefenseUprightAll
+   resetBufAtttackReverse
+   resetDebufAttackReverse
+   resetDebufAttackReverseAll
+   resetBufDefenseReverse
+   resetDebufDefenseReverse
+   resetDebufDefenseReverseAll
+   copyBufBase
+   copyBufAttribute
+   heal
+   healShake
+   curePoison
+   cureSleep
+   cureDeepPoison
+   cureParalysis
+   recovery
+   oprUrgencyId
+   oprUrgencyValue
+   addGuiltBonusId
+   addGuiltBonusCount
+   addGuiltBonusValue
+   superburstTiming
+   recurringAttribute
+   reflectionTurn
+   reflectionAttribute
+   reflectionMagnification
+   reflectionResetAttribute
+   addBaseCountType
+   addBaseCountValue
+   addBaseAtkSelf
+   addBaseDefSelf
+   addBaseAtkOpponent
+   addBaseDefOpponent
+   resetBase
+   addBaseAttribute
+   matchCountType
+   matchCountValue
+   matchMagnification
+   unmatchMagnification
+
+== Colosseum (21 campi)
+   colosseumId
+   colosseumStageId
+   round
+   ap
+   arrivalStageCount
+   rankId
+   excellentUnlockCount
+   validStageReward
+   stageRewardType
+   stageRewardId
+   stageRewardAssignType
+   stageRewardSkillId
+   stageRewardSkillLv
+   stageRewardNum
+   validReward
+   rewardType
+   rewardId
+   rewardAssignType
+   rewardSkillId
+   rewardSkillLv
+   rewardNum
+
+== ColosseumStage (11 campi)
+   colosseumStageId
+   openDate
+   closeDate
+   rankingCloseDate
+   headColosseumId
+   termColosseumId
+   rankingId
+   validStage
+   stageId
+   loopStageCount
+   lvPerLoop
+
+== Comeback (18 campi)
+   comebackId
+   title
+   description
+   comment
+   day
+   require
+   stageStartId
+   stageEndId
+   comebackMissionNum
+   startDate
+   endDate
+   rewardType
+   itemId
+   skillType
+   skillId
+   skillLv
+   burstUpperNumber
+   itemNum
+
+== CommunicationBgm (4 campi)
+   bgmId
+   sortId
+   name
+   bgm
+
+== CommunicationCategory (6 campi)
+   categoryId
+   sortId
+   bannerUrl
+   startTime
+   endTime
+   status
+
+== CommunicationRoom (21 campi)
+   id
+   backgroundId
+   sortId
+   validChild
+   startTime
+   endTime
+   viewType
+   validParts
+   partsId
+   dataType
+   xPostion
+   yPostion
+   zSort
+   bgmId
+   ballonScale
+   minMember
+   maxMember
+   validAvatar
+   avatarXPosition
+   avatarYPosition
+   avatarDirection
+
+== CommunicationTalk (5 campi)
+   talkId
+   sortId
+   display
+   talk
+   voice
+
+== CommunicationThumbnail (3 campi)
+   thumbnailId
+   sortId
+   image
+
+== DarkAbility (17 campi)
+   abilityId
+   motionId
+   effectId
+   distance
+   effectDirectionFix
+   name
+   name2lines
+   description
+   attribute
+   damageType
+   power
+   powerConvexStage
+   bonusFeverpoint
+   selfStatusId
+   selfStatusNumber
+   opponentStatusId
+   opponentStatusNumber
+
+== DarkBattleMisc (2 campi)
+   battleMiscId
+   value
+
+== DarkBook (9 campi)
+   bookId
+   category
+   targetId
+   sortId
+   validRank
+   rankNum
+   rewardType
+   rewardId
+   rewardNum
+
+== DarkBossStage (34 campi)
+   openId
+   battleNumber
+   scenarioType
+   bossStageId
+   validEnemyId
+   enemyListCount
+   enemyListId
+   enemyListType
+   enemyBackgroundId
+   enemyBackgroundType
+   enemyBackgroundSwitch
+   bgmBattle
+   validBossId
+   bossId
+   victoryConditions
+   victoryValue
+   bossBackgroundId
+   victoryPose
+   victorySe
+   bgmBoss
+   disableContinue
+   mainPartner
+   subPartner1
+   subPartner2
+   subPartner3
+   subPartner4
+   partnerDisplay
+   validBeforeDrama
+   beforeDramaId
+   beforeDramaType
+   validAfterDrama
+   afterDramaId
+   afterDramaType
+   bgmPartner
+
+== DarkBuff (5 campi)
+   buffId
+   grade
+   name
+   effect
+   addPower
+
+== DarkCard (12 campi)
+   cardId
+   imageCardId
+   sortId
+   flavor
+   exchangeSp
+   exchangeBp
+   attributeCategory
+   cardTypeId
+   name
+   abilityId
+   validSubability
+   subabilityId
+
+== DarkDrawCardType (28 campi)
+   drawCardTypeId
+   sortId
+   name
+   benefitId
+   parentId
+   payType
+   price
+   validFluctuationPrice
+   fluctuationPrice
+   validLot
+   lotName
+   lotCount
+   tableIds
+   bannerUrl
+   detailUrl
+   dayCount
+   warrantNumberOfTime
+   warrantDisplayOfTime
+   validComment
+   comment
+   warrantCounterId
+   warrantTableIds
+   warrantCardListIds
+   warrantCardRepeat
+   warrantResetCardListIds
+   displayTimeLeft
+   startDate
+   endDate
+
+== DarkEnemy (31 campi)
+   enemyId
+   enemyDisplayId
+   deadType
+   level
+   attackInterval
+   hp
+   attack
+   defense
+   matk
+   mdef
+   dropBp
+   unrestricted
+   dropHp
+   resistFire
+   resistWater
+   resistLightning
+   resistWind
+   resistHoly
+   resistDarkness
+   resistNoAttribute
+   registPoison
+   registSleep
+   registParalysis
+   registDarkness
+   registConfus
+   validSkill
+   skillId
+   skillRequire
+   skillRequireArg
+   skillReference
+   skillOdds
+
+== DarkEnemyAbility (13 campi)
+   enemyAbilityId
+   enemyMotionId
+   enemyEffectId
+   effectDirectionFix
+   name
+   description
+   attribute
+   damageType
+   power
+   selfStatusId
+   selfStatusNumber
+   opponentStatusId
+   opponentStatusNumber
+
+== DarkEnemyDisplay (20 campi)
+   enemyDisplayId
+   name
+   flavor
+   kind
+   showType
+   showSwf
+   showFrame
+   hideFrame
+   spBattle
+   battleOffsetX
+   battleOffsetY
+   cameraY
+   distanceAway
+   bookListX
+   bookListY
+   bookListHeight
+   bookDetailX
+   bookDetailY
+   bookDetailHeight
+   displayHeight
+
+== DarkEvResource (5 campi)
+   resourceId
+   priority
+   validResource
+   dlKind
+   endTime
+
+== DarkEvStage (28 campi)
+   evStageId
+   sortId
+   partner
+   validEnemyId
+   enemyListCount
+   enemyListId
+   enemyListType
+   enemyBackgroundId
+   enemyBackgroundType
+   enemyBackgroundSwitch
+   bgmBattle
+   validBossId
+   bossId
+   victoryConditions
+   victoryValue
+   bossBackgroundId
+   victoryPose
+   victorySe
+   bgmBoss
+   disableContinue
+   payType
+   freeCount
+   payCount
+   resetCount
+   bannerUrl
+   detailUrl
+   startDate
+   endDate
+
+== DarkInitItem (6 campi)
+   id
+   category
+   equipType
+   equipNo
+   param
+   itemId
+
+== DarkItemshop (13 campi)
+   itemshopId
+   sortId
+   itemType
+   itemId
+   itemNum
+   benefitId
+   payType
+   price
+   count
+   frameType
+   display
+   startDate
+   endDate
+
+== DarkMainMission (9 campi)
+   missionId
+   missionBoardName
+   conditionId
+   validTarget
+   targetType
+   targetValue1
+   targetValue2
+   targetValue3
+   targetNum
+
+== DarkMap (6 campi)
+   id
+   fileName
+   offsetX
+   offsetY
+   priority
+   nextId
+
+== DarkMapList (2 campi)
+   mapListId
+   mapId
+
+== DarkMaterial (13 campi)
+   materialId
+   type
+   imageId
+   validAttributeId
+   attributeId
+   sortId
+   name
+   description
+   rare
+   validEffect
+   effectType
+   attribute
+   effectNum
+
+== DarkMaterialRecipe (8 campi)
+   recipeId
+   materialId
+   sortId
+   type
+   needBp
+   validNeedMaterial
+   needMaterialId
+   needMaterialNum
+
+== DarkMisc (2 campi)
+   miscId
+   value
+
+== DarkMissionBoard (13 campi)
+   missionBoardId
+   missionBoardType
+   missionBoardName
+   flavor
+   benefitId
+   sortId
+   missionNum
+   listId
+   rewardType
+   rewardId
+   rewardNum
+   startDate
+   endDate
+
+== DarkMissionList (14 campi)
+   missionId
+   listId
+   sortId
+   missionListName
+   conditionId
+   validTarget
+   targetType
+   targetValue1
+   targetValue2
+   targetValue3
+   targetNum
+   rewardType
+   rewardId
+   rewardNum
+
+== DarkPlayer (12 campi)
+   lv
+   needBp
+   hp
+   attack
+   defense
+   magicAttack
+   magicDefense
+   friend1Id
+   friend2Id
+   friend3Id
+   friend4Id
+   friend5Id
+
+== DarkPlayerParts (9 campi)
+   id
+   hair
+   haircolor
+   face
+   costume
+   body
+   keybladeCategory
+   keybladeGrade
+   accessory
+
+== DarkPve (10 campi)
+   pveId
+   name
+   worldId
+   listId
+   startReward
+   endReward
+   startRankingReward
+   endRankingReward
+   startDatetime
+   endDatetime
+
+== DarkPveReward (6 campi)
+   pveRewardId
+   floor
+   validReward
+   rewardType
+   rewardId
+   rewardNum
+
+== DarkRankingReward (7 campi)
+   rankingRewardId
+   startRank
+   endRank
+   validReward
+   rewardType
+   rewardId
+   rewardNum
+
+== DarkStageDrama (4 campi)
+   id
+   validBeforeDrama
+   dramaId
+   dramaType
+
+== DarkStatus (8 campi)
+   statusId
+   statusType
+   name
+   value1
+   value2
+   value3
+   value4
+   value5
+
+== DarkWorldStage (12 campi)
+   worldStageId
+   name
+   worldId
+   difficulty
+   releaseNum
+   enemyListId
+   enemyBackgroundId
+   enemyBackgroundType
+   enemyBackgroundSwitch
+   bgmBattle
+   startDate
+   endDate
+
+== DrawMedalType (47 campi)
+   drawMedalTypeId
+   drawType
+   sortId
+   name
+   benefitId
+   payType
+   price
+   validFluctuationPrice
+   fluctuationPrice
+   tableId
+   validLot
+   lotName
+   lotCount
+   lotSsr
+   lotPsr
+   lotSr
+   lotPr
+   lotR
+   lotPn
+   lotN
+   tableIds
+   vipcoinNumber
+   limitedvipcoinNumber
+   validAdd
+   addType
+   addId
+   addSkillType
+   addSkillId
+   addSkillLv
+   addNum
+   bannerUrl
+   mypageBanner
+   detailUrl
+   dayCount
+   warrantNumberOfTime
+   warrantDisplayOfTime
+   validComment
+   comment
+   warrantCounterId
+   warrantTableIds
+   warrantMedalListIds
+   warrantMedalRepeat
+   warrantResetMedalListIds
+   displayTimeLeft
+   startDate
+   endDate
+   isDeleted
+
+== DrawPetType (24 campi)
+   drawPetTypeId
+   drawType
+   sortId
+   payType
+   price
+   lotName
+   lotCount
+   tableId
+   vipcoinNumber
+   limitedvipcoinNumber
+   lastoneValidAdd
+   lastoneAddType
+   lastoneAddId
+   lastoneAddSkillType
+   lastoneAddSkillId
+   lastoneAddSkillLv
+   lastoneAddNum
+   bannerUrl
+   mypageBanner
+   detailUrl
+   displayTimeLeft
+   startDate
+   endDate
+   isDeleted
+
+== Emblem (16 campi)
+   emblemId
+   imageId
+   sortId
+   name
+   description
+   category
+   attribute
+   source
+   keybladeCategory
+   slot1
+   slot2
+   slot3
+   slot4
+   slot5
+   upperParam
+   endTime
+
+== Enemy (74 campi)
+   enemyId
+   name
+   flavor
+   displayId
+   show
+   showSwf
+   showFrame
+   hideFrame
+   moveSpeed
+   hitRadius
+   tapRadius
+   width
+   height
+   spBattle
+   cameraY
+   distanceAway
+   kind
+   kind2
+   absorbAttribute
+   attribute
+   validGrowth
+   baseLv
+   hp
+   attack
+   defense
+   exp
+   money
+   raidPoint
+   lux
+   score
+   attackCp
+   suppressCp
+   attackHp
+   suppressHp
+   battlePattern
+   displayHeight
+   uiDisplayHeight
+   validUrgency
+   urgency
+   urgencyValue
+   urgencyFrequency
+   urgencySkillId
+   validSkill
+   skillId
+   skillRequire
+   skillRequireArg
+   skillOdds
+   protectPoison
+   protectDeepPoison
+   protectSleep
+   protectParalysis
+   registPoison
+   registDeepPoison
+   registSleep
+   registParalysis
+   bufAttack
+   bufDefense
+   bufAttackPower
+   bufDefensePower
+   bufAttackSpeed
+   bufDefenseSpeed
+   bufAttackMagic
+   bufDefenseMagic
+   bufAttackUpright
+   bufDefenseUpright
+   bufAttackReverse
+   bufDefenseReverse
+   bufTurn
+   bufCount
+   statusAilments
+   statusAilmentsTurn
+   statusAilmentsCount
+   titleOffsetX
+   titleOffsetY
+
+== EnemyAttack (61 campi)
+   enemyAttackId
+   name
+   attackMotion
+   hitEffect
+   effectDirectionFix
+   display
+   attackTarget
+   choiseAttribute
+   hitCount
+   power
+   critical
+   criticalPower
+   target
+   effect
+   addTarget
+   addTurn
+   addCount
+   bufAttack
+   bufDefense
+   bufAttackPower
+   bufDefensePower
+   bufAttackSpeed
+   bufDefenseSpeed
+   bufAttackMagic
+   bufDefenseMagic
+   bufAttackUpright
+   bufDefenseUpright
+   bufAttackReverse
+   bufDefenseReverse
+   resetAttack
+   resetDefense
+   resetAttackPower
+   resetDefensePower
+   resetAttackSpeed
+   resetDefenseSpeed
+   resetAttackMagic
+   resetDefenseMagic
+   resetAttackUpright
+   resetDefenseUpright
+   resetAttackReverse
+   resetDefenseReverse
+   heal
+   healShake
+   poison
+   deepPoison
+   sleep
+   paralysis
+   curePoison
+   cureSleep
+   cureParalysis
+   spEffect
+   reflectionTurn
+   reflectionAttribute
+   reflectionMagnification
+   reflectionResetAttribute
+   uplightPDefense
+   uplightSDefense
+   uplightMDefense
+   reversePDefense
+   reverseSDefense
+   reverseMDefense
+
+== EvCampaign (18 campi)
+   campaignId
+   type
+   power
+   displayText
+   stageType
+   validStageId
+   stageId
+   startTime
+   endTime
+   weekMonday
+   weekTuesday
+   weekWednesday
+   weekThursday
+   weekFriday
+   weekSaturday
+   weekSunday
+   groupPattern
+   validMinute
+
+== EvMedalList (6 campi)
+   evMedalListId
+   listId
+   medalId
+   rate
+   display
+   isDeleted
+
+== EvResource (5 campi)
+   resourceId
+   priority
+   validResource
+   dlKind
+   endTime
+
+== EvScoreReward (9 campi)
+   scoreRewardId
+   score
+   validReward
+   type
+   id
+   skillType
+   skillId
+   skillLv
+   num
+
+== EvStage (38 campi)
+   eventStageId
+   parentEventStageId
+   validStageId
+   stageId
+   validStageWidthId
+   stageStartId
+   stageEndId
+   resetFlag
+   eventCategory
+   eventType
+   scoreMedalListId
+   scoreStartReward
+   scoreEndReward
+   rankingId
+   bannerUrl
+   mypageBanner
+   detailUrl
+   startTime
+   endTime
+   endDispTime
+   boardEndTime
+   weekMonday
+   weekTuesday
+   weekWednesday
+   weekThursday
+   weekFriday
+   weekSaturday
+   weekSunday
+   benefitId
+   benefitMonday
+   benefitTuesday
+   benefitWednesday
+   benefitThursday
+   benefitFriday
+   benefitSaturday
+   benefitSunday
+   groupPattern
+   validMinute
+
+== GuiltProb (5 campi)
+   id
+   value
+   factor
+   weight
+   isCampaign
+
+== InitItem (7 campi)
+   id
+   category
+   equipType
+   equipNo
+   param
+   itemId
+   skillId
+
+== Keyblade (25 campi)
+   keybladeId
+   name
+   description
+   lv
+   displayId
+   category
+   subslotRate
+   passive
+   passivePower
+   drawCount
+   maxBurstGauge
+   validConsist
+   attribute
+   darklight
+   accord
+   dlaccord
+   partnerRate
+   evolveId
+   validNeedMaterial
+   needMaterialId
+   needMaterialNum
+   rotation
+   scaling
+   ofsX
+   ofsY
+
+== KeybladeSubslot (5 campi)
+   subslotId
+   category
+   slotNumber
+   attribute
+   darklight
+
+== LoginBonus (14 campi)
+   loginBonusId
+   bonusType
+   title
+   description
+   comment
+   day
+   startDate
+   endDate
+   rewardType
+   rewardId
+   rewardAssignSkillType
+   rewardAssignSkillId
+   rewardAssignSkillLv
+   rewardNum
+
+== LsiGame (11 campi)
+   gameId
+   groupId
+   sortId
+   challenge
+   name
+   modeName
+   explanation
+   helpUrl
+   targetScore
+   bgm
+   status
+
+== Material (6 campi)
+   materialId
+   category
+   sortId
+   name
+   description
+   sell
+
+== Medal (63 campi)
+   medalId
+   imageId
+   thumbId
+   cutinId
+   imageCategory
+   artId
+   displayId
+   sortId
+   name
+   flavor
+   advantage
+   listSortId
+   autoEnhance
+   validPack
+   type
+   attribute
+   darklight
+   validSource
+   source
+   rare
+   skillSlot
+   shuffleskillSlot
+   spShuffleskillSlot
+   addPetPt
+   guiltValue
+   addGuiltBurstLv
+   addGuiltBurstLvMax
+   maxLv
+   expType
+   cost
+   minCost
+   growthType
+   attack
+   maxAttack
+   addMaxAttack
+   defense
+   maxDefense
+   addMaxDefense
+   validBurst
+   burstId
+   validSuperBurst
+   superBurstId
+   burstEnhanceCategory
+   groupId
+   sellSpherePoint
+   materialExp
+   sell
+   sellJewel
+   sellTicket
+   sellPerLv
+   enhanceAttack
+   enhanceDefense
+   enhanceCost
+   enhanceGuilt
+   shuffleSkillGroupId
+   burstLvGroupId
+   validEvolve
+   evolveId
+   evolveMoney
+   validEvolveNeed
+   evolveNeedId
+   voice
+   bgm
+
+== MedalMisc (2 campi)
+   medalMiscId
+   value
+
+== Misc (2 campi)
+   miscId
+   value
+
+== Mission (24 campi)
+   id
+   missionType
+   sortId
+   conditionId
+   page
+   missionName
+   validTarget
+   targetType
+   targetId
+   targetNum
+   validStages
+   targetStageType
+   targetStageStartId
+   targetStageEndId
+   rewardType
+   itemId
+   skillType
+   skillId
+   skillLv
+   burstUpperNumber
+   itemNum
+   startDate
+   endDate
+   rewardEndTime
+
+== Moogleshop (21 campi)
+   moogleshopId
+   type
+   sortId
+   shuffleSkillId
+   itemType
+   itemId
+   skillType
+   skillId
+   skillLv
+   burstUpperNumber
+   itemNum
+   flavor
+   benefitId
+   payType
+   price
+   count
+   cpTitle
+   frameType
+   display
+   startDate
+   endDate
+
+== Multi (12 campi)
+   multiId
+   coinId
+   useAp
+   valid
+   stageStartId
+   stageEndId
+   weight
+   bannerUrl
+   detailUrl
+   startTime
+   endTime
+   boardEndTime
+
+== MultiStage (48 campi)
+   multiStageId
+   stageBinId
+   hpFactor
+   validDamagemvp
+   damagemvpRewardType
+   damagemvpItemId
+   damagemvpSkillType
+   damagemvpSkillId
+   damagemvpSkillLv
+   damagemvpBurstUpperNumber
+   damagemvpItemNum
+   validHelpmvp
+   helpmvpRewardType
+   helpmvpItemId
+   helpmvpSkillType
+   helpmvpSkillId
+   helpmvpSkillLv
+   helpmvpBurstUpperNumber
+   helpmvpItemNum
+   nohelpmvpRewardType
+   nohelpmvpItemId
+   nohelpmvpSkillType
+   nohelpmvpSkillId
+   nohelpmvpSkillLv
+   nohelpmvpBurstUpperNumber
+   nohelpmvpItemNum
+   clearmissionRequire
+   clearmissionName
+   clearmissionDataType
+   clearmissionIdType
+   clearmissionId
+   clearmissionNum
+   clearmissionRewardType
+   clearmissionItemId
+   clearmissionSkillType
+   clearmissionSkillId
+   clearmissionSkillLv
+   clearmissionBurstUpperNumber
+   clearmissionItemNum
+   validTimemission
+   timemissionRequire
+   timemissionId
+   timemissionNum
+   timemissionStartId
+   timemissionEndId
+   bgmField
+   bgmBattle
+   bgmBoss
+
+== MultiTalk (5 campi)
+   talkId
+   category
+   talk
+   imageId
+   motionId
+
+== MultiTimemission (26 campi)
+   timemissionId
+   require
+   name
+   dataType
+   idType
+   id
+   num
+   time
+   appearId
+   rewardType
+   itemId
+   skillType
+   skillId
+   skillLv
+   burstUpperNumber
+   itemNum
+   weight1
+   weight2
+   weight3
+   weight4
+   weight5
+   weight6
+   weight7
+   weight8
+   weight9
+   weight10
+
+== MypageBackground (13 campi)
+   id
+   backgroundId
+   sortId
+   validChild
+   startTime
+   endTime
+   viewType
+   validParts
+   partsId
+   dataType
+   xPostion
+   yPostion
+   zSort
+
+== Passive (10 campi)
+   passiveId
+   name
+   validPassive
+   type
+   value
+   hp
+   abilitygauge
+   attack
+   defense
+   attribute
+
+== PassiveSetting (7 campi)
+   passiveSettingId
+   sortId
+   passiveConditions
+   passiveValue1
+   passiveValue2
+   description
+   passiveId
+
+== PetParts (6 campi)
+   petPartsId
+   name
+   partsType
+   combinationType
+   combinationFlag
+   offsetNumber
+
+== PetPartsOffset (32 campi)
+   petPartsId
+   baseY
+   bodyLeftFrontLegX
+   bodyLeftFrontLegY
+   bodyRightFrontLegX
+   bodyRightFrontLegY
+   bodyLeftBackLegX
+   bodyLeftBackLegY
+   bodyRightBackLegX
+   bodyRightBackLegY
+   bodyTailX
+   bodyTailY
+   bodyAcNecklaceX
+   bodyAcNecklaceY
+   bodyBagX
+   bodyBagY
+   bodySpX
+   bodySpY
+   bodyShadowX
+   bodyShadowScale
+   headEarFrontX
+   headEarFrontY
+   headEarBackX
+   headEarBackY
+   headMouthX
+   headMouthY
+   headMaskX
+   headMaskY
+   headHatX
+   headHatY
+   headNecklaceX
+   headNecklaceY
+
+== PetRank (6 campi)
+   rank
+   needPt
+   magnification
+   rankUpSkill
+   validOpenSkill
+   openSkillIds
+
+== PetSkill (11 campi)
+   skillId
+   thumbId
+   name
+   description
+   invokeDescription
+   invokeType
+   skillValue1
+   skillValue2
+   skillValue3
+   skillValue4
+   skillValue5
+
+== Player (7 campi)
+   lv
+   needExp
+   luxMedal
+   ap
+   cost
+   hp
+   rewardId
+
+== Pvp (18 campi)
+   pvpId
+   stageId
+   stageBinId
+   dayCount
+   benefitDayCount
+   battleTimeout
+   validHoldKeyblade
+   holdKeyblade
+   validRank
+   rankUpPer
+   rankDownPer
+   groupId
+   scoreStartReward
+   scoreEndReward
+   rankingId
+   detailUrl
+   startTime
+   endTime
+
+== PvpScoreReward (9 campi)
+   scoreRewardId
+   score
+   validReward
+   type
+   id
+   skillType
+   skillId
+   skillLv
+   num
+
+== RaidEnemy (68 campi)
+   raidEnemyId
+   name
+   raidDisplayId
+   attribute
+   rare
+   weakness
+   validParts
+   parts
+   validGrowth
+   baseLv
+   hp
+   attack
+   defense
+   expAttack
+   expSuppress
+   moneyAttack
+   moneySuppress
+   luxAttack
+   luxSuppress
+   burstAttack
+   burstSuppress
+   hpAttack
+   hpSuppress
+   guiltSuppress
+   rewardId
+   mvpRewardId
+   destroyAllRewardId
+   validLocked
+   lockedLv
+   lockedRewardId
+   lockedMvpRewardId
+   lockedDestroyAllRewardId
+   drawHeight
+   attackWidth
+   attackHeight
+   validSkill
+   skillId
+   skillRequire
+   skillRequireArg
+   skillOdds
+   protectPoison
+   protectDeepPoison
+   protectSleep
+   protectParalysis
+   protectConfusion
+   registPoison
+   registDeepPoison
+   registSleep
+   registParalysis
+   registConfusion
+   bufAttack
+   bufDefense
+   bufAttackPower
+   bufDefensePower
+   bufAttackSpeed
+   bufDefenseSpeed
+   bufAttackMagic
+   bufDefenseMagic
+   bufAttackUpright
+   bufDefenseUpright
+   bufAttackReverse
+   bufDefenseReverse
+   bufTurn
+   bufCount
+   statusAilments
+   statusAilmentsTurn
+   statusAilmentsCount
+   bgmRaid
+
+== RaidEnemyAttack (46 campi)
+   raidEnemyAttackId
+   name
+   display
+   choiseAttribute
+   hitCount
+   power
+   critical
+   criticalPower
+   target
+   effect
+   addTarget
+   addTurn
+   addCount
+   bufAttack
+   bufDefense
+   bufAttackPower
+   bufDefensePower
+   bufAttackSpeed
+   bufDefenseSpeed
+   bufAttackMagic
+   bufDefenseMagic
+   bufAttackUpright
+   bufDefenseUpright
+   bufAttackReverse
+   bufDefenseReverse
+   resetAttack
+   resetDefense
+   resetAttackPower
+   resetDefensePower
+   resetAttackSpeed
+   resetDefenseSpeed
+   resetAttackMagic
+   resetDefenseMagic
+   resetAttackUpright
+   resetDefenseUpright
+   resetAttackReverse
+   resetDefenseReverse
+   heal
+   healShake
+   poison
+   deepPoison
+   sleep
+   paralysis
+   curePoison
+   cureSleep
+   cureParalysis
+
+== RaidReward (12 campi)
+   raidRewardId
+   oddsUpPerLv
+   pointUpPerLv
+   validReward
+   type
+   id
+   assignSkillType
+   assignSkillId
+   assignSkillLv
+   burstUpperNumber
+   num
+   odds
+
+== RaidSetting (13 campi)
+   raidSettingId
+   bossId
+   bossUpTime
+   useAp
+   rareBossId
+   rareBossUpTime
+   rareUseAp
+   rareUpType
+   rareUpTypeArg
+   rareUpTriggerBossId
+   validUnlockRare
+   unlockRareBossId
+   unlockRareNum
+
+== Ranking (9 campi)
+   rankingId
+   category
+   startDatetime
+   endDatetime
+   startRank
+   endRank
+   unionStartRank
+   unionEndRank
+   validReward
+
+== RankingPvp (6 campi)
+   rankingId
+   startDatetime
+   endDatetime
+   pvpStartRank
+   pvpEndRank
+   validReward
+
+== RankingReward (11 campi)
+   rankingRewardId
+   startRank
+   endRank
+   validReward
+   type
+   id
+   skillType
+   skillId
+   skillLv
+   burstUpperNumber
+   num
+
+== Reward (10 campi)
+   rewardId
+   validReward
+   display
+   type
+   id
+   assignSkillType
+   assignSkillId
+   assignSkillLv
+   num
+   odds
+
+== SerialcodeReward (12 campi)
+   serialcodeRewardId
+   name
+   startDate
+   endDate
+   itemId
+   validReward
+   type
+   id
+   skillType
+   skillId
+   skillLv
+   num
+
+== Shop (23 campi)
+   shopId
+   productId
+   sortId
+   type
+   os
+   price
+   coin
+   addCoin
+   extraCoinOnBalloon
+   stageSkipTicket
+   darkDrawTicket
+   cpAddCoin
+   cpExtraCoinOnBalloon
+   cpStageSkipTicket
+   explanation
+   appleStatus
+   benefitId
+   benefitBonusValue
+   benefitExplanation
+   useBenefitExplanation
+   thumbId
+   status
+   display
+
+== Shuffleskill (19 campi)
+   shuffleSkillId
+   category
+   type
+   name
+   sortId
+   duplicate
+   ability
+   hp
+   poison
+   paralyze
+   sleep
+   enemyKind
+   enemyKindRate
+   raidKindRate
+   addDamage
+   attack
+   defense
+   rate
+   campaignRate
+
+== Skill (35 campi)
+   skillId
+   imageId
+   thumbId
+   name
+   description
+   rank
+   maxLv
+   expType
+   sortId
+   categoryEvolve
+   invokeType
+   invokeProb
+   invokeProbPerLv
+   invokeShowTiming
+   value1
+   attackUp
+   burstCancel
+   burstLock
+   damageCut
+   dokonjo
+   counter
+   addAction
+   addPoison
+   addDeepPoison
+   addSleep
+   addParalysis
+   conditionTurn
+   conditionCount
+   pvpConditionTurn
+   pvpConditionCount
+   prizeHpUp
+   prizeBurstUp
+   luxUp
+   moneyUp
+   raidUp
+
+== SkillExp (2 campi)
+   expId
+   value
+
+== Sphere (13 campi)
+   sphereBoardId
+   boardName
+   kindId
+   boardId
+   arryId
+   masuId
+   type
+   openId
+   openParam
+   price
+   detailUrl
+   startDatetime
+   endDatetime
+
+== SphereArray (6 campi)
+   arryId
+   spCol4
+   spCol3
+   spCol2
+   spCol1
+   spCol0
+
+== SphereMasu (10 campi)
+   masuId
+   sphereBoardId
+   spherePoint
+   rewardSelect
+   medalCategory
+   rewardId
+   rewardExpand
+   rewardExpandId
+   rewardValue
+   burstUpperNumber
+
+== Stage (60 campi)
+   stageId
+   stageBinId
+   id
+   name
+   mapName
+   useAp
+   chapterId
+   worldId
+   thumbId
+   onlyDrama
+   stageKind
+   showIcon
+   hideIcon
+   noPartner
+   validStopStage
+   validBeforeDrama
+   beforeDramaId
+   beforeDramaType
+   validAfterDrama
+   afterDramaId
+   afterDramaType
+   branchType
+   disableContinue
+   addLevel
+   holdKeyblade
+   hardmodeRequire
+   hardmodeName
+   hardmodeComparison
+   hardmodeNum
+   validClearGetTitle
+   clearGetTitle
+   validClearGetSphere
+   clearGetSphere
+   resetClearGet
+   validClearGetItem
+   clearGetItemType
+   clearGetItemId
+   clearGetAssignSkillType
+   clearGetAssignSkillId
+   clearGetAssignSkillLv
+   clearGetItemNum
+   resetSubMission
+   validSubmission
+   submissionRequire
+   submissionName
+   submissionDataType
+   submissionIdType
+   submissionId
+   submissionNum
+   submissionRewardType
+   submissionItemId
+   submissionSkillType
+   submissionSkillId
+   submissionSkillLv
+   submissionItemNum
+   combinedSubmissionFlag
+   raidBoss
+   bgmField
+   bgmBattle
+   bgmBoss
+
+== StageDrama (4 campi)
+   id
+   validBeforeDrama
+   dramaId
+   dramaType
+
+== Stamp (8 campi)
+   stampId
+   category
+   imageId
+   require
+   sortId
+   imageWidth
+   imageHeight
+   validStamp
+
+== Theater (16 campi)
+   theaterId
+   worldId
+   num
+   resourceId
+   dramaNameType
+   validDramaName
+   dramaName
+   stageId
+   stageNum
+   validStageMaster
+   validBeforeDrama
+   dramaId
+   dramaType
+   bgm
+   validHomeopen
+   validTheater
+
+== Title (7 campi)
+   titleId
+   category
+   title
+   description
+   require
+   value
+   label
+
+== TutorialMisc (8 campi)
+   tutorialId
+   startClearQuest
+   startMiscId
+   num1
+   num2
+   setClearQuest
+   setMiscId
+   valid
+
+== World (12 campi)
+   worldId
+   worldName
+   raidBackground
+   instanceLwf
+   instance
+   xPos
+   yPos
+   rate
+   validParts
+   partsId
+   xPostion
+   yPostion
+
+== XtresMisc (2 campi)
+   miscId
+   value
+
