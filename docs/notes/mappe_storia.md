@@ -724,8 +724,8 @@ Hard version of the story quests. Work files: `D:\Progetto_Restauro_KH_UX\tmp\pr
   `stories[]` (`stageId`, `useAp`, `score`, `playStatus`, `clearMissionIds`), `newStageId`, `luxRank`,
   `openRankingId`. So the Proud list = the kind-4 stageIds unlocked so far. Start/clear go through the usual `/stage/start`
   (113) / `/stage/clear` with the 100xxxx stageId (no separate endpoint found).
-- `/stage/achievements` (169) has `strengthNumerator/Denominator` next to `main*`: most likely the Proud completion of the
-  Story screen (khuxwiki changelog: «completion percentage for Standard Mode and Proud Mode»).
+- `/stage/achievements` (169): the Story category of the Quests screen counts the objectives of Standard and Proud
+  quests together (`main*`); `strength*` is the Special category ([server](server.md#achievements), I-037).
 - Start popup: the client loads `StartDeckProudScene_ver260.json`, `StartDeckProud_Deck_ver230`,
   `StartDeckProud_Panel_KB(_Ad)_ver230` (keyblade without «Change»: `NotChangeKB_Name`) and
   `AdventureTop2_Proud_RaidInfo_Start.json`; strings `PMode_Panel`, `PMode_Ability_Txt`.
@@ -800,7 +800,7 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   variant; the client loads `mappoi_stg` = stageId - misc 124, replaced by `stageBinId`, + unionId - 1 with branchType 1), separate `stageScores`/`clearMissions` (key 100xxxx), `lastClearStageId` not moved by Proud clears,
   Q978-without-start fallback also for Proud, Beginner 41 derived (`lastProudNumber() >= 3`).
 - `/stage/achievements` `strength*` = the Special quests category (panel Achieved3, opens at Quest 6,
-  misc 122), **not** Proud: not touched (I-037).
+  misc 122), **not** Proud; Proud objectives count in `main*` (I-037, [server](server.md#achievements)).
 - **Open (bench)**: `addLevel` is shown only in the raid-boss popup (level + addLevel); no battle use found, so
   whether Proud enemies really are stronger must be checked on the bench (Proud 1 vs Story 1 enemy HP/level). Which stageId
   `/stage/start` sends for the Proud 555 (1018300 or 101830x; the server accepts both).

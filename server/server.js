@@ -187,6 +187,7 @@ function route(url) {
   if (p === '/moogleshop/list') return 'moogleshoplist';
   if (/^\/stage\/\d+$/.test(p)) return 'stagelist';
   if (p === '/stage/hard') return 'stagehard'; // Proud Mode (I-200)
+  if (p === '/stage/achievements') return 'stageachievements'; // categorie di Quests (I-037)
   if (p === '/stage/start') return 'stagestart';
   if (p === '/stage/continue' || p === '/stage/retire') return 'stagecontinue';
   if (p === '/stage/clear') return 'stageclear';
@@ -3867,6 +3868,44 @@ function respondProudList(res) {
   });
 }
 
+// GET /stage/achievements (azione 169, schermata Quests con le categorie; I-037, docs/notes/server.md#achievements).
+// Ogni coppia numeratore/denominatore (interi a 16 bit) e' il «Progress: N%» di una categoria; COMPLETE quando
+// numeratore >= denominatore, quindi 0/0 = COMPLETE (il difetto di prima: tutte le categorie complete).
+// - main = Story: obiettivi compiuti delle missioni Standard (1-979) e Proud (note di versione 2.2.0: «completion
+//   percentage for Standard Mode and Proud Mode challenges»); denominatore = tutti gli obiettivi di quelle missioni.
+// - strength (Special), event (Events), multi (Union Cross): modalita' non ancora presenti nel server: 0/1 = «Progress:
+//   0%» senza COMPLETE (nessuna sfida compiuta), finche' non ci saranno.
+// - colosseumRank 0 e pvpRanking con rank 0: il client scrive «---» (nessuna classifica).
+const ACHIEVEMENT_EMPTY = { numerator: 0, denominator: 1 };
+function storyAchievement() {
+  const done = player.clearMissions || {};
+  let numerator = 0, denominator = 0;
+  for (const r of masterRows('stage')) {
+    const story = r.stageKind === 1 && r.id >= 1 && r.id <= STORY_LAST;
+    const proud = r.stageKind === PROUD_KIND && r.stageId > PROUD_OFFSET;
+    if (!story && !proud) continue;
+    const n = Math.min(3, r.validSubmission || 0);
+    denominator += n;
+    numerator += new Set((done[r.stageId] || []).filter((m) => m >= 1 && m <= n)).size;
+  }
+  return { numerator, denominator };
+}
+function respondStageAchievements(res) {
+  const main = storyAchievement();
+  const cap = (v) => Math.min(0x7fff, v); // il client li legge come short
+  send(res, 200, {
+    ret: ret(),
+    stageAchievement: {
+      mainNumerator: cap(main.numerator), mainDenominator: cap(main.denominator),
+      strengthNumerator: ACHIEVEMENT_EMPTY.numerator, strengthDenominator: ACHIEVEMENT_EMPTY.denominator,
+      eventNumerator: ACHIEVEMENT_EMPTY.numerator, eventDenominator: ACHIEVEMENT_EMPTY.denominator,
+      multiNumerator: ACHIEVEMENT_EMPTY.numerator, multiDenominator: ACHIEVEMENT_EMPTY.denominator,
+      colosseumRank: 0,
+      pvpRanking: { rankingStatus: 0, userPvpRanking: { rank: 0, class: 0, point: 0 } },
+    },
+  });
+}
+
 // In tutte le risposte di avvio "maintenance" va OMESSO: il client controlla che
 // il suo tipo JSON sia null. Anche un 0 numerico vale come manutenzione attiva.
 
@@ -4037,6 +4076,7 @@ function handler(scheme) {
       }
       if (kind === 'stagelist') return respondStageList(res);
       if (kind === 'stagehard') return respondProudList(res);
+      if (kind === 'stageachievements') return respondStageAchievements(res);
       if (kind === 'stagestart') return respondStageStart(res, entry.bodyDecoded);
       if (kind === 'stagecontinue') return respondStageContinue(res, req.url.split('?')[0], entry.bodyDecoded);
       if (kind === 'stageclear') return respondStageClear(res, entry.bodyDecoded);
@@ -4378,6 +4418,8 @@ module.exports._test = {
   respondStageList, lastStoryStageId, stageNumber, stageRowOf, userDetailData, ensureUnion,
   // server/test-proud.js (Proud Mode, I-200)
   respondProudList, proudUnlocked, lastProudNumber, poiStageId, stageTreasures, stageEnemyDrops,
+  // server/test-achievements.js (I-037)
+  respondStageAchievements,
   // server/test-gacha-server.js
   sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
 };

@@ -100,8 +100,26 @@ chain before action 251 or without a session; the errors stay `:251` for the who
   `/stage/pickup` (`pisckupStages`, sic), 185 `/user/theater/available`, 81 `PUT /party/notice`, 59
   `/mypage` (`backgroundId` 150911), 177 `/pet/coordinate/members`, 143 `/campaign`, 240
   `/raid/list` (`selfRaid`, `raids[]`), 2 `/user/point`.
-- `/stage/achievements` replies with numerators/denominators at 0: the Quests screen shows
-  «COMPLETE» on all categories (ISSUES I-037).
+
+<a id="achievements"></a>
+### `GET /stage/achievements` (169): the Quests category screen
+
+- Response: `stageAchievement` with `mainNumerator/Denominator`, `strengthNumerator/Denominator`,
+  `eventNumerator/Denominator`, `multiNumerator/Denominator` (read as 16-bit integers), `colosseumRank` and
+  `pvpRanking {rankingStatus, userPvpRanking {rank, class, point}}`; every field is mandatory.
+- Each pair is the progress of one category of the Quests screen: `main` = Story, `strength` = Special,
+  `event` = Events, `multi` = Union Cross. The category shows «Progress: N%» with N = numerator x 100 /
+  denominator (truncated) and «COMPLETE» when numerator >= denominator, so 0/0 is «COMPLETE». A category that is
+  still locked (Special from Quest 6, Events from Quest 14, Union Cross from Quest 24: `misc` 122, 123, 130) is greyed
+  with «Complete quest N to unlock!», independently of the pair.
+- Coliseum panel: `colosseumRank` 0 or -1 = «---», otherwise the rank; PvP: `rankingStatus` 4 or 5 or `rank` 0 =
+  «---», otherwise the rank.
+- What the pairs count (version 2.2.0 notes: completion percentage of the Standard and Proud Mode challenges, of the
+  active Special/event quest challenges and boards, of the active Cross Boards): challenges = quest objectives.
+- Our server (I-037): `main` = objectives cleared (`clearMissions`) of the Standard quests 1-979 plus the Proud
+  quests, over all their objectives (978 + 978 quests x 3 = 5,868; Quest 978 has none). Special, Events and Union
+  Cross do not exist yet: 0/1 («Progress: 0%», no «COMPLETE»). `colosseumRank` 0 and `rank` 0 («---»). Before
+  22-10 the reply was all zeros, so every category showed «COMPLETE». Test: `server/test-achievements.js`.
 
 <a id="master"></a>
 ## Master tables
