@@ -312,7 +312,8 @@ check(/^img\/wipe\/wipe_1\[1-4\]\.png\tjp/m.test(tsv), 'originals.tsv: wipe_11..
   const { NOTICES } = require('./routes-info-album');
   const nt = NOTICES.find((x) => x.title === 'Story Quests 526-979');
   const t = nt ? nt.body.join(' ') : '';
-  check(nt && nt.tag === 'IMPORTANT' && NOTICES.indexOf(nt) === 0, 'notizia IMPORTANT in cima');
+  // since 22-10 the list is shown newest first (byDate), so the notice only has to be IMPORTANT
+check(nt && nt.tag === 'IMPORTANT', 'notizia IMPORTANT');
   // obiettivi coi codici originali e trofei 61-63 (21-10): il paragrafo dei tappabuchi solo se il master servito ne ha
   // ancora, niente paragrafo dei Trophy
   let master = [];
