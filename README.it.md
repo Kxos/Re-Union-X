@@ -13,6 +13,9 @@
 > o Disney, né approvato o sponsorizzato da loro. *Kingdom Hearts*, *Kingdom Hearts Union χ[Cross]* e tutti i
 > nomi, personaggi e asset collegati appartengono ai rispettivi proprietari. Qui non si distribuiscono file del
 > gioco. Vedi [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+>
+> **Nome.** «Re-Union X» non ha legami con **KH ReUnion** ([@KH_ReUnion](https://x.com/KH_ReUnion)), un progetto amatoriale
+> diverso con un nome simile. Se il suo team ci chiedesse di cambiare nome, ne parleremo volentieri.
 
 > La documentazione di lavoro (HANDOFF, ISSUES, note tecniche, diario) è in inglese dal 22 ottobre 2026;
 > questa pagina riassume il progetto in italiano.

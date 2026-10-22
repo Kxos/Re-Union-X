@@ -13,6 +13,9 @@
 > sponsored by Square Enix or Disney. *Kingdom Hearts*, *Kingdom Hearts Union χ[Cross]* and all related names,
 > characters and assets belong to their owners. No game files are distributed here. See
 > [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+>
+> **Name.** «Re-Union X» is not related to **KH ReUnion** ([@KH_ReUnion](https://x.com/KH_ReUnion)), a separate fan
+> project with a similar name. If its team asks us to change our name, we will gladly discuss it.
 
 Preservation project: bringing **Kingdom Hearts Union χ[Cross] · Dark Road** back as a
 locally playable experience, after the servers shut down (May 2021) and almost all of
