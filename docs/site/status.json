@@ -6,103 +6,121 @@
       "name": "Startup and home screen",
       "state": "done",
       "detail": "The original, unmodified 4.3.1 Android client starts, creates a new player, plays the Prologue and reaches the home screen.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Story quests",
       "state": "done",
       "detail": "Quests 1-979 on the original maps and rooms, with cutscenes, per-quest music, original enemy stats and levels, objectives, chests and Trophies.",
-      "done": 979, "total": 979, "unit": "quests"
+      "done": 979,
+      "total": 979,
+      "unit": "quests"
     },
     {
       "name": "Combat",
       "state": "done",
       "detail": "Special Attacks with variable damage, enemy attacks, Lux levels up to 999.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Medals",
       "state": "done",
       "detail": "Medal List, selling, Level Up (Special Attack dots and Bonus, Skills, traits, Trait Medals), Evolve.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Shop",
       "state": "done",
       "detail": "The original banners: 807 deals with their guarantees, pity, weekly rotation, seasonal banners, a kept banner and a filterable catalog.",
-      "done": 807, "total": 807, "unit": "deals"
+      "done": 807,
+      "total": 807,
+      "unit": "deals"
     },
     {
       "name": "Moogle Shop",
       "state": "done",
       "detail": "Medals and items exchanged for Moogle points.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Missions and Login Bonus",
       "state": "done",
       "detail": "Daily, weekly and Limited missions, campaigns and the daily Login Bonus.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Profile, Avatar Boards, pet",
       "state": "done",
       "detail": "Profile, avatar parts and Avatar Boards, the pet.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "In-game Notices",
       "state": "done",
       "detail": "Every difference from the original game is explained in the Notices, inside the game and on this site.",
-      "done": 1, "total": 1
+      "done": 1,
+      "total": 1
     },
     {
       "name": "Enemy graphics (quests 526-979)",
       "state": "progress",
       "detail": "142 enemy families have their original look; about 88 are still missing and are shown with the look of a similar enemy. Screenshots and videos of them help: see How to help.",
-      "done": 142, "total": 230, "unit": "families"
+      "done": 142,
+      "total": 230,
+      "unit": "families"
     },
     {
       "name": "Guest allies",
       "state": "progress",
       "detail": "The allies who fight at your side in some story quests (Hercules, Aladdin, Ralph, Ephemer...): being fixed, to be verified.",
-      "done": 1, "total": 2
+      "done": 1,
+      "total": 2
     },
     {
       "name": "Proud Mode",
-      "state": "progress",
-      "detail": "The hard version of the story quests: research done, original layouts being imported.",
-      "done": 1, "total": 4
+      "state": "done",
+      "detail": "The hard version of all 979 story quests: unlocked by story Quest 500, original red screens, higher enemy levels, a fixed Keyblade and a Special Attack condition per quest, Proud Keyblade rewards."
     },
     {
       "name": "Easy installation",
       "state": "missing",
       "detail": "Today the setup is long and technical. A launcher will make it simple when the work is finished.",
-      "done": 0, "total": 1
+      "done": 0,
+      "total": 1
     },
     {
       "name": "Events",
       "state": "missing",
       "detail": "Event quests, event banners and boosters.",
-      "done": 0, "total": 1
+      "done": 0,
+      "total": 1
     },
     {
       "name": "Raid Bosses",
       "state": "missing",
       "detail": "Raid Boss battles and their rewards.",
-      "done": 0, "total": 1
+      "done": 0,
+      "total": 1
     },
     {
       "name": "Coliseum",
       "state": "missing",
       "detail": "Coliseum battles and rankings.",
-      "done": 0, "total": 1
+      "done": 0,
+      "total": 1
     },
     {
       "name": "Union Cross and PvP",
       "state": "missing",
       "detail": "Realtime multiplayer: needs a self-hosted Photon server (phase E).",
-      "done": 0, "total": 1
+      "done": 0,
+      "total": 1
     }
   ]
 }
