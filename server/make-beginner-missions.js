@@ -15,8 +15,9 @@ const path = require('path');
 // del Guilt Burst, derivato), 40 rango dello Spirit (rango della Gear, derivato), 41 Proud superate fino alla 3 (derivato, I-200). Restano a 0 finche' non c'e' la
 // funzione: 3 Raid Boss (contatore 'raid' mai chiamato, niente Raid), 36-38 quest speciali e Proud Quest (eventi),
 // 42 eventi, 43 Colosseo, 44 Union Cross (nessuno stage/tabella/partita di quel tipo nel server).
-// rewardType 2 Jewel; 26 Skip Ticket (setItemImageData della 1.0.1; per lo «Skip Ticket+» da verificare).
-const J = 2, SKIP = 26;
+// rewardType 2 Jewel; 28 Skip Ticket+ (client 4.3.1, icona e testo per tipo: 26 = «Skip Ticket» 102600058, 28 = «Skip
+// Ticket+» 102600065, JP スキップチケットⅡ; la wiki da' «Skip Ticket+» alle Beginner 9-10).
+const J = 2, SKIP = 28;
 const ROWS = [
   [30, 'Complete story quest 6', 6, 1, 10, J, 100],
   [30, 'Complete story quest 14', 14, 1, 10, J, 100],

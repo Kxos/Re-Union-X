@@ -267,8 +267,11 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   They stay at 0 because the feature is missing: 3 Raid Boss, 36-38 special quests and Proud Quest, 41 Proud Mode, 42 events,
   43 Colosseum, 44 Union Cross (16-10, `test-beginner.js`; 30 uses the most advanced story quest, not lastClearStageId which the
   Tours push further; bench 16-10 evening: Nova, Spirit and Draw advance and are collected correctly, verified
-  by the user). Reward «Skip Ticket+» = type 26 (the
-  client writes «Skip Ticket», jewel icon: image to be found), `player.stageSkipTicket`. Bench: 12/34 complete
+  by the user). Reward «Skip Ticket+» = **type 28** (client 4.3.1 reward
+  icon/name switch: 26 = «Skip Ticket», text 102600058, JP スキップチケット; 28 = «Skip Ticket+», text 102600065, JP
+  スキップチケットⅡ), `player.superSkipTicket` («Force Skip», [mappe_storia](mappe_storia.md#proud-start-popup-check));
+  until 23-10 it was type 26 (shown as «Skip Ticket» with a jewel icon). Bench 23-10 (rev 180, save `skiptest`): Draw Medal
+  x 3 shows «Skip Ticket+ x 5» with the rainbow ticket, Collect -> «Received Skip Ticket+ x 5!», superSkipTicket 2 -> 7. Bench: 12/34 complete
   on the test save, Collect All -> +1000 jewels and «All rewards have been collected.». Limited not added
   (all tied to 2017-2021 dates: to be decided).
 - `GET /user/mission` (action 187, on entering the home) **is not the Missions window**: for 187
@@ -497,7 +500,7 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     (the jewel maximum is our own choice).
   - `resourceType`: 1/2 Jewel, 3 medal,
     4 Munny, 5 material, 6 Friend Point, 10 Raid Points, 11 Lux, 13 keyblade, 14-17 rewards,
-    18-20/23 avatar parts, 25 sphere, 26 Skip Ticket. The server collects 1/2, 3, 4, 5, 11, 13, 14
+    18-20/23 avatar parts, 25 sphere, 26 Skip Ticket, 28 Skip Ticket+. The server collects 1/2, 3, 4, 5, 11, 13, 14
     (`grantItem`, now also 11 = `player.lux`).
   - `POST /user/present/receive` = action 49: `{receivePresentIds: [uint64]}` (Collect and Collect All).
     All mandatory: `userData.userPoint`, `userMaterials`, `userMedals`,

@@ -59,9 +59,10 @@ check(st(d3.id).numUpper === 3 && st(d3.id).status === 1, 'tre estrazioni: Draw 
 check(st(d7.id).numUpper === 3 && st(d7.id).status === 0, 'Draw x7 a 3/7');
 for (let i = 0; i < 4; i++) call(t.respondGachaDraw, { drawMedalTypeId: 10011, count: 10 });
 check(st(d7.id).numUpper === 7 && st(d7.id).status === 1, 'sette estrazioni: Draw x7 da riscuotere');
-const skip = p.stageSkipTicket || 0;
+const skip = p.superSkipTicket || 0, plain = p.stageSkipTicket || 0;
 call(t.respondMissionReceive, { receiveMissionIds: [d3.id] });
-check((p.stageSkipTicket || 0) === skip + 5, `premio Draw x3: 5 Skip Ticket (${skip} -> ${p.stageSkipTicket})`);
+check((p.superSkipTicket || 0) === skip + 5, `premio Draw x3: 5 Skip Ticket+ (${skip} -> ${p.superSkipTicket})`);
+check((p.stageSkipTicket || 0) === plain, 'premio Draw x3: nessuno Skip Ticket normale');
 
 // 39 Nova = livello del Guilt Burst (+1 prima guilt, +5 prima guilt massima)
 const n20 = row(39, 20), n50 = row(39, 50);
