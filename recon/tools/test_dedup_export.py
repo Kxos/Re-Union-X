@@ -142,11 +142,13 @@ t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override'})
 check(len(t) > 3500, 'versioned table rows: %d' % len(t))
 bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4])]
 check(not bad, 'rows outside the allow-list: %s' % bad[:3])
-under_review = {'1609', '1643'}       # 23-10 second review: 1609 (a piece missing) and 1643 (not reviewed)
+under_review = {'1643'}       # not reviewed yet (1609 approved by the third review, 23-10)
 check(not (under_review & set(real_allow)), 'families under review in the allow-list: %s' % (under_review & set(real_allow)))
-held = ['1612/wait/', '1651/dead/'] + ['%s/atk1_o/' % f for f in ('2004', '2014', '2015', '2017', '2019', '2020', '2021')]
-check(not [k for k in t if k.startswith(tuple('lwf/character/enemy/' + h for h in held))],
-      'animations held for another review round in the table')
+# third review (overrides_C.tsv, 23-10): the animations held after the second review are now in the table
+released = ['1609/wait/', '1609/atk1_o/', '1612/wait/', '1651/dead/'] + \
+    ['%s/atk1_o/' % f for f in ('2004', '2014', '2015', '2017', '2019', '2020', '2021')]
+missing = [h for h in released if not any(k.startswith('lwf/character/enemy/' + h) for k in t)]
+check(not missing, 'animations released by the third review not in the table: %s' % missing)
 check(any(k.startswith('lwf/character/enemy/1550/dead/') for k in t), '1550 dead approved by the second review')
 ovr = sorted(k for k, v in t.items() if v[2] == 'dedup-override')
 check(len(ovr) == 6 and all(k.startswith('lwf/character/enemy/1636/wait/') for k in ovr), 'dedup-override rows: %s' % ovr)

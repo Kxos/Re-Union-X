@@ -65,7 +65,7 @@
 271
 272
 # 23-10-2026, flagged families: every animation except the one named
-1651:-dead
+1651
 # 23-10-2026, second review (overrides_A/B.tsv; reviewed rows replace the proposal ones): approved except the
 # animations named (another review round: 1609 whole family, 1612 wait, 1651 dead, atk1_o of 2004 2014 2015 2017
 # 2019 2020 2021 (arm piece missing)); 1550/1554/1560/1595 now with dead
@@ -84,22 +84,22 @@
 1560
 1563
 1595
-1612:-wait
+1612
 1615
 1618
 1620
 1629
 1645
-2004:-atk1_o
+2004
 2008
 2011
 2012
-2014:-atk1_o
-2015:-atk1_o
-2017:-atk1_o
-2019:-atk1_o
-2020:-atk1_o
-2021:-atk1_o
+2014
+2015
+2017
+2019
+2020
+2021
 2022
 2023
 2024
@@ -109,3 +109,6 @@
 # replaced by the reviewed knockback pieces of the same size (user's decision 23-10)
 1636
 1636:+replace-survivor
+# 23-10-2026, third review (overrides_C.tsv) approved: the held animations released (1609 whole family, 1612 wait,
+# 1651 dead, atk1_o of 2004 2014 2015 2017 2019 2020 2021); overrides_D.tsv (fourth review) not approved yet
+1609
