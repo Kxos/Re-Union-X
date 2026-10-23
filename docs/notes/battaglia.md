@@ -466,6 +466,11 @@ category 4 `recolour-whole` (`recon/tools/jp_recoloured.tsv` +10 rows), declared
 (defeat animation reconstructed; the Notice also names Guard Armor Ω as recovered); master revision 177. Complete
 families **142** (category 1: 120, 2: 8, 3: 6, 4: 8); family-clone rows 526-979 by graphic: family 46, Dark Road 28,
 base 148.
+**23-10**: candidate donors must declare `MIN_MISS` (3) missing sizes, or all of them when the family misses fewer
+(before, 13 families missing 1-2 sizes had no candidate at all). New: **1539 Ferry Reaper complete** (62x69 from film
+2321101, identical to the slot of the DR twin 5055), 2503 two shadows; 1550 rows rejected visually (two different
+95x95 frames under the signature threshold). Complete **146** (123/9/6/8). TOPN 250 and survivors from all animations
+were tried and give fewer rows. Detail and the list of the 99 still incomplete: [journal 2026-10-23](../journal/2026-10-23.md#i-194).
 
 <a id="alleati-20xx"></a>
 ## Families 2001-2024: characters in story quests (I-199, 22-10)

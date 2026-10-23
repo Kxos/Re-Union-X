@@ -91,12 +91,33 @@ check(not res['wait']['donors'] and res['wait']['pick'] == {}, 'incoherent donor
 honest = donor('drama/8', [('h_s', 10, 10, 'S'), ('h_t', 20, 20, 'T'), ('h_u', 40, 40, 'U'), ('h_m', 30, 30, 'W')])
 check(dd.gate(honest, 'A', an4, diff), 'gate: coherent donor refused')
 
+# 5. candidate donors (23-10): a family missing fewer than MIN_MISS distinct sizes still gets candidates (it needs
+# all its missing sizes); a family missing >= MIN_MISS sizes keeps the old threshold
+_resolve = dd.resolve
+dd.resolve = lambda pool, path, names: {n: path + '/' + n for n in names}
+need1 = {'wait': {'miss': [['m', [62, 69]]], 'have': {'s': ['S', 'jp', [10, 10]]}}}
+idx = {'lwf/drama/1/a.lwf': ('jp431', 'h1', [('x', 62, 69), ('y', 10, 10)]),
+       'lwf/drama/2/b.lwf': ('jp431', 'h2', [('z', 5, 5)]),
+       'lwf/character/enemy/77/wait/wait.lwf': ('jp431', 'h3', [('w', 62, 69)])}
+got = [c[1] for c in dd.candidates(77, need1, idx)]
+check(got == ['lwf/drama/1/a.lwf'], 'one missing size: candidates %r' % got)
+need3 = {'wait': {'miss': [['a', [1, 1]], ['b', [2, 2]], ['c', [3, 3]]], 'have': {}}}
+idx3 = {'d/two.lwf': ('jp431', 'h4', [('p', 1, 1), ('q', 2, 2)]),
+        'd/three.lwf': ('jp431', 'h5', [('p', 1, 1), ('q', 2, 2), ('r', 3, 3)])}
+got = [c[1] for c in dd.candidates(77, need3, idx3)]
+check(got == ['d/three.lwf'], 'three missing sizes: only donors with >= 3 (%r)' % got)
+check(dd.candidates(77, {'wait': {'miss': [], 'have': {}}}, idx) == [], 'nothing missing: no candidates')
+dd.resolve = _resolve
+
 # helpers
 check(dd.close((10, 10), (11, 9)) and not dd.close((10, 10), (12, 10)), 'close: +-1 px')
 check(dd.lcs_map([(1, 1), (2, 2), (3, 3)], [(2, 2), (9, 9), (3, 3)]) == {1: 0, 2: 2}, 'lcs_map')
 check(dd.rejected(2011, 'lwf/character/enemy/7005/atkSp/x.png') and dd.rejected(1645, 'lwf/drama/2552701/a.png')
       and not dd.rejected(1645, 'lwf/drama/2551601/a.png') and not dd.rejected(1561, 'lwf/drama/2331101/a.png'),
       'visual rejects')
+check(dd.rejected(1550, 'lwf/drama/2323901/2323901_e38393e38383e38388e3839ee38383e383972031392e706e67.png')
+      and not dd.rejected(1550, 'lwf/drama/2323901/2323901_e38393e38383e38388e3839ee38383e383972031382e706e67.png'),
+      'visual reject 1550 (film bitmap 19 only)')
 k, rel = dd.container_of(os.path.join(dd.X501, 'lwf', 'drama', '1', 'a.png'))
 check((k, rel) == ('jp501', 'lwf/drama/1/a.png'), 'container_of jp501: %r' % ((k, rel),))
 check(dd.container_of(os.path.join(dd.D, 'enemy_x', 'a.png')) == (None, None), 'container_of outside')
@@ -114,6 +135,10 @@ check(all(k.startswith('lwf/character/enemy/') for k in deep), 'published path o
 fams = {int(k.split('/')[3]) for k in deep}
 check(not fams & {285, 1635, 2011, 2021}, 'visually rejected families in the table: %s' % sorted(fams & {285, 1635, 2011, 2021}))
 check(not [k for k, v in deep.items() if k.split('/')[3] == '1645' and 'lwf/drama/2552701/' in v[1]], '1645 rows from 2552701')
+check(not [k for k, v in deep.items() if k.split('/')[3] == '1550' and dd.rejected(1550, v[1])], '1550 rows from film bitmap 19')
+check(len([k for k in deep if k.startswith('lwf/character/enemy/1539/')
+           and k.endswith('e38393e38383e38388e3839ee38383e383972031352e706e67.png')]) == 2,
+      '1539 Ferry Reaper 62x69 (wait, knockback) from the one-size search (23-10)')
 if os.path.isdir(dd.JP431) and os.path.isdir(dd.X501):
     miss = [k for k in deep if not xd.lookup(deep, k)]
     check(not miss, 'missing sources in extra_donors_deep.tsv: %d (%s)' % (len(miss), miss[:3]))

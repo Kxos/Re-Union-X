@@ -64,12 +64,16 @@ TOL = 1             # declared size +-1 px
 COV = 0.8           # rule B: share of the family sizes in the donor table
 MIN_DIMS = 8        # rule B: minimum distinct family sizes
 TOPN = 60           # candidate donors per family
+MIN_MISS = 3        # candidate donor: declares >= MIN_MISS missing sizes (all of them when the family misses fewer)
 ORIGINAL_KINDS = ('jp', 'diretto', 'stesso', 'doppione', 'copia')     # survivors usable as anchors
 # Visual check of the v2 sheets (22-10): the new part is not clearly the same creature or the same piece.
 # (family, source path fragment or '' = whole family, reason)
 VISUAL_REJECT = [
     (285, '', 'only survivor a 9x6 speck; 21x7/8x12 pieces of enemy 1 not recognisable'),
     (1541, '2321701_e38393e38383e38388e3839ee38383e38397203138392e706e67', 'orange 74x41 shell foreign to the creature'),
+    # 23-10 (families missing < 3 sizes, sheet tmp\\i194_23\\c1550.png): film bitmaps 18 and 19 are two different
+    # 95x95 frames (red eye glow on/off) whose 32x32 signatures differ by 4.9/255 (< SAME): one image for both slots
+    (1550, '2323901_e38393e38383e38388e3839ee38383e383972031392e706e67', 'two different 95x95 frames (eye glow on/off) taken as one image'),
     (1635, '', 'white clouds of a player ability (burst/motion/abl_12046): an effect, not the creature'),
     (1645, 'lwf/drama/2552701/', 'knockback from film 2552701: Turbo/Cy-Bug pieces, not clearly King Candy'),
     (1650, 'lwf/drama/2420701/', 'small orange 36x56 flame foreign to Darkness'),
@@ -428,16 +432,21 @@ def fam_data(need_f, diff):
 
 
 def candidates(fam, need_f, idx):
-    """TOPN LWFs outside the family by (missing sizes covered, surviving sizes covered); >= 3 missing."""
+    """TOPN LWFs outside the family by (missing sizes covered, surviving sizes covered); >= MIN_MISS missing sizes,
+    or all of them when the family misses fewer than MIN_MISS distinct sizes (23-10: before, a family missing only
+    one or two sizes, e.g. 1614 34x21 or 1561 103x65/104x65, never had a candidate donor; acceptance unchanged)."""
     mset = {tuple(wh) for e in need_f.values() for t, wh in e['miss'] if wh}
     sset = {tuple(v[2]) for e in need_f.values() for v in e['have'].values() if v[2]}
+    need = min(MIN_MISS, len(mset))
+    if not need:
+        return []
     scores = []
     for p, (k, sh, t) in idx.items():
         if ('\\enemy\\%s\\' % fam) in p or ('/enemy/%s/' % fam) in p:
             continue
         dd = {(x[1], x[2]) for x in t}
         sm = len(mset & dd)
-        if sm >= 3:
+        if sm >= need:
             scores.append((sm, len(sset & dd), k, p))
     scores.sort(key=lambda x: (-x[0], -x[1]))
     out, seen = [], set()
