@@ -47,6 +47,10 @@ folders of the dump (dedup_match.py proposal), only the rows the user approved o
 (recon/tools/extra_donors_dedup.tsv from dedup_export.py, rule dedup-order; `--dedup ''` excludes it). The same table
 holds the user-approved DOWNSCALED copies of original art (rule dedup-rescale, 23-10, category 3, containers rescale and
 rescale_e1 outside the repo): same place in the order, accepted only at exactly the declared size.
+Whole animations dropped from the JP dump (I-194, 23-10, user-approved; recon/tools/extra_donors_whole.tsv from
+whole_export.py, `--whole ''` excludes it): the 2018 WW container name index puts the missing dead.lwf of 24 families on
+the records of a donor dead (generic Shadow smoke or the twin; rule whole-ww-index, category 2), Ralph allies' wait =
+2013 wait (whole-same-pose, category 2), 1576/1578/1618 dead from a same-rig family (whole-same-rig, category 3).
 
 Effetti di comparsa: lwf/character/enemy/show_effect_fla/show_effect<N>/ per gli showSwf originali
 (external\\thethiny\\enemy_dec.json) non serviti, stesse regole (completi o niente).
@@ -94,6 +98,9 @@ ap.add_argument('--extra', default=None,
                 help="copie originali da altri contenitori (default recon/tools/extra_donors.tsv; '' = nessuna)")
 ap.add_argument('--deep', default=None,
                 help="original copies found by content (default recon/tools/extra_donors_deep.tsv, deep_donors.py; '' = none)")
+ap.add_argument('--whole', default=None,
+                help="user-approved whole-animation copies (default recon/tools/extra_donors_whole.tsv, whole_export.py; "
+                     "'' = none)")
 ap.add_argument('--dedup', default=None,
                 help="original copies matched by texture-table order, user-approved (default "
                      "recon/tools/extra_donors_dedup.tsv, dedup_export.py; '' = none)")
@@ -128,6 +135,10 @@ EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, ru
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
                                rules={'content-anchor', 'bracket'}), **EXTRA)
+# user-approved WHOLE-animation copies (extra_donors_whole.tsv from whole_export.py, I-194 23-10): used only as whole
+# animations (LWF row + all its texture rows) when the JP LWF is absent; extra_donors.tsv wins on the same rows
+EXTRA = dict(extra_donors.load(extra_donors.WHOLE_TABLE if a.whole is None else a.whole,
+                               rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig'}), **EXTRA)
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
 # category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
 # rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
@@ -357,20 +368,30 @@ def plan_anim(root_rel, anim, jp_all):
     # 4.3.1 manca del tutto (es. wait e dead di 1543 Pot Spider da 5048); LWF e tutte le sue texture dalla tabella
     # Poi (categoria 4, jp_recoloured.tsv regola recolour-whole) la dead generica del gemello di colore: solo fumo, le
     # stesse texture in tutte le LWF dead con quella tabella (JP 4.3.1 contro DR: 394 texture, differenza <= 1,6/255)
-    for table, rule, label in ((EXTRA, 'whole-dr-twin', 'animazione intera dal gemello Dark Road'),
-                               (RECOL, 'recolour-whole', 'animazione intera generica dal gemello di colore')):
+    # Also the user-approved whole copies of extra_donors_whole.tsv (I-194 23-10): whole-ww-index / whole-same-pose
+    # (category 2, status 'copia intera') and whole-same-rig (category 3, status 'ricostruita intera'); the category is
+    # the worst rule among the LWF row and its texture rows
+    for table, rules, label in ((EXTRA, extra_donors.WHOLE_RULES, 'animazione intera'),
+                                (RECOL, ('recolour-whole',), 'animazione intera generica dal gemello di colore')):
         wl, wc = extra(pre + lw, table)
-        if not (wl and table[pre + lw][2] == rule):
+        if not (wl and table[pre + lw][2] in rules):
             continue
+        rule = table[pre + lw][2]
         todo, dims = {pre + lw: wl}, tex_dims(wl)
         for t in refs_of(wl):
-            tp, _ = extra(pre + t, table)
-            if not (tp and table[pre + t][2] == rule and (dims is None or fits(tp, dims.get(t)))):
+            tp, tc = extra(pre + t, table)
+            if not (tp and table[pre + t][2] in rules and (dims is None or fits(tp, dims.get(t)))):
                 break
             todo[pre + t] = tp
+            wc = max(wc, tc)
         else:
+            if table is RECOL:
+                st = 'gemello ricolorato'
+            else:
+                st = {'whole-dr-twin': 'gemello DR', 'whole-same-rig': 'ricostruita intera'}.get(rule, 'copia intera')
+                label = 'animazione intera dal gemello Dark Road' if rule == 'whole-dr-twin' else label + ' (' + rule + ')'
             notes.append('%s (%s)' % (label, table[pre + lw][3]))
-            return 'gemello DR' if table is EXTRA else 'gemello ricolorato', todo, '; '.join(notes), wc
+            return st, todo, '; '.join(notes), wc
     if not jl and not bl:
         return 'assente', None, '; '.join(notes) or 'nessuna fonte', None
     return 'incompleta', None, '; '.join(notes), None

@@ -66,8 +66,18 @@ with open(DDP, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1912/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-override\t10x10\tA\n'
              'lwf/character/enemy/1913/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-rescale\t10x10\tC\n'
              'lwf/character/enemy/1914/wait/wait_a.png\tjp431:lwf/drama/98/98_11.png\tdedup-rescale\t10x10\tC\n')
+# user-approved whole-animation copies (extra_donors_whole.tsv, I-194 23-10): whole-ww-index category 2,
+# whole-same-rig category 3 (reconstruction); 1917: a texture row with another rule -> not a whole copy
+WHL = os.path.join(TMP, 'whole.tsv')
+with open(WHL, 'w', encoding='utf-8') as fh:
+    fh.write('# test\n'
+             'lwf/character/enemy/1915/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-ww-index\tn\n'
+             'lwf/character/enemy/1915/dead/dead_d.png\tjp501:lwf/character/enemy/5915/dead/dead_d.png\twhole-ww-index\tn\n'
+             'lwf/character/enemy/1916/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-same-rig\tn\n'
+             'lwf/character/enemy/1916/dead/dead_d.png\tjp501:lwf/character/enemy/5915/dead/dead_d.png\twhole-same-rig\tn\n'
+             'lwf/character/enemy/1917/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-ww-index\tn\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
-            '--extra', XTR, '--recolour', COL, '--dedup', DDP] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
+            '--extra', XTR, '--recolour', COL, '--dedup', DDP, '--whole', WHL] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
 import make_jp_enemies as m  # noqa: E402
 
@@ -331,6 +341,24 @@ try:
     check(m.extra_donors.category('dedup-rescale') == 3 and m.KIND_CAT['riscalata'] == 3, 'dedup-rescale category 3')
     check('dedup-rescale' not in {v[2] for v in m.EXTRA.values()}, 'dedup-rescale never read from the other tables')
     check(m.override('lwf/character/enemy/1913/wait/wait_a.png') is None, 'a dedup-rescale row is not an override')
+
+    # whole-animation copies (extra_donors_whole.tsv, I-194 23-10): the JP dead folder is absent
+    box('jp501', 'lwf/character/enemy/5915/dead/dead.lwf', lwf('dead_d.png'))
+    qd2 = box('jp501', 'lwf/character/enemy/5915/dead/dead_d.png', b'D2')
+    for fam in ('1915', '1916', '1917'):
+        put(fam + '/wait/wait.lwf', lwf('wait_k.png'))
+        put(fam + '/wait/wait_k.png', b'K')
+        body(fam, skip=('dead',))
+    r, todo = m.plan_enemy(1915)
+    check(r['status'] == 'completo' and r['anims']['dead']['status'] == 'copia intera' and r['category'] == 2
+          and todo.get('lwf/character/enemy/1915/dead/dead_d.png') == qd2, 'whole-ww-index: category 2 (%s)' % r)
+    r, todo = m.plan_enemy(1916)
+    check(r['status'] == 'completo' and r['anims']['dead']['status'] == 'ricostruita intera' and r['category'] == 3,
+          'whole-same-rig: reconstruction, category 3 (%s)' % r)
+    r, todo = m.plan_enemy(1917)
+    check(r['status'] == 'incompleto' and not todo, 'whole copy without its texture rows: incomplete (%s)' % r)
+    check(m.extra_donors.category('whole-ww-index') == 2 and m.extra_donors.category('whole-same-pose') == 2
+          and m.extra_donors.category('whole-same-rig') == 3, 'whole rules categories')
 
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto

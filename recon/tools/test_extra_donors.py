@@ -103,6 +103,29 @@ for fam, src in WHOLE_DEAD.items():
         refs = {m.decode() for m in re.findall(rb'[\w\-.]+\.png', open(src_lwf, 'rb').read())}
         have = {k.rsplit('/', 1)[1] for k in rows}
         check(refs and refs <= have, 'dead generica %d: texture senza riga %s' % (fam, sorted(refs - have)[:3]))
+# user-approved whole-animation copies (extra_donors_whole.tsv, whole_export.py, I-194 23-10): known rules only, every
+# animation has its LWF row and a row for every texture its LWF cites, one source folder per animation, no overlap
+wh = xd.load(xd.WHOLE_TABLE, rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig'})
+check(len(wh) > 300, 'extra_donors_whole.tsv: %d rows' % len(wh))
+check(not set(wh) & (set(ex) | set(dd) | set(rr) | set(rc)), 'whole copies overlap another table')
+anims = {}
+for k, v in wh.items():
+    anims.setdefault(k.rsplit('/', 1)[0], []).append((k, v))
+check(len(anims) == 31, 'whole copies: %d animations (31 approved)' % len(anims))
+for d, rows in anims.items():
+    an = d.rsplit('/', 1)[1]
+    check(any(k == d + '/' + an + '.lwf' for k, _ in rows), 'whole copy without its LWF: ' + d)
+    check(len({v[2] for _, v in rows}) == 1, 'whole copy with mixed rules: ' + d)
+    lw = xd.lookup(wh, d + '/' + an + '.lwf')
+    if lw:
+        import re
+        refs = {m.decode() for m in re.findall(rb'[\w\-.]+\.png', open(lw, 'rb').read())}
+        check(refs <= {k.rsplit('/', 1)[1] for k, _ in rows}, 'whole copy %s: texture without a row' % d)
+check({int(d.split('/')[3]) for d, rows in anims.items() if rows[0][1][2] == 'whole-same-rig'} == {1576, 1578, 1618},
+      'whole-same-rig (category 3) only for 1576, 1578, 1618')
+if os.path.isdir(xd.ROOTS['jp501'][0]):
+    miss = [k for k in wh if not xd.lookup(wh, k)]
+    check(not miss, 'sources missing in extra_donors_whole.tsv: %d (%s)' % (len(miss), miss[:3]))
 if rc and os.path.isdir(xd.ROOTS['recolour'][0]):
     miss = [k for k in rc if not xd.lookup(rc, k)]
     check(not miss, 'sorgenti assenti in jp_recoloured.tsv: %d (%s)' % (len(miss), miss[:3]))
