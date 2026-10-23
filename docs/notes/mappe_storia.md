@@ -828,7 +828,8 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   resources uses the red button texture `But10`; the JP 4.3.1 revision and every Global screenshot (Proud, Story
   «Select a Keyblade.») use the orange `But06`, like Equipment. Fix: new option `restyle=` of `import_jp_coco.py`
   (only for served WW layouts: the widget's textures from the JP revision, texts and positions stay WW) on the three
-  layouts. Needs a new resources version.
+  layouts. Built in resources 62 and verified on the bench 23-10 (Story Q595 and Proud Q979 start popups: Optimize
+  orange like Equipment).
 - **Objectives**: Proud 979 «Complete within 3 turns / Complete without having to continue» x 2 is what the khuxwiki page
   lists in both the NA and the JP fields; 19 Proud pages repeat an objective (66, 142, 904, 909, 925, 963-974, 977, 979).
   The /Archive pages show that an official update replaced early objectives (e.g. «Defeat N or more enemies» -> «Collect
