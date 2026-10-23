@@ -361,6 +361,33 @@ assert.equal(fmbCount(), 0, 'two Fantasia Mickey B consumed');
 assert.ok(r.attachmentMedalIds.includes(cell2.userMedalId), 'the empty stack cell is removed');
 log('13. Evolve with Fantasia Mickey B: SN++ - KH III Terra (1), HD Roxas (2), stack consumed copy by copy');
 
+// 14. Evolutions added from the khuxwiki (I-205, 23-10). Blue Fairy LV 1 -> LV 2 with five LV 1 of its own stack:
+// the base is the head of the cell the client also sends five times as material, never consumed as one of them.
+// Pongo + three Puppy 5★ + Perdita -> 101 Dalmatians and Meow Wow + KH 3D Sora + KH 3D Riku 6★ -> Sora & Riku & Meow Wow:
+// one copy of each different medal
+const BF1 = 301495, BF2 = 301496;
+assert.deepEqual([byId.get(BF1).evolveId, byId.get(BF1).validEvolveNeed, byId.get(BF1).evolveNeedId], [BF2, 5, Array(5).fill(BF1)]);
+const bfCount = (id) => t.userMedalList().filter((m) => m.medalId === id).length;
+give(BF1, 7);
+const bfCell = t.stackedMedalList().find((c) => c.medalId === BF1);
+assert.equal(bfCell.number, 7, 'one Blue Fairy LV 1 stack');
+const money0 = p.money;
+r = evolve(bfCell.userMedalId, Array(5).fill(bfCell.userMedalId));
+assert.equal(state(bfCell.userMedalId).medalId, BF2, 'the base became LV 2');
+assert.equal(bfCount(BF1), 1, 'five LV 1 consumed, the base not among them');
+assert.equal(p.money, money0 - byId.get(BF1).evolveMoney, 'evolveMoney of the row');
+assert.ok(r.userMedals.some((m) => m.medalId === BF1 && m.number === 1), 'the LV 1 copy left arrives as its own cell');
+const dal = [301366, 301363, 301364, 301365, 301367].map((id) => give(id)[0]);
+r = evolve(dal[0], dal.slice(1));
+assert.equal(state(dal[0]).medalId, 301368, 'Pongo -> 101 Dalmatians');
+assert.ok(dal.slice(1).every((id) => !state(id)), 'three Puppy 5★ + Perdita consumed');
+assert.deepEqual([...r.attachmentMedalIds].sort(), dal.slice(1).sort(), 'consumed cells removed');
+const trio = [23086, 22086, 21086].map((id) => give(id)[0]);
+r = evolve(trio[0], trio.slice(1));
+assert.equal(state(trio[0]).medalId, 300826, 'Meow Wow -> Sora & Riku & Meow Wow');
+assert.ok(!state(trio[1]) && !state(trio[2]), 'KH 3D Sora + Riku consumed');
+log('14. Added evolutions: Blue Fairy LV 1 -> 2 on its own stack, Pongo + Puppies + Perdita, Meow Wow + KH 3D Sora/Riku');
+
 // medaglia 1 (Stock Medal) intatta
 assert.equal(byId.get(1).imageId, 90000);
 try { fs.unlinkSync(SAVE); } catch {}

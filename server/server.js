@@ -3216,12 +3216,16 @@ function respondMedalEvolve(res, body) {
   const list = new Map(userMedalList().map((m) => [m.userMedalId, m]));
   const base = list.get(Number(body?.baseUserMedalId));
   const cells = (body?.attachmentMedalIds || []).map(Number);
-  // celle impilate: una copia per ogni volta che la cella compare nell'elenco
+  // celle impilate: una copia per ogni volta che la cella compare nell'elenco. La base non e' mai un materiale:
+  // Blue Fairy LV n -> n+1 e Chip/Dale evolvono con copie della propria pila (la cella e' la base stessa, I-205)
   const used = new Map();
+  const stacks = stackedMedalList();
   const comps = cells.map((id) => {
-    const copies = stackCopies(id, (used.get(id) || 0) + 1);
-    used.set(id, copies.length);
-    return list.get(copies[copies.length - 1]);
+    const k = (used.get(id) || 0) + 1;
+    used.set(id, k);
+    const cell = stacks.find((m) => m.userMedalId === id);
+    const pool = (cell ? cell.copies : [id]).filter((x) => x !== base?.userMedalId);
+    return list.get(pool[k - 1]);
   }).filter(Boolean);
   const now = serverTime();
   const row = base && rows.get(base.medalId);
