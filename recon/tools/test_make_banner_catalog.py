@@ -66,6 +66,10 @@ STORY = [[1, 200, '2016-04-07'], [201, 250, '2016-04-21'], [251, 300, '2016-05-1
 check(m.unlock_quest('2016-04-20', STORY) == 0, 'sblocco nel lancio')
 check(m.unlock_quest('2016-04-21', STORY) == 200, 'sblocco tranche 201-250')
 check(m.unlock_quest('2016-05-12', STORY) == 250, 'sblocco tranche 251-300')
+# righe con la stessa data = una tranche (716-725 e 726-730 il 2018-01-11): la prima, come storyDay del server (I-084)
+TIED = [[706, 715, '2017-12-14'], [716, 725, '2018-01-11'], [726, 730, '2018-01-11'], [731, 735, '2018-03-14']]
+check(m.unlock_quest('2018-03-13', TIED) == 715, 'sblocco tranche con due righe alla stessa data: 715')
+check(m.unlock_quest('2018-03-14', TIED) == 730, 'sblocco tranche 731-735')
 
 # --- limite giornaliero
 check(m.day_limit('You may draw ONCE per day', 'FEATURED') == 1 and m.day_limit('Top-Drawer 3 times per day', 'DAILY') == 3,

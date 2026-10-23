@@ -83,7 +83,8 @@ saved.forEach((d, i) => { medalFrom[i] = d; });
 const gachaMod = require('./gacha');
 const cat = t.gachaCatalog().banners, sizes = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 check(gachaMod.ticketUnlockQuest(cat, 40, sizes) === 815, `ticketUnlockQuest 40 = ${gachaMod.ticketUnlockQuest(cat, 40, sizes)}, atteso 815`);
-check(gachaMod.ticketUnlockQuest(cat, 41, sizes) === 840, `ticketUnlockQuest 41 = ${gachaMod.ticketUnlockQuest(cat, 41, sizes)}, atteso 840`);
+// 835: tranche 836-845 del 2019-02-21 (due righe alla stessa data = una tranche, I-084 23-10; prima 840)
+check(gachaMod.ticketUnlockQuest(cat, 41, sizes) === 835, `ticketUnlockQuest 41 = ${gachaMod.ticketUnlockQuest(cat, 41, sizes)}, atteso 835`);
 check(gachaMod.ticketUnlockQuest(cat, 99, sizes) === Infinity, 'rewardType senza biglietto: Infinity');
 const w01 = weekly.findIndex((ids) => ids.includes(4059)), w02 = weekly.findIndex((ids) => ids.includes(4091));
 const clk = require('./clock');
@@ -94,11 +95,11 @@ for (const [quest, want] of [[525, false], [814, false], [840, true]]) {
     if (wi < 0) { check(false, 'W01/W02 non trovate'); continue; }
     at(weekOf(wi));
     const got = quiet(() => t.missionsData()).map((m) => m.id);
-    if (quest === 814 && ids[0] === 4091) continue; // 815 sblocca solo i Platinum: i Draw Ticket servono 840
+    if (quest === 814 && ids[0] === 4091) continue; // 815 sblocca solo i Platinum: i Draw Ticket servono 835
     check(ids.every((id) => got.includes(id) === want), `quest ${quest}, settimana ${wi}: righe ${ids} ${want ? 'attese' : 'assenti'} (${ids.map((id) => got.includes(id))})`);
   }
 }
-// storia vera fino alla 979 (piano 526-979): con le righe 840 del master superata, senza forzare, i Draw Ticket si sbloccano
+// storia vera fino alla 979 (piano 526-979): con la 835 del master superata, senza forzare, i Draw Ticket si sbloccano
 {
   const s840 = t.masterRows('stage').find((r) => r.stageKind === 1 && r.id === 840);
   if (!s840) log('SKIP storia vera: master senza la missione 840 (righe 526-979 di make-story-oltre.js)');
@@ -106,7 +107,7 @@ for (const [quest, want] of [[525, false], [814, false], [840, true]]) {
     t.forceStoryQuest(null);
     const keep = t.player.stageScores;
     const wi = w02;
-    for (const [n, want] of [[839, false], [840, true]]) {
+    for (const [n, want] of [[834, false], [835, true]]) {
       t.player.stageScores = Object.fromEntries(t.masterRows('stage').filter((r) => r.stageKind === 1 && r.id <= n).map((r) => [r.stageId, 1]));
       at(weekOf(wi));
       const got = quiet(() => t.missionsData()).map((m) => m.id);

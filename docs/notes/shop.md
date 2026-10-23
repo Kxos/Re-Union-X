@@ -154,7 +154,8 @@ Spec: [shop-banner-design](../superpowers/specs/2026-10-16-shop-banner-design.md
 (first date of each rarity: 6★ since 15/07/2016, 7★ since 25/05/2018), `story` (quest tranches with their date), `subsets`,
 `medals` (by name: `ids` [id, rarity, date], `std`, `alias`, `origin`, `att`) and 808 `banners`: `rowId` B0001-B0808,
 `drawMedalTypeId`, `name`, `type`, `start`/`end`, `unlockQuest` (first quest of the tranche running at the start of the
-banner - 1, user's decision of 17-10; 85 unlocked by quest 525), `payType`/`currency`, `prices`
+banner - 1, user's decision of 17-10; story rows with the same date are one tranche, the first row counts: fixed 23-10,
+[medaglie](medaglie.md#trait-deals); 85 unlocked by quest 525), `payType`/`currency`, `prices`
 (steps), `lotCount`, `rarityMix`, `dayLimit`, `totalLimit`, `vipFree`, `pool` (`mode` sets/inherit/released/list/
 evolve, `filter`), `guarantee` (list, count, slot, pity, every), `skill`, `bonus`, `catalogOnly`. **Drawable only with
 `catalogOnly === null`** (never look at `flags`, which can keep INCOMPLETE on rows completed by the overrides).
@@ -867,7 +868,8 @@ slow cases (~9 s) are intermittent and coincide with a failing Google Play Servi
     seasonal ones (the precedence of the payType 8 currencies stays season > pinned > rotation); plate with
     `/web/gacha/img/<id>-kept2.png` (label C3c, `recon/tools/kept_banner_badge.py`, cache in
     `server/game_data/gacha_img_kept/`; `KEPT_STYLE` in gacha.js to be raised at every new drawing);
-  - Limited with Platinum/Draw Ticket only from quest 815/840 (thresholds from the catalogue, `ticketUnlockQuest`);
+  - Limited with Platinum/Draw Ticket only from quest 815/840 (thresholds from the catalogue, `ticketUnlockQuest`; Draw Ticket
+    835 since 23-10, unlock-quest fix of [medaglie](medaglie.md#trait-deals));
   - Catalog with GAME YEAR tabs (hidden if empty), Filters panel, search by medal (`/web/gacha/search`);
   - the draw also accepts the banners of the last `/gacha/list` sent to the client (Shop page not reloaded).
 - **Test save `prove525`**: `prove.json` with `stageScores` of all 525 quests (created on 20-10 with a

@@ -336,9 +336,82 @@ STR/DEF 1, cost 999, 15 Pet Points, «Lesser Attack» x1.00 at 1 gauge. About 31
   Paralysis Resist 20% (slot 1/2) + 1 dot + EXP (Great x1.5). Deal B0513: Details «Guarantees one Trait Medal #106», the
   draw gives the 7★ and #106. In the Level Up the materials are added by dragging them onto the slot (`Swipe 1430 410 240 630 900`).
 - Limit (until 21-10): the Trait deals (from 13-3-2018) were beyond the date of the story (quest 525 = 8-12-2016), so they
-  could not be reached by playing (only with `-GachaShow`); with quests 526-979 they unlock with the story (e.g. B0259,
-  `unlockQuest` 725 in `server/game_data/gacha_catalog.json`), not yet seen on the bench; the original Moogle Shop also sold them («Trait Medal #N x10», 1,000
-  jewels, in the deal window; khuxwiki for #189-#313): not done yet.
+  could not be reached by playing (only with `-GachaShow`); with quests 526-979 they unlock with the story (below). The
+  original Moogle Shop also sold them («Trait Medal #N x10», 1,000 jewels, in the deal window; khuxwiki for #189-#313): not
+  done yet (I-164).
+
+<a id="trait-deals"></a>
+### Trait deals with the story 526-979 (offline check 23-10)
+
+Test `node server/test-trait-deals.js` (real catalogue and master, temporary save; `--list` prints the full table deal /
+name / Trait Medal / unlock quest / first Shop week). The Shop choice depends on the story point (tranche of
+`catalog.story`), on the weekly rotation (`player.gacha.rot`, one week of the original period per real Monday, I-165) and on
+the real calendar only for the seasons: the fake «twin month» date ([server](server.md#orologio)) does not enter it (it is
+only the countdown under the plate). For each deal the test checks, through `storyCtx` + `gachaShopList` (the same choice as
+`GET /gacha/list`): in the Shop at the first quest of the tranche whose period contains its dates, in the first rotation week
+that overlaps them; absent one quest earlier in every week; absent in the weeks outside its dates; the recipe expands and each
+Trait Medal #N has its row (9000000+N, type 9); end to end B0259 at quest 716 week 9 (plate 3,000 Jewels, 5 draws give
+Trait Medal #1 by the pity) and B0293 (Trait slot, #10 in one draw).
+
+- **262 deals** with a «trait medal #N» in the recipe (152 distinct numbers, #1-#302, all from 13-3-2018): **233 reach the
+  Shop**, the other 29 are VIP twins (`catalogOnly` VIP_TWIN), each with a drawable twin with the same Trait Medal and start.
+  Only 2 rotation weeks lose a Trait deal to the 20-plate limit (B0732 week 4 and B0746 week 9 of 2020-10-08, the busiest
+  period): both are listed in another week of it. Shop seasons (real calendar) can take more plates in those weeks. Lot 5 deals (B0543, B0565, B0585 «Trait Medal Deal»)
+  need the sizes 1-10 of `run-server.ps1` (with `KHUX_GACHA_SIZES=1,3,10` they stay out).
+- **Bug fixed 23-10 (unlock quest)**: `unlock_quest` of `make_banner_catalog.py` took the last story row dated before the
+  banner; where two rows share the date (571-585/586-600, 716-725/726-730, 836-840/841-845, 866-870/871-875, 951-955/956-960,
+  961-965/966-970) the banners of that period unlocked only at the second row (e.g. B0259 at 725), while the server shows
+  the whole period from its first quest: for quests 716-724 the Shop had 1 plate from week 4 on, for 961-964 none. Now the
+  first row (B0259 715, 101 banners lowered: 585->570, 725->715, 840->835, 870->865, 955->950, 965->960, 34 Trait deals);
+  the local catalogue was patched in place with the same rule (identical to a regeneration), the Limited Draw Ticket
+  missions now open at 835 (was 840, `test-limited.js`). No master change.
+- Not reproduced (described, no fix): B0273, B0284, B0288 («EX Medal Deal») say that Trait Medal #4/#2/#3 drawn there comes
+  without reinforcement, so those Trait Medals were in their pool, but the recipe does not contain them (#4 is in no deal);
+  the Ticket Draws B0478, B0488, B0489, B0536, B0537, B0577, B0578 «draw from ... Trait Medals» without saying which (5★
+  slot: none drawn); B0543/B0565/B0585 give 5 Trait Medals but not the «5 Limited VIP Coins» of the notice (the coin is a
+  pool name, never drawn because every slot is a Trait slot). 161 Trait Medals are in no deal (events, Moogle Shop: I-164).
+
+First Shop week of each drawable Trait deal (unlock quest = first quest of the tranche - 1; «wN» = week N of the rotation
+after entering the tranche, real Mondays; a deal that runs past the end of its period also comes back in week 1 of the next):
+
+| Tranche | Quests | Unlock quest | Weeks | Deals first in the Shop (Trait Medal, rotation week) |
+|---|---|---|---|---|
+| 2018-01-11 | 716-730 | 715 | 9 | B0259 #1 w9 |
+| 2018-03-14 | 731-735 | 730 | 5 | B0266 #2 w2; B0267 #2 w2; B0269 #3 w3 |
+| 2018-04-12 | 736-750 | 735 | 4 | B0278 #5 w1; B0279 #7 w1; B0280 #6 w1; B0283 #8 w2; B0292 #9 w2; B0293 #10 w3; B0294 #11 w3; B0295 #12 w3; B0296 #13 w3; B0299 #14 w4; B0300 #15 w4 |
+| 2018-05-10 | 751-760 | 750 | 6 | B0303 #16 w1; B0324 #18 w5; B0327 #10 w6; B0328 #11 w6; B0329 #12 w6; B0330 #13 w6; B0331 #14 w6; B0332 #15 w6 |
+| 2018-06-21 | 761-775 | 760 | 4 | B0333 #19 w1; B0343 #20 w2; B0352 #22 w4; B0353 #23 w4 |
+| 2018-07-19 | 776-780 | 775 | 4 | B0361 #26 w2; B0362 #19 w2; B0363 #20 w2; B0369 #26 w4; B0371 #30 w4 |
+| 2018-08-16 | 781-790 | 780 | 5 | B0374 #31 w1; B0379 #19 w2; B0380 #20 w2; B0384 #33 w3; B0386 #34 w4; B0387 #37 w4; B0388 #36 w4; B0389 #38 w5 |
+| 2018-09-14 | 791-800 | 790 | 4 | B0390 #39 w1; B0391 #40 w1; B0394 #43 w2; B0395 #44 w3; B0396 #45 w3; B0397 #48 w4 |
+| 2018-10-11 | 801-805 | 800 | 4 | B0399 #49 w1; B0402 #19 w3; B0403 #20 w3; B0411 #52 w3; B0412 #54 w4 |
+| 2018-11-08 | 806-810 | 805 | 4 | B0415 #57 w1; B0419 #39 w3; B0420 #34 w3; B0421 #40 w3; B0422 #37 w3; B0423 #36 w3; B0424 #33 w3; B0425 #52 w3; B0426 #58 w3; B0427 #48 w3 |
+| 2018-12-05 | 811-815 | 810 | 6 | B0428 #61 w1; B0430 #63 w1; B0432 #65 w2; B0433 #48 w2; B0435 #66 w3; B0438 #67 w3; B0440 #61 w4; B0442 #69 w4; B0443 #70 w4; B0444 #71 w4; B0445 #52 w5 |
+| 2019-01-10 | 816-825 | 815 | 4 | B0448 #77 w1; B0449 #58 w1; B0452 #66 w2; B0457 #67 w3; B0458 #61 w3; B0459 #82 w4 |
+| 2019-02-07 | 826-835 | 825 | 2 | B0462 #71 w1; B0463 #84 w1; B0464 #85 w2 |
+| 2019-02-21 | 836-845 | 835 | 6 | B0466 #86 w1; B0468 #52 w1; B0470 #52 w1; B0472 #89 w2; B0474 #70 w2; B0476 #58 w3; B0480 #90 w3; B0483 #66 w5 |
+| 2019-04-18 | 851-855 | 850 | 6 | B0501 #100 w1; B0502 #69 w1; B0503 #70 w1; B0504 #71 w1; B0505 #103 w2; B0508 #103 w2; B0512 #107 w4; B0513 #106 w4; B0514 #109 w5; B0517 #110 w6 |
+| 2019-05-29 | 856-860 | 855 | 3 | B0527 #116 w2 |
+| 2019-06-13 | 861-865 | 860 | 4 | B0528 #118 w1; B0529 #89 w1; B0530 #119 w1; B0531 #98 w1; B0532 #120 w2; B0534 #67 w2; B0535 #61 w2; B0538 #121 w3; B0540 #122 w3; B0543 #123 w3; B0544 #124 w4 |
+| 2019-07-11 | 866-875 | 865 | 2 | B0546 #126 w1; B0547 #125 w1; B0551 #127 w2; B0553 #128 w2 |
+| 2019-07-25 | 876-880 | 875 | 8 | B0556 #109 w1; B0557 #92 w1; B0558 #48 w1; B0559 #110 w1; B0560 #97 w1; B0561 #94 w1; B0563 #129 w2; B0565 #130 w2; B0566 #132 w3; B0567 #131 w3; B0568 #133 w3; B0570 #134 w4; B0573 #121 w5; B0574 #135 w5; B0579 #139 w6; B0580 #136 w6; B0581 #140 w6; B0582 #138 w6; B0583 #137 w6; B0585 #141 w6; B0586 #127 w7; B0587 #128 w7; B0588 #123 w7 |
+| 2019-09-19 | 881-885 | 880 | 4 | B0593 #120 w1; B0595 #129 w1; B0597 #147 w2; B0598 #148 w2; B0600 #149 w2; B0601 #150 w2; B0602 #137 w3; B0603 #138 w3; B0606 #153 w4; B0607 #152 w4; B0608 #154 w4; B0609 #136 w4; B0610 #140 w4 |
+| 2019-10-17 | 886-890 | 885 | 4 | B0613 #155 w2; B0614 #157 w3; B0615 #157 w3; B0616 #158 w4 |
+| 2019-11-14 | 891-895 | 890 | 5 | B0619 #159 w1; B0621 #160 w2; B0622 #162 w3; B0626 #164 w5; B0627 #159 w5 |
+| 2019-12-19 | 896-900 | 895 | 6 | B0628 #157 w1; B0630 #170 w2; B0632 #174 w4; B0633 #172 w4; B0634 #173 w4; B0635 #160 w4; B0636 #176 w5; B0637 #177 w6 |
+| 2020-01-30 | 901-905 | 900 | 4 | B0638 #179 w1; B0640 #174 w2; B0641 #172 w2; B0642 #173 w2; B0643 #180 w3 |
+| 2020-02-27 | 906-910 | 905 | 4 | B0646 #185 w1; B0647 #186 w3; B0648 #187 w4 |
+| 2020-03-26 | 911-915 | 910 | 5 | B0649 #188 w1; B0650 #190 w1; B0653 #174 w3; B0654 #172 w3; B0655 #173 w3; B0656 #196 w4; B0657 #197 w4; B0658 #179 w4; B0659 #198 w5 |
+| 2020-04-30 | 916-920 | 915 | 6 | B0661 #200 w1; B0664 #162 w2; B0665 #202 w3; B0666 #201 w3; B0670 #204 w4; B0671 #203 w4; B0672 #206 w5; B0673 #180 w6; B0674 #209 w6; B0675 #210 w6 |
+| 2020-06-11 | 921-925 | 920 | 5 | B0676 #212 w1; B0677 #213 w1; B0679 #190 w2; B0681 #214 w2; B0682 #170 w3; B0684 #216 w3; B0685 #188 w4; B0687 #218 w5; B0688 #196 w5; B0689 #197 w5 |
+| 2020-07-16 | 926-930 | 925 | 6 | B0690 #219 w1; B0691 #220 w2; B0692 #223 w3; B0693 #224 w3; B0694 #225 w3; B0699 #226 w5 |
+| 2020-08-27 | 931-935 | 930 | 1 | B0704 #233 w1; B0705 #232 w1; B0706 #231 w1 |
+| 2020-09-03 | 936-940 | 935 | 5 | B0708 #233 w1; B0709 #232 w1; B0710 #231 w1; B0712 #234 w1; B0714 #174 w1; B0715 #172 w1; B0716 #173 w1; B0717 #179 w1; B0718 #237 w2; B0719 #235 w2; B0720 #236 w2; B0722 #247 w3; B0723 #248 w3; B0724 #249 w3 |
+| 2020-10-08 | 941-945 | 940 | 10 | B0732 #254 w1; B0746 #263 w4; B0759 #283 w9 |
+| 2020-12-17 | 946-950 | 945 | 6 | B0787 #302 w5 |
+| 2021-01-28 | 951-960 | 950 | 4 | B0801 #103 w2 |
+
+VIP twins (never in the Shop, Trait Medal drawable from the twin): B0429, B0431, B0434, B0436, B0439, B0441, B0446, B0450, B0453, B0467, B0469, B0471, B0473, B0475, B0477, B0484, B0506, B0509, B0515, B0518, B0533, B0539, B0541, B0552, B0554, B0571, B0575, B0617, B0620.
 
 <a id="skill"></a>
 ## Skills and Overwrite Skill of the Level Up (I-088)
