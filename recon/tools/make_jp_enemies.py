@@ -121,14 +121,15 @@ DONORS = jp_dedup_donors.load(jp_dedup_donors.TABLE if a.donors is None else a.d
 import jp_reconstructed  # noqa: E402
 RECON = jp_reconstructed.load(jp_reconstructed.TABLE if a.recon is None else a.recon)
 import extra_donors  # noqa: E402
-EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole'})
+EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override'})
 # original copies found by content (deep_donors.py: rules content-anchor and bracket, category 2); extra_donors.tsv
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
                                rules={'content-anchor', 'bracket'}), **EXTRA)
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
-# category 2, read last among the copies (never overrides a file or a row of the tables above)
-DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup, rules={'dedup-order'})
+# category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
+# rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
+DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup, rules={'dedup-order', 'dedup-override'})
 RECOL = extra_donors.load(extra_donors.RECOLOUR_TABLE if a.recolour is None else a.recolour, rules={'recolour', 'recolour-whole'})
 ROOTS = dict(extra_donors.ROOTS, jp431=[a.jp_root])
 for _x in a.src_root:
@@ -153,6 +154,12 @@ def extra(published, table=None):
     t = EXTRA if table is None else table
     p = extra_donors.lookup(t, published, ROOTS)
     return (p, extra_donors.category(t[published][2])) if p else (None, None)
+
+
+def override(published):
+    """user-approved replacement of a piece another source supplies (dedup-override rows) -> path or None."""
+    v = DEDUP.get(published)
+    return extra_donors.lookup(DEDUP, published, ROOTS) if v and v[2] == 'dedup-override' else None
 
 
 def listing(p):
@@ -242,6 +249,9 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
     ricolorate con le misure dichiarate (+-2 px); le ricostruite no (ombre scalate)."""
     def fit(q):
         return dims is None or fits(q, dims.get(t))
+    op = override(pre + t)
+    if op and fit(op):
+        return op, 'dedup'
     if t in jp:
         return jp[t], 'jp'
     xp, xc = extra(pre + t)
@@ -291,7 +301,7 @@ def plan_anim(root_rel, anim, jp_all):
         todo, miss = {pre + lw: jl}, []
         for t in refs:
             p = jp.get(t) or (b.get(t) if same_b else None)
-            if p:
+            if p and not override(pre + t):
                 todo[pre + t] = p
             else:
                 miss.append(t)

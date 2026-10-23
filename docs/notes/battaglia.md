@@ -484,7 +484,7 @@ append mode: rows already approved are kept, `--rebuild` starts again). Skipped:
 duplicates, extra/deep copies, **dedup**, then reconstructed and recoloured; `--dedup ''` excludes it), so it never
 replaces an original file or a row of the other tables. First approval 23-10 (63 families, 2,350 rows): complete
 **164** (123/24/6/11), +15: 208, 1525, 1541, 1549, 1561, 1577, 1611, 1614, 1619, 1624, 1625, 1650 and the Ralph allies
-2013, 2016, 2018; master revision 184.
+2013, 2016, 2018; master revision 184. Second review 23-10: `dedup_export.py` merges the review override files (`tmp\dedup\review\overrides_*.tsv`, same columns + `note`, per-key replacement, later file wins) and recomputes the rows of every reviewed family; allow-list markers `<fam>:!<marker>` (leave out) and `<fam>:+<marker>` (rule **`dedup-override`**: wins over every other source for that path, size still checked; used only for the six 1636 wait pieces, user's decision). 3,642 rows, complete **173** (123/33/6/11).
 
 <a id="alleati-20xx"></a>
 ## Families 2001-2024: characters in story quests (I-199, 22-10)

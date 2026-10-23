@@ -29,11 +29,31 @@ check(de.allowed(allow, '1504', 'wait') and de.allowed(allow, '1504', 'dead') an
 check(de.allowed(allow, '1550', 'wait') and not de.allowed(allow, '1550', 'dead'), 'exclusion: %s' % (allow.get('1550'),))
 check(not de.allowed(allow, '2004', 'wait') and de.allowed(allow, '2004', 'atk1_o'), 'exclusion 2004')
 check(not de.allowed(allow, '1520', 'wait'), 'family not in the list')
-try:
-    de.parse_allow(['15x0'])
-    errors.append('bad family accepted')
-except ValueError:
-    pass
+for bad in ('15x0', '1502:!', '1502:+', '1502:-'):
+    try:
+        de.parse_allow([bad])
+        errors.append('bad entry accepted: %r' % bad)
+    except ValueError:
+        pass
+# note markers: `!m` leaves the rows out, `+m` exports them as dedup-override; a family with markers only is whole
+mk = de.parse_allow(['1609:!Piece-Missing', '1636', '1636:+replace-survivor'])
+check(de.allowed(mk, '1609', 'wait') and not de.allowed(mk, '1609', 'wait', {'method': 'review_B', 'note': 'a piece-missing x'})
+      and de.allowed(mk, '1609', 'wait', {'method': 'rerun', 'note': 'ok'}), 'marker exclusion: %s' % (mk.get('1609'),))
+check(de.allowed(mk, '1636', 'wait', {'method': 'review:replace-survivor'}), '+marker rows stay allowed')
+
+# merge: an override row replaces the proposal row of the same key, DROP removes the pick, a later file wins,
+# proposal rows not named stay; the families of the override files are the reviewed ones
+P = [{'family': '1611', 'anim': 'wait', 'texname': 'a', 'source': 'old_a'},
+     {'family': '1611', 'anim': 'wait', 'texname': 'b', 'source': 'old_b'},
+     {'family': '1611', 'anim': 'dead', 'texname': 'c', 'source': 'old_c'},
+     {'family': '1502', 'anim': 'wait', 'texname': 'a', 'source': 'p'}]
+OA = [{'family': '1611', 'anim': 'wait', 'texname': 'a', 'source': 'new_a'},
+      {'family': '1611', 'anim': 'dead', 'texname': 'c', 'source': 'DROP'}]
+OC = [{'family': '1611', 'anim': 'wait', 'texname': 'a', 'source': 'newer_a'}]
+mg, rv = de.merge(P, [OA, OC])
+mm = {(r['family'], r['anim'], r['texname']): r['source'] for r in mg}
+check(mm == {('1611', 'wait', 'a'): 'newer_a', ('1611', 'wait', 'b'): 'old_b', ('1611', 'dead', 'c'): '',
+             ('1502', 'wait', 'a'): 'p'} and rv == {'1611'}, 'merge: %s %s' % (mm, rv))
 
 TMP = tempfile.mkdtemp(prefix='dedupx-', dir=r'D:\Progetto_Restauro_KH_UX\tmp' if os.path.isdir(r'D:\Progetto_Restauro_KH_UX\tmp') else None)
 try:
@@ -62,6 +82,10 @@ try:
     def cont(p):
         return ('jp431', p[len('R/jp/'):]) if p.startswith('R/jp/') else (None, None)
     out, sk = de.export(rows, allow, cont, size_ok=lambda p, s: 'big' not in p)
+    # +marker -> rule dedup-override, only for the marked rows of that family
+    ov_rows = [dict(rows[0], family='1636', method='review:replace-survivor'), dict(rows[0], family='1636', texname='w2.png')]
+    ovo, _ = de.export(ov_rows, mk, cont, size_ok=lambda p, s: True)
+    check(sorted(v[2] for v in ovo.values()) == ['dedup-order', 'dedup-override'], 'override rule: %s' % ovo)
     pub = 'lwf/character/enemy/1502/wait/wait_1.png'
     check(list(out) == [pub] and out[pub] == (pub, 'jp431:x/a.png', 'dedup-order', '97x24', 'A'), 'export: %s' % out)
     check(sorted(s[2].split(':')[0] for s in sk) == ['no source proposed', 'outside the extra_donors.py containers',
@@ -89,9 +113,22 @@ try:
     real_fits = de.fits
     de.fits = lambda p, s: True
     try:
-        de.main(['--proposal', prop, '--approved', al, '--out', tab])
+        de.main(['--proposal', prop, '--approved', al, '--out', tab, '--overrides', os.devnull])
         check(de.read_table(tab)[pub][1] == 'jp431:x/a.png', 'append: the approved row already in the table is kept')
-        de.main(['--proposal', prop, '--approved', al, '--out', tab, '--rebuild'])
+        # a reviewed family (named in an override file): its old rows are recomputed in append mode too
+        ovp = os.path.join(TMP, 'overrides_A.tsv')
+        with open(ovp, 'w', encoding='utf-8') as fh:
+            fh.write('family\tanim\ttexname\tsize\tsource\tdonor_lwf\tmethod\tconfidence\tscore\tnote\n'
+                     '1502\twait\twait_1.png\t97x24\t%s\t\treview\tA\t\tfix\n' % os.path.join(xd.ROOTS['jp431'][0], 'z', 'fix.png'))
+        de.main(['--proposal', prop, '--approved', al, '--out', tab, '--overrides', ovp])
+        check(de.read_table(tab)[pub][1] == 'jp431:z/fix.png', 'reviewed row replaces the old one: %s' % (de.read_table(tab)[pub],))
+        with open(al, 'w', encoding='utf-8') as fh:
+            fh.write('1502:-wait\n')
+        de.main(['--proposal', prop, '--approved', al, '--out', tab, '--overrides', ovp])
+        check(pub not in de.read_table(tab), 'reviewed key now excluded leaves the table')
+        with open(al, 'w', encoding='utf-8') as fh:
+            fh.write('1502\n')
+        de.main(['--proposal', prop, '--approved', al, '--out', tab, '--rebuild', '--overrides', os.devnull])
         check(de.read_table(tab)[pub][1] == 'jp431:y/other.png', '--rebuild: %s' % (de.read_table(tab)[pub],))
     finally:
         de.fits = real_fits
@@ -101,17 +138,19 @@ finally:
 
 # the versioned table: loads, every row approved by the allow-list and never a family under review
 real_allow = de.parse_allow(open(de.APPROVED, encoding='utf-8'))
-t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order'})
-check(len(t) > 2000, 'versioned table rows: %d' % len(t))
+t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override'})
+check(len(t) > 3500, 'versioned table rows: %d' % len(t))
 bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4])]
 check(not bad, 'rows outside the allow-list: %s' % bad[:3])
-under_review = {'251', '285', '1500', '1520', '1521', '1532', '1536', '1537', '1544', '1558', '1563', '1609', '1612', '1615',
-                '1618', '1620', '1629', '1636', '1643', '1645', '2008', '2011', '2012', '2014', '2015', '2017', '2019',
-                '2020', '2021', '2022', '2023', '2024', '2502', '2509'}
-check(not (under_review & set(real_allow)), 'families under review in the 23-10 allow-list: %s' % (under_review & set(real_allow)))
-check(not [k for k in t if k.startswith(('lwf/character/enemy/1550/dead/', 'lwf/character/enemy/2004/wait/'))],
-      'excluded animations (1550 dead, 2004 wait) in the table')
-check(all(v[0] in ('jp431', 'jp501', 'b2016') for v in t.values()), 'containers')
+under_review = {'1609', '1643'}       # 23-10 second review: 1609 (a piece missing) and 1643 (not reviewed)
+check(not (under_review & set(real_allow)), 'families under review in the allow-list: %s' % (under_review & set(real_allow)))
+held = ['1612/wait/', '1651/dead/'] + ['%s/atk1_o/' % f for f in ('2004', '2014', '2015', '2017', '2019', '2020', '2021')]
+check(not [k for k in t if k.startswith(tuple('lwf/character/enemy/' + h for h in held))],
+      'animations held for another review round in the table')
+check(any(k.startswith('lwf/character/enemy/1550/dead/') for k in t), '1550 dead approved by the second review')
+ovr = sorted(k for k, v in t.items() if v[2] == 'dedup-override')
+check(len(ovr) == 6 and all(k.startswith('lwf/character/enemy/1636/wait/') for k in ovr), 'dedup-override rows: %s' % ovr)
+check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values()), 'containers')
 
 if errors:
     print('ERRORS (%d)' % len(errors))

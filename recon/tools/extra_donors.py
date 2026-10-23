@@ -50,7 +50,10 @@ ROOTS = {
     'recolour': [os.path.join(D, 'enemy_gen_src', 'recolour')],
 }
 RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'donor&order': 2, 'twinfam': 2,
-         'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4}
+         'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4,
+         # dedup-override: user-approved reviewed row (extra_donors_dedup.tsv only) that wins over every other source
+         # for that exact path (23-10, 1636 wait: the deep-table "survivors" were drama decorations, a dedup mix-up)
+         'dedup-override': 2}
 
 
 def category(rule):

@@ -45,7 +45,8 @@ with open(XTR, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1902/wait/wait.lwf\tww501:lwf/character/enemy/5902/wait/wait.lwf\twhole-dr-twin\tn\n'
              'lwf/character/enemy/1902/wait/wait_w.png\tww501:lwf/character/enemy/5902/wait/wait_w.png\twhole-dr-twin\tn\n'
              'lwf/character/enemy/1903/wait/wait_1.png\tjp501:lwf/character/enemy/5903/wait/wait_1.png\ttwinfam\tn\n'
-             'lwf/character/enemy/1906/wait/wait_a.png\tww501:lwf/character/enemy/5901/wait/wait_a.png\ttwinfam\tn\n')
+             'lwf/character/enemy/1906/wait/wait_a.png\tww501:lwf/character/enemy/5901/wait/wait_a.png\ttwinfam\tn\n'
+             'lwf/character/enemy/1910/wait/wait_a.png\tww501:lwf/character/enemy/5901/wait/wait_a.png\ttwinfam\tn\n')
 COL = os.path.join(TMP, 'recol.tsv')
 with open(COL, 'w', encoding='utf-8') as fh:
     fh.write('# prova\n'
@@ -59,7 +60,10 @@ with open(DDP, 'w', encoding='utf-8') as fh:
     fh.write('# test\n'
              'lwf/character/enemy/1907/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-order\t10x10\tA\n'
              'lwf/character/enemy/1906/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-order\t10x10\tA\n'
-             'lwf/character/enemy/1909/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-order\t10x10\tC\n')
+             'lwf/character/enemy/1909/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-order\t10x10\tC\n'
+             'lwf/character/enemy/1910/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
+             'lwf/character/enemy/1911/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
+             'lwf/character/enemy/1912/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-override\t10x10\tA\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
             '--extra', XTR, '--recolour', COL, '--dedup', DDP] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
@@ -290,6 +294,26 @@ try:
     r, todo = m.plan_enemy(1907)
     check(todo.get('lwf/character/enemy/1907/wait/wait_a.png') == os.path.join(JP, '1907', 'wait', 'wait_a.png'),
           'the original file wins over the dedup row')
+    # rule dedup-override (user's decision 23-10, 1636 wait): the reviewed row wins over a row of the other tables
+    # (1910), over an original file even when nothing else is missing (1911); its declared size is still checked
+    # (1912: a 40x40 source for 10x10 does not replace the original file)
+    a98 = os.path.join(ROOT, 'lwf', 'drama', '98', '98_a.png')
+    for fam in ('1910', '1911', '1912'):
+        put(fam + '/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+        body(fam)
+    for fam in ('1911', '1912'):
+        put(fam + '/wait/wait_a.png', png(10, 10))
+    r, todo = m.plan_enemy(1910)
+    check(r['status'] == 'completo' and todo.get('lwf/character/enemy/1910/wait/wait_a.png') == a98,
+          'dedup-override wins over extra_donors.tsv (%s)' % r)
+    r, todo = m.plan_enemy(1911)
+    check(r['status'] == 'completo' and r['category'] == 2 and todo.get('lwf/character/enemy/1911/wait/wait_a.png') == a98,
+          'dedup-override wins over the original file (%s)' % r)
+    r, todo = m.plan_enemy(1912)
+    check(todo.get('lwf/character/enemy/1912/wait/wait_a.png') == os.path.join(JP, '1912', 'wait', 'wait_a.png'),
+          'dedup-override with another size: the original file stays')
+    check(m.override('lwf/character/enemy/1907/wait/wait_a.png') is None, 'a dedup-order row is not an override')
+    check('dedup-override' not in {v[2] for v in m.EXTRA.values()}, 'dedup-override never read from the other tables')
 
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto
