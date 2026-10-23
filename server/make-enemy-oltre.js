@@ -110,6 +110,64 @@ function allyDisplay(fam, a, drawn) {
   return null;
 }
 
+// Late-story HP restore (I-206, user decision 23-10): original footage of quests 851-979 shows enemy HP far above
+// the linear extrapolation of the 5 curve points (Lv 1-999) we serve (979 Ephemer & Skuld ~6.5e11 at Lv 5500, ours
+// 3.1e6). Local override file (derived from that evidence, never in the repository):
+//   {"level_fix": {...}, "ids": {"<enemyId>": {name, level, hp, confidence, fit, residual[]}}}
+// For each listed id (exact clone, family clone or master row) the curve points <= Lv 999 stay as they are and ONE
+// point (level, hp) is added after them (client: up to 6 points, linear, last segment extrapolated). The other curves
+// (attack, defense, exp, money, raidPoint, lux, score) get the value they already had at that level, so they do not
+// change anywhere. Master rows modified by a previous run are recognised (6 points, 5th = 999, 6th != 9999: every
+// original 6-point row ends at 9999) and brought back to their 5 points before cloning, so clones never inherit a
+// master row's extra point. Rows whose original curve already has 6 points are never listed (generator rule).
+const HP_PATH = process.env.KHUX_ENEMY_HP_OLTRE || path.join(OLTRE_DIR, 'enemy_hp_oltre.json');
+const CURVES = ['hp', 'attack', 'defense', 'exp', 'money', 'raidPoint', 'lux', 'score'];
+const INT32 = new Set(['exp', 'money', 'raidPoint']);
+const KEEP_LV = 999, MAX_POINTS = 6, ORIG_LAST = 9999;
+// client formula: segment i = first with baseLv[i+1] >= level (capped at validGrowth-2), linear, extrapolated
+function curveAt(row, key, level) {
+  const lv = row.baseLv, v = row[key], n = row.validGrowth;
+  if (!Array.isArray(v) || n < 2) return Array.isArray(v) ? v[0] || 0 : 0;
+  let i = 0;
+  while (i + 1 < n - 1 && lv[i + 1] < level) i++;
+  return v[i] + (level - lv[i]) / (lv[i + 1] - lv[i]) * (v[i + 1] - v[i]);
+}
+const isRestoredPoint = (r) => r.validGrowth === MAX_POINTS && r.baseLv[MAX_POINTS - 2] === KEEP_LV
+  && r.baseLv[MAX_POINTS - 1] !== ORIG_LAST;
+function dropRestoredPoint(r) {
+  for (const k of ['baseLv', ...CURVES]) if (Array.isArray(r[k])) r[k] = r[k].slice(0, MAX_POINTS - 1);
+  r.validGrowth = MAX_POINTS - 1;
+}
+// row with its points <= 999 plus (level, hp); null if the row cannot take it (no point at 999, already 6 <= 999)
+function withHpPoint(row, level, hp) {
+  const n = row.validGrowth;
+  let k = 0;
+  while (k < n && row.baseLv[k] <= KEEP_LV) k++;
+  if (k < 2 || k >= MAX_POINTS || row.baseLv[k - 1] !== KEEP_LV || !(level > KEEP_LV) || !(hp > 0)) return null;
+  const out = {};
+  for (const key of CURVES) {
+    if (!Array.isArray(row[key])) continue;
+    let v = key === 'hp' ? Math.round(hp) : Math.round(curveAt(row, key, level));
+    if (INT32.has(key)) v = Math.min(v, 2 ** 31 - 1);
+    out[key] = [...row[key].slice(0, k), v];
+  }
+  return Object.assign(row, out, { baseLv: [...row.baseLv.slice(0, k), level], validGrowth: k + 1 });
+}
+// overrides on every row (master or added): -> {applied, skipped[]}
+function applyHpPoints(enemies, hpIds = {}) {
+  const byId = new Map(enemies.map((r) => [r.enemyId, r]));
+  const rep = { applied: 0, skipped: [] };
+  for (const [k, v] of Object.entries(hpIds)) {
+    const row = byId.get(Number(k));
+    if (!row) { rep.skipped.push([Number(k), 'no row']); continue; }
+    // a clone of an original 6-point row (Yellow Opera 9999): the extra point replaces the 9999 one; attack and the
+    // other curves take their value at the new level, so they stay the same up to it
+    if (withHpPoint(row, Number(v.level), Number(v.hp))) rep.applied++;
+    else rep.skipped.push([Number(k), 'curve does not end at 999']);
+  }
+  return rep;
+}
+
 // D-A: solo gli id di 9-10 cifre sono varianti di un nemico base
 const isClone = (id) => id >= 1e8 && id < 1e10;
 // base di un id lungo: ultime 5 cifre se la riga c'e', altrimenti ultime 4 (regola del controller, 21-10)
@@ -314,7 +372,8 @@ function defaultSources() {
   if (!missing) throw new Error(`enemy-oltre: ${MISSING_PATH} senza «missing»`);
   const names = readJson(path.join(path.dirname(MISSING_PATH), 'oltre525.json'), {}).learned_enemy_names || {};
   for (const [k, v] of Object.entries(missing)) if (!v.name && names[k]) v.name = names[k];
-  return { missing, proposal: readRequired(PROPOSAL_PATH, 'proposta di clone'), stats: readJson(STATS_PATH, {}) };
+  return { missing, proposal: readRequired(PROPOSAL_PATH, 'proposta di clone'), stats: readJson(STATS_PATH, {}),
+    hp: readJson(HP_PATH, {}).ids || {} };
 }
 
 // righe di un giro precedente (gli id dell'elenco non sono mai nel master originale): via, si rigenerano
@@ -332,8 +391,17 @@ function addRows(enemies, src) {
   if (!s.details) s.details = readDetails();
   if (!s.flavors) s.flavors = wikiFlavors();
   strip(enemies, s.missing);
+  // master rows: the extra HP point of a previous run goes away before cloning (I-206)
+  let hpReset = 0;
+  for (const e of enemies) if (isRestoredPoint(e)) { dropRestoredPoint(e); hpReset++; }
   const res = enemyRowsFor(s.missing, enemies, s);
   enemies.push(...res.rows);
+  const hpRep = applyHpPoints(enemies, s.hp || {});
+  for (const k of Object.keys(s.hp || {})) if (res.sources[k]) res.sources[k].hpRestored = true;
+  if (Object.keys(s.hp || {}).length || hpReset) {
+    console.log(`enemy-oltre: HP above Lv 999 restored on ${hpRep.applied} rows (${hpReset} master rows reset first)`
+      + (hpRep.skipped.length ? `; skipped ${JSON.stringify(hpRep.skipped.slice(0, 5))}` : ''));
+  }
   // righe alleate del master (2001, 2002, 2003, 12001, 22001): nome del personaggio e grafica (I-199)
   const allies = s.allies || readAllies();
   let alliesBase = 0;
@@ -359,6 +427,7 @@ function addRows(enemies, src) {
   console.log(`enemy-oltre: +${res.rows.length} righe (${res.cloned} cloni esatti, ${res.family} cloni di famiglia, `
     + `${res.allies} alleati, ${res.fromStats} da fonte); ${res.uncovered.length} senza base, fuori; alleati del master ${alliesBase}`);
   return { added: res.rows.length, cloned: res.cloned, family: res.family, allies: res.allies, alliesBase,
+    hpApplied: hpRep.applied, hpSkipped: hpRep.skipped, hpReset,
     fromStats: res.fromStats, sources: res.sources, uncovered: res.uncovered };
 }
 
@@ -403,5 +472,5 @@ if (require.main === module && process.argv[2] === '--flavors') {
   patch(process.argv[2] || path.join(__dirname, 'master_data'), { ...d, drawn: drawnDisplays(), sourcesOut: process.argv[3] || SOURCES_PATH });
 }
 
-module.exports = { MAX_ID, SOURCES_PATH, DR_LOOK, GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors, ALLY_PATH, readAllies, isClone, baseOf, familyOf, drawnDisplays, readDetails, enemyRowsFor, defaultSources, strip, addRows,
+module.exports = { MAX_ID, SOURCES_PATH, HP_PATH, curveAt, withHpPoint, applyHpPoints, isRestoredPoint, DR_LOOK, GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors, ALLY_PATH, readAllies, isClone, baseOf, familyOf, drawnDisplays, readDetails, enemyRowsFor, defaultSources, strip, addRows,
   patch };

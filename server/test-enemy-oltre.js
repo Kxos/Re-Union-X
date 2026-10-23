@@ -5,7 +5,7 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const { enemyRowsFor, addRows, patch, isClone, baseOf, familyOf, drawnDisplays, defaultSources, MAX_ID, DR_LOOK,
-  GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors } = require('./make-enemy-oltre');
+  GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors, curveAt, withHpPoint } = require('./make-enemy-oltre');
 const TMP = process.env.KHUX_TMP || 'D:\\Progetto_Restauro_KH_UX\\tmp';
 fs.mkdirSync(TMP, { recursive: true });
 const tmpDirs = [];
@@ -167,6 +167,39 @@ const repA = addRows(memA, { missing: allyMissing, proposal: allyProp, drawn: ne
 check(repA.allies === 3 && repA.alliesBase === 2 && memA.filter((r) => [2001, 12001].includes(r.enemyId))
   .every((r) => r.name === 'Hercules' && r.displayId === 2001), 'righe alleate del master: nome e grafica');
 
+// --- I-206: late-story HP point above Lv 999 --------------------------------------------------------------------
+{
+  const m = row(10024, 'Armored Archer', { hp: [6800, 18500, 25540, 48887, 322654], attack: [1050, 1395, 2441, 6119, 15336],
+    exp: [1, 2, 3, 4, 5], money: [1, 2, 3, 4, 5], raidPoint: [1, 1, 1, 1, 1], lux: [1, 2, 3, 4, 5], score: [1, 1, 1, 1, 1] });
+  const yo = row(3, 'Yellow Opera', { validGrowth: 6, baseLv: [1, 35, 100, 300, 999, 9999], hp: [1, 2, 3, 4, 160967, 20274223],
+    attack: [1, 2, 3, 4, 11640, 248487] });
+  const orig = JSON.parse(JSON.stringify([m, yo]));
+  const mem = [m, yo];
+  const miss = { 1905000003: { missions: [700] }, 1905010024: { missions: [701] } };
+  const hp = { 10024: { level: 1150, hp: 1000000 }, 1905000003: { level: 1550, hp: 5e9 } };
+  const r = addRows(mem, { missing: miss, proposal: {}, drawn: new Set(), allies: {}, hp });
+  const g = new Map(mem.map((x) => [x.enemyId, x]));
+  const a = g.get(10024), c3 = g.get(1905000003), c24 = g.get(1905010024);
+  check(r.hpApplied === 2 && a.validGrowth === 6 && JSON.stringify(a.baseLv) === '[1,35,100,300,999,1150]' && a.hp[5] === 1000000,
+    `master row: sixth point ${JSON.stringify(a.baseLv)} ${a.hp}`);
+  check([1, 35, 500, 999].every((L) => curveAt(a, 'hp', L) === curveAt(orig[0], 'hp', L)), 'master row: HP <= 999 unchanged');
+  // attack: the new point is rounded (int64), so past it the line drifts by the rounding only (< 0.1% here)
+  const same = (x, y, L, top) => Math.abs(curveAt(x, 'attack', L) - curveAt(y, 'attack', L)) <= (L <= top ? 0.5 : 1e-3 * curveAt(y, 'attack', L));
+  check([999, 1150, 3000].every((L) => same(a, orig[0], L, 1150)), 'master row: attack unchanged');
+  check(c24.validGrowth === 5 && JSON.stringify(c24.hp) === JSON.stringify(orig[0].hp), 'clone without override: the base\'s 5 points, not its sixth');
+  check(c3.baseLv[5] === 1550 && c3.hp[5] === 5e9 && [1200, 1550, 5000].every((L) => same(c3, orig[1], L, 1550)),
+    'clone of a 9999 row: point replaces 9999, attack unchanged');
+  check(JSON.stringify(g.get(3)) === JSON.stringify(orig[1]), 'original 6-point master row untouched');
+  // second run (master row already with its point) and run without the file: idempotent, then back to the original
+  const snap = JSON.stringify(mem);
+  addRows(mem, { missing: miss, proposal: {}, drawn: new Set(), allies: {}, hp });
+  check(JSON.stringify(mem) === snap, 'HP points idempotent');
+  addRows(mem, { missing: miss, proposal: {}, drawn: new Set(), allies: {}, hp: {} });
+  check(JSON.stringify(mem.find((x) => x.enemyId === 10024)) === JSON.stringify(orig[0]), 'without the file: master row back to 5 points');
+  check(withHpPoint(row(5, 'x', { validGrowth: 2, baseLv: [1, 200, 31085, 0, 0], hp: [1, 2, 3, 0, 0] }), 1500, 9) === null,
+    'curve not ending at 999: no point');
+}
+
 // --- dati veri su una copia del master ---------------------------------------------------------------------
 const MASTER = path.join(__dirname, 'master_data');
 const MISSING = process.env.KHUX_ENEMIES_OLTRE525 || 'D:\\Progetto_Restauro_KH_UX\\reference\\world_schema\\oltre525\\enemies_oltre525.json';
@@ -197,8 +230,39 @@ if (fs.existsSync(path.join(MASTER, 'enemy.json')) && fs.existsSync(MISSING)) {
   const clones = ids.filter((id) => isClone(id) && baseOf(id, (x) => beforeIds.has(x)) !== null);
   check(clones.length > 0 && clones.every((id) => {
     const x = byIdA.get(id), b = byIdA.get(baseOf(id, (y) => beforeIds.has(y)));
-    return x && x.name === b.name && JSON.stringify(x.hp) === JSON.stringify(b.hp) && x.displayId === b.displayId;
-  }), `${clones.length} cloni = base a 5/4 cifre (nome, HP, displayId)`);
+    // HP up to Lv 999 (the restored late-story point above 999 is per id, I-206)
+    const low = (r) => JSON.stringify(r.hp.slice(0, 5)) + JSON.stringify(r.baseLv.slice(0, 5));
+    return x && x.name === b.name && low(x) === low(b) && x.displayId === b.displayId;
+  }), `${clones.length} cloni = base a 5/4 cifre (nome, HP fino al Lv 999, displayId)`);
+  // I-206: every listed id served with its point; Lv <= 999 and attack unchanged against the run without the file
+  const hpIds = defaultSources().hp;
+  if (Object.keys(hpIds).length) {
+    check(r1.hpApplied === Object.keys(hpIds).length && !r1.hpSkipped.length, `HP points: ${r1.hpApplied}, skipped ${JSON.stringify(r1.hpSkipped)}`);
+    const dir0 = mkTmp();
+    fs.copyFileSync(path.join(dir, 'enemy.json'), path.join(dir0, 'enemy.json'));
+    patch(dir0, { ...defaultSources(), hp: {}, drawn, sourcesOut: path.join(dir0, 'src.json') });
+    const plain = new Map(JSON.parse(fs.readFileSync(path.join(dir0, 'enemy.json'), 'utf8')).map((r) => [r.enemyId, r]));
+    const badLow = [], badAtk = [], badHp = [];
+    for (const [k, v] of Object.entries(hpIds)) {
+      const a = byIdA.get(Number(k)), p = plain.get(Number(k));
+      if (!a || !p) { badHp.push(k); continue; }
+      if (a.validGrowth !== 6 || a.baseLv[5] !== v.level || a.hp[5] !== v.hp) badHp.push(k);
+      for (const L of [1, 50, 500, 999]) if (Math.round(curveAt(a, 'hp', L)) !== Math.round(curveAt(p, 'hp', L))) badLow.push(`${k}@${L}`);
+      for (const L of [999, 1500, v.level, 6000]) {
+        const d = Math.abs(curveAt(a, 'attack', L) - curveAt(p, 'attack', L));
+        if (d > (L <= v.level ? 0.5 : 1e-3 * curveAt(p, 'attack', L))) badAtk.push(`${k}@${L}`);
+      }
+    }
+    check(!badHp.length, `HP point not served: ${badHp.slice(0, 5)}`);
+    check(!badLow.length, `HP changed at Lv <= 999: ${badLow.slice(0, 5)}`);
+    check(!badAtk.length, `attack changed: ${badAtk.slice(0, 5)}`);
+    // rows not listed: same as without the file (master rows reset, clones never inherit a base's point)
+    const changed = after.filter((r) => !hpIds[r.enemyId] && plain.has(r.enemyId)
+      && JSON.stringify([r.baseLv, r.hp, r.attack]) !== JSON.stringify([plain.get(r.enemyId).baseLv, plain.get(r.enemyId).hp, plain.get(r.enemyId).attack]));
+    check(!changed.length, `rows without an override changed: ${changed.slice(0, 5).map((r) => r.enemyId)}`);
+    const e979 = byIdA.get(2105011651);
+    if (e979 && hpIds[2105011651]) console.log(`HP 979 Ephemer & Skuld at Lv 5500: ${Math.round(curveAt(e979, 'hp', 5500))} (without: ${Math.round(curveAt(plain.get(2105011651), 'hp', 5500))})`);
+  }
   const five = clones.filter((id) => beforeIds.has(id % 100000) && beforeIds.has(id % 10000)
     && JSON.stringify(byIdA.get(id % 100000).hp) !== JSON.stringify(byIdA.get(id % 10000).hp));
   if (drawn.size) {

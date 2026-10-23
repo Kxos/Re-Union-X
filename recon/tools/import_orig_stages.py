@@ -102,6 +102,8 @@ if args.oltre and os.path.normcase(os.path.abspath(args.out)) == os.path.normcas
 if args.oltre:
     FORCE_2016, KEEP_WW = set(), set()
 Q555 = (18300, 18301, 18302, 18303, 18304)
+# Lv where original gameplay footage contradicts the wiki (I-206, 23-10): Q960 Crabby Cake shown at LV 1900 (wiki 1850)
+LEVEL_FOOTAGE = {960: 1900}
 
 
 def served_rooms():
@@ -142,7 +144,7 @@ if args.oltre:
     for m in oltre['missions']:
         if only is None or m['q'] in only:
             q_of[m['stage']['stageId']] = m['q']
-            lvl_of[m['stage']['stageId']] = m['lvl']
+            lvl_of[m['stage']['stageId']] = LEVEL_FOOTAGE.get(m['q'], m['lvl'])
     if only is None or 555 in only:
         for u in oltre['unmatched_stages']:
             if u['stageId'] in Q555 and u['parts']:

@@ -66,7 +66,11 @@ The Story now goes on after Quest 525, up to **Quest 979**, with the original ma
 
 Quests 617 and 661: the first part of each quest was lost. It is rebuilt in the original room (Quest 661 with the number of enemies of the original stage).
 
-250 enemies of the later quests have no surviving stats: they use the stats of the most similar original enemy (same family and role). 62 other enemies are exact copies of their base enemy, as in the original game data.
+250 enemies of the later quests have no surviving stats: they use the abilities and **attack** of the most similar original enemy (same family and role). 62 other enemies are exact copies of their base enemy, as in the original game data.
+
+Enemy **HP above level 999** follows the original scale, measured on recordings of the original game: from Quest 851 enemies get much tougher, and the final quests reach hundreds of billions of HP (Quest 979, Ephemer & Skuld: about 650 billion). Up to level 999, and in Quests 1-525, nothing changes. Where no recording exists the HP is **estimated** from the nearest measured quests, and kept on the low side (**reconstructed**). Quest 960 is now level 1900, as in the original game.
+
+The late quests were made for the strongest teams of the original game: from about Quest 900 on you need a **very strong team** (high-tier Medals with traits, a strong Keyblade and Guilt).
 
 Some enemies show their original look, but a few small graphic details that were lost (for example their **shadow**) are reconstructed from the same enemy or from a standard one.
 
@@ -74,15 +78,15 @@ A few pieces of Trickmaster, Shipwreck Shark (the water-slash arcs of its attack
 
 Barrier Master, Pot Spider, Apricot Opera, Margoyle and Guard Armor Ω show again their original look, recovered from later versions of the game files or from other places where the same enemy appears (raids, cutscenes).
 
-Chill Ripper, Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for Chill Ripper it comes from its twin enemy of Dark Road, for the two Gummi Saucers from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies.
+Chill Ripper, Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for Chill Ripper it comes from its twin enemy of Dark Road, for the two Gummi Saucers from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies. The defeat animations of Red Gearbit and Blue Gearbit (from the Green Gearbit, the same model) and of one Cy-Bug (from the other Cy-Bugs of the same size) are **reconstructed** the same way.
 
 Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer, Blitz Spear and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed).
 
-Some later enemies whose original graphics are still missing use for now the **look of the same or a similar enemy**, from Dark Road (for example Sleep Archer, Volcanic Lord or Amber Opera) or from Union χ itself (for example Martial Monkey shows as a Cheery Ape), until their original graphics are recovered.
+Some later enemies whose original graphics are still missing use for now the **look of the same or a similar enemy**, from Dark Road (for example Sleep Archer or Amber Opera) or from Union χ itself (for example Martial Monkey shows as a Cheery Ape), until their original graphics are recovered.
 
 In some quests a character fights **at your side** (Hercules, Aladdin, Mog, Phillip, Ephemer, Calhoun, Ralph, the Union leaders and other Keyblade wielders): as in the original game, they join the battle against the boss, attack after your turn and cannot be targeted. Their attacks are the original ally attacks.
 
-Hercules and two Keyblade wielders (Quests 350, 525, 540 and 825), Aladdin (Quests 585, 753, 757, 760, 789 and 790), Ralph in Quests 923, 930, 932 and 975, Ephemer, Calhoun and two of the Union leaders (Quest 977) show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). The original graphics of the other allies are incomplete: for now they show the look of Hercules (Prince Ali, Phillip, Ralph in his other quests) or of one of those Keyblade wielders (Mog, the other Union leaders), until their own graphics are recovered.
+Hercules and two Keyblade wielders (Quests 350, 525, 540 and 825), Aladdin (Quests 585, 753, 757, 760, 789 and 790), Ralph (Quests 923, 930, 931, 932, 935, 955, 965 and 975), Ephemer, Calhoun and two of the Union leaders (Quest 977) show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). The original graphics of the other allies are incomplete: for now they show the look of Hercules (Prince Ali, Phillip) or of one of those Keyblade wielders (Mog, the other Union leaders), until their own graphics are recovered.
 
 Quests 876-979: the original quest files do not say the level of each enemy (the original server gave it), so every enemy fights at the level of the quest: there are no weaker enemies mixed in.
 
