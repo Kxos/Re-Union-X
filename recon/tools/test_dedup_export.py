@@ -40,6 +40,40 @@ mk = de.parse_allow(['1609:!Piece-Missing', '1636', '1636:+replace-survivor'])
 check(de.allowed(mk, '1609', 'wait') and not de.allowed(mk, '1609', 'wait', {'method': 'review_B', 'note': 'a piece-missing x'})
       and de.allowed(mk, '1609', 'wait', {'method': 'rerun', 'note': 'ok'}), 'marker exclusion: %s' % (mk.get('1609'),))
 check(de.allowed(mk, '1636', 'wait', {'method': 'review:replace-survivor'}), '+marker rows stay allowed')
+for bad in ('1502:^', '1502:@', '1502:@other'):
+    try:
+        de.parse_allow([bad])
+        errors.append('bad entry accepted: %r' % bad)
+    except ValueError:
+        pass
+# `^file[/anim]`: rows of that family in that override file ignored (the earlier layers stay); `@rescale`
+sk = de.parse_allow(['1558', '1558:^E1', '1635', '1635:^overrides_F/atkSp', '233', '233:@rescale'])
+check(de.ignored(sk, 'e1', {'family': '1558', 'anim': 'wait'}) and not de.ignored(sk, 'e2', {'family': '1558', 'anim': 'wait'})
+      and de.ignored(sk, 'f', {'family': '1635', 'anim': 'atkSp'}) and not de.ignored(sk, 'f', {'family': '1635', 'anim': 'wait'})
+      and not de.ignored(sk, 'e1', {'family': '1635', 'anim': 'atkSp'}), 'ignored rows: %s' % sk)
+check(sk['233'][5] and not sk['1558'][5] and de.allowed(sk, '1558', 'wait'), '@rescale flag / ^ keeps the family')
+P0 = [{'family': '1558', 'anim': 'wait', 'texname': 'a', 'source': 'served'},
+      {'family': '1635', 'anim': 'atkSp', 'texname': 'b', 'source': 'served'}]
+mg0, rv0 = de.merge(P0, [('overrides_E1.tsv', [{'family': '1558', 'anim': 'wait', 'texname': 'a', 'source': 'e1'}]),
+                         ('F', [{'family': '1635', 'anim': 'atkSp', 'texname': 'b', 'source': 'f'},
+                                {'family': '1635', 'anim': 'wait', 'texname': 'c', 'source': 'f'}])], sk)
+check({(r['family'], r['texname']): r['source'] for r in mg0} == {('1558', 'a'): 'served', ('1635', 'b'): 'served',
+                                                                  ('1635', 'c'): 'f'} and rv0 == {'1635'},
+      'merge with ignored rows: %s %s' % (mg0, rv0))
+# rescale proposal rows: only @rescale families, grades A/B/C, scale >= 1; note keeps the original and its size
+RP = [{'family': '233', 'anim': 'wait', 'texname': 'w.png', 'size': '10x10', 'source': r'D:\x y\big.png', 'source_size': '12x12',
+       'scale': '1.2', 'method': 'm', 'confidence': 'C', 'note': 'n', 'png': 'P/233/w.png'},
+      dict(family='233', anim='wait', texname='r.png', size='10x10', source='s', source_size='12x12', scale='1.2', method='m',
+           confidence='R', note='', png='P/233/r.png'),
+      dict(family='233', anim='wait', texname='u.png', size='10x10', source='s', source_size='8x8', scale='0.8', method='m',
+           confidence='A', note='', png='P/233/u.png'),
+      dict(family='1558', anim='wait', texname='w.png', size='10x10', source='s', source_size='12x12', scale='1.2', method='m',
+           confidence='A', note='', png='P/1558/w.png')]
+rr = de.rescale_rows(RP, sk)
+check([r['texname'] for r in rr] == ['w.png'] and rr[0]['source'] == 'P/233/w.png'
+      and de.rescaled_from(rr[0]) == (r'D:\x y\big.png', (12, 12)), 'rescale rows: %s' % rr)
+check(de.rescaled_from({'note': 'was a hole; rescaled from data/a b/c.png 309x455'}) == ('data/a b/c.png', (309, 455))
+      and de.rescaled_from({'note': 'x'}) is None, 'rescaled_from')
 
 # merge: an override row replaces the proposal row of the same key, DROP removes the pick, a later file wins,
 # proposal rows not named stay; the families of the override files are the reviewed ones
@@ -86,6 +120,26 @@ try:
     ov_rows = [dict(rows[0], family='1636', method='review:replace-survivor'), dict(rows[0], family='1636', texname='w2.png')]
     ovo, _ = de.export(ov_rows, mk, cont, size_ok=lambda p, s: True)
     check(sorted(v[2] for v in ovo.values()) == ['dedup-order', 'dedup-override'], 'override rule: %s' % ovo)
+    # 1560 replace-copia (user 23-10): only the marked rows of 1560 become dedup-override
+    m60 = de.parse_allow(['1560', '1560:+replace-copia'])
+    o60, _ = de.export([dict(rows[0], family='1560', note='black feather; replace-copia: was the yellow ring'),
+                        dict(rows[0], family='1560', texname='w3.png', note='goblin eyes')], m60, cont, size_ok=lambda p, s: True)
+    check({k.split('/')[-1]: v[2] for k, v in o60.items()} == {'wait_1.png': 'dedup-override', 'w3.png': 'dedup-order'},
+          '1560 replace-copia: %s' % o60)
+    # downscaled copies (containers rescale/rescale_e1): rule dedup-rescale, exact declared size, never an upscale
+    def cont_r(p):
+        return ('rescale', p[len('RS/'):]) if p.startswith('RS/') else cont(p)
+    rz = os.path.join(TMP, 'rz.png')
+    with open(rz, 'wb') as fh:
+        fh.write(b'\x89PNG\r\n\x1a\n' + struct.pack('>I', 13) + b'IHDR' + struct.pack('>II', 96, 24) + b'\x08\x06\x00\x00\x00')
+    rrow = dict(rows[0], source='RS/233/w.png', size='97x24', note='rescaled from data/a b/big.png 120x30')
+    check(de.rescale_ok(png, '97x24', rrow) and not de.rescale_ok(rz, '97x24', rrow)
+          and not de.rescale_ok(png, '97x24', dict(rrow, note='rescaled from x.png 90x20'))
+          and not de.rescale_ok(png, '97x24', dict(rrow, note='no origin')), 'rescale_ok: exact size, downscale only')
+    orr, skr = de.export([rrow, dict(rrow, texname='w2.png', source='RS/233/w2.png')], allow, cont_r,
+                         rescale_ok_fn=lambda p, s, r: 'w2' not in p)
+    check([v[1:3] for v in orr.values()] == [('rescale:233/w.png', 'dedup-rescale')] and len(skr) == 1
+          and skr[0][2].startswith('downscaled copy'), 'export rescale: %s %s' % (orr, skr))
     pub = 'lwf/character/enemy/1502/wait/wait_1.png'
     check(list(out) == [pub] and out[pub] == (pub, 'jp431:x/a.png', 'dedup-order', '97x24', 'A'), 'export: %s' % out)
     check(sorted(s[2].split(':')[0] for s in sk) == ['no source proposed', 'outside the extra_donors.py containers',
@@ -138,8 +192,8 @@ finally:
 
 # the versioned table: loads, every row approved by the allow-list and never a family under review
 real_allow = de.parse_allow(open(de.APPROVED, encoding='utf-8'))
-t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override'})
-check(len(t) > 3500, 'versioned table rows: %d' % len(t))
+t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override', 'dedup-rescale'})
+check(len(t) > 4200, 'versioned table rows: %d' % len(t))
 bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4])]
 check(not bad, 'rows outside the allow-list: %s' % bad[:3])
 under_review = {'1643'}       # not reviewed yet (1609 approved by the third review, 23-10)
@@ -151,8 +205,19 @@ missing = [h for h in released if not any(k.startswith('lwf/character/enemy/' + 
 check(not missing, 'animations released by the third review not in the table: %s' % missing)
 check(any(k.startswith('lwf/character/enemy/1550/dead/') for k in t), '1550 dead approved by the second review')
 ovr = sorted(k for k, v in t.items() if v[2] == 'dedup-override')
-check(len(ovr) == 6 and all(k.startswith('lwf/character/enemy/1636/wait/') for k in ovr), 'dedup-override rows: %s' % ovr)
-check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values()), 'containers')
+check(len(ovr) == 13 and len([k for k in ovr if k.startswith('lwf/character/enemy/1636/wait/')]) == 6
+      and len([k for k in ovr if k.startswith('lwf/character/enemy/1560/')]) == 7, 'dedup-override rows: %s' % ovr)
+check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values() if v[2] != 'dedup-rescale')
+      and all(v[0] in ('rescale', 'rescale_e1') for v in t.values() if v[2] == 'dedup-rescale'), 'containers')
+# fourth to sixth review (23-10): 1558 keeps the version served before E1, no 1635 atkSp row from overrides_F, and
+# downscaled copies only for the approved families (rescale proposal) and the review files' own choices
+check(len([k for k in t if k.startswith('lwf/character/enemy/1558/')]) == 7, '1558 rows changed')
+check(not [k for k in t if k.startswith('lwf/character/enemy/1635/atkSp/')], '1635 atkSp rows from overrides_F')
+resc_fams = {k.split('/')[3] for k, v in t.items() if v[2] == 'dedup-rescale'}
+check(resc_fams <= set('233 240 251 1502 1516 1535 1536 1538 1548 1552 1554 1563 1646 2500 2006 2501 2506 2510'.split()),
+      'downscaled copies outside the approved families: %s' % sorted(resc_fams))
+check(not [k for k, v in t.items() if k.split('/')[3] == '1538' and v[2] == 'dedup-rescale' and '/atk1_o/' not in k],
+      '1538: only the four water-slash arcs of atk1_o are downscaled')
 
 if errors:
     print('ERRORS (%d)' % len(errors))

@@ -63,7 +63,9 @@ with open(DDP, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1909/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-order\t10x10\tC\n'
              'lwf/character/enemy/1910/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
              'lwf/character/enemy/1911/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
-             'lwf/character/enemy/1912/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-override\t10x10\tA\n')
+             'lwf/character/enemy/1912/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-override\t10x10\tA\n'
+             'lwf/character/enemy/1913/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-rescale\t10x10\tC\n'
+             'lwf/character/enemy/1914/wait/wait_a.png\tjp431:lwf/drama/98/98_11.png\tdedup-rescale\t10x10\tC\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
             '--extra', XTR, '--recolour', COL, '--dedup', DDP] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
@@ -314,6 +316,21 @@ try:
           'dedup-override with another size: the original file stays')
     check(m.override('lwf/character/enemy/1907/wait/wait_a.png') is None, 'a dedup-order row is not an override')
     check('dedup-override' not in {v[2] for v in m.EXTRA.values()}, 'dedup-override never read from the other tables')
+    # rule dedup-rescale (user-approved downscaled copies, 23-10): accepted only at EXACTLY the declared size
+    # (1913: 10x10 -> complete, category 3); 1914: an 11x10 file, within the +-2 px of the other copies, is refused
+    with open(os.path.join(ROOT, 'lwf', 'drama', '98', '98_11.png'), 'wb') as fh:
+        fh.write(png(11, 10))
+    for fam in ('1913', '1914'):
+        put(fam + '/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+        body(fam)
+    r, todo = m.plan_enemy(1913)
+    check(r['status'] == 'completo' and r['category'] == 3 and todo.get('lwf/character/enemy/1913/wait/wait_a.png') == a98
+          and 'downscaled' in r['anims']['wait'].get('note', ''), 'dedup-rescale exact size: category 3 (%s)' % r)
+    r, todo = m.plan_enemy(1914)
+    check(r['status'] == 'incompleto' and not todo, 'dedup-rescale with +-2 px: refused (%s)' % r)
+    check(m.extra_donors.category('dedup-rescale') == 3 and m.KIND_CAT['riscalata'] == 3, 'dedup-rescale category 3')
+    check('dedup-rescale' not in {v[2] for v in m.EXTRA.values()}, 'dedup-rescale never read from the other tables')
+    check(m.override('lwf/character/enemy/1913/wait/wait_a.png') is None, 'a dedup-rescale row is not an override')
 
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto

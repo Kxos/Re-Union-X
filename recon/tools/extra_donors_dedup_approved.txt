@@ -5,6 +5,9 @@
 #   <family>:!<marker>  rows whose method/note contains <marker> left out
 #   <family>:+<marker>  rows whose method/note contains <marker> exported with rule dedup-override (they win over
 #                       every other source for that path; user's decision only)
+#   <family>:^<file>[/<anim>]  rows of that family (animation) in tmp/dedup/review/overrides_<file>.tsv ignored
+#   <family>:@rescale   rows of tmp/dedup/rescale/rescale_proposal.tsv (dedup_rescale.py) graded A/B/C approved:
+#                       downscaled copies of original art, rule dedup-rescale (exact declared size, never upscaled)
 # Reviewed families (named in tmp/dedup/review/overrides_*.tsv) are always re-exported from proposal + overrides.
 # 23-10-2026, first review: every proposed piece (confidence A/B/C) of these families
 1502
@@ -112,3 +115,27 @@
 # 23-10-2026, third review (overrides_C.tsv) approved: the held animations released (1609 whole family, 1612 wait,
 # 1651 dead, atk1_o of 2004 2014 2015 2017 2019 2020 2021); overrides_D.tsv (fourth review) not approved yet
 1609
+# 23-10-2026, fourth to sixth review (overrides_D/E1/E2/F.tsv: Ralph eyes of 2014/2020, E1, E2, F) approved, except:
+# 1558 keeps the version served before (every overrides_E1.tsv row of 1558 ignored); the atkSp straw/limb rows of
+# 1635 in overrides_F.tsv are wrong (user: f49/f81 straws) and ignored (the 1635 rows of E1 and the F cloud puffs
+# of wait/knockback stay)
+1558:^E1
+1635:^F/atkSp
+# 1560: the E1 rows marked replace-copia put the black feather in place of the yellow-ring extra_donors.tsv copies
+1560:+replace-copia
+# downscaled copies of original art (dedup_rescale.py, rescale_proposal.tsv grades A/B/C) approved for these families
+# only; the downscaled rows written by the review files themselves (1538 water-slash arcs in E1; 2006, 2501, 2506,
+# 2510 in E2) come in with their file
+233:@rescale
+240:@rescale
+251:@rescale
+1502:@rescale
+1516:@rescale
+1535:@rescale
+1536:@rescale
+1548:@rescale
+1552:@rescale
+1554:@rescale
+1563:@rescale
+1646:@rescale
+2500:@rescale

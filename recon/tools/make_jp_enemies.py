@@ -44,7 +44,9 @@ Category 2 also includes the original copies found by content in other LWFs of t
 recon/tools/extra_donors_deep.tsv from deep_donors.py, rules content-anchor and bracket; `--deep ''` excludes it).
 Last among the category-2 copies (I-194, 23-10): pieces matched by texture-table ORDER to identical copies in other
 folders of the dump (dedup_match.py proposal), only the rows the user approved on the review sheets
-(recon/tools/extra_donors_dedup.tsv from dedup_export.py, rule dedup-order; `--dedup ''` excludes it).
+(recon/tools/extra_donors_dedup.tsv from dedup_export.py, rule dedup-order; `--dedup ''` excludes it). The same table
+holds the user-approved DOWNSCALED copies of original art (rule dedup-rescale, 23-10, category 3, containers rescale and
+rescale_e1 outside the repo): same place in the order, accepted only at exactly the declared size.
 
 Effetti di comparsa: lwf/character/enemy/show_effect_fla/show_effect<N>/ per gli showSwf originali
 (external\\thethiny\\enemy_dec.json) non serviti, stesse regole (completi o niente).
@@ -121,7 +123,7 @@ DONORS = jp_dedup_donors.load(jp_dedup_donors.TABLE if a.donors is None else a.d
 import jp_reconstructed  # noqa: E402
 RECON = jp_reconstructed.load(jp_reconstructed.TABLE if a.recon is None else a.recon)
 import extra_donors  # noqa: E402
-EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override'})
+EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override', 'dedup-rescale'})
 # original copies found by content (deep_donors.py: rules content-anchor and bracket, category 2); extra_donors.tsv
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
@@ -129,7 +131,10 @@ EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
 # category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
 # rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
-DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup, rules={'dedup-order', 'dedup-override'})
+# Rows with rule dedup-rescale (user-approved 23-10): DOWNSCALED copies of original art (category 3), same place in the
+# order as dedup-order but accepted only at EXACTLY the declared size (no +-2 px tolerance)
+DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup,
+                          rules={'dedup-order', 'dedup-override', 'dedup-rescale'})
 RECOL = extra_donors.load(extra_donors.RECOLOUR_TABLE if a.recolour is None else a.recolour, rules={'recolour', 'recolour-whole'})
 ROOTS = dict(extra_donors.ROOTS, jp431=[a.jp_root])
 for _x in a.src_root:
@@ -236,8 +241,15 @@ def fits(p, wh):
     return s is not None and wh is not None and abs(s[0] - wh[0]) <= 2 and abs(s[1] - wh[1]) <= 2
 
 
+def fits_exact(p, wh):
+    """downscaled copies (rule dedup-rescale, I-194 23-10): written at the declared size, accepted only at that size."""
+    s = img_size(p)
+    return s is not None and wh is not None and tuple(s) == tuple(wh)
+
+
 # tipo di fonte di una texture -> categoria della regola dell'utente (extra_donors.py)
-KIND_CAT = {'jp': 1, 'diretto': 1, 'stesso': 2, 'doppione': 2, 'copia': 2, 'dedup': 2,'ricostruita': 3, 'ricolorata': 4}
+KIND_CAT = {'jp': 1, 'diretto': 1, 'stesso': 2, 'doppione': 2, 'copia': 2, 'dedup': 2, 'riscalata': 3, 'ricostruita': 3,
+            'ricolorata': 4}
 
 
 def fill_tex(pre, anim, t, jp, jp_all, dims):
@@ -273,7 +285,10 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
     if xp and fit(xp):
         return xp, 'copia'
     qp, _ = extra(pre + t, DEDUP)
-    if qp and fit(qp):
+    if qp and DEDUP[pre + t][2] == 'dedup-rescale':
+        if dims is not None and fits_exact(qp, dims.get(t)):
+            return qp, 'riscalata'
+    elif qp and fit(qp):
         return qp, 'dedup'
     rp = recon(pre + t)
     if rp:
@@ -333,6 +348,7 @@ def plan_anim(root_rel, anim, jp_all):
             for kind, what in (('doppione', 'dalla tabella dei doppioni'), ('diretto', 'dirette da altri contenitori (exact501)'),
                                ('copia', 'da altri contenitori (extra_donors.tsv)'),
                                ('dedup', 'by table order (extra_donors_dedup.tsv)'),
+                               ('riscalata', 'downscaled copies of original art (extra_donors_dedup.tsv, dedup-rescale)'),
                                ('ricostruita', 'ricostruite (jp_reconstructed.tsv)'), ('ricolorata', 'ricolorate (jp_recoloured.tsv)')):
                 if count.get(kind):
                     notes.append('%d %s' % (count[kind], what))

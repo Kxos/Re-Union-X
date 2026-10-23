@@ -48,12 +48,20 @@ ROOTS = {
     'ww501': [os.path.join(D, 'tmp', 'enemy_src2', 'ww'), os.path.join(D, 'tmp', 'enemy_src2', 'wwtex')],
     'b2016': [private_tools.local_path('ref_work', 'bundle2016', 'files')],
     'recolour': [os.path.join(D, 'enemy_gen_src', 'recolour')],
+    # downscaled copies of original art (I-194, 23-10, user-approved; dedup_rescale.py and the review rounds write
+    # them outside the repo): rule dedup-rescale of extra_donors_dedup.tsv only
+    'rescale': [os.path.join(D, 'tmp', 'dedup', 'rescale', 'png')],
+    'rescale_e1': [os.path.join(D, 'tmp', 'dedup', 'review', 'work_E1', 'png')],
 }
 RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'donor&order': 2, 'twinfam': 2,
          'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4,
          # dedup-override: user-approved reviewed row (extra_donors_dedup.tsv only) that wins over every other source
          # for that exact path (23-10, 1636 wait: the deep-table "survivors" were drama decorations, a dedup mix-up)
-         'dedup-override': 2}
+         'dedup-override': 2,
+         # dedup-rescale: user-approved DOWNSCALED copy of an original image (same art stored at a larger scale in another
+         # LWF, LANCZOS on premultiplied alpha to the exact declared size, never upscaled; 23-10, I-194): category 3
+         # like the scaled shadows of jp_reconstructed.tsv; extra_donors_dedup.tsv only, exact size checked
+         'dedup-rescale': 3}
 
 
 def category(rule):
