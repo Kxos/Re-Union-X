@@ -34,6 +34,19 @@ check(p.superSkipTicket === 0, 'a 0 non va sotto zero');
 start({ stageSkip: 7 });
 check(p.stageSkipTicket === 1 && p.superSkipTicket === 0, 'stageSkip sconosciuto: nulla scalato');
 
+// Lux Record: uno skip segna la missione superata ma non alza il record (23-10)
+const clear = (lux) => call(t.respondStageClear, { getPoint: { exp: 0, money: 0, lux, score: 0 }, getMaterials: [],
+  getEnemyDropItems: [], getTreasures: [], clearMissionIds: [] });
+p.stageScores = {};
+p.stageSkipTicket = 1;
+start({ stageSkip: 1 }); clear(5000);
+check(1010 in p.stageScores && p.stageScores[1010] === 0, `skip su missione nuova: superata, record 0 (${p.stageScores[1010]})`);
+start({}); clear(3000);
+check(p.stageScores[1010] === 3000, `partita normale: record 3000 (${p.stageScores[1010]})`);
+p.superSkipTicket = 1;
+start({ stageSkip: 2 }); clear(9000);
+check(p.stageScores[1010] === 3000, `Force Skip: record invariato (${p.stageScores[1010]})`);
+
 try { fs.unlinkSync(SAVE); } catch { /* gia' tolto */ }
 if (errors.length) { log('ERRORI:\n  ' + errors.join('\n  ')); process.exit(1); }
-log('OK: Skip Ticket (stageSkip 1) e Skip Ticket+ (stageSkip 2) scalati da /stage/start');
+log('OK: Skip Ticket (stageSkip 1) e Skip Ticket+ (stageSkip 2) scalati da /stage/start, Lux Record invariato dagli skip');

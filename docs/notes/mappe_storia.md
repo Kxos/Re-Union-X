@@ -823,8 +823,15 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   screenshot of Q974). In Proud there is no other condition. Bench 23-10 (save `skiptest`): «Skip» is greyed (marks
   black) when the quest lacks objectives (Proud 977 cleared without objectives); «Force Skip» works even on a Proud quest
   never cleared (979 with no `stageScores`): the client sends `stageSkip: 2` and `/stage/clear`, the quest becomes
-  COMPLETE with no objectives. Open: the server stores the skipped run's Lux (21,177) as Lux Record; the original
-  behaviour for the record after a skip is not documented.
+  COMPLETE with no objectives. Story (save `skipstory`, story stopped at 671): the panel is in the second screen
+  («Choose a friend's Medal and tap "Start."»), not in «Select a Keyblade.»; same rules: Skip greyed on 595 (no
+  objectives), Skip on 670 (3/3), Force Skip on 595 and on the never-cleared 671, which then counts as cleared and
+  unlocks 672 (NEW); 25 AP spent each time (server `[ap]`, client checks AP first). **Lux Record**: skips never raise
+  it (user's decision 23-10, `currentStageSkip` in `respondStageClear`; a never-cleared quest gets record 0, still
+  cleared because `stageScores` has the key). **Ticket icon**: the client reloads `img/ui/ST_Ticket_Icon.png` (gold)
+  or `img/ui/ST_Ticket_SP_Icon.png` (rainbow) on each toggle; the gold one is missing from `img/ui` in both the WW and
+  the JP 4.3.1 resources (only `cocostudio/publish/ST_Ticket_Icon.png`, the layout default), so after Force Skip ->
+  Skip the rainbow icon stayed: served as alias by `build-resources.ps1` (bench 23-10: gold again after the toggle).
   The Story popup uses the same rule plus «quest already cleared». The test saves `proud979`/`proudall` have no
   `stageSkipTicket`, so the server sends 0 and the panel is hidden: **correct, nothing to fix**. Tickets come from the
   Beginner missions (reward type 26).

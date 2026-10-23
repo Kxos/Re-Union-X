@@ -177,7 +177,10 @@ foreach ($n in $imgJp) {
 $alias = @{ 'ui\AvtInfo_CrownIcon4' = 'cocostudio/publish/AvtInfo_CrownIcon4.png'; 'ui\AvtInfo_trophyIcon3' = 'cocostudio/publish/AvtInfo_trophyIcon3.png'
   'ui\AvtInfo_trophyIcon4' = 'cocostudio/publish/AvtInfo_trophyIcon4.png'; 'incentive\IncentiveIcon_42' = 'cocostudio/publish/IncentiveIcon_42.png'
   # arco dell'HP (I-032): nelle risorse WW solo sotto cocostudio/publish, stesse dimensioni di quelle in img/ui
-  'ui\PlayerStatusIndicator\Avatar_Circle_01' = 'cocostudio/publish/Avatar_Circle_01.png'; 'ui\PlayerStatusIndicator\Avatar_Side_01' = 'cocostudio/publish/Avatar_Side_01.png' }
+  'ui\PlayerStatusIndicator\Avatar_Circle_01' = 'cocostudio/publish/Avatar_Circle_01.png'; 'ui\PlayerStatusIndicator\Avatar_Side_01' = 'cocostudio/publish/Avatar_Side_01.png'
+  # biglietto dorato del pannello Skip (I-203): il client lo ricarica da img/ui quando si torna da «Force Skip» a
+  # «Skip», ma img/ui/ST_Ticket_Icon.png manca anche nelle risorse JP/WW originali (restava l'icona arcobaleno)
+  'ui\ST_Ticket_Icon' = 'cocostudio/publish/ST_Ticket_Icon.png' }
 $ac = "$D\catalog\img_alias"
 $need = @($alias.Values | Where-Object { -not (Test-Path "$ac\$_") })
 if ($need) { python -I recon\tools\res_get.py "$D\resource_data\names_v4.tsv" "$D\resource_data\7\data" $ac @need; if ($LASTEXITCODE) { throw 'res_get img_alias fallito' } }

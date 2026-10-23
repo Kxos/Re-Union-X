@@ -1673,6 +1673,7 @@ function respondStageStart(res, req) {
     console.log(`[ap] stage ${player.currentStageId}: -${useAp} AP -> ${changeAp(-useAp)}/${maxAp()}`);
   }
   spendSkipTicket(req?.stageSkip);
+  player.currentStageSkip = Number(req?.stageSkip) || 0; // /stage/clear: uno skip non tocca il Lux Record
   savePlayer();
   send(res, 200, {
     ret: ret(),
@@ -2140,8 +2141,11 @@ function respondStageClear(res, req) {
     grantItem(stage?.submissionRewardType?.[n - 1], stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
   }
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
-  // stage completato, con il record di Lux (Lux Record nell'elenco delle missioni)
-  player.stageScores[stageId] = Math.max(player.stageScores[stageId] || 0, lux);
+  // stage completato, con il record di Lux (Lux Record nell'elenco delle missioni); uno skip (Skip Ticket o
+  // Skip Ticket+, I-203) segna la missione come superata ma non alza il record (decisione dell'utente, 23-10)
+  const skipped = !!player.currentStageSkip;
+  player.currentStageSkip = 0;
+  player.stageScores[stageId] = skipped ? (player.stageScores[stageId] || 0) : Math.max(player.stageScores[stageId] || 0, lux);
   // EXP di skill del combattimento (getPoint.exp) a ogni medaglia del deck con una skill salvata
   const skillUps = grantDeckSkillExp(Number(req?.getPoint?.exp));
   if (skillUps.length) console.log(`[skill] salite di livello: userSkillId ${skillUps.join(', ')}`);
