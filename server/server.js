@@ -4414,6 +4414,7 @@ module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
   player, respondMedalEnhance, respondMedalShuffleSkill, respondUser, respondMedalEvolve, userMedalList, userMedalElement, userPointData, isGuiltUnlocked, userSkillsData,
+  stackedMedalList, // server/test-medal-enhance.js (I-205 Evolve with a stack)
   // server/test-keyblades.js
   kbEvo, ownedKeyblades, grantKeyblade, grantMissingKeyblades, userKeybladesData, userDecksData, masterRows,
   // server/test-keyblade-unlock.js

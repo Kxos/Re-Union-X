@@ -336,6 +336,31 @@ assert.equal(r.afterEnhanceUserMedal.burstUpperNumber || 0, 0, 'Trait Medal su u
 assert.ok((state(tmOther).exp || 0) > exp0 || state(tmOther).level > 1, 'Trait Medal su un\'altra medaglia: EXP');
 log('12. Trait Medal: trait + pallino sulla sua medaglia (6★, 7★, boosted), 3 impilate = 1 trait e 3 pallini, altrove solo EXP');
 
+// 13. Evolve with Fantasia Mickey B (I-205): SN++ - KH III Terra 301941 -> 302008 asks for one (evolve-wiki.js), HD Roxas
+// 300893 -> 302079 for two. The client sends the stack cell once per copy; the server takes that many copies and the cell
+// stays while copies are left (it is not in attachmentMedalIds)
+const FMB = g.MICKEY_B_ID;
+assert.deepEqual([byId.get(301941).validEvolveNeed, byId.get(301941).evolveNeedId], [1, [FMB, 0, 0, 0, 0]], 'Terra: one Fantasia Mickey B');
+assert.deepEqual([byId.get(300893).validEvolveNeed, byId.get(300893).evolveNeedId], [2, [FMB, FMB, 0, 0, 0]], 'HD Roxas: two');
+const fmbCount = () => t.userMedalList().filter((m) => m.medalId === FMB).length;
+give(FMB, 3);
+const fmbCell = t.stackedMedalList().find((c) => c.medalId === FMB);
+assert.equal(fmbCell.number, fmbCount(), 'one stack');
+const n0 = fmbCount();
+const terra = give(301941)[0];
+r = evolve(terra, [fmbCell.userMedalId]);
+assert.equal(state(terra).medalId, 302008, 'Terra evolved');
+assert.equal(fmbCount(), n0 - 1, 'one Fantasia Mickey B consumed');
+assert.ok(!r.attachmentMedalIds.includes(t.stackedMedalList().find((c) => c.medalId === FMB).userMedalId), 'the stack cell stays');
+const roxas = give(300893)[0];
+const cell2 = t.stackedMedalList().find((c) => c.medalId === FMB);
+assert.equal(cell2.number, 2);
+r = evolve(roxas, [cell2.userMedalId, cell2.userMedalId]);
+assert.equal(state(roxas).medalId, 302079, 'HD Roxas evolved');
+assert.equal(fmbCount(), 0, 'two Fantasia Mickey B consumed');
+assert.ok(r.attachmentMedalIds.includes(cell2.userMedalId), 'the empty stack cell is removed');
+log('13. Evolve with Fantasia Mickey B: SN++ - KH III Terra (1), HD Roxas (2), stack consumed copy by copy');
+
 // medaglia 1 (Stock Medal) intatta
 assert.equal(byId.get(1).imageId, 90000);
 try { fs.unlinkSync(SAVE); } catch {}

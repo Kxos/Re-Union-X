@@ -42,6 +42,8 @@ const EVOLVE = [
   [11013, {}],                                                // Wakka 3★ -> 4★ (3 Fairy Godmother)
   [11015, {}],                                                // Wakka 5★ -> 6★ (5 medaglie di due tipi)
   [31176, { burstUpperNumber: 5, guilt: true }],              // Lexaeus A 6★ -> 7★ (5 Blue Fairy [3], guilt max)
+  [301941, { burstUpperNumber: 5, guilt: true }],             // SN++ - KH III Terra -> 302008 (1 Fantasia Mickey B, I-205)
+  [300893, { burstUpperNumber: 5, guilt: true }],             // HD Roxas -> SN++ - HD Roxas (2 Fantasia Mickey B, I-205)
 ];
 // Level Up: basi al livello 1 e materiali (impilati dove validPack)
 const LEVEL_BASES = [11015, 11015, 32186];                    // Wakka 5★ x2, Marluxia A 6★

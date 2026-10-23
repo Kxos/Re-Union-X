@@ -256,6 +256,15 @@ if (process.env.KHUX_MEDALS_ALL === '1') {
   fairyAdded = fairies.length;
   fairyEvolve = blueFairy.applyBlueFairyEvolve(medals);
 }
+// Evolve with the required medals of the khuxwiki (I-205, evolve-wiki.js): Fantasia Mickey B upgrades (SN++),
+// {{Evo}} combinations and copies, only on rows that already evolve; original SE materials stay
+let wikiEvolve = { changes: [], report: [] };
+if (process.env.KHUX_MEDALS_ALL === '1') {
+  try {
+    const wiki = JSON.parse(fs.readFileSync(process.env.KHUX_WIKI_ALL || 'D:\\Progetto_Restauro_KH_UX\\wiki\\wiki_all.json', 'utf8'));
+    wikiEvolve = require('./evolve-wiki').applyWikiEvolve(medals, wiki);
+  } catch { console.warn('wiki_all.json missing: Evolve without the khuxwiki required medals (I-205)'); }
+}
 // BGM Medals (medal_bgm.json): bgm = id del suono audio/<id>.akb, suonato nel dettaglio
 // della medaglia; stesso nome = righe 6★ e 7★. Nomi della wiki «(EX)» = «[EX]» del master.
 const MEDAL_BGM = JSON.parse(fs.readFileSync(path.join(__dirname, 'medal_bgm.json'), 'utf8')).medals;
@@ -853,6 +862,6 @@ for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
 }
 console.log(`medal: ${medals.length} righe (+${roboAdded} da Roboloid, ${tiersFromRobo} tier da Roboloid); player: ${players.length} livelli (HP lv1 = ${hp})` +
   (enemies ? `; enemy: ${enemies.length} righe (${displaysJp} con grafica originale di enemy_gen, ${displaysDarkRoad} con grafica di Dark Road, ${displaysSubstituted} con grafica sostitutiva, ${showsRestored} con effetto di comparsa originale ripristinato, ${showsSubstituted} con effetto di comparsa sostitutivo; enemyAttack +${attacksAdded})` : '') + `; burst: ${bursts.length} righe (+${burstsAdded}, ${buffStats.rows} con buff/debuff, ${buffStats.fromOrig} da thethiny, ${buffStats.conflicts} conflitti)` +
-  `; supernova: ${snBursts.length} attacchi, +${meowAdded} Dual Meow Wow, ${snEvolve.applied} Evolve con medaglie richieste (${snEvolve.missing} regole senza medaglie); +${fairyAdded} Blue Fairy, ${fairyEvolve} Evolve 6★->7★ con Blue Fairy (${orgEvolve} dell'Organizzazione XIII verso la 7★ «X A»); bgm: ${bgmRows} righe` +
+  `; supernova: ${snBursts.length} attacchi, +${meowAdded} Dual Meow Wow, ${snEvolve.applied} Evolve con medaglie richieste (${snEvolve.missing} regole senza medaglie); +${fairyAdded} Blue Fairy, ${fairyEvolve} Evolve 6★->7★ con Blue Fairy (${orgEvolve} dell'Organizzazione XIII verso la 7★ «X A»); ${wikiEvolve.changes.length} Evolve with khuxwiki required medals (I-205); bgm: ${bgmRows} righe` +
   `; guilt: +${guiltExtra} medaglie speciali, ${Object.keys(dotFix).length} burst con pallini corretti, guiltProb ${guiltProb.length} righe` +
   `; stage: +${storyAdded} missioni di storia (${submissionsFixed} obiettivi su nemici assenti), filmati: ${dramasTheater} dal theater, ${dramasOff} disattivati`);
