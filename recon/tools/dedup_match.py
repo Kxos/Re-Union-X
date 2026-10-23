@@ -13,9 +13,11 @@ the same animation that survived), so animations with ZERO surviving textures we
 Method, per incomplete animation (need_now.json: lwf, have, miss):
   1. candidate donors: the TOPN LWFs (identical copies by sha1 merged; files resolved over every copy) whose texture
      table declares the most missing sizes (exact size), plus the TOPP whose table is mostly made of missing sizes
-     (small specific LWFs: NPCs, raids, other enemies, which big films would otherwise crowd out);
+     (small specific LWFs: NPCs, raids, other enemies, which big films would otherwise crowd out); the family's
+     own other animations are candidates too (only the animation itself is excluded);
   2. alignment: lcs_map of the (w, h) sequences of the enemy table and the donor table (same Flash source -> same
-     order); per aligned index the length of the contiguous diagonal run that contains it;
+     order; donor tables listed in reverse order are aligned backwards, see align); per aligned index the length of
+     the contiguous diagonal run that contains it;
   3. donor check on the enemy's own known pieces aligned to a donor texture: ok (same image, Sig diff < SAME) / bad;
   4. per missing piece the candidates of every donor (aligned file present); agree/disagree = the other
      donors' aligned files equal / different by content (pick: the longest contiguous run at that index, capped at
@@ -32,6 +34,7 @@ import collections
 import json
 import os
 import pickle
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -61,6 +64,49 @@ def runs(mp):
             out[x] = e - k + 1
         k = e + 1
     return out
+
+
+def align(seq, dseq):
+    """enemy (w, h) sequence vs donor sequence -> ({i: j}, runs). Some films list the same bitmaps in REVERSE order
+    (e.g. drama 2450101: bitmap 58 .. 8, while enemy 1618 lists bitmap 1 .. 51), so the donor table is aligned both
+    ways and the longer alignment is kept; runs are measured on the diagonal of the chosen direction."""
+    mp = dd.lcs_map(seq, dseq)
+    rv = dd.lcs_map(seq, dseq[::-1])
+    if len(rv) > len(mp):
+        n = len(dseq)
+        return {i: n - 1 - j for i, j in rv.items()}, runs(rv)
+    return mp, runs(mp)
+
+
+def name_key(n):
+    """meaningful original layer name of a texture ('<prefix>_<hex utf-8>.png'), or None for the generic
+    Flash 'bitmap N' names (their numbers differ between LWFs) and undecodable names."""
+    m = re.search(r'_([0-9a-f]+)\.png$', n)
+    if not m:
+        return None
+    try:
+        s = bytes.fromhex(m.group(1)).decode('utf-8')
+    except ValueError:
+        return None
+    if re.fullmatch(r'(ビットマップ|bitmap|Bitmap) ?\d+\.png', s):
+        return None
+    return s
+
+
+def name_pins(T, t, mp, rn):
+    """same meaningful name and same size in the donor table pins the alignment (1554: 37 tail frames of equal size,
+    pic000001..037, that the reversed alignment had mapped end to end); pinned pieces count as a capped run."""
+    idx = {}
+    for j, (n, w, h) in enumerate(t):
+        k = name_key(n)
+        if k:
+            idx.setdefault((k, w, h), j)
+    for i, (n, w, h) in enumerate(T):
+        k = name_key(n)
+        j = idx.get((k, w, h)) if k else None
+        if j is not None:
+            mp[i] = j
+            rn[i] = max(rn.get(i, 0), RUN_CAP)
 
 
 def classify(c):
@@ -167,6 +213,74 @@ def palette_pass(rows, T, have, sig, diff):
             r['conf'] = 'B'
 
 
+BITMAP = re.compile(r'^(?:ビットマップ|bitmap|Bitmap) ?(\d+)\.png$')
+OFF_MIN = 5         # survivors supporting one numbering offset
+OFF_SHARE = 0.8     # share of the survivors of that film with that offset
+
+
+def bitmap_no(n):
+    """'<prefix>_<hex of "bitmap N.png">.png' -> N, else None"""
+    m = re.search(r'_([0-9a-f]+)\.png$', n)
+    if not m:
+        return None
+    try:
+        b = BITMAP.match(bytes.fromhex(m.group(1)).decode('utf-8'))
+    except ValueError:
+        return None
+    return int(b.group(1)) if b else None
+
+
+def offsets(pairs):
+    """[(enemy bitmap N, film bitmap M)] -> dominant M - N when supported by >= OFF_MIN and >= OFF_SHARE, else None."""
+    c = collections.Counter(m - n for n, m in pairs)
+    if not c:
+        return None
+    k, s = c.most_common(1)[0]
+    return k if s >= OFF_MIN and s >= OFF_SHARE * len(pairs) else None
+
+
+def local_offset(pairs, n, k=4):
+    """offset at enemy bitmap n from the k survivors with the nearest numbers: all equal (and >= 3) -> it, else None
+    (1550 dead: bitmaps 2..9 at +18, 10..20 at +22, so bitmap 1 takes +18)."""
+    near = sorted(pairs, key=lambda x: (abs(x[0] - n), x[0]))[:k]
+    offs = {m - a for a, m in near}
+    return offs.pop() if len(near) >= 3 and len(offs) == 1 else None
+
+
+def offset_pass(fam, an, rows, T, have, by, tab, sha_of):
+    """the survivors often come from the creature's own film with a constant bitmap-number offset (enemy 'bitmap N' =
+    film 'bitmap N+k': 1618 +7 from 2450101, 1629 +319 from 2470401, 1550 dead +18 from 2323901), while the film table
+    order is shuffled or reversed so that the order alignment misses it. k: the film's dominant offset, else the
+    offset shared by the nearest survivors (local_offset). A missing 'bitmap N' then takes the film's
+    'bitmap N+k' when it exists with the exact declared size; it replaces pieces without source and B/C picks (A picks
+    stay; a different image is reported in the method)."""
+    lwf_in = {}
+    for q, s in sha_of.items():
+        lwf_in.setdefault(os.path.normcase(os.path.dirname(q)), s)
+    pairs = collections.defaultdict(list)
+    for n, f in have.items():
+        a, b = bitmap_no(n), bitmap_no(os.path.basename(f).split('.')[0] + '.png')
+        s = lwf_in.get(os.path.normcase(os.path.dirname(f)))
+        if a is not None and b is not None and s:
+            pairs[s].append((a, b))
+    byrow = {r['tex']: r for r in rows}
+    for s, pr in pairs.items():
+        kg = offsets(pr)
+        fl = files_of(s, by, tab)
+        film = {bitmap_no(n): (w, h, fl[n]) for n, w, h in tab[s] if n in fl and bitmap_no(n) is not None}
+        for n, w, h in T:
+            r = byrow.get(n)
+            a = bitmap_no(n)
+            if r is None or a is None or r['conf'] == 'A':
+                continue
+            k = kg if kg is not None else local_offset(pr, a)
+            if k is None or (a + k) not in film or film[a + k][:2] != (w, h):
+                continue
+            r['src'], r['donor'], r['conf'] = film[a + k][2], by[s][0], 'A'
+            r['method'] = 'offset(film bitmap N%+d, %d/%d survivors)' % (k, sum(1 for x in pr if x[1] - x[0] == k),
+                                                                        len(pr))
+
+
 # --- data ---------------------------------------------------------------------------------------------------------------
 def pool_of(p):
     pn = os.path.normcase(p)
@@ -230,10 +344,12 @@ def match_anim(fam, an, v, by, tab, sha_of, sig, names, virt):
     have = {n: x[0] for n, x in v['have'].items()}
     mi = [i for i, (n, w, h) in enumerate(T) if n in miss]
     ms = collections.Counter(seq[i] for i in mi)
-    own = (os.sep + 'enemy' + os.sep + fam + os.sep)
+    # only the animation itself is excluded: the family's OTHER animations are the best donors (1520 atk1_o: the
+    # 85x76 torso is in its own complete wait, under another bitmap number)
+    me = sha_of.get(v['lwf'])
     sc = []
     for s, t in tab.items():
-        if any(own in q for q in by[s]):
+        if s == me or any(os.path.normcase(q) == os.path.normcase(v['lwf']) for q in by[s]):
             continue
         dims = {(w, h) for n, w, h in t}
         c = sum(k for wh, k in ms.items() if wh in dims)
@@ -249,8 +365,8 @@ def match_anim(fam, an, v, by, tab, sha_of, sig, names, virt):
         fl = dict(files_of(s, by, tab))
         for q in by[s]:
             fl.update({k: f for k, f in virt.get(q, {}).items() if k not in fl})
-        mp = dd.lcs_map(seq, [(w, h) for n, w, h in t])
-        rn = runs(mp)
+        mp, rn = align(seq, [(w, h) for n, w, h in t])
+        name_pins(T, t, mp, rn)
         ok = bad = 0
         for i, j in mp.items():
             n = T[i][0]
@@ -308,6 +424,7 @@ def match_anim(fam, an, v, by, tab, sha_of, sig, names, virt):
         rows.append({'fam': fam, 'anim': an, 'i': i, 'tex': n, 'w': w, 'h': h, 'src': f, 'donor': d['path'], 'alts': alts,
                      'conf': g, 'method': meth, 'score': round(d['ok'] / max(1, d['ok'] + d['bad']), 3), 'c': c})
     palette_pass(rows, T, have, sig, diff)
+    offset_pass(fam, an, rows, T, have, by, tab, sha_of)
     for r in rows:              # earlier visual rejects (deep_donors.VISUAL_REJECT) stay visible but never above C
         if r['src'] and dd.rejected(int(fam), r['src']):
             r['conf'] = 'C'

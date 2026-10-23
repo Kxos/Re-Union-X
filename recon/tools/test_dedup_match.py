@@ -35,6 +35,36 @@ mp = dd.lcs_map(A, B)
 check(mp == {0: 1, 1: 2, 2: 3, 3: 4}, 'lcs block %r' % mp)
 check(set(dm.runs(mp).values()) == {4}, 'one run of 4')
 
+# align: a donor listing the same block in reverse order is aligned backwards, runs on that diagonal
+mp, rn = dm.align(A, B[::-1])
+check(mp == {0: 4, 1: 3, 2: 2, 3: 1}, 'align reversed %r' % mp)
+check(set(rn.values()) == {4}, 'reversed run of 4 %r' % rn)
+mp, rn = dm.align(A, B)
+check(mp == {0: 1, 1: 2, 2: 3, 3: 4}, 'align forward unchanged %r' % mp)
+
+# name pins: meaningful names (hex utf-8 after the prefix) pin the alignment; generic 'bitmap N' names do not
+def hx(s):
+    return s.encode('utf-8').hex()
+
+
+check(dm.name_key('dead_%s.png' % hx('tail_pic000001.png')) == 'tail_pic000001.png', 'name_key decodes')
+check(dm.name_key('wait_%s.png' % hx('ビットマップ 12.png')) is None, 'generic bitmap names are not keys')
+T = [('dead_%s.png' % hx('tail_pic%06d.png' % k), 50, 40) for k in (1, 2, 3)]
+t = [('2323901_%s.png' % hx('tail_pic%06d.png' % k), 50, 40) for k in (3, 2, 1)]
+mp, rn = {0: 0, 1: 1, 2: 2}, {0: 3, 1: 3, 2: 3}
+dm.name_pins(T, t, mp, rn)
+check(mp == {0: 2, 1: 1, 2: 0}, 'name pins override an end-to-end alignment %r' % mp)
+
+# numbering offsets: enemy bitmap N survivors found at film bitmap N+k
+check(dm.bitmap_no('wait_%s.png' % hx('ビットマップ 12.png')) == 12, 'bitmap_no decodes')
+check(dm.bitmap_no('wait_%s.png' % hx('tail_pic000001.png')) is None, 'named textures have no bitmap number')
+check(dm.offsets([(n, n + 7) for n in range(1, 9)] + [(20, 3)]) == 7, 'dominant offset +7 (8/9)')
+check(dm.offsets([(1, 8), (2, 9), (3, 10)]) is None, 'too few survivors for an offset')
+check(dm.offsets([(n, n + 7) for n in range(5)] + [(n, n + 3) for n in range(5, 9)]) is None, 'mixed offsets: none')
+pr = [(n, n + 18) for n in range(2, 10)] + [(n, n + 22) for n in range(10, 21)]
+check(dm.local_offset(pr, 1) == 18, 'local offset from the nearest survivors (1550 dead bitmap 1 -> +18)')
+check(dm.local_offset(pr, 10) is None, 'local offset at a boundary between two offsets: none')
+
 base = {'bad': 0, 'ok': 2, 'haves': 3, 'cover': 0.9, 'run': 6, 'nvar': 2, 'area': 400, 'agree': 1,
         'disagree': 0, 'name': 0}
 
