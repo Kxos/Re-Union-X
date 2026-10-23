@@ -139,3 +139,7 @@
 1563:@rescale
 1646:@rescale
 2500:@rescale
+# 23-10-2026, seventh review (overrides_G.tsv) approved: 1635 atkSp leg flipbook (8-copy groups = their own
+# original member, 9-copy rest-pose groups = the knockback limbs) and the 2506 foot pieces b28/b29 of
+# knockback/wait/move/atk1_o (drama 2270201 bitmaps 40/41, replacing three E2 rows; G is read after E2). The
+# 1635:^F/atkSp entry above stays: G supersedes those keys.

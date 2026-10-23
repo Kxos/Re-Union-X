@@ -212,7 +212,21 @@ check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values() if v[
 # fourth to sixth review (23-10): 1558 keeps the version served before E1, no 1635 atkSp row from overrides_F, and
 # downscaled copies only for the approved families (rescale proposal) and the review files' own choices
 check(len([k for k in t if k.startswith('lwf/character/enemy/1558/')]) == 7, '1558 rows changed')
-check(not [k for k in t if k.startswith('lwf/character/enemy/1635/atkSp/')], '1635 atkSp rows from overrides_F')
+# seventh review (overrides_G.tsv, 23-10): the 1635 atkSp rows come from G only (F still ignored): 77 rows, every
+# source a 1635 bitmap (42 atkSp originals of the 8-copy groups, 35 knockback limbs for the 9-copy rest-pose groups);
+# the 2506 foot pieces b28/b29 of knockback/wait/move/atk1_o are drama 2270201 bitmaps 40/41 (after E2)
+sp = {k: v for k, v in t.items() if k.startswith('lwf/character/enemy/1635/atkSp/')}
+check(len(sp) == 77 and all(v[1].startswith('lwf/character/enemy/1635/atkSp/') or
+                            v[1].startswith('lwf/character/enemy/1635/knockback/') for v in sp.values())
+      and sum(v[1].startswith('lwf/character/enemy/1635/knockback/') for v in sp.values()) == 35,
+      '1635 atkSp rows of overrides_G: %d' % len(sp))
+hx = lambda n: ''.join('%02x' % ord(c) for c in ' %d.png' % n) + '.png'  # noqa: E731
+feet = {'knockback': (28, 29), 'wait': (28, 29), 'move': (28, 29), 'atk1_o': (52, 53)}
+for an, (b0, b1) in feet.items():
+    for b, d in ((b0, 40), (b1, 41)):
+        k = [k for k in t if k.startswith('lwf/character/enemy/2506/%s/' % an) and k.endswith(hx(b))]
+        check(len(k) == 1 and t[k[0]][1].startswith('lwf/drama/2270201/') and t[k[0]][1].endswith(hx(d)),
+              '2506 %s b%d from drama 2270201 b%d: %s' % (an, b, d, [t[x][1] for x in k]))
 resc_fams = {k.split('/')[3] for k, v in t.items() if v[2] == 'dedup-rescale'}
 check(resc_fams <= set('233 240 251 1502 1516 1535 1536 1538 1548 1552 1554 1563 1646 2500 2006 2501 2506 2510'.split()),
       'downscaled copies outside the approved families: %s' % sorted(resc_fams))
