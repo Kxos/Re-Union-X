@@ -53,8 +53,15 @@ with open(COL, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1905/dead/dead.lwf\tww501:lwf/character/enemy/5902/dead/dead.lwf\trecolour-whole\tn\n'
              'lwf/character/enemy/1905/dead/dead_d.png\tww501:lwf/character/enemy/5902/dead/dead_d.png\trecolour-whole\tn\n'
              'lwf/character/enemy/1906/wait/wait_a.png\trecolour:lwf/character/enemy/1904/wait/wait_a.png\trecolour\tn\n')
+# original copies matched by texture-table order (extra_donors_dedup.tsv, I-194 23-10): last among the copies
+DDP = os.path.join(TMP, 'dedup.tsv')
+with open(DDP, 'w', encoding='utf-8') as fh:
+    fh.write('# test\n'
+             'lwf/character/enemy/1907/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-order\t10x10\tA\n'
+             'lwf/character/enemy/1906/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-order\t10x10\tA\n'
+             'lwf/character/enemy/1909/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-order\t10x10\tC\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
-            '--extra', XTR, '--recolour', COL] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
+            '--extra', XTR, '--recolour', COL, '--dedup', DDP] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
 import make_jp_enemies as m  # noqa: E402
 
@@ -257,6 +264,32 @@ try:
     os.remove(qd)
     r, todo = m.plan_enemy(1905)
     check(r['status'] == 'incompleto' and not todo, 'dead intera con una texture assente: incompleto (%s)' % r)
+
+    # original copies by table order (extra_donors_dedup.tsv, rule dedup-order, category 2): used when nothing else
+    # has the texture; a row of extra_donors.tsv wins on the same path (1906); declared size checked (1909: 40x40
+    # source for 10x10 -> incomplete); an original file of the enemy always wins (1907)
+    os.makedirs(os.path.join(ROOT, 'lwf', 'drama', '98'), exist_ok=True)
+    with open(os.path.join(ROOT, 'lwf', 'drama', '98', '98_a.png'), 'wb') as fh:
+        fh.write(png(10, 10))
+    with open(os.path.join(ROOT, 'lwf', 'drama', '98', '98_big.png'), 'wb') as fh:
+        fh.write(png(40, 40))
+    for fam in ('1907', '1909'):
+        put(fam + '/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+        body(fam)
+    r, todo = m.plan_enemy(1907)
+    check(r['status'] == 'completo' and r['category'] == 2 and todo.get('lwf/character/enemy/1907/wait/wait_a.png') ==
+          os.path.join(ROOT, 'lwf', 'drama', '98', '98_a.png'), 'dedup-order copy: category 2 (%s)' % r)
+    check('1 by table order' in r['anims']['wait'].get('note', ''), 'dedup note: %s' % r['anims']['wait'])
+    r, todo = m.plan_enemy(1906)
+    check(todo.get('lwf/character/enemy/1906/wait/wait_a.png') == q1, 'extra_donors.tsv wins over the dedup table')
+    r, todo = m.plan_enemy(1909)
+    check(r['status'] == 'incompleto' and not todo, 'dedup copy with another size: incomplete (%s)' % r)
+    check(m.extra_donors.category('dedup-order') == 2 and m.KIND_CAT['dedup'] == 2, 'dedup category 2')
+    # an original file of the enemy always wins over the dedup row
+    put('1907/wait/wait_a.png', png(10, 10))
+    r, todo = m.plan_enemy(1907)
+    check(todo.get('lwf/character/enemy/1907/wait/wait_a.png') == os.path.join(JP, '1907', 'wait', 'wait_a.png'),
+          'the original file wins over the dedup row')
 
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto

@@ -385,7 +385,7 @@ def family_needs(fams, workdir):
     """as tmp\\deep_scan\\scripts\\need.py: per family and mandatory animation (+ move) that is not complete and has
     its JP LWF: survivors (fill_tex, original sources only) and missing textures, with declared sizes. The versioned tables
     of make_jp_enemies.py, without extra_donors_deep.tsv."""
-    sys.argv = ['make_jp_enemies.py', '--dry', '--deep', '', '--out', os.path.join(workdir, 'dry')]
+    sys.argv = ['make_jp_enemies.py', '--dry', '--deep', '', '--dedup', '', '--out', os.path.join(workdir, 'dry')]
     import make_jp_enemies as M
     if fams is None:
         M.main()

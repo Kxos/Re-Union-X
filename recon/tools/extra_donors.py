@@ -35,6 +35,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TABLE = os.path.join(HERE, 'extra_donors.tsv')
 RECOLOUR_TABLE = os.path.join(HERE, 'jp_recoloured.tsv')
 DEEP_TABLE = os.path.join(HERE, 'extra_donors_deep.tsv')
+# original copies matched by texture-table order (dedup_match.py proposal, user-approved rows only: dedup_export.py;
+# rule dedup-order, category 2, read last among the copies)
+DEDUP_TABLE = os.path.join(HERE, 'extra_donors_dedup.tsv')
 D = r'D:\Progetto_Restauro_KH_UX'
 import sys  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # with python -I the script folder is not on sys.path
@@ -47,7 +50,7 @@ ROOTS = {
     'recolour': [os.path.join(D, 'enemy_gen_src', 'recolour')],
 }
 RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'donor&order': 2, 'twinfam': 2,
-         'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'recolour': 4, 'recolour-whole': 4}
+         'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4}
 
 
 def category(rule):

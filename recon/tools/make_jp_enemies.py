@@ -42,6 +42,9 @@ in enemy_gen_src\\recolour; `--recolour ''` la esclude), con la dead generica in
 `--src-root jp501=<cartella>`. Ogni famiglia completa ha la sua categoria (la peggiore) in report.json.
 Category 2 also includes the original copies found by content in other LWFs of the same creature (I-194, 22-10:
 recon/tools/extra_donors_deep.tsv from deep_donors.py, rules content-anchor and bracket; `--deep ''` excludes it).
+Last among the category-2 copies (I-194, 23-10): pieces matched by texture-table ORDER to identical copies in other
+folders of the dump (dedup_match.py proposal), only the rows the user approved on the review sheets
+(recon/tools/extra_donors_dedup.tsv from dedup_export.py, rule dedup-order; `--dedup ''` excludes it).
 
 Effetti di comparsa: lwf/character/enemy/show_effect_fla/show_effect<N>/ per gli showSwf originali
 (external\\thethiny\\enemy_dec.json) non serviti, stesse regole (completi o niente).
@@ -89,6 +92,9 @@ ap.add_argument('--extra', default=None,
                 help="copie originali da altri contenitori (default recon/tools/extra_donors.tsv; '' = nessuna)")
 ap.add_argument('--deep', default=None,
                 help="original copies found by content (default recon/tools/extra_donors_deep.tsv, deep_donors.py; '' = none)")
+ap.add_argument('--dedup', default=None,
+                help="original copies matched by texture-table order, user-approved (default "
+                     "recon/tools/extra_donors_dedup.tsv, dedup_export.py; '' = none)")
 ap.add_argument('--recolour', default=None,
                 help="texture ricolorate da un gemello (default recon/tools/jp_recoloured.tsv; '' = nessuna)")
 ap.add_argument('--src-root', action='append', default=[], metavar='CONTENITORE=CARTELLA',
@@ -120,6 +126,9 @@ EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, ru
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
                                rules={'content-anchor', 'bracket'}), **EXTRA)
+# original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
+# category 2, read last among the copies (never overrides a file or a row of the tables above)
+DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup, rules={'dedup-order'})
 RECOL = extra_donors.load(extra_donors.RECOLOUR_TABLE if a.recolour is None else a.recolour, rules={'recolour', 'recolour-whole'})
 ROOTS = dict(extra_donors.ROOTS, jp431=[a.jp_root])
 for _x in a.src_root:
@@ -221,7 +230,7 @@ def fits(p, wh):
 
 
 # tipo di fonte di una texture -> categoria della regola dell'utente (extra_donors.py)
-KIND_CAT = {'jp': 1, 'diretto': 1, 'stesso': 2, 'doppione': 2, 'copia': 2, 'ricostruita': 3, 'ricolorata': 4}
+KIND_CAT = {'jp': 1, 'diretto': 1, 'stesso': 2, 'doppione': 2, 'copia': 2, 'dedup': 2,'ricostruita': 3, 'ricolorata': 4}
 
 
 def fill_tex(pre, anim, t, jp, jp_all, dims):
@@ -253,6 +262,9 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
         return dp, 'doppione'
     if xp and fit(xp):
         return xp, 'copia'
+    qp, _ = extra(pre + t, DEDUP)
+    if qp and fit(qp):
+        return qp, 'dedup'
     rp = recon(pre + t)
     if rp:
         return rp, 'ricostruita'
@@ -310,6 +322,7 @@ def plan_anim(root_rel, anim, jp_all):
             notes.append('%d texture da altre animazioni dello stesso nemico' % count.get('stesso', 0))
             for kind, what in (('doppione', 'dalla tabella dei doppioni'), ('diretto', 'dirette da altri contenitori (exact501)'),
                                ('copia', 'da altri contenitori (extra_donors.tsv)'),
+                               ('dedup', 'by table order (extra_donors_dedup.tsv)'),
                                ('ricostruita', 'ricostruite (jp_reconstructed.tsv)'), ('ricolorata', 'ricolorate (jp_recoloured.tsv)')):
                 if count.get(kind):
                     notes.append('%d %s' % (count[kind], what))

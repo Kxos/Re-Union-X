@@ -472,6 +472,20 @@ base 148.
 95x95 frames under the signature threshold). Complete **146** (123/9/6/8). TOPN 250 and survivors from all animations
 were tried and give fewer rows. Detail and the list of the 99 still incomplete: [journal 2026-10-23](../journal/2026-10-23.md#i-194).
 
+**Original copies matched by texture-table order** (I-194, 23-10; category 2, read LAST among the copies). The
+containers store identical files once, so whole animation folders hold only the `.lwf` while the same bitmaps sit in
+films, raids, effects or other enemies at the same index of the aligned texture table (same Flash source).
+`recon/tools/dedup_match.py` writes a proposal (local, `tmp\dedup`), the user approves families or animations on the
+review sheets, `recon/tools/extra_donors_dedup_approved.txt` lists them (`1502`, `1502:wait`, `1550:-dead`) and
+`recon/tools/dedup_export.py` exports the approved rows to `recon/tools/extra_donors_dedup.tsv` (rule `dedup-order`;
+append mode: rows already approved are kept, `--rebuild` starts again). Skipped: pieces without a proposed source and
+**rescaled copies** (source pixel size not within +-2 px of the declared size: the generator's `fits()` refuses them).
+`make_jp_enemies.py` reads the table after every other original source (`fill_tex`: jp, exact501, same enemy,
+duplicates, extra/deep copies, **dedup**, then reconstructed and recoloured; `--dedup ''` excludes it), so it never
+replaces an original file or a row of the other tables. First approval 23-10 (63 families, 2,350 rows): complete
+**164** (123/24/6/11), +15: 208, 1525, 1541, 1549, 1561, 1577, 1611, 1614, 1619, 1624, 1625, 1650 and the Ralph allies
+2013, 2016, 2018; master revision 184.
+
 <a id="alleati-20xx"></a>
 ## Families 2001-2024: characters in story quests (I-199, 22-10)
 
