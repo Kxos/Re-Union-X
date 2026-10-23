@@ -4,7 +4,8 @@
 // enemies_oltre525.json vero, e gli obiettivi «Defeat X» di make-story-oltre.js sulla copia (Review Focus 4).
 'use strict';
 const fs = require('fs'), path = require('path');
-const { enemyRowsFor, addRows, patch, isClone, baseOf, familyOf, drawnDisplays, defaultSources, MAX_ID, DR_LOOK } = require('./make-enemy-oltre');
+const { enemyRowsFor, addRows, patch, isClone, baseOf, familyOf, drawnDisplays, defaultSources, MAX_ID, DR_LOOK,
+  GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors } = require('./make-enemy-oltre');
 const TMP = process.env.KHUX_TMP || 'D:\\Progetto_Restauro_KH_UX\\tmp';
 fs.mkdirSync(TMP, { recursive: true });
 const tmpDirs = [];
@@ -100,6 +101,32 @@ const rd2 = enemyRowsFor({ 255: { missions: [1] } }, enemies, { proposal, drawn:
 check(rd2.rows[0].displayId === 24 && rd2.sources[255].graphic === 'base', 'DR non servita: grafica della base');
 check(Object.entries(DR_LOOK).every(([f, v]) => Number(f) < 5000 && v.displayId > 0 && ['high', 'medium'].includes(v.confidence) && v.note),
   'DR_LOOK: famiglia KHUX -> displayId Dark Road (or a UX look since 22-10), confidenza high/medium, nota');
+// descrizioni (I-204): il clone di famiglia con un altro nome non tiene la descrizione della base
+const wikiPage = 'intro\n{|class="wikitable"\n|-bgcolor="#e6e6fa"\n|[[File:Shadow KHX.png|64x64px|center]]\n'
+  + '|{{a|Shadow|{{nihongo|\'\'\'{{kh|Shadow}}\'\'\'|シャドウ<br>|Shadou}}}}\n|Often travels in a group.\n----\nOther text.\n'
+  + '|style="text-align:center;"|{{AttIcon|power|x50px}}\n|-bgcolor="#e6e6fa"\n|{{a|Chill Ripper|[[File:Chill Ripper KHUX.png|64x64px|center]]}}\n'
+  + '|{{nihongo|\'\'\'{{kh|Chill Ripper}}\'\'\'|コールドリッパー<br>|Kōrudo Rippā}}\n|[The Challenge of Absorption]<br>Event text.\n----\n'
+  + 'This creature not only has lots of HP, but can also boost its [[Defense|defense]]!\n|style="text-align:center;"|{{AttIcon|magic|x50px}}\n|}';
+const parsed = parseWikiEnemies(wikiPage);
+check(JSON.stringify(parsed.shadow) === JSON.stringify(['Often travels in a group.', 'Other text.']),
+  `wiki: forma immagine-poi-nome: ${JSON.stringify(parsed.shadow)}`);
+check(parsed['chill ripper'] && parsed['chill ripper'][1] === 'This creature not only has lots of HP, but can also boost its defense!'
+  && parsed['chill ripper'][0].startsWith('[The Challenge'), `wiki: forma nome-poi-nihongo, link puliti: ${JSON.stringify(parsed['chill ripper'])}`);
+const rose = row(10076, 'White Rose', { flavor: 'This rose definitely has thorns...' });
+check(flavorFor('White Rose', rose, {}).kind === 'base' && flavorFor('Chill Ripper', rose, { 'chill ripper': 'Chilly.' }).flavor === 'Chilly.'
+  && flavorFor('Chill Ripper', rose, {}).flavor === GENERIC_FLAVOR, 'flavorFor: base solo con lo stesso nome, se no wiki, se no neutra');
+const fr = enemyRowsFor({ 11524: { missions: [670] }, 1905011524: { missions: [671] }, 255: { missions: [1] } }, enemies.concat([rose]), {
+  proposal: { 11524: { base: 10076, confidence: 'low', name: 'Chill Ripper', attribute: 3, reason: 'White Rose' }, ...proposal },
+  drawn, flavors: { 'chill ripper': 'Chilly.' } });
+const frBy = new Map(fr.rows.map((r) => [r.enemyId, r]));
+check(frBy.get(11524).flavor === 'Chilly.' && fr.sources[11524].flavor === 'wiki' && rose.flavor.startsWith('This rose'),
+  `Q670: Chill Ripper con la sua descrizione, non quella della rosa: ${frBy.get(11524).flavor}`);
+check(frBy.get(1905011524).flavor === 'Chilly.', 'id lungo «via»: descrizione della sua corta');
+check(frBy.get(255).flavor === tpl.flavor && fr.sources[255].flavor === 'base', 'stesso nome della base: descrizione della base');
+const stale = [{ ...rose }, { ...frBy.get(11524), flavor: rose.flavor }];
+const rf = refreshFlavors(stale, { 11524: { kind: 'family-clone', base: 10076 }, 10076: { kind: 'exact-clone', base: 1 } }, { 'chill ripper': 'Chilly.' });
+check(rf.changed === 1 && rf.wiki === 1 && stale[1].flavor === 'Chilly.' && stale[0].flavor === rose.flavor, `refreshFlavors: ${JSON.stringify(rf)}`);
+
 // gia' presenti: niente doppioni
 const again = enemyRowsFor(missing, enemies.concat(res.rows), { stats, proposal, drawn });
 check(again.rows.length === 0, `seconda corsa: +${again.rows.length}`);
@@ -205,6 +232,19 @@ if (fs.existsSync(path.join(MASTER, 'enemy.json')) && fs.existsSync(MISSING)) {
   const kinds = {};
   for (const v of Object.values(saved.sources)) { const k = v.kind + (v.confidence ? `(${v.confidence})` : ''); kinds[k] = (kinds[k] || 0) + 1; }
   console.log(`fonti: ${JSON.stringify(kinds)}; cloni con HP diversi fra base a 5 e a 4 cifre: ${five.length}`);
+  // I-204: nessun clone di famiglia con la descrizione di un nemico di un altro nome (Q670 Chill Ripper = rosa);
+  // la descrizione vuota (" ") e' quella originale di Darkling e dei Master (stesso nome della base): esclusa
+  const descOf = new Map();
+  for (const r of before) if (!descOf.has(r.flavor)) descOf.set(r.flavor, r.name);
+  const wrong = after.filter((r) => saved.sources[r.enemyId] && saved.sources[r.enemyId].kind === 'family-clone'
+    && String(r.flavor).trim() && descOf.has(r.flavor) && descOf.get(r.flavor) !== r.name && r.flavor !== GENERIC_FLAVOR);
+  check(wrong.length === 0, `descrizioni di un altro nemico: ${wrong.slice(0, 5).map((r) => `${r.enemyId} ${r.name} = ${descOf.get(r.flavor)}`)}`);
+  const chill = after.filter((r) => r.name === 'Chill Ripper');
+  check(chill.length > 0 && chill.every((r) => !/rose/i.test(r.flavor)), `Chill Ripper: ${chill.map((r) => r.flavor)}`);
+  if (Object.keys(wikiFlavors()).length) {
+    const gen = Object.entries(saved.sources).filter(([, v]) => v.kind === 'family-clone' && v.flavor === 'generic');
+    check(gen.length === 0, `cloni di famiglia senza descrizione khuxwiki: ${gen.map(([k]) => k).slice(0, 5)}`);
+  }
   const r2 = patch(dir, { ...defaultSources(), drawn, sourcesOut: srcOut });
   check(r2.added === r1.added && JSON.stringify(JSON.parse(fs.readFileSync(path.join(dir, 'enemy.json'), 'utf8'))) === JSON.stringify(after),
     'patch idempotente (righe rigenerate uguali)');

@@ -4,7 +4,7 @@
 # server e app ripartono normali (relogin.ps1). Il download completo e' di ~2,3 GB.
 #   .\update-resources.ps1 [-Revision N]
 # -Revision = BASE della revisione del master (run-server.ps1)
-param([int]$Revision = 180)
+param([int]$Revision = 181)
 $repo = Split-Path (Split-Path (Split-Path $PSScriptRoot))
 $log = 'D:\Progetto_Restauro_KH_UX\logs\server.log'
 Set-Location $repo

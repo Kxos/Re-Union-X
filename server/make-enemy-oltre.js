@@ -118,6 +118,60 @@ const baseOf = (id, has) => (has(id % 100000) ? id % 100000 : has(id % 10000) ? 
 const familyOf = (id) => (id >= 1e7 ? id % 100000 : id) % 10000;
 const copy = (r) => JSON.parse(JSON.stringify(r));
 
+// Descrizione (flavor, il testo sotto TARGET nel popup d'avvio della missione e nell'album) dei cloni di famiglia
+// (I-204, 23-10): il clone copiava quella della base, cosi' 1524 Chill Ripper (base 10076 White Rose) mostrava «This rose
+// definitely has thorns...». Fonte: tabella «Enemies» di khuxwiki (wiki_all.json, pagina «Enemies»: nome, descrizione,
+// attributo, tipo; le varianti della descrizione separate da «----»). Si prende la prima variante che non e' di un
+// evento («[The Challenge of ...]»). Solo locale: il testo non entra nel repository (master_data e' ignorato).
+const WIKI_ALL_PATH = process.env.KHUX_WIKI_ALL || 'D:\\Progetto_Restauro_KH_UX\\wiki\\wiki_all.json';
+// nome senza descrizione nella fonte: testo neutro (mai quello di un altro nemico); il giro lo conta
+const GENERIC_FLAVOR = 'Little is known about this enemy. Check its attribute and choose your Medals wisely!';
+const cleanWiki = (s) => String(s)
+  .replace(/<br\s*\/?>/gi, ' ')
+  .replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1')
+  .replace(/\{\{[^{}]*\}\}/g, '')
+  .replace(/'{2,}/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+// testo della pagina «Enemies» -> {"<nome minuscolo>": [varianti pulite]}. Le righe della tabella hanno due forme:
+// «|[[File:..]]» poi «|{{a|Nome|{{nihongo..}}}}», oppure «|{{a|Nome|[[File:..]]}}» poi «|{{nihongo..}}»; la
+// descrizione e' la prima cella che non e' immagine, nome, giapponese o stile
+function parseWikiEnemies(text) {
+  const out = {};
+  for (const r of String(text || '').split(/\n\|-[^\n]*\n/).slice(1)) {
+    const m = /\{\{a\|([^|{}]+)\|/.exec(r);
+    if (!m) continue;
+    const cells = [];
+    let cur = null;
+    for (const l of r.split('\n')) {
+      if (l.startsWith('|')) { if (cur !== null) cells.push(cur); cur = l.slice(1); } else if (cur !== null) cur += '\n' + l;
+    }
+    if (cur !== null) cells.push(cur);
+    const desc = cells.find((c) => !/^\s*(\[\[File|\{\{a\||\{\{nihongo|style=|''|\})/.test(c));
+    if (!desc) continue;
+    const variants = desc.split(/\n-{4,}\n/).map(cleanWiki).filter(Boolean);
+    const key = m[1].trim().toLowerCase();
+    if (variants.length && !out[key]) out[key] = variants;
+  }
+  return out;
+}
+// {"<nome minuscolo>": descrizione}: prima variante non di evento (se tutte lo sono, la prima)
+function wikiFlavors(p = WIKI_ALL_PATH) {
+  if (!p || !fs.existsSync(p)) return {};
+  let page;
+  try { page = JSON.parse(fs.readFileSync(p, 'utf8')).Enemies; } catch { return {}; }
+  const out = {};
+  for (const [k, v] of Object.entries(parseWikiEnemies(page))) out[k] = v.find((x) => !x.startsWith('[')) || v[0];
+  return out;
+}
+// descrizione di un clone di famiglia: quella della base solo se il nome e' lo stesso; se no quella del nome
+// (flavors), se no il testo neutro. -> {flavor, kind: 'base' | 'wiki' | 'generic'}
+function flavorFor(name, base, flavors = {}) {
+  if (base && String(name || '').toLowerCase() === String(base.name || '').toLowerCase()) return { flavor: base.flavor, kind: 'base' };
+  const w = flavors[String(name || '').toLowerCase()];
+  return w ? { flavor: w, kind: 'wiki' } : { flavor: GENERIC_FLAVOR, kind: 'generic' };
+}
+
 // grafiche servite di un nemico, come make-game-tables.js: lwf/character/enemy/<d>/wait/ nei nomi delle risorse
 // (names_v4.tsv) piu' le cartelle di enemy_gen con wait/wait.lwf (drawnJp). Solo d < 5000 conta come grafica KHUX
 function drawnDisplays(namesFile = NAMES_PATH, drawnJp = null) {
@@ -216,6 +270,9 @@ function enemyRowsFor(missing, enemyRows, src = {}) {
     row.enemyId = id;
     if (p.name) row.name = p.name;
     if (p.attribute) row.attribute = p.attribute;
+    // descrizione del nemico vero, mai quella della base con un altro nome (I-204)
+    const fl = flavorFor(row.name, b, src.flavors);
+    row.flavor = fl.flavor;
     // grafica (decisione dell'utente del 21-10, Task 7: «se la grafica originale c'e', si usa»): displayId originale =
     // famiglia dell'id (nel master ogni riga di storia da 1000 in su ha displayId = famiglia: 1001-1006, 1020-1023,
     // 1501, 2001-2003...; JP 4.3.1 ha lwf/character/enemy/<famiglia>/ per tutte le 139 famiglie nuove) se servita, cioe'
@@ -238,7 +295,7 @@ function enemyRowsFor(missing, enemyRows, src = {}) {
     out.family++;
     return add(row, { kind: 'family-clone', confidence: p.confidence, base: p.base, name: row.name, displayId: row.displayId,
       graphic: own ? 'family' : dr ? 'dark-road' : 'base', ...(own ? {} : { familyDisplay: fam }),
-      ...(dr ? { drConfidence: dr.confidence } : {}), detail: !!det, reason: p.reason });
+      ...(dr ? { drConfidence: dr.confidence } : {}), detail: !!det, flavor: fl.kind, reason: p.reason });
   };
   for (const id of short) family(id);
   for (const id of pending) family(id);
@@ -273,6 +330,7 @@ function strip(enemies, missing) {
 function addRows(enemies, src) {
   const s = src || { ...defaultSources(), drawn: drawnDisplays(), sourcesOut: SOURCES_PATH };
   if (!s.details) s.details = readDetails();
+  if (!s.flavors) s.flavors = wikiFlavors();
   strip(enemies, s.missing);
   const res = enemyRowsFor(s.missing, enemies, s);
   enemies.push(...res.rows);
@@ -295,11 +353,31 @@ function addRows(enemies, src) {
     console.log(`enemy-oltre: grafica della famiglia ${g.filter((v) => v.graphic === 'family').length}, Dark Road `
       + `${g.filter((v) => v.graphic === 'dark-road').length}, della base ${g.filter((v) => v.graphic === 'base').length} `
       + '(cloni di famiglia diretti; i lunghi «via» copiano la loro corta)');
+    console.log(`enemy-oltre: descrizioni dei cloni di famiglia: della base (stesso nome) ${g.filter((v) => v.flavor === 'base').length}, `
+      + `khuxwiki ${g.filter((v) => v.flavor === 'wiki').length}, neutre ${g.filter((v) => v.flavor === 'generic').length}`);
   }
   console.log(`enemy-oltre: +${res.rows.length} righe (${res.cloned} cloni esatti, ${res.family} cloni di famiglia, `
     + `${res.allies} alleati, ${res.fromStats} da fonte); ${res.uncovered.length} senza base, fuori; alleati del master ${alliesBase}`);
   return { added: res.rows.length, cloned: res.cloned, family: res.family, allies: res.allies, alliesBase,
     fromStats: res.fromStats, sources: res.sources, uncovered: res.uncovered };
+}
+
+// solo le descrizioni (I-204) su un master gia' costruito, senza rigenerare le righe (abilita', comparsa e obiettivi
+// che make-game-tables.js aggiunge dopo restano): righe family-clone di sources (enemy_oltre_sources.json), base =
+// source.base. -> {wiki, generic, base, changed}
+function refreshFlavors(enemies, sources, flavors = wikiFlavors()) {
+  const byId = new Map(enemies.map((r) => [r.enemyId, r]));
+  const rep = { wiki: 0, generic: 0, base: 0, changed: 0 };
+  for (const [k, v] of Object.entries(sources || {})) {
+    if (v.kind !== 'family-clone') continue;
+    const row = byId.get(Number(k));
+    if (!row) continue;
+    const fl = flavorFor(row.name, byId.get(v.base), flavors);
+    rep[fl.kind]++;
+    if (row.flavor !== fl.flavor) { row.flavor = fl.flavor; rep.changed++; }
+    v.flavor = fl.kind;
+  }
+  return rep;
 }
 
 // master gia' costruito: le basi hanno gia' il displayId servito; idempotente
@@ -311,10 +389,19 @@ function patch(masterDir, src) {
   return rep;
 }
 
-if (require.main === module) {
+if (require.main === module && process.argv[2] === '--flavors') {
+  // node server/make-enemy-oltre.js --flavors [cartella master]: solo le descrizioni (I-204), sul posto
+  const file = path.join(process.argv[3] || path.join(__dirname, 'master_data'), 'enemy.json');
+  const enemies = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const saved = readRequired(SOURCES_PATH, 'fonti');
+  const rep = refreshFlavors(enemies, saved.sources);
+  fs.writeFileSync(file, JSON.stringify(enemies));
+  fs.writeFileSync(SOURCES_PATH, JSON.stringify(saved, null, 1));
+  console.log(`enemy-oltre --flavors: ${JSON.stringify(rep)}`);
+} else if (require.main === module) {
   const d = defaultSources();
   patch(process.argv[2] || path.join(__dirname, 'master_data'), { ...d, drawn: drawnDisplays(), sourcesOut: process.argv[3] || SOURCES_PATH });
 }
 
-module.exports = { MAX_ID, SOURCES_PATH, DR_LOOK, ALLY_PATH, readAllies, isClone, baseOf, familyOf, drawnDisplays, readDetails, enemyRowsFor, defaultSources, strip, addRows,
+module.exports = { MAX_ID, SOURCES_PATH, DR_LOOK, GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors, ALLY_PATH, readAllies, isClone, baseOf, familyOf, drawnDisplays, readDetails, enemyRowsFor, defaultSources, strip, addRows,
   patch };

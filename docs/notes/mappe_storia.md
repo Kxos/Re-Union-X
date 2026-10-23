@@ -848,6 +848,17 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   (only for served WW layouts: the widget's textures from the JP revision, texts and positions stay WW) on the three
   layouts. Built in resources 62 and verified on the bench 23-10 (Story Q595 and Proud Q979 start popups: Optimize
   orange like Equipment).
+- **TARGET description** (I-204, bench 23-10: Q670 Chill Ripper showed «This rose definitely has thorns...»): the text
+  under TARGET is the `flavor` of the target's `enemy` master row. The 526-979 family clones (`make-enemy-oltre.js`)
+  copied the whole base row, flavor included, and only renamed it: 11524 Chill Ripper is cloned from 10076 White Rose
+  (the rose text belongs to White Rose; Ephemer & Skuld of Q979 had it for the same reason). 220 of the 227 direct
+  family clones carried another enemy's description (91 names, 288 quests 585-979, also Darkness 977, Dual Blade 671,
+  Green Requiem 676). Fix 23-10: a family clone keeps the base's flavor only when it has the base's name; otherwise it
+  takes the first non-event variant of its own row in the khuxwiki «Enemies» table (`wiki\wiki_all.json`, page
+  «Enemies», read locally at build time, `wikiFlavors()`), else a neutral text (`GENERIC_FLAVOR`, 0 rows today). The
+  long «via» ids copy their short clone. Applied to the built master without regenerating the rows:
+  `node server/make-enemy-oltre.js --flavors` (also records `flavor: base|wiki|generic` in `enemy_oltre_sources.json`);
+  master rev 181. Test: `server/test-enemy-oltre.js` (no family clone with another enemy's description).
 - **Objectives**: Proud 979 «Complete within 3 turns / Complete without having to continue» x 2 is what the khuxwiki page
   lists in both the NA and the JP fields; 19 Proud pages repeat an objective (66, 142, 904, 909, 925, 963-974, 977, 979).
   The /Archive pages show that an official update replaced early objectives (e.g. «Defeat N or more enemies» -> «Collect
