@@ -86,6 +86,23 @@ check(all(any(k == d + '/' + d.rsplit('/', 1)[1] + '.lwf' for k in ex) for d in 
 if os.path.isdir(xd.ROOTS['jp501'][0]) and os.path.isdir(xd.ROOTS['ww501'][1]):
     miss = [k for k in ex if not xd.lookup(ex, k)]
     check(not miss, 'sorgenti assenti in extra_donors.tsv: %d (%s)' % (len(miss), miss[:3]))
+# generic smoke dead (recolour-whole, user's decisions: 1524 on 22-10, 1590/1592/2503 on 23-10): for each family the
+# whole dead (LWF + every texture) comes from ONE source folder; the expected donors
+WHOLE_DEAD = {1501: '5038', 1524: '5045', 1590: '1591', 1592: '1591', 2503: '1'}
+for fam, src in WHOLE_DEAD.items():
+    rows = {k: v for k, v in rc.items() if k.startswith('lwf/character/enemy/%d/dead/' % fam)}
+    lw = rows.get('lwf/character/enemy/%d/dead/dead.lwf' % fam)
+    check(lw and all(v[2] == 'recolour-whole' for v in rows.values()) and len(rows) >= 2,
+          'dead generica %d: righe %d' % (fam, len(rows)))
+    check(len({v[0] + ':' + v[1].rsplit('/', 1)[0] for v in rows.values()}) == 1
+          and all(v[1].startswith('lwf/character/enemy/%s/dead/' % src) for v in rows.values()),
+          'dead generica %d: una sola cartella sorgente (%s)' % (fam, src))
+    src_lwf = xd.lookup(rc, 'lwf/character/enemy/%d/dead/dead.lwf' % fam) if lw else None
+    if src_lwf:
+        import re
+        refs = {m.decode() for m in re.findall(rb'[\w\-.]+\.png', open(src_lwf, 'rb').read())}
+        have = {k.rsplit('/', 1)[1] for k in rows}
+        check(refs and refs <= have, 'dead generica %d: texture senza riga %s' % (fam, sorted(refs - have)[:3]))
 if rc and os.path.isdir(xd.ROOTS['recolour'][0]):
     miss = [k for k in rc if not xd.lookup(rc, k)]
     check(not miss, 'sorgenti assenti in jp_recoloured.tsv: %d (%s)' % (len(miss), miss[:3]))
