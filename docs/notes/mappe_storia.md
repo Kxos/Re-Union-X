@@ -820,7 +820,11 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
 - **Skip** (bottom left: Skip button, Skip Ticket icon and count, objective marks): the panel is in the scene and imported;
   the client shows it only when the player has Skip Tickets, i.e. `userData.userPoint.stageSkipTicket` > 0 (or
   `superSkipTicket` > 0; with both > 0 the round button next to the count switches between the two kinds, as in the
-  screenshot of Q974). In Proud there is no other condition; the button itself is greyed until the quest is cleared.
+  screenshot of Q974). In Proud there is no other condition. Bench 23-10 (save `skiptest`): «Skip» is greyed (marks
+  black) when the quest lacks objectives (Proud 977 cleared without objectives); «Force Skip» works even on a Proud quest
+  never cleared (979 with no `stageScores`): the client sends `stageSkip: 2` and `/stage/clear`, the quest becomes
+  COMPLETE with no objectives. Open: the server stores the skipped run's Lux (21,177) as Lux Record; the original
+  behaviour for the record after a skip is not documented.
   The Story popup uses the same rule plus «quest already cleared». The test saves `proud979`/`proudall` have no
   `stageSkipTicket`, so the server sends 0 and the panel is hidden: **correct, nothing to fix**. Tickets come from the
   Beginner missions (reward type 26).
