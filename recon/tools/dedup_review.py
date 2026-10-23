@@ -20,6 +20,10 @@ animations of one family with the same exact size, unique in both tables and >= 
     piece inside a contiguous run >= RUN_MIN whose other pieces, where both sides are known, agree by content;
     grade B (original donor) / C.
 Every row says where it came from; the reviewer accepts or rejects it against the renders.
+
+render() draws a frame of an enemy rig for review sheets: blend modes from place.object (add, multiply) and Flash
+mask layers (place.depth clip depth, see lwf_rig.py) applied as clips, never drawn as colour (review B's sheets read
+the clip depth as a blend mode, so 1615's mask, a 187x198 solid red square with clip depth 6, covered the creature).
 """
 import argparse
 import collections
@@ -123,6 +127,73 @@ def own_candidates(fam, an, need_f, prop, diff, grades='AB'):
                                          '; conflict with %s' % ','.join(c['from'] for c in conflict) if conflict else '')
         rows.append(best)
     return rows
+
+
+TINT = {'A': (0, 255, 0), 'B': (255, 220, 0), 'C': (255, 0, 0), 'X': (255, 0, 255)}
+
+
+def _warp(im, M, S, W, H):
+    import numpy as np
+    from PIL import Image
+    Mi = np.linalg.inv(M) @ S
+    return np.asarray(im.transform((W, H), Image.AFFINE, tuple(Mi[:2].ravel()), resample=Image.BILINEAR),
+                      np.float32) / 255.
+
+
+def render(L, frame, texmap, tint=None, s=1.0, box=None, movie=None, bg=(0.32, 0.36, 0.42)):
+    """L: lwf_rig.LWF; texmap {texture index: RGBA image of the declared size}; tint {texture index: TINT key}
+    -> (RGB image, box). Missing textures leave holes; a mask whose texture is missing clips with its rectangle."""
+    import numpy as np
+    from PIL import Image
+    dr = L.draws(movie_id=movie, frame_idx=frame)
+    if box is None:
+        xs, ys = [], []
+        for tex, (u, v, w, h), M, mul, add in dr:
+            for cx, cy in ((u, v), (u + w, v), (u, v + h), (u + w, v + h)):
+                p = M @ np.array([cx, cy, 1.])
+                xs.append(p[0])
+                ys.append(p[1])
+        if not xs:
+            return None, None
+        box = (min(xs) - 4, min(ys) - 4, max(xs) + 4, max(ys) + 4)
+    x0, y0, x1, y1 = box
+    W, H = max(8, int((x1 - x0) * s)), max(8, int((y1 - y0) * s))
+    C = np.zeros((H, W, 4), np.float32)
+    S = np.array([[1 / s, 0, x0], [0, 1 / s, y0], [0, 0, 1.]])
+    cache = {}
+
+    def clip_alpha(md):
+        if id(md) not in cache:
+            a = np.zeros((H, W, 1), np.float32)
+            for x in md:
+                im = texmap.get(x[0]) or Image.new('RGBA', (int(x[1][2]), int(x[1][3])), (255, 255, 255, 255))
+                a = np.maximum(a, _warp(im, x[2], S, W, H)[..., 3:4])
+            cache[id(md)] = a
+        return cache[id(md)]
+
+    for d in dr:
+        tex, rect, M, mul, add = d
+        im = texmap.get(tex)
+        if im is None:
+            continue
+        a = _warp(im, M, S, W, H)
+        if tint and tex in tint:
+            a = a.copy()
+            a[..., :3] = a[..., :3] * 0.4 + np.array(TINT[tint[tex]]) / 255. * 0.6
+        al = a[..., 3:4] * float(mul[3])
+        for md in (d.masks or ()):
+            al = al * clip_alpha(md)
+        rgb = np.clip(a[..., :3] * np.array(mul[:3]) + np.array(add[:3]), 0, 1) * al
+        if d.blend == 1:                     # add
+            C[..., :3] = np.clip(C[..., :3] + rgb, 0, 1)
+            continue
+        if d.blend == 5:                     # multiply
+            C[..., :3] = C[..., :3] * (1 - al + rgb)
+        else:
+            C[..., :3] = rgb + (1 - al) * C[..., :3]
+        C[..., 3:4] = al + (1 - al) * C[..., 3:4]
+    out = C[..., :3] + (1 - C[..., 3:4]) * np.array(bg, np.float32)
+    return Image.fromarray((np.clip(out, 0, 1) * 255).astype('uint8')), box
 
 
 def main(argv=None):
