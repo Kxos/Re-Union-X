@@ -1619,7 +1619,7 @@ function userPointData(now) {
     lastApDatetime: serverTimeAt(ap.time), // da qui il client conta la ricarica
     stageSpherePoint: 0, raidSpherePoint: 0, colosseumSpherePoint: 0,
     // da qui in poi uint
-    specialPoint: 0, stageSkipTicket: player.stageSkipTicket || 0, superSkipTicket: 0, vipPoint: 0,
+    specialPoint: 0, stageSkipTicket: player.stageSkipTicket || 0, superSkipTicket: player.superSkipTicket || 0, vipPoint: 0,
     // livello del Burst (pulsante rosso in battaglia, una volta per missione; il client non
     // lo crea a 0): +1 alla prima guilt di ogni medaglia, +5 alla prima guilt massima
     guiltBurstLv: guiltBurst().level(), multiPoint: 0, missionPoint: 0, limitedVipPoint: 0,
@@ -1630,6 +1630,22 @@ function userPointData(now) {
     // Cookie: stessa valuta rinominata dall'evento); reference/missions/limited_rewards_map.md
     limitedDrawTicket1: player.limitedDrawTicket1 || 0, limitedDrawTicket2: gacha.ticketsOf(player)[player.gacha?.listedCurrency || 'draw'] || 0, limitedDrawTicket3: 0,
   };
+}
+
+// Skip del popup di avvio (I-203, docs/notes/mappe_storia.md#proud-start-popup-check): stageSkip 1 = Skip Ticket
+// (pulsante «Skip», solo con i 3 obiettivi gia' compiuti: lo controlla il client), 2 = Skip Ticket+ («Force Skip»,
+// anche con obiettivi mancanti). Il client salta la battaglia e manda subito /stage/clear con i premi calcolati da
+// lui (score 0, nessun obiettivo nuovo); qui si scala solo il biglietto. AP spesi come per una partita normale.
+const SKIP_TICKETS = { 1: 'stageSkipTicket', 2: 'superSkipTicket' };
+function spendSkipTicket(stageSkip) {
+  const kind = Number(stageSkip) || 0;
+  if (!kind) return;
+  const field = SKIP_TICKETS[kind];
+  if (!field) { console.log(`[skip] stage ${player.currentStageId}: stageSkip ${kind} sconosciuto, nessun biglietto scalato`); return; }
+  const have = player[field] || 0;
+  if (have <= 0) { console.log(`[skip] stage ${player.currentStageId}: ${field} a 0, skip senza biglietto`); return; }
+  player[field] = have - 1;
+  console.log(`[skip] stage ${player.currentStageId}: ${field} ${have} -> ${player[field]}`);
 }
 
 function respondStageStart(res, req) {
@@ -1656,6 +1672,7 @@ function respondStageStart(res, req) {
     if (before < useAp) console.log(`[ap] stage ${player.currentStageId}: costo ${useAp} AP, disponibili ${before}`);
     console.log(`[ap] stage ${player.currentStageId}: -${useAp} AP -> ${changeAp(-useAp)}/${maxAp()}`);
   }
+  spendSkipTicket(req?.stageSkip);
   savePlayer();
   send(res, 200, {
     ret: ret(),

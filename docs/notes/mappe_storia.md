@@ -823,7 +823,14 @@ story map), `server/test-keyblade-unlock.js` (Proud keyblades from the Proud row
   screenshot of Q974). In Proud there is no other condition; the button itself is greyed until the quest is cleared.
   The Story popup uses the same rule plus «quest already cleared». The test saves `proud979`/`proudall` have no
   `stageSkipTicket`, so the server sends 0 and the panel is hidden: **correct, nothing to fix**. Tickets come from the
-  Beginner missions (reward type 26). Open: the server echoes `stageSkip` of `/stage/start` but does not spend a ticket.
+  Beginner missions (reward type 26).
+- **Spending** (bench 23-10, save `skiptest`): «Skip» sends `/stage/start` with `stageSkip: 1`, «Force Skip» (Skip
+  Ticket+, rainbow ticket, no objective marks) `stageSkip: 2`; the client skips the battle and sends `/stage/clear` at
+  once with the rewards it computed (`score 0`, `clearMissionIds []`), then RESULTS, Congratulations and the quest
+  list (Lux Record unchanged). The server spends one ticket of the matching kind in `spendSkipTicket` (`server.js`),
+  AP as for a normal start; `superSkipTicket` comes from the save (`player.superSkipTicket`). Test
+  `server/test-skip.js`. Original rule (khuxwiki, Items): Skip Ticket only with all three objectives cleared (the
+  client greys the button), Skip Ticket+ also with missing objectives; Skip during a High Score Challenge gives 0 points.
 - **Optimize** (`Button_Auto` of `StartDeck{Proud,Edit2,Multi}_Button_ToDeck_ver260`): the WW revision served in our
   resources uses the red button texture `But10`; the JP 4.3.1 revision and every Global screenshot (Proud, Story
   «Select a Keyblade.») use the orange `But06`, like Equipment. Fix: new option `restyle=` of `import_jp_coco.py`
