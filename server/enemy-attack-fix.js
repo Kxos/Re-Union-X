@@ -47,15 +47,37 @@ function applyEnemyAttacks(atts, origRows, served = servedHitEffects()) {
   return stats;
 }
 
+// righe mancanti citate dai nemici: la 5.0.1 ne ha 13, i nemici veri ne citano centinaia. Copia di un attacco vero
+// per posizione (prima abilita' «Attack» 1, seconda «Moderate Attack» 101, le altre «Powerful Attack» 601; i nemici
+// con 3 abilita' andavano in crash all'avvio della missione) e per i contrattacchi (urgencySkillId, I-207: 1501001 del
+// Gold Tricholoma mancava) 601; poi applyEnemyAttacks mette i valori originali. -> righe aggiunte
+function addMissing(atts, enemies) {
+  const have = new Set(atts.map((a) => a.enemyAttackId));
+  const tpl = (i) => atts.find((a) => a.enemyAttackId === [1, 101, 601][Math.min(i, 2)]) || atts[0];
+  let added = 0;
+  const add = (sid, i) => {
+    if (!sid || have.has(sid)) return;
+    atts.push(Object.assign(JSON.parse(JSON.stringify(tpl(i))), { enemyAttackId: sid }));
+    have.add(sid);
+    added++;
+  };
+  for (const e of enemies) {
+    (e.skillId || []).forEach(add);
+    (e.urgencySkillId || []).forEach((sid) => add(sid, 2));
+  }
+  return added;
+}
+
 const readOrig = (file = ORIG) => JSON.parse(fs.readFileSync(file, 'utf8'));
 
-module.exports = { applyEnemyAttacks, servedHitEffects, readOrig };
+module.exports = { applyEnemyAttacks, addMissing, servedHitEffects, readOrig };
 
 if (require.main === module) {
   const dir = path.resolve(process.argv[2] || path.join(__dirname, 'master_data'));
   const file = path.join(dir, 'enemyAttack.json');
   const atts = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const stats = applyEnemyAttacks(atts, readOrig());
+  const added = addMissing(atts, JSON.parse(fs.readFileSync(path.join(dir, 'enemy.json'), 'utf8')));
+  const stats = { added, ...applyEnemyAttacks(atts, readOrig()) };
   console.log('enemy-attack-fix:', JSON.stringify(stats));
-  if (stats.patched) fs.writeFileSync(file, JSON.stringify(atts));
+  if (stats.patched || added) fs.writeFileSync(file, JSON.stringify(atts));
 }

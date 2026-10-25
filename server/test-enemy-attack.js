@@ -4,6 +4,18 @@ const fs = require('fs'); const path = require('path');
 const fix = require('./enemy-attack-fix');
 const errors = []; const check = (ok, msg) => { if (!ok) errors.push(msg); };
 const atts = JSON.parse(fs.readFileSync(path.join(__dirname, 'master_data', 'enemyAttack.json'), 'utf8'));
+// ogni attacco citato dai nemici esiste, anche i contrattacchi (urgencySkillId: 1501001 del Gold Tricholoma, I-207)
+const enemies = JSON.parse(fs.readFileSync(path.join(__dirname, 'master_data', 'enemy.json'), 'utf8'));
+const haveAtt = new Set(atts.map((a) => a.enemyAttackId));
+const dangling = [...new Set(enemies.flatMap((e) => [...(e.skillId || []), ...(e.urgencySkillId || [])]).filter((s) => s && !haveAtt.has(s)))];
+check(dangling.length === 0, `attacchi citati ma assenti: ${dangling.slice(0, 5)} (${dangling.length})`);
+// unita': addMissing copia il modello per posizione (1, 101, 601) e i contrattacchi da 601; idempotente
+const tpl = [1, 101, 601].map((id) => ({ enemyAttackId: id, name: `t${id}`, power: id }));
+const mini = JSON.parse(JSON.stringify(tpl));
+const added = fix.addMissing(mini, [{ skillId: [1, 7, 8, 9], urgencySkillId: [5] }]);
+check(added === 4 && mini.find((a) => a.enemyAttackId === 7)?.power === 101 && mini.find((a) => a.enemyAttackId === 5)?.power === 601,
+  `addMissing: ${added} ${JSON.stringify(mini.slice(3))}`);
+check(fix.addMissing(mini, [{ skillId: [1, 7, 8, 9], urgencySkillId: [5] }]) === 0, 'addMissing non idempotente');
 const served = fix.servedHitEffects();
 const again = fix.applyEnemyAttacks(atts, fix.readOrig(), served);
 check(again.patched === 0, `master non corretto o non idempotente: ${JSON.stringify(again)}`);

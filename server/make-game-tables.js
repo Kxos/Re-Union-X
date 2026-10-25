@@ -379,27 +379,16 @@ if (enemies && fs.existsSync(namesFile)) {
   // nemici delle missioni 526-979 (make-enemy-oltre.js): cloni delle basi, ora col displayId servito, o grafica della
   // famiglia se servita; prima di abilita', comparsa e make-story-oltre.js (obiettivi «Defeat X»)
   enemyOltre.addRows(enemies, { ...enemyOltre.defaultSources(), drawn, sourcesOut: enemyOltre.SOURCES_PATH });
-  // abilita' dei nemici: enemyAttack della 5.0.1 ha 13 righe, i nemici veri ne citano
-  // centinaia (skillId). Le mancanti si copiano dagli attacchi veri: prima abilita' =
-  // «Attack» (1), seconda = «Moderate Attack» (101), le altre «Powerful Attack» (601). I nemici
-  // con 3 abilita' andavano in crash all'avvio della missione (missioni zoo singole)
+  // abilita' dei nemici: enemyAttack della 5.0.1 ha 13 righe, i nemici veri ne citano centinaia (skillId,
+  // urgencySkillId): le mancanti da enemy-attack-fix.js addMissing
   const attPath = path.join(OUT, 'enemyAttack.json');
   const attBasePath = path.join(OUT, 'enemyAttack_base.json');
+  const atkFix = require('./enemy-attack-fix');
   if (fs.existsSync(attPath)) {
     if (!fs.existsSync(attBasePath)) fs.copyFileSync(attPath, attBasePath);
     const atts = JSON.parse(fs.readFileSync(attBasePath, 'utf8'));
-    const have = new Set(atts.map((a) => a.enemyAttackId));
-    const tplAtt = (i) => atts.find((a) => a.enemyAttackId === [1, 101, 601][Math.min(i, 2)]) || atts[0];
-    for (const e of enemies) {
-      (e.skillId || []).forEach((sid, i) => {
-        if (!sid || have.has(sid)) return;
-        atts.push(Object.assign(JSON.parse(JSON.stringify(tplAtt(i))), { enemyAttackId: sid }));
-        have.add(sid);
-        attacksAdded++;
-      });
-    }
+    attacksAdded += atkFix.addMissing(atts, enemies);
     // righe originali (stati alterati, potenza, buff) dai dati di thethiny: enemy-attack-fix.js
-    const atkFix = require('./enemy-attack-fix');
     atkFix.applyEnemyAttacks(atts, atkFix.readOrig());
     fs.writeFileSync(attPath, JSON.stringify(atts));
   }
