@@ -804,8 +804,16 @@ for d in JP_IMG:
             if rel.endswith('.png') and name not in _served_all:
                 writes.setdefault(name, ('jp', p, None))
 # fumetto dei propri messaggi della chat (I-210): il client chiede img/chat/Chat_Balloon_A1.png, il JP lo tiene in publish
-if 'img/chat/Chat_Balloon_A1.png' not in _served_all and os.path.exists(os.path.join(JP_ROOT, 'cocostudio', 'publish', 'Chat_Balloon_A1.png')):
-    writes.setdefault('img/chat/Chat_Balloon_A1.png', ('jp', os.path.join(JP_ROOT, 'cocostudio', 'publish', 'Chat_Balloon_A1.png'), None))
+if 'img/chat/Chat_Balloon_A1.png' not in _served_all and jp_path('Chat_Balloon_A1.png'):
+    writes.setdefault('img/chat/Chat_Balloon_A1.png', ('jp', jp_path('Chat_Balloon_A1.png'), None))
+# adesivi della chat (I-210, server/stamp-table.js): solo i 7 JP senza testo giapponese disegnato
+_stamp_dir = os.path.join(JP_ROOT, 'img', 'stamp')
+if os.path.isdir(_stamp_dir):
+    _stamps = latest(_stamp_dir)
+    for _n in (4, 5, 8, 10, 12, 23, 27):
+        _rel = 'talkstamp_%d.png' % _n
+        if _rel in _stamps and 'img/stamp/' + _rel not in _served_all:
+            writes.setdefault('img/stamp/' + _rel, ('jp', _stamps[_rel], None))
 # icone SN/SN+/SN++ della Supernova: img/ui/SBurst_Icon1..3 e ...R (il JP tiene le
 # non R in cocostudio/publish) e le texture del pannello assenti dalle risorse WW
 _jp_pub = os.path.join(JP_ROOT, 'cocostudio', 'publish')

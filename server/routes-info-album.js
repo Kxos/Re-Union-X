@@ -103,6 +103,11 @@ function updateNotice(realMs) {
 // Solo informazioni utili per capire come funziona il gioco (decisione dell'utente del 16-10): niente
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
+  // chat del party di un solo giocatore (I-210, routes-chat.js, stamp-table.js)
+  { date: '10/25', tag: 'INFORMATION', title: 'Party Chat',
+    body: ['The **Chat** button at the top of the home screen opens your party chat again, as in the original game. You need to be in a party: create one from the Party menu.',
+      'Your party has only you as a member, so the chat shows only your own messages and stickers (up to 40 characters per message, the last 1000 messages are kept). It works like a notepad for now.',
+      'Stickers: 7 of the original stickers are available. The others had Japanese text drawn in them and are not shown (**reconstructed** list).'] },
   // Proud Mode (I-200, make-proud.js, docs/notes/mappe_storia.md#proud-mode): sblocco alla Quest 500 (decisione
   // dell'utente del 22-10), AP 0 (valore finale), jewel e keyblade della wiki, condizioni coi codici del client
   { date: '10/22', tag: 'IMPORTANT', title: 'Proud Mode',

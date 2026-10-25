@@ -810,6 +810,8 @@ fs.writeFileSync(path.join(OUT, 'mypageBackground.json'), JSON.stringify(backgro
 fs.writeFileSync(path.join(OUT, 'reward.json'), JSON.stringify(rewards));
 fs.writeFileSync(path.join(OUT, 'medal.json'), JSON.stringify(medals));
 fs.writeFileSync(path.join(OUT, 'player.json'), JSON.stringify(players));
+// adesivi della chat del party (stamp-table.js, I-210)
+fs.writeFileSync(path.join(OUT, 'stamp.json'), JSON.stringify(require('./stamp-table').stampRows()));
 // guiltProb (guilt della copia, «Special Attack Bonus»): intervalli della khuxwiki per tier, un
 // valore ogni 1%, peso uniforme (medal-guilt.js guiltProbRows; prima vuota)
 const guiltProb = guilt.guiltProbRows();
