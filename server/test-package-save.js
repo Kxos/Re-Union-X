@@ -26,6 +26,10 @@ const kb = new Set(p.keyblades.map((k) => k.keybladeId));
 for (const k of [...max.keyblades, ...proud.keyblades]) check(kb.has(k.keybladeId), `keyblade ${k.keybladeId} missing`);
 const uk = p.keyblades.map((k) => k.userKeybladeId);
 check(new Set(uk).size === uk.length, 'duplicate userKeybladeId');
+check(p.freeStone === 100000, `jewels ${p.freeStone}, expected 100000`);
+// no party: the bench saves carry the author's «Kxos's Party»; with a party the home Chat button opens the party chat,
+// which has no service on our side and crashes the client (tester report 25-10)
+check(p.party === undefined, `party kept: ${JSON.stringify(p.party)}`);
 check(bytes(MAX).equals(before[0]) && bytes(PROUD).equals(before[1]), 'a source save was modified');
 
 // the server loads it, Proud Mode is open and finished up to 979

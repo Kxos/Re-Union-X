@@ -23,6 +23,11 @@ function merge(max, proud) {
   }
   pruneDuplicates(max, LIVE_TARGET);
   max.medalMaxExtra = Math.max(max.medalMaxExtra || 0, MEDAL_LIMIT); // storage at the game's maximum (3000 slots)
+  max.freeStone = PACKAGE_JEWELS; // jewels for the tester: Shop draws, Moogle Shop traits (author, 25-10)
+  // the bench party («Kxos's Party») stays on the bench: with a party the home Chat button opens the party chat, which
+  // has no service here and crashes the client (tester, 25-10); the first-party jewel bonus stays available
+  delete max.party;
+  delete max.partyFirstRewardDone;
   return max;
 }
 
@@ -30,7 +35,7 @@ function merge(max, proud) {
 // more. Spare copies of medals owned more than once are sold (medalState.removed, as Sell does) until LIVE_TARGET
 // are left: never the last copy of a medal, never a medal in a deck, subslot, Spirit slot or support, locked
 // copies only if needed, lowest level first.
-const MEDAL_LIMIT = 3000, LIVE_TARGET = 2900;
+const MEDAL_LIMIT = 3000, LIVE_TARGET = 2900, PACKAGE_JEWELS = 100000;
 function pruneDuplicates(p, target) {
   const state = (p.medalState = p.medalState || {});
   const refs = new Set([...(p.deck || []), ...Object.values(p.keybladeDecks || {}).flat(),

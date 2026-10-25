@@ -14,6 +14,9 @@ HOW TO PLAY
 2. Double-click "Play".
    - If LDPlayer 9.5.37 is not installed, Play offers to install it from this folder.
      Re-Union X only works with this exact LDPlayer version: keep LDPlayer's updates off.
+   - If the Play window stops moving after LDPlayer has been installed, close the Play
+     window (and LDPlayer, if it opened by itself) and double-click Play again: the
+     installation is done and Play continues from there.
    - The first start takes a few minutes. A window shows what is happening.
 3. When the game shows its title screen, tap KHUX START.
    The first time the game downloads about 4 GB of data: tap Download and keep the game
