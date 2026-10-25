@@ -384,6 +384,16 @@ Template to copy, fill and paste:
 **Attachments (screenshot / video / logs\server.log):** e.g. screenshot attached, server.log attached
 ```
 
+## Play package (private builds)
+
+For a few testers the author builds a **ready-to-play package** on the development PC with
+`tools/play/packaging/make-play-package.ps1`. The player only double-clicks `Play.bat`: the launcher
+(`tools/play/launcher/`) prepares a dedicated LDPlayer 9.5.37 instance, and the server runs **inside the
+emulator** on a pinned Node.js for Android (`tools/play/packaging/termux-node.lock`, started by
+`tools/play/guest/rx-start.sh`), so no Windows DNS change, IP or firewall rule is needed. A package contains
+files that this project never distributes, so packages are private, personal and never published; this
+repository only holds the code that builds and runs them.
+
 ## Current limitations
 
 What is missing in the game is listed in the in-game Notices and in [ISSUES.md](ISSUES.md). This list is
