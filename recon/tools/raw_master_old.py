@@ -76,9 +76,11 @@ LAYOUT = {
         ('registSleep', 1036, 'i'), ('registParalysis', 1040, 'i'),
         ('bufAttack', 1044, 'i'), ('bufDefense', 1048, 'i'), ('bufAttackPower', 1052, 'i'),
         ('bufDefensePower', 1056, 'i'), ('bufAttackSpeed', 1060, 'i'), ('bufDefenseSpeed', 1064, 'i'),
-        ('bufAttackMagic', 1068, 'i'), ('bufDefenseMagic', 1072, 'i'), ('bufAttackUpright', 1076, 'i'),
-        ('bufDefenseUpright', 1080, 'i'), ('bufAttackReverse', 1084, 'i'), ('bufDefenseReverse', 1088, 'i'),
-        ('bufTurn', 1092, 'i'), ('bufCount', 1096, 'i'),
+        ('bufAttackMagic', 1068, 'i'), ('bufDefenseMagic', 1072, 'i'),
+        # niente buff Upright/Reversed (I-207: prima letti qui, spostati): verificato sulle 665 righe contro
+        # data/enemy.json di thethiny e sulla wiki (White Rose 76 dorme, 112 per 5 turni)
+        ('bufTurn', 1076, 'i'), ('bufCount', 1080, 'i'), ('statusAilments', 1084, 'i', 2),
+        ('statusAilmentsTurn', 1092, 'i'), ('statusAilmentsCount', 1096, 'i'),
     ]),
     'medal': (1300, [
         ('medalId', 0, 'i'), ('imageId', 4, 'i'), ('thumbId', 8, 'i'), ('unk_12', 12, 'i'),

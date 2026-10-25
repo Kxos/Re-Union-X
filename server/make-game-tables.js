@@ -320,6 +320,8 @@ if (realEnemies) {
   enemies = JSON.parse(fs.readFileSync(path.join(OUT, 'enemy.json'), 'utf8'));
   const have = new Set(enemies.map((e) => e.enemyId));
   for (const r of realEnemies) if (!have.has(r.enemyId)) enemies.push(fromReal('enemy', r));
+  // buff e stati iniziali delle righe gia' presenti come la riga vera (enemy-start-state.js, I-207)
+  console.log(`enemy: buff/stati iniziali riallineati su ${require('./enemy-start-state').applyStartState(enemies, realEnemies)} righe`);
   // nemici degli stage JP delle missioni 526-979 (make-enemy-oltre.js): le righe di un giro precedente via, si
   // rigenerano sotto, dopo la scelta della grafica delle basi
   enemyOltre.strip(enemies, enemyOltre.defaultSources().missing);
