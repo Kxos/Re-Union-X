@@ -12,7 +12,7 @@ $stub = Join-Path $tmp 'stub.ps1'
 function Rec([string]$s) { Add-Content $env:RX_CALLS $s }
 function Find-LDPlayer { if ($env:RX_T_NOLD) { return $null }; @{ Dir = 'C:\LD'; Version = $env:RX_T_LDVER } }
 function Test-OneDrivePath([string]$Path) { $Path.StartsWith($env:RX_T_ONEDRIVE) }
-function Get-InstanceIndex([string]$List2, [string]$Name) { 1 }
+function Get-InstanceIndex([string]$List2, [string]$Name) { if ($env:RX_T_NOINSTANCE -and -not (Select-String -Path $env:RX_CALLS -Pattern 'new-instance' -Quiet)) { -1 } else { 1 } }
 function Get-InstanceRunning([string]$List2, [int]$Index) { [bool]$env:RX_T_RUNNING }
 function New-ReUnionInstance([string]$LdDir) { Rec 'new-instance'; 1 }
 function Set-InstanceShares([string]$LdDir, [int]$Index, [string]$MiscDir, [string]$PicturesDir) { Rec "shares $MiscDir|$PicturesDir" }
@@ -36,17 +36,21 @@ function Invoke-Guest([string]$LdDir, [int]$Index, [string]$Cmd) {
         return 'package:com.square_enix.android_googleplay.khuxww'
     }
     if ($Cmd -match 'pm install') { return 'Success' }
-    if ($Cmd -match 'rx-start\.sh') { if ($env:RX_T_SERVERFAIL) { return @('RX:ERROR SERVER the server stopped', '') } else { return @('unpacking', 'RX:READY 12', '') } }
+    if ($Cmd -match 'rx-start\.sh') {
+        if ($env:RX_T_GUESTOUT -eq 'empty') { return @('', '') }
+        if ($env:RX_T_GUESTOUT) { return @($env:RX_T_GUESTOUT, '') }
+        if ($env:RX_T_SERVERFAIL) { return @('RX:ERROR SERVER the server stopped', '') } else { return @('unpacking', 'RX:READY 12', '') }
+    }
     ''
 }
 '@ | Set-Content $stub -Encoding UTF8
 
-function Run-Play([hashtable]$Env) {
+function Run-Play([hashtable]$Env, [string[]]$extra = @('-TestHooks')) {
     $calls = Join-Path $tmp "calls-$([guid]::NewGuid()).txt"; New-Item $calls -ItemType File | Out-Null
     $vars = @{ RX_PLAYLIB = $stub; RX_CALLS = $calls; RX_ANSWER = 'n'; RX_T_LDVER = '9.5.37.0'; RX_T_ONEDRIVE = 'Z:\none' }
     foreach ($k in $Env.Keys) { $vars[$k] = $Env[$k] }
     foreach ($k in $vars.Keys) { Set-Item "Env:$k" $vars[$k] }
-    $out = & powershell -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\Play.ps1" -Package $pkg -DataDir $data 2>&1 | Out-String
+    $out = & powershell -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\Play.ps1" -Package $pkg -DataDir $data @extra 2>&1 | Out-String
     $code = $LASTEXITCODE
     foreach ($k in $vars.Keys) { Remove-Item "Env:$k" -ErrorAction SilentlyContinue }
     return @{ Code = $code; Out = $out; Calls = (Get-Content $calls -Raw) }
@@ -75,6 +79,31 @@ try {
     # game not installed: installed from inside the guest (no Windows path given to ldconsole)
     $r = Run-Play @{ RX_T_NOGAME = '1' }
     Check ($r.Code -eq 0 -and $r.Calls -match 'guest pm install -r /mnt/shared/Misc/data/game/khux-4\.3\.1\.apk' -and $r.Calls -notmatch 'installapp') "APK install from the guest: calls $($r.Calls)"
+    # error text: the server.log tail only for SERVER/TIMEOUT, without ANSI colours; no output at all = clear message
+    New-Item -ItemType Directory -Force "$data\logs" | Out-Null
+    [IO.File]::WriteAllText("$data\logs\server.log", "line A`n$([char]27)[31m[err]$([char]27)[0m port in use`n")
+    $r = Run-Play @{ RX_T_SERVERFAIL = '1' }
+    Check ($r.Out -match 'port in use' -and $r.Out -notmatch [char]27) "SERVER error: log tail missing or with ANSI codes: $($r.Out)"
+    $r = Run-Play @{ RX_T_GUESTOUT = 'RX:ERROR NODE Node.js does not run in this emulator' }
+    Check ($r.Code -eq 4 -and $r.Out -notmatch 'port in use') "NODE error must not show an old server.log: $($r.Out)"
+    $r = Run-Play @{ RX_T_GUESTOUT = 'empty' }
+    Check ($r.Code -eq 4 -and $r.Out -match 'did not answer') "no guest output: $($r.Out)"
+    Remove-Item "$data\logs\server.log" -Force
+    # 12 GB also when the save exists but the emulator instance is new (the game downloads everything again)
+    New-Item -ItemType Directory -Force "$data\save" | Out-Null; '{}' | Set-Content "$data\save\player.json"
+    $r = Run-Play @{ RX_T_LOWSPACE = '1'; RX_T_NOINSTANCE = '1' }
+    Check ($r.Code -eq 3) "new instance with a save, low space: code $($r.Code)"
+    # ... and when the package brings another resource version than the last start
+    '{ "resources": 69 }' | Set-Content "$pkg\data\package.json"; '68' | Set-Content (Join-Path $data 'resources.txt')
+    $r = Run-Play @{ RX_T_LOWSPACE = '1' }
+    Check ($r.Code -eq 3) "new resource version, low space: code $($r.Code)"
+    $r = Run-Play @{}
+    Check ((Get-Content (Join-Path $data 'resources.txt') -Raw).Trim() -eq '69') 'last resource version not recorded'
+    Check ($r.Out -match 'download about 4 GB') "new resource version: download warning missing: $($r.Out)"
+    Remove-Item "$data\save" -Recurse -Force; Remove-Item (Join-Path $data 'resources.txt'), "$pkg\data\package.json" -Force
+    # test hooks only with -TestHooks: without it the real PlayLib is used (here: OneDrive check on a fake OneDrive root)
+    $r = Run-Play @{ OneDrive = $tmp } -extra @()
+    Check ($r.Code -eq 2) "RX_PLAYLIB honoured without -TestHooks: code $($r.Code)"
     $r = Run-Play @{ RX_T_SERVERFAIL = '1' }
     Check ($r.Code -eq 4 -and $r.Out -match [regex]::Escape("$data\logs\server.log")) "server error: code $($r.Code) $($r.Out)"
     $r = Run-Play @{}

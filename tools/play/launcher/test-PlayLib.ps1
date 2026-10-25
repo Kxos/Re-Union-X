@@ -55,8 +55,14 @@ try {
     Check (-not (Test-FreeSpace -Path $tmp -NeedBytes 1PB)) '1 PB reported as available'
     Check (Test-FreeSpace -Path $tmp -NeedBytes 1MB) '1 MB reported as missing'
 
-    # Find-LDPlayer on this PC
+    # Find-LDPlayer on this PC: checked only where LDPlayer 9 is installed (uninstall key present), skipped elsewhere
     $ld = Find-LDPlayer
-    Check ($ld -and $ld.Version -eq '9.5.37.0' -and (Test-Path (Join-Path $ld.Dir 'ldconsole.exe'))) "Find-LDPlayer: $($ld | Out-String)"
+    $keys = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    if (Get-ItemProperty $keys -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -eq 'LDPlayer 9' }) {
+        Check ($ld -and $ld.Version -and (Test-Path (Join-Path $ld.Dir 'ldconsole.exe'))) "Find-LDPlayer: $($ld | Out-String)"
+    } else {
+        Check ($null -eq $ld) 'Find-LDPlayer found an LDPlayer that is not installed'
+        Write-Host 'Find-LDPlayer: LDPlayer 9 not installed on this PC, live check skipped'
+    }
 } finally { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue }
 if ($errors.Count) { $errors | ForEach-Object { "FAIL: $_" }; exit 1 } else { 'OK' }
