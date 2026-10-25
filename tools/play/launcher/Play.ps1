@@ -41,6 +41,7 @@ try {
         Say "Re-Union X needs LDPlayer 9.5.37 exactly ($have)."
         $setup = Join-Path $Package 'data\setup\LDPlayer9-9.5.37.exe'
         if (-not (Ask 'Install LDPlayer 9.5.37 now from this folder?')) { Stop-With 5 'Re-Union X needs LDPlayer 9.5.37. Run Play again when you want to install it.' }
+        Say 'When the LDPlayer installation is finished, if this window does not continue, close it (and LDPlayer) and start Play again.'
         Install-LDPlayer $setup
         $ld = Find-LDPlayer
         if (-not $ld -or $ld.Version -ne '9.5.37.0') { Stop-With 5 'Re-Union X needs LDPlayer 9.5.37, but it is still not installed. Run Play again to retry.' }

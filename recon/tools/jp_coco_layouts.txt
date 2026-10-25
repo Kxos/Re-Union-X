@@ -250,3 +250,7 @@ StartDeckProudScene_ver260.json
 StartDeckProud_Button_ToDeck_ver260.json  restyle=Button_Auto
 StartDeckEdit2_Button_ToDeck_ver260.json  restyle=Button_Auto
 StartDeckMulti_Button_ToDeck_ver260.json  restyle=Button_Auto
+
+# --- Chat (icona della home in alto; assente dalle risorse WW: il client apriva ChatScene senza layout e andava in
+# crash, puntatore nullo, segnalazione di un tester del pacchetto 25-10). Rapporto --check: 4 layout, 5 texture, 2 testi ---
+ChatScene.json
