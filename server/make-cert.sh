@@ -3,7 +3,7 @@
 #
 #   ./server/make-cert.sh 192.168.1.50
 #
-# Produce in server/certs/ (o in $KHUX_CERT_DIR, per il pacchetto di gioco tools/play):
+# Produce in server/certs/ (or in $KHUX_CERT_DIR: play package, tools/play):
 #   ca.crt      -> da installare sul telefono come CA utente
 #   server.key  -> chiave del server
 #   server.crt  -> certificato, valido per gli host dirottati e per l'IP indicato

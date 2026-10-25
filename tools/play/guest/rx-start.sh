@@ -4,7 +4,7 @@
 #   ld.exe -s <index> "sh /mnt/shared/Misc/data/guest/rx-start.sh <real-now ISO, UTC>"
 # Shared folders of the dedicated instance: Misc = the package folder, Pictures = the player's data folder
 # (save/, logs/). Settings in data/package.env (or $RX_ENV). Nothing here survives an emulator restart.
-# Last line printed: «RX:READY <seconds>» or «RX:ERROR <NODE|CA|NET|SERVER|TIMEOUT> <message>».
+# Last line printed: «RX:READY <seconds>» or «RX:ERROR <SETUP|NODE|CA|NET|SERVER|TIMEOUT> <message>».
 set -u
 NOW=${1:-}
 PKGDIR=/mnt/shared/Misc/data
@@ -18,10 +18,14 @@ fail() { echo "RX:ERROR $1 $2"; exit 1; }
 
 [ -f "$ENVFILE" ] || fail NODE "settings not found: $ENVFILE"
 set -a; . "$ENVFILE"; set +a
+for v in KHUX_RESOURCE_KEY KHUX_RESOURCE_SIZE KHUX_REVISION RX_CA_HASH; do
+  eval "[ -n \"\${$v:-}\" ]" || fail SETUP "package.env lacks $v: rebuild the package"
+done
 
-# 1. Node.js runtime (unpacked again only when the package's archive changes)
+# 1. Node.js runtime (unpacked again only when the package's archive changes: size + md5)
 TAR=$PKGDIR/guest/node.tar
-STAMP=$(stat -c %s "$TAR" 2>/dev/null) || fail NODE "missing $TAR"
+[ -f "$TAR" ] || fail NODE "missing $TAR"
+STAMP="$(stat -c %s "$TAR") $(md5sum "$TAR" | cut -d' ' -f1)"
 if [ "$(cat $ROOT/.version 2>/dev/null)" != "$STAMP" ]; then
   rm -rf $ROOT && mkdir -p $ROOT && tar xf "$TAR" -C $ROOT || fail NODE 'cannot unpack the Node.js runtime'
   echo "$STAMP" > $ROOT/.version
@@ -61,7 +65,7 @@ LOG=$DATA/logs/server.log
 # the previous session's log is kept: after a crash the player restarts with Play and then reports the bug
 [ -f $LOG ] && mv -f $LOG $DATA/logs/server.prev.log
 export LD_LIBRARY_PATH=$USR/lib KHUX_PUBLIC_URL=https://127.0.0.1 KHUX_SAVE=$DATA/save/player.json
-export KHUX_RESOURCE_DIR=$PKGDIR/resources KHUX_REAL_NOW=$NOW KHUX_PYTHON=/nonexistent
+export KHUX_RESOURCE_DIR=$PKGDIR/resources KHUX_REAL_NOW=$NOW KHUX_PYTHON=/nonexistent KHUX_LOG_DIR=$DATA/logs
 [ -n "$NOW" ] || unset KHUX_REAL_NOW
 nohup $USR/bin/node $PKGDIR/server/server.js > $LOG 2>&1 &
 PID=$!

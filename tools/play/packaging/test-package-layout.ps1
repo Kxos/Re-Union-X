@@ -42,7 +42,8 @@ if (Test-Path "$d\server\certs\server.crt") {
     Check ($a -ne $b) 'package CA must differ from the bench CA'
 }
 $img = @(Get-ChildItem "$d\server\game_data\gacha_img" -Filter '*.png' -ErrorAction SilentlyContinue).Count
-$kept = @(Get-ChildItem "$d\server\game_data\gacha_img_kept" -Filter '*-kept2.png' -ErrorAction SilentlyContinue).Count
+$keptStyle = (node -e "console.log(require(process.argv[1]).KEPT_STYLE)" (Join-Path $repo 'server\gacha.js')).Trim()
+$kept = @(Get-ChildItem (Join-Path $d 'server\game_data\gacha_img_kept') -Filter "*-kept$keptStyle.png" -ErrorAction SilentlyContinue).Count
 Check ($img -gt 0 -and $kept -eq $img) "kept banner images $kept / $img"
 
 $tracked = git -c safe.directory=* -C $repo ls-files | Where-Object { $_ -match '(package\.env|\.apk)$' }

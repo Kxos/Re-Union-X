@@ -47,7 +47,7 @@ const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_E
 const HTTP_PORT = Number(process.env.KHUX_HTTP_PORT || 80);
 const HTTPS_PORT = Number(process.env.KHUX_HTTPS_PORT || 443);
 const CERT_DIR = path.join(__dirname, 'certs');
-const LOG_DIR = path.join(__dirname, 'logs');
+const LOG_DIR = process.env.KHUX_LOG_DIR || path.join(__dirname, 'logs'); // KHUX_LOG_DIR: pacchetto di gioco (cartella logs del giocatore)
 const LOG_FILE = path.join(LOG_DIR, 'requests.ndjson');
 const DNS_LOG_FILE = path.join(LOG_DIR, 'dns.ndjson');
 
