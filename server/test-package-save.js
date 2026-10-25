@@ -27,8 +27,7 @@ for (const k of [...max.keyblades, ...proud.keyblades]) check(kb.has(k.keybladeI
 const uk = p.keyblades.map((k) => k.userKeybladeId);
 check(new Set(uk).size === uk.length, 'duplicate userKeybladeId');
 check(p.freeStone === 100000, `jewels ${p.freeStone}, expected 100000`);
-// no party: the bench saves carry the author's «Kxos's Party»; with a party the home Chat button opens the party chat,
-// which has no service on our side and crashes the client (tester report 25-10)
+// no party: the bench saves carry the author's «Kxos's Party»; the player creates their own (party chat: I-210)
 check(p.party === undefined, `party kept: ${JSON.stringify(p.party)}`);
 check(bytes(MAX).equals(before[0]) && bytes(PROUD).equals(before[1]), 'a source save was modified');
 

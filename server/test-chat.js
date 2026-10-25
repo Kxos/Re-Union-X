@@ -39,8 +39,11 @@ r = call('GET', '/chatsvc/chat/message/1?count=1000&startIndex=0').out;
 const m = r.entry;
 check(r.totalResults === 2 && m[0].messageNumber === 1 && m[1].messageNumber === 2 && m[1].messageData === 'ISTAMP:TALKS:2', `messaggi ${JSON.stringify(r)}`);
 check(m[0].nickName === '1' && m[0].tagName === '1' && m[0].userEndPointUrl === 'https://127.0.0.1/chatsvc' && m[0].messageStatus === 0
-  && m[0].createAt === '2021-05-15 12:00:00' && m[0].userImageUrl === '', `campi ${JSON.stringify(m[0])}`);
+  && m[0].createAt === '2021-05-15 21:00:00' && m[0].userImageUrl === '', `campi ${JSON.stringify(m[0])}`);
 check(saved >= 2 && player.chat.messages.length === 2, 'non salvati');
+// il servizio di chat legge createAt come ora giapponese (UTC+9; banco 25-10: «9 hours ago» per un messaggio appena
+// mandato), la API principale come UTC: in uscita +9 ore, nel salvataggio l'ora del server
+check(player.chat.messages[0].createAt === '2021-05-15 12:00:00', 'salvataggio non in ora del server');
 // startMessageNumber: dal numero dato in poi
 r = call('GET', '/chatsvc/chat/message/1?count=1000&startMessageNumber=2').out;
 check(r.entry.length === 1 && r.entry[0].messageNumber === 2, `startMessageNumber ${JSON.stringify(r)}`);

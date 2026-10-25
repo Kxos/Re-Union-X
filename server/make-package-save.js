@@ -24,9 +24,9 @@ function merge(max, proud) {
   pruneDuplicates(max, LIVE_TARGET);
   max.medalMaxExtra = Math.max(max.medalMaxExtra || 0, MEDAL_LIMIT); // storage at the game's maximum (3000 slots)
   max.freeStone = PACKAGE_JEWELS; // jewels for the tester: Shop draws, Moogle Shop traits (author, 25-10)
-  // the bench party («Kxos's Party») stays on the bench: with a party the home Chat button opens the party chat, which
-  // has no service here and crashes the client (tester, 25-10); the first-party jewel bonus stays available
-  delete max.party;
+  // the bench party («Kxos's Party», the author's name) stays on the bench: the player creates their own from the Party
+// menu (the party chat works since I-210, 25-10); the first-party jewel bonus stays available
+delete max.party;
   delete max.partyFirstRewardDone;
   return max;
 }
