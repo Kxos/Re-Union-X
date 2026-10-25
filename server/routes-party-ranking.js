@@ -31,7 +31,7 @@
 // destro cerca il leader in partyUserList, senza di lui legge fuori dall'array). Catena:
 // 83 /party, 86 /party/member/list, 81 /party/notice, 84 /party/detail (solo con partyId), 82 /party/login.
 // - 79 POST /party/create {name, message, playStyle, agreeType}: userParty, party, firstReward int.
-// - party: chatId 0 e chatEndpointUrl vuoto (chat HTTP non servita).
+// - party: chatId 1 e chatEndpointUrl = servizio di chat di routes-chat.js (I-210; prima 0 e vuoto, chat non servita).
 // - 86 con getDetail: ogni elemento = elemento giocatore + (userKeyblade,
 //   userRanking, lastStageId, comment, linkPlatformId, userColosseumRanking/userPvpRanking int, raidHelpNumber).
 // - 84 GET /party/detail: {rank uint}.
@@ -128,7 +128,7 @@ function respondPartyRanking(deps, res, kind, p, body) {
   const party = pt && {
     partyId: PARTY_ID, unionId: player.unionId || 0, rank: 1, name: pt.name, playStyle: pt.playStyle,
     agreeType: pt.agreeType, message: pt.message, memberCount: 1, leaderUserId: 1, adminUserIds: [],
-    leaderAppointDate: deps.outTime(pt.createDate), newcomerDate: deps.outTime(pt.createDate), chatId: 0, chatEndpointUrl: '',
+    leaderAppointDate: deps.outTime(pt.createDate), newcomerDate: deps.outTime(pt.createDate), chatId: 1, chatEndpointUrl: deps.chatUrl || '',
   };
   const withParty = (o) => (pt ? { ret: ret(), userParty, party, ...o } : { ret: ret(), userParty, ...o });
   if (kind === 'partycreate') return send(res, 200, withParty({ firstReward }));

@@ -33,6 +33,7 @@ const loginBonus = require('./login-bonus');
 const infoAlbum = require('./routes-info-album');
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
+const chatRoutes = require('./routes-chat'); // chat del party (I-210)
 const medalSkill = require('./medal-skill');
 const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
@@ -204,6 +205,7 @@ function route(url) {
   if (p === '/campaign') return 'campaign';
   if (p === '/ranking/reward/check') return 'rankingrewardcheck';
   if (routePartyRanking(p)) return routePartyRanking(p);
+  if (chatRoutes.routeChat(p)) return chatRoutes.routeChat(p);
   // Coliseum PvP (azioni 194-205): respondPvp
   // /pvp/keyblade resta alla risposta generica (com'era prima del 14-10): con la risposta completa di pvp
   // (userDecks) ogni battaglia andava in crash creando l'HUD, con solo ret «200 ERROR :196»
@@ -4107,9 +4109,15 @@ function handler(scheme) {
       }
       if (kind === 'album') return send(res, 200, { ret: ret(), ...infoAlbum.albumData(userMedalList(), masterRows('medal'),
         (t) => (medalGuilt.GUILT_RANGES[t] || {}).max || 0) });
+      // chat del party: /user/chat (6), /payment/info (24) e il servizio in chiaro sotto /chatsvc (server/routes-chat.js)
+      if (['userchat', 'paymentinfo', 'chatsvc'].includes(kind)) {
+        return chatRoutes.respondChat({ player, savePlayer, serverTime, ret, publicUrl: PUBLIC_URL,
+          stampIds: () => masterRows('stamp').filter((r) => r.validStamp).map((r) => r.stampId) },
+          res, kind, req.method, req.url, entry.bodyJson || entry.bodyDecoded);
+      }
       // Party (82, 87) e classifiche (129-140, 178-184): server/routes-party-ranking.js
       if (['partylogin', 'partysearch', 'rankinglist', 'partycreate', 'party', 'partymembers', 'partydetail', 'partyupdate', 'partyleave', 'partyemptylist'].includes(kind)) {
-        return respondPartyRanking({ send, ret, serverTime, realNow, outTime, player, userObject, userDetailData, userAvatarData, savePlayer, addPresent,
+        return respondPartyRanking({ send, ret, serverTime, realNow, outTime, player, chatUrl: chatRoutes.CHAT_URL({ publicUrl: PUBLIC_URL }), userObject, userDetailData, userAvatarData, savePlayer, addPresent,
           selfElement: (now, partyId) => selfPlayerElement(now, sharedMedalData(now), partyId),
           keyblade: () => userKeybladeData(favoriteKeyblade()), lastStoryQuest: () => stageNumber(lastStoryStageId()), weeklyLux: () => weeklyLux() },
           res, kind, req.url.split('?')[0].toLowerCase(), entry.bodyDecoded);

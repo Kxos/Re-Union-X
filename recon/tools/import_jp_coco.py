@@ -496,7 +496,9 @@ for n in ours:
 # (il plist e' quello dello slot) e la loro scrittura resta a questo blocco.
 JP_ARM = {'Cursor_Anim_Ranking': ('MyPageAnime0', 'Cursor_Anim_Ranking0'),
           'Cursor_Anim_Ranking2': ('MyPageAnime0', 'Cursor_Anim_Ranking0'),
-          'Cursor_Anim_Proud': ('ActMapTreasureBoxExAnim0', 'Cursor_Anim_Proud0')}
+          'Cursor_Anim_Proud': ('ActMapTreasureBoxExAnim0', 'Cursor_Anim_Proud0'),
+          # cursore dell'adesivo scelto nella lista della chat (Chat_Stamp_On, I-210): l'ultimo plist libero
+          'Cursor_Anim_Chat': ('ActMapTreasureBoxAnim0', 'Cursor_Anim_Chat0')}
 
 results, writes = [], {}            # writes: nome publish -> ('jp', percorso, dati|None) | ('delete')
 for root, opts in roots:
@@ -782,6 +784,8 @@ for d in JP_LWF:
 JP_IMG = ['img/ui/PlayerStatusIndicator']
 # I-207: icone di assorbimento (img/battle/Absorb_%s.png) e cifre dei danni riflessi/Guard Break (img/damage)
 JP_IMG += ['img/battle', 'img/damage']
+# I-210: fumetti dei messaggi della chat (img/chat/Chat_Balloon_B1 degli altri; A1, il proprio, sotto: nel JP sta in publish)
+JP_IMG += ['img/chat']
 _served_all = set()
 for _tsv in (os.path.join(D, 'resource_data', 'names_v4.tsv'), os.path.join(D, 'ipa431', 'names_addnl.tsv')):
     if os.path.exists(_tsv):
@@ -799,6 +803,9 @@ for d in JP_IMG:
             name = d + '/' + rel
             if rel.endswith('.png') and name not in _served_all:
                 writes.setdefault(name, ('jp', p, None))
+# fumetto dei propri messaggi della chat (I-210): il client chiede img/chat/Chat_Balloon_A1.png, il JP lo tiene in publish
+if 'img/chat/Chat_Balloon_A1.png' not in _served_all and os.path.exists(os.path.join(JP_ROOT, 'cocostudio', 'publish', 'Chat_Balloon_A1.png')):
+    writes.setdefault('img/chat/Chat_Balloon_A1.png', ('jp', os.path.join(JP_ROOT, 'cocostudio', 'publish', 'Chat_Balloon_A1.png'), None))
 # icone SN/SN+/SN++ della Supernova: img/ui/SBurst_Icon1..3 e ...R (il JP tiene le
 # non R in cocostudio/publish) e le texture del pannello assenti dalle risorse WW
 _jp_pub = os.path.join(JP_ROOT, 'cocostudio', 'publish')

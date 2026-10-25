@@ -254,6 +254,21 @@ StartDeckMulti_Button_ToDeck_ver260.json  restyle=Button_Auto
 # --- Chat (icona della home in alto; assente dalle risorse WW: il client apriva ChatScene senza layout e andava in
 # crash, puntatore nullo, segnalazione di un tester del pacchetto 25-10). Rapporto --check: 4 layout, 5 texture, 2 testi ---
 ChatScene.json
+# I-210 (chat del party di un solo giocatore, server/routes-chat.js): i layout che il codice carica da se' (non dalla
+# scena). Chat_Panel: la riga di un messaggio, caricata da ChatScrollView e usata subito (seek «Avatar») senza
+# controllo: era la vera causa del crash. Adesivi (Chat_Stamp, Chat_Stamp_On + armatura Cursor_Anim_Chat, JP_ARM) e
+# finestre del tocco lungo su un messaggio (Chat_Post_*)
+Chat_Panel.json
+Chat_Stamp.json
+Chat_Stamp_On.json
+Chat_Post_Delete.json
+Chat_Post_Check.json
+Chat_Post_Block.json
+Chat_Post_Report.json
+Chat_Post_ReportWin.json
+Chat_Post_ReportPanel.json
+Chat_Post_BlockPanel.json
+Chat_Post_BlockList.json
 
 # --- Contatori dei nemici (I-207): numero del contatore sopra il nemico (attacchi, colpi, slot), azzeramento,
 # contrattacco. Il client controlla che il file esista e che i widget non siano nulli (FUN_00b00968) ---
