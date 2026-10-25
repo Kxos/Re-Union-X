@@ -73,4 +73,4 @@ if (require.main === module) {
   console.log(`${DST}: ${p.medals.length} medals, ${Object.keys(p.stageScores).length} stage scores, ${p.keyblades.length} keyblades`);
 }
 
-module.exports = { merge };
+module.exports = { merge, pruneDuplicates };
