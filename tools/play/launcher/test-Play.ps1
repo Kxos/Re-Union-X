@@ -22,9 +22,9 @@ function Install-LDPlayer([string]$Exe) { Rec "install $Exe" }
 function Invoke-LDConsole([string]$LdDir, [string[]]$Arguments) { Rec ("ldconsole " + ($Arguments -join ' ')); '1,Re-Union X,0,0,0,-1,-1,1920,1080,280' }
 function Invoke-Guest([string]$LdDir, [int]$Index, [string]$Cmd) {
     Rec "guest $Cmd"
-    if ($Cmd -match 'boot_completed') { return '1' }
+    if ($Cmd -match 'boot_completed') { return @('1', '') }
     if ($Cmd -match 'pm list packages') { return 'package:com.square_enix.android_googleplay.khuxww' }
-    if ($Cmd -match 'rx-start\.sh') { if ($env:RX_T_SERVERFAIL) { return 'RX:ERROR SERVER the server stopped' } else { return 'RX:READY 12' } }
+    if ($Cmd -match 'rx-start\.sh') { if ($env:RX_T_SERVERFAIL) { return @('RX:ERROR SERVER the server stopped', '') } else { return @('unpacking', 'RX:READY 12', '') } }
     ''
 }
 '@ | Set-Content $stub -Encoding UTF8
