@@ -214,6 +214,7 @@ function route(url) {
   if (p === '/user/support' || p === '/user/support/update') return 'usersupport';
   if (p === '/stage/support/list') return 'supportlist';
   if (p === '/user/avatar' || p === '/user/avatar/all' || p === '/user/avatar/parts') return 'useravatar';
+  if (p === '/user/avatar/update') return 'useravatarupdate';
   if (p === '/user') return 'user';
   if (p === '/user/profile') return 'userprofile';
   if (p === '/mypage') return 'mypage';
@@ -974,11 +975,39 @@ const AVATAR_COORDINATE = 1;
 function userAvatarData() {
   const a = player.avatar || {};
   return {
-    myCoordinateNo: AVATAR_COORDINATE, gender: a.gender ?? player.gender,
+    myCoordinateNo: player.avatarCoordinate || AVATAR_COORDINATE, gender: a.gender ?? player.gender,
     hairPartsId: a.hairPartsId || 0, hairColorPartsId: a.hairColorPartsId || 0,
     facePartsId: a.facePartsId || 0, bodyPartsId: a.bodyPartsId || 0, skinPartsId: a.skinPartsId || 0,
     accessoriesPartsIds: a.accessoriesPartsIds || [],
   };
+}
+
+// Tutti gli abiti salvati (fino a 6, «Create and save up to six different patterns!»): l'indossato e quelli di
+// player.avatarPatterns (myCoordinateNo -> parti), per /user/avatar/all e /user/avatar/update
+const AVATAR_FIELDS = ['gender', 'hairPartsId', 'hairColorPartsId', 'facePartsId', 'bodyPartsId', 'skinPartsId', 'accessoriesPartsIds'];
+function userAvatarsData() {
+  const worn = userAvatarData();
+  const others = Object.entries(player.avatarPatterns || {}).filter(([no]) => Number(no) !== worn.myCoordinateNo)
+    .map(([no, a]) => ({ ...userAvatarData(), ...a, myCoordinateNo: Number(no), accessoriesPartsIds: a.accessoriesPartsIds || [] }));
+  return [worn, ...others].sort((x, y) => x.myCoordinateNo - y.myCoordinateNo);
+}
+
+// POST /user/avatar/update (azione 43, Outfits > Save): corpo {updateAvatarData: [{myCoordinateNo, gender, defaultFlag,
+// ...PartsId, accessoriesPartsIds}]}; defaultFlag 1 = l'abito da indossare. Risposta: userAvatars + userData (schema
+// automatico). Senza gestore il client mostrava «200 ERROR :43» (tester del pacchetto, 25-10).
+function respondAvatarUpdate(res, body) {
+  for (const u of body?.updateAvatarData || []) {
+    const no = Number(u.myCoordinateNo) || AVATAR_COORDINATE;
+    const parts = Object.fromEntries(AVATAR_FIELDS.filter((k) => u[k] !== undefined).map((k) => [k, u[k]]));
+    (player.avatarPatterns = player.avatarPatterns || {})[no] = parts;
+    if (Number(u.defaultFlag) === 1 || no === (player.avatarCoordinate || AVATAR_COORDINATE)) {
+      player.avatar = { ...(player.avatar || {}), ...parts };
+      if (Number(u.defaultFlag) === 1) player.avatarCoordinate = no;
+    }
+    console.log(`  [avatar] abito ${no}${Number(u.defaultFlag) === 1 ? ' (indossato)' : ''}: corpo ${parts.bodyPartsId}, accessori ${JSON.stringify(parts.accessoriesPartsIds)}`);
+  }
+  savePlayer();
+  send(res, 200, { ret: ret(), userAvatars: userAvatarsData(), userData: { userPoint: userPointData(serverTime()), userDetail: userDetailData() } });
 }
 
 // Parti possedute: quelle indossate (tipo dalla tabella avatarParts).
@@ -986,6 +1015,7 @@ function userAvatarPartsData() {
   const a = userAvatarData();
   // indossate e guadagnate (premi degli Avatar Boards, player.avatarParts)
   const ids = [a.hairPartsId, a.hairColorPartsId, a.facePartsId, a.bodyPartsId, a.skinPartsId, ...a.accessoriesPartsIds,
+    ...Object.values(player.avatarPatterns || {}).flatMap((p) => [p.hairPartsId, p.hairColorPartsId, p.facePartsId, p.bodyPartsId, p.skinPartsId, ...(p.accessoriesPartsIds || [])]),
     ...(player.avatarParts || [])].filter(Boolean);
   const rows = masterRows('avatarParts');
   return [...new Set(ids)].map((id, i) => ({
@@ -1955,7 +1985,7 @@ function userDetailData() {
     // possedute (prova con tutte le medaglie: server/grant-all-medals.js)
     unionId: ensureUnion(),
     maxMedal: maxMedal(), mvpCount: 0,
-    equipCoordinateNo: player.avatar ? AVATAR_COORDINATE : 0, // coordinato indossato (userAvatars)
+    equipCoordinateNo: player.avatar ? (player.avatarCoordinate || AVATAR_COORDINATE) : 0, // coordinato indossato (userAvatars)
     // numero della missione (campo id della tabella stage: Prologue = 1), non lo stageId
     // (1010): la schermata Quests lo confronta con misc 106 (130) per
     // sbloccare il quarto pulsante, e da sbloccato cerca un testo che non c'e' (crash).
@@ -4173,9 +4203,10 @@ function handler(scheme) {
       if (kind === 'useravatar') {
         const p = req.url.split('?')[0];
         if (p === '/user/avatar/parts') return send(res, 200, { ret: ret(), userAvatarParts: userAvatarPartsData() });
-        if (p === '/user/avatar/all') return send(res, 200, { ret: ret(), userAvatars: [userAvatarData()] });
+        if (p === '/user/avatar/all') return send(res, 200, { ret: ret(), userAvatars: userAvatarsData() });
         return send(res, 200, { ret: ret(), userAvatar: userAvatarData() });
       }
+      if (kind === 'useravatarupdate') return respondAvatarUpdate(res, entry.bodyDecoded);
       // GET /raid/reward/151101 (azione 120): userData.userPoint,
       // raidRewards[] e guiltBurstFirst/MaxUserMedalIds. Nessun premio.
       if (kind === 'raidreward') {
@@ -4417,6 +4448,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
   player, respondMedalEnhance, respondMedalShuffleSkill, respondUser, respondMedalEvolve, userMedalList, userMedalElement, userPointData, isGuiltUnlocked, userSkillsData,
   stackedMedalList, // server/test-medal-enhance.js (I-205 Evolve with a stack)
   // server/test-keyblades.js
