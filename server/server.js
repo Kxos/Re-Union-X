@@ -19,6 +19,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const stream = require('stream');
 const crypto = require('crypto');
 const zlib = require('zlib');
 
@@ -746,7 +747,11 @@ function respondResourceFile(req, res) {
     return res.end();
   }
   res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': fs.statSync(file).size });
-  fs.createReadStream(file).pipe(res);
+  // pipeline e non pipe (I-136): un errore di lettura dopo i controlli (file tolto, illeggibile) chiude la risposta
+  // invece di arrivare come eccezione asincrona non gestita e far cadere il server; chiude il file se il client se ne va
+  stream.pipeline(fs.createReadStream(file), res, (err) => {
+    if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') console.log(`[risorse] ${version}/${kind}/${name}: ${err.message}`);
+  });
 }
 
 // Tutorial finito dalla fase 995 (dopo il Prologue). Con isFinished 0 il client resta
@@ -4480,7 +4485,7 @@ module.exports._test = {
   // server/test-mission-settle.js
   settleClock, MISSION_COUNTER, MISSION_DERIVED, missionProgress, petSubslotNow, guiltBurst,
   // server/test-master-clock.js
-  masterRevisionNow, servedMasterRows, sessionRevision, respondLogin, respondMasterFile, masterBody, respondMaster, respondResourceSize, respondStatus,
+  masterRevisionNow, servedMasterRows, sessionRevision, respondLogin, respondMasterFile, respondResourceFile, masterBody, respondMaster, respondResourceSize, respondStatus,
   // server/test-story-oltre.js (missioni 526-979)
   respondStageList, lastStoryStageId, stageNumber, stageRowOf, userDetailData, ensureUnion,
   // server/test-proud.js (Proud Mode, I-200)
