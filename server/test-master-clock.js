@@ -33,12 +33,17 @@ check(end(activeMonthly[0]) === '2020-11-01 08:00:00', `Limited mensile ${end(ac
 check(rows.filter((r) => r.missionType === 3 || (r.missionType === 4 && r.endDate !== '2099-12-31 23:59:59'))
   .every((r) => r.rewardEndTime === r.endDate), 'rewardEndTime diverso da endDate');
 check(rows.find((r) => r.id === activeMonthly[0]).rewardEndTime === '2020-11-01 08:00:00', 'rewardEndTime della Limited mensile');
-// stesso contenuto per la stessa revisione, e servito in meno di 50 ms dalla cache
-const b1 = t.masterBody('mission'); const t0 = process.hrtime.bigint();
-call(t.respondMaster);
-const ms = Number(process.hrtime.bigint() - t0) / 1e6;
+// stesso contenuto per la stessa revisione, servito dalla cache: sotto i 200 ms (senza cache ~1,9 s, 25-10; con la cache
+// 40-65 ms, oltre la vecchia soglia di 50 ms con le tabelle di oggi). Il minimo di
+// 5 chiamate: una sola misura risente del carico della macchina (57-68 ms il 25-10 con il master di oggi)
+const b1 = t.masterBody('mission');
+let ms = Infinity;
+for (let i = 0; i < 5; i++) {
+  const t0 = process.hrtime.bigint(); call(t.respondMaster);
+  ms = Math.min(ms, Number(process.hrtime.bigint() - t0) / 1e6);
+}
 check(t.masterBody('mission').equals(b1), 'contenuto cambiato senza cambio di revisione');
-check(ms < 50, `respondMaster ${ms.toFixed(1)} ms con la cache`);
+check(ms < 200, `respondMaster ${ms.toFixed(1)} ms con la cache`);
 // risorse: versionRes/darkVersionRes non seguono la revisione del master
 // (versionDat e le altre stanno nell'involucro ret() di ogni risposta, non in respondStatus)
 const st = call(t.respondMaster).ret;
