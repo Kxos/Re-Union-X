@@ -41,6 +41,20 @@ Check (Test-Path (Join-Path $DataDir 'logs\server.log')) 'logs\server.log missin
 # an invalid real time makes the server exit: the script must report it
 $bad = @(& $g "$script not-a-date")
 Check ((Get-LastLine $bad) -match '^RX:ERROR SERVER') "invalid real time: last line «$(Get-LastLine $bad)»"
+# the previous session's log is kept for bug reports (server.prev.log), the new one starts fresh
+Check (Test-Path (Join-Path $DataDir 'logs\server.prev.log')) 'logs\server.prev.log not kept'
+Check ("$(Get-Content (Join-Path $DataDir 'logs\server.prev.log') -Raw -ErrorAction SilentlyContinue)" -match 'https://0\.0\.0\.0:443') 'server.prev.log must hold the previous (working) session'
+Check ("$(Get-Content (Join-Path $DataDir 'logs\server.log') -Raw -ErrorAction SilentlyContinue)" -match 'KHUX_REAL_NOW non valido') 'server.log must hold the current (failed) session'
+
+# a port taken by another program: immediate RX:ERROR SERVER (not READY, not a 180 s timeout)
+$null = & $g "toybox nc -L -p 80 -s 0.0.0.0 true >/dev/null 2>&1 & echo started"
+Start-Sleep 2
+$sw = [Diagnostics.Stopwatch]::StartNew()
+$busy = @(& $g "$script $now")
+Check ((Get-LastLine $busy) -match '^RX:ERROR SERVER') "port 80 taken: last line «$(Get-LastLine $busy)»"
+Check ($sw.Elapsed.TotalSeconds -lt 150) "port 80 taken: reported after $([int]$sw.Elapsed.TotalSeconds) s"
+$null = & $g 'pkill -f "nc -L -p 80"'
+
 $null = & $g "$script $now"   # leave a working server behind
 
 if ($errors.Count) { $errors | ForEach-Object { "FAIL: $_" }; exit 1 } else { 'OK' }

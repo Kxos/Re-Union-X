@@ -57,6 +57,14 @@ try {
     $idx = Get-InstanceIndex -List2 $list -Name $NAME
     if ($idx -lt 0) { $idx = New-ReUnionInstance $ld.Dir; $list = (Invoke-LDConsole $ld.Dir @('list2')) -join "`n" }
     $running = Get-InstanceRunning -List2 $list -Index $idx
+    # an open emulator may still show another package (a new one unpacked elsewhere): restart it on this folder
+    if ($running -and -not (Test-SharesMatch -Shares (Get-InstanceShares -LdDir $ld.Dir -Index $idx) -MiscDir $Package -PicturesDir $DataDir)) {
+        Progress 20 'Restarting the emulator on this package folder...'
+        Invoke-LDConsole $ld.Dir @('quit', '--index', "$idx") | Out-Null
+        $t = 0
+        while ((Get-InstanceRunning -List2 ((Invoke-LDConsole $ld.Dir @('list2')) -join "`n") -Index $idx) -and $t -lt 60) { Start-Sleep 2; $t += 2 }
+        $running = $false
+    }
     if (-not $running) { Set-InstanceShares -LdDir $ld.Dir -Index $idx -MiscDir $Package -PicturesDir $DataDir }
 
     if (-not $running) {
@@ -70,7 +78,8 @@ try {
     }
     if ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx "pm list packages $GAME")) -notmatch 'khuxww') {
         Progress 45 'Installing the game in the emulator...'
-        Invoke-LDConsole $ld.Dir @('installapp', '--index', "$idx", '--filename', (Join-Path $Package 'data\game\khux-4.3.1.apk')) | Out-Null
+        # from inside the guest: ldconsole installapp takes a Windows path, which breaks on non-ASCII folders
+        Add-Content $playLog (ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx 'pm install -r /mnt/shared/Misc/data/game/khux-4.3.1.apk'))
         $t = 0
         while ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx "pm list packages $GAME")) -notmatch 'khuxww') {
             if ($t -ge 180) { Stop-With 1 "The game could not be installed in the emulator. Send this file: $playLog" }
@@ -87,7 +96,7 @@ try {
     Add-Content $playLog ($out -join "`n")
     if ($last -notmatch '^RX:READY') {
         $tail = if (Test-Path $serverLog) { (Get-Content $serverLog -Tail 20) -join "`n" } else { '' }
-        Stop-With 4 "The Re-Union X server could not start ($($last -replace '^RX:ERROR ')).`n$tail`nPlease send this file in the bug report: $serverLog"
+        Stop-With 4 "The Re-Union X server could not start ($($last -replace '^RX:ERROR ')).`n$tail`nPlease send this file in the bug report: $serverLog (and server.prev.log next to it)"
     }
 
     if ($firstStart) {

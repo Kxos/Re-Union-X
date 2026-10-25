@@ -16,6 +16,8 @@ function Get-InstanceIndex([string]$List2, [string]$Name) { 1 }
 function Get-InstanceRunning([string]$List2, [int]$Index) { [bool]$env:RX_T_RUNNING }
 function New-ReUnionInstance([string]$LdDir) { Rec 'new-instance'; 1 }
 function Set-InstanceShares([string]$LdDir, [int]$Index, [string]$MiscDir, [string]$PicturesDir) { Rec "shares $MiscDir|$PicturesDir" }
+function Get-InstanceShares([string]$LdDir, [int]$Index) { Rec 'get-shares'; @{ Misc = 'x'; Pictures = 'y' } }
+function Test-SharesMatch($Shares, [string]$MiscDir, [string]$PicturesDir) { -not $env:RX_T_OTHERSHARES }
 function Disable-LDUpdate([string]$LdDir) { Rec 'no-update' }
 function Test-FreeSpace([string]$Path, [long]$NeedBytes) { -not $env:RX_T_LOWSPACE }
 function Install-LDPlayer([string]$Exe) { Rec "install $Exe" }
@@ -29,7 +31,11 @@ function Invoke-Guest([string]$LdDir, [int]$Index, [string]$Cmd) {
         if ($n -eq 0) { return 'mCurrentFocus=Window{1 u0 com.google.android.gms/com.google.android.gms.auth.uiflows.addaccount.ErrorActivity}' }
         return 'mCurrentFocus=Window{2 u0 com.square_enix.android_googleplay.khuxww/org.cocos2dx.cpp.AppActivity}'
     }
-    if ($Cmd -match 'pm list packages') { return 'package:com.square_enix.android_googleplay.khuxww' }
+    if ($Cmd -match 'pm list packages') {
+        if ($env:RX_T_NOGAME -and -not (Select-String -Path $env:RX_CALLS -Pattern 'pm install' -Quiet)) { return '' }
+        return 'package:com.square_enix.android_googleplay.khuxww'
+    }
+    if ($Cmd -match 'pm install') { return 'Success' }
     if ($Cmd -match 'rx-start\.sh') { if ($env:RX_T_SERVERFAIL) { return @('RX:ERROR SERVER the server stopped', '') } else { return @('unpacking', 'RX:READY 12', '') } }
     ''
 }
@@ -59,6 +65,16 @@ try {
     # the game must be closed before the server restarts (a running game loses its session with a new server)
     $stop = $r.Calls.IndexOf('am force-stop com.square_enix'); $start = $r.Calls.IndexOf('rx-start.sh')
     Check ($stop -ge 0 -and $stop -lt $start) 'already running: game not force-stopped before the server restart'
+    # running with the shares of another package (new package unpacked elsewhere): restart the instance on the new folder
+    $r = Run-Play @{ RX_T_RUNNING = '1'; RX_T_OTHERSHARES = '1' }
+    $q = $r.Calls.IndexOf('ldconsole quit'); $s = $r.Calls.IndexOf("shares $pkg"); $l = $r.Calls.IndexOf('ldconsole launch')
+    Check ($r.Code -eq 0 -and $q -ge 0 -and $q -lt $s -and $s -lt $l) "running with other shares: quit, shares, launch expected; calls $($r.Calls)"
+    # running with the right shares: no restart
+    $r = Run-Play @{ RX_T_RUNNING = '1' }
+    Check ($r.Calls -notmatch 'ldconsole quit' -and $r.Calls -notmatch 'shares ') 'running with the right shares must not restart the instance'
+    # game not installed: installed from inside the guest (no Windows path given to ldconsole)
+    $r = Run-Play @{ RX_T_NOGAME = '1' }
+    Check ($r.Code -eq 0 -and $r.Calls -match 'guest pm install -r /mnt/shared/Misc/data/game/khux-4\.3\.1\.apk' -and $r.Calls -notmatch 'installapp') "APK install from the guest: calls $($r.Calls)"
     $r = Run-Play @{ RX_T_SERVERFAIL = '1' }
     Check ($r.Code -eq 4 -and $r.Out -match [regex]::Escape("$data\logs\server.log")) "server error: code $($r.Code) $($r.Out)"
     $r = Run-Play @{}

@@ -53,18 +53,28 @@ for p in udp tcp; do iptables -t nat -A RX_NAT -p $p --dport 53 -m owner ! --uid
 iptables -C OUTPUT -p tcp --dport 853 -j REJECT 2>/dev/null || iptables -I OUTPUT -p tcp --dport 853 -j REJECT
 
 # 5. server (a previous one is stopped first); first start: the package's start save
-pkill -f "$USR/bin/node" 2>/dev/null; sleep 1
+pkill -f "$USR/bin/node" 2>/dev/null
+i=0; while pidof node >/dev/null && [ $i -lt 20 ]; do sleep 0.5; i=$((i+1)); done
 mkdir -p $DATA/save $DATA/logs
 [ -f $DATA/save/player.json ] || cp $PKGDIR/start-save.json $DATA/save/player.json
 LOG=$DATA/logs/server.log
+# the previous session's log is kept: after a crash the player restarts with Play and then reports the bug
+[ -f $LOG ] && mv -f $LOG $DATA/logs/server.prev.log
 export LD_LIBRARY_PATH=$USR/lib KHUX_PUBLIC_URL=https://127.0.0.1 KHUX_SAVE=$DATA/save/player.json
 export KHUX_RESOURCE_DIR=$PKGDIR/resources KHUX_REAL_NOW=$NOW KHUX_PYTHON=/nonexistent
 [ -n "$NOW" ] || unset KHUX_REAL_NOW
 nohup $USR/bin/node $PKGDIR/server/server.js > $LOG 2>&1 &
 PID=$!
 i=0
+# ready only with all three listeners (HTTP 80, HTTPS 443, DNS 53); a listen error does not stop node, it is only
+# logged as «... non avviato», so it is caught here at once
 while [ $i -lt 180 ]; do
-  grep -q 'https://0.0.0.0:443' $LOG 2>/dev/null && { echo "RX:READY $i"; exit 0; }
+  if grep -q 'non avviato' $LOG 2>/dev/null; then
+    kill $PID 2>/dev/null
+    fail SERVER "a network port is in use by another program, see logs/server.log: $(grep 'non avviato' $LOG | head -n 1)"
+  fi
+  grep -q 'http://0.0.0.0:80' $LOG 2>/dev/null && grep -q 'https://0.0.0.0:443' $LOG && grep -q 'DNS in ascolto' $LOG \
+    && { echo "RX:READY $i"; exit 0; }
   kill -0 $PID 2>/dev/null || fail SERVER "the server stopped, see logs/server.log: $(tail -n 1 $LOG)"
   sleep 1; i=$((i+1))
 done

@@ -71,9 +71,26 @@ function Set-InstanceShares([string]$LdDir, [int]$Index, [string]$MiscDir, [stri
     Set-LDConfigValue $cfg 'statusSettings.sharedPictures' (& $q $PicturesDir)
 }
 
-# Postpones LDPlayer's update check (the game only works on 9.5.37)
+# Shared folders of instance $Index as written in its config (@{Misc; Pictures}), or $null without a config
+function Get-InstanceShares([string]$LdDir, [int]$Index) {
+    $cfg = Join-Path $LdDir "vms\config\leidian$Index.config"
+    if (-not (Test-Path $cfg)) { return $null }
+    $j = [IO.File]::ReadAllText($cfg) | ConvertFrom-Json
+    return @{ Misc = $j.'statusSettings.sharedMisc'; Pictures = $j.'statusSettings.sharedPictures' }
+}
+
+# $true if the shares point at these folders (case, slashes and a trailing separator ignored)
+function Test-SharesMatch($Shares, [string]$MiscDir, [string]$PicturesDir) {
+    if (-not $Shares) { return $false }
+    $n = { param($p) if (-not $p) { '' } else { ([IO.Path]::GetFullPath(($p -replace '/', '\')).TrimEnd('\')).ToLowerInvariant() } }
+    return ((& $n $Shares.Misc) -eq (& $n $MiscDir)) -and ((& $n $Shares.Pictures) -eq (& $n $PicturesDir))
+}
+
+# Postpones LDPlayer's update check (the game only works on 9.5.37). A fresh install that was never opened has no
+# leidians.config yet: nothing to postpone then
 function Disable-LDUpdate([string]$LdDir) {
-    Set-LDConfigValue (Join-Path $LdDir 'vms\config\leidians.config') 'nextCheckupdateTime' '4102444800'
+    $cfg = Join-Path $LdDir 'vms\config\leidians.config'
+    if (Test-Path $cfg) { Set-LDConfigValue $cfg 'nextCheckupdateTime' '4102444800' }
 }
 
 # $true if the drive of $Path has at least $NeedBytes free
