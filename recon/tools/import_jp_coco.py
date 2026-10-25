@@ -694,6 +694,12 @@ JP_LWF += ['lwf/battle/KakuseiAttack_Again_%s' % s for s in ('A', 'B', 'pvp_A', 
 # (finora se ne prendevano solo le texture, in LWF_FILL). Delle sue 6 texture manca solo Medal_L_31306.png, il
 # segnaposto della medaglia (nessuna copia nell'estrazione JP): resta assente, come per le Again si vede la medaglia vera
 JP_LWF += ['lwf/battle/Burst_Medal_Change']
+# Meccaniche speciali dei nemici (I-207): assorbimento (absorbAttribute: lwf/battle/Absorb_<Power|Speed|Magic|Uplight|
+# Reverse>, il client salta una LWF assente) e riflesso dei danni (enemyAttack reflection*: Reflection e le icone
+# ActMapReflectionAnim/RIcon_*), assenti dalle risorse WW
+JP_LWF += ['lwf/battle/Absorb_%s' % s for s in ('Power', 'Speed', 'Magic', 'Uplight', 'Reverse')]
+JP_LWF += ['lwf/battle/Reflection'] + ['lwf/battle/ActMapReflectionAnim/RIcon_%s' % s
+                                        for s in ('Base', 'Power', 'Speed', 'Magic', 'Uplight', 'Reverse')]
 # Texture citate dal LWF ma assenti dall'estrazione JP: il nome e' <cartella>_<nome originale in
 # esadecimale>.png e lo stesso nome originale (effetti KeyBlade_ef*, png_ef0*, star01, 進化_KeyBlade_
 # ef*) sta in altre LWF. Senza, il client non disegna quei pezzi: «COMPLET» senza la seconda E
@@ -774,6 +780,8 @@ for d in JP_LWF:
 # servite solo Circle_03/04/05: oltre la soglia (HP saliti con le Avatar Boards) texture nulla e
 # crash a ogni battaglia (indirizzo 0x24; banco 14-10). Solo i file non serviti.
 JP_IMG = ['img/ui/PlayerStatusIndicator']
+# I-207: icone di assorbimento (img/battle/Absorb_%s.png) e cifre dei danni riflessi/Guard Break (img/damage)
+JP_IMG += ['img/battle', 'img/damage']
 _served_all = set()
 for _tsv in (os.path.join(D, 'resource_data', 'names_v4.tsv'), os.path.join(D, 'ipa431', 'names_addnl.tsv')):
     if os.path.exists(_tsv):

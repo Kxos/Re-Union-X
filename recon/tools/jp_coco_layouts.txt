@@ -254,3 +254,11 @@ StartDeckMulti_Button_ToDeck_ver260.json  restyle=Button_Auto
 # --- Chat (icona della home in alto; assente dalle risorse WW: il client apriva ChatScene senza layout e andava in
 # crash, puntatore nullo, segnalazione di un tester del pacchetto 25-10). Rapporto --check: 4 layout, 5 texture, 2 testi ---
 ChatScene.json
+
+# --- Contatori dei nemici (I-207): numero del contatore sopra il nemico (attacchi, colpi, slot), azzeramento,
+# contrattacco. Il client controlla che il file esista e che i widget non siano nulli (FUN_00b00968) ---
+ActMapSpEnmUI_Number.json
+ActMapSpEnmUI_CountReset.json
+ActMapSpEnmUI_CounterAtk.json
+ActMapSpEnmUI_State.json
+ActMapSpEnmUI_Target.json
