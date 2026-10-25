@@ -52,9 +52,17 @@ function addMessage(deps, text) {
   return c.last;
 }
 
+// il servizio di chat legge createAt come ora giapponese (UTC+9), la API principale come UTC: senza lo spostamento un
+// messaggio appena mandato mostrava «9 hours ago» (banco 25-10). Nel salvataggio resta l'ora del server
+const JST_MS = 9 * 3600 * 1000;
+const toJst = (s) => {
+  const t = Date.parse(String(s).replace(' ', 'T') + 'Z');
+  return Number.isFinite(t) ? new Date(t + JST_MS).toISOString().slice(0, 19).replace('T', ' ') : s;
+};
+
 const element = (deps, m) => ({
   messageNumber: m.messageNumber, tagName: String(USER_ID), userEndPointUrl: CHAT_URL(deps), nickName: String(USER_ID),
-  userImageUrl: '', messageData: m.messageData, messageStatus: 0, createAt: m.createAt,
+  userImageUrl: '', messageData: m.messageData, messageStatus: 0, createAt: toJst(m.createAt),
 });
 
 // kind: 'userchat' | 'paymentinfo' | 'chatsvc'; body: corpo JSON in chiaro (servizio) o decifrato (API principale)
