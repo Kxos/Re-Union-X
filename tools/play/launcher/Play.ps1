@@ -8,7 +8,8 @@ param(
     [string]$DataDir = (Join-Path $env:LOCALAPPDATA 'Re-Union X')
 )
 $ErrorActionPreference = 'Stop'
-if ($env:RX_PLAYLIB) { . $env:RX_PLAYLIB } else { . "$PSScriptRoot\PlayLib.ps1" }
+. "$PSScriptRoot\PlayLib.ps1"
+if ($env:RX_PLAYLIB) { . $env:RX_PLAYLIB }   # tests: replaces the functions that touch LDPlayer
 $GAME = 'com.square_enix.android_googleplay.khuxww'
 $NAME = 'Re-Union X'
 New-Item -ItemType Directory -Force (Join-Path $DataDir 'logs') | Out-Null
@@ -63,15 +64,15 @@ try {
         Invoke-LDConsole $ld.Dir @('launch', '--index', "$idx") | Out-Null
     }
     $t = 0
-    while ((Invoke-Guest $ld.Dir $idx 'getprop sys.boot_completed') -ne '1') {
+    while ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx 'getprop sys.boot_completed')) -ne '1') {
         if ($t -ge 240) { Stop-With 6 "The emulator did not start in 4 minutes. Close LDPlayer and run Play again. If it happens again, send this file: $playLog" }
         Start-Sleep 5; $t += 5
     }
-    if (-not ((Invoke-Guest $ld.Dir $idx "pm list packages $GAME") -match 'khuxww')) {
+    if ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx "pm list packages $GAME")) -notmatch 'khuxww') {
         Progress 45 'Installing the game in the emulator...'
         Invoke-LDConsole $ld.Dir @('installapp', '--index', "$idx", '--filename', (Join-Path $Package 'data\game\khux-4.3.1.apk')) | Out-Null
         $t = 0
-        while (-not ((Invoke-Guest $ld.Dir $idx "pm list packages $GAME") -match 'khuxww')) {
+        while ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx "pm list packages $GAME")) -notmatch 'khuxww') {
             if ($t -ge 180) { Stop-With 1 "The game could not be installed in the emulator. Send this file: $playLog" }
             Start-Sleep 5; $t += 5
         }
@@ -80,7 +81,7 @@ try {
     Progress 60 'Starting the Re-Union X server (about a minute)...'
     $now = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     $out = @(Invoke-Guest $ld.Dir $idx "sh /mnt/shared/Misc/data/guest/rx-start.sh $now")
-    $last = "$($out[-1])"
+    $last = "$(Get-LastLine $out)"
     Add-Content $playLog ($out -join "`n")
     if ($last -notmatch '^RX:READY') {
         $tail = if (Test-Path $serverLog) { (Get-Content $serverLog -Tail 20) -join "`n" } else { '' }

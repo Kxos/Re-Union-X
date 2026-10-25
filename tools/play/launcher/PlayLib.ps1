@@ -92,6 +92,10 @@ function New-ReUnionInstance([string]$LdDir) {
     return $idx
 }
 
+# ld.exe output as one trimmed string, and its last non-empty line (ld.exe adds empty lines)
+function ConvertTo-GuestText($Lines) { ((@($Lines) | Where-Object { $_ -ne $null }) -join "`n").Trim() }
+function Get-LastLine($Lines) { @(@($Lines) | Where-Object { "$_".Trim() -ne '' })[-1] }
+
 # ldconsole.exe with arguments; returns its output lines
 function Invoke-LDConsole([string]$LdDir, [string[]]$Arguments) { & (Join-Path $LdDir 'ldconsole.exe') @Arguments }
 
