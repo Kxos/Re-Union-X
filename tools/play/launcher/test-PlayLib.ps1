@@ -18,6 +18,18 @@ try {
     Check ([IO.File]::ReadAllText($cfg) -match '"propertySettings.phoneModel": "2210132C",') 'other keys changed'
     Check ($j.'basicSettings.rootMode' -eq $false) 'rootMode changed'
 
+    # Get-InstanceShares reads back what Set-InstanceShares wrote (Play compares them with the wanted folders)
+    $sh = Get-InstanceShares -LdDir $tmp -Index 3
+    Check ($sh.Misc -eq 'C:/Users/Zoë/Games/Re-Union X' -and $sh.Pictures -eq 'D:/RX data') "Get-InstanceShares: $($sh.Misc) | $($sh.Pictures)"
+    Check (Test-SharesMatch -Shares $sh -MiscDir 'C:\Users\Zoë\Games\Re-Union X\' -PicturesDir 'D:\RX data') 'same folders (trailing \, backslashes) must match'
+    Check (-not (Test-SharesMatch -Shares $sh -MiscDir 'D:\Other\Re-Union X' -PicturesDir 'D:\RX data')) 'a different package folder must not match'
+    Check ($null -eq (Get-InstanceShares -LdDir $tmp -Index 9)) 'missing instance config must give $null'
+
+    # Disable-LDUpdate on a fresh LDPlayer without leidians.config: no error, nothing created
+    $fresh = Join-Path $tmp 'fresh'; New-Item -ItemType Directory -Force "$fresh\vms\config" | Out-Null
+    $ok = $true; try { Disable-LDUpdate -LdDir $fresh } catch { $ok = $false }
+    Check $ok 'Disable-LDUpdate must not fail when leidians.config is missing'
+
     # Test-OneDrivePath
     $saved = $env:OneDrive; $env:OneDrive = 'C:\Users\x\OneDrive'
     Check (Test-OneDrivePath 'C:\Users\x\OneDrive\Re-Union X') 'OneDrive path not detected'

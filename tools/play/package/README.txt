@@ -41,6 +41,7 @@ SOMETHING WENT WRONG?
 The game is a work in progress: bugs and crashes are expected. Please report them on the
 Re-Union X Discord (#bug-reports) with:
 - what you were doing and what happened (a screenshot or short video helps);
-- the files in %LOCALAPPDATA%\Re-Union X\logs (play.log and server.log).
+- the files in %LOCALAPPDATA%\Re-Union X\logs: play.log, server.log and server.prev.log
+  (server.prev.log is the game session before the last start of Play: send it after a crash).
 
 If Play shows an error, it tells you what to do and which log file to send.
