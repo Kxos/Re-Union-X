@@ -21,7 +21,40 @@ function merge(max, proud) {
   for (const k of proud.keyblades) {
     if (!owned.has(k.keybladeId)) max.keyblades.push({ ...k, userKeybladeId: next++ });
   }
+  pruneDuplicates(max, LIVE_TARGET);
+  max.medalMaxExtra = Math.max(max.medalMaxExtra || 0, MEDAL_LIMIT); // storage at the game's maximum (3000 slots)
   return max;
+}
+
+// The game refuses every quest when the medals exceed the storage (max 3000 slots): the max-power save has
+// more. Spare copies of medals owned more than once are sold (medalState.removed, as Sell does) until LIVE_TARGET
+// are left: never the last copy of a medal, never a medal in a deck, subslot, Spirit slot or support, locked
+// copies only if needed, lowest level first.
+const MEDAL_LIMIT = 3000, LIVE_TARGET = 2900;
+function pruneDuplicates(p, target) {
+  const state = (p.medalState = p.medalState || {});
+  const refs = new Set([...(p.deck || []), ...Object.values(p.keybladeDecks || {}).flat(),
+    ...Object.values(p.keybladeSubslots || {}).flatMap((s) => Object.values(s)), ...(p.pet?.subslot || []),
+    ...Object.values(p.petBaseSlots || {}), p.supportUserMedalId].filter((id) => id > 0));
+  const live = p.medals.filter((m) => !state[m.userMedalId]?.removed).map((m) => ({
+    id: m.userMedalId, kind: state[m.userMedalId]?.medalId || m.medalId,
+    level: state[m.userMedalId]?.level || m.level || 1, locked: Boolean(p.medalLocks?.[m.userMedalId]),
+  }));
+  const copies = new Map();
+  for (const m of live) copies.set(m.kind, (copies.get(m.kind) || 0) + 1);
+  let count = live.length;
+  for (const allowLocked of [false, true]) {
+    const spare = live.filter((m) => !refs.has(m.id) && (allowLocked || !m.locked))
+      .sort((a, b) => a.level - b.level || a.id - b.id);
+    for (const m of spare) {
+      if (count <= target) return count;
+      if (copies.get(m.kind) < 2 || state[m.id]?.removed) continue;
+      state[m.id] = { ...state[m.id], removed: true };
+      copies.set(m.kind, copies.get(m.kind) - 1);
+      count--;
+    }
+  }
+  return count;
 }
 
 if (require.main === module) {

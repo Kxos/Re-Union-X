@@ -34,6 +34,21 @@ const log = console.log; console.log = () => {};
 let t; try { t = require('./server')._test; } finally { console.log = log; }
 check(t.proudUnlocked(), 'Proud Mode closed');
 check(t.lastProudNumber() === 979, `last Proud quest ${t.lastProudNumber()}`);
+// medal storage: the game refuses every quest above its capacity (max 3000 slots); keep room for drops
+const live = t.userMedalList();
+check(live.length <= 2900, `live medals ${live.length} > 2900 (storage full: no quest can start)`);
+check(live.length >= 2800, `live medals ${live.length}: too many duplicates removed`);
+check(t.maxMedal() >= live.length + 100, `storage ${t.maxMedal()} for ${live.length} medals`);
+// every medal kind of the max-power save is still owned, and no deck/subslot/Spirit/support points to a removed medal
+const liveIds = new Set(live.map((m) => m.userMedalId));
+// kind of a medal as the server sees it: medalState may hold the evolved medalId, «removed» = sold
+const maxLiveKinds = new Set(max.medals.filter((m) => !max.medalState?.[m.userMedalId]?.removed)
+  .map((m) => max.medalState?.[m.userMedalId]?.medalId || m.medalId));
+const kinds = new Set(live.map((m) => m.medalId));
+for (const k of maxLiveKinds) check(kinds.has(k), `medal kind ${k} lost`);
+const refs = [...p.deck, ...Object.values(p.keybladeDecks).flat(), ...Object.values(p.keybladeSubslots).flatMap((s) => Object.values(s)),
+  ...(p.pet?.subslot || []), ...Object.values(p.petBaseSlots || {}), p.supportUserMedalId].filter((id) => id > 0);
+for (const id of new Set(refs)) check(liveIds.has(id), `referenced medal ${id} removed`);
 fs.rmSync(OUT, { force: true });
 console.log(errors.length ? errors.map((e) => 'FAIL: ' + e).join('\n') : 'OK');
 process.exit(errors.length ? 1 : 0);
