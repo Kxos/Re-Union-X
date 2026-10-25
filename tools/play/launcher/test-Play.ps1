@@ -23,6 +23,12 @@ function Invoke-LDConsole([string]$LdDir, [string[]]$Arguments) { Rec ("ldconsol
 function Invoke-Guest([string]$LdDir, [int]$Index, [string]$Cmd) {
     Rec "guest $Cmd"
     if ($Cmd -match 'boot_completed') { return @('1', '') }
+    if ($Cmd -match 'mCurrentFocus') {
+        # first look: Google's sign-in error over the game (fresh instance, clock in 2021); then the game
+        $n = [int](Get-Content "$env:RX_CALLS.focus" -ErrorAction SilentlyContinue); Set-Content "$env:RX_CALLS.focus" ($n + 1)
+        if ($n -eq 0) { return 'mCurrentFocus=Window{1 u0 com.google.android.gms/com.google.android.gms.auth.uiflows.addaccount.ErrorActivity}' }
+        return 'mCurrentFocus=Window{2 u0 com.square_enix.android_googleplay.khuxww/org.cocos2dx.cpp.AppActivity}'
+    }
     if ($Cmd -match 'pm list packages') { return 'package:com.square_enix.android_googleplay.khuxww' }
     if ($Cmd -match 'rx-start\.sh') { if ($env:RX_T_SERVERFAIL) { return @('RX:ERROR SERVER the server stopped', '') } else { return @('unpacking', 'RX:READY 12', '') } }
     ''
@@ -50,11 +56,15 @@ try {
     Check ($r.Code -eq 3 -and $r.Out -match 'free space') "low space: code $($r.Code)"
     $r = Run-Play @{ RX_T_RUNNING = '1' }
     Check ($r.Code -eq 0 -and $r.Calls -notmatch 'ldconsole launch' -and $r.Calls -match 'rx-start\.sh') "already running: code $($r.Code) calls $($r.Calls)"
+    # the game must be closed before the server restarts (a running game loses its session with a new server)
+    $stop = $r.Calls.IndexOf('am force-stop com.square_enix'); $start = $r.Calls.IndexOf('rx-start.sh')
+    Check ($stop -ge 0 -and $stop -lt $start) 'already running: game not force-stopped before the server restart'
     $r = Run-Play @{ RX_T_SERVERFAIL = '1' }
     Check ($r.Code -eq 4 -and $r.Out -match [regex]::Escape("$data\logs\server.log")) "server error: code $($r.Code) $($r.Out)"
     $r = Run-Play @{}
     Check ($r.Code -eq 0) "happy path: code $($r.Code) $($r.Out)"
     Check ($r.Calls -match 'ldconsole launch' -and $r.Calls -match 'no-update' -and $r.Calls -match 'monkey -p com\.square_enix') "happy path calls: $($r.Calls)"
+    Check ($r.Calls -match 'monkey -p [^\r\n]+\r?\n(?:.*\r?\n)*guest input keyevent 4') 'Google sign-in error not dismissed with Back after opening the game'
     Check ($r.Calls -match 'rx-start\.sh \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ') 'real time not passed to the guest script'
     Check ($r.Calls -match [regex]::Escape("shares $pkg|$data")) 'shares not pointed at package and data folder'
     Check (Test-Path "$data\logs\play.log") 'play.log not written'

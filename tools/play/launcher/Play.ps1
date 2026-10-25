@@ -78,6 +78,8 @@ try {
         }
     }
 
+    # a running game loses its session when the server restarts: close it first (it reopens below)
+    Invoke-Guest $ld.Dir $idx "am force-stop $GAME" | Out-Null
     Progress 60 'Starting the Re-Union X server (about a minute)...'
     $now = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     $out = @(Invoke-Guest $ld.Dir $idx "sh /mnt/shared/Misc/data/guest/rx-start.sh $now")
@@ -96,6 +98,15 @@ try {
     }
     Progress 95 'Opening the game...'
     Invoke-Guest $ld.Dir $idx "monkey -p $GAME -c android.intent.category.LAUNCHER 1" | Out-Null
+    # The game asks Google Play Games to sign in; with the clock in 2021 Google answers «Couldn't sign in» and the
+    # window stays over the title screen until Back. Close it for the player (up to 45 s after the game opens).
+    $closed = $false
+    for ($t = 0; $t -lt 45; $t += 3) {
+        $focus = ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx 'dumpsys window | grep mCurrentFocus')
+        if ($focus -match 'com\.google\.android\.gms') { Invoke-Guest $ld.Dir $idx 'input keyevent 4' | Out-Null; $closed = $true }
+        elseif ($closed -and $focus -match [regex]::Escape($GAME)) { break }
+        Start-Sleep 3
+    }
     Write-Progress -Activity 'Re-Union X' -Completed
     Say 'Have fun! Always start the game with Play.'
     exit 0
