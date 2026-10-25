@@ -685,6 +685,15 @@ JP_LWF += ['lwf/medal/Kakusei/Kakusei_Icon%04d' % n for n in (10, 20, 30, 40, 50
 # file la salta e non si vede nessuna spunta (banco 22-10, Proud 979). La sua texture (Result_Clear_Challenge_On) sta
 # solo in Result_Clear_On_eff: riempimento da LWF_FILL
 JP_LWF += ['lwf/battleresult/Result_Clear_On_eff_all']
+# Extra Attack (trait addDamage > 0): il secondo uso della medaglia nella ruota della battaglia e' disegnato da
+# KakuseiAttack_Again_A/B (pvp_A/B nel PvP), che agganciano Medal_L.lwf della medaglia; senza il file restava solo
+# la cornice dello slot, vuota (banco 25-10). A e B non hanno PNG nell'estrazione JP: le loro texture stanno, con lo
+# stesso nome originale, in pvp_A e pvp_B (riempimento da LWF_FILL)
+JP_LWF += ['lwf/battle/KakuseiAttack_Again_%s' % s for s in ('A', 'B', 'pvp_A', 'pvp_B')]
+# Cambio di posizione della medaglia dopo gli Special Attack che spostano il deck: anche questa LWF non era servita
+# (finora se ne prendevano solo le texture, in LWF_FILL). Delle sue 6 texture manca solo Medal_L_31306.png, il
+# segnaposto della medaglia (nessuna copia nell'estrazione JP): resta assente, come per le Again si vede la medaglia vera
+JP_LWF += ['lwf/battle/Burst_Medal_Change']
 # Texture citate dal LWF ma assenti dall'estrazione JP: il nome e' <cartella>_<nome originale in
 # esadecimale>.png e lo stesso nome originale (effetti KeyBlade_ef*, png_ef0*, star01, 進化_KeyBlade_
 # ef*) sta in altre LWF. Senza, il client non disegna quei pezzi: «COMPLET» senza la seconda E
@@ -693,6 +702,8 @@ LWF_FILL = [os.path.join(JP_ROOT, 'lwf', 'battleresult', 'Result_Reward'),
             os.path.join(JP_ROOT, 'lwf', 'battleresult', 'Result_Clear_On_eff'),
             os.path.join(JP_ROOT, 'lwf', 'adventure', 'Colosseum_Open'),
             os.path.join(JP_ROOT, 'lwf', 'battle', 'Burst_Medal_Change'),
+            os.path.join(JP_ROOT, 'lwf', 'battle', 'KakuseiAttack_Again_pvp_A'),
+            os.path.join(JP_ROOT, 'lwf', 'battle', 'KakuseiAttack_Again_pvp_B'),
             os.path.join(D, 'layouts', 'orig', 'lwf', 'battleresult', 'Result_Reward')]
 # Kakusei_Get1 (ruota del trait, I-084 A): sh_plate, sh_skill_eff5/plate_hikari/star1/star2/white sono salvate solo in
 # Kakusei_Get2, l'icona 0090 in Kakusei_Icon0090
