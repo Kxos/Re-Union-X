@@ -241,7 +241,7 @@ medal fields `validBurst`, `burstId`, `validSuperBurst`, `superBurstId`.
 - `critical` = critical chance in ten-thousandths (5000 = 50%), `criticalPower` = multiplier
   x10000 of the critical hit (10000 = x1); the
   chance is scaled by 1 + bonus/10000 of the traits. High certainty.
-- `recovery` = gauges recovered by the player («Gauge +N»): the client adds N
+- `recovery` = gauges recovered by the player («Gauge +N») in **ten-thousandths** (1 gauge = 10000, as the cost; I-209): the client adds the value
   to the gauge and, if > 0, animates the recovery (`BurstGauge_Recovery`). High certainty.
 - `oprUrgencyId`/`oprUrgencyValue` = enemy countdown: id 1 = resets the counters to their initial value («Resets count»), id 2 = adds
   `oprUrgencyValue` (signed, maximum 999: «Enemy countdown +3» = 3, «±0» = 0) to the counters of
