@@ -5,10 +5,12 @@
 # RX_PLAYLIB (tests only): a replacement for PlayLib.ps1; RX_ANSWER: answer to the yes/no questions.
 param(
     [string]$Package = (Split-Path (Split-Path $PSScriptRoot)),
-    [string]$DataDir = (Join-Path $env:LOCALAPPDATA 'Re-Union X')
+    [string]$DataDir = (Join-Path $env:LOCALAPPDATA 'Re-Union X'),
+    [switch]$TestHooks   # test-Play.ps1 only: honour RX_PLAYLIB and RX_ANSWER (ignored in normal use)
 )
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\PlayLib.ps1"
+if (-not $TestHooks) { $env:RX_PLAYLIB = $null; $env:RX_ANSWER = $null }
 if ($env:RX_PLAYLIB) { . $env:RX_PLAYLIB }   # tests: replaces the functions that touch LDPlayer
 $GAME = 'com.square_enix.android_googleplay.khuxww'
 $NAME = 'Re-Union X'
@@ -48,14 +50,20 @@ try {
     }
     Disable-LDUpdate $ld.Dir
 
-    $need = if ($firstStart) { 12GB } else { 2GB }
-    if (-not (Test-FreeSpace -Path $ld.Dir -NeedBytes $need)) {
-        Stop-With 3 ("Not enough free space on the LDPlayer drive ({0}): Re-Union X needs {1} GB free. Free some space and run Play again." -f [IO.Path]::GetPathRoot($ld.Dir), ($need / 1GB))
-    }
-
     Progress 15 'Preparing the Re-Union X emulator...'
     $list = (Invoke-LDConsole $ld.Dir @('list2')) -join "`n"
     $idx = Get-InstanceIndex -List2 $list -Name $NAME
+    # the game downloads all its data (~4.3 GB) on a first start, on a new emulator instance and when the package brings
+    # another resource version than the last start (resources.txt in the data folder)
+    $pkgJson = Join-Path $Package 'data\package.json'
+    $pkgRes = if (Test-Path $pkgJson) { "$((Get-Content $pkgJson -Raw | ConvertFrom-Json).resources)" } else { '' }
+    $resFile = Join-Path $DataDir 'resources.txt'
+    $lastRes = if (Test-Path $resFile) { (Get-Content $resFile -Raw).Trim() } else { '' }
+    $download = $firstStart -or $idx -lt 0 -or ($pkgRes -and $lastRes -and $pkgRes -ne $lastRes)
+    $need = if ($download) { 12GB } else { 2GB }
+    if (-not (Test-FreeSpace -Path $ld.Dir -NeedBytes $need)) {
+        Stop-With 3 ("Not enough free space on the LDPlayer drive ({0}): Re-Union X needs {1} GB free. Free some space and run Play again." -f [IO.Path]::GetPathRoot($ld.Dir), ($need / 1GB))
+    }
     if ($idx -lt 0) { $idx = New-ReUnionInstance $ld.Dir; $list = (Invoke-LDConsole $ld.Dir @('list2')) -join "`n" }
     $running = Get-InstanceRunning -List2 $list -Index $idx
     # an open emulator may still show another package (a new one unpacked elsewhere): restart it on this folder
@@ -95,13 +103,20 @@ try {
     $out = @(Invoke-Guest $ld.Dir $idx "sh /mnt/shared/Misc/data/guest/rx-start.sh $now")
     $last = "$(Get-LastLine $out)"
     Add-Content $playLog ($out -join "`n")
+    if ($last -notmatch '^RX:') {
+        Stop-With 4 "The emulator did not answer when starting the Re-Union X server. Close LDPlayer and run Play again. If it happens again, send this file: $playLog"
+    }
     if ($last -notmatch '^RX:READY') {
-        $tail = if (Test-Path $serverLog) { (Get-Content $serverLog -Tail 20) -join "`n" } else { '' }
+        # the server log only says something for a server that ran this time (SERVER, TIMEOUT); without colour codes
+        $tail = if ($last -match '^RX:ERROR (SERVER|TIMEOUT)' -and (Test-Path $serverLog)) {
+            ((Get-Content $serverLog -Tail 20) -join "`n") -replace "$([char]27)\[[0-9;]*m", ''
+        } else { '' }
         Stop-With 4 "The Re-Union X server could not start ($($last -replace '^RX:ERROR ')).`n$tail`nPlease send this file in the bug report: $serverLog (and server.prev.log next to it)"
     }
+    if ($pkgRes) { Set-Content -Path $resFile -Value $pkgRes }
 
-    if ($firstStart) {
-        Say 'First start: the game will now download about 4 GB of data.'
+    if ($download) {
+        Say 'The game will now download about 4 GB of data.'
         Say 'Tap KHUX START, then Download, and keep the game open until it finishes.'
     } else {
         Say 'Tap KHUX START to play.'
