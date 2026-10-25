@@ -92,6 +92,12 @@ function New-ReUnionInstance([string]$LdDir) {
     return $idx
 }
 
+# ldconsole.exe with arguments; returns its output lines
+function Invoke-LDConsole([string]$LdDir, [string[]]$Arguments) { & (Join-Path $LdDir 'ldconsole.exe') @Arguments }
+
+# Runs the LDPlayer installer included in the package and waits for it to close
+function Install-LDPlayer([string]$Exe) { Start-Process -FilePath $Exe -Wait }
+
 # Root shell command in the guest through ld.exe (one ld.exe at a time: LDPlayer crashes with concurrent calls)
 $script:LD_MUTEX = New-Object System.Threading.Mutex($false, 'Global\khux_ld_exe')
 function Invoke-Guest([string]$LdDir, [int]$Index, [string]$Cmd) {
