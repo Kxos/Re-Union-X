@@ -59,7 +59,9 @@ function buffFields(ability, target) {
     } else if (code === 'Esuna') for (const k of CURES) out[k] = 1;
     else if (code === 'AttributeAlways' && v === 'Neutral') out.attribute = 5;
     else if (code === 'GuiltBuff' && Number(v)) guilt = Number(v);
-    else if (code === 'GaugeRecovery' && Number(v)) out.recovery = Number(v);
+    // il client conta il gauge in decimillesimi (1 gauge = 10000, come il costo): «Gauge +5» = 50000
+    // (private/research/gauge_recovery.md; con 5 il gauge non risaliva, banco 25-10)
+    else if (code === 'GaugeRecovery' && Number(v)) out.recovery = Number(v) * 10000;
     else if (code === 'CriticalChance' && Number(v)) out.critical = Number(v) * 100;
     else if (/^Renew/.test(code)) {
       const kind = code === 'Renew' ? v : code.slice(5);
