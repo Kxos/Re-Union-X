@@ -44,6 +44,11 @@ if (-not $Resources) {
 $resDir = "$resRoot\$Resources"; Need "$resDir\data"; Need "$resDir\index"
 
 if (Test-Path $Out) { throw "output folder exists, remove it first: $Out" }
+# the package holds the APK, the resources and the key: never inside the public repository
+$outFull = [IO.Path]::GetFullPath($Out).TrimEnd('\') + '\'
+if ($outFull.StartsWith(([IO.Path]::GetFullPath($repo).TrimEnd('\') + '\'), [StringComparison]::OrdinalIgnoreCase)) {
+    throw "the package must not be built inside the repository: $Out"
+}
 $d = Join-Path $Out 'data'
 New-Item -ItemType Directory -Force $d | Out-Null
 
@@ -56,8 +61,11 @@ Copy-Item "$repo\recon\out\*_ww431.json" "$d\recon\out\"
 Step 'kept banner images (the guest has no Python)'
 $img = "$repo\server\game_data\gacha_img"; $kept = "$repo\server\game_data\gacha_img_kept"
 New-Item -ItemType Directory -Force $kept | Out-Null
+# the server asks for <id>-kept<KEPT_STYLE>.png (server/gacha.js): same style here, or the guest serves plain banners
+$keptStyle = (node -e "console.log(require(process.argv[1]).KEPT_STYLE)" "$repo\server\gacha.js").Trim()
+if ($keptStyle -notmatch '^\d+$') { throw "cannot read KEPT_STYLE from server/gacha.js: $keptStyle" }
 foreach ($f in Get-ChildItem $img -Filter '*.png') {
-    $dst = Join-Path $kept ($f.BaseName + '-kept2.png')
+    $dst = Join-Path $kept ($f.BaseName + "-kept$keptStyle.png")
     if ((Test-Path $dst) -and (Get-Item $dst).LastWriteTime -ge $f.LastWriteTime) { continue }
     python -I "$repo\recon\tools\kept_banner_badge.py" $f.FullName $dst
     if ($LASTEXITCODE) { throw "kept_banner_badge.py failed on $($f.Name)" }
@@ -66,14 +74,18 @@ robocopy $kept "$d\server\game_data\gacha_img_kept" /E /NFL /NDL /NJH /NJS /NP |
 
 Step 'certificates of the package (not the bench CA)'
 $tmpCerts = "$W\tmp\play\certs-$PID"
-$env:KHUX_CERT_DIR = $tmpCerts.Replace('\', '/')
-& $bash "$repo\server\make-cert.sh" 127.0.0.1 | Out-Null
-if ($LASTEXITCODE) { throw "make-cert.sh failed: $LASTEXITCODE" }
-Remove-Item Env:KHUX_CERT_DIR
-New-Item -ItemType Directory -Force "$d\server\certs" | Out-Null
-foreach ($f in 'ca.crt', 'server.crt', 'server.key') { Copy-Item "$tmpCerts\$f" "$d\server\certs\$f" }
-$caHash = (& $openssl x509 -subject_hash_old -noout -in "$tmpCerts\ca.crt").Trim()
-Remove-Item -Recurse -Force $tmpCerts
+try {
+    $env:KHUX_CERT_DIR = $tmpCerts.Replace('\', '/')
+    & $bash "$repo\server\make-cert.sh" 127.0.0.1 | Out-Null
+    if ($LASTEXITCODE) { throw "make-cert.sh failed: $LASTEXITCODE" }
+    New-Item -ItemType Directory -Force "$d\server\certs" | Out-Null
+    foreach ($f in 'ca.crt', 'server.crt', 'server.key') { Copy-Item "$tmpCerts\$f" "$d\server\certs\$f" }
+    $caHash = (& $openssl x509 -subject_hash_old -noout -in "$tmpCerts\ca.crt").Trim()
+} finally {
+    # the CA private key never stays on disk, even if the build stops here
+    Remove-Item Env:KHUX_CERT_DIR -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force $tmpCerts -ErrorAction SilentlyContinue
+}
 
 Step "resources version $Resources"
 New-Item -ItemType Directory -Force "$d\resources\$Resources\data", "$d\resources\$Resources\index" | Out-Null
