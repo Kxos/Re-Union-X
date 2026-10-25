@@ -1,6 +1,6 @@
-// node test-medal-guilt.js <repo>/server
+// node server/test-medal-guilt.js [<repo>/server]   (default: this folder)
 const path = require('path');
-const dir = process.argv[2];
+const dir = process.argv[2] || __dirname;
 const g = require(path.join(dir, 'medal-guilt.js'));
 const medal = require(path.join(dir, 'master_data', 'medal.json'));
 const burst = require(path.join(dir, 'master_data', 'burst.json'));
