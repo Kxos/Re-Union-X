@@ -22,7 +22,7 @@ function commentOf(b) {
   const mix = (b.rarityMix || []).map(([r, n]) => `${n}x ${r}★+`).join(', ');
   const lim = gd.limitText(b);
   const extra = b.guarantee?.pity ? ` - featured Medal guaranteed within ${b.guarantee.pity} draws`
-    : b.vipFree ? ' - one free VIP draw per day' : lim ? ` - ${lim}` : '';
+    : gacha.isFreeDaily(b) ? ' - one free draw a day for all Free Deals' : lim ? ` - ${lim}` : '';
   return `${b.lotCount} Medal${b.lotCount === 1 ? '' : 's'}${mix ? `: ${mix}` : ''}${extra}`;
 }
 

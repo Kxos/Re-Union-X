@@ -23,7 +23,11 @@ const KEPT_STYLE = 2;
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1' }; // payType 8: player.drawTickets[currency]
 const TICKET_CURRENCIES = ['draw', 'holiday', 'spooky', 'moogle'];
-const VIP_FREE = 'vipFree'; // chiave del limite condiviso delle Free Deal VIP (spec 9.5)
+const VIP_FREE = 'vipFree'; // chiave del limite condiviso delle Free Deal (spec 9.5; nome storico dei salvataggi)
+// Free Deal giornaliera: gratuita (tutti i prezzi 0) con una estrazione al giorno, VIP o no, senza limite totale. Tutte
+// insieme danno UNA sola estrazione al giorno (decisione dell'utente 26-10, non originale: si sceglie su quale), fissate
+// o no; prima valeva solo per le Free Deal VIP.
+const isFreeDaily = (b) => !!b.vipFree || (b.dayLimit === 1 && !b.totalLimit && (b.prices || []).length > 0 && b.prices.every((x) => x === 0));
 
 // Contatori delle valute payType 8: crea player.drawTickets e migra limitedDrawTicket2 una volta.
 function ticketsOf(player) {
@@ -64,8 +68,10 @@ const isFreeLike = (b) => (b.prices || []).every((x) => x <= 1) || !!b.vipFree |
 function pinnable(b, ctx) {
   if (!ctx.periodStart || b.catalogOnly || !drawable(b, ctx.sizes)) return false;
   if (b.unlockQuest > ctx.storyQuest && !ctx.show?.has(b.rowId)) return false;
-  // le VIP Draw si fissano come le altre (decisione dell'utente 26-10): col lucchetto finche' manca il benefit VIP
-  return (b.end || '2099-12-31') < ctx.periodStart && !isFreeLike(b) && !seasonOf(b);
+  // le VIP Draw si fissano come le altre (decisione dell'utente 26-10): col lucchetto finche' manca il benefit VIP.
+  // Anche le Free Deal giornaliere (decisione dell'utente 26-10): fissate o no, tutte insieme danno una sola estrazione al
+  // giorno (isFreeDaily, VIP_FREE), quindi fissarne una dopo l'altra non ne aggiunge.
+  return (b.end || '2099-12-31') < ctx.periodStart && (!isFreeLike(b) || isFreeDaily(b)) && !seasonOf(b);
 }
 // Il banner di player.gacha.pinned se e' ancora fissabile (altrimenti null; il campo resta nel salvataggio).
 function pinnedBanner(banners, player, ctx) {
@@ -262,7 +268,7 @@ function usedToday(player, key, realMs) {
   return g.day === clock.dayIndex(realMs) ? g.used?.[key] || 0 : 0;
 }
 function dayLeft(player, b, realMs) {
-  if (b.vipFree) return Math.max(0, 1 - usedToday(player, VIP_FREE, realMs));
+  if (isFreeDaily(b)) return Math.max(0, 1 - usedToday(player, VIP_FREE, realMs));
   if (!b.dayLimit) return 0;
   return Math.max(0, b.dayLimit - usedToday(player, b.drawMedalTypeId, realMs));
 }
@@ -270,7 +276,7 @@ function dayLeft(player, b, realMs) {
 // (totalLimit su player.gacha.count, Ruling 28); 0 se il banner non ha limiti (isDayLimited 0).
 function drawsLeft(player, b, realMs) {
   const left = [];
-  if (b.vipFree || b.dayLimit) left.push(dayLeft(player, b, realMs));
+  if (isFreeDaily(b) || b.dayLimit) left.push(dayLeft(player, b, realMs));
   if (b.totalLimit) left.push(Math.max(0, b.totalLimit - drawCount(player, b)));
   return left.length ? Math.min(...left) : 0;
 }
@@ -304,8 +310,8 @@ function checkDraw(banner, player, body, { realMs, freeSlots, sizes, storyQuest,
   if (!sizes.has(banner.lotCount)) return `animazione per ${banner.lotCount} medaglie assente`;
   if (Number(body?.count) !== banner.lotCount) console.log(`  [gacha] count ${body?.count} diverso da lotCount ${banner.lotCount}: vale lotCount`);
   if (banner.totalLimit && drawCount(player, banner) >= banner.totalLimit) return 'limite totale raggiunto';
-  if (banner.vipFree && dayLeft(player, banner, realMs) < 1) return 'estrazione gratuita VIP gia\' usata oggi';
-  if (!banner.vipFree && banner.dayLimit && dayLeft(player, banner, realMs) < 1) return 'limite giornaliero raggiunto';
+  if (isFreeDaily(banner) && dayLeft(player, banner, realMs) < 1) return 'Free Deal gia\' usata oggi';
+  if (!isFreeDaily(banner) && banner.dayLimit && dayLeft(player, banner, realMs) < 1) return 'limite giornaliero raggiunto';
   const price = priceFor(banner, player);
   if (balance(player, banner) < price) return `${walletName(banner)} ${balance(player, banner)} < ${price}`;
   if (freeSlots < banner.lotCount) return `box: ${freeSlots} posti per ${banner.lotCount} medaglie`;
@@ -319,10 +325,10 @@ function payDraw(banner, player, realMs, gotFeatured) {
   const g = gstate(player), id = banner.drawMedalTypeId;
   (g.count ||= {})[id] = (g.count[id] || 0) + 1;
   (g.sinceFeatured ||= {})[id] = gotFeatured ? 0 : (g.sinceFeatured[id] || 0) + 1;
-  if (banner.vipFree || banner.dayLimit) {
+  if (isFreeDaily(banner) || banner.dayLimit) {
     const day = clock.dayIndex(realMs);
     if (g.day !== day) { g.day = day; g.used = {}; }
-    const key = banner.vipFree ? VIP_FREE : id;
+    const key = isFreeDaily(banner) ? VIP_FREE : id;
     (g.used ||= {})[key] = (g.used[key] || 0) + 1;
   }
   return price;
@@ -605,6 +611,8 @@ function pinButton(banner, ctx) {
     + `<script>${PIN_JS}</script>`;
 }
 // VIP Draw (I-134): il pass a pagamento dell'originale qui si guadagna con le missioni settimanali (vip-benefit.js)
+// Free Deal giornaliere: una sola estrazione al giorno fra tutte (isFreeDaily)
+const FREE_DAILY_TEXT = 'Free Deal: all Free Deals share one free draw a day, kept in the Shop or not: choose which one to draw (not original: each Free Deal had its own daily draw).';
 const VIP_DRAW_TEXT = 'VIP Draw: needs the VIP benefit. Complete all Weekly Missions of a week to get it for the rest of that week and the whole next week (in the original it came with a paid weekly pass).';
 function detailPage(banner, ex, medalNames, ctx) {
   const evolve = banner.pool?.mode === 'evolve';
@@ -635,7 +643,7 @@ function detailPage(banner, ex, medalNames, ctx) {
     + `${featured.size ? ', <span class="f">guaranteed Medal</span>' : ''}.</p>` : '';
   const rates = rated ? '<h2>Draw rates</h2><p class="n">Medal rarities of each draw: original. Chances of one more star: reconstructed for this restoration.</p>'
     + `${oddsTable(banner, ex, medalNames)}${pity}${garanzie}${skillSection(banner, ctx.skillNames)}${evolve ? '' : `<hr><h2>Medals in this draw</h2>${legend}`}${pool}` : '';
-  const vip = banner.vipDraw ? `<p class="k">★ ${esc(VIP_DRAW_TEXT)}</p>` : '';
+  const vip = (banner.vipDraw ? `<p class="k">★ ${esc(VIP_DRAW_TEXT)}</p>` : '') + (isFreeDaily(banner) ? `<p class="k">★ ${esc(FREE_DAILY_TEXT)}</p>` : '');
   const back = ctx?.fromCatalog ? `<div class="bar"><a class="back" href="/web/gacha/catalog#c${banner.drawMedalTypeId}">BACK<span></span></a></div>` : '';
   return page(banner.name, `<img src="/web/gacha/img/${banner.drawMedalTypeId}.png" alt="">${head}${vip}`
     + `<span class="s s-${st.key}">${esc(st.text)}</span>${st.key === 'later' ? `<div class="why later">${laterWhy(banner, ctx?.shopWeek, ctx)}</div>` : STATE_WHY[st.key] ? `<div class="why ${st.key}">${esc(STATE_WHY[st.key])}</div>` : ''}${pinButton(banner, ctx)}<h2>Campaign Period</h2><p>Original banner: ${dates(banner)}.</p>`
@@ -683,13 +691,13 @@ function payGroupOf(b) {
   if (b.payType === 8) return b.currency === 'draw' ? 'draw' : SEASONAL_CURRENCIES.has(b.currency) ? 'seasonal' : 'other';
   return 'other';
 }
-const isVip = (b) => (b.flags || []).includes('VIP');
+const isVip = (b) => !!b.vipDraw || (b.flags || []).includes('VIP');
 // icone originali delle valute (JP 4.3.1, servite da /web/gacha/icon/<chiave>.png; recon/tools/shop_icons.py le prepara).
 // Se non si caricano l'<img> resta un quadrato vuoto di misura fissa: l'impaginazione non cambia.
 const PAY_ICON_KEYS = ['jewel', 'platinum', 'draw', 'seasonal', 'vip', 'other'];
 const payIcon = (k) => `<img class="ic" src="/web/gacha/icon/${k}.png" alt="">`;
 const PAY_ICON = Object.fromEntries(PAY_ICON_KEYS.map((k) => [k, `${payIcon(k)} `]));
-const PAY_OPTS = [['all', 'All'], ['jewel', `${payIcon('jewel')}Jewels`], ['platinum', `${payIcon('platinum')}Platinum Ticket`], ['draw', `${payIcon('draw')}Draw Ticket`], ['seasonal', `${payIcon('seasonal')}Seasonal tickets`], ['vip', `${payIcon('vip')}VIP`], ['other', `${payIcon('other')}Other`]];
+const PAY_OPTS = [['all', 'All'], ['jewel', `${payIcon('jewel')}Jewels`], ['platinum', `${payIcon('platinum')}Platinum Ticket`], ['draw', `${payIcon('draw')}Draw Ticket`], ['seasonal', `${payIcon('seasonal')}Seasonal tickets`], ['vip', `${payIcon('vip')}VIP`], ['free', 'Free Deals'], ['other', `${payIcon('other')}Other`]];
 // SHOW: «In the Shop now» comprende il fissato; «Unlocked, not in the Shop now» = later e size; i banner solo catalogo
 // (stato catalog) compaiono solo con «All banners»
 const SHOW_OPTS = [['all', 'All banners'], ['now', '▶ In the Shop now'], ['unl', 'Unlocked, not in the Shop now'], ['lock', '🔒 Still locked']];
@@ -738,12 +746,12 @@ var SHOW={now:{now:1,pinned:1},unl:{later:1,size:1},lock:{locked:1}};
 var HINT='Shows the banners where this Medal can be drawn.',KEY='khuxCatalog';
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.cat .b'),function(el){return {el:el,id:el.id.slice(1),y:attr(el,'data-year'),pay:attr(el,'data-pay'),vip:attr(el,'data-vip')==='1',st:attr(el,'data-state')};});
+var rows=[].map.call(document.querySelectorAll('.cat .b'),function(el){return {el:el,id:el.id.slice(1),y:attr(el,'data-year'),pay:attr(el,'data-pay'),vip:attr(el,'data-vip')==='1',free:attr(el,'data-free')==='1',st:attr(el,'data-state')};});
 var cur={y:'all',pay:'all',show:'all',q:'',ids:null},dr=null,cache={},timer=null,xhr=null,busy=false,err=false;
 function copy(s){return {y:s.y,pay:s.pay,show:s.show,q:s.q,ids:s.ids};}
 function match(r,s,anyYear){
 if(!anyYear&&s.y!=='all'&&r.y!==s.y)return false;
-if(s.pay==='vip'?!r.vip:(s.pay!=='all'&&r.pay!==s.pay))return false;
+if(s.pay==='vip'?!r.vip:s.pay==='free'?!r.free:(s.pay!=='all'&&r.pay!==s.pay))return false;
 if(s.show!=='all'&&!SHOW[s.show][r.st])return false;
 return !s.q||!s.ids||!!s.ids[r.id];}
 function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
@@ -813,7 +821,7 @@ function catalogPage(banners, ctx) {
     const st = stateOf(b, ctx), y = gameYearOf(b.start), pay = payGroupOf(b), href = `/web/gacha/detail/${b.drawMedalTypeId}?from=catalog`;
     perYear[y]++;
     const pk = pinnable(b, ctx) ? (() => { const on = st.key !== 'pinned'; return `<div class="pkw"><button type="button" class="pk" data-id="${b.drawMedalTypeId}" data-pin="${on ? `/web/gacha/pin/${b.drawMedalTypeId}` : '/web/gacha/unpin'}" data-on="${on ? 1 : 0}">${on ? '📌 Keep in the Shop' : 'Remove from the Shop'}</button><div class="pinmsg"></div></div>`; })() : '';
-    return `<div class="b ${st.key}" id="c${b.drawMedalTypeId}" data-year="${y}" data-pay="${pay}" data-vip="${isVip(b) ? 1 : 0}" data-state="${st.key}">`
+    return `<div class="b ${st.key}" id="c${b.drawMedalTypeId}" data-year="${y}" data-pay="${pay}" data-vip="${isVip(b) ? 1 : 0}" data-free="${isFreeDaily(b) ? 1 : 0}" data-state="${st.key}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="640" height="140" src="/web/gacha/img/${b.drawMedalTypeId}.png" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(b.name)}</a><div class="n">${esc(niceRange(b))}</div>`
       + `${priceLine(b) ? `<div class="pay">${PAY_ICON[pay]}${priceLine(b)}</div>` : ''}<span class="s s-${st.key}">${esc(st.text)}</span>${pk}</div></div>`;
@@ -842,5 +850,5 @@ function catalogPage(banners, ctx) {
 module.exports = {
   KEPT_STYLE, PAY_ICON_KEYS,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
-  dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, pinnable, pinnedBanner,
+  dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };

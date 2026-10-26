@@ -897,5 +897,10 @@ about 2x featured odds, 5 instead of 3 Magic Mirrors, more Limited VIP Coins; no
 - The 39 catalog rows `catalogOnly: 'VIP_TWIN'` and the 13 per-medal VIP rows of Sep-Nov 2019 (flag `VIP`, B0579-B0615: a
   different name from the standard pool deal, so no twin) become `vipDraw` banners at load (`gacha-data.loadCatalog`): master row with benefitId
   100, refused by `/gacha/draw` without the benefit, keepable in the Shop like the others (user's decision 26-10: the kept plate shows the padlock until the benefit), note on the details page. The 17 «VIP Free Deals»
-  (`vipFree`, WJE-only in the original) need the benefit too (user's decision 26-10; shared daily limit, spec 9.5).
+  (`vipFree`, WJE-only in the original) and the 5 «[WJE] Monday Only Free Deal» rows (no VIP flag, matched by name) need
+  the benefit too (user's decision 26-10).
+- **Free Deals** (`gacha.isFreeDaily`: all prices 0, one draw a day, no total limit; 34 rows, 22 VIP): together they give
+  **one** free draw a day (key `vipFree` of `player.gacha.used`, historical name), kept in the Shop or not, and they are
+  keepable (user's decision 26-10, not original: each had its own daily draw). Catalog filter «Free Deals», note on the
+  details page, IMPORTANT notice «Free Deals».
 - Bench: `relogin.ps1 -Vip 1` (or `0`) forces the benefit on/off (`KHUX_VIP`).
