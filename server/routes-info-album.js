@@ -103,6 +103,13 @@ function updateNotice(realMs) {
 // Solo informazioni utili per capire come funziona il gioco (decisione dell'utente del 16-10): niente
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
+  // VIP Draw (I-134, vip-benefit.js, ricerca D:\Progetto_Restauro_KH_UX\tmp\vip\REPORT.md): decisione dell'utente
+  // 26-10 = benefit dalle 10 missioni settimanali, per il resto della settimana e la successiva; da rivedere (I-164)
+  { date: '10/26', tag: 'IMPORTANT', title: 'VIP Draws',
+    body: ['The **VIP Draws** of the original Shop are back: 39 VIP versions of the deals from December 2018 to November 2019. A VIP Draw costs the same as the standard draw and adds the original VIP extras of its deal, such as a closer guarantee of the featured Medal or more Magic Mirrors.',
+      'In the original game VIP Draws needed a **paid weekly pass**. Here nothing is sold: you get the **VIP benefit** by completing **all the Weekly Missions** of a week. It then lasts for the rest of that week and the whole next week (**not original**).',
+      'The Weekly Missions include Raid Bosses and Union Cross, which are not available yet: until they come back the VIP benefit cannot be earned and VIP Draws show a padlock.',
+      'This rule is temporary and will be reviewed when the game balance is studied again.'] },
   // chat del party di un solo giocatore (I-210, routes-chat.js, stamp-table.js)
   { date: '10/25', tag: 'INFORMATION', title: 'Party Chat',
     body: ['The **Chat** button at the top of the home screen opens your party chat again, as in the original game. You need to be in a party: create one from the Party menu.',

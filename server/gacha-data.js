@@ -35,10 +35,13 @@ function slotRarities(banner) {
 
 // Legge il catalogo; vuoto ma valido se il file manca, non e' JSON o non ha «banners».
 // I campi in piu' del catalogo vero (version, statistiche) restano.
+// Le varianti VIP del catalogo (catalogOnly 'VIP_TWIN', 39 banner dic. 2018 - nov. 2019) sono VIP Draw servite
+// (I-134, decisione dell'utente 26-10): vipDraw true, riga del master con il benefitId VIP (vip-benefit.js).
+const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true } : b);
 function loadCatalog(file) {
   try {
     const c = JSON.parse(fs.readFileSync(file, 'utf8'));
-    return c && Array.isArray(c.banners) ? { ...EMPTY(), ...c } : EMPTY();
+    return c && Array.isArray(c.banners) ? { ...EMPTY(), ...c, banners: c.banners.map(vipDrawOf) } : EMPTY();
   } catch {
     return EMPTY();
   }
@@ -427,15 +430,16 @@ function rollSkill(spec, slotIndex, skillRows, rng) {
 
 // Riga del master drawMedalType (47 campi, recon/out/master_types_ww431.json).
 // bannerUrl/detailUrl sono percorsi: server.js (servedMasterRows) ci mette davanti l'indirizzo http.
-// drawType 1; benefitId 0 (il lucchetto apre l'acquisto in-app: crash, I-134); comment = striscia
+// drawType 1; benefitId 0, VIP_BENEFIT_ID per le VIP Draw (senza il benefit il client mostra il lucchetto: I-134);
+// comment = striscia
 // scorrevole sotto il banner, stringa printf (niente % sciolti), visibile con warrantDisplayOfTime 1
 // e userWarrantDisplayOfTime 1 nella lista (spike del 16-10, prova 3). warrant = striscia della garanzia:
 // {display, number, validComment}; con display != 0 la striscia compare se 1 <= userWarrantDisplayOfTime <= display.
-function drawMedalTypeRow({ drawMedalTypeId, name, payType, price, sortId, bannerUrl, detailUrl, comment, warrant }) {
+function drawMedalTypeRow({ drawMedalTypeId, name, payType, price, sortId, bannerUrl, detailUrl, comment, warrant, benefitId = 0 }) {
   const w = { display: 1, number: 0, validComment: 1, ...warrant };
   const z = (n) => Array(n).fill(0);
   return {
-    drawMedalTypeId, drawType: 1, sortId, name, benefitId: 0, payType, price,
+    drawMedalTypeId, drawType: 1, sortId, name, benefitId, payType, price,
     validFluctuationPrice: 0, fluctuationPrice: z(5), tableId: 0, validLot: 0, lotName: ['', '', ''],
     lotCount: z(3), lotSsr: z(3), lotPsr: z(3), lotSr: z(3), lotPr: z(3), lotR: z(3), lotPn: z(3), lotN: z(3),
     tableIds: z(3), vipcoinNumber: 0, limitedvipcoinNumber: 0, validAdd: 0, addType: 0, addId: 0, addSkillType: 0,

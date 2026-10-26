@@ -121,7 +121,7 @@ check(t.gachaCatalog().banners.find((b) => b.rowId === 'B0008').catalogOnly, 'Bl
 
 // lista alla quest 200 (storia al 2016-04-07): show B0005 per primo (start 2019), poi start uguale per id
 let l = call(t.respondGachaList);
-check(Array.isArray(l.petGachaList) && JSON.stringify(ids(l)) === '[9001,10005,10001,10002,10003,10004]', `lista: ${ids(l)}`);
+check(Array.isArray(l.petGachaList) && JSON.stringify(ids(l)) === '[9001,10005,10001,10002,10003,10004,10006]', `lista: ${ids(l)}`);
 check(plate(l, 10002).price === 3000 && plate(l, 10003).price === 1, 'lista: prezzi dinamici (3000, VIP 1)');
 
 // estrazioni rifiutate senza addebito: catalogOnly, fuori periodo, scartato, sconosciuto, Catalog
@@ -160,6 +160,22 @@ check(plate(call(t.respondGachaList), 10002).price === 2500, 'lista dopo la prim
 p.freeStone = 2500;
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10002, count: 10 });
 check(r.userMedalIds && p.freeStone === 0, 'seconda estrazione: -2500');
+
+// VIP Draw (I-134): senza il benefit rifiutata, userBenefits vuoto; con le 10 missioni settimanali completate (o KHUX_VIP=1) ok
+p.freeStone = 100;
+r = call(t.respondGachaDraw, { drawMedalTypeId: 10006, count: 1 });
+check(!r.userMedalIds && p.freeStone === 100 && t.vipBenefits().length === 0, 'VIP Draw senza benefit: rifiutata');
+{
+  const week = t.masterRows('mission').filter((x) => x.missionType === 3);
+  const realMs = Date.now();
+  const saved = p.missions;
+  p.missions = Object.fromEntries(week.map((x) => [x.id, { period: require('./clock').weekIndex(realMs), count: x.targetNum[0], received: false }]));
+  const ub = t.vipBenefits(realMs);
+  check(ub.length === 1 && ub[0].benefitId === require('./vip-benefit').VIP_BENEFIT_ID && /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(ub[0].endDatetime), `missioni settimanali complete: userBenefits ${JSON.stringify(ub)}`);
+  r = call(t.respondGachaDraw, { drawMedalTypeId: 10006, count: 1 });
+  check(r.userMedalIds && r.userMedalIds.length === 1 && p.freeStone === 0, 'VIP Draw con il benefit: estratta');
+  p.missions = saved; delete p.vip;
+}
 
 // errore durante la consegna (qui: elenco medaglie congelato, grantItem lancia): niente addebitato,
 // niente consegnato a meta', il giocatore torna com'era e il client riceve solo {ret}
@@ -233,7 +249,7 @@ let w = raw(t.respondGachaWeb, '/web/gacha/detail/10001');
 check(String(w.body).includes('DAILY DEAL!') && /text\/html/.test(w.headers['Content-Type']), 'pagina dettagli');
 check(page('/web/gacha/detail/10005').includes('Dual Meow Wow [SAB LV 8]'), 'dettagli evolve: nomi da medal.json');
 check(page('/web/gacha/detail/10004').includes('Attack Boost II'), 'dettagli: skill presenti in skill.json');
-check(page('/web/gacha/detail/10006').includes('VIP variant'), 'dettagli di un banner solo catalogo');
+check(page('/web/gacha/detail/10006').includes('VIP Draw: needs the VIP benefit'), 'dettagli di una VIP Draw (I-134)');
 check(page('/web/gacha/detail/10009').includes('Original details missing'), 'dettagli INCOMPLETE senza eccezioni');
 check(page('/web/gacha/detail/10008').includes('Medals not available yet'), 'dettagli del banner scartato');
 w = raw(t.respondGachaWeb, '/web/gacha/odds');
@@ -241,7 +257,7 @@ check(String(w.body).includes('Probabilities') && String(w.body).includes('DAILY
 w = raw(t.respondGachaWeb, '/web/gacha/odds/10002');
 check(String(w.body).includes('Epic Medal Carnival') && !String(w.body).includes('DAILY DEAL!'), 'odds di una piastra (id accodato dal client)');
 w = raw(t.respondGachaWeb, '/web/gacha/odds/9001');
-check(String(w.body).includes('Epic Medal Carnival') && String(w.body).includes('DAILY DEAL!') && !String(w.body).includes('VIP Twin Deal'), 'odds della piastra Catalog: i banner della lista');
+check(String(w.body).includes('Epic Medal Carnival') && String(w.body).includes('DAILY DEAL!') && String(w.body).includes('VIP Twin Deal') && !String(w.body).includes('Unknown Deal'), 'odds della piastra Catalog: i banner della lista');
 // ricerca per medaglia (sp3 7.1): ids dei banner, senza maiuscole; vuota = tutti; indice in memoria per storyDay
 {
   const search = (q) => JSON.parse(String(raw(t.respondGachaWeb, `/web/gacha/search?q=${encodeURIComponent(q)}`).body)).ids;

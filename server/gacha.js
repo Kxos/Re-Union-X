@@ -64,7 +64,7 @@ const isFreeLike = (b) => (b.prices || []).every((x) => x <= 1) || !!b.vipFree |
 function pinnable(b, ctx) {
   if (!ctx.periodStart || b.catalogOnly || !drawable(b, ctx.sizes)) return false;
   if (b.unlockQuest > ctx.storyQuest && !ctx.show?.has(b.rowId)) return false;
-  return (b.end || '2099-12-31') < ctx.periodStart && !isFreeLike(b) && !seasonOf(b);
+  return (b.end || '2099-12-31') < ctx.periodStart && !isFreeLike(b) && !seasonOf(b) && !b.vipDraw; // VIP Draw: legata alla settimana del benefit
 }
 // Il banner di player.gacha.pinned se e' ancora fissabile (altrimenti null; il campo resta nel salvataggio).
 function pinnedBanner(banners, player, ctx) {
@@ -294,9 +294,10 @@ function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, st
   };
 }
 
-function checkDraw(banner, player, body, { realMs, freeSlots, sizes, storyQuest, show }) {
+function checkDraw(banner, player, body, { realMs, freeSlots, sizes, storyQuest, show, vip = false }) {
   if (!banner) return `banner ${body?.drawMedalTypeId} sconosciuto`;
   if (banner.catalogOnly) return 'banner solo nel catalogo';
+  if (banner.vipDraw && !vip) return 'VIP Draw senza il benefit VIP'; // il client mostra il lucchetto (I-134)
   if (![1, 7, 8].includes(banner.payType)) return `payType ${banner.payType} non estraibile`;
   if (banner.unlockQuest > storyQuest && !show?.has(banner.rowId)) return 'banner bloccato';
   if (!sizes.has(banner.lotCount)) return `animazione per ${banner.lotCount} medaglie assente`;
@@ -602,6 +603,8 @@ function pinButton(banner, ctx) {
     + `onclick="return khuxPin(this,document.getElementById('pinmsg'),function(){document.getElementById('pinbtn').style.display='none';})">${pinned ? 'Remove from the Shop' : '📌 Keep in the Shop'}</a><div id="pinmsg" class="pinmsg"></div></div>`
     + `<script>${PIN_JS}</script>`;
 }
+// VIP Draw (I-134): il pass a pagamento dell'originale qui si guadagna con le missioni settimanali (vip-benefit.js)
+const VIP_DRAW_TEXT = 'VIP Draw: needs the VIP benefit. Complete all Weekly Missions of a week to get it for the rest of that week and the whole next week (in the original it came with a paid weekly pass).';
 function detailPage(banner, ex, medalNames, ctx) {
   const evolve = banner.pool?.mode === 'evolve';
   const st = stateOf(banner, ctx);
@@ -631,8 +634,9 @@ function detailPage(banner, ex, medalNames, ctx) {
     + `${featured.size ? ', <span class="f">guaranteed Medal</span>' : ''}.</p>` : '';
   const rates = rated ? '<h2>Draw rates</h2><p class="n">Medal rarities of each draw: original. Chances of one more star: reconstructed for this restoration.</p>'
     + `${oddsTable(banner, ex, medalNames)}${pity}${garanzie}${skillSection(banner, ctx.skillNames)}${evolve ? '' : `<hr><h2>Medals in this draw</h2>${legend}`}${pool}` : '';
+  const vip = banner.vipDraw ? `<p class="k">★ ${esc(VIP_DRAW_TEXT)}</p>` : '';
   const back = ctx?.fromCatalog ? `<div class="bar"><a class="back" href="/web/gacha/catalog#c${banner.drawMedalTypeId}">BACK<span></span></a></div>` : '';
-  return page(banner.name, `<img src="/web/gacha/img/${banner.drawMedalTypeId}.png" alt="">${head}`
+  return page(banner.name, `<img src="/web/gacha/img/${banner.drawMedalTypeId}.png" alt="">${head}${vip}`
     + `<span class="s s-${st.key}">${esc(st.text)}</span>${st.key === 'later' ? `<div class="why later">${laterWhy(banner, ctx?.shopWeek, ctx)}</div>` : STATE_WHY[st.key] ? `<div class="why ${st.key}">${esc(STATE_WHY[st.key])}</div>` : ''}${pinButton(banner, ctx)}<h2>Campaign Period</h2><p>Original banner: ${dates(banner)}.</p>`
     + `${gtext ? `<h2>Deal Details</h2><p>${gtext}</p>` : ''}${rates}${back}`, back ? 'hb' : '');
 }

@@ -31,6 +31,7 @@ const { makeGuiltBurst } = require('./guilt-burst');
 const medalGuilt = require('./medal-guilt');
 const medalTrait = require('./medal-trait');
 const loginBonus = require('./login-bonus');
+const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
@@ -200,6 +201,7 @@ function route(url) {
   if (p === '/colosseum') return 'colosseum';
   if (p === '/user/point' || p === '/user/sphere/reset') return 'userpoint';
   if (p === '/user/stone') return 'userstone';
+  if (p === '/user/shop') return 'usershop'; // userBenefits (VIP, I-134)
   if (p === '/user/present') return 'userpresent';
   if (p === '/user/present/receive') return 'presentreceive';
   if (p === '/user/material') return 'usermaterial';
@@ -1435,7 +1437,7 @@ function respondGachaDraw(res, body) {
   const now = serverTime(), realMs = realNow(), ctx = storyCtx();
   const banner = gachaData.bannerById(gachaCatalog().banners, body?.drawMedalTypeId);
   const freeSlots = maxMedal() - stackedMedalList().length;
-  let why = gacha.checkDraw(banner, player, body, { ...ctx, realMs, freeSlots, sizes: GACHA_SIZES, show: GACHA_SHOW });
+  let why = gacha.checkDraw(banner, player, body, { ...ctx, realMs, freeSlots, sizes: GACHA_SIZES, show: GACHA_SHOW, vip: vipActive(realMs) });
   if (!why && !GACHA_SHOW.has(banner.rowId) && !gachaShopList(ctx).includes(banner) && !gachaLastListed.has(banner.drawMedalTypeId)) why = `${banner.rowId} non e' nella lista dello Shop`;
   if (why) {
     console.log(`  [gacha] estrazione rifiutata: ${why} (corpo ${JSON.stringify(body)})`);
@@ -2577,6 +2579,27 @@ function missionCount(counter, n) {
   for (const row of masterRows('mission')) {
     if (MISSION_COUNTER[row.conditionId] === counter && missionActive(row, nowMs)) missionState(row, nowMs).count += n;
   }
+  vipRefresh(nowMs);
+}
+
+// VIP benefit (I-134, vip-benefit.js): settimana guadagnata quando tutte le missioni settimanali attive sono
+// completate; si registra subito (player.vip.earnedWeek), prima che il cambio di settimana azzeri i contatori.
+// KHUX_VIP=1 lo forza attivo e KHUX_VIP=0 spento (prove sul banco del lucchetto e delle tavole VIP).
+function vipRefresh(realMs = realNow()) {
+  const rows = masterRows('mission').filter((r) => r.missionType === 3 && missionActive(r, realMs));
+  const cur = (r) => { const s = player.missions?.[r.id]; return s && s.period === missionPeriod(r, realMs) ? s : null; };
+  if (vipBenefit.weekEarned(rows, cur)) player.vip = vipBenefit.markEarned(player.vip, clock.weekIndex(realMs));
+}
+function vipActive(realMs = realNow()) {
+  if (process.env.KHUX_VIP === '1') return true;
+  if (process.env.KHUX_VIP === '0') return false;
+  vipRefresh(realMs);
+  return vipBenefit.isActive(player.vip, clock.weekIndex(realMs));
+}
+function vipBenefits(realMs = realNow()) {
+  const end = (w) => serverTimeAt(clock.weekStartOf(w));
+  if (process.env.KHUX_VIP === '1') return [{ benefitId: vipBenefit.VIP_BENEFIT_ID, endDatetime: end(clock.weekIndex(realMs) + 1) }];
+  return vipActive(realMs) ? vipBenefit.userBenefits(player.vip, clock.weekIndex(realMs), end) : [];
 }
 
 // missions[] di /user/mission/list e /user/mission/receive: solo id del master (altrimenti il
@@ -4236,6 +4259,8 @@ function handler(scheme) {
       // GET /user/stone (azione 7): i jewel. freeStone = guadagnati in
       // gioco (premi delle missioni), payStone = comprati (sempre 0)
       if (kind === 'userstone') return send(res, 200, { ret: ret(), userStone: { freeStone: player.freeStone || 0, payStone: 0 } });
+      // GET /user/shop (azione 8): userBenefits[] {benefitId, endDatetime} = il benefit VIP guadagnato (vip-benefit.js)
+      if (kind === 'usershop') return send(res, 200, { ret: ret(), userBenefits: vipBenefits() });
       // Presents: GET /user/present (azione 20) e POST /user/present/receive (azione 49)
       if (kind === 'userpresent') return respondUserPresent(res);
       if (kind === 'presentreceive') return respondPresentReceive(res, entry.bodyDecoded);
@@ -4461,6 +4486,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  vipBenefits, // server/test-gacha-server.js (I-134)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
   player, respondMedalEnhance, respondMedalShuffleSkill, respondUser, respondMedalEvolve, userMedalList, userMedalElement, userPointData, isGuiltUnlocked, userSkillsData,
   stackedMedalList, // server/test-medal-enhance.js (I-205 Evolve with a stack)
