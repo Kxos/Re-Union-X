@@ -189,12 +189,16 @@ check(p.freeStone === 2500 && JSON.stringify(p) === before, 'consegna fallita: n
 check(!Object.isFrozen(p.medals), 'consegna fallita: elenco medaglie ripristinato');
 check(logs.some((x) => /consegna/.test(x)), 'consegna fallita: log');
 
-// VIP gratuito: 1 Jewel, una volta al giorno
+// VIP gratuito: 1 Jewel, una volta al giorno, solo con il benefit VIP (I-134, KHUX_VIP=1 per la prova)
 p.freeStone = 5;
+r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
+check(!r.userMedalIds && p.freeStone === 5, 'VIP Free Deal senza benefit: rifiutata');
+process.env.KHUX_VIP = '1';
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
 check(r.userMedalIds && p.freeStone === 4, 'VIP: costa 1 Jewel');
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
 check(!r.userMedalIds && p.freeStone === 4, 'VIP: seconda rifiutata');
+delete process.env.KHUX_VIP;
 
 // abilita' e bonus
 p.freeStone = 300;

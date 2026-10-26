@@ -297,7 +297,7 @@ function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, st
 function checkDraw(banner, player, body, { realMs, freeSlots, sizes, storyQuest, show, vip = false }) {
   if (!banner) return `banner ${body?.drawMedalTypeId} sconosciuto`;
   if (banner.catalogOnly) return 'banner solo nel catalogo';
-  if (banner.vipDraw && !vip) return 'VIP Draw senza il benefit VIP'; // il client mostra il lucchetto (I-134)
+  if ((banner.vipDraw || banner.vipFree) && !vip) return 'VIP Draw senza il benefit VIP'; // il client mostra il lucchetto (I-134)
   if (![1, 7, 8].includes(banner.payType)) return `payType ${banner.payType} non estraibile`;
   if (banner.unlockQuest > storyQuest && !show?.has(banner.rowId)) return 'banner bloccato';
   if (!sizes.has(banner.lotCount)) return `animazione per ${banner.lotCount} medaglie assente`;
