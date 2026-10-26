@@ -22,7 +22,7 @@ check(again.patched === 0, `master non corretto o non idempotente: ${JSON.string
 // stati alterati come l'originale (Poison Apple «High Chance of Poison»)
 const byId = new Map(atts.map((a) => [a.enemyAttackId, a]));
 check(byId.get(9301)?.poison === 10000, `9301 poison ${byId.get(9301)?.poison}`);
-check(atts.filter((a) => a.poison || a.deepPoison || a.sleep || a.paralysis).length === 39, 'attacchi con stato != 39');
+check(atts.filter((a) => !(a.enemyAttackId >= 992070000 && a.enemyAttackId < 992080000) && (a.poison || a.deepPoison || a.sleep || a.paralysis)).length === 39, 'attacchi originali con stato != 39 (le righe 9920700xx delle mosse a 0 a parte)');
 // solo risorse servite: effetto di colpo servito, animazione atk1_o o atkSp
 const badHit = atts.filter((a) => !served.has(a.hitEffect)).map((a) => `${a.enemyAttackId}:${a.hitEffect}`);
 check(badHit.length === 0, `hitEffect non serviti: ${badHit.slice(0, 5).join(', ')} (${badHit.length})`);

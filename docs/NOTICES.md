@@ -127,7 +127,7 @@ Hercules and two Keyblade wielders (Quests 350, 525, 540 and 825), Aladdin (Ques
 
 Quests 876-979: the original quest files do not say the level of each enemy (the original server gave it), so every enemy fights at the level of the quest: there are no weaker enemies mixed in.
 
-**Enemy counters are paused** (26-10): in the original game many enemies from Quest 585 on showed a counter that went down with each attack or hit and, at 0, interrupted your attack with a move of their own (a status effect, a debuff, healing their allies, running away...). The counts are known, but which move each enemy used is not yet: the counters come back enemy by enemy once their original move is confirmed.
+**Enemy counters** (26-10): from Quest 585 on, many enemies show a counter above them. A red counter goes down with each Medal you use, a blue one with each hit. At 0 the enemy interrupts your attack with a move of its own, then the counter starts again from its first value. They are back for the 24 kinds of enemies whose move is described in their original description, such as the Archers (poison, paralysis, sleep), Green Requiem and Emerald Sonata (heal all enemies), Barrier Master (raises its allies' DEF), Warlock Step and Fortuneteller (lower your STR) or Wight Knight (removes your boosts). Some values of these moves are not recorded anywhere (how much they heal, how long a status or a boost lasts): they are **reconstructed** from the closest original move. Enemies whose counter move is unknown, such as Cy-Bugs or Chocolate Monster, have no counter for now.
 
 Some enemies **absorb** the damage of one kind of Medal, as their description says (for example Gargoyle Wizard absorbs Magic Medals, Darkness absorbs Reversed Medals).
 
