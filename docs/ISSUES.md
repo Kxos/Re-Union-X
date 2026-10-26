@@ -95,6 +95,7 @@ esearch\REPORT.md`: original notices, khuxwiki, video frames) shows that at 0 th
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-211 | OPEN | **Cost 999 for the non-battle Medals** (user, 26-10): the boost, evolve, EXP and sell Medals (materials such as Chip/Dale/Cid, Fantasia Mickey, Huey/Dewey/Louie, the sell-only Medals...) must all have cost 999, because they cannot be put on Keyblades and played like the other Medals. To do: list them in the medal master, check the original cost field, set 999 and verify the deck/keyblade screens on the bench | [medaglie](notes/medaglie.md) | - |
 | I-022 | OPEN | Sell: the plate of the support medals alternates the price with an empty text (orig. «FOR SYNTHESIS») | [medaglie](notes/medaglie.md#medal-list) | 9b83a55 |
 | I-023 | OPEN | Sort/Filter popup to compare with the original (Favorite, SP Attack Bonus/No Bonus greyed out, Imitation, Special Traits); tier row now 1-10 with icons 9-10 (to check on the bench) | [medaglie](notes/medaglie.md#sort) | dbcf6c6, b19a74c |
 | I-024 | OPEN | Evolve: original result animation (now the Level Up one) | [medaglie](notes/medaglie.md#level-evolve) | dd25fb8 |
