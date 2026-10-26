@@ -71,8 +71,10 @@ check(file.equals(body0) && crypto.createHash('md5').update(file).digest('hex') 
 process.env.KHUX_RESOURCE_SIZE = '5';
 const rs = call(t.respondResourceSize, { masterRevision: r0, resourceRevision: 1e9 });
 const rsOld = call(t.respondResourceSize, { masterRevision: r0 - 1, resourceRevision: 1e9 });
+const rsRes = call(t.respondResourceSize, { masterRevision: r0, resourceRevision: 0 });
 delete process.env.KHUX_RESOURCE_SIZE;
-check(rs.size === 0 && rsOld.size === 5, `resourcesize a sessione aperta: ${rs.size} / ${rsOld.size}`);
+check(rsRes.size === 5, `resourcesize con le risorse vecchie: ${rsRes.size}`);
+check(rs.size === 0 && rsOld.size === t.masterBytes() && rsOld.size > 0, `resourcesize a sessione aperta: ${rs.size} / ${rsOld.size}`);
 // login successivo: revisione e master nuovi
 call(t.respondLogin);
 check(t.sessionRevision() === r0 + 1 && call(t.respondMaster).ret.versionDat === r0 + 1, 'revisione nuova al login');
