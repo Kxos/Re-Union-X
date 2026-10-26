@@ -40,7 +40,8 @@ function slotRarities(banner) {
 // Free Deal VIP (vipFree, riservate al pass nell'originale) vogliono il benefit (decisione dell'utente 26-10). Da
 // settembre 2019 le VIP Draw erano una tavola per medaglia accanto al deal standard a pool, con un altro nome: il
 // gemello del catalogo non le trova, il flag VIP si' (13 banner B0579-B0615, banco 26-10).
-const VIP_FLAG = (b) => (b.flags || []).includes('VIP');
+// «[WJE] Monday Only Free Deal» (set.-ott. 2020): riservate al pass anche senza il flag VIP del catalogo
+const VIP_FLAG = (b) => (b.flags || []).includes('VIP') || /^\[WJE\]/.test(b.name || '');
 const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true }
   : b.vipFree || VIP_FLAG(b) ? { ...b, vipDraw: true } : b);
 function loadCatalog(file) {

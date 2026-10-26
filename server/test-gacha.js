@@ -141,7 +141,12 @@ check(g.checkDraw(vip1, pv, { count: 10 }, dopt) === 'VIP Draw senza il benefit 
 check(g.checkDraw(vip1, pv, { count: 10 }, { ...dopt, vip: true }) === null, 'VIP: prima estrazione');
 g.payDraw(vip1, pv, t0, false);
 check(pv.freeStone === 9, 'VIP: 1 Jewel scalato');
-check(g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, vip: true }) ==='estrazione gratuita VIP gia\' usata oggi', 'VIP: seconda Free Deal rifiutata');
+check(g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, vip: true }) === 'Free Deal gia\' usata oggi', 'VIP: seconda Free Deal rifiutata');
+// una Free Deal giornaliera NON VIP condivide la stessa estrazione del giorno (decisione dell'utente 26-10)
+const freeN = mk({ dayLimit: 1, prices: [0] });
+check(g.isFreeDaily(freeN) && !g.isFreeDaily(mk({ dayLimit: 1, prices: [600] })) && !g.isFreeDaily(mk({ dayLimit: 1, prices: [0], totalLimit: 1 })), 'isFreeDaily');
+check(g.checkDraw(freeN, pv, { count: 10 }, dopt) === 'Free Deal gia\' usata oggi', 'Free Deal non VIP: stessa estrazione del giorno gia\' usata');
+check(g.checkDraw(freeN, pv, { count: 10 }, { ...dopt, realMs: next }) === null, 'Free Deal non VIP: il giorno dopo ok');
 check(plate(pv, vip1, t0).userLimitedCount === 0 && plate(pv, vip2, t0).userLimitedCount === 0, 'VIP: userLimitedCount 0 per entrambi');
 check(plate(pv, vip2, next).userLimitedCount === 1 && g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, realMs: next, vip: true }) === null, 'VIP: il giorno dopo di nuovo 1');
 
@@ -534,11 +539,12 @@ try {
   const okb = old({ prices: [0, 3000] });
   check(g.pinnable(okb, pc) === true, 'pinnable: [0,3000] di un periodo passato');
   check(g.pinnable({ ...okb, vipDraw: true }, pc) === true, 'pinnable: VIP Draw fissabile come le altre (I-134)');
+  check(g.pinnable(old({ prices: [0], vipFree: true, vipDraw: true }), pc) === true, 'pinnable: Free Deal VIP fissabile (limite giornaliero condiviso)');
   const seasonOf = require('./gacha-seasons').seasonOf;
   const seaRow = require('./game_data/gacha_catalog.json').banners.find((b) => seasonOf(b));
   const bad = {
     bloccato: old({ unlockQuest: 400 }), futuro: old({ start: '2016-07-01', end: '2016-07-30' }), 'periodo attuale': old({ end: '2016-06-15' }),
-    'prices [0]': old({ prices: [0] }), 'prices [1]': old({ prices: [1] }), vipFree: old({ vipFree: true }),
+    'prices [0]': old({ prices: [0] }), 'prices [1]': old({ prices: [1] }),
     'Free Jewels Draw': old({ name: 'Free Jewels Draw' }), stagionale: old({ rowId: seaRow ? seaRow.rowId : 'B0057' }),
     catalogOnly: old({ catalogOnly: 'VIP_TWIN' }), dimensione: old({ lotCount: 5 }),
   };
@@ -556,7 +562,7 @@ try {
   // stato
   check(JSON.stringify(g.stateOf(okb, { ...sctx, ...pc, pinnedRowId: okb.rowId })) === '{"key":"pinned","text":"📌 Kept in the Shop"}', 'stato pinned');
   check(g.stateOf(okb, { ...sctx, ...pc }).text === 'Not in the Shop now — can be kept in the Shop', 'stato later fissabile');
-  check(g.stateOf(bad.vipFree, { ...sctx, ...pc }).text === 'Not in the Shop now', 'stato later non fissabile');
+  check(g.stateOf(bad['prices [0]'], { ...sctx, ...pc }).text === 'Not in the Shop now', 'stato later non fissabile');
   // pagine
   const dctx = { ...sctx, ...pc, skillNames: new Set(), fromCatalog: true };
   const dk = g.detailPage(okb, undefined, medalNames, dctx);
@@ -567,7 +573,7 @@ try {
   const dr = g.detailPage(okb, undefined, medalNames, { ...dctx, pinnedRowId: okb.rowId });
   check(dr.includes('Remove from the Shop') && dr.includes('/web/gacha/unpin') && dr.includes('Removed.') && dr.includes('Leave and re-enter the Shop.') && dr.includes('pinmsg off') && !dr.includes('>📌 Keep in the Shop</a>'), 'dettagli: Remove');
   check(!g.detailPage(okb, undefined, medalNames, { ...dctx, fromCatalog: false }).includes('Keep in the Shop'), 'dettagli: niente pulsante fuori dal Catalog');
-  check(!g.detailPage(bad.vipFree, undefined, medalNames, dctx).includes('Keep in the Shop'), 'dettagli: niente pulsante se non fissabile');
+  check(!g.detailPage(bad['prices [0]'], undefined, medalNames, dctx).includes('Keep in the Shop'), 'dettagli: niente pulsante se non fissabile');
   // verdetti dei Details (finale): stagionale fuori finestra, fissabile passato
   const wk = { day: '2016-06-01', periodEnd: '2016-06-30', from: '2016-06-06', to: '2016-06-12', k: 0, n: 1 };
   const dctx2 = { ...dctx, shopWeek: wk };
@@ -575,7 +581,7 @@ try {
   check(/Seasonal banner: it returns to the top of the Shop every year, <b>[A-Z][a-z]+ \d+ – [A-Z][a-z]+ \d+<\/b> \(UTC, real calendar\)/.test(dSea) && !dSea.includes('will not come back') && !dSea.includes('later period'), 'dettagli: stagionale, verdetto stagionale');
   check(dk2.length > 0 && g.detailPage(okb, undefined, medalNames, dctx2).includes('will not come back to the Shop, unless you keep it in the Shop with the button below.'), 'dettagli: passato fissabile dal Catalog');
   check(g.detailPage(okb, undefined, medalNames, { ...dctx2, fromCatalog: false }).includes('unless you keep it in the Shop from the Banner Catalog.'), 'dettagli: passato fissabile fuori dal Catalog');
-  check(g.detailPage(bad.vipFree, undefined, medalNames, dctx2).includes('will not come back to the Shop. You can still') && !g.detailPage(bad.vipFree, undefined, medalNames, dctx2).includes('unless you keep'), 'dettagli: non fissabile senza clausola');
+  check(g.detailPage(bad['prices [0]'], undefined, medalNames, dctx2).includes('will not come back to the Shop. You can still') && !g.detailPage(bad['prices [0]'], undefined, medalNames, dctx2).includes('unless you keep'), 'dettagli: non fissabile senza clausola');
 } catch (err) { errors.push(`fissato: eccezione ${err.stack}`); }
 
 // ricerca per medaglia (sp3 7.1, I-150): nomi per banner -> ids dei banner
@@ -615,7 +621,7 @@ try {
     check(yp.includes(t), `catalogo: testo «${t}»`);
   }
   check(yp.includes('/web/gacha/search?q=') && yp.includes('encodeURIComponent(') && yp.includes('Searching…'), 'catalogo: ricerca con encodeURIComponent e «Searching…»');
-  const rows = [...yp.matchAll(/<div class="b [^"]*" id="c(\d+)" data-year="(\d)" data-pay="(\w+)" data-vip="([01])" data-state="(\w+)">/g)];
+  const rows = [...yp.matchAll(/<div class="b [^"]*" id="c(\d+)" data-year="(\d)" data-pay="(\w+)" data-vip="([01])" data-free="[01]" data-state="(\w+)">/g)];
   check(rows.length === yb.length, `catalogo: data-* su ogni banner (${rows.length})`);
   const row = (b) => rows.find((r) => Number(r[1]) === b.drawMedalTypeId) || [];
   check(row(yb[0])[2] === '0' && row(yb[1])[2] === '1' && row(yb[5])[2] === '5', 'catalogo: data-year');

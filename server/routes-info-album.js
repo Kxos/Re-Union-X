@@ -103,6 +103,12 @@ function updateNotice(realMs) {
 // Solo informazioni utili per capire come funziona il gioco (decisione dell'utente del 16-10): niente
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
+  // Free Deal giornaliere (gacha.isFreeDaily): una sola estrazione al giorno fra tutte, fissabili (decisione dell'utente 26-10)
+  { date: '10/26', tag: 'IMPORTANT', title: 'Free Deals',
+    body: ['**Free Deals** are the free banners with one draw a day, such as the anniversary and holiday draws and the VIP Free Deals.',
+      'All Free Deals share **one free draw a day**: when more than one is in the Shop, choose which one to draw. The draw comes back the next day (**not original**: each Free Deal had its own daily draw).',
+      'Free Deals from past periods can be **kept in the Shop** from the Banner Catalog like the other banners. Keeping more of them, one after another, does not add draws.',
+      'In the Banner Catalog the filter **Free Deals** shows them all. VIP Free Deals also need the VIP benefit (see the VIP Draws notice).'] },
   // VIP Draw (I-134, vip-benefit.js, ricerca D:\Progetto_Restauro_KH_UX\tmp\vip\REPORT.md): decisione dell'utente
   // 26-10 = benefit dalle 10 missioni settimanali, per il resto della settimana e la successiva; da rivedere (I-164)
   { date: '10/26', tag: 'IMPORTANT', title: 'VIP Draws',
