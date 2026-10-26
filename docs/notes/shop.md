@@ -54,8 +54,7 @@ is no longer written). Tests: `node server/test-gacha-data.js`, `node server/tes
   (always 0), 7/8 limitedDrawTicket1/2 (Platinum/Draw Ticket, from `userPoint`), **9 = crash** when drawing (text
   106240303 missing). payType 1 -> DrawButton1 with the price text; 4-9 with tickets < price -> grey
   button (`But07_Disable`, since resources 39).
-- **price** never 0 (draw without confirmation); **benefitId** always 0 (locked plate: padlock, the tap
-  crashes, I-134).
+- **price** never 0 (draw without confirmation); **benefitId** 0, except the VIP Draws (100, [below](#vip-draws)).
 - The master's **comment** as a printf format with userWarrantDisplayOfTime (scrolling strip under the banner, with
   warrantDisplayOfTime 1, userWarrantDisplayOfTime 1, validComment 1); the list's name/description do not appear.
 - Button text: drawType 1/3/5 + payType -> texts 1061404xx / 1061803xx; the Catalog uses the Gold Ticket
@@ -877,3 +876,25 @@ slow cases (~9 s) are intermittent and coincide with a failing Google Play Servi
 - Postponed (plan's register): rotation countdown off by one week at the edges of a season
   or after pinning; a season starting within a session (countdown from the next login); boosted rows of
   Axel Art [EX] / KH II Kairi [EX+] in the master (B0238, B0362, B0363 without boost); summer only with size 4.
+
+## VIP Draws <a id="vip-draws"></a>
+
+(I-134, 26-10.) Original: the paid weekly pass «Weekly Jewels Extravaganza» (US$14.99, once a week, until Sunday 11:59 p.m. PT,
+3,000 Jewels) unlocked the VIP Draws (Dec 2018 - Nov 2019): same Jewel price as the standard draw, own stopper (within 5/10),
+about 2x featured odds, 5 instead of 3 Magic Mirrors, more Limited VIP Coins; no weekly cap. Research outside the repo
+(`D:\Progetto_Restauro_KH_UX	mpip\REPORT.md`, notices of the community donation).
+
+- Client: a plate whose master `drawMedalType.benefitId` is not in `/user/shop` `userBenefits[{benefitId, endDatetime}]` shows the
+  padlock panel (`LockMask/lock_plate/Txt_Lock` of `ShopDraw_3Plate_Plate_ver310`, a text the code never writes: the WW layout keeps a JP
+  development placeholder, replaced by `make_shop_lock.py`) and disables the draw buttons. With the benefit active the client adds its own
+  box «All draws available until Sunday! N days left». The pass benefit is 100 (misc 505; 506 = 200).
+- Padlock tap (Android): misc 722/723 -> `Shop` row 203 (if `status` != 0) or 1203, no null check (crash with an empty `shop`),
+  then `/payment/info` and a Google Play query for the productId; our rows (`make-shop-rows.js`) have a fake productId, `os` 0 and
+  `display` 0 (the Jewels list takes only `os` 2 and `display` 1): nothing happens.
+- Restoration rule (user's decision 26-10, **not original**, to be reviewed in I-164): the benefit is earned by completing all the
+  Weekly Missions of a week (the 10 of the active series) and lasts for the rest of that week and the whole next week
+  (`server/vip-benefit.js`, `player.vip.earnedWeek`). Raid Boss and Union Cross do not exist yet: today nobody can earn it.
+- The 39 catalog rows `catalogOnly: 'VIP_TWIN'` become `vipDraw` banners at load (`gacha-data.loadCatalog`): master row with benefitId
+  100, refused by `/gacha/draw` without the benefit, never kept in the Shop, note on the details page. The 17 «VIP Free Deals»
+  (`vipFree`) stay open to everyone (shared daily limit, spec 9.5).
+- Bench: `relogin.ps1 -Vip 1` (or `0`) forces the benefit on/off (`KHUX_VIP`).

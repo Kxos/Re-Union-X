@@ -9,6 +9,7 @@
 # -TutorialFinished: il client scarica le risorse (azione 28) solo a tutorial finito;
 # dal 9 ottobre 2026 il server lo considera finito gia' dalla fase 995 (dopo il
 # Prologue), quindi serve solo a un giocatore fermo prima.
+# -Vip 1|0: benefit VIP forzato acceso o spento (KHUX_VIP, lucchetto e VIP Draw, I-134)
 # -KbFree: potenziamento dei keyblade senza materiali (KHUX_KB_FREE=1, prove dei livelli)
 # -GachaShow: rowId del catalogo separati da virgola (es. B0306,B0456) aggiunti alla lista dello Shop anche
 # se non sbloccati o fuori data (KHUX_GACHA_SHOW, prove al banco; docs/notes/shop.md)
@@ -16,7 +17,7 @@
 # fatto da server/make-test-save.js)
 # -EnemyAtk N: attacco dei nemici x N (KHUX_BENCH_ENEMY_ATK, solo banco: per finire a terra e provare Second
 # Chance); la revisione servita cambia, quindi il client riscarica il master sia accendendola sia spegnendola
-param([int]$Revision = 191, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0)
+param([int]$Revision = 192, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0, [string]$Vip)
 $repo = Split-Path (Split-Path (Split-Path $PSScriptRoot))
 $logs = 'D:\Progetto_Restauro_KH_UX\logs'
 New-Item -ItemType Directory -Force $logs | Out-Null
@@ -34,6 +35,7 @@ if ($SkillProb -ge 0) { $env:KHUX_BENCH_SKILL_PROB = "$SkillProb" } else { Remov
 if ($Save) { $env:KHUX_SAVE = Join-Path $repo "server\save\$Save.json" } else { Remove-Item Env:KHUX_SAVE -ErrorAction SilentlyContinue }
 if ($TutorialFinished) { $env:KHUX_TUTORIAL_FINISHED = '1' }
 if ($KbFree) { $env:KHUX_KB_FREE = '1' }
+if ($Vip) { $env:KHUX_VIP = $Vip } # -Vip 1/0: benefit VIP forzato acceso/spento (VIP Draw, I-134)
 # -Pet: sistema dei pet e 6o slot (KHUX_PET=1, server/pet.js; I-005)
 # pet acceso di default dal 15-10 (dimenticare -Pet lo toglieva dalla home); -NoPet per spegnerlo
 if (-not $NoPet) { $env:KHUX_PET = '1' }

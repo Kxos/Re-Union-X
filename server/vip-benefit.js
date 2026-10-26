@@ -7,8 +7,9 @@
 // e vale per il resto di quella settimana e per tutta la successiva. Da rivedere nel ribilanciamento (I-164).
 'use strict';
 
-// id del benefit: il valore originale non e' noto (righe Shop del pass mai viste); uno solo per tutte le funzioni VIP
-const VIP_BENEFIT_ID = 1;
+// id del benefit: 100 = misc 505 del client (controllo «owned» del pass; 506 = 200 l'altro benefit, analisi del
+// 26-10); uno solo per tutte le funzioni VIP
+const VIP_BENEFIT_ID = 100;
 
 // Settimana `week` guadagnata se ogni riga settimanale attiva quella settimana e' completata (count >= traguardo) o
 // riscossa. rows = righe del master mission con missionType 3 attive nella settimana; state(row) = {period, count,

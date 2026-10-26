@@ -125,7 +125,7 @@ Tools (20-10):
   renamed them `dark_Icon_Lock` / `_Disable` (same graphics as `QuestBut_Lock`): `make_shop_lock.py` copies them
   from the catalog (resources 39, I-133). A locked plate turns off the draw buttons,
   which loads `img/ui/%s_Disable.png` (also `_Off`/`_On`) onto an ImageView
-  with 9-slice: `But07_Disable` was missing (copy of `But24_Disable`, same shape). Tap on the padlock: I-134.
+  with 9-slice: `But07_Disable` was missing (copy of `But24_Disable`, same shape). Tap on the padlock and its panel text: I-134 ([shop](shop.md#vip-draws)).
 - An ImageView whose texture the client replaces (e.g. `Image_3`
   of the Events banner) must be without 9-slice and with a served texture.
 - Arrow buttons accept the tap in a rectangle as large as the target but **centered on its
@@ -215,7 +215,7 @@ armatures, textures) and writes it into `stage_gen\files\cocostudio\publish\` ov
   `Plate11_pm`, `Plate18_pm`, `Deck_Panel_StartDeck_pm` (9-slice), `PMode_Rule_Logo`, `PMode_Rule_Panel_A`,
   `Charge_CloseBut_Off/On`; `Cursor_Anim_Proud` (frame `PMode_Rule_Panel_B`, yellow frame of the condition panel) on
   `ActMapTreasureBoxExAnim0`. Open: the JP `PMode_Rule_Logo` reads «RULE», the global client showed «CONDITION» in the
-  same yellow style (reference\proud_moded_x94ey7mwud141.jpg); the WW texture is not in our resources (to redraw).
+  same yellow style (reference\proud_moded_x94ey7mwud141.jpg); the WW texture is not in our resources (to redraw).
   Served WW root that make_layouts overwrote (`MedalInfo_ReleaseWindow`): the WW one comes back,
   copied only to translate its texts, with the missing textures from JP (Panel07, 9-slice of I-049).
   Exception `graft=W1,W2` (only served WW roots): grafts into the WW the widgets W1, W2 of the JP revision
