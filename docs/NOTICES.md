@@ -127,7 +127,7 @@ Hercules and two Keyblade wielders (Quests 350, 525, 540 and 825), Aladdin (Ques
 
 Quests 876-979: the original quest files do not say the level of each enemy (the original server gave it), so every enemy fights at the level of the quest: there are no weaker enemies mixed in.
 
-From Quest 585 on, many enemies show a **counter** above them that goes down with each of your attacks ("N-attack count") or with each hit ("N-hit count"), or that watches one slot of your deck ("Slot N counter"): at 0, or when you attack with that slot, the enemy counterattacks and the count starts again. The counts come from the community quest pages (127 enemies); which attack each enemy used to counterattack is not known, so it uses its own strongest attack (**reconstructed**). Enemies whose count is not recorded have no counter for now.
+**Enemy counters are paused** (26-10): in the original game many enemies from Quest 585 on showed a counter that went down with each attack or hit and, at 0, interrupted your attack with a move of their own (a status effect, a debuff, healing their allies, running away...). The counts are known, but which move each enemy used is not yet: the counters come back enemy by enemy once their original move is confirmed.
 
 Some enemies **absorb** the damage of one kind of Medal, as their description says (for example Gargoyle Wizard absorbs Magic Medals, Darkness absorbs Reversed Medals).
 
