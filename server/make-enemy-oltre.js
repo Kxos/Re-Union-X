@@ -469,7 +469,11 @@ if (require.main === module && process.argv[2] === '--flavors') {
   console.log(`enemy-oltre --flavors: ${JSON.stringify(rep)}`);
 } else if (require.main === module) {
   const d = defaultSources();
-  patch(process.argv[2] || path.join(__dirname, 'master_data'), { ...d, drawn: drawnDisplays(), sourcesOut: process.argv[3] || SOURCES_PATH });
+  const dir = process.argv[2] || path.join(__dirname, 'master_data');
+  patch(dir, { ...d, drawn: drawnDisplays(), sourcesOut: process.argv[3] || SOURCES_PATH });
+  // le righe rifatte perdono contatori e assorbimento (I-207): li rimette enemy-mechanics.js, come nella catena
+  // make-game-tables (26-10: dimenticato dopo una rigenerazione delle grafiche, 0 contatori nel master)
+  require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'enemy-mechanics.js'), dir], { stdio: 'inherit' });
 }
 
 module.exports = { MAX_ID, SOURCES_PATH, HP_PATH, curveAt, withHpPoint, applyHpPoints, isRestoredPoint, DR_LOOK, GENERIC_FLAVOR, parseWikiEnemies, wikiFlavors, flavorFor, refreshFlavors, ALLY_PATH, readAllies, isClone, baseOf, familyOf, drawnDisplays, readDetails, enemyRowsFor, defaultSources, strip, addRows,
