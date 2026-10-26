@@ -19,7 +19,8 @@ check(rows.length === 1 + catalog.banners.length && rows[0].drawMedalTypeId === 
 check(rows.every((r) => r.price >= 1), 'price >= 1');
 check(rows.every((r) => [1, 4, 5, 6, 7, 8].includes(r.payType)), 'payType ammessi');
 check(rows.find((r) => r.drawMedalTypeId === 10003).payType === 1 && rows.find((r) => r.drawMedalTypeId === 10006).payType === 1, 'payType 9 e 3 -> 1');
-check(rows.every((r) => r.benefitId === 0), 'benefitId 0');
+check(rows.every((r) => r.benefitId === 0), 'benefitId 0 senza VIP Draw');
+check(m.masterRows({ ...catalog, banners: [{ ...catalog.banners[0], vipDraw: true }] })[1].benefitId === require('./vip-benefit').VIP_BENEFIT_ID, 'VIP Draw: benefitId VIP');
 check(rows.find((r) => r.drawMedalTypeId === 10001).price === 600 && rows.find((r) => r.drawMedalTypeId === 10002).price === 1, 'prezzo della prima estrazione');
 const r1 = rows.find((r) => r.drawMedalTypeId === 10001);
 check(r1.bannerUrl === '/web/gacha/img/10001.png' && r1.detailUrl === '/web/gacha/detail/10001' && r1.sortId === 10, 'url e sortId');

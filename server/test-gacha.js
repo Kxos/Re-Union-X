@@ -150,6 +150,8 @@ const cheap = mk({ prices: [600], lotCount: 3 });
 check(g.checkDraw(cheap, pc, { count: 3 }, dopt) === null, 'estrazione ok');
 check(g.checkDraw(undefined, pc, { drawMedalTypeId: 1 }, dopt) !== null, 'banner sconosciuto');
 check(g.checkDraw({ ...cheap, catalogOnly: 'VIP_TWIN' }, pc, { count: 3 }, dopt) === 'banner solo nel catalogo', 'catalogOnly');
+check(g.checkDraw({ ...cheap, vipDraw: true }, pc, { count: 3 }, dopt) === 'VIP Draw senza il benefit VIP', 'VIP Draw senza benefit');
+check(g.checkDraw({ ...cheap, vipDraw: true }, pc, { count: 3 }, { ...dopt, vip: true }) === null, 'VIP Draw con il benefit');
 check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, dopt) === 'banner bloccato', 'banner bloccato');
 check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, { ...dopt, show: new Set([cheap.rowId]) }) === null, 'show sblocca');
 for (const pt of [4, 5, 6, 9]) check(g.checkDraw({ ...cheap, payType: pt }, pc, { count: 3 }, dopt) === `payType ${pt} non estraibile`, `payType ${pt}`);
