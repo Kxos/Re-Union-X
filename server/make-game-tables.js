@@ -394,6 +394,7 @@ if (enemies && fs.existsSync(namesFile)) {
     // contatori e assorbimento dei nemici 526-979 (enemy-mechanics.js, I-207), con gli attacchi gia' completi
     const mech = require('./enemy-mechanics');
     console.log('enemy-mechanics:', JSON.stringify(mech.applyMechanics(enemies, atts, mech.readTable())));
+    fs.writeFileSync(attPath, JSON.stringify(atts)); // con le righe nuove delle mosse a 0
   }
   // effetto di comparsa: lwf/character/enemy/show_effect_fla/show_effect<showSwf>/ (nelle
   // risorse 1-4, 100, 501-506, 1000). Se manca (es. 5, 8, 15, 103) il campo va in crash

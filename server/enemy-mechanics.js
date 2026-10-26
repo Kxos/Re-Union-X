@@ -19,6 +19,10 @@ const fs = require('fs');
 const path = require('path');
 
 const TABLE_PATH = process.env.KHUX_ENEMY_MECHANICS || 'D:\\Progetto_Restauro_KH_UX\\reference\\world_schema\\oltre525\\enemy_mechanics_oltre.json';
+// Mosse a 0 verificate (I-207, 26-10, tmp\i207\moves\MOVES.md): per id {urgency, value, skillId, family} + le righe
+// enemyAttack nuove (992070001...), copie di righe originali con il solo valore documentato cambiato. Solo le famiglie
+// la cui mossa e' confermata dalla descrizione nel gioco; i valori assenti da ogni fonte vengono dalla riga modello.
+const MOVES_PATH = process.env.KHUX_ENEMY_COUNTER_MOVES || 'D:\\Progetto_Restauro_KH_UX\\reference\\world_schema\\oltre525\\enemy_counter_moves.json';
 const BITS = { power: 1, speed: 2, magic: 4, upright: 8, reversed: 16 };
 
 // attacco piu' forte contro il giocatore fra le abilita' del nemico; null se ha solo cure/buff sugli alleati
@@ -37,6 +41,11 @@ const first = (arr, v) => { const out = Array.isArray(arr) && arr.length ? arr.m
 
 // rows: righe enemy (sul posto); atts: righe enemyAttack; table: {counters, absorb}. -> rapporto
 function applyMechanics(rows, atts, table) {
+  // righe d'attacco nuove delle mosse a 0: aggiunte o rimpiazzate per id (idempotente)
+  for (const r of table.rows || []) {
+    const i = atts.findIndex((a) => a.enemyAttackId === r.enemyAttackId);
+    if (i >= 0) atts[i] = { ...r }; else atts.push({ ...r });
+  }
   const attById = new Map(atts.map((a) => [a.enemyAttackId, a]));
   const rep = { counters: 0, suspended: 0, absorb: 0, noAttack: [] };
   for (const row of rows) {
@@ -64,16 +73,29 @@ function applyMechanics(rows, atts, table) {
   return rep;
 }
 
-const readTable = (file = TABLE_PATH) => JSON.parse(fs.readFileSync(file, 'utf8'));
+// tabella dei contatori + mosse verificate: un id delle mosse vale piu' della tabella base (anche gli ambigui risolti)
+function readTable(file = TABLE_PATH, movesFile = MOVES_PATH) {
+  const table = JSON.parse(fs.readFileSync(file, 'utf8'));
+  let moves = { counters: {}, rows: [] };
+  try { moves = JSON.parse(fs.readFileSync(movesFile, 'utf8')); } catch { /* nessuna mossa verificata: contatori sospesi */ }
+  table.counters = { ...(table.counters || {}) };
+  for (const [id, m] of Object.entries(moves.counters || {})) table.counters[id] = { urgency: m.urgency, value: m.value, skillId: m.skillId };
+  table.rows = moves.rows || [];
+  return table;
+}
 
-module.exports = { applyMechanics, counterAttack, readTable, TABLE_PATH };
+module.exports = { applyMechanics, counterAttack, readTable, TABLE_PATH, MOVES_PATH };
 
 if (require.main === module) {
   const dir = path.resolve(process.argv[2] || path.join(__dirname, 'master_data'));
   const file = path.join(dir, 'enemy.json');
   const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
   const before = JSON.stringify(rows);
-  const rep = applyMechanics(rows, JSON.parse(fs.readFileSync(path.join(dir, 'enemyAttack.json'), 'utf8')), readTable(process.argv[3]));
+  const attFile = path.join(dir, 'enemyAttack.json');
+  const atts = JSON.parse(fs.readFileSync(attFile, 'utf8'));
+  const attsBefore = JSON.stringify(atts);
+  const rep = applyMechanics(rows, atts, readTable(process.argv[3]));
   if (JSON.stringify(rows) !== before) fs.writeFileSync(file, JSON.stringify(rows));
+  if (JSON.stringify(atts) !== attsBefore) fs.writeFileSync(attFile, JSON.stringify(atts));
   console.log('enemy-mechanics:', JSON.stringify(rep));
 }
