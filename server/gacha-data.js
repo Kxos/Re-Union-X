@@ -36,8 +36,9 @@ function slotRarities(banner) {
 // Legge il catalogo; vuoto ma valido se il file manca, non e' JSON o non ha «banners».
 // I campi in piu' del catalogo vero (version, statistiche) restano.
 // Le varianti VIP del catalogo (catalogOnly 'VIP_TWIN', 39 banner dic. 2018 - nov. 2019) sono VIP Draw servite
-// (I-134, decisione dell'utente 26-10): vipDraw true, riga del master con il benefitId VIP (vip-benefit.js).
-const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true } : b);
+// (I-134, decisione dell'utente 26-10): vipDraw true, riga del master con il benefitId VIP (vip-benefit.js). Anche le
+// Free Deal VIP (vipFree, riservate al pass nell'originale) vogliono il benefit (decisione dell'utente 26-10).
+const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true } : b.vipFree ? { ...b, vipDraw: true } : b);
 function loadCatalog(file) {
   try {
     const c = JSON.parse(fs.readFileSync(file, 'utf8'));

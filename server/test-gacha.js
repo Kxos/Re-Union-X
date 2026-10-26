@@ -137,12 +137,13 @@ const vip2 = mk({ vipFree: true, prices: [0] });
 const pv = { freeStone: 10 };
 const plate = (pp, b, ms) => g.gachaListData([b], pp, { realMs: ms, webBase: 'http://h', ...opt }).gachaList[1];
 check(plate(pv, vip1, t0).userLimitedCount === 1 && plate(pv, vip1, t0).isDayLimited === 1, 'VIP: disponibile');
-check(g.checkDraw(vip1, pv, { count: 10 }, dopt) === null, 'VIP: prima estrazione');
+check(g.checkDraw(vip1, pv, { count: 10 }, dopt) === 'VIP Draw senza il benefit VIP', 'VIP: Free Deal senza benefit (I-134)');
+check(g.checkDraw(vip1, pv, { count: 10 }, { ...dopt, vip: true }) === null, 'VIP: prima estrazione');
 g.payDraw(vip1, pv, t0, false);
 check(pv.freeStone === 9, 'VIP: 1 Jewel scalato');
-check(g.checkDraw(vip2, pv, { count: 10 }, dopt) === 'estrazione gratuita VIP gia\' usata oggi', 'VIP: seconda Free Deal rifiutata');
+check(g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, vip: true }) ==='estrazione gratuita VIP gia\' usata oggi', 'VIP: seconda Free Deal rifiutata');
 check(plate(pv, vip1, t0).userLimitedCount === 0 && plate(pv, vip2, t0).userLimitedCount === 0, 'VIP: userLimitedCount 0 per entrambi');
-check(plate(pv, vip2, next).userLimitedCount === 1 && g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, realMs: next }) === null, 'VIP: il giorno dopo di nuovo 1');
+check(plate(pv, vip2, next).userLimitedCount === 1 && g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, realMs: next, vip: true }) === null, 'VIP: il giorno dopo di nuovo 1');
 
 // controlli dell'estrazione
 const pc = { freeStone: 1000, limitedDrawTicket1: 0 };
