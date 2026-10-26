@@ -4,9 +4,11 @@
 // righe 526-979 di make-enemy-oltre.js sono cloni senza. La tabella privata
 // reference\world_schema\oltre525\enemy_mechanics_oltre.json (enemy_mechanics_oltre.py: wiki delle missioni x stage
 // JP) da' per id il tipo (2 «N-attack count», 3 «N-hit count», 7 «Slot N counter») e il valore; urgencyFrequency 0 =
-// il contatore riparte sempre (come il Gold Tricholoma originale). Nessuna fonte dice com'era il contrattacco: si usa
-// l'attacco piu' forte del nemico stesso contro il giocatore (potenza x colpi, a parita' quello in evidenza,
-// display 1), nessuna riga inventata. Assorbimento: bit 0 Power, 1 Speed, 2 Magic, 3 Upright, 4 Reversed.
+// il contatore riparte sempre (come il Gold Tricholoma originale). Contrattacchi SOSPESI (decisione dell'utente 26-10):
+// la ricerca (D:\Progetto_Restauro_KH_UX\tmp\i207\research\REPORT.md) mostra che a 0 la mossa era propria della
+// famiglia (veleno, DEF giu', cura degli alleati, fuga...), non «l'attacco piu' forte» usato il 25-10. Un contatore si
+// applica solo se la tabella da' la mossa verificata (c.skillId); gli altri vengono tolti (validUrgency 0).
+// Assorbimento: bit 0 Power, 1 Speed, 2 Magic, 3 Upright, 4 Reversed.
 // Grafica (ActMapSpEnmUI_*, Absorb_*): import_jp_coco.py. Notice «Story Quests 526-979».
 //
 // make-game-tables.js la applica dopo make-enemy-oltre.js addRows() e la creazione degli attacchi; da sola corregge
@@ -36,11 +38,16 @@ const first = (arr, v) => { const out = Array.isArray(arr) && arr.length ? arr.m
 // rows: righe enemy (sul posto); atts: righe enemyAttack; table: {counters, absorb}. -> rapporto
 function applyMechanics(rows, atts, table) {
   const attById = new Map(atts.map((a) => [a.enemyAttackId, a]));
-  const rep = { counters: 0, absorb: 0, noAttack: [] };
+  const rep = { counters: 0, suspended: 0, absorb: 0, noAttack: [] };
   for (const row of rows) {
     const c = (table.counters || {})[row.enemyId];
-    if (c) {
-      const sid = counterAttack(row, attById);
+    if (c && !c.skillId) {
+      // sospeso: nessuna mossa verificata; toglie anche un contatore messo da una versione precedente (righe 526-979)
+      Object.assign(row, { validUrgency: 0, urgency: first(row.urgency, 0), urgencyValue: first(row.urgencyValue, 0),
+        urgencyFrequency: first(row.urgencyFrequency, 0), urgencySkillId: first(row.urgencySkillId, 0) });
+      rep.suspended++;
+    } else if (c) {
+      const sid = attById.has(c.skillId) ? c.skillId : null;
       if (sid == null) rep.noAttack.push(row.enemyId);
       else {
         Object.assign(row, { validUrgency: 1, urgency: first(row.urgency, c.urgency), urgencyValue: first(row.urgencyValue, c.value),
