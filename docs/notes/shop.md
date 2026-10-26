@@ -894,7 +894,8 @@ about 2x featured odds, 5 instead of 3 Magic Mirrors, more Limited VIP Coins; no
 - Restoration rule (user's decision 26-10, **not original**, to be reviewed in I-164): the benefit is earned by completing all the
   Weekly Missions of a week (the 10 of the active series) and lasts for the rest of that week and the whole next week
   (`server/vip-benefit.js`, `player.vip.earnedWeek`). Raid Boss and Union Cross do not exist yet: today nobody can earn it.
-- The 39 catalog rows `catalogOnly: 'VIP_TWIN'` become `vipDraw` banners at load (`gacha-data.loadCatalog`): master row with benefitId
+- The 39 catalog rows `catalogOnly: 'VIP_TWIN'` and the 13 per-medal VIP rows of Sep-Nov 2019 (flag `VIP`, B0579-B0615: a
+  different name from the standard pool deal, so no twin) become `vipDraw` banners at load (`gacha-data.loadCatalog`): master row with benefitId
   100, refused by `/gacha/draw` without the benefit, never kept in the Shop, note on the details page. The 17 «VIP Free Deals»
   (`vipFree`, WJE-only in the original) need the benefit too (user's decision 26-10; shared daily limit, spec 9.5).
 - Bench: `relogin.ps1 -Vip 1` (or `0`) forces the benefit on/off (`KHUX_VIP`).
