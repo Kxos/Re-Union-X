@@ -38,9 +38,9 @@ check(u(1501) === '[1,2,5,0,1501001]', `Gold Tricholoma originale toccato ${u(15
 const counted = master.filter((e) => e.validUrgency > 0 && e.enemyId !== 1501 && !(e.enemyId >= 160911501 && e.enemyId <= 160951501));
 // mosse a 0 verificate (26-10): 44 nemici di 24 famiglie, ognuno con una riga d'attacco esistente; Chocolate Monster resta spento
 const attIds = new Set(JSON.parse(fs.readFileSync(path.join(__dirname, 'master_data', 'enemyAttack.json'), 'utf8')).map((a) => a.enemyAttackId));
-check(counted.length === 44, `nemici con contatore ${counted.length}, attesi 44`);
+check(counted.length === 41, `nemici con contatore ${counted.length}, attesi 41 (Green Requiem in attesa della grafica)`);
 check(counted.every((e) => attIds.has(e.urgencySkillId[0]) && e.urgencyFrequency[0] === 0), 'mossa a 0 senza riga di attacco');
-check(u(1502) === '[1,2,2,0,992070010]', `Green Requiem (q592, 2-attack, cura senza colpire: attackTarget 3) ${u(1502)}`);
+check(u(1502) === '[0,0,0,0,0]', `Green Requiem spento finche' non ha la sua grafica (I-194) ${u(1502)}`);
 const src = JSON.parse(fs.readFileSync(require('./make-enemy-oltre').SOURCES_PATH, 'utf8')).sources;
 check(counted.every((e) => src[e.enemyId]), 'contatore su un nemico delle missioni 1-525');
 
