@@ -533,6 +533,7 @@ try {
   const old = (o) => mk({ unlockQuest: 200, start: '2016-05-01', end: '2016-05-30', ...o });
   const okb = old({ prices: [0, 3000] });
   check(g.pinnable(okb, pc) === true, 'pinnable: [0,3000] di un periodo passato');
+  check(g.pinnable({ ...okb, vipDraw: true }, pc) === true, 'pinnable: VIP Draw fissabile come le altre (I-134)');
   const seasonOf = require('./gacha-seasons').seasonOf;
   const seaRow = require('./game_data/gacha_catalog.json').banners.find((b) => seasonOf(b));
   const bad = {
