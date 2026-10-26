@@ -387,7 +387,7 @@ function page(title, body, cls = '', side = '') {
     + '.back span{display:inline-block;margin-left:12px;width:14px;height:9px;border:3px solid #fff;border-left:0;border-radius:0 8px 8px 0;vertical-align:1px;position:relative}.back span:after{content:"";position:absolute;left:-7px;bottom:-8px;border-style:solid;border-width:6px 9px 6px 0;border-color:transparent #fff transparent transparent}'
     + 'body.hb{padding-bottom:90px}'
     + '.pin{margin:10px 0}.btn{display:inline-block;padding:7px 22px;border-radius:10px;border:2px solid #ffe08a;color:#fff;text-decoration:none;font:bold 18px sans-serif;background:linear-gradient(#e0a020,#a8700a)}'
-    + '.btn[data-on="0"]{border-color:#9fd4ff;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c)}' // «Remove from the Shop» blu come BACK, diverso dal «Keep» arancio (utente 26-10)
+    + '.btn[data-on="0"]{border-color:#ffb0b0;background:linear-gradient(#ff5a5a,#d81e2e 55%,#9c1020)}' // «Remove from the Shop» rosso come OK, diverso dal «Keep» arancio (utente 26-10)
     + '.pinmsg{display:none;border:3px solid #5cd94a;background:#0d4a2a;border-radius:10px;padding:10px 14px;margin:10px 0;text-align:center;font:bold 22px/1.3 sans-serif;color:#fff;box-shadow:0 0 12px rgba(92,217,74,.5)}'
     + '.pinmsg small{display:block;font:15px/1.4 sans-serif;color:#e6f5ea;margin-top:5px}.pinmsg.off{border-color:#ffa500;background:#5a3a08;box-shadow:0 0 12px rgba(255,165,0,.5)}.pinmsg.err{border-color:#ff4a74;background:#5a1224;box-shadow:none}'
     + '.top{text-align:right;font-size:15px}.box{border:2px solid #ffcd4a;padding:6px 10px;margin:8px 0}</style></head><body' + (cls ? ` class="${cls}"` : '') + '>'
@@ -731,7 +731,7 @@ const CATALOG_CSS = 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-wi
   + '.search{display:flex;align-items:center;background:#fff;border-radius:18px;padding:2px 12px;color:#7a8a96}'
   + '.search input{flex:1;min-width:0;border:0;outline:0;font:16px sans-serif;color:#222;background:transparent;padding:4px 6px}'
   + '.pk{margin-top:5px;border:2px solid #ffe08a;border-radius:10px;color:#fff;font:bold 13px sans-serif;padding:3px 12px;background:linear-gradient(#e0a020,#a8700a);cursor:pointer}'
-  + '.pk[data-on="0"]{border-color:#9fd4ff;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c)}' // «Remove from the Shop» blu (utente 26-10)
+  + '.pk[data-on="0"]{border-color:#ffb0b0;background:linear-gradient(#ff5a5a,#d81e2e 55%,#9c1020)}' // «Remove from the Shop» rosso (utente 26-10)
   + '.cat .pinmsg{font-size:16px;padding:6px 8px;margin:6px 0 0}.cat .pinmsg small{font-size:13px}'
   + '.hint{color:#9fb7c6;font-size:13px;margin:3px 0 0 4px}.opts{display:flex;flex-wrap:wrap;gap:6px}'
   + '.o{border:1px solid #5d8aa6;border-radius:16px;padding:3px 12px;font:14px sans-serif;color:#d9e6ee;background:#083048;cursor:pointer}'
