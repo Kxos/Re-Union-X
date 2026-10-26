@@ -42,3 +42,18 @@ for dst, s in PAIRS.items():
     os.makedirs(os.path.dirname(dp), exist_ok=True)
     shutil.copyfile(sp, dp)
     print(dst, '<-', s, im.size)
+
+# Testo del pannello del lucchetto (Txt_Lock sotto LockMask/lock_plate, 211x66, corpo 18): il client non lo scrive mai
+# (nessun riferimento al nome nel codice) e il layout WW servito ha ancora il segnaposto giapponese dello sviluppo
+# («fino a 11 caratteri per riga»). Lo mostrano le VIP Draw senza il benefit VIP (I-134): testo nostro con la regola
+# del restauro (vip-benefit.js), nessuna schermata originale del pannello trovata.
+LAYOUT = 'cocostudio/publish/ShopDraw_3Plate_Plate_ver310.json'
+PLACEHOLDER = '"text": "上下で十一文字ずつで二十二文字まではいります"'
+LOCK_TEXT = '"text": "Clear all Weekly Missions to unlock"'  # il client va a capo da solo: 2 righe (banco 26-10)
+raw = open(os.path.join(src, *LAYOUT.split('/')), 'rb').read().decode('utf-8')
+if raw.count(PLACEHOLDER) != 1:
+    sys.exit('%s: segnaposto di Txt_Lock non trovato' % LAYOUT)
+dp = os.path.join(out, *LAYOUT.split('/'))
+os.makedirs(os.path.dirname(dp), exist_ok=True)
+open(dp, 'wb').write(raw.replace(PLACEHOLDER, LOCK_TEXT).encode('utf-8'))
+print(LAYOUT, '<- Txt_Lock in inglese')
