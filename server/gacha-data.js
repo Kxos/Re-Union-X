@@ -37,8 +37,12 @@ function slotRarities(banner) {
 // I campi in piu' del catalogo vero (version, statistiche) restano.
 // Le varianti VIP del catalogo (catalogOnly 'VIP_TWIN', 39 banner dic. 2018 - nov. 2019) sono VIP Draw servite
 // (I-134, decisione dell'utente 26-10): vipDraw true, riga del master con il benefitId VIP (vip-benefit.js). Anche le
-// Free Deal VIP (vipFree, riservate al pass nell'originale) vogliono il benefit (decisione dell'utente 26-10).
-const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true } : b.vipFree ? { ...b, vipDraw: true } : b);
+// Free Deal VIP (vipFree, riservate al pass nell'originale) vogliono il benefit (decisione dell'utente 26-10). Da
+// settembre 2019 le VIP Draw erano una tavola per medaglia accanto al deal standard a pool, con un altro nome: il
+// gemello del catalogo non le trova, il flag VIP si' (13 banner B0579-B0615, banco 26-10).
+const VIP_FLAG = (b) => (b.flags || []).includes('VIP');
+const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: null, vipDraw: true }
+  : b.vipFree || VIP_FLAG(b) ? { ...b, vipDraw: true } : b);
 function loadCatalog(file) {
   try {
     const c = JSON.parse(fs.readFileSync(file, 'utf8'));

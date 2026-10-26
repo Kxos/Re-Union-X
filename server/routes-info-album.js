@@ -106,7 +106,7 @@ const NOTICES = [
   // VIP Draw (I-134, vip-benefit.js, ricerca D:\Progetto_Restauro_KH_UX\tmp\vip\REPORT.md): decisione dell'utente
   // 26-10 = benefit dalle 10 missioni settimanali, per il resto della settimana e la successiva; da rivedere (I-164)
   { date: '10/26', tag: 'IMPORTANT', title: 'VIP Draws',
-    body: ['The **VIP Draws** of the original Shop are back: 39 VIP versions of the deals from December 2018 to November 2019. A VIP Draw costs the same as the standard draw and adds the original VIP extras of its deal, such as a closer guarantee of the featured Medal or more Magic Mirrors. The **VIP Free Deals** (one free draw a day) need the VIP benefit too, as in the original.',
+    body: ['The **VIP Draws** of the original Shop are back: 52 VIP versions of the deals from December 2018 to November 2019. A VIP Draw costs the same as the standard draw and adds the original VIP extras of its deal, such as a closer guarantee of the featured Medal or more Magic Mirrors. The **VIP Free Deals** (one free draw a day) need the VIP benefit too, as in the original.',
       'In the original game VIP Draws needed a **paid weekly pass**. Here nothing is sold: you get the **VIP benefit** by completing **all the Weekly Missions** of a week. It then lasts for the rest of that week and the whole next week (**not original**).',
       'The Weekly Missions include Raid Bosses and Union Cross, which are not available yet: until they come back the VIP benefit cannot be earned and VIP Draws show a padlock.',
       'This rule is temporary and will be reviewed when the game balance is studied again.'] },
