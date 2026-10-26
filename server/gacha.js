@@ -64,7 +64,8 @@ const isFreeLike = (b) => (b.prices || []).every((x) => x <= 1) || !!b.vipFree |
 function pinnable(b, ctx) {
   if (!ctx.periodStart || b.catalogOnly || !drawable(b, ctx.sizes)) return false;
   if (b.unlockQuest > ctx.storyQuest && !ctx.show?.has(b.rowId)) return false;
-  return (b.end || '2099-12-31') < ctx.periodStart && !isFreeLike(b) && !seasonOf(b) && !b.vipDraw; // VIP Draw: legata alla settimana del benefit
+  // le VIP Draw si fissano come le altre (decisione dell'utente 26-10): col lucchetto finche' manca il benefit VIP
+  return (b.end || '2099-12-31') < ctx.periodStart && !isFreeLike(b) && !seasonOf(b);
 }
 // Il banner di player.gacha.pinned se e' ancora fissabile (altrimenti null; il campo resta nel salvataggio).
 function pinnedBanner(banners, player, ctx) {
