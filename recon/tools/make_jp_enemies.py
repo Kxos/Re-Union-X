@@ -145,7 +145,7 @@ EXTRA = dict(extra_donors.load(extra_donors.WHOLE_TABLE if a.whole is None else 
 # Rows with rule dedup-rescale (user-approved 23-10): DOWNSCALED copies of original art (category 3), same place in the
 # order as dedup-order but accepted only at EXACTLY the declared size (no +-2 px tolerance)
 DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup,
-                          rules={'dedup-order', 'dedup-override', 'dedup-rescale'})
+                          rules={'dedup-order', 'dedup-override', 'dedup-rescale', 'dedup-wwrecord'})
 RECOL = extra_donors.load(extra_donors.RECOLOUR_TABLE if a.recolour is None else a.recolour, rules={'recolour', 'recolour-whole'})
 ROOTS = dict(extra_donors.ROOTS, jp431=[a.jp_root])
 for _x in a.src_root:
@@ -299,7 +299,7 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
     if qp and DEDUP[pre + t][2] == 'dedup-rescale':
         if dims is not None and fits_exact(qp, dims.get(t)):
             return qp, 'riscalata'
-    elif qp and fit(qp):
+    elif qp and (fit(qp) or DEDUP[pre + t][2] == 'dedup-wwrecord'):  # wwrecord: misura del file, non quella dichiarata
         return qp, 'dedup'
     rp = recon(pre + t)
     if rp:
