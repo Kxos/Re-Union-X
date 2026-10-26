@@ -414,9 +414,19 @@ function respondResourceSize(res, req) {
   // manda in crash» del 7 ottobre riguardava un client senza master, revisione 0.)
   // Il crash dopo un aggiornamento dei master per chi rientra NON dipende da
   // qui: vedi HANDOFF, «Il crash dopo l'aggiornamento dei master».
-  const upToDate = Number(req?.masterRevision) >= sessionRevision()
-    && Number(req?.resourceRevision) >= latestResourceVersion();
-  send(res, 200, { ret: ret(), size: upToDate ? 0 : Number(process.env.KHUX_RESOURCE_SIZE || 0) });
+  // Con le risorse gia' all'ultima versione e solo il master vecchio si annuncia il master (somma dei file di MASTER_DIR):
+  // il client mostra comunque «Tap "Download"...» a ogni cambio di revisione (anche con 0: «Approx. 0.00 KB», banco 26-10)
+  // e scarica solo le 106 tabelle, mai i pacchetti; prima annunciava i 4,28 GB delle risorse.
+  const masterCurrent = Number(req?.masterRevision) >= sessionRevision();
+  const resourcesCurrent = Number(req?.resourceRevision) >= latestResourceVersion();
+  const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : Number(process.env.KHUX_RESOURCE_SIZE || 0);
+  send(res, 200, { ret: ret(), size });
+}
+// byte dei master serviti (file .json di MASTER_DIR), per /system/resourcesize quando cambia solo il master
+function masterBytes() {
+  try {
+    return fs.readdirSync(MASTER_DIR).filter((f) => f.endsWith('.json')).reduce((n, f) => n + fs.statSync(path.join(MASTER_DIR, f)).size, 0);
+  } catch { return 0; }
 }
 
 // ---------------------------------------------------------------------------
@@ -4511,7 +4521,7 @@ module.exports._test = {
   // server/test-mission-settle.js
   settleClock, MISSION_COUNTER, MISSION_DERIVED, missionProgress, petSubslotNow, guiltBurst,
   // server/test-master-clock.js
-  masterRevisionNow, servedMasterRows, sessionRevision, respondLogin, respondMasterFile, respondResourceFile, masterBody, respondMaster, respondResourceSize, respondStatus,
+  masterRevisionNow, servedMasterRows, sessionRevision, respondLogin, respondMasterFile, respondResourceFile, masterBody, respondMaster, respondResourceSize, masterBytes, respondStatus,
   // server/test-story-oltre.js (missioni 526-979)
   respondStageList, lastStoryStageId, stageNumber, stageRowOf, userDetailData, ensureUnion,
   // server/test-proud.js (Proud Mode, I-200)

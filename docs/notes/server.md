@@ -178,6 +178,13 @@ chain before action 251 or without a session; the errors stay `:251` for the who
   twin before 2020), I-131 (`term()` of the rankings on the fake Monday 00:00), I-132 (`endDate` with
   `KHUX_SERVER_TIME`). An unreadable `KHUX_REAL_NOW` stops the server startup with an error.
 - **Login measurement** (`tools\ldplayer\session\login-time.ps1 -N 5`, times from the app launch):
+- **Download popup at every master change** (26-10): the client shows «Tap "Download" to download the game. (Approx. N)»
+  whenever its master revision is older than the server's, even with `size` 0 («Approx. 0.00 KB»), then downloads only
+  the 106 master tables (no resource file). `PUT /system/resourcesize` now announces the master bytes (sum of the
+  `.json` files of `master_data`, ~24 MB) when the resources are current, and the whole resource version only when
+  they are not: before it announced 4.28 GB at every revision bump. Bench 26-10: «Approx. 23.85 MB», home reached.
+  Never lower the session revision: the client keeps the highest it saw and would skip the next master until it is
+  passed (26-10: bench client at 196 after a test, scripts moved to 197).
 
   | | /khux/login | total (home settled) | tables |
   |---|---|---|---|
