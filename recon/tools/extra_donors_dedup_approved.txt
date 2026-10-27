@@ -143,3 +143,10 @@
 # original member, 9-copy rest-pose groups = the knockback limbs) and the 2506 foot pieces b28/b29 of
 # knockback/wait/move/atk1_o (drama 2270201 bitmaps 40/41, replacing three E2 rows; G is read after E2). The
 # 1635:^F/atkSp entry above stays: G supersedes those keys.
+# reccheck 27-10 (user-approved sheets tmp/dedup/reccheck27/triage): 2018-record override rows
+31:wait
+106:move
+106:wait
+1501:knockback
+1501:wait
+2002:wait
