@@ -82,14 +82,14 @@
             "kind": "t-update",
             "count": 123,
             "label": "Original files of the game",
-            "detail": "The original files of the Japanese 4.3.1 version, used as they are."
+            "detail": "The original files of the game, used as they are."
           },
           {
             "tag": "ORIGINAL",
             "kind": "t-update",
             "count": 86,
             "label": "Original files found elsewhere",
-            "detail": "Still the original art, recovered from other places in the game data: identical copies kept in other folders, the 2018 worldwide name index, story cutscenes that use the same pictures, and an older 2016 version of the game."
+            "detail": "Still the original art, found in other places of the game's own data, for example identical pictures stored for other scenes or effects."
           },
           {
             "tag": "RESTORED",
@@ -101,7 +101,7 @@
               "Wily Bandit",
               "Wandering Spook",
               "Trickmaster",
-              "Unnamed family no. 251",
+              "1 more family (name to be confirmed)",
               "Green Requiem",
               "Ferocious Fins",
               "Burrfish (2 forms)",
@@ -132,7 +132,7 @@
             "detail": "Built from the original art of a twin enemy (the Dark Road version or another colour variant of the same creature) and recoloured.",
             "names": [
               "Eliminator",
-              "Unnamed family no. 1501",
+              "1 more family (name to be confirmed)",
               "Emerald Sonata",
               "Poison Archer",
               "Paralysis Archer",
