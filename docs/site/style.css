@@ -173,3 +173,25 @@ h3.sq:before{content:"";display:inline-block;width:14px;height:14px;background:v
 
 /* the game-like rounded font only for titles, tabs, tags and buttons */
 h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
+
+/* status: optional breakdown of an area (status.json «breakdown»), a fold like the game's detail panels */
+.more{margin:10px 0 2px;background:#0f3a5c;border:2px solid #2a6a9a;border-radius:8px;overflow:hidden}
+.more summary{cursor:pointer;padding:7px 12px;font-weight:800;color:var(--cyan);font-family:var(--font)}
+.more summary:hover{color:#fff}
+.more[open] summary{border-bottom:2px dotted var(--dots)}
+.parts{list-style:none;margin:0;padding:0}
+.rows .parts li{display:grid;grid-template-columns:auto auto 1fr;gap:4px 12px;align-items:start;padding:9px 12px;border-bottom:2px dotted var(--dots)}
+.rows .parts li:last-child{border-bottom:0}
+.parts .tag{min-width:96px;margin-top:2px}
+.parts .pn{font-size:20px;font-weight:800;color:var(--key);min-width:2.2em;text-align:right;line-height:1.4}
+.parts .pl{min-width:0;font-size:15px}
+.parts .pl b{display:block;color:#fff}
+.names{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.names i{font-style:normal;font-size:13px;line-height:1.3;padding:2px 8px;border-radius:10px;background:#0a2440;border:1px solid #36a6e6;overflow-wrap:anywhere}
+.pnote{margin:0;padding:9px 12px;font-size:14px;color:var(--muted)}
+@media (max-width:700px){
+  .rows .parts li{grid-template-columns:auto 1fr;padding:8px 10px}
+  .parts .tag{min-width:0}
+  .parts .pn{text-align:left;grid-column:2;grid-row:1}
+  .parts .pl{grid-column:1/3}
+}

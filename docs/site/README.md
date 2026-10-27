@@ -28,6 +28,9 @@ Edit `status.json`. Each area:
 - `state`: `done` (group «Works today»), `progress` («In progress») or `missing` («Not there yet»).
 - `done` / `total`: fill of the bar; with `unit` the row also shows «done/total unit», without it a percentage
   (hidden for `done` rows).
+- Optional `breakdown`: a fold under the row («How the 245 families were restored»), e.g.
+  `{ "title": "...", "parts": [{ "tag": "ORIGINAL", "kind": "t-update", "count": 123, "label": "...", "detail": "...", "names": ["..."] }], "note": "..." }`.
+  `kind` is a tag colour (`t-update`, `t-event`, `t-campaign`, `t-important`, `t-info`); `names` (optional) are shown as chips.
 - The meter at the top counts the areas in state `done`.
 - Also update `updated` and, when it changes, `summary`. The «Where we are» rows of the Home section are plain HTML
   in `index.html`.
