@@ -63,8 +63,10 @@ D:\Progetto_Restauro_KH_UX\LDPlayer\LDPlayer9\ld.exe -s 0 "sh /mnt/shared/Misc/p
   khuxwiki Max = base x guilt); waiting for the user: what value they saw wrong, battle check of the «320% BONUS» hit,
   decisions on the 0-4 dot fallback of the SN++ rows and 302012 KH III Xion (medaglie.md#sn-fiend). **Running/next:**
   1) reccheck on all families: `tmp\dedup\reccheck27\` (64 suspect slots in 28 served families; record index often
-  shifted by one), triage agent writing `tmp\dedup\reccheck27\triage\` (TRIAGE.md, sheets, proposal.tsv) -> user
-  approval -> integrate as `dedup-wwrecord-override`; 2) build resources **74** (`build-resources.ps1 -Version 74`),
+  NOT shifted: the `stesso` same-name rule picks neighbouring frames), triage DONE: 52 WRONG in 22 families / 11 OK /
+  1 UNSURE (1505 atkSp bm37: keep ours), `tmp\dedup\reccheck27\triage\` (TRIAGE.md, sheets\wrong_<fam>.png,
+  proposal.tsv 52 rows `dedup-wwrecord-override`) -> user approval -> append to extra_donors_dedup.tsv, regenerate twice,
+  make-enemy-oltre, suite; 43 tierA rows of unserved families not triaged; 2) build resources **74** (`build-resources.ps1 -Version 74`),
   `update-resources.ps1` (+ KHUX START / Download), relogin with rev 205; check Green Requiem green + its counter in q592,
   cost 999 screens; 3) user bench of the counters; 4) play package (rev 205+ / resources 74).
 - **STATE AS OF 26-10 EVENING.** Bench instance 0: resources **72** installed, master served **rev 203**
