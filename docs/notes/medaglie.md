@@ -265,6 +265,22 @@ lowercase `Txt_cancel`). `POST /user/material/sell` {userMaterialId, number} (50
 10; Mythril Shard and Orichalcum not sellable. Material icons: `fetch_material_icons.py` (44 of 45,
 Remembrance Gem missing).
 
+<a id="support-cost"></a>
+## Cost of the non-battle Medals (I-211, 27-10)
+
+User decision 26-10: the Medals that cannot go on a Keyblade and be played show cost **999**, like the Trait Medals.
+`server/support-medal-cost.js` sets `cost` and `minCost` to 999 on every row with `type` 2 (EXP: Huey, Dewey, Louie,
+Huey & Dewey & Louie, Scrooge), 3 (sell-only: Moogle), 4 (Boost: Chip, Dale, Magic Mirror), 5 (Cost: Cid, Cid 5,
+Cid 10), 6 (Evolve: Cheshire Cat, Merlin, Fairy Godmother, Yen Sid, Fantasia Mickey A, Flora, Fauna, Merryweather,
+Magic Broom, Dual Meow Wow SAB 7-9, Blue Fairy SA Bonus 1-8) and 8 (Fantasia Mickey B): **54 rows**, all 0/0 before.
+`minCost` 999 too, so Cid has nothing to lower (`upperCost` = cost - minCost = 0). Untouched: battle Medals (type 1,
+also the system rows 1-7 Stock Medal/Burst/Blast) and the Trait Medals (type 9, already 999).
+- **Deviation from the original**: thethiny's rows (old format) have cost 0 / minCost 0 on all 41 original support
+  Medals; the khuxwiki infobox of the support Medals has no cost. 999 is a display choice of the user.
+- Applied by `make-game-tables.js` after `make-trait-medals`; on its own it fixes the master in place (idempotent):
+  `node server/support-medal-cost.js`. Test: `node server/test-support-medal-cost.js`. To verify on the bench: Medal
+  List detail and Level Up/Evolve screens (cost 999), deck screens unchanged (support Medals still not selectable).
+
 <a id="trait-medal"></a>
 ## Trait Medal (I-084)
 
@@ -776,3 +792,22 @@ changed (468 new variable + 18 Critical), displayPower and medal.json unchanged;
   27 next medal, 31 less Lux): the code is followed, to be verified on the bench.
 - 9 rows with the display at full dots (khuxwiki) different from LowMulti (3000545, 3000701, 3001893, 3001981, 3002008-3002012):
   display kept, gap hi − lo.
+
+<a id="sn-fiend"></a>
+### SN++ - Fiend multiplier (I-212, check 27-10)
+
+Burst 3001932 «Dark Inferno +6» (medal 301932 and boosted 2301932), type 36 («Damage+: 1 enemy or 0 parts left»),
+powers in ten-thousandths, guilt factor applied by the client on both ends (tier 10: up to +320%, x4.20):
+
+| level | ours (displayPower - displayMaxPower) | khuxwiki |
+|---|---|---|
+| 0 dots | 5500 - 155500 = x0.55 - 15.55 | not given |
+| 1-4 dots | x0.58/0.64/0.73/0.85 - 15.58/15.64/15.73/15.85 | not given |
+| 5 dots | 10000 - 160000 = **x1.00 - 16.00** | **x1.00 - 16.00** |
+| 5 dots, SAB tier 10 max | x1.00·4.2 - 16.00·4.2 = **x4.20 - 67.20** | **x4.20 - 67.20** («Max») |
+
+sp1 150000 (S1 = 15) = 16.00 − 1.00, Roboloid LowMulti 1 / HighMulti 16: the documented levels match, nothing
+changed. The 0-4 dot values come from the `tierPower` fallback of `medal-power-fix.js` (wiki 7★ with only `dmg7`,
+no `dmg6`: full value minus +300/+900/+1800/+3000/+4500). All 163 SN++ rows use it, but only Fiend (and SN/SN+ - KH III
+Pirate Sora, SN/SN+ - KH III Dark Baymax: x0.55 -> x1.00) have a base so low that the -0.45 is about half of the
+multiplier; the thethiny originals use equal steps per dot (+400/+600/+800/+1000). Open user decision.
