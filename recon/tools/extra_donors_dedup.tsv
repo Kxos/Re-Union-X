@@ -4590,3 +4590,9 @@ lwf/character/enemy/1527/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720313
 lwf/character/enemy/1527/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972033302e706e67.png	jp431:lwf/character/enemy/1527/wait/wait_e38393e38383e38388e3839ee38383e383972031332e706e67.png	dedup-wwrecord-override	25x25	A
 lwf/character/enemy/1527/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972034322e706e67.png	jp431:lwf/character/enemy/1527/wait/wait_e38393e38383e38388e3839ee38383e3839720342e706e67.png	dedup-wwrecord-override	35x35	A
 lwf/character/enemy/1527/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972034332e706e67.png	jp431:lwf/character/enemy/1527/wait/wait_e38393e38383e38388e3839ee38383e3839720352e706e67.png	dedup-wwrecord-override	33x35	A
+# I-194 27-10: 1502 Green Requiem atkSp, 2018-record files (user-approved 27-10, sheet tmp\gr1502)
+lwf/character/enemy/1502/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972032312e706e67.png	jp431:lwf/burst/motion/abl_11916/abl_11916_e38393e38383e38388e3839ee38383e383972031302e706e67.png	dedup-wwrecord	44x47	A
+lwf/character/enemy/1502/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972032322e706e67.png	jp431:lwf/burst/motion/abl_12156/abl_12156_e38393e38383e38388e3839ee38383e3839720392e706e67.png	dedup-wwrecord	44x47	A
+lwf/character/enemy/1502/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972032352e706e67.png	jp431:lwf/character/enemy/hit_effect_fla/eff_2014/eff_2014_e38393e38383e38388e3839ee38383e3839720312e706e67.png	dedup-wwrecord	67x67	A
+lwf/character/enemy/1502/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972032382e706e67.png	jp431:lwf/character/enemy/1553/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972032302e706e67.png	dedup-wwrecord	295x295	A
+lwf/character/enemy/1502/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972032392e706e67.png	jp431:lwf/character/enemy/1553/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972032302e706e67.png	dedup-wwrecord	295x295	A
