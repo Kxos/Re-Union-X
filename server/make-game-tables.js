@@ -837,6 +837,8 @@ if (fs.existsSync(gachaCatalog)) require('./make-nova-rows').patch(OUT, gachaCat
 require('./make-trait-groups').patch(OUT);
 // Trait Medal (I-084 parte B): righe type 9 9.000.000+N e legame del pallino sulle linee (make-trait-medals.js)
 require('./make-trait-medals').patch(OUT);
+// Cost 999 on the non-battle Medals (EXP, sell, Boost, Cost, Evolve, Fantasia Mickey B; I-211, support-medal-cost.js)
+require('./support-medal-cost').patch(OUT);
 // Livelli Lux 302-999 ricostruiti e misc 100 = 999 (make-lux-levels.js, richiesta dell'utente 19-10)
 require('./make-lux-levels').patch(OUT);
 // Login bonus (I-176): Daily 100/100/200/200/300 e Total della 1.1.3 (make-login-bonus.js)
