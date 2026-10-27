@@ -65,7 +65,7 @@ D:\Progetto_Restauro_KH_UX\LDPlayer\LDPlayer9\ld.exe -s 0 "sh /mnt/shared/Misc/p
   1) reccheck on all families: `tmp\dedup\reccheck27\` (64 suspect slots in 28 served families; record index often
   NOT shifted: the `stesso` same-name rule picks neighbouring frames). User 27-10: 13 families integrated (b00ea5c),
   251/1536/2510 keep ours; 21/55/98/113/140/169/2003 = triage artefact (those slots are served from the 2016 package,
-  `tmp\dedup\reccheck27\fix7\FIX7.md`, sheets fix_<fam>.png): waiting for the user's "no change" OK; fallback_jp.tsv
+  `tmp\dedup\reccheck27\fix7\FIX7.md`, sheets fix_<fam>.png): user confirmed "no change" 27-10; fallback_jp.tsv
   (868 rows) not integrated. Generator bug fixed (ab46688: sources.json manifest, files rewritten when the source
   changes; enemy_gen fully rewritten 27-10). Future rechecks: build the served map from plan_enemy(), not texsrc.json;
   43 tierA rows of unserved families not triaged; 2) build resources **74** (`build-resources.ps1 -Version 74`),
