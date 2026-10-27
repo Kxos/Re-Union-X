@@ -73,6 +73,9 @@ RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'd
          # I-194 hunt26 (26-10, user): file identico (stesso record dell'indice WW 2018) servito alla SUA misura, come lo serve
          # gia' il nemico che lo condivide (i JP originali sono spesso salvati a un'altra risoluzione)
          'dedup-wwrecord': 2,
+         # dedup-wwrecord-override (27-10, user-approved 1527 atk1_o check): a dedup-wwrecord file that wins over every
+         # other source for that exact path, like dedup-override (the old dedup/same-name pieces were wrong substitutes)
+         'dedup-wwrecord-override': 2,
          # whole animations whose JP 4.3.1 folder was dropped as a byte copy (I-194, 23-10, user-approved;
          # extra_donors_whole.tsv only): whole-ww-index = the 2018 WW container name index puts the family's LWF and
          # PNG names on the same records as the donor folder (proven copy); whole-same-pose = Ralph allies' 1-frame wait

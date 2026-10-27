@@ -64,6 +64,7 @@ with open(DDP, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1910/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
              'lwf/character/enemy/1911/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-override\t10x10\tA\n'
              'lwf/character/enemy/1912/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-override\t10x10\tA\n'
+             'lwf/character/enemy/1918/wait/wait_a.png\tjp431:lwf/drama/98/98_big.png\tdedup-wwrecord-override\t10x10\tA\n'
              'lwf/character/enemy/1913/wait/wait_a.png\tjp431:lwf/drama/98/98_a.png\tdedup-rescale\t10x10\tC\n'
              'lwf/character/enemy/1914/wait/wait_a.png\tjp431:lwf/drama/98/98_11.png\tdedup-rescale\t10x10\tC\n')
 # user-approved whole-animation copies (extra_donors_whole.tsv, I-194 23-10): whole-ww-index category 2,
@@ -324,6 +325,14 @@ try:
     r, todo = m.plan_enemy(1912)
     check(todo.get('lwf/character/enemy/1912/wait/wait_a.png') == os.path.join(JP, '1912', 'wait', 'wait_a.png'),
           'dedup-override with another size: the original file stays')
+    # rule dedup-wwrecord-override (27-10, 1527 atk1_o): wins over the original file at the source's own size
+    put('1918/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+    body('1918')
+    put('1918/wait/wait_a.png', png(10, 10))
+    r, todo = m.plan_enemy(1918)
+    check(todo.get('lwf/character/enemy/1918/wait/wait_a.png') == os.path.join(ROOT, 'lwf', 'drama', '98', '98_big.png'),
+          'dedup-wwrecord-override wins at its own size (%s)' % r)
+    check('dedup-wwrecord-override' not in {v[2] for v in m.EXTRA.values()}, 'wwrecord-override only in the dedup table')
     check(m.override('lwf/character/enemy/1907/wait/wait_a.png') is None, 'a dedup-order row is not an override')
     check('dedup-override' not in {v[2] for v in m.EXTRA.values()}, 'dedup-override never read from the other tables')
     # rule dedup-rescale (user-approved downscaled copies, 23-10): accepted only at EXACTLY the declared size
