@@ -130,7 +130,9 @@ DONORS = jp_dedup_donors.load(jp_dedup_donors.TABLE if a.donors is None else a.d
 import jp_reconstructed  # noqa: E402
 RECON = jp_reconstructed.load(jp_reconstructed.TABLE if a.recon is None else a.recon)
 import extra_donors  # noqa: E402
-EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra, rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override', 'dedup-rescale'})
+EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra,
+                          rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override', 'dedup-rescale',
+                                                           'dedup-wwrecord-override'})
 # original copies found by content (deep_donors.py: rules content-anchor and bracket, category 2); extra_donors.tsv
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
@@ -142,10 +144,12 @@ EXTRA = dict(extra_donors.load(extra_donors.WHOLE_TABLE if a.whole is None else 
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
 # category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
 # rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
+# (dedup-wwrecord-override, 27-10: the same for a dedup-wwrecord file, served at its own size)
 # Rows with rule dedup-rescale (user-approved 23-10): DOWNSCALED copies of original art (category 3), same place in the
 # order as dedup-order but accepted only at EXACTLY the declared size (no +-2 px tolerance)
 DEDUP = extra_donors.load(extra_donors.DEDUP_TABLE if a.dedup is None else a.dedup,
-                          rules={'dedup-order', 'dedup-override', 'dedup-rescale', 'dedup-wwrecord'})
+                          rules={'dedup-order', 'dedup-override', 'dedup-rescale', 'dedup-wwrecord',
+                                 'dedup-wwrecord-override'})
 RECOL = extra_donors.load(extra_donors.RECOLOUR_TABLE if a.recolour is None else a.recolour, rules={'recolour', 'recolour-whole'})
 ROOTS = dict(extra_donors.ROOTS, jp431=[a.jp_root])
 for _x in a.src_root:
@@ -172,10 +176,14 @@ def extra(published, table=None):
     return (p, extra_donors.category(t[published][2])) if p else (None, None)
 
 
+OVERRIDE_RULES = ('dedup-override', 'dedup-wwrecord-override')
+
+
 def override(published):
-    """user-approved replacement of a piece another source supplies (dedup-override rows) -> path or None."""
+    """user-approved replacement of a piece another source supplies (dedup-override and dedup-wwrecord-override rows)
+    -> path or None."""
     v = DEDUP.get(published)
-    return extra_donors.lookup(DEDUP, published, ROOTS) if v and v[2] == 'dedup-override' else None
+    return extra_donors.lookup(DEDUP, published, ROOTS) if v and v[2] in OVERRIDE_RULES else None
 
 
 def listing(p):
@@ -273,7 +281,7 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
     def fit(q):
         return dims is None or fits(q, dims.get(t))
     op = override(pre + t)
-    if op and fit(op):
+    if op and (fit(op) or DEDUP[pre + t][2] == 'dedup-wwrecord-override'):  # wwrecord: the file's own size
         return op, 'dedup'
     if t in jp:
         return jp[t], 'jp'

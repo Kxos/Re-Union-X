@@ -192,7 +192,8 @@ finally:
 
 # the versioned table: loads, every row approved by the allow-list and never a family under review
 real_allow = de.parse_allow(open(de.APPROVED, encoding='utf-8'))
-t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override', 'dedup-rescale'})
+t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override', 'dedup-rescale', 'dedup-wwrecord',
+                                    'dedup-wwrecord-override'})
 check(len(t) > 4200, 'versioned table rows: %d' % len(t))
 bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4])]
 check(not bad, 'rows outside the allow-list: %s' % bad[:3])
@@ -211,7 +212,8 @@ check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values() if v[
       and all(v[0] in ('rescale', 'rescale_e1') for v in t.values() if v[2] == 'dedup-rescale'), 'containers')
 # fourth to sixth review (23-10): 1558 keeps the version served before E1, no 1635 atkSp row from overrides_F, and
 # downscaled copies only for the approved families (rescale proposal) and the review files' own choices
-check(len([k for k in t if k.startswith('lwf/character/enemy/1558/')]) == 7, '1558 rows changed')
+# (+2 atk1_o hit-effect rows approved in hunt26, 26-10)
+check(len([k for k in t if k.startswith('lwf/character/enemy/1558/')]) == 9, '1558 rows changed')
 # seventh review (overrides_G.tsv, 23-10): the 1635 atkSp rows come from G only (F still ignored): 77 rows, every
 # source a 1635 bitmap (42 atkSp originals of the 8-copy groups, 35 knockback limbs for the 9-copy rest-pose groups);
 # the 2506 foot pieces b28/b29 of knockback/wait/move/atk1_o are drama 2270201 bitmaps 40/41 (after E2)
