@@ -330,7 +330,10 @@ def plan_anim(root_rel, anim, jp_all):
     pre = '%s/%s/%s/' % (ENEMY, root_rel, anim)
     notes = []
     if jl:
-        refs = refs_of(jl)
+        # only names of the texture table (hunt27 27-10, user): some LWFs also carry strings like eff_png_ef03 that no
+        # texture record draws (1535/1536, 2005/2006), which kept those animations incomplete
+        tdims = tex_dims(jl)
+        refs = [x for x in refs_of(jl) if tdims is None or x in tdims]
         same_b = bl is not None and sha(bl) == sha(jl)
         todo, miss = {pre + lw: jl}, []
         for t in refs:
@@ -354,7 +357,7 @@ def plan_anim(root_rel, anim, jp_all):
         todo, cat, ok = {pre + lw: jl}, 1, True
         dims = tex_dims(jl)
         count = {}
-        for t in refs_of(jl):
+        for t in refs:
             q, kind = fill_tex(pre, anim, t, jp, jp_all, dims)
             if not q:
                 ok = False

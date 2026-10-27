@@ -206,8 +206,10 @@ missing = [h for h in released if not any(k.startswith('lwf/character/enemy/' + 
 check(not missing, 'animations released by the third review not in the table: %s' % missing)
 check(any(k.startswith('lwf/character/enemy/1550/dead/') for k in t), '1550 dead approved by the second review')
 ovr = sorted(k for k, v in t.items() if v[2] == 'dedup-override')
-check(len(ovr) == 13 and len([k for k in ovr if k.startswith('lwf/character/enemy/1636/wait/')]) == 6
-      and len([k for k in ovr if k.startswith('lwf/character/enemy/1560/')]) == 7, 'dedup-override rows: %s' % ovr)
+# (hunt27 group A, 27-10: 1560 rows replaced by the record files, new rows for 1536/1548/1608)
+check(len(ovr) == 24 and len([k for k in ovr if k.startswith('lwf/character/enemy/1636/wait/')]) == 6
+      and len([k for k in ovr if k.startswith('lwf/character/enemy/1560/')]) == 7
+      and len([k for k in ovr if k.startswith('lwf/character/enemy/1608/')]) == 9, 'dedup-override rows: %s' % ovr)
 check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values() if v[2] != 'dedup-rescale')
       and all(v[0] in ('rescale', 'rescale_e1') for v in t.values() if v[2] == 'dedup-rescale'), 'containers')
 # fourth to sixth review (23-10): 1558 keeps the version served before E1, no 1635 atkSp row from overrides_F, and
