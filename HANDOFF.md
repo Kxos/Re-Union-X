@@ -52,7 +52,8 @@ D:\Progetto_Restauro_KH_UX\LDPlayer\LDPlayer9\ld.exe -s 0 "sh /mnt/shared/Misc/p
 
 (Older state blocks, 17-22 October: [docs/journal/2026-10-22.md](docs/journal/2026-10-22.md).)
 
-- **STATE AS OF 27-10 — RESTART FROM HERE.** Bench instance 0 ON: resources **73** installed today (the server announces the
+- **27-10 EVENING UPDATE (read first).** Bench instance 0: resources **74** installed + master **rev 205** served (`relogin.ps1 -Save maxpower -RealNow 2026-12-09T10:00:00Z`), home reached; tombstones 02/03 of 27-10 = emulator system services (audioserver/sensors), not the game. To check by the user: Green Requiem green look + counter (q592), cost 999 of the support Medals, Fiend «320% BONUS» hit in battle. Running: hunt27 texture hunt for the 16 incomplete families (agents, `tmp\dedup\hunt27\A` = 1532/1563/1554/1560/1535/1536/1608, `B` = 1628/1635/1645/1646/2005/2006/2010/2022/2024) -> user approval -> integrate, resources 75.
+- **STATE AS OF 27-10 (DAY).** Bench instance 0 ON: resources **73** installed today (the server announces the
   newest built version: the client downloaded it), master served **rev 203** (`relogin.ps1 -Revision 203 -Save maxpower
   -RealNow 2026-12-09T10:00:00Z`), Windows DNS on 192.168.1.185. Session scripts at **rev 205** (= 204 enemy rows + I-211
   cost 999 + Green Requiem counter): **never serve 204/205 on resources 72/73**. Done 27-10: 1527/1542 integrated (rule
