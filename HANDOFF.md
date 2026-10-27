@@ -52,7 +52,22 @@ D:\Progetto_Restauro_KH_UX\LDPlayer\LDPlayer9\ld.exe -s 0 "sh /mnt/shared/Misc/p
 
 (Older state blocks, 17-22 October: [docs/journal/2026-10-22.md](docs/journal/2026-10-22.md).)
 
-- **STATE AS OF 26-10 EVENING — RESTART FROM HERE.** Bench instance 0: resources **72** installed, master served **rev 203**
+- **STATE AS OF 27-10 — RESTART FROM HERE.** Bench instance 0 ON: resources **73** installed today (the server announces the
+  newest built version: the client downloaded it), master served **rev 203** (`relogin.ps1 -Revision 203 -Save maxpower
+  -RealNow 2026-12-09T10:00:00Z`), Windows DNS on 192.168.1.185. Session scripts at **rev 205** (= 204 enemy rows + I-211
+  cost 999 + Green Requiem counter): **never serve 204/205 on resources 72/73**. Done 27-10: 1527/1542 integrated (rule
+  `dedup-wwrecord-override`, 6babf2d), Green Requiem atkSp complete (aed2189) and its counter back on (29ecf74, local
+  schema `enemy_counter_moves.json` changed, backup tmp\enemy_counter_moves.before-gr-2026-10-27.json), I-211 (26a3f4f,
+  notice «Support Medal Cost»; bench check of the 999 still to do). I-212: the Medal detail «Damage» never includes the
+  guilt in the 4.3.1 client (decompiled analysis tmp\i212\ANALYSIS.txt; ours = x1.00-16.00 like the original formula;
+  khuxwiki Max = base x guilt); waiting for the user: what value they saw wrong, battle check of the «320% BONUS» hit,
+  decisions on the 0-4 dot fallback of the SN++ rows and 302012 KH III Xion (medaglie.md#sn-fiend). **Running/next:**
+  1) reccheck on all families: `tmp\dedup\reccheck27\` (64 suspect slots in 28 served families; record index often
+  shifted by one), triage agent writing `tmp\dedup\reccheck27\triage\` (TRIAGE.md, sheets, proposal.tsv) -> user
+  approval -> integrate as `dedup-wwrecord-override`; 2) build resources **74** (`build-resources.ps1 -Version 74`),
+  `update-resources.ps1` (+ KHUX START / Download), relogin with rev 205; check Green Requiem green + its counter in q592,
+  cost 999 screens; 3) user bench of the counters; 4) play package (rev 205+ / resources 74).
+- **STATE AS OF 26-10 EVENING.** Bench instance 0: resources **72** installed, master served **rev 203**
   (Green Requiem counter off). In the repo: session scripts at **rev 204** = enemy rows pointing at the new graphics of
   hunt26 (Green Requiem now display 1502 instead of Yellow Opera 5003): **never serve rev 204 on resources 72** (missing
   graphics). Resources **73** built (227 complete families) but NOT installed (skip it: build 74 tomorrow). **Tomorrow, in
