@@ -564,6 +564,17 @@ def main():
     jobs = [(n, p, os.path.join(OUT_FILES, *n.split('/'))) for n, p in sorted(plan.items())]
     stats, size, errors = {}, 0, []
     if not a.dry:
+        # source of every written file (27-10): convert() keeps a file newer than its source, so a slot whose source
+        # changed to an OLDER file (e.g. a dedup-wwrecord-override row pointing at an original JP file) was never
+        # rewritten. Without the manifest every file counts as changed.
+        man_path = os.path.join(a.out, 'sources.json')
+        try:
+            old_src = json.load(open(man_path, encoding='utf-8'))
+        except (OSError, ValueError):
+            old_src = {}
+        for n, p, dst in jobs:
+            if old_src.get(n) != os.path.normcase(os.path.abspath(p)) and os.path.exists(dst):
+                os.remove(dst)
         with Pool(a.jobs or None) as pool:
             for n, st, sz in pool.imap_unordered(convert, jobs, chunksize=32):
                 k = st.split(' ')[0]
@@ -582,6 +593,9 @@ def main():
             if dp != OUT_FILES and not os.listdir(dp):
                 os.rmdir(dp)
         stats['tolti'] = removed
+        with open(man_path, 'w', encoding='utf-8') as fh:
+            bad_n = {n for n, _ in errors}
+            json.dump({n: os.path.normcase(os.path.abspath(p)) for n, p, _ in jobs if n not in bad_n}, fh)
     else:
         have_sz = [os.path.getsize(j[2]) for j in jobs if os.path.exists(j[2])]
         size = sum(have_sz)
