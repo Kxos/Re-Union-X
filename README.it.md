@@ -33,10 +33,10 @@ rimozione dall'app di quasi tutte le funzionalità di Union χ, ridotta a theate
 | A | Analisi statica del client: host ed endpoint | ✅ completata |
 | B | Server REST minimo → il client raggiunge la home screen | ✅ APK 4.3.1 **originale** su LDPlayer 9 (Android 9): nuovo giocatore, Prologue, home |
 | C | Schema dei campi delle 54 tabelle master | ✅ completata — 106 tabelle, 1.739 campi |
-| D | Popolamento master data, quest e combattimento single-player | 🔄 dal nuovo giocatore alla home; missioni di storia **1–979** con le mappe e le stanze originali (dai dati JP 4.3.1), filmati, musica per missione, statistiche e livelli originali dei nemici, obiettivi, forzieri e Trophy; Special Attack con danno variabile e attacchi dei nemici; Medal List, vendita, Level Up (pallini e guilt, skill, trait, Trait Medal), Evolve, Moogle Shop, Shop con i banner originali (807 deal con garanzie, pity, rotazione settimanale, stagionali, banner fissato e catalogo con filtri), Profilo, Missioni e campagne Limited, Avatar Boards, pet, livelli Lux fino a 999, Notices in gioco che spiegano ogni differenza dall'originale. In corso: grafiche originali di circa 90 famiglie di nemici delle missioni 526–979 (oggi con l'aspetto di un nemico simile) |
+| D | Popolamento master data, quest e combattimento single-player | 🔄 dal nuovo giocatore alla home; missioni di storia **1–979** con le mappe e le stanze originali (dai dati JP 4.3.1), filmati, musica per missione, statistiche e livelli originali dei nemici, obiettivi, forzieri e Trophy; Special Attack con danno variabile e attacchi dei nemici; Medal List, vendita, Level Up (pallini e guilt, skill, trait, Trait Medal), Evolve, Moogle Shop, Shop con i banner originali (807 deal con garanzie, pity, rotazione settimanale, stagionali, banner fissato e catalogo con filtri), Profilo, Missioni e campagne Limited, Avatar Boards, pet, livelli Lux fino a 999, Notices in gioco che spiegano ogni differenza dall'originale. Grafiche dei nemici: tutte le **245** famiglie di nemici delle missioni 1–979 complete (27 ottobre; verifica finale in gioco aperta, I-194): **209** del tutto originali (123 dai file originali JP 4.3.1, 86 file originali recuperati altrove nei dati del gioco), **36** restaurate con lavoro di ricostruzione (25 quasi del tutto originali con alcuni pezzi riscalati o ricostruiti, 11 ricolorate da un gemello) |
 | E | Photon self-hosted per Union Cross / raid / PvP | ⬜ |
 
-Stato aggiornato al 22 ottobre 2026. Le schermate che il client 4.3.1 non trova più nelle
+Stato aggiornato al 27 ottobre 2026. Le schermate che il client 4.3.1 non trova più nelle
 risorse (layout CocoStudio, testi, animazioni) vengono **ricostruite**: dagli originali
 vicini, dai nomi dei widget cercati dal client e da immagini di riferimento dell'epoca.
 
@@ -51,11 +51,11 @@ vicini, dai nomi dei widget cercati dal client e da immagini di riferimento dell
 ## Cosa cerchiamo
 
 Chiediamo solo **informazioni**, mai file del gioco. Gran parte dei contenuti veniva scaricata dai
-server dopo l'installazione e viene ricostruita dal progetto; manca ancora l'aspetto di circa
-**90 famiglie di nemici** delle missioni 526–979 (Gearbit, Flappy Bug, Cy-Bug, King Candy, Jafar,
-Dragon Maleficent, Darkness, Ephemer & Skuld...) (appello del 22 ottobre su
-[Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)). Aiutano screenshot e video, e
-tutto cio' che riguarda **eventi, raid, Coliseum, Union Cross e PvP** (screenshot, video, regole,
+server dopo l'installazione e viene ricostruita dal progetto. Dal 27 ottobre non manca piu' nessuna
+famiglia di nemici della storia (appello del 22 ottobre su
+[Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)); aiutano ancora screenshot e video
+delle **36 famiglie ricostruite** (elencate sul [sito](https://kxos.github.io/Re-Union-X/#status)) per
+verificarle e migliorarle, dei nemici di eventi e raid, e tutto cio' che riguarda **eventi, raid, Coliseum, Union Cross e PvP** (screenshot, video, regole,
 premi, guide). Contattaci aprendo una issue; non inviare ne' pubblicare file del gioco.
 
 ## Sintesi tecnica

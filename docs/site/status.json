@@ -1,5 +1,5 @@
 {
-  "updated": "22 October 2026",
+  "updated": "27 October 2026",
   "summary": "Single player works from a new player to the end of the story (quest 979). Multiplayer, events and raids do not exist yet.",
   "areas": [
     {
@@ -68,12 +68,85 @@
       "total": 1
     },
     {
-      "name": "Enemy graphics (quests 526-979)",
-      "state": "progress",
-      "detail": "142 enemy families have their original look; about 88 are still missing and are shown with the look of a similar enemy. Screenshots and videos of them help: see How to help.",
-      "done": 142,
-      "total": 230,
-      "unit": "families"
+      "name": "Enemy graphics",
+      "state": "done",
+      "detail": "All 245 enemy families of story quests 1-979 now have their complete look (on 22 October about 88 were still missing). 209 are fully original; 36 were restored by reconstruction work. A last check of the new looks in the running game is still open.",
+      "done": 245,
+      "total": 245,
+      "unit": "families",
+      "breakdown": {
+        "title": "How the 245 families were restored",
+        "parts": [
+          {
+            "tag": "ORIGINAL",
+            "kind": "t-update",
+            "count": 123,
+            "label": "Original files of the game",
+            "detail": "The original files of the Japanese 4.3.1 version, used as they are."
+          },
+          {
+            "tag": "ORIGINAL",
+            "kind": "t-update",
+            "count": 86,
+            "label": "Original files found elsewhere",
+            "detail": "Still the original art, recovered from other places in the game data: identical copies kept in other folders, the 2018 worldwide name index, story cutscenes that use the same pictures, and an older 2016 version of the game."
+          },
+          {
+            "tag": "RESTORED",
+            "kind": "t-event",
+            "count": 25,
+            "label": "Mostly original, a few pieces rebuilt",
+            "detail": "Most of each family is original. A few pieces were made from original art rescaled to the size the game needs, shadows were redrawn, or a piece was rebuilt from other files of the same character.",
+            "names": [
+              "Wily Bandit",
+              "Wandering Spook",
+              "Trickmaster",
+              "Unnamed family no. 251",
+              "Green Requiem",
+              "Ferocious Fins",
+              "Burrfish (2 forms)",
+              "Diver",
+              "Armored Knight",
+              "Gold Hammer Frame",
+              "Silver Hammer Frame",
+              "Shipwreck Shark",
+              "Luna Bandit",
+              "Amber Opera",
+              "Red Gearbit",
+              "Blue Gearbit",
+              "Cy-Bug",
+              "Swaying Cactus",
+              "Nightmare Cy-bug",
+              "Mog",
+              "Piercing Knight",
+              "Ratty Rat",
+              "Shadow Witch",
+              "Shadow Magician"
+            ]
+          },
+          {
+            "tag": "RESTORED",
+            "kind": "t-campaign",
+            "count": 11,
+            "label": "Recoloured from a twin",
+            "detail": "Built from the original art of a twin enemy (the Dark Road version or another colour variant of the same creature) and recoloured.",
+            "names": [
+              "Eliminator",
+              "Unnamed family no. 1501",
+              "Emerald Sonata",
+              "Poison Archer",
+              "Paralysis Archer",
+              "Blitz Spear",
+              "Chill Ripper",
+              "Red Gummi Saucer",
+              "Blue Gummi Saucer",
+              "Ring-A-Ding",
+              "Wight Knight"
+            ]
+          }
+        ],
+        "note": "A family counts in the lowest group of any of its pieces. The ally characters (Keyblade wielders, Union leaders and friends) never had knockback, defeat or movement animations in the original game either: as the original data allows, they reuse their standing animation."
+      }
     },
     {
       "name": "Guest allies",

@@ -33,10 +33,10 @@ Union χ was removed from the app, which was reduced to a theater mode.
 | A | Static analysis of the client: hosts and endpoints | ✅ done |
 | B | Minimal REST server → the client reaches the home screen | ✅ **unmodified original** APK 4.3.1 on LDPlayer 9 (Android 9): new player, Prologue, home |
 | C | Field schema of the 54 master tables | ✅ done — 106 tables, 1,739 fields |
-| D | Master data, quests and single-player combat | 🔄 from new player to home; story quests **1–979** with the original maps and rooms (from the JP 4.3.1 data), cutscenes, per-quest music, original enemy stats and levels, objectives, chests and Trophies; Special Attacks with variable damage and enemy attacks; Medal List, selling, Level Up (Special Attack dots and Bonus, Skills, traits, Trait Medals), Evolve, Moogle Shop, Shop with the original banners (807 deals with their guarantees, pity, weekly rotation, seasonal banners, a kept banner and a filterable catalog), Profile, Missions and Limited campaigns, Avatar Boards, pet, Lux levels up to 999, in-game Notices explaining every deviation from the original. In progress: original graphics for about 90 enemy families of quests 526–979 (today shown with the look of a similar enemy) |
+| D | Master data, quests and single-player combat | 🔄 from new player to home; story quests **1–979** with the original maps and rooms (from the JP 4.3.1 data), cutscenes, per-quest music, original enemy stats and levels, objectives, chests and Trophies; Special Attacks with variable damage and enemy attacks; Medal List, selling, Level Up (Special Attack dots and Bonus, Skills, traits, Trait Medals), Evolve, Moogle Shop, Shop with the original banners (807 deals with their guarantees, pity, weekly rotation, seasonal banners, a kept banner and a filterable catalog), Profile, Missions and Limited campaigns, Avatar Boards, pet, Lux levels up to 999, in-game Notices explaining every deviation from the original. Enemy graphics: all **245** enemy families of quests 1–979 complete (27 October; final in-game check open, I-194): **209** fully original (123 from the original JP 4.3.1 files, 86 original files recovered elsewhere in the game data), **36** restored by reconstruction (25 mostly original with a few pieces rescaled or rebuilt, 11 recoloured from a twin) |
 | E | Self-hosted Photon for Union Cross / raids / PvP | ⬜ |
 
-Status as of 22 October 2026. Screens that the 4.3.1 client can no longer find in its
+Status as of 27 October 2026. Screens that the 4.3.1 client can no longer find in its
 resources (CocoStudio layouts, texts, animations) are **rebuilt**: from nearby originals,
 from the widget names the client looks up, and from reference images of the time.
 
@@ -51,11 +51,11 @@ from the widget names the client looks up, and from reference images of the time
 ## What we are looking for
 
 We ask only for **information**, never for game files. Much of the game content was downloaded from
-the servers after install and is rebuilt by the project; the look of about **90 enemy families** of
-quests 526–979 (Gearbits, Flappy Bugs, Cy-Bugs, King Candy, Jafar, Dragon Maleficent, Darkness,
-Ephemer & Skuld...) is still missing (appeal of 22 October on
-[Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)). Screenshots and videos of them
-help, as does anything about **events, raids, Coliseum, Union Cross and PvP** (screenshots, videos,
+the servers after install and is rebuilt by the project. Since 27 October no enemy family of the story
+is missing any more (appeal of 22 October on
+[Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)); screenshots and videos of the
+**36 reconstructed families** (listed on the [site](https://kxos.github.io/Re-Union-X/#status)) still
+help to check and improve them, as do the enemies of events and raids, and anything about **events, raids, Coliseum, Union Cross and PvP** (screenshots, videos,
 rules, rewards, guides). Please get in touch by opening an issue; do not send or post game files.
 
 ## Technical summary

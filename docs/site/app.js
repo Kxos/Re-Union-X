@@ -37,6 +37,15 @@
     { state: 'progress', title: 'In progress', tag: 't-event', label: 'IN PROGRESS' },
     { state: 'missing', title: 'Not there yet', tag: 't-important', label: 'MISSING' }
   ];
+  // optional «breakdown» of an area: {title, parts: [{tag, kind, count, label, detail, names?}], note?}
+  function breakdown(b) {
+    if (!b || !b.parts) return '';
+    return '<details class="more"><summary>' + esc(b.title || 'Details') + '</summary><ul class="parts">' + b.parts.map(function (p) {
+      var names = p.names && p.names.length ? '<span class="names">' + p.names.map(function (n) { return '<i>' + esc(n) + '</i>'; }).join('') + '</span>' : '';
+      return '<li><span class="tag ' + esc(p.kind || 't-info') + '">' + esc(p.tag) + '</span><span class="pn">' + esc(p.count) + '</span>'
+        + '<span class="pl"><b>' + esc(p.label) + '</b> ' + esc(p.detail) + names + '</span></li>';
+    }).join('') + '</ul>' + (b.note ? '<p class="pnote">' + esc(b.note) + '</p>' : '') + '</details>';
+  }
   function renderStatus(data) {
     var areas = data.areas || [];
     var done = areas.filter(function (a) { return a.state === 'done'; }).length;
@@ -52,7 +61,7 @@
         return '<li class="s-' + g.state + '"><div class="st' + (g.state === 'done' && !a.unit ? ' nobar' : '') + '"><span class="tag ' + g.tag + '">' + g.label + '</span>'
           + '<span class="n">' + esc(a.name) + '</span><span class="c">' + count + '</span>'
           + '<span class="d">' + esc(a.detail) + '</span>'
-          + '<span class="bar"><i style="width:' + pct + '%"></i></span></div></li>';
+          + '<span class="bar"><i style="width:' + pct + '%"></i></span></div>' + breakdown(a.breakdown) + '</li>';
       }).join('') + '</ul></div>';
     }).join('');
   }
