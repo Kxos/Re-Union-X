@@ -152,6 +152,12 @@ for ln, line in enumerate(open(args.list, encoding='utf-8'), 1):
                 opts.setdefault('clone', []).append(m.groups())
         elif p.startswith('graft='):            # graft=W1,W2: widget del JP (rev=) innestati nel layout WW servito
             opts.setdefault('graft', []).extend(x for x in p[6:].split(',') if x)
+        elif p.startswith('graftww='):          # graftww=Layout.json/W@x:y,...: widget di un ALTRO layout WW servito
+            for c in p[8:].split(','):
+                m = re.match(r'^([^/]+\.json)/([^@]+)@(-?\d+):(-?\d+)$', c)
+                if not m:
+                    sys.exit('%s:%d: graftww= non valido %r' % (args.list, ln, c))
+                opts.setdefault('graftww', []).append((m.group(1), m.group(2), int(m.group(3)), int(m.group(4))))
         elif p.startswith('restyle='):          # restyle=W1,W2: texture dei widget dalla revisione JP (layout WW servito)
             opts.setdefault('restyle', []).extend(x for x in p[8:].split(',') if x)
         elif p.startswith('set='):              # set=Widget.opzione=valore[,...]: ritocco del layout JP
@@ -377,6 +383,48 @@ def graft_widget(data, jp_file, name):
     return None
 
 
+def graft_ww_widget(data, src_layout, name, x, y):
+    """Opzione graftww= (solo radici WW servite): copia il widget name (con i figli) da un altro layout WW
+    servito, sotto il genitore con lo stesso nome, alla posizione x, y. Per i nodi che il client cerca in
+    tutte le barre ma che una sola ha (I-213: SpEnm_NumNull e CounterAtk_NumNull di
+    RaidBattle_EnemyStatusField_S, assenti da _S_Boss: senza genitore il widget del contatore viene
+    liberato e poi riusato)."""
+    import copy
+    src = served_path(src_layout)
+    if not os.path.exists(src):
+        return 'layout %s non servito' % src_layout
+
+    def index(d):
+        found, tags = {}, []
+
+        def walk(n, parent):
+            o = n.get('options') or {}
+            if isinstance(o.get('tag'), int):
+                tags.append(o['tag'])
+            if o.get('name'):
+                found.setdefault(o['name'], (n, parent))
+            for c in n.get('children') or []:
+                walk(c, n)
+        walk(d.get('widgetTree') or {}, None)
+        return found, tags
+    ww, ww_tags = index(data)
+    if name in ww:
+        return None
+    sf, _ = index(load_json(src))
+    if name not in sf or sf[name][1] is None:
+        return 'widget assente in %s' % src_layout
+    node, parent = sf[name]
+    pname = (parent.get('options') or {}).get('name')
+    if pname not in ww:
+        return 'genitore %s assente' % pname
+    dup = copy.deepcopy(node)
+    dup['options']['x'], dup['options']['y'] = x, y
+    if dup['options'].get('tag') in ww_tags:
+        dup['options']['tag'] = max(ww_tags) + 1
+    ww[pname][0].setdefault('children', []).append(dup)
+    return None
+
+
 TEX_KEYS = ('normalData', 'pressedData', 'disabledData', 'fileNameData', 'backGroundImageData')
 
 
@@ -517,6 +565,12 @@ for root, opts in roots:
                 r['block'].append('%s: graft %s: %s' % (root, g, err))
             else:
                 r['warn'].append('widget %s innestato dal JP (rev %s)' % (g, PIN.get(root, 'corrente')))
+        for lay, g, gx, gy in opts.get('graftww', []):
+            err = graft_ww_widget(pre[root][1], lay, g, gx, gy)
+            if err:
+                r['block'].append('%s: graftww %s: %s' % (root, g, err))
+            else:
+                r['warn'].append('widget %s innestato da %s (%d, %d)' % (g, lay, gx, gy))
         for w in opts.get('restyle', []):
             done, err = restyle_widget(pre[root][1], jp_path(root), w)
             if err:
@@ -525,8 +579,8 @@ for root, opts in roots:
                 r['warn'].append('texture di %s dal JP: %s' % (w, '; '.join(done)))
         plan[root] = ('jp', src, pre[root][1])
         todo = [(root, 'pre')]
-    elif opts.get('graft') or opts.get('restyle'):
-        r['block'].append('graft=/restyle= solo per un layout WW servito')
+    elif opts.get('graft') or opts.get('graftww') or opts.get('restyle'):
+        r['block'].append('graft=/graftww=/restyle= solo per un layout WW servito')
         todo = []
     elif jp_path(root):
         r['kind'] = 'jp'

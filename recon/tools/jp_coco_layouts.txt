@@ -10,6 +10,8 @@
 #   +absent-ok   texture assenti ovunque tollerate (mai con il 9-slice: quello ferma sempre)
 #   graft=a,b    solo per un layout WW servito: innesta i widget a, b della revisione JP (rev=) sotto lo
 #                stesso genitore, il resto resta WW (eccezione alla regola dei nomi serviti)
+#   graftww=L.json/W@x:y,...  solo per un layout WW servito: innesta il widget W di un altro layout WW
+#                servito L sotto lo stesso genitore, alla posizione x, y
 #   restyle=a,b  solo per un layout WW servito: le texture dei widget a, b dalla revisione JP, testi e
 #                posizioni restano WW (la revisione WW servita e' piu' vecchia di quella vista nel Global)
 # «? Nome  # motivo» = da decidere: non si importa, compare solo nel rapporto.
@@ -236,7 +238,10 @@ ActionMap_PlayerStatusField_new.json    rev=360289 graft=BaseBuff_Avt_Null1,Base
 # RaidBattle_EnemyStatusField_S e _S_Raid; nelle revisioni JP ci sono anche in _L, _L_Multi e _S_Boss
 RaidBattle_EnemyStatusField_L.json         rev=438800 graft=BaseBuff_Enm1,BaseBuff_Enm2
 RaidBattle_EnemyStatusField_L_Multi.json   rev=376985 graft=BaseBuff_Enm1,BaseBuff_Enm2
-RaidBattle_EnemyStatusField_S_Boss.json    rev=376981 graft=BaseBuff_Enm1,BaseBuff_Enm2
+# I-213 (29-10): il contatore dei nemici (InterruptIcon) aggancia il widget ActMapSpEnmUI_CountReset a SpEnm_NumNull
+# e i numeri a CounterAtk_NumNull; la barra dei boss non li ha (ne' WW ne' JP): widget liberato e riusato -> crash
+# al Give Up / Supernova. Si innestano da _S (SpEnm alla stessa posizione, CounterAtk accanto a BuffDeBuffIcon come in _S)
+RaidBattle_EnemyStatusField_S_Boss.json    rev=376981 graft=BaseBuff_Enm1,BaseBuff_Enm2 graftww=RaidBattle_EnemyStatusField_S.json/SpEnm_NumNull@18:0,RaidBattle_EnemyStatusField_S.json/CounterAtk_NumNull@152:-25
 # pannello del tempo delle missioni a tempo: il client lo carica nelle 699-704 (Hidden Staircase), assente -> crash in GUIReader (banco 22-10)
 ActMapTimeAttack_TimePanel.json
 # Proud Mode (I-200, docs/notes/mappe_storia.md#proud-mode): popup di partenza StartDeckProudScene_ver260,
