@@ -131,6 +131,8 @@ Questo restauro si regge sul lavoro di chi ha conservato e documentato il gioco 
   moltiplicatori, condizioni degli speciali, galleria degli asset).
 - **KHUX Wiki** ([khuxwiki.com](https://www.khuxwiki.com/)) e **KH Wiki** ([khwiki.com](https://www.khwiki.com/)) —
   missioni, medaglie, speciali, eventi e immagini usati come riferimento.
+- **ReLux Team** — ricerche su eventi, raid, Union Cross e campagne del gioco, calcolatori fatti dai giocatori e
+  indicazioni sui riferimenti della community, che guidano il restauro delle modalita' a evento.
 
 ## Regole del repository
 
