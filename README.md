@@ -131,6 +131,8 @@ This restoration stands on the work of people who preserved and documented the g
   multipliers, special attack conditions, asset gallery).
 - **KHUX Wiki** ([khuxwiki.com](https://www.khuxwiki.com/)) and **KH Wiki** ([khwiki.com](https://www.khwiki.com/)) —
   quests, medals, special attacks, events and images used as references.
+- **ReLux Team** — research on the game's events, raids, Union Cross and campaigns, player-made calculators, and
+  pointers to community references, which guide the restoration of the event modes.
 
 ## Repository rules
 
