@@ -634,8 +634,7 @@ from the CDN: in the WW resources there is only `204010301`. 5020: one npc (730,
 -> `204050201.txt`, missing. Served maps: 178 texts cited, 1 served, 177 in the 2016 pack in
 English (176 also in JP). Fix: `recon/tools/import_npc_talk.py` in `build-resources.ps1` (after
 the ui texts, before `resource_pack`) copies into the generated pack the current revision of 2016, failing
-that the JP one (flagged), report `stage_gen
-pc_talk.json`. The type 4 npcs have 1/2 in those
+that the JP one (flagged), report `stage_gen\npc_talk.json`. The type 4 npcs have 1/2 in those
 fields: they do not talk.
 
 <a id="prove"></a>
