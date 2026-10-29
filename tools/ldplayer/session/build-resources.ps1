@@ -241,7 +241,7 @@ $i440Need = @('img/union/Union_01.png', 'img/union/Union_02.png', 'img/union/Uni
 if ($i440Need) { python -I recon\tools\res_get.py "$D\ipa440\names440misc.tsv" "$D\ipa440\miscdata" $i440 @i440Need; if ($LASTEXITCODE) { throw 'res_get ipa440 fallito' } }
 python -I recon\tools\import_originals.py recon\tools\originals.tsv "$refWork\bundle2016\files" `
   "$jpData" "$sg\files" `
-  --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv" --i440 $i440 --report "$sg\originals.json"
+  --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv" --i440 $i440 --jp501 "$D\tmp\jp501\x" --report "$sg\originals.json"
 if ($LASTEXITCODE) { throw 'import_originals fallito' }
 # suoni se_<nome> dei LWF originali appena importati (KeyBlade_Evolution/StepUp, training_SE dei pet): la
 # ricerca di import_jp_coco e' girata prima, sui LWF generati senza eventi (banco 19-10: evoluzione muta)
