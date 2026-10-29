@@ -134,7 +134,7 @@ In some quests a character fights **at your side** (Hercules, Aladdin, Mog, Phil
 
 The allies show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). All the Ralph allies share the same pieces, as in the original files (29-10).
 
-The characters standing in the quest maps of Quests 601-974 are back with their original look (29-10), except one character in Quests 918, 919 and 927 whose original graphics have not been found (it stays invisible). The Heartless standing in Quest 870 uses the slightly smaller art of the same enemy, stretched to its size (**reconstructed**).
+The characters standing in the quest maps of Quests 601-974 are back with their original look (29-10), except one character in Quests 918, 919 and 927 whose original graphics have not been found (it stays invisible).
 
 Quests 876-979: the original quest files do not say the level of each enemy (the original server gave it), so every enemy fights at the level of the quest: there are no weaker enemies mixed in.
 
