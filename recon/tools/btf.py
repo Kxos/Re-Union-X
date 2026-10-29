@@ -8,7 +8,8 @@ Intestazione (little endian):
 tipo 8: RGBA 32 bit, dati zlib da +0x26
 tipo 9: palette, +0x22 u16 numero di colori N, dati zlib da +0x28: N colori RGBA poi un
         indice di un byte per pixel
-tipo 1: segnaposto (1x1)
+tipo 1: palette come il 9 ma senza zlib (+0x22 u16 N colori, dati da +0x28): anche texture vere (occhi
+        degli NPC, 82 file nel pacchetto 2016; I-216, 29-10), non solo il segnaposto trasparente da 45 byte
 
     python -I recon/tools/btf.py <file.btf> <uscita.png> (Pillow: senza -I se serve)
 """
@@ -34,9 +35,9 @@ def decode(d):
     if i['type'] == 8:
         raw = zlib.decompressobj().decompress(d[0x26:])
         im = Image.frombytes('RGBA', (w, h), raw[:w * h * 4])
-    elif i['type'] == 9:
+    elif i['type'] in (1, 9):
         n = struct.unpack_from('<H', d, 0x22)[0]
-        raw = zlib.decompressobj().decompress(d[0x28:])
+        raw = d[0x28:] if i['type'] == 1 else zlib.decompressobj().decompress(d[0x28:])
         pal = [tuple(raw[k * 4:k * 4 + 4]) for k in range(n)]
         im = Image.new('RGBA', (w, h))
         im.putdata([pal[b] if b < n else (0, 0, 0, 0) for b in raw[n * 4:n * 4 + w * h]])
