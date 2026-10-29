@@ -198,6 +198,7 @@ function route(url) {
   if (p === '/stage/event') return 'stageevent';
   if (p === '/stage/pickup') return 'stagepickup';
   if (p === '/user/notice') return 'usernotice';
+  if (p === '/user/option' || p === '/user/option/update') return 'useroption';
   if (p === '/colosseum') return 'colosseum';
   if (p === '/user/point' || p === '/user/sphere/reset') return 'userpoint';
   if (p === '/user/stone') return 'userstone';
@@ -385,6 +386,25 @@ function respondLogin(res) {
   // accoda il drawMedalTypeId della piastra all'url (banco 16-10: GET /web/gacha/odds9001), da qui la «/»
   body.odds = `${WEB_BASE}/web/gacha/odds/`;
   send(res, 200, body);
+}
+
+// Settings (Other > Settings, I-111): POST /user/option/update (azione 150) manda i sei interruttori
+// {isNoticeAp, isNoticeHelp, isNoticeEvent, isNoticeLuxUp, isNoticePet, isTwitterThumbnail} e il client
+// rilegge userOption dalla risposta; senza la rotta, riaprendo Settings tornavano tutti su OFF (banco 29-10).
+// GET /user/option risponde con quelli salvati. Le notifiche push non esistono: si salva solo la scelta.
+const USER_OPTION_KEYS = ['isNoticeAp', 'isNoticeHelp', 'isNoticeEvent', 'isNoticeLuxUp', 'isNoticePet', 'isTwitterThumbnail'];
+function respondUserOption(res, body) {
+  const cur = player.userOption || {};
+  const next = {};
+  for (const k of USER_OPTION_KEYS) {
+    const v = body && body[k] !== undefined ? Number(body[k]) : cur[k];
+    next[k] = v ? 1 : 0;
+  }
+  if (body && USER_OPTION_KEYS.some((k) => body[k] !== undefined)) {
+    player.userOption = next;
+    savePlayer();
+  }
+  send(res, 200, { ret: ret(), userOption: next });
 }
 
 function respondCoppa(res) {
@@ -4185,6 +4205,7 @@ function handler(scheme) {
       if (kind === 'aprecover') return respondApRecover(res);
   if (kind === 'stageevent') return respondStageEvent(res);
   if (kind === 'usernotice') return send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: 0, isOthersRaid: 0 } });
+  if (kind === 'useroption') return respondUserOption(res, entry.bodyDecoded);
   if (kind === 'colosseum') return respondColosseum(res);
       // GET /campaign (azione 143): campaigns, array di int (id delle campagne attive)
       if (kind === 'campaign') return send(res, 200, { ret: ret(), campaigns: [] });
