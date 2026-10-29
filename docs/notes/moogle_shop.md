@@ -74,8 +74,9 @@ References: `reference\moogle_shop\` (moogle_shop_01.png, jp410_136.png). Taps i
 <a id="aperti"></a>
 ## Open
 
-Long trait names touching the icon; invisible moogle; plate `LB_Munnies` missing; «N days
-left» shows 1980 days (guest clock at 2021, `endDate` in 2026) (ISSUES I-021). Red cursor
+Closed 29-10 (ISSUES I-021): moogle, `LB_Munnies` and long trait names fine on the bench; the timed offers
+(`display` 1) get `endDate` = next Monday 08:00 in fake time when the master is served, and their exchanges
+reset each real week (`moogleshopBought` + `moogleshopWeek` in the save). Red cursor
 of the slot to replace (armature `MedalInfo_Anim`, `animeCursor`) wider than the window; special
 traits (Spirit Training) not handled (ISSUES I-043).
 
