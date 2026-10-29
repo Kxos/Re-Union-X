@@ -924,3 +924,7 @@ lwf/map/hole_thunder/hole_thunder_32352e706e67.png	b16	lwf/map/hole_rain/hole_ra
 lwf/map/hole_thunder/hole_thunder_322e706e67.png	b16	lwf/map/hole_rain/hole_rain_322e706e67.png
 lwf/map/hole_thunder/hole_thunder_352e706e67.png	b16	lwf/map/hole_rain/hole_rain_352e706e67.png
 lwf/map/hole_thunder/hole_thunder_31312e706e67.png	b16	lwf/map/hole_rain/hole_rain_31312e706e67.png
+
+# 43. Room snow (I-215, 29-10: weather 2/3 in quests 459-464 and 781-783): SnowParticle loads img/stage/<pt_snow_*>.plist;
+#     never served, so the snow init failed and the rooms showed no snow (no crash: 460 alive in the 21-10 smoke). Complete in 2016.
+img/stage/pt_snow_*	b16
