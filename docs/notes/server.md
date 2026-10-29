@@ -320,6 +320,9 @@ The screens have their own APIs, described in the area files: medals
 <a id="eventi"></a>
 ## Events (`GET /stage/event`, action 109)
 
+- Bench 29-10 (rev 206): the Quests screen tabs use the same request with a body field `eventCategory`:
+  **Special = 1**, **Events = 2**, sent at every opening of the tab (not cached from login); both show
+  «No available events.» with the empty list. The list can therefore change while the game is open.
 - «Events» button of the Story list (unlocked after Quest 14). Response: `events[]`, `highScoreRank`,
   then `eventCategory` (int, **optional**, at the root).
 - Root: `events[]` (array, mandatory) and `highScoreRank` (uint, mandatory). Without events:
