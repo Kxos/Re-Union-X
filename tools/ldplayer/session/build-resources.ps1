@@ -124,7 +124,7 @@ foreach ($t in Get-ChildItem "$D\layouts\ui_texts\text\ui" -File) {
 # English table $D\private\npc_talk_en.tsv (game text, not in the repo); kinds used: ww (original WW text
 # under another id). wiki and reconstructed (our translation, to declare in the Notices) only after the
 # user's decision: set $npcTalkKinds = 'ww,wiki,reconstructed'
-$npcTalkKinds = 'ww'
+$npcTalkKinds = 'ww,wiki,reconstructed'   # user-approved 29-10 (Notice «Story Quests 526-979»)
 $npcTalkEn = @()
 if (Test-Path "$D\private\npc_talk_en.tsv") { $npcTalkEn = @('--en', "$D\private\npc_talk_en.tsv", '--kinds', $npcTalkKinds) }
 python -I recon\tools\import_npc_talk.py "$D\resource_data\names_v4.tsv" "$refWork\bundle2016" `
