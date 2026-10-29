@@ -229,6 +229,10 @@ edge (x 1722) and check that Undo is gray. To do: `target` 3 for the random Supe
   The client enables Evolve only with: maximum level, all the required medals, munny >= `evolveMoney` and, if
   the 7★ has a higher tier, guilt of the user medal at the **maximum** of the tier range: the «Max Guilted» of
   the source is enforced by the client.
+  Bench 29-10 (I-205): the max-guilt rule also applies when the result keeps the tier: Halloween Sora C 5★ (tier 3)
+  -> Sora & Donald & Goofy C 6★ (tier 3) stayed grey with guilt 0 and enabled with guiltFactor 10000; bases of tier 0
+  (Pongo, Puppy) and tier 1 (Meow Wow -> tier 3 result) evolved with guilt 0. Rule seen so far: base tier >= 3 needs
+  max guilt (tier 2 not tested). The guilt (+100%) passes to the evolved medal.
   Bench 15-10: Lexaeus A 6★ LV100, 5 dots, guilt 10000 (max tier 3) + 5 Blue Fairy [3] -> Lexaeus A 7★ (No. 1111),
   request `{baseUserMedalId:723, attachmentMedalIds:[2313 x5]}` (the stack repeats the first id), the server consumes
   2313-2317 and 99999 munny. How to get them without PvP: I-126 (decision postponed).
