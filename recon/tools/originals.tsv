@@ -891,7 +891,7 @@ cocostudio/publish/ActionMapCoerceEnmAnim0.png	b16,jp
 
 # 38. Pioggia delle stanze (I-184, smoke 21-10: 2140 e 10400 dei Dwarf Woodlands crashavano dopo il filmato):
 # caso 1 apre lwf/map/hole_rain/hole_rain.lwf e non controlla il NULL. Completa nel 2016.
-#     hole_thunder (caso 4): nel JP solo la LWF, texture assenti ovunque: non servita finche' una stanza non la chiede.
+#     hole_thunder (caso 4): sezione 42.
 lwf/map/hole_rain/	b16,jp
 
 # 39. Musiche delle missioni non servite (I-188, utente 21-10: quest 493 senza musica di battaglia): 501005002 battaglia del
@@ -910,3 +910,17 @@ img/wipe/wipe_1[1-4].png	jp
 img/material/material_61.png	jp
 img/material/material_62.png	jp
 img/material/material_63.png	jp
+
+# 42. Room thunderstorm (I-214, bench 29-10: quest 808 crashed at start; maps 32160_01, 32170_00, 32180_00/01, weather 4):
+#     case 4 opens lwf/map/hole_thunder/hole_thunder.lwf and does not check NULL. LWF only in JP; its 9 textures (full-screen
+#     flashes) are the same records as hole_rain in the WW 2018 index (names.tsv): copied from the 2016 hex-named twins.
+lwf/map/hole_thunder/hole_thunder.lwf	jp
+lwf/map/hole_thunder/hole_thunder_382e706e67.png	b16	lwf/map/hole_rain/hole_rain_382e706e67.png
+lwf/map/hole_thunder/hole_thunder_31332e706e67.png	b16	lwf/map/hole_rain/hole_rain_31332e706e67.png
+lwf/map/hole_thunder/hole_thunder_31362e706e67.png	b16	lwf/map/hole_rain/hole_rain_31362e706e67.png
+lwf/map/hole_thunder/hole_thunder_31392e706e67.png	b16	lwf/map/hole_rain/hole_rain_31392e706e67.png
+lwf/map/hole_thunder/hole_thunder_32322e706e67.png	b16	lwf/map/hole_rain/hole_rain_32322e706e67.png
+lwf/map/hole_thunder/hole_thunder_32352e706e67.png	b16	lwf/map/hole_rain/hole_rain_32352e706e67.png
+lwf/map/hole_thunder/hole_thunder_322e706e67.png	b16	lwf/map/hole_rain/hole_rain_322e706e67.png
+lwf/map/hole_thunder/hole_thunder_352e706e67.png	b16	lwf/map/hole_rain/hole_rain_352e706e67.png
+lwf/map/hole_thunder/hole_thunder_31312e706e67.png	b16	lwf/map/hole_rain/hole_rain_31312e706e67.png
