@@ -207,7 +207,9 @@ check(not missing, 'animations released by the third review not in the table: %s
 check(any(k.startswith('lwf/character/enemy/1550/dead/') for k in t), '1550 dead approved by the second review')
 ovr = sorted(k for k, v in t.items() if v[2] == 'dedup-override')
 # (hunt27, 27-10: 1560 rows replaced by the record files, new rows for 1536/1548/1608, 1645 cuff arm, 16 for 1635 hunt28)
-check(len(ovr) == 42 and len([k for k in ovr if k.startswith('lwf/character/enemy/1636/wait/')]) == 6
+# (29-10: 16 for the Ralph allies 2016/2017/2018 wait, aligned to 2014)
+check(len(ovr) == 58 and len([k for k in ovr if k.startswith('lwf/character/enemy/1636/wait/')]) == 6
+      and len([k for k in ovr if k.split('/')[3] in ('2016', '2017', '2018')]) == 16
       and len([k for k in ovr if k.startswith('lwf/character/enemy/1560/')]) == 7
       and len([k for k in ovr if k.startswith('lwf/character/enemy/1608/')]) == 9, 'dedup-override rows: %s' % ovr)
 check(all(v[0] in ('jp431', 'jp501', 'ww501', 'b2016') for v in t.values() if v[2] != 'dedup-rescale')
