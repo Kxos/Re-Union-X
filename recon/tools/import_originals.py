@@ -13,7 +13,8 @@ qui sostituiscono i nostri nel pacchetto generato. Elenco (recon/tools/originals
   (LWF con le sue texture);
 - fonti: b16 (pacchetto WW inglese del 2016), jp (dati JP 4.3.1, nomi <nome>.<8 cifre>.<ext>: vince la
   revisione piu' alta, il suffisso si toglie), i440 (file dell'IPA 4.4.0 WW gia' estratti con res_get.py in
-  --i440, es. catalog\ipa440_extract), separate da virgola in ordine di preferenza;
+  --i440, es. catalog\ipa440_extract), jp501 (estratto dell'OBB JP 5.0.1 in --jp501, tmp/jp501/x: NPC della
+  sezione 45, I-197), separate da virgola in ordine di preferenza;
 - sorgente: percorso nella fonte se diverso dalla destinazione (stesso significato di glob e cartella).
 
 --served: nomi gia' serviti dalle risorse WW (OBB 5.0.1, IPA 4.3.1; prima colonna dei TSV): con glob e cartelle si
@@ -86,8 +87,8 @@ def served_names(paths):
     return names
 
 
-def run(rows, b16, jp, out, served=frozenset(), i440=None):
-    roots = {'b16': (b16, 'b16'), 'jp': (jp, 'jp'), 'i440': (i440 or '', 'i440')}
+def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None):
+    roots = {'b16': (b16, 'b16'), 'jp': (jp, 'jp'), 'i440': (i440 or '', 'i440'), 'jp501': (jp501 or '', 'jp501')}
     report = []
     for r in rows:
         hits, used = [], None
@@ -118,11 +119,12 @@ def main(argv):
     rows = parse(open(lst, encoding='utf8').read().split('\n'))
     served = served_names(argv[argv.index('--served') + 1].split(',')) if '--served' in argv else frozenset()
     i440 = argv[argv.index('--i440') + 1] if '--i440' in argv else None
-    report = run(rows, b16, jp, out, served, i440)
+    jp501 = argv[argv.index('--jp501') + 1] if '--jp501' in argv else None
+    report = run(rows, b16, jp, out, served, i440, jp501)
     if '--report' in argv:
         json.dump(report, open(argv[argv.index('--report') + 1], 'w', encoding='utf8'), indent=1)
     print('originali: %d righe, %d file (%s)' % (len(report), sum(r['files'] for r in report),
-          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440'))))
+          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440', 'jp501'))))
 
 
 if __name__ == '__main__':
