@@ -120,9 +120,16 @@ foreach ($t in Get-ChildItem "$D\layouts\ui_texts\text\ui" -File) {
 # testi di dialogo degli NPC (text/drama/2040xxxxx, I-154): citati dai record npc delle mappe gia' in
 # $sg\files\stage, scaricati dal CDN nell'originale (nelle risorse WW solo 204010301); dal pacchetto
 # 2016 (inglese), in mancanza dal JP 4.3.1 (segnalati); senza, toccare l'NPC con la nuvoletta non fa nulla
+# Texts without an English original (Quests 526-979, and 204052101 Japanese in the 2016 package): local
+# English table $D\private\npc_talk_en.tsv (game text, not in the repo); kinds used: ww (original WW text
+# under another id). wiki and reconstructed (our translation, to declare in the Notices) only after the
+# user's decision: set $npcTalkKinds = 'ww,wiki,reconstructed'
+$npcTalkKinds = 'ww'
+$npcTalkEn = @()
+if (Test-Path "$D\private\npc_talk_en.tsv") { $npcTalkEn = @('--en', "$D\private\npc_talk_en.tsv", '--kinds', $npcTalkKinds) }
 python -I recon\tools\import_npc_talk.py "$D\resource_data\names_v4.tsv" "$refWork\bundle2016" `
   "$jpData\text\drama" `
-  "$sg\files\stage" "$sg\files" --report "$sg\npc_talk.json"
+  "$sg\files\stage" "$sg\files" --report "$sg\npc_talk.json" @npcTalkEn
 if ($LASTEXITCODE) { throw 'import_npc_talk fallito' }
 # pulsante «Overwrite Skill» del Level Up acceso (I-157): il client carica skill_mix_button_On/_Disable e,
 # acceso, le cornici Medal_Syn_Select_Panel02 in img/ui; WW serve solo _Off (acceso restava grigio). BTF del 2016
