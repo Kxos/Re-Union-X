@@ -531,6 +531,12 @@ function servedMasterRows(name, realMs) {
       ...(ends.has(r.drawMedalTypeId) ? { displayTimeLeft: 1, endDate: clock.fakeString(ends.get(r.drawMedalTypeId), off) }
         : leave.has(r.drawMedalTypeId) ? { displayTimeLeft: 1, endDate: clock.fakeString(clock.weekStartOf(leave.get(r.drawMedalTypeId)), off) } : {}) }));
   }
+  // moogleshop: le offerte a tempo (display 1, «N days left») scadono ogni lunedi' come le Weekly, in ora finta
+  // (make-moogleshop.js fissava endDate alla generazione: «2137 days left», I-021)
+  if (name === 'moogleshop') {
+    const end = clock.fakeString(clock.weekStartOf(clock.weekIndex(realMs) + 1), clock.twinOffset(realMs));
+    return rows.map((r) => (r.display ? { ...r, endDate: end } : r));
+  }
   if (name !== 'mission') return rows;
   const off = clock.twinOffset(realMs);
   const w = clock.weekIndex(realMs), mi = clock.monthIndex(realMs);
@@ -3382,6 +3388,16 @@ function respondMaterialSell(res, body) {
 // popup «Select Medal»; userShuffleSkillId = trait da sostituire (0 = slot libero). Il trait
 // e' shuffleSkillId della riga; la medaglia aggiornata torna in shuffleskillUserMedals (stesso
 // formato di userMedals). Il costo si scala solo se lo scambio riesce.
+// Scambi gia' fatti per riga; quelli delle offerte a tempo (display 1) ripartono ogni settimana reale con la scadenza
+function moogleshopBought() {
+  const week = clock.weekIndex(realNow());
+  if (player.moogleshopWeek !== week) {
+    const timed = new Set(masterRows('moogleshop').filter((r) => r.display).map((r) => String(r.moogleshopId)));
+    player.moogleshopBought = Object.fromEntries(Object.entries(player.moogleshopBought || {}).filter(([k]) => !timed.has(k)));
+    player.moogleshopWeek = week;
+  }
+  return player.moogleshopBought;
+}
 function respondMoogleshopBuy(res, body) {
   body = body || {};
   const id = Number(body.moogleshopId ?? body.id);
@@ -3400,7 +3416,7 @@ function respondMoogleshopBuy(res, body) {
   const cost = row.price * n;
   const wallet = row.payType === 1 ? 'freeStone' : 'money';
   if ((player[wallet] || 0) < cost) return fail(`${wallet} insufficienti (${player[wallet] || 0} < ${cost})`);
-  if (row.count && (player.moogleshopBought?.[id] || 0) + n > row.count) return fail('scambi esauriti');
+  if (row.count && (moogleshopBought()[id] || 0) + n > row.count) return fail('scambi esauriti');
   if (row.type === 1) {
     const medal = userMedalList().find((m) => m.userMedalId === Number(body.userMedalId));
     const mrow = medal && masterRows('medal').find((r) => r.medalId === medal.medalId);
@@ -3425,7 +3441,7 @@ function respondMoogleshopBuy(res, body) {
       `${replace ? `, sostituisce ${replace}` : ''}: ${list.length}/${mrow.shuffleskillSlot}`);
   } else grantItem(row.itemType, row.itemId, row.itemNum * n);
   player[wallet] = player[wallet] - cost;
-  player.moogleshopBought = player.moogleshopBought || {};
+  player.moogleshopBought = moogleshopBought();
   player.moogleshopBought[id] = (player.moogleshopBought[id] || 0) + n;
   savePlayer();
   console.log(`  [moogle shop] articolo ${id} x${n}: tipo ${row.itemType} id ${row.itemId} x${row.itemNum * n}, -${cost} ${row.payType === 1 ? 'jewel' : 'munny'}`);
@@ -4192,7 +4208,7 @@ function handler(scheme) {
       // Prova (10 ottobre): con la tabella piena ma moogleshops vuoto il client scrive «No
       // items available.»: si elencano le righe attive, limitCount = scambi rimasti
       if (kind === 'moogleshoplist') {
-        const bought = player.moogleshopBought || {};
+        const bought = moogleshopBought();
         return send(res, 200, { ret: ret(), moogleshops: masterRows('moogleshop').map((r) => ({
           moogleshopId: r.moogleshopId, limitCount: r.count ? Math.max(0, r.count - (bought[r.moogleshopId] || 0)) : 0 })) });
       }
@@ -4518,6 +4534,7 @@ module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
   vipBenefits, // server/test-gacha-server.js (I-134)
+  moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
   player, respondMedalEnhance, respondMedalShuffleSkill, respondUser, respondMedalEvolve, userMedalList, userMedalElement, userPointData, isGuiltUnlocked, userSkillsData,
   stackedMedalList, // server/test-medal-enhance.js (I-205 Evolve with a stack)
