@@ -128,11 +128,13 @@ Chill Ripper, Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their ori
 
 Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer, Blitz Spear and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed).
 
-Some later enemies whose original graphics are still missing use for now the **look of the same or a similar enemy**, from Dark Road (for example Sleep Archer or Amber Opera) or from Union χ itself (for example Martial Monkey shows as a Cheery Ape), until their original graphics are recovered.
+Every enemy and every ally now shows its own original look (27-10); where pieces were missing they are completed as described above.
 
 In some quests a character fights **at your side** (Hercules, Aladdin, Mog, Phillip, Ephemer, Calhoun, Ralph, the Union leaders and other Keyblade wielders): as in the original game, they join the battle against the boss, attack after your turn and cannot be targeted. Their attacks are the original ally attacks.
 
-Hercules and two Keyblade wielders (Quests 350, 525, 540 and 825), Aladdin (Quests 585, 753, 757, 760, 789 and 790), Ralph (Quests 923, 930, 931, 932, 935, 955, 965 and 975), Ephemer, Calhoun and two of the Union leaders (Quest 977) show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). The original graphics of the other allies are incomplete: for now they show the look of Hercules (Prince Ali, Phillip) or of one of those Keyblade wielders (Mog, the other Union leaders), until their own graphics are recovered.
+The allies show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). All the Ralph allies share the same pieces, as in the original files (29-10).
+
+The characters standing in the quest maps of Quests 601-974 are back with their original look (29-10), except one character in Quests 918, 919 and 927 whose original graphics have not been found (it stays invisible). The Heartless standing in Quest 870 uses the slightly smaller art of the same enemy, stretched to its size (**reconstructed**).
 
 Quests 876-979: the original quest files do not say the level of each enemy (the original server gave it), so every enemy fights at the level of the quest: there are no weaker enemies mixed in.
 
