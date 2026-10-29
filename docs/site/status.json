@@ -150,9 +150,9 @@
     },
     {
       "name": "Guest allies",
-      "state": "progress",
-      "detail": "The allies who fight at your side in some story quests (Hercules, Aladdin, Ralph, Ephemer...): being fixed, to be verified.",
-      "done": 1,
+      "state": "done",
+      "detail": "The allies who fight at your side in some story quests (Hercules, Aladdin, Ralph, Ephemer...): all with their original look, verified on the bench (29 Oct).",
+      "done": 2,
       "total": 2
     },
     {
