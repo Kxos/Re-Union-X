@@ -151,6 +151,7 @@ const allIds = [...E.map((e) => e.evStageId), ...CAMP.map(([, c]) => c.evStageId
 check(new Set(allIds).size === allIds.length, 'evStageIds unique across entries, campaigns and week versions');
 check(WV.every(([k]) => new Date(k.slice(k.indexOf('@') + 1, k.indexOf('@') + 11) + 'T00:00:00Z').getUTCDay() === 1), 'week versions start on a Monday');
 check(WV.every(([, v]) => !v.banner || BANNER_RE.test(v.banner)), 'week version banners are khuxwiki names');
+check(WV.filter(([, v]) => v.dropped).map(([k, v]) => `${k}:${v.evStageId}`).join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701', 'fix round 1: the two clipped 2019-03-04 Medal Quest rows dropped, ids 7700 / 7701 reserved');
 const BANNERS = process.env.KHUX_SPECIAL_BANNERS || 'D:\\Progetto_Restauro_KH_UX\\reference\\special_banners';
 if (fs.existsSync(BANNERS)) {
   const have = new Set(fs.readdirSync(BANNERS));

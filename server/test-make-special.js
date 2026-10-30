@@ -354,10 +354,29 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   badW({ ...weekly, versions: { ...weekly.versions, 'beta@2020-07-06': { evStageId: 7800 } } }, 'frozen version without a table row rejected');
   badW({ ...weekly, aliases: {} }, 'reward not in the master without an alias rejected');
   badW({ ...weekly, sets: { 'VIP! Beta': { entry: 'nope' } } }, 'set on an unknown entry rejected');
+  // fix round 1: a dropped version (its rewards are a campaign's) is left out, its id stays reserved
+  const ow3 = ms.build({ ...rules, weekly: { ...weekly, versions: { ...weekly.versions, 'beta@2020-06-01': { evStageId: 7700, dropped: 'given by campaign C1' } } } }, catW, masterW);
+  const ids3 = Object.fromEntries(ow3.index.entries.filter((x) => x.weekOf).map((x) => [x.key, x.evStageId]));
+  check(!('beta@2020-06-01' in ids3) && ids3['beta@2020-06-15'] === 7705 && ids3['beta@2020-06-15#2'] === 7701 && !ow3.evStageRows.some((r) => r.eventStageId === 7700),
+    `dropped version: left out, id 7700 reserved (${JSON.stringify(ids3)})`);
+  // fix round 1: campaign ids (7501 up) and week-version ids (7700 up) never collide
+  const errOf = (r, cat) => { try { ms.build(r, cat, masterW); return ''; } catch (err) { return err.message; } };
+  check(/week-version id 7650 outside 7700-7999/.test(errOf({ ...rules, weekly: { ...weekly, versions: { ...weekly.versions, 'beta@2020-06-15': { evStageId: 7650 } } } }, catW)),
+    'a frozen week-version id below 7700 rejected with a clear message');
+}
+{
+  const catC = { ...catalogue, quests: [...catalogue.quests, { quest: 'VIP! Medal Quest', series: 'VIP! Medal Quest', world: 'Wonderland', room: "White Rabbit's House", ap: 'zero', level: '15', target: 'King Pretender', objectives: [
+    'Complete without having to continue -> (See table) x1', 'Complete without having to continue -> (See table) x1', 'Complete without having to continue -> (See table) x1'] }],
+  vip_limited_campaigns_ww: [{ id: 'E1-1', notice: 1, date: '2020-06-01', title: 'A', start: '2020-06-01', end: '2020-06-08' }, { id: 'E2-1', notice: 2, date: '2020-06-08', title: 'B', start: '2020-06-08', end: '2020-06-15' }] };
+  const part = { parts: [{ quest: 'VIP! X', rewards: ['Cid 6★ x1', 'Cid 6★ x1', 'Cid 6★ x1'] }] };
+  const errOf = (campaigns) => { try { ms.build({ ...rules, campaigns }, catC, master); return ''; } catch (err) { return err.message; } };
+  check(/campaign C2: evStageId 7700 in the week-version range \(7700\+\)/.test(errOf({ C1: { ...part, evStageId: 7699 }, C2: part })), `next campaign id reaching 7700 rejected (${errOf({ C1: { ...part, evStageId: 7699 }, C2: part })})`);
+  check(/campaign C1: evStageId 7700 in the week-version range/.test(errOf({ C1: { ...part, evStageId: 7700 }, C2: { ...part, evStageId: 7501 } })), 'frozen campaign id 7700 rejected');
+  check(errOf({ C1: { ...part, evStageId: 7698 }, C2: part }) === '', 'campaign ids up to 7699 accepted');
 }
 
 // errors on bad rules
-const bad =(r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
+const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
 bad([{ ...rules.entries[0], series: ['Nope'] }], 'entry without quests rejected');
 bad([{ ...rules.entries[0], drops: [{ type: 3, id: 12345, num: 1 }] }], 'drop not in the medal table rejected');
@@ -429,7 +448,7 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
     material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
   const live = real.entries.filter((e) => !e.removed);
   const weeklyV = all.index.entries.filter((e) => e.weekOf);
-  check(all.evStageRows.length === 1 + live.length + 120 + 176, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 176 week versions)`);
+  check(all.evStageRows.length === 1 + live.length + 120 + 174, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 174 week versions)`);
   // the 120 WW week-limited VIP campaigns (Task 12)
   const sp = require('./special');
   const camps = all.index.entries.filter((e) => e.campaign && !e.weekOf);
@@ -444,6 +463,7 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   }
   check(camps.every((e) => e.vip && e.stageIds.length >= 1 && e.stageIds.length <= 5 && e.campaign.start <= e.campaign.end), 'real build: campaigns VIP, 1-5 quests, window start <= end');
   const addD = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+  const listedAt0 = (from) => sp.currentEntries(all.index, { period: sp.periodOf(from, real.periods), shopFrom: from, shopTo: addD(from, 6) });
   for (const e of camps) {
     const p = sp.periodOf(e.campaign.start, real.periods);
     const has = (from, to, per = p) => sp.currentEntries(all.index, { period: per, shopFrom: from, shopTo: to }).includes(e);
@@ -473,10 +493,34 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   // round 17: the recurring VIP sets follow the weekly rotation (catalogue vip_recurring_weekly, appendix B)
   const perSet = {};
   for (const e of weeklyV) perSet[e.weekOf] = (perSet[e.weekOf] || 0) + 1;
-  check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 48, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2 }),
+  check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 46, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2 }),
     `real build: week versions per set ${JSON.stringify(perSet)}`);
   check(weeklyV.every((e) => real.weekly.versions[e.key]?.evStageId === e.evStageId && e.evStageId >= 7700 && e.evStageId <= 7999), 'real build: week version ids frozen in special_periods.json (7700-7999)');
-  check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 176, 'real build: 176 frozen week versions');
+  check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 176, 'real build: 176 frozen week-version ids (2 dropped, reserved)');
+  // fix round 1 (ruling): the two clipped Medal Quest rows of 2019-03-04 are the campaigns' (C49538 / C49546, C50518): dropped, ids reserved
+  const dropped = Object.entries(real.weekly.versions).filter(([k, v]) => !k.startsWith('_') && v.dropped).map(([k, v]) => `${k}:${v.evStageId}`);
+  check(dropped.join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701' && !all.evStageRows.some((r) => [7700, 7701].includes(r.eventStageId)), `real build: dropped versions ${dropped}`);
+  // cross-check: no week version gives a 7★ medal that a campaign of an overlapping week already gives
+  const rare7 = new Set(t('medal').filter((m) => m.rare === 7).map((m) => m.medalId));
+  const medals7 = (en) => en.stageIds.flatMap((id) => { const r = all.stageRows.find((x) => x.stageId === id); return r.submissionItemId.filter((m, i) => r.submissionRewardType[i] === 3 && rare7.has(m)); });
+  const clash = [];
+  // (the row's own first week, before the clip to the entry's from: clippedFrom)
+  for (const v of weeklyV) for (const c of camps.filter((c) => c.campaign.start <= v.campaign.end && c.campaign.end >= (v.clippedFrom || v.campaign.start))) {
+    const both = medals7(v).filter((m) => medals7(c).includes(m));
+    if (both.length) clash.push(`${v.key} / ${c.key}: ${both}`);
+  }
+  check(!clash.length, `real build: 7★ medals of a week version also given by an overlapping campaign: ${clash.join('; ')}`);
+  // ruling: two versions of one set in the same week where the original banners overlapped (faithful), each with a _note
+  const twoWeeks = [], twoKeys = new Set();
+  for (let w = '2018-10-01'; w <= '2021-05-24'; w = addD(w, 7)) {
+    const by = {};
+    for (const en of listedAt0(w)) if (en.weekOf) (by[en.weekOf] ||= []).push(en.key);
+    for (const [set, keys] of Object.entries(by)) if (keys.length > 1) { twoWeeks.push(`${w} ${set}`); keys.forEach((k) => twoKeys.add(k)); }
+  }
+  check(twoWeeks.join() === ['2019-06-03 vip-medal', '2019-06-10 vip-medal', '2019-07-22 vip-gems', '2019-07-29 vip-gems', '2019-09-23 vip-medal', '2019-09-30 vip-medal', '2019-10-28 vip-medal'].join(),
+    `real build: weeks with two versions of a set ${twoWeeks}`);
+  check([...twoKeys].every((k) => /two/.test(real.weekly.versions[k]._note || '')) && Object.entries(real.weekly.versions).filter(([, v]) => /two versions/.test(v._note || '')).length === twoKeys.size,
+    `real build: _note on exactly the versions sharing a week (${[...twoKeys].filter((k) => !real.weekly.versions[k]._note)})`);
   check(!weeklyV.some((e) => /skill/i.test(e.weekOf)), 'real build: no VIP! Skill versions');
   const medalOf = (label) => { const m = t('medal').filter((x) => `${x.name} ${x.rare}★` === label).sort((a, b) => a.medalId - b.medalId)[0]; return m ? m.medalId : -1; };
   const listedAt = (from) => sp.currentEntries(all.index, { period: sp.periodOf(from, real.periods), shopFrom: from, shopTo: addD(from, 6) });
