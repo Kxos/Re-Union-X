@@ -324,9 +324,9 @@ var c={all:0},n=0,k=0,i,j,r,on,p;
 // campaigns: per year counts of the matching rows; a search goes to the one year it finds (or All years)
 var yc={all:0},ys=[];for(i=0;i<items.length;i++){r=items[i];if(r.camp&&match(r,cur)){yc.all++;if(!yc[r.y]){yc[r.y]=0;ys.push(r.y);}yc[r.y]++;}}
 if(cur.q)yr=ys.length===1?ys[0]:'all';
-// any other filter: a year without matching campaigns gives way to the one year that has some (or All years)
-else if(nf(cur)&&yr!=='all'&&!yc[yr])yr=ys.length===1?ys[0]:'all';
-for(i=0;i<ycs.length;i++){ycs[i].n.textContent=yc[ycs[i].y]||0;ycs[i].el.className='yc'+(ycs[i].y===yr?' on':'');}
+// any other filter or a period tab: a year without matching campaigns gives way to the one year that has some (or All years)
+else if((nf(cur)||cur.p!=='all')&&yr!=='all'&&!yc[yr])yr=ys.length===1?ys[0]:'all';
+for(i=0;i<ycs.length;i++){ycs[i].n.textContent=yc[ycs[i].y]||0;ycs[i].el.className='yc'+(ycs[i].y===yr?' on':'')+(ycs[i].y!=='all'&&!yc[ycs[i].y]?' hide':'');}
 for(i=0;i<items.length;i++){r=items[i];if(match(r,cur,true)){c.all++;for(p in PN)if(r.ps.indexOf(' '+p+' ')>=0)c[p]=(c[p]||0)+1;}
 on=match(r,cur)&&(!r.camp||yr==='all'||r.y===yr);hide(r.el,!on);if(on){if(r.camp)k++;else n++;}}
 // month labels: only above visible rows
