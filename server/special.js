@@ -82,22 +82,33 @@ const pinnable = (entry, period) => {
 const specialEvents = (index, ctx) => {
   const { period, weekday, vip, pinnedKey, dayEndStr, weekEndStr, imgBase } = ctx;
   const stageState = ctx.stageState || (() => ({ score: 0, playStatus: 0, clearMissionIds: [] }));
-  const build = (src, evStageId, { isLock, endTime, kept }) => ({
-    stages: src.stageIds.map((stageId, i) => {
+  // objectives of a stage (ctx.objectiveCount: validSubmission of the master row, at most 3; default 3)
+  const objectiveCount = ctx.objectiveCount || (() => 3);
+  // complete (crown to the right of the banner, user 31-10): 1 when every stage has all its objectives done; a stage
+  // without objectives counts once cleared (playStatus)
+  const allDone = (stages) => (stages.length && stages.every((s) => {
+    const n = Math.min(3, objectiveCount(s.stageId));
+    return n > 0 ? [1, 2, 3].slice(0, n).every((m) => s.clearMissionIds.includes(m)) : !!s.playStatus;
+  }) ? 1 : 0);
+  const build = (src, evStageId, { isLock, endTime, kept }) => {
+    const stages = src.stageIds.map((stageId, i) => {
       const st = stageState(stageId) || {};
       return { stageId, useAp: src.useAp[i] || 0, score: st.score || 0, playStatus: st.playStatus || 0,
         clearMissionIds: st.clearMissionIds || [] };
-    }),
-    eventStageId: evStageId,
-    showIcon: 1,
-    bannerUrl: `${imgBase}${imgPath(`${evStageId}${kept ? '-kept' : ''}`)}`,
-    eventType: 0,
-    status: 1,
-    endTime,
-    newStageId: 0,
-    isLock,
-    complete: 0,
-  });
+    });
+    return {
+      stages,
+      eventStageId: evStageId,
+      showIcon: 1,
+      bannerUrl: `${imgBase}${imgPath(`${evStageId}${kept ? '-kept' : ''}`)}`,
+      eventType: 0,
+      status: 1,
+      endTime,
+      newStageId: 0,
+      isLock,
+      complete: allDone(stages),
+    };
+  };
   // VIP entries and campaigns last until the end of the week, the others until the end of the day
   const endOf = (en, isLock) => (en.vip || en.campaign || isLock === 2 ? weekEndStr : dayEndStr);
 

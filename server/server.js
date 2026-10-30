@@ -3937,6 +3937,8 @@ function specialCtx(realMs = realNow()) {
     nowStr: serverTimeAt(realMs), dayEndStr: serverTimeAt(clock.dayEnd(realMs)), weekEndStr: serverTimeAt(clock.weekEnd(realMs)),
     imgBase: WEB_BASE,
     stageState: (id) => ({ score: scores[id] || 0, playStatus: id in scores ? STAGE_CLEARED : 0, clearMissionIds: stageClearMissions(id) }),
+    // obiettivi della riga del master (validSubmission, al piu' 3): complete = corona a destra del banner (31-10)
+    objectiveCount: (id) => stageRowOf(id)?.validSubmission ?? 3,
   };
 }
 // events[] della scheda Special: vuoto prima della missione 6 o senza indice

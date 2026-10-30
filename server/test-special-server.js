@@ -204,6 +204,16 @@ check(raw(t.respondSpecialWeb, '/web/special/icon/nope.png').code === 404 && raw
   Object.assign(sc, keep);
 }
 
+// round 6: corona a destra del banner (complete): l'allenamento con [1,2,3] nel salvataggio -> catalogo complete 1
+{
+  const keep = p.clearMissions[970000];
+  p.clearMissions[970000] = [1, 2, 3];
+  check(ev(1).events[0]?.eventStageId === 7000 && ev(1).events[0].complete === 1, `catalogo con [1,2,3]: complete ${ev(1).events[0]?.complete}`);
+  p.clearMissions[970000] = [1, 2];
+  check(ev(1).events[0].complete === 0, 'catalogo con [1,2]: complete 0');
+  if (keep === undefined) delete p.clearMissions[970000]; else p.clearMissions[970000] = keep;
+}
+
 // 11. fissare una quest: POST /web/special/pin/<evStageId> e /web/special/unpin
 const post = (url) => { const r = raw(t.respondSpecialPost, url); return { code: r.code, body: JSON.parse(r.body.toString('utf8')) }; };
 check(server.route('/web/special/pin/7060') === 'specialweb', 'rotta pin');
