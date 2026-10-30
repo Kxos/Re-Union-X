@@ -501,10 +501,16 @@ function build(rules, catalogue, masterRows) {
   const cpChests = Math.max(1, Math.ceil(maxGauge * GAUGE_UNIT / CP_PER_CHEST));
   const evStageRows = [evStageRow(CATALOG_EV, [TRAINING_STAGE], { detailUrl: '/web/special/catalog' })];
 
+  // a weeklyOnly entry (VIP! Skill, coordinator ruling 30-10: no fallback, the set is listed only in the weeks of its
+  // table rows) is only the template of its week versions: no rows, not in the index; its id and key stay reserved
   const seenEv = new Set([CATALOG_EV]), seenKey = new Set();
+  for (const en of rules.entries.filter((x) => x.weeklyOnly)) {
+    if (!(en.evStageId > EV_FIRST && en.evStageId <= EV_LAST) || seenEv.has(en.evStageId)) throw new Error(`special: ${en.key}: evStageId ${en.evStageId} missing, out of range or repeated`);
+    seenEv.add(en.evStageId); seenKey.add(en.key);
+  }
   // campaigns (Task 12) and the weekly versions of the recurring VIP sets (round 17) after the entries: the ids of the
   // entries' stage and drop rows do not move
-  for (const en of [...rules.entries, ...campaignEntries(rules, catalogue), ...weeklyEntries(rules, catalogue, L, report)]) {
+  for (const en of [...rules.entries.filter((x) => !x.weeklyOnly), ...campaignEntries(rules, catalogue), ...weeklyEntries(rules, catalogue, L, report)]) {
     if (!(en.evStageId > EV_FIRST && en.evStageId <= EV_LAST) || seenEv.has(en.evStageId)) throw new Error(`special: ${en.key}: evStageId ${en.evStageId} missing, out of range or repeated`);
     if (seenKey.has(en.key)) throw new Error(`special: key ${en.key} repeated`);
     seenEv.add(en.evStageId); seenKey.add(en.key);
