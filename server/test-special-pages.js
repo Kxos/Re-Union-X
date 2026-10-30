@@ -10,14 +10,17 @@ const index = {
   catalog: { evStageId: 7000 },
   entries: [
     e('kb', 7101, { periods: [2], days: ['Tue'] }),
-    e('kb2', 7102, { periods: [1] }),
+    e('kb2', 7102, { periods: [1], family: 'SQ13', stages: [{ quest: 'Quest Two', dropRewardIds: [1] }] }),
     e('repl', 7103, { periods: [1, 2], replacedBy: 'kb' }),
     e('gone', 7104, { periods: [1], removed: 'no-use' }),
     e('later', 7105, { periods: [5] }),
-    e('vipq', 7106, { periods: [3], vip: true, days: [] }),
+    e('vipq', 7106, { periods: [3], vip: true, days: [], family: 'SQ22' }),
+    e('cid', 7107, { periods: [2], family: 'SQ12' }),
+    e('camp', 7108, { periods: [3, 4], campaign: { start: '2016-01-01', end: '2016-02-01' } }),
   ],
 };
-const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, periods: PERIODS });
+const names = { drop: (rid) => (rid === 1 ? ['Huey Ver. A', 'Mythril Shard'] : []), objective: (sid) => (sid === 71020 ? ['Cid Ver. B'] : []) };
+const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, periods: PERIODS, names });
 const idx = (s) => html.indexOf(s);
 check(idx('id="p1"') > 0 && idx('id="p1"') < idx('id="p2"') && idx('id="p4"') < idx('id="p5"'), 'five period sections in order');
 check((html.match(/class="per/g) || []).length >= 5, 'five sections');
@@ -31,6 +34,28 @@ check(row(7102).includes('📌 Keep in Special') && row(7102).includes('Replaces
 check(row(7106).includes('VIP only'), 'VIP');
 check(row(7101).includes('/web/special/img/7101.png') && row(7101).includes('Tue'), 'image and days');
 check(row(7102).includes('Every day'), 'every day');
+// Task 13: tabs, filters sheet, data attributes, half-size banners
+check(html.includes('class="tab on" data-p="all"'), 'All tab default');
+for (const p of PERIODS) check(html.includes('data-p="' + p.n + '"') && html.includes('id="tc' + p.n + '"'), 'tab ' + p.n);
+check(html.includes('id="tc1">3<') && html.includes('id="tcall">8<'), 'tab counts (3 in period 1, 8 total)');
+const attr = (id, a) => { const r = row(id), m = new RegExp(a + '="([^"]*)"').exec(r.slice(0, r.indexOf('>') + 1)); return m ? m[1] : null; };
+for (const id of [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108]) check(['data-period', 'data-type', 'data-show', 'data-search'].every((a) => attr(id, a) !== null), 'row attrs ' + id);
+check(attr(7102, 'data-search').includes('huey') && attr(7102, 'data-search').includes('mythril') && attr(7102, 'data-search').includes('quest two'), 'search has drop names');
+check(attr(7107, 'data-search') === 'n-cid', 'search plain name');
+check(attr(7102, 'data-period') === '1' && attr(7101, 'data-period') === '2', 'data-period');
+check(attr(7107, 'data-type') === 'daily' && attr(7106, 'data-type').split(' ').includes('vip') && attr(7108, 'data-type') === 'camp' && attr(7101, 'data-type') === 'weekday', 'types');
+check(attr(7101, 'data-show') === 'kept' && attr(7102, 'data-show') === 'can' && attr(7103, 'data-show') === 'replaced' && attr(7104, 'data-show') === 'removed' && attr(7105, 'data-show') === 'later' && attr(7106, 'data-show') === 'can' && attr(7108, 'data-show') === 'now', 'shows');
+check(html.includes('id="sum"') && html.includes('>8 quests</span> · all periods, no filters') && html.includes('id="fbtn"'), 'summary and filters button');
+check(html.includes('id="sheet"') && html.includes('data-g="type"') && html.includes('data-g="show"') && html.includes('id="fq"') && html.includes('id="freset"') && html.includes('id="fok"'), 'filters sheet');
+check(html.includes('FIND') && html.includes('TYPE') && html.includes('SHOW') && html.includes('Daily Cid') && html.includes('Later in the Story'), 'sheet groups');
+check(row(7102).includes('width="320"') && row(7102).includes('height="70"') && html.includes('.im{'), 'half-size banner');
+const rowFor = (id) => row(id).includes('khuxClick');
+check(rowFor(7102) && rowFor(7101), 'pin buttons kept');
+const nonames = pages.catalogPage(index, { period: 4, pinnedKey: '', periods: PERIODS });
+check(nonames.includes('data-search="n-kb2 | quest two"'), 'works without names');
+const built = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], medal: [{ medalId: 9, name: 'Huey' }], material: [{ materialId: 8, name: 'Mythril' }],
+  stage: [{ stageId: 3, submissionRewardType: [5, 14, 0], submissionItemId: [8, 0, 0] }] }[n]));
+check(built.drop(5).join() === 'Huey,Mythril,Jewels' && built.objective(3).join() === 'Mythril,Avatar Coin' && built.drop(99).length === 0, 'buildNames');
 const none = pages.catalogPage(index, { period: 4, pinnedKey: '', vip: false, periods: PERIODS });
 check(!none.includes('Replaces:'), 'no Replaces without a pin');
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
