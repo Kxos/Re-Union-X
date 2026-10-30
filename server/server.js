@@ -2092,7 +2092,8 @@ function respondStageContinue(res, path, body) {
   }
   if (String(path).toLowerCase() === '/stage/retire') { player.stageInProgress = false; savePlayer(); }
   // Give Up: «the special attack gauge will reset», il corpo porta {burst: 0}
-  if (String(path).toLowerCase() === '/stage/retire' && typeof body?.burst === 'number') {
+  // (non l'allenamento: li' la gauge resta com'era)
+  if (String(path).toLowerCase() === '/stage/retire' && typeof body?.burst === 'number' && player.currentStageId !== TRAINING_STAGE_ID) {
     setKeybladeBurst(body.burst);
     console.log(`[gauge] /stage/retire burst = ${body.burst}: salvata nel keyblade`);
     savePlayer();
@@ -2185,29 +2186,32 @@ function respondStageClear(res, req) {
   // misc 106) ne' le quest Special (stageKind 2, id 970000+: banco 30-10, una Special lo portava a 970001)
   if (stage?.stageKind === 1 && stageNumber(stageId) >= stageNumber(player.lastClearStageId)) player.lastClearStageId = stageId;
   // munny e materiali raccolti (sacchetti dei nemici, forzieri) come li riporta il client
-  player.money = (player.money || 0) + (Number(req?.getPoint?.money) || 0);
+  // Allenamento (970000, Special): solo punteggio e obiettivi; niente gauge, munny, materiali, drop, Lux, contatori,
+  // EXP di skill ne' premi degli obiettivi (la quest e' un banco di prova, il client mostra CONGRATULATIONS dai suoi dati)
+  const training = playedId === TRAINING_STAGE_ID;
+  if (!training) player.money = (player.money || 0) + (Number(req?.getPoint?.money) || 0);
   // gauge degli attacchi speciali: resta salvata nel keyblade (userKeyblades[].burst), non
   // riparte da 0 a ogni missione. Campo `burst` del corpo (banco: "burst":24000; prima si
   // prendeva il primo campo con burst nel nome, guiltBurstMaximumDamage = 0, e la gauge si azzerava)
-  if (typeof req?.burst === 'number') {
+  if (!training && typeof req?.burst === 'number') {
     setKeybladeBurst(req.burst);
     console.log(`[gauge] /stage/clear burst = ${req.burst}: salvata nel keyblade`);
   }
-  for (const m of req?.getMaterials || []) grantItem(5, m.materialId, m.number);
+  for (const m of training ? [] : req?.getMaterials || []) grantItem(5, m.materialId, m.number);
   // sacchetti dei nemici: il client riporta solo gli uid (getEnemyDropItems), il
   // contenuto e' la riga di reward del nemico nella mappa (1 se l'uid non ha record),
   // come in CONGRATULATIONS (es. Spring Water x12 in Combat 102); solo le posizioni mandate a /stage/start
   // (enemyDropTypes: materiali e medaglie delle quest Special)
   const enemyRows = new Map((poiOf(playedId)?.enemies || []).map((e) => [e.uid, e.reward]));
   const steal = player.steal?.stageId === playedId ? player.steal : null;
-  for (const uid of req?.getEnemyDropItems || []) {
+  for (const uid of training ? [] : req?.getEnemyDropItems || []) {
     const row = rewardRowById(enemyRows.get(uid) ?? 1);
     const k = steal && steal.uid === uid ? steal.mult : 1; // drop rubato dal pet (Steal): x skillValue3
     if (row) enemyDropTypes(row.rewardId).forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
   }
   player.steal = null;
   // premio del primo completamento («Quest Complete!»: es. Combat 101, 300 jewel)
-  if (first && stage?.validClearGetItem) {
+  if (first && !training && stage?.validClearGetItem) {
     stage.clearGetItemType.forEach((t, i) => grantItem(t, stage.clearGetItemId[i], stage.clearGetItemNum[i]));
   }
   // clearMissionIds: le missioni compiute in questa partita, come le riporta il corpo
@@ -2215,7 +2219,7 @@ function respondStageClear(res, req) {
   // Le missioni sui Lux (submissionRequire 29, «Collect %d or more Lux») il client non
   // le riporta: le valuta il server sui Lux della partita (getPoint.lux), che
   // restituisce in getLux (la barra Lux di RESULTS).
-  const lux = Number(req?.getPoint?.lux) || 0;
+  const lux = training ? 0 : Number(req?.getPoint?.lux) || 0;
   const rankBefore = luxRankFor(player.lux);
   const apBefore = apState().ap; // con la soglia del livello di prima
   player.lux += lux; // userPoint.lux/totalLux e luxRank nella risposta: dopo lo stage
@@ -2226,10 +2230,12 @@ function respondStageClear(res, req) {
     player.apTime = realNow();
     console.log(`[ap] level up ${rankBefore} -> ${luxRankFor(player.lux)}: AP ${apBefore} -> ${player.ap}/${maxAp()}`);
   }
-  missionCount('quest', 1);
-  missionCount('lux', lux);
-  missionCount('enemy', Number(req?.enemyDeadNumber) || 0); // Limited «Defeat 100 enemies»
-  weeklyLux(lux);
+  if (!training) {
+    missionCount('quest', 1);
+    missionCount('lux', lux);
+    missionCount('enemy', Number(req?.enemyDeadNumber) || 0); // Limited «Defeat 100 enemies»
+    weeklyLux(lux);
+  }
   const cleared = Array.isArray(req?.clearMissionIds) ? [...req.clearMissionIds] : [];
   (stage?.submissionRequire || []).forEach((kind, i) => {
     if (kind === 29 && lux >= (stage.submissionNum?.[i] ?? Infinity) && !cleared.includes(i + 1)) cleared.push(i + 1);
@@ -2246,7 +2252,7 @@ function respondStageClear(res, req) {
   if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
-  for (const n of cleared.filter((n) => !before.includes(n))) {
+  for (const n of training ? [] : cleared.filter((n) => !before.includes(n))) {
     grantItem(stage?.submissionRewardType?.[n - 1], stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
   }
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
@@ -2257,7 +2263,7 @@ function respondStageClear(res, req) {
   player.currentStageSkip = 0;
   player.stageScores[stageId] = skipped ? (player.stageScores[stageId] || 0) : Math.max(player.stageScores[stageId] || 0, lux);
   // EXP di skill del combattimento (getPoint.exp) a ogni medaglia del deck con una skill salvata
-  const skillUps = grantDeckSkillExp(Number(req?.getPoint?.exp));
+  const skillUps = training ? [] : grantDeckSkillExp(Number(req?.getPoint?.exp));
   if (skillUps.length) console.log(`[skill] salite di livello: userSkillId ${skillUps.join(', ')}`);
   savePlayer();
   send(res, 200, {
@@ -3863,6 +3869,7 @@ function specialIndex() {
   return specialMemo;
 }
 const SPECIAL_FIRST = 970000, SPECIAL_LAST = 979999; // stageId delle quest Special (make-special.js)
+const TRAINING_STAGE_ID = 970000; // Training Grounds (special.json catalog): quest senza premi, vedi respondStageClear
 const isSpecialStage = (stageId) => Number(stageId) >= SPECIAL_FIRST && Number(stageId) <= SPECIAL_LAST;
 // la scheda si apre con la missione di storia misc 122 (6), come il pulsante del client
 const specialUnlocked = () => stageNumber(lastStoryStageId()) >= miscValue(122, 6);
@@ -4723,7 +4730,7 @@ module.exports._test = {
   // server/test-achievements.js (I-037)
   respondStageAchievements,
   // server/test-special-server.js (scheda Special)
-  respondStageEvent, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, respondSpecialPost, ret, WEB_BASE,
+  respondStageEvent, respondStageContinue, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, respondSpecialPost, ret, WEB_BASE,
   weekIndex: clock.weekIndex,
   // server/test-gacha-server.js
   sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
