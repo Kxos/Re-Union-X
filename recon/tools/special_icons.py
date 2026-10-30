@@ -28,6 +28,10 @@ ORIGINAL = {
     'camp': 'cocostudio/publish/IncentiveIcon_PresentBox.png',  # present box (campaigns)
     'lock': 'cocostudio/publish/Lock_Icon.png',              # padlock (VIP only, locked)
     'removed': 'cocostudio/publish/NotUsed_Icon.png',        # «not usable» sign (not restored)
+    # REWARDS chips (round 7): the client's reward icons (IncentiveIcon_<n>)
+    'jewel': 'cocostudio/publish/IncentiveIcon_01.png',      # Jewel (also the Shop's Jewel icon)
+    'avatar': 'img/incentive/IncentiveIcon_20.png',          # avatar part (reward type 20)
+    'material': 'cocostudio/publish/IncentiveIcon_02.png',   # crystal of the material rewards
 }
 # share of the height kept from the top (full-body pictures too thin at chip size)
 TOP_SHARE = {'mog': 0.58}
@@ -138,7 +142,18 @@ def draw_now():
     return c
 
 
-DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now}
+def draw_medal():
+    """Medal (no generic medal icon in the client): gold rim, blue face, white star."""
+    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
+    fill_shape(c, lambda d: d.ellipse((14, 14, 178, 178), fill=255), *GOLD)
+    fill_shape(c, lambda d: d.ellipse((38, 38, 154, 154), fill=255), *BLUE, width=4)
+    import math
+    pts = [(96 + (44 if i % 2 == 0 else 19) * math.sin(i * math.pi / 5), 98 - (44 if i % 2 == 0 else 19) * math.cos(i * math.pi / 5)) for i in range(10)]
+    ImageDraw.Draw(c).polygon(pts, fill=(255, 255, 255, 255))
+    return c
+
+
+DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal}
 
 
 def main(argv):

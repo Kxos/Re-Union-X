@@ -13,7 +13,7 @@ const niceDay = (d) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ''); retur
 // Icons of the chips, pills and Keep button (user 31-10: no emoji): /web/special/icon/<key>.png from
 // server/game_data/special_icons (recon/tools/special_icons.py: original client icons where they exist, the others drawn
 // in the game's style). Only these keys are served. A missing file leaves an empty square of fixed size.
-const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now'];
+const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material'];
 const icon = (k) => `<img class="ic" src="/web/special/icon/${k}.png" alt="">`;
 const KEEP_LABEL = `${icon('pin')}Keep in Special`, REMOVE_LABEL = 'Remove from Special';
 
@@ -61,6 +61,10 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.im{flex:0 0 auto;width:320px;max-width:100%}.im img{width:100%}.info{flex:1 1 170px;min-width:0;line-height:1.4}'
   + '.nm{font-weight:bold;color:#fff;text-decoration:none}.d{color:#b9cfdc;font-size:14px}'
   + PILL_CSS
+  // group rows: a strip of day / variant chips, each in the colour of its own status
+  + '.chs{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.ch{display:inline-block;border:1px solid transparent;border-radius:10px;padding:0 7px;font-size:12.5px;line-height:1.7;color:#fff;text-decoration:none;white-space:nowrap}'
+  + '.ch .ic{width:1.1em;height:1.1em;margin:-.2em .2em 0 -.15em}.c-now{background:#2e9e3e;font-weight:bold}.c-pinned{background:#b8860b;font-weight:bold}.c-can{background:#1a6fa8}'
+  + '.c-locked{background:#5a6470;color:#e0e6ea}.c-off{background:#3d4750;color:#b0bac2}.c-other{background:transparent;border-color:#8aa3b3;color:#b9cfdc}'
   + '.pinmsg{display:none;position:sticky;bottom:6px;background:#2e9e3e;border-radius:8px;padding:6px 10px;font-size:16px;margin-top:10px}.pinmsg small{display:block;font-size:13px}'
   + '.pinmsg.off{background:#1a6fa8}.pinmsg.err{background:#b02020}'
   + '.ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(1,12,20,.68);z-index:5}'
@@ -92,6 +96,9 @@ const TYPE_OPTS = [['all', 'All'], ['weekday', 'Weekday', 'weekday'], ['daily', 
 // `other` (current period, not this week) has no chip: All only
 const SHOW_OPTS = [['all', 'All quests'], ['can', 'Can be kept now', 'pin'], ['now', 'In Special now', 'now'], ['kept', 'Kept', 'pin'],
   ['replaced', 'Replaced', 'replaced'], ['removed', 'Not restored', 'removed'], ['later', 'Later in the Story', 'later']];
+// REWARDS chips (round 7): reward types of the drops and objective rewards of an entry
+const REWARD_OPTS = [['all', 'All'], ['medal', 'Medals', 'medal'], ['avatar', 'Avatar parts', 'avatar'], ['jewel', 'Jewels', 'jewel'], ['material', 'Materials', 'material']];
+const REWARD_OF_TYPE = { 3: 'medal', 20: 'avatar', 2: 'jewel', 5: 'material' };
 const optLabel = ([, l, k]) => (k ? icon(k) : '') + esc(l);
 function typesOf(en) {
   const t = [];
@@ -127,6 +134,9 @@ function buildNames(rows) {
       const r = table(['reward', 'rewardId']).get(rid);
       return r ? r.type.map((t, i) => name(t, r.id[i])).filter(Boolean) : [];
     },
+    // reward types (REWARDS filter): of a drop row and of a stage's objective rewards (0 = none left out)
+    dropTypes: (rid) => (table(['reward', 'rewardId']).get(rid)?.type || []).filter(Boolean),
+    objectiveTypes: (sid) => (stageRow(sid)?.submissionRewardType || []).filter(Boolean),
     objective: (sid) => {
       const r = stageRow(sid);
       return r ? (r.submissionRewardType || []).map((t, i) => name(t, r.submissionItemId[i])).filter(Boolean) : [];
@@ -213,49 +223,56 @@ const keepButton = (id, on, extra = '') => `<a href="#" class="pk" data-id="${id
 const daysText = (en) => (en.days === 'all' ? 'Every day' : (en.days || []).join(', '));
 const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 
-// ES5, no external script. Rows: one read of three attributes at start; filtering toggles " hide" on the row, and on
-// the period section when none of its rows is visible. khuxRow (called by PIN_JS after a pin / unpin) moves the
-// status of the rows: the new kept row gold, the old one back to «can be kept».
+// ES5, no external script. Rows: one read of the attributes at start; filtering toggles " hide" on the row, and on
+// the period section when none of its rows is visible. A row is one entry or a group of entries sharing a banner
+// (data-eid / data-show: space-separated, one per member; data-n: members). khuxRow (called by PIN_JS after a pin /
+// unpin) moves the statuses: the new kept entry gold, the old one back to «can be kept» (a group: its chips).
 const JS = `(function(){
-var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__},PILL=__PILL__;
+var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__;
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,id:attr(el,'data-eid'),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',s:attr(el,'data-show'),q:attr(el,'data-search')||''};});
+var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,ids:(attr(el,'data-eid')||'').split(' '),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',ss:(attr(el,'data-show')||'').split(' '),rw:' '+(attr(el,'data-reward')||'')+' ',n:+attr(el,'data-n')||1,nf:+attr(el,'data-nf'),q:attr(el,'data-search')||''};});
 var secs=[].map.call(document.querySelectorAll('.sec'),function(el){return {el:el,p:attr(el,'data-p')};});
-var cur={p:'all',type:'all',show:'all',q:''},dr=null;
-function copy(s){return {p:s.p,type:s.type,show:s.show,q:s.q};}
-// a row per entry and period: the All tab uses the first row of each entry only (r.f), so every count is of entries
+var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null;
+function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
+// a row per entry (or group) and period: the All tab uses the first rows only (r.f), so nothing is counted twice there
 function match(r,s,anyPeriod){
 if(!anyPeriod){if(s.p==='all'&&!r.f)return false;if(s.p!=='all'&&r.p!==s.p)return false;}
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
-if(s.show!=='all'&&r.s!==s.show)return false;
+if(s.show!=='all'&&(' '+r.ss.join(' ')+' ').indexOf(' '+s.show+' ')<0)return false;
+if(s.reward!=='all'&&r.rw.indexOf(' '+s.reward+' ')<0)return false;
 return !s.q||r.q.indexOf(s.q.toLowerCase())>=0;}
 function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
-function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.q?1:0);}
+function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.reward!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function plural(n){return n+' quest'+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
 function render(){
-var c={all:0},n=0,i,r,on,sh={};
+var c={all:0},n=0,m=0,i,r,on,sh={};
 for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){if(r.f)c.all++;c[r.p]=(c[r.p]||0)+1;}
-on=match(r,cur);if(on){n++;sh[r.p]=1;}r.el.className=r.el.className.replace(/ hide/g,'')+(on?'':' hide');}
+on=match(r,cur);if(on){n++;m+=cur.p==='all'?r.nf:r.n;sh[r.p]=1;}r.el.className=r.el.className.replace(/ hide/g,'')+(on?'':' hide');}
 for(i=0;i<secs.length;i++)secs[i].el.className='sec'+(sh[secs[i].p]?'':' hide');
 [].forEach.call(document.querySelectorAll('.tab'),function(t){var p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
 var k=nf(cur),h='<span class="n1">'+plural(n)+'</span>';
+if(m!==n)h+=' <small class="n">('+m+' with every day and variant)</small>';
 if(cur.p!=='all')h+=' from <b>'+esc(PN[cur.p])+'</b>';
 if(!k)h+=cur.p==='all'?' · all periods, no filters':' · no filters';
 else{h+=cur.p==='all'?' match:':' match your filters:';
 if(cur.type!=='all')h+=' '+tag('type',LAB.type[cur.type]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
+if(cur.reward!=='all')h+=' '+tag('reward',LAB.reward[cur.reward]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;$('fdot').textContent=k?k:'';}
-function setRow(r,show){var p=PILL[show];r.s=show;r.el.setAttribute('data-show',show);r.el.className='q '+p.cls+(/ hide/.test(r.el.className)?' hide':'');
-var s=r.el.querySelector('.s');if(s){s.className='s s-'+p.cls;s.innerHTML=p.html;}}
-window.khuxRow=function(id,on){var name='',i,r;for(i=0;i<rows.length;i++){r=rows[i];if(r.s==='kept')setRow(r,'can');if(r.id===id){setRow(r,on?'kept':'can');if(on)name=r.el.querySelector('.nm').textContent;}}
-for(i=0;i<rows.length;i++){r=rows[i];var x=r.el.querySelector('.rp');
-if(!x&&r.s==='can'&&name){x=document.createElement('div');x.className='rp';var s=r.el.querySelector('.s');s.parentNode.insertBefore(x,s.nextSibling);}
-if(x){x.textContent='Replaces\\u003a '+name;x.style.display=name&&r.s==='can'?'':'none';}}
+// one member of a row changes status: a single row gets the new bar and pill, a group the new chip colour
+function setMember(r,j,show){var p=PILL[show];r.ss[j]=show;r.el.setAttribute('data-show',r.ss.join(' '));
+if(r.ids.length===1){r.el.className='q '+p.cls+(/ hide/.test(r.el.className)?' hide':'');var s=r.el.querySelector('.s');if(s){s.className='s s-'+p.cls;s.innerHTML=p.html;}return;}
+var ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(ch){ch.className='ch c-'+p.cls;var ic=ch.querySelector('.ic');if(ic)ic.src='/web/special/icon/pin.png';}}
+window.khuxRow=function(id,on){var name='',i,j,r;for(i=0;i<rows.length;i++){r=rows[i];for(j=0;j<r.ids.length;j++){if(r.ss[j]==='kept')setMember(r,j,'can');
+if(r.ids[j]===id){setMember(r,j,on?'kept':'can');if(on){var t=r.ids.length===1?r.el.querySelector('.nm'):r.el.querySelector('.ch[data-eid="'+id+'"]');name=t?(attr(t,'title')||t.textContent):'';}}}}
+for(i=0;i<rows.length;i++){r=rows[i];if(r.ids.length!==1)continue;var x=r.el.querySelector('.rp');
+if(!x&&r.ss[0]==='can'&&name){x=document.createElement('div');x.className='rp';var s=r.el.querySelector('.s');s.parentNode.insertBefore(x,s.nextSibling);}
+if(x){x.textContent='Replaces\\u003a '+name;x.style.display=name&&r.ss[0]==='can'?'':'none';}}
 render();};
 function sync(){
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var g=attr(box,'data-g');[].forEach.call(box.children,function(o){o.className=o.className.replace(/ on/g,'')+(attr(o,'data-v')===dr[g]?' on':'');});});
@@ -266,69 +283,111 @@ $('fbtn').onclick=openF;$('fx').onclick=closeF;$('dim').onclick=closeF;
 $('fq').oninput=function(){dr.q=this.value.replace(/\\s+/g,' ').replace(/^ | $/g,'');sync();};
 $('fq').onkeydown=function(e){if(e.keyCode===13)this.blur();};
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){box.onclick=function(e){var t=e.target;while(t&&t!==box&&!attr(t,'data-v'))t=t.parentNode;var v=attr(t,'data-v');if(!v||!dr)return;dr[attr(box,'data-g')]=v;sync();};});
-$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.show='all';dr.q='';$('fq').value='';sync();};
+$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.show='all';dr.reward='all';dr.q='';$('fq').value='';sync();};
 $('fok').onclick=function(){if(!dr)return;var s=dr;s.p=cur.p;closeF();cur=s;render();};
 $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x'))t=t.parentNode;var x=attr(t,'data-x');if(!x)return;e.preventDefault();
-if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='q'||x==='all')cur.q='';render();};
+if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='reward'||x==='all')cur.reward='all';if(x==='q'||x==='all')cur.q='';render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 render();
 var h=location.hash&&document.getElementById(location.hash.slice(1));if(h&&h.scrollIntoView)h.scrollIntoView();
 })();`;
 
+// group rows (round 7, user 31-10): entries of one period section with the same banner art (the seven Daily Cid days,
+// VIP! Materials and Materials 2...) take one row. Best member status first: it gives the row its bar and pill.
+const SHOW_RANK = ['now', 'can', 'kept', 'other', 'replaced', 'later', 'removed'];
+const CHIP_ICON = { now: 'now', can: 'pin', kept: 'pin', replaced: 'replaced', later: 'later', removed: 'removed' };
+const DAY_SUFFIX = /\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/;
+const familyTitle = (name) => String(name).replace(DAY_SUFFIX, '').replace(/\s+\d+$/, '');
+const variantOf = (en) => (Array.isArray(en.days) && en.days.length === 1 ? en.days[0] : (/\s(\d+)$/.exec(en.name) || [, '1'])[1]);
+
 function catalogPage(index, ctx = {}) {
   const periods = ctx.periods || special.PERIODS, cur = ctx.period;
-  const names = ctx.names || { drop: () => [], objective: () => [] };
+  const names = { drop: () => [], objective: () => [], dropTypes: () => [], objectiveTypes: () => [], ...(ctx.names || {}) };
   const data = pageData(index, ctx), { entries } = data;
   const per = (en) => Math.min(...en.periods);
   // searchable text of an entry: its name, its quests' names, the drop items and the objective rewards (lower case)
+  const stagesOf = (en) => (en.stages && en.stages.length ? en.stages : [{ dropRewardIds: en.dropRewardIds }]);
   const search = (en) => {
     const parts = [en.name];
-    const stages = en.stages && en.stages.length ? en.stages : [{ dropRewardIds: en.dropRewardIds }];
-    for (const s of stages) {
+    for (const s of stagesOf(en)) {
       if (s.quest) parts.push(s.quest);
       for (const rid of s.dropRewardIds || []) parts.push(...names.drop(rid));
     }
     for (const sid of en.stageIds || []) parts.push(...names.objective(sid));
     return [...new Set(parts.map((x) => String(x).toLowerCase().replace(/\s+/g, ' ').trim()).filter(Boolean))].join(' | ');
   };
-  // one row per entry and period (bench 31-10: the current period lists every quest it has); the first one (its first
-  // period) carries id="q<id>" (hash of the details BACK) and data-first, the All tab shows only those
+  // REWARDS chips: reward types of the drop rows and of the objective rewards (3 medal, 20 avatar part, 2 Jewels, 5 material)
+  const rewards = (en) => {
+    const types = [...stagesOf(en).flatMap((s) => (s.dropRewardIds || []).flatMap((rid) => names.dropTypes(rid))),
+      ...(en.stageIds || []).flatMap((sid) => names.objectiveTypes(sid))];
+    return REWARD_OPTS.slice(1).filter(([v]) => types.some((t) => REWARD_OF_TYPE[t] === v)).map(([v]) => v).join(' ');
+  };
   const statusMemo = new Map();
+  const statusFor = (en) => { if (!statusMemo.has(en)) statusMemo.set(en, statusOf(en, ctx, data)); return statusMemo.get(en); };
+  // one row per entry (or group) and period (bench 31-10: the current period lists every quest it has); the first one of
+  // an entry (its first period) carries id="q<id>" (hash of the details BACK) and data-first, the All tab shows only those
   const row = (en, p) => {
-    const id = en.evStageId, href = detailHref(id), first = p === per(en);
-    if (!statusMemo.has(en)) statusMemo.set(en, statusOf(en, ctx, data));
-    const st = statusMemo.get(en);
+    const id = en.evStageId, href = detailHref(id), first = p === per(en), st = statusFor(en);
     const button = st.button === null ? '' : keepButton(id, st.button, ' onclick="return khuxClick(this)"');
-    return `<div class="q ${st.cls}" id="q${id}${first ? '' : `-p${p}`}" data-eid="${id}"${first ? ' data-first="1"' : ''} data-period="${p}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}">`
+    return `<div class="q ${st.cls}" id="q${id}${first ? '' : `-p${p}`}" data-eid="${id}"${first ? ' data-first="1"' : ''} data-period="${p}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}" data-reward="${rewards(en)}" data-n="1" data-nf="${first ? 1 : 0}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(id)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(en.name)}</a><div class="d">${esc(daysText(en))}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>`
       + `${st.pill}${st.rp || ''}${button ? `<div>${button}</div>` : ''}</div></div>
 `;
   };
+  const groupRow = (list, p) => {
+    const sts = list.map(statusFor), best = sts.reduce((a, b) => (SHOW_RANK.indexOf(b.show) < SHOW_RANK.indexOf(a.show) ? b : a));
+    const head = list[0], href = detailHref(head.evStageId), anyFirst = list.some((en) => per(en) === p);
+    const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
+    const chips = list.map((en, j) => {
+      const st = sts[j], k = st.cls === 'locked' ? 'lock' : CHIP_ICON[st.show];
+      return `<a class="ch c-${st.cls}"${per(en) === p ? ` id="q${en.evStageId}"` : ''} data-eid="${en.evStageId}" href="${detailHref(en.evStageId)}" title="${esc(en.name)}">${k ? icon(k) : ''}${esc(variantOf(en))}</a>`;
+    }).join('');
+    const keepable = list.filter((en, j) => sts[j].button !== null);
+    const button = keepable.length === 1 ? `<div>${keepButton(keepable[0].evStageId, statusFor(keepable[0]).button, ' onclick="return khuxClick(this)"')}</div>` : '';
+    const days = list.every((en) => Array.isArray(en.days) && en.days.length === 1);
+    return `<div class="q ${best.cls}" id="g${head.evStageId}-p${p}" data-eid="${list.map((en) => en.evStageId).join(' ')}"${anyFirst ? ' data-first="1"' : ''} data-period="${p}" data-type="${uniq(list.map(typesOf))}" data-show="${sts.map((s) => s.show).join(' ')}" data-search="${esc(list.map(search).join(' | '))}" data-reward="${uniq(list.map(rewards))}" data-n="${list.length}" data-nf="${list.filter((en) => per(en) === p).length}">`
+      + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`
+      + `<div class="info"><span class="nm">${esc(familyTitle(head.name))}</span><div class="d">${list.length} ${days ? 'days' : 'variants'}${list.every((en) => en.vip) ? ' · <span class="vip">VIP only</span>' : ''}</div>`
+      + `${best.pill}<div class="chs">${chips}</div>${button}</div></div>
+`;
+  };
+  // the rows of a section: entries with the same (non-empty) banner art together, in the order of their first entry
+  const rowsOf = (p) => {
+    const groups = [], byBanner = new Map();
+    for (const en of entries.filter((x) => x.periods.includes(p))) {
+      const g = en.banner ? byBanner.get(en.banner) : null;
+      if (g) g.push(en); else { const ng = [en]; groups.push(ng); if (en.banner) byBanner.set(en.banner, ng); }
+    }
+    return groups;
+  };
+  const secRows = new Map(periods.map((p) => [p.n, rowsOf(p.n)]));
   const sections = periods.map((p) => {
-    const rows = entries.filter((en) => en.periods.includes(p.n)).map((en) => row(en, p.n)).join('');
+    const rows = secRows.get(p.n).map((g) => (g.length === 1 ? row(g[0], p.n) : groupRow(g, p.n))).join('');
     return `<div class="sec" data-p="${p.n}"><h2 class="per" id="p${p.n}">${esc(p.name)}</h2>`
       + `<div class="n">${niceDay(p.from)} – ${niceDay(p.to)}</div>${rows || '<p class="n">No quests.</p>'}</div>`;
   }).join('');
   const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
   const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
-  const n = entries.length, nq = `${n} quest${n === 1 ? '' : 's'}`;
+  // All: the rows that hold the first period of one of their entries
+  const n = [...secRows].reduce((t, [pn, gs]) => t + gs.filter((g) => g.some((en) => per(en) === pn)).length, 0), nq = `${n} quest${n === 1 ? '' : 's'}`;
   const pillJs = (k) => ({ cls: PILLS[k][0], html: pillInner(PILLS[k]) });
+  const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
-    .replace('__TYPE__', JSON.stringify(Object.fromEntries(TYPE_OPTS.slice(1).map((o) => [o[0], optLabel(o)]))))
-    .replace('__SHOW__', JSON.stringify(Object.fromEntries(SHOW_OPTS.slice(1).map((o) => [o[0], optLabel(o)]))))
+    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__REWARD__', labels(REWARD_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }));
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
-    + '<p class="n">Quests from past periods can be kept in Special. Only one can be kept at a time. Tap a banner for its details.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, entries.filter((en) => en.periods.includes(p.n)).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
+    + '<p class="n">Quests from past periods can be kept in Special. Only one can be kept at a time. Tap a banner, or a day, for its details.</p>'
+    + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, secRows.get(p.n).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
     + `<div class="sum" id="sum"><span class="n1">${nq}</span> · all periods, no filters</div>${sections}`
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Quest or reward name" autocomplete="off"></div>'
     + '<div class="hint">Matches quest names and the items they give (e.g. Huey, Mythril, Cid).</div>'
     + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS)}</div>`
+    + `<h4>REWARDS</h4><div class="opts" data-g="reward">${opts(REWARD_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${nq}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${PIN_JS}</script><script>${js}</script></body></html>`;
