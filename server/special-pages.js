@@ -52,7 +52,7 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.sum{background:#06283e;border-radius:6px;padding:6px 10px;margin:0 0 6px;font-size:15px;line-height:1.7}.sum .n1{color:#ffa500;font-weight:bold}'
   + '.tag{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:14px;padding:0 4px 0 10px;margin:3px 4px 0 0;font-size:14px;line-height:1.6}'
   + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px}'
-  + '.hide{display:none}'
+  + '.hide{display:none!important}' // !important: .row (display:flex) comes later in the sheet and won (bench rev 221)
   // every card / campaign row: the same 5px side bar (colour by status, like the Shop's .b.now / .b.pinned) and the same
   // padding; banner at half size (640x140 -> 320x70), the text wraps under it on a narrow phone
   + '.row{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:10px 0 10px 10px;border-left:5px solid #5d8aa6;border-bottom:1px solid #2f5d78;cursor:pointer;position:relative;padding-right:28px}'
@@ -324,6 +324,8 @@ var c={all:0},n=0,k=0,i,j,r,on,p;
 // campaigns: per year counts of the matching rows; a search goes to the one year it finds (or All years)
 var yc={all:0},ys=[];for(i=0;i<items.length;i++){r=items[i];if(r.camp&&match(r,cur)){yc.all++;if(!yc[r.y]){yc[r.y]=0;ys.push(r.y);}yc[r.y]++;}}
 if(cur.q)yr=ys.length===1?ys[0]:'all';
+// any other filter: a year without matching campaigns gives way to the one year that has some (or All years)
+else if(nf(cur)&&yr!=='all'&&!yc[yr])yr=ys.length===1?ys[0]:'all';
 for(i=0;i<ycs.length;i++){ycs[i].n.textContent=yc[ycs[i].y]||0;ycs[i].el.className='yc'+(ycs[i].y===yr?' on':'');}
 for(i=0;i<items.length;i++){r=items[i];if(match(r,cur,true)){c.all++;for(p in PN)if(r.ps.indexOf(' '+p+' ')>=0)c[p]=(c[p]||0)+1;}
 on=match(r,cur)&&(!r.camp||yr==='all'||r.y===yr);hide(r.el,!on);if(on){if(r.camp)k++;else n++;}}
@@ -513,7 +515,9 @@ function catalogPage(index, ctx = {}) {
     return label + row(f);
   }).join('');
   const years = [...new Set(camps.map((f) => f.list[0].campaign.start.slice(0, 4)))];
-  const shopYear = String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
+  // the year of the campaign of the Shop week, else the Shop week's year (bench rev 221: a week across New Year)
+  const nowCamp = camps.find((f) => f.list.some((en) => data.current.has(en)));
+  const shopYear = nowCamp ? nowCamp.list[0].campaign.start.slice(0, 4) : String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
   const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
   const yearsHtml = `<div class="yrs" id="yrs">${yearChip('all', 'All years', camps.length)}${years.map((y) => yearChip(y, y, camps.filter((f) => f.list[0].campaign.start.startsWith(y)).length)).join('')}</div>`;
   const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
