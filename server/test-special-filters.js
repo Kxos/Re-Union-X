@@ -40,8 +40,18 @@ const fx = { catalog: { evStageId: 7000 }, entries: [
   e('cold', 7812, { name: 'Key Art #9 VIP Quests!', periods: [2], vip: true, campaign: { start: '2017-08-07', end: '2017-08-13' }, banner: 'o.png' }),
   e('cold2', 7813, { name: 'Mickey Campaign', periods: [2], vip: true, campaign: { start: '2017-09-04', end: '2017-09-10' }, banner: 'p.png' }),
   e('cnext', 7814, { name: 'Next Year Campaign', periods: [4], vip: true, campaign: { start: '2020-02-03', end: '2020-02-09' }, banner: 'n.png' }),
+  // round 17 fix 1: a recurring VIP set with week versions (weekOf): one quest row, this week's version listed, a past one keepable
+  e('vset', 7821, { name: 'VIP! Medal Quest', periods: [3, 4], vip: true, family: 'SQ22', from: '2019-03-04', banner: 'm.png' }),
+  e('vset@2019-06-03', 7822, { name: 'VIP! Medal Quest', periods: [3], vip: true, family: 'SQ22', weekOf: 'vset', weekTitle: 'Get Sora & Stitch Medal!', campaign: { start: '2019-06-03', end: '2019-06-30' }, banner: 'm.png', stages: [{ quest: 'VIP! Medal Quest', dropRewardIds: [1] }] }),
+  e('vset@2019-12-30', 7823, { name: 'VIP! Medal Quest', periods: [4], vip: true, family: 'SQ22', weekOf: 'vset', weekTitle: 'SN++ - Peter Pan', campaign: { start: '2019-12-30', end: '2020-01-05' }, banner: 'm.png' }),
 ] };
 const names = { drop: (rid) => (rid === 1 ? ['Huey', 'Mythril'] : []), objective: () => [], dropTypes: (rid) => (rid === 1 ? [3, 5] : []), objectiveTypes: () => [] };
+{
+  // the set is one quest row (not a campaign row) with its 3 versions; this week's version makes it «now»
+  const h = pages.catalogPage(fx, { period: 4, pinnedKey: 'kept', periods: PERIODS, names, shopFrom: '2020-01-02', shopTo: '2020-01-08', weekday: 'Tue', vip: true });
+  const r = (h.split('<div class="row').find((x) => x.includes('id="q7821"')) || '');
+  if (!(r.startsWith(' ') && !r.startsWith(' cr') && r.includes('data-eid="7821 7822 7823"') && r.includes('data-nv="3"') && /data-show="[^"]*now/.test(r) && !/data-type="[^"]*camp/.test(r))) errors.push(`fixture: week versions row ${r.slice(0, 220)}`);
+}
 for (const vip of [false, true]) run(fx, { period: 4, pinnedKey: 'kept', periods: PERIODS, names, shopFrom: '2020-01-02', shopTo: '2020-01-08', weekday: 'Tue', vip }, `fixture vip=${vip}`);
 let real = null; try { real = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'special.json'), 'utf8')); } catch { /* no local index */ }
 if (real) {

@@ -291,7 +291,10 @@ function campaignEntries(rules, catalogue) {
       throw new Error(`special: ${key}: unknown part ${JSON.stringify(part)}`);
     }
     if (quests.length > 5) throw new Error(`special: campaign ${key}: ${quests.length} quests, at most 5 per banner`);
-    return { key, evStageId: sp.evStageId || next++, name: sp.name || campaignName(r.title), family: sp.family || 'SQ21',
+    const evStageId = sp.evStageId || next++;
+    // campaign ids run from 7501 to 7699: 7700 up belongs to the week versions of the recurring VIP sets (round 17)
+    if (evStageId >= WEEKLY_EV_FIRST) throw new Error(`special: campaign ${key}: evStageId ${evStageId} in the week-version range (${WEEKLY_EV_FIRST}+): campaign ids run from ${CAMPAIGN_EV_FIRST} to ${WEEKLY_EV_FIRST - 1}`);
+    return { key, evStageId, name: sp.name || campaignName(r.title), family: sp.family || 'SQ21',
       periods: [periodOfDay(start, rules.periods)], days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '',
       campaign: { start, end }, banner: sp.banner || '', generic: !!sp.generic, notice: r.notice, questObjs: quests };
   });
@@ -347,7 +350,12 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
   if (!W || !W.sets) return [];
   const table = catalogue.vip_recurring_weekly || {};
   const frozen = Object.fromEntries(Object.entries(W.versions || {}).filter(([k]) => !k.startsWith('_')));
-  const used = new Set(Object.values(frozen).map((v) => v.evStageId));
+  // frozen ids live in WEEKLY_EV_FIRST..EV_LAST (campaigns stop below, campaignEntries); a dropped version (its rewards
+  // are a campaign's, `dropped` = why) is left out but keeps its id reserved, so no other id moves
+  for (const [k, v] of Object.entries(frozen)) {
+    if (!(v.evStageId >= WEEKLY_EV_FIRST && v.evStageId <= EV_LAST)) throw new Error(`special: weekly ${k}: week-version id ${v.evStageId} outside ${WEEKLY_EV_FIRST}-${EV_LAST}`);
+  }
+  const used = new Set(Object.values(frozen).map((v) => v.evStageId)), seenKeys = new Set();
   let next = WEEKLY_EV_FIRST;
   const nextId = () => { while (used.has(next)) next++; used.add(next); return next++; };
   const aliases = W.aliases || {};
@@ -365,12 +373,14 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
     const lo = [pFrom, en.from || ''].sort().pop(), hi = [pTo, en.to || '9999'].sort()[0];
     const keys = new Set();
     for (const row of table[setName] || []) {
-      const weeks = weeksOf(row.dates).filter((w) => w >= lo && w <= hi);
+      const allWeeks = weeksOf(row.dates), weeks = allWeeks.filter((w) => w >= lo && w <= hi);
       if (!weeks.length) continue;
       const start = weeks[0], end = [addDays(weeks[weeks.length - 1], 6), hi].sort()[0];
       let key = weekKey(spec.entry, start);
       for (let n = 2; keys.has(key); n++) key = `${weekKey(spec.entry, start)}#${n}`;
       keys.add(key);
+      seenKeys.add(key);
+      if ((frozen[key] || {}).dropped) continue;
       const rewards = row.rewards.slice(0, 3).map((r, i) => {
         let label = weeklyLabel(r, row.banner);
         if (!label) return null;
@@ -395,11 +405,11 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
       const fz = frozen[key] || {};
       out.push({ key, evStageId: fz.evStageId || nextId(), name: en.name, family: en.family, periods: [periodOfDay(start, rules.periods)],
         days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '', campaign: { start, end }, banner: fz.banner || en.banner || '',
-        weekOf: en.key, weekTitle: String(row.banner || '').trim(), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
+        weekOf: en.key, weekTitle: String(row.banner || '').trim(), ...(start !== allWeeks[0] ? { clippedFrom: allWeeks[0] } : {}), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
     }
   }
   if (unknown.length) throw new Error(`special: weekly rewards not in the master (add rules.weekly.aliases): ${unknown.join('; ')}`);
-  const stray = Object.keys(frozen).filter((k) => !out.some((x) => x.key === k));
+  const stray = Object.keys(frozen).filter((k) => !seenKeys.has(k));
   if (stray.length) throw new Error(`special: rules.weekly.versions without a table row: ${stray.join(', ')}`);
   return out;
 }
@@ -464,7 +474,7 @@ function build(rules, catalogue, masterRows) {
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
       resetGroup: en.resetGroup || '', banner: en.banner || '' };
     if (en.questObjs && !en.weekOf) Object.assign(base, { generic: en.generic, notice: en.notice });
-    if (en.weekOf) Object.assign(base, { weekOf: en.weekOf, weekTitle: en.weekTitle });
+    if (en.weekOf) Object.assign(base, { weekOf: en.weekOf, weekTitle: en.weekTitle }, en.clippedFrom ? { clippedFrom: en.clippedFrom } : {});
     // optional days that split a period (special.currentEntries checks them against the Shop week)
     if (en.from) base.from = en.from;
     if (en.to) base.to = en.to;
