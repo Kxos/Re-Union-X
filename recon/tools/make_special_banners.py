@@ -1,13 +1,16 @@
 """Banners of the Special tab (640x140 PNG) and their -kept copies (spec 2026-10-30-special-tab-design.md 4, 10).
 
-    python -I recon/tools/make_special_banners.py [--index F] [--src D] [--out D] [--enemies D] [--mode palette|full]
+    python -I recon/tools/make_special_banners.py [--index F] [--rules F] [--src D] [--out D] [--enemies D]
+        [--mode palette|full]
         -> server/game_data/special_img/<evStageId>.png and <evStageId>-kept.png (git-ignored)
 
 Index: server/game_data/special.json (make-special.js). Each entry names the original khuxwiki banner file in `banner`
 (server/special_periods.json, entries and campaigns); the originals are downloaded by hand into reference\\special_banners\\
 (local only, never in the repo) and resized to 640x140 (fit of make_banner_images.py: centre crop when the ratio differs).
 Entries without an original (or with the file missing) get a generated plate in the style of make_banner_images.plate:
-quest name on a gradient in the colour of the family (SQ code).
+quest name on a gradient in the colour of the family (SQ code), except the campaigns whose original is lost and whose
+rules carry a `reconstruct` spec (--rules, server/special_periods.json; C44151, C48395): those are rebuilt in the style
+of the original VIP quest banners from local in-game screenshots (reconstructed_banner).
 Catalogue banner (catalog.evStageId, 7000; Task 14, user 30-10): darkened oblique strips of original Special banners
 (CATALOG_STRIPS), «SPECIAL CATALOG» in the gold lettering with brown outline of the originals, the subtitle, and on the
 right what a tap opens: the training quest's Large Body and Shadow (drawn from the local enemy rigs, --enemies: LWF +
@@ -130,7 +133,11 @@ def kept_tab(im):
     im = im.convert('RGBA')
     if im.size != (640, 140):
         im = im.resize((640, 140), Image.LANCZOS)
-    solid = max(TAB_SOLID, vip_tab_end(im) + 4)
+    return _tab(im, KEPT_TEXT, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, max(TAB_SOLID, vip_tab_end(im) + 4))
+
+
+def _tab(im, text, hi, lo, dk, solid, size=18):
+    """the top-left tab band of the originals (KEPT QUEST gold, VIP Quest red) over an RGBA 640x140 banner"""
     W, H = 640 * S, 140 * S
     y0, y1, xs, xf = TAB_Y0 * S, TAB_Y1 * S, solid * S, (solid + TAB_FADE) * S
     alpha = Image.new('L', (W, H), 0)
@@ -141,15 +148,15 @@ def kept_tab(im):
         d.line([(x, y0), (x, y1 - 1)], fill=int(255 * (1 - t * t * (3 - 2 * t))))   # smoothstep fade-out
     # alpha set on the gold itself: paste() with a mask would also blend the colour towards the transparent black of
     # the layer, the dark edge of the fade (fix round 1)
-    L = kept.vgrad((W, H), kept.GOLD_HI, kept.GOLD_LO, y0, y1)
+    L = kept.vgrad((W, H), hi, lo, y0, y1)
     L.putalpha(alpha)
     edge = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     de = ImageDraw.Draw(edge)
-    de.rectangle([0, y1 - S, xf, y1 - 1], fill=kept.GOLD_DK)                 # dark lower edge
+    de.rectangle([0, y1 - S, xf, y1 - 1], fill=dk)                          # dark lower edge
     de.rectangle([0, y0 + S, xf, y0 + 2 * S - 1], fill=(255, 252, 228, 200))  # light upper edge
     edge.putalpha(ImageChops.multiply(edge.getchannel('A'), alpha))
     L = Image.alpha_composite(L, edge)
-    ImageDraw.Draw(L).text((9 * S, (y0 + y1) / 2 + S * .5), KEPT_TEXT, font=make_shop_art.font(18 * S),
+    ImageDraw.Draw(L).text((9 * S, (y0 + y1) / 2 + S * .5), text, font=make_shop_art.font(size * S),
                            fill=(255, 255, 255, 255), anchor='lm', stroke_width=int(2.2 * S), stroke_fill=BROWN)
     sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     # drop shadow only under the solid part: it fades out much faster than the band (cube of the band alpha), so
@@ -310,13 +317,103 @@ def catalog_banner(src_dir, enemies=None):
     return im
 
 
+# ---- reconstructed banners (campaigns whose original is lost; round 3, 30-10) ----
+VIP_RED = ((255, 72, 60), (214, 18, 24), (96, 8, 10, 255))   # the red «VIP Quest» tab of the originals (249,39,39)
+VIP_GRAD = ((150, 24, 120), (70, 18, 120))                  # VIP pink (left) -> purple (right)
+TITLE_FONTS = [r'C:\Windows\Fonts\ARLRDBD.TTF', 'ARLRDBD.TTF']   # rounded heavy lettering, closest to the originals'
+
+
+def title_font(px):
+    from PIL import ImageFont
+    for f in TITLE_FONTS:
+        try:
+            return ImageFont.truetype(f, px)
+        except OSError:
+            pass
+    return make_shop_art.font(px)
+
+
+def _fit_font(text, px, width, outline):
+    f = title_font(px)
+    while px > 14 and f.getlength(text) + 2 * outline > width:
+        px -= 1
+        f = title_font(px)
+    return f
+
+
+def reconstruct_sources(spec, src_dir):
+    """True when every local source of a `reconstruct` spec (board, icon, tile) is in src_dir"""
+    return bool(spec) and all(spec.get(k) and os.path.exists(os.path.join(src_dir, spec[k])) for k in ('board', 'icon', 'tile'))
+
+
+def reconstructed_banner(spec, src_dir):
+    """640x140 RGBA banner rebuilt in the style of the original VIP quest banners for a campaign whose banner is lost
+    (rules.campaigns[key].reconstruct): spec {board, crop [x0, y0, x1, y1] of the board screenshot, icon (Limited VIP
+    Coin), tile (board preview tile), title, sub, tab?}. Background: the crop of the real board screenshot, darkened
+    and blended into the VIP pink -> purple gradient, with a soft glow behind the lettering; the red «VIP Quest» tab at
+    the top left; the title in the gold lettering with the dark outline (gold_text), the sub line in white with a
+    dark plum outline; on the right the board tile with the Limited VIP Coin over its lower-left corner."""
+    board = Image.open(os.path.join(src_dir, spec['board'])).convert('RGB')
+    if spec.get('crop'):
+        board = board.crop(tuple(spec['crop']))
+    bg = mbi.fit(board).convert('RGB')
+    bg = ImageChops.multiply(bg, Image.new("RGB", bg.size, (185, 185, 185)))          # darken
+    grad = Image.new('RGB', (640, 1))
+    for x in range(640):
+        t = x / 639
+        grad.putpixel((x, 0), tuple(int(a + (b - a) * t) for a, b in zip(*VIP_GRAD)))
+    grad = grad.resize((640, 140))
+    im = Image.blend(bg, ImageChops.screen(bg, grad), .75).convert("RGBA")
+    im = Image.blend(im, grad.convert("RGBA"), .18)
+    # light rays + glow behind the title (the originals' sparkle backdrop, kept soft)
+    glow = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
+    dg = ImageDraw.Draw(glow)
+    dg.ellipse((40, 40, 470, 150), fill=(255, 150, 220, 80))
+    for i in range(9):
+        a = -math.pi * (.05 + .1 * i)
+        dg.polygon([(250, 150), (250 + math.cos(a - .04) * 700, 150 + math.sin(a - .04) * 700),
+                    (250 + math.cos(a + .04) * 700, 150 + math.sin(a + .04) * 700)], fill=(255, 220, 245, 26))
+    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(14)))
+    sp = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sp)
+    h = int(hashlib.md5(spec['board'].encode()).hexdigest(), 16)
+    for i in range(16):                                                               # sparkles (stable per board)
+        x, y, r = 20 + (h >> (3 * i)) % 440, 10 + (h >> (5 * i + 1)) % 120, 2 + (h >> (7 * i + 2)) % 3
+        ds.polygon([(x, y - 3 * r), (x + r * .5, y), (x, y + 3 * r), (x - r * .5, y)], fill=(255, 255, 255, 170))
+        ds.polygon([(x - 3 * r, y), (x, y - r * .5), (x + 3 * r, y), (x, y + r * .5)], fill=(255, 255, 255, 170))
+    im = Image.alpha_composite(im, sp)
+    # right: the board tile (gold frame of the preview) with a drop shadow, the Limited VIP Coin over its corner
+    tile = Image.open(os.path.join(src_dir, spec['tile'])).convert('RGBA')
+    tile = tile.resize((118, int(tile.height * 118 / tile.width)), Image.LANCZOS)
+    tx, ty = 508, (140 - tile.height) // 2 + 2
+    shd = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
+    shd.paste((20, 0, 30, 170), (tx + 4, ty + 5, tx + 4 + tile.width, ty + 5 + tile.height))
+    im = Image.alpha_composite(im, shd.filter(ImageFilter.GaussianBlur(4)))
+    im.alpha_composite(tile, (tx, ty))
+    coin = Image.open(os.path.join(src_dir, spec['icon'])).convert('RGBA')
+    coin = coin.resize((66, int(coin.height * 66 / coin.width)), Image.LANCZOS)
+    im.alpha_composite(coin, (tx - 40, 140 - coin.height - 4))
+    # lettering
+    title, sub = spec.get('title', ''), spec.get('sub', '')
+    f = _fit_font(title, 44, 450, 6)
+    gold_text(im, (18, 64 if sub else 76), title, f, outline=6, bot=(240, 120, 10))
+    if sub:
+        fs = _fit_font(sub, 24, 440, 3)
+        ImageDraw.Draw(im).text((24, 108), sub, font=fs, anchor='lm', fill=(255, 255, 255, 255),
+                                stroke_width=3, stroke_fill=(70, 10, 60, 255))
+    return _tab(im, spec.get('tab', 'VIP Quest'), VIP_RED[0], VIP_RED[1], VIP_RED[2], 100)
+
+
 def source_counts(rules, src_dir):
-    """banners of the rules (entries + campaigns): {'original': n, 'plate': n, 'missing': [names not in src_dir]}"""
-    names = [e.get('banner', '') for e in rules.get('entries', [])]
-    names += [c.get('banner', '') for k, c in (rules.get('campaigns') or {}).items() if not k.startswith('_')]
-    r = {'original': 0, 'plate': 0, 'missing': []}
-    for b in names:
-        if not b:
+    """banners of the rules (entries + campaigns): {'original': n, 'plate': n, 'reconstructed': n, 'missing': [names
+    not in src_dir]}"""
+    names = [(e.get('banner', ''), None) for e in rules.get('entries', [])]
+    names += [(c.get('banner', ''), c.get('reconstruct')) for k, c in (rules.get('campaigns') or {}).items() if not k.startswith('_')]
+    r = {'original': 0, 'plate': 0, 'reconstructed': 0, 'missing': []}
+    for b, rc in names:
+        if not b and rc and reconstruct_sources(rc, src_dir):
+            r['reconstructed'] += 1
+        elif not b:
             r['plate'] += 1
         elif os.path.exists(os.path.join(src_dir, b)):
             r['original'] += 1
@@ -325,19 +422,25 @@ def source_counts(rules, src_dir):
     return r
 
 
-def build_all(index, src_dir, out_dir, mode, enemies=None):
-    """writes the PNGs of the catalogue banner and of every entry; returns the counts original / plate / catalog"""
+def build_all(index, src_dir, out_dir, mode, enemies=None, rules=None):
+    """writes the PNGs of the catalogue banner and of every entry; returns the counts original / plate / catalog /
+    reconstructed (rules: server/special_periods.json, whose campaigns[key].reconstruct rebuilds a lost banner)"""
     os.makedirs(out_dir, exist_ok=True)
-    n = {'original': 0, 'plate': 0, 'catalog': 0}
+    n = {'original': 0, 'plate': 0, 'catalog': 0, 'reconstructed': 0}
+    camps = (rules or {}).get('campaigns') or {}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
         mbi.save_png(catalog_banner(src_dir, enemies), os.path.join(out_dir, '%d.png' % cat['evStageId']), mode)
         n['catalog'] += 1
     for e in index.get('entries', []):
         p = os.path.join(src_dir, e['banner']) if e.get('banner') else None
+        rc = (camps.get(e.get('key')) or {}).get('reconstruct')
         if p and os.path.exists(p):
             im = mbi.fit(Image.open(p))
             n['original'] += 1
+        elif not p and reconstruct_sources(rc, src_dir):
+            im = reconstructed_banner(rc, src_dir)
+            n['reconstructed'] += 1
         else:
             im = plate(e['name'], e.get('family', '')).convert('RGBA')
             n['plate'] += 1
@@ -356,12 +459,19 @@ def main():
     ap.add_argument('--src', default=os.path.join(ROOT, 'reference', 'special_banners'))
     ap.add_argument('--out', default=os.path.join(REPO, 'server', 'game_data', 'special_img'))
     ap.add_argument('--enemies', default=ENEMIES, help='enemy rigs (LWF + BTF) for the catalogue figures; missing -> none')
+    ap.add_argument('--rules', default=os.path.join(REPO, 'server', 'special_periods.json'),
+                    help='campaigns[key].reconstruct: banners rebuilt from local sources (originals lost)')
     ap.add_argument('--mode', choices=['palette', 'full'], default='palette')
     a = ap.parse_args()
     with open(a.index, encoding='utf-8') as f:
         index = json.load(f)
-    r = build_all(index, a.src, a.out, a.mode, a.enemies)
-    print('special banners: %d originals, %d plates, %d catalog -> %s' % (r['original'], r['plate'], r['catalog'], a.out))
+    rules = None
+    if os.path.exists(a.rules):
+        with open(a.rules, encoding='utf-8') as f:
+            rules = json.load(f)
+    r = build_all(index, a.src, a.out, a.mode, a.enemies, rules)
+    print('special banners: %d originals, %d reconstructed, %d plates, %d catalog -> %s'
+          % (r['original'], r['reconstructed'], r['plate'], r['catalog'], a.out))
 
 
 if __name__ == '__main__':

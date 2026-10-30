@@ -61,6 +61,8 @@ The **Adamantite Ore Challenge** and **Mythril Madness** are not available: thei
 
 The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost; a VIP campaign whose quests are not known has one quest of its theme. Rewards that do not exist in this version are replaced by the closest one or left out, and the **VIP! Skill** quest is not available.
 
+Two campaign banners, **Anniversary Extravaganza: Limited VIP Boards!** and **Limited VIP Coin Skill Board!**, are **reconstructed** from in-game screenshots of their boards, because the original banners are lost.
+
 ## Support Medal Cost
 
 **INFORMATION** · 10/27

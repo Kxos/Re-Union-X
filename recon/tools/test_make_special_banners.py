@@ -76,7 +76,7 @@ try:
     for f in ('7000.png', '7001.png', '7001-kept.png', '7002.png', '7002-kept.png', '7003.png', '7003-kept.png', '7004.png', '7004-kept.png', '7005.png', '7005-kept.png'):
         check(os.path.exists(os.path.join(out, f)) and size(f) == (640, 140), '%s: 640x140' % f)
     check(not os.path.exists(os.path.join(out, '7000-kept.png')), 'no -kept for the catalogue banner (never pinned)')
-    check(r == {'original': 3, 'plate': 2, 'catalog': 1}, 'counts %s' % r)
+    check(r == {'original': 3, 'plate': 2, 'catalog': 1, 'reconstructed': 0}, 'counts %s' % r)
     a = Image.open(os.path.join(out, '7001.png')).convert('RGB')
     check(a.getpixel((320, 100))[0] > 150, 'original resized (red), not a plate')
     g = Image.open(os.path.join(out, '7003.png')).convert('RGB')
@@ -143,6 +143,45 @@ try:
     solid_l = col[0]
     check(min(col) >= solid_l - 6, 'KEPT fade: nothing darker than the solid tab (min %.0f, solid %.0f)' % (min(col), solid_l))
     check(all(b >= a - 3 for a, b in zip(col, col[1:])), 'KEPT fade gets lighter towards the right: %s' % [int(v) for v in col])
+    # round 3 (30-10): reconstructed banners of the campaigns whose original is lost (rules.campaigns[key].reconstruct):
+    # a crop of the real board screenshot blended into the VIP pink, the red «VIP Quest» tab, the gold title, the coin
+    # icon and the board tile on the right
+    board = Image.new('RGB', (1919, 819), (10, 20, 60))
+    bd = __import__('PIL.ImageDraw', fromlist=['Draw']).Draw(board)
+    for x in range(100, 1900, 160):
+        for y in range(80, 800, 160):
+            bd.ellipse((x, y, x + 90, y + 90), fill=(90, 110, 200))
+    board.save(os.path.join(src, 'Board.png'))
+    Image.new('RGBA', (91, 94), (200, 40, 120, 255)).save(os.path.join(src, 'Coin.png'))
+    Image.new('RGBA', (258, 259), (220, 180, 60, 255)).save(os.path.join(src, 'Tile.png'))
+    spec = {'board': 'Board.png', 'crop': [0, 100, 1919, 520], 'icon': 'Coin.png', 'tile': 'Tile.png',
+            'title': 'Limited VIP Boards!', 'sub': 'Anniversary Extravaganza'}
+    rc = m.reconstructed_banner(spec, src).convert('RGB')
+    check(rc.size == (640, 140), 'reconstructed banner 640x140 (%s)' % (rc.size,))
+    pl = m.plate('Anniversary Extravaganza: Limited VIP Boards!', 'SQ21').convert('RGB')
+    check(mean(ImageChops.difference(rc, pl)) > 20, 'reconstructed banner differs from the plain plate')
+    check(sum(gold(p) for p in pixels(rc.crop((10, 34, 470, 92)))) > 1500, 'reconstructed title in gold lettering')
+    check(sum(brown(p) for p in pixels(rc.crop((10, 34, 470, 92)))) > 600, 'reconstructed title with a dark outline')
+    check(sum(red(rc.getpixel((x, y))) for x in range(0, 120, 2) for y in range(8, 32, 2)) > 250, 'red «VIP Quest» tab top left')
+    check(sum(1 for p in pixels(rc.crop((480, 0, 640, 140))) if p[0] > 200 and 150 < p[1] < 200 and p[2] < 90) > 800,
+          'board tile on the right')
+    check(sum(1 for p in pixels(rc.crop((440, 40, 640, 140))) if p[0] > 180 and p[1] < 70 and 90 < p[2] < 150) > 300,
+          'Limited VIP Coin icon on the right')
+    board2 = Image.new('RGB', (1919, 819), (10, 20, 60))
+    board2.save(os.path.join(src, 'Board2.png'))
+    rc2 = m.reconstructed_banner(dict(spec, board='Board2.png'), src).convert('RGB')
+    check(mean(ImageChops.difference(rc.crop((0, 100, 640, 140)), rc2.crop((0, 100, 640, 140)))) > 3,
+          'background made of the board screenshot')
+    rx = {'catalog': {}, 'entries': [
+        {'key': 'C1', 'evStageId': 7201, 'name': 'Limited VIP Boards!', 'family': 'SQ21', 'banner': '', 'removed': ''},
+        {'key': 'C2', 'evStageId': 7202, 'name': 'Plain', 'family': 'SQ21', 'banner': '', 'removed': ''}]}
+    rr = m.build_all(rx, src, os.path.join(tmp, 'rout'), 'full', rules={'campaigns': {'C1': {'reconstruct': spec}}})
+    check(rr == {'original': 0, 'plate': 1, 'catalog': 0, 'reconstructed': 1}, 'reconstructed counted %s' % rr)
+    got = Image.open(os.path.join(tmp, 'rout', '7201.png')).convert('RGB')
+    check(mean(ImageChops.difference(got, rc)) < 2 and os.path.exists(os.path.join(tmp, 'rout', '7201-kept.png')),
+          'build_all writes the reconstructed banner and its -kept copy')
+    lostsrc = m.build_all(rx, os.path.join(tmp, 'nothing'), os.path.join(tmp, 'rout2'), 'full', rules={'campaigns': {'C1': {'reconstruct': spec}}})
+    check(lostsrc['plate'] == 2 and lostsrc['reconstructed'] == 0, 'reconstruct sources missing -> plate %s' % lostsrc)
     check(m.plate_color('SQ13') == m.plate_color('SQ13') and m.plate_color('SQ13') != m.plate_color('SQ22'), 'family colours')
     check(m.plate_color('SQ21') == m.plate_color('SQ22') == m.plate_color('SQ23'), 'VIP campaigns (SQ21) and Materials (SQ23): the VIP pink of SQ22')
     # Task 14: the real rules resolve every mapped banner (entries + campaigns) to an original of reference\special_banners
@@ -153,9 +192,14 @@ try:
             rules = json.load(f)
         c = m.source_counts(rules, REF)
         named = sum(1 for e in rules['entries'] if e.get('banner')) + sum(1 for k, v in rules['campaigns'].items() if not k.startswith('_') and v.get('banner'))
-        check(c['missing'] == [] and c['original'] == named and c['original'] >= 180 and c['plate'] == 2,
-              'real rules: originals vs plates %s (named %d)' % (c, named))
-        print('real rules: %d originals, %d plates' % (c['original'], c['plate']))
+        check(c['missing'] == [] and c['original'] == named and c['original'] >= 180 and c['plate'] == 0
+              and c['reconstructed'] == 2, 'real rules: originals vs plates %s (named %d)' % (c, named))
+        print('real rules: %d originals, %d reconstructed, %d plates' % (c['original'], c['reconstructed'], c['plate']))
+        for k in ('C44151', 'C48395'):
+            sp = rules['campaigns'][k].get('reconstruct') or {}
+            ok = all(os.path.exists(os.path.join(REF, sp.get(f, '') or '?')) for f in ('board', 'icon', 'tile'))
+            rb = m.reconstructed_banner(sp, REF).convert('RGB') if ok else None
+            check(rb is not None and rb.size == (640, 140), '%s reconstructed from the local sources' % k)
         # round 2: the Limited VIP Board notice images become the banner unchanged in content (640x140 already)
         for n in ('Notice 71999 Limited Winter VIP Board banner (notice image).png', 'Notice 72714 New Year Limited VIP Boards banner (notice image).png'):
             orig = Image.open(os.path.join(REF, n)).convert('RGB')
