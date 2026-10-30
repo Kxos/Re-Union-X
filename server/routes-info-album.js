@@ -140,6 +140,17 @@ const NOTICES = [
       'Only Quest 1 survives as an original Proud quest file. The other quests are rebuilt from the original game code (how conditions and objectives work) and from the community wiki (levels, Keyblades, conditions, objectives and rewards of each quest).',
       'Proud Quests cost **0 AP**, as at the end of the original game (at launch they cost 10).',
       'Proud Quests 891, 892 and 913 have no special attack condition: none is recorded for them.'] },
+  // scheda Special (docs/superpowers/specs/2026-10-30-special-tab-design.md, sezione 9)
+  { date: '10/30', tag: 'IMPORTANT', title: 'Special Quests',
+    body: ['The **Special** tab of the Quests screen is open once you finish Story Quest 6. It **follows your Story**: it shows the Special Quests of the period of the original game that matches your story date, with the same weekly rotation as the Shop.',
+      'Weekday quests open on their original weekdays. The others are shown with a **padlock**. **VIP**, earned by finishing all the **Weekly Missions** (see the VIP Draws notice), opens every weekday quest on any day and shows the VIP quests. Quests opened this way carry an **Available** plate.',
+      'The **Unlock All** button and tapping a locked banner have **no function**, because nothing is sold. Because locked banners are shown, the Shop button "Buy discounted 3,000 Jewel pack!" lights up, and it has no function either.',
+      '## Special Catalog',
+      'The first banner is the **Special Catalog**. **Details** opens the catalogue of every period. You can keep **one quest** from the past: it appears under the catalogue with a KEPT banner, like the kept banner of the Shop (**not original**). A quest replaced by a better later version cannot be kept. Kept weekday quests can be played on any day; kept VIP quests need the VIP benefit.',
+      'Tapping the Special Catalog banner starts a **training** quest: it costs no AP, gives no Lux and no rewards. One path leads to a Shadow that clears the quest; the other leads to a training dummy that cannot be defeated, so leave it with **Give Up**. The chests on that path fill your special attack gauge, which is not kept after the quest.',
+      '## Not available',
+      'The **Adamantite Ore Challenge** and **Mythril Madness** are not available: their materials have **no use** in this version of the game.',
+      'The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost.'] },
   // missioni di storia 526-979 (I-009, piano docs/superpowers/plans/2026-10-21-missioni-526-979.md, make-story-oltre.js):
   // parti ricostruite (617/661, nemici, livelli dei nemici 876-979, keyblade, 978) e tappabuchi rimasti dei mondi nuovi;
   // obiettivi (codici del client) e trofei (materiali 61-63) originali dal 21-10; aspetto Dark Road della stessa specie

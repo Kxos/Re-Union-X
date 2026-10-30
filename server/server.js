@@ -2241,6 +2241,8 @@ function respondStageClear(res, req) {
     if (cleared.length) console.log(`[stage] ${stageId}: obiettivi ${cleared} senza gli altri (tutti insieme): non contano`);
     cleared.length = 0;
   }
+  // Daily Cid: l'azzeramento della settimana nuova PRIMA di scrivere gli obiettivi di questa partita (altrimenti li cancellerebbe)
+  if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
   for (const n of cleared.filter((n) => !before.includes(n))) {

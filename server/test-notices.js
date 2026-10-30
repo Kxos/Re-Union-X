@@ -107,6 +107,19 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(diff.some((s) => /Keep in the Shop/.test(s) && /did not exist in the original/.test(s)), 'differenze: banner fissato');
   check(diff.some((s) => /Platinum Tickets or Draw Tickets/.test(s) && /only after a banner that uses them/.test(s)), 'differenze: Limited coi biglietti');
 }
+// Special Quests (Special tab, 30-10)
+{
+  const sq = n.NOTICES.find((x) => x.title === 'Special Quests');
+  const t = sq ? sq.body.join(' ') : '';
+  check(sq && sq.tag === 'IMPORTANT' && sq.date === '10/30', 'Special: IMPORTANT 10/30');
+  check(/follows your Story/.test(t), 'Special: segue la storia');
+  check(/Special Catalog/.test(t) && /one quest/.test(t), 'Special: catalogo, una quest');
+  check(/Weekly Missions/.test(t), 'Special: VIP dalle missioni settimanali');
+  check(/Adamantite Ore Challenge/.test(t) && /Mythril Madness/.test(t) && /no use/.test(t), 'Special: sfide non ripristinate');
+  check(/Unlock All/.test(t) && /no function/.test(t), 'Special: Unlock All');
+  check(/training/.test(t) && /Give Up/.test(t), 'Special: allenamento');
+  check(/reconstructed/.test(t), 'Special: drop ricostruiti');
+}
 n.NOTICES.push({ date: '1', tag: 'X', title: 'a<b>"&', body: ['<script>'] });
 p = n.noticesPage(U(2026, 10, 16, 15));
 n.NOTICES.pop();
