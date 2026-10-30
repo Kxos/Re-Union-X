@@ -111,7 +111,13 @@ boundaries in data, not in code.
   tables (appendix B, 176 versions): own stage and evStage id (7700-7875, frozen in `special_periods.json` `weekly`),
   the row's three rewards, VIP, listed only in the Shop weeks it covers (it takes its set's place in the tab), pinnable
   per version from a later period; the catalogue shows each set as one quest with its weeks as versions. Weeks without
-  a row keep the set's representative entry (fallback). VIP! Skill stays out (skill-assigned medals).
+  a row keep the set's representative entry (fallback).
+  Round 18: VIP! Skill joins as a weekly set (entry `vip-skill` 7092, 2019-05-27 to 2021-02-28; 25 frozen versions
+  7876-7900, 7893 dropped as a repeated wiki row). A skill reward «1 6★ <skill>» is a **Scrooge 6★** (90126, the image
+  on khuxwiki) with that master skill at its maxLv 20: rules `sets["VIP! Skill"].skills` (18 texts, all exact master
+  names) and `skillCarrier`, stage row `submissionSkillType 1 / submissionSkillId / submissionSkillLv`, granted by
+  `grantObjectiveReward` in server.js into `player.medalSkills` (as the Shop's skill medals, `giveSkill`). A row whose
+  weeks are not consecutive (VIP! Skill 4 and 5 alternate) gives one version per run of weeks.
 - **All 120 WW week-limited VIP campaigns** are in scope (user, 30-10): each one appears in the rotation week that
   matches its original dates, with VIP, and is a separate catalogue entry pinnable under the VIP rule. Weeks without a
   campaign show only the permanent VIP quests of the period. They can be built after the permanent quests.

@@ -158,7 +158,8 @@
   {"key": "vip-materials-2", "evStageId": 7028, "quests": ["VIP! Chip & Dale (Materials quest)", "VIP! Huey & Dewey & Louie (Materials quest)"], "name": "VIP! Materials 2", "family": "SQ23", "periods": [4,5], "from": "2020-10-12", "days": "all", "vip": true, "replacedBy": null, "removed": "", "resetGroup": "", "objectives": {"VIP! Chip & Dale (Materials quest)": ["Complete without having to continue -> Chip & Dale 6★ x1", "Complete without having to continue -> Chip & Dale 6★ x1", "Complete without having to continue -> Chip & Dale 6★ x1"]}, "banner": "Special - VIP Materials quest banner KHUX.png", "drops": [], "_note": "the other two SQ23 Materials quests; «SP Chip & Dale 6★» is not in the 4.3.1 master: closest = Chip & Dale 6★"},
   {"key": "vip-spirit-part", "evStageId": 7029, "quests": ["VIP! Jewels & Spirit Part Quest"], "name": "VIP! Jewels & Spirit Part", "family": "SQ22", "periods": [3,4], "from": "2020-03-09", "days": "all", "vip": true, "replacedBy": null, "removed": "", "resetGroup": "", "rewards": ["Jewel x1400", "Balloon Olaf & Sven (♂) x1", "Balloon Olaf & Sven (♀) x1"], "banner": "Special - VIP Get Balloon Olaf & Sven spirit part and 1400 Jewels! banner KHUX.png", "drops": [], "_note": "deferred from Task 7: objective rewards of the week 2020-04-13 (appendix B; spirit parts are avatar parts of both genders, as VIP! Jewels & Avatar Parts: 1400 Jewels + ♂ + ♀ instead of the original 3rd reward Moogle 6★); first week 2020-03-09, last listed 2020-08-24 (periods 3-4)"},
   {"key": "mythril-madness", "evStageId": 7090, "series": ["Mythril Madness"], "name": "Mythril Madness", "family": "SQ06", "periods": [1, 2], "days": ["Sat", "Sun"], "vip": false, "replacedBy": null, "removed": "no-use", "resetGroup": "", "banner": "Special - Mythril Madness banner KHUX.png", "drops": [], "_note": "removed from every period (spec 6, user 30-10): Mythril Stone/Gem/Crystal feed no keyblade upgrade in 4.3.1"},
-  {"key": "adamantite", "evStageId": 7091, "series": ["Adamantite Ore Challenge (Olympia)", "Adamantite Ore Challenge (Treasure Trove)", "Adamantite Ore Challenge (Three Wishes)", "Adamantite Ore Challenge (Lady Luck)", "Adamantite Ore Challenge (Starlight)", "Adamantite Ore Challenge (Divine Rose)", "Adamantite Ore Challenge (Moogle O' Glory)", "Adamantite Ore Challenge (Fairy Stars)", "Adamantite Ore Challenge (Stroke of Midnight)"], "name": "Adamantite Ore Challenge", "family": "SQ08", "periods": [1, 2], "days": "all", "vip": false, "replacedBy": null, "removed": "no-use", "resetGroup": "", "banner": "Special - Adamantite Ore Challenge banner KHUX.png", "drops": [], "_note": "removed from every period (spec 6, user 30-10): Adamantite Ore feeds no keyblade upgrade in 4.3.1; one entry for the 9 keyblade series"}
+  {"key": "adamantite", "evStageId": 7091, "series": ["Adamantite Ore Challenge (Olympia)", "Adamantite Ore Challenge (Treasure Trove)", "Adamantite Ore Challenge (Three Wishes)", "Adamantite Ore Challenge (Lady Luck)", "Adamantite Ore Challenge (Starlight)", "Adamantite Ore Challenge (Divine Rose)", "Adamantite Ore Challenge (Moogle O' Glory)", "Adamantite Ore Challenge (Fairy Stars)", "Adamantite Ore Challenge (Stroke of Midnight)"], "name": "Adamantite Ore Challenge", "family": "SQ08", "periods": [1, 2], "days": "all", "vip": false, "replacedBy": null, "removed": "no-use", "resetGroup": "", "banner": "Special - Adamantite Ore Challenge banner KHUX.png", "drops": [], "_note": "removed from every period (spec 6, user 30-10): Adamantite Ore feeds no keyblade upgrade in 4.3.1; one entry for the 9 keyblade series"},
+  {"key": "vip-skill", "evStageId": 7092, "quests": ["VIP! Skill"], "name": "VIP! Skill", "family": "SQ22", "periods": [3, 4, 5], "from": "2019-05-27", "to": "2021-02-28", "days": "all", "vip": true, "replacedBy": null, "removed": "", "resetGroup": "", "rewards": ["Scrooge 6★ {ATK B X Max & Lux++} x1", "Magic Mirror 6★ x1", "Moogle 6★ x1"], "banner": "Special - VIP VIP! Skill banner KHUX.png", "drops": [], "_note": "round 18: recurring VIP set restored. Objective rewards of the week 2020-09-07 (appendix B, first «VIP! Skill» banner): the skill medal is a Scrooge 6★ carrying the skill at its max level (khuxwiki VIP! Skill: Scrooge 6★ image next to every skill reward; «{skill}» = assigned skill, make-special.js skillPart); first week 2019-05-27, last 2021-02-22 (appendix B); weeks without a row show these rewards (reconstructed)"}
  ],
  "campaignSets": {
   "_note": "shared quest sets of the campaigns (make-special.js campaignEntries); pack: the original set gave `total` items, one per quest (7 quests); a banner holds at most 5 quests, so the last quest kept gives the rest (builder's call)",
@@ -293,7 +294,7 @@
   "C72714": {"evStageId": 7620, "generic": true, "banner": "Notice 72714 New Year Limited VIP Boards banner (notice image).png", "parts": [{"quest": "VIP! New Year Board", "rewards": ["SN++ - Remy 7★ x1", "Moogle 6★ x1", "Moogle 6★ x1"]}], "_note": "as C71999"}
  },
  "weekly": {
-  "_note": "recurring VIP sets, one version per week (round 17, user 31-10 «faithful»; make-special.js weeklyEntries): rows of the catalogue's vip_recurring_weekly (appendix B) -> week versions of the set's entry, key <entry>@<first Monday> («#2»: a second row starting the same week), evStageId frozen here (from 7700; a new row takes the next free id), banner = the week's original khuxwiki banner when the hunt has it (referencespecial_banners), else the entry's. Rewards from the row; aliases: the 4.3.1 master lacks the name -> closest one, null = left out (the slot gets Moogle 6★, the sets' filler). Weeks without a row keep the entry (fallback, its rewards of one representative week). Sets without weekly rows (VIP! Magic Broom & Magic Mirror, VIP! Materials) stay one entry; VIP! Skill is left out (skill-assigned medals cannot be granted). Rows before an entry's from (vip-medal, vip-jewels-avatar: 2019-03-04) are the 2019 campaigns C49538-C50518, clipped.",
+  "_note": "recurring VIP sets, one version per week (round 17, user 31-10 «faithful»; make-special.js weeklyEntries): rows of the catalogue's vip_recurring_weekly (appendix B) -> week versions of the set's entry, key <entry>@<first Monday> («#2»: a second row starting the same week), evStageId frozen here (from 7700; a new row takes the next free id), banner = the week's original khuxwiki banner when the hunt has it (referencespecial_banners), else the entry's. Rewards from the row; aliases: the 4.3.1 master lacks the name -> closest one, null = left out (the slot gets Moogle 6★, the sets' filler). Weeks without a row keep the entry (fallback, its rewards of one representative week). Sets without weekly rows (VIP! Magic Broom & Magic Mirror, VIP! Materials) stay one entry. VIP! Skill (round 18): skill rewards -> the carrier medal with the skill at max level (sets.skills / skillCarrier); a row whose weeks are not consecutive gives one version per run of weeks. Rows before an entry's from (vip-medal, vip-jewels-avatar: 2019-03-04) are the 2019 campaigns C49538-C50518, clipped.",
   "sets": {
    "VIP! Medal Quest": {"entry":"vip-medal"},
    "VIP! Gems": {"entry":"vip-gems"},
@@ -301,7 +302,27 @@
    "VIP! Dual Meow Wow": {"entry":"vip-dual-meow-wow"},
    "VIP! Jewels & Spirit Part Quest": {"entry":"vip-spirit-part","bothGenders":true,"_note":"spirit parts as avatar parts of both genders (as the entry): ♂ and ♀ in slots 2-3 instead of the Moogle 6★ when the master has both"},
    "VIP! Jewels & Avatar Parts": {"entry":"vip-jewels-avatar"},
-   "VIP! Subslot Medal Quest": {"entry":"vip-subslot"}
+   "VIP! Subslot Medal Quest": {"entry":"vip-subslot"},
+   "VIP! Skill": {"entry":"vip-skill","skillCarrier":"Scrooge","skills":{
+    "_note":"round 18: catalogue skill text of «1 6★ <skill>» -> master skill name (server/master_data/skill.json, 4.3.1 table of 163 skills); all 18 texts are master names exactly (checked 30-10, tmp/vipskill/SKILLS.md). The carrier is the Scrooge 6★ (90126) shown next to each skill reward on khuxwiki VIP! Skill; the skill comes at its maxLv (20, «Max»), submissionSkillType 1 / Id / Lv of the stage row",
+    "ATK B VIII Max & Paralysis":"ATK B VIII Max & Paralysis",
+    "Attack Boost X Max":"Attack Boost X Max",
+    "ATK B X Max & Lux++":"ATK B X Max & Lux++",
+    "AB IX Max & Lux++ & GA 2":"AB IX Max & Lux++ & GA 2",
+    "ATK B XIII Max & Paralysis":"ATK B XIII Max & Paralysis",
+    "Defense Boost VII Max":"Defense Boost VII Max",
+    "ATK B XIV Max & GA 2":"ATK B XIV Max & GA 2",
+    "AB X Max & Lux++ & GA 2":"AB X Max & Lux++ & GA 2",
+    "ATK B XIV Max & Paralysis":"ATK B XIV Max & Paralysis",
+    "ATK B XIV Max & Sleep":"ATK B XIV Max & Sleep",
+    "ATK B XIII Max & GA 0":"ATK B XIII Max & GA 0",
+    "AB X Max & Lux++ & GA 1":"AB X Max & Lux++ & GA 1",
+    "ATK B XI Max & Lux++":"ATK B XI Max & Lux++",
+    "ATK B XIV Max & GA 1":"ATK B XIV Max & GA 1",
+    "AB X Max & Lux++ & GA 0":"AB X Max & Lux++ & GA 0",
+    "ATK B XIV Max & GA 0":"ATK B XIV Max & GA 0",
+    "DEF Boost VIII Max":"DEF Boost VIII Max",
+    "Attack Boost XV Max":"Attack Boost XV Max"}}
   },
   "aliases": {
    "_note": "closest master name (builder's call): (EX) medals of the titles -> [EX], «(Boosted)» -> the plain medal (boosted copies are not separate rows), Key Art 8 -> «#8», Holiday Draw Tickets -> Draw Tickets, the spirit parts «Goofy's Hat» / «Donald's Hat» / «XIII Replica Hood» -> the avatar parts «Goofy: Hat» / «Donald: Hat» / «Organization XIII Coat: Hood»; null = not in 4.3.1, left out",
@@ -497,7 +518,32 @@
    "vip-jewels-avatar@2021-02-15": {"evStageId": 7872},
    "vip-jewels-avatar@2021-02-22": {"evStageId": 7873},
    "vip-subslot@2020-03-23": {"evStageId": 7874},
-   "vip-subslot@2020-04-13": {"evStageId": 7875}
+   "vip-subslot@2020-04-13": {"evStageId": 7875},
+   "vip-skill@2019-05-27": {"evStageId": 7876, "banner": "Special - VIP Get NEW SKILL! - ATK B VIII Max & Paralysis banner KHUX.png"},
+   "vip-skill@2019-07-08": {"evStageId": 7877, "banner": "Special - VIP Get NEW SKILL! - Attack Boost X Max banner KHUX.png"},
+   "vip-skill@2020-09-07": {"evStageId": 7878, "banner": "Special - VIP VIP! Skill banner KHUX.png"},
+   "vip-skill@2020-09-14": {"evStageId": 7879, "banner": "Special - VIP VIP! Skill 2 banner KHUX.png"},
+   "vip-skill@2020-09-21": {"evStageId": 7880, "banner": "Special - VIP VIP! Skill 3 banner KHUX.png"},
+   "vip-skill@2020-09-28": {"evStageId": 7881, "banner": "Special - VIP VIP! Skill 4 banner KHUX.png", "_note": "run 1 of 3 of the row «VIP! Skill 4» (weeks 09/28, 10/19, 11/09/20, alternating with «VIP! Skill 5»)"},
+   "vip-skill@2020-10-19": {"evStageId": 7882, "banner": "Special - VIP VIP! Skill 4 banner KHUX.png", "_note": "run 2 of 3 of the row «VIP! Skill 4»"},
+   "vip-skill@2020-11-09": {"evStageId": 7883, "banner": "Special - VIP VIP! Skill 4 banner KHUX.png", "_note": "run 3 of 3 of the row «VIP! Skill 4»"},
+   "vip-skill@2020-10-12": {"evStageId": 7884, "banner": "Special - VIP VIP! Skill 5 banner KHUX.png", "_note": "run 1 of 2 of the row «VIP! Skill 5» (weeks 10/12, 11/02/20)"},
+   "vip-skill@2020-11-02": {"evStageId": 7885, "banner": "Special - VIP VIP! Skill 5 banner KHUX.png", "_note": "run 2 of 2 of the row «VIP! Skill 5»"},
+   "vip-skill@2020-11-23": {"evStageId": 7886, "banner": "Special - VIP VIP! Skill 6 banner KHUX.png"},
+   "vip-skill@2020-11-30": {"evStageId": 7887, "banner": "Special - VIP VIP! Skill 6 banner KHUX.png"},
+   "vip-skill@2020-12-07": {"evStageId": 7888, "banner": "Special - VIP VIP! Skill banner KHUX.png"},
+   "vip-skill@2020-12-14": {"evStageId": 7889, "banner": "Special - VIP VIP! Skill 7 banner KHUX.png"},
+   "vip-skill@2020-12-21": {"evStageId": 7890, "banner": "Special - VIP VIP! Skill 8 banner KHUX.png"},
+   "vip-skill@2020-12-28": {"evStageId": 7891, "banner": "Special - VIP VIP! Skill 8 banner KHUX.png"},
+   "vip-skill@2021-01-04": {"evStageId": 7892, "banner": "Special - VIP VIP! Skill 6 banner KHUX.png"},
+   "vip-skill@2021-01-04#2": {"evStageId": 7893, "banner": "Special - VIP VIP! Skill 6 banner KHUX.png", "dropped": "round 18: the khuxwiki table lists the row 01/04/21 «VIP! Skill 6» twice with the same rewards (a copy, not a second banner); id 7893 reserved, never reused"},
+   "vip-skill@2021-01-11": {"evStageId": 7894, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-01-18": {"evStageId": 7895, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-01-25": {"evStageId": 7896, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-02-01": {"evStageId": 7897, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-02-08": {"evStageId": 7898, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-02-15": {"evStageId": 7899, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"},
+   "vip-skill@2021-02-22": {"evStageId": 7900, "banner": "Special - VIP VIP! Skill 9 banner KHUX.png"}
   }
  }
 }

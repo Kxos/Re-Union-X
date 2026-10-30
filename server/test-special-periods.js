@@ -143,15 +143,18 @@ check(CAMP.filter(([, c]) => c.banner).length === 118, `campaigns with an origin
 const WK = rules.weekly || {};
 const WV = Object.entries(WK.versions || {}).filter(([k]) => !k.startsWith('_'));
 const WS = Object.entries(WK.sets || {}).filter(([k]) => !k.startsWith('_'));
-check(WS.map(([, v]) => v.entry).sort().join() === 'vip-draw-ticket,vip-dual-meow-wow,vip-gems,vip-jewels-avatar,vip-medal,vip-spirit-part,vip-subslot', `weekly sets: ${WS.map(([, v]) => v.entry)}`);
+check(WS.map(([, v]) => v.entry).sort().join() === 'vip-draw-ticket,vip-dual-meow-wow,vip-gems,vip-jewels-avatar,vip-medal,vip-skill,vip-spirit-part,vip-subslot', `weekly sets: ${WS.map(([, v]) => v.entry)}`);
 check(WS.every(([, v]) => { const en = byKey.get(v.entry); return en && en.vip && en.family === 'SQ22' && (en.quests || []).length === 1 && !en.removed; }), 'weekly sets on one-quest VIP SQ22 entries');
-check(!WS.some(([k]) => /Skill/.test(k)), 'VIP! Skill is not a weekly set (skill-assigned medals)');
-check(WV.length === 176 && WV.every(([k, v]) => /^vip-[a-z-]+@\d{4}-\d\d-\d\d(#\d)?$/.test(k) && WS.some(([, s]) => k.startsWith(s.entry + '@')) && v.evStageId >= 7700 && v.evStageId <= 7999), `weekly versions: 176 keys <entry>@<Monday>, ids 7700-7999 (${WV.length})`);
+const SKS = (WK.sets || {})['VIP! Skill'] || {};
+check(SKS.entry === 'vip-skill' && SKS.skillCarrier === 'Scrooge' && Object.keys(SKS.skills || {}).filter((k) => !k.startsWith('_')).length === 18, 'VIP! Skill: weekly set with carrier Scrooge and 18 skill texts (round 18)');
+check(Object.entries(SKS.skills || {}).every(([k, v]) => k.startsWith('_') || (typeof v === 'string' && v)), 'VIP! Skill: every skill text maps to a master skill name');
+check(WV.length === 201 && WV.every(([k, v]) => /^vip-[a-z-]+@\d{4}-\d\d-\d\d(#\d)?$/.test(k) && WS.some(([, s]) => k.startsWith(s.entry + '@')) && v.evStageId >= 7700 && v.evStageId <= 7999), `weekly versions: 201 keys <entry>@<Monday>, ids 7700-7999 (${WV.length})`);
 const allIds = [...E.map((e) => e.evStageId), ...CAMP.map(([, c]) => c.evStageId), ...WV.map(([, v]) => v.evStageId)];
 check(new Set(allIds).size === allIds.length, 'evStageIds unique across entries, campaigns and week versions');
 check(WV.every(([k]) => new Date(k.slice(k.indexOf('@') + 1, k.indexOf('@') + 11) + 'T00:00:00Z').getUTCDay() === 1), 'week versions start on a Monday');
 check(WV.every(([, v]) => !v.banner || BANNER_RE.test(v.banner)), 'week version banners are khuxwiki names');
-check(WV.filter(([, v]) => v.dropped).map(([k, v]) => `${k}:${v.evStageId}`).join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701', 'fix round 1: the two clipped 2019-03-04 Medal Quest rows dropped, ids 7700 / 7701 reserved');
+check(WV.filter(([, v]) => v.dropped).map(([k, v]) => `${k}:${v.evStageId}`).join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701,vip-skill@2021-01-04#2:7893', 'fix round 1: the two clipped 2019-03-04 Medal Quest rows dropped, ids 7700 / 7701 reserved; round 18: the repeated VIP! Skill row of 2021-01-04, id 7893 reserved');
+check(WV.filter(([k]) => k.startsWith('vip-skill@')).map(([, v]) => v.evStageId).join() === Array.from({ length: 25 }, (_, i) => 7876 + i).join(), 'round 18: VIP! Skill week versions frozen at 7876-7900, after the round-17 max 7875');
 const BANNERS = process.env.KHUX_SPECIAL_BANNERS || 'D:\\Progetto_Restauro_KH_UX\\reference\\special_banners';
 if (fs.existsSync(BANNERS)) {
   const have = new Set(fs.readdirSync(BANNERS));
