@@ -353,6 +353,34 @@ The screens have their own APIs, described in the area files: medals
     others: master `eventCategory` 4 = High Score, else plain list). It cannot be disabled.
   - **Details button**: shown when master `evStage.detailUrl` is not empty, also on Special banners; opens the
     Information2 WebView with `detailUrl?<session params>` (no `?` in the URL). Verified with `/web/beginner`.
+- Bench Special spike 30-10 (rev 214, plan `docs/superpowers/plans/2026-10-30-special-tab.md` Task 1; screenshots
+  `sp5`-`sp20`):
+  - **Stage rows**:
+    - a stage row with **`stageKind` 2**, `id` = `stageId` 970001 and `stageBinId` 1040 works as a Special quest;
+    - the quest list shows its name, AP, objectives and target;
+    - Begin sends `/stage/start` with `stageId` 970001 and **`eventId` = the `eventStageId`** (7001);
+    - the map loads from `stageBinId` (the server must map the POI the same way);
+    - RESULTS shows the row name.
+  - **Quest list**: a banner with 3 stages shows 3 quests in `stages[]` order.
+  - **Banner order**: the order on screen is the `events[]` order.
+  - **Lock and countdown plates**:
+    - `isLock` 0: plain banner with a countdown plate «N minutes left» from `endTime` (server fake time; a past date
+      = «0 minutes left»);
+    - `isLock` 2: red «Available» plate instead (fits the original meaning: a quest opened by the pass);
+    - `isLock` 1 with flag 4: padlock, no plate.
+  - **Medal drops from enemies work**:
+    - send `dropItemTypeIds` with 3 at the position of the medal in the enemy's reward row (`[0,3]` for a row with
+      types `[5,3]`), and grant it at `/stage/clear`;
+    - CONGRATULATIONS shows the medal; «x4» came from the pet Steal multiplier.
+    - Our current clear loop grants every type-5 entry of the row even when the client was told `0` there: grant
+      only the positions sent as non-zero.
+  - **`functionFlags` bit 4 is read once per session at login**: sending it only in `/stage/event`,
+    `/stage/achievements` or not in `/gacha/list` changes nothing. It is global.
+    - Side effect: the Shop button «Buy discounted 3,000 Jewel pack!» turns from grey to pink.
+    - Tapping it sends `/payment/info`, `/user/shop`, `/shop/campaign` (not served), and nothing opens.
+    - Home and the Quests screen are unchanged.
+  - **Clearing a stage with `id` 970001 set `player.lastClearStageId` to 970001** (story progress bug, plan Review
+    Focus 1); the maxpower save was repaired by hand (back to 39159, quest 979).
 
 <a id="keyblade"></a>
 ## Owned keyblades (I-050)
