@@ -224,5 +224,26 @@ check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
   check(kp.map((x) => x.eventStageId).join() === '7000,7702,7021,7022' && kp[1].bannerUrl.endsWith('/7702-kept.png'), `kept week version next to the fallback (${kp.map((x) => x.eventStageId)})`);
 }
 
+// bench rev 223: Shop weeks start on the tranche day (e.g. Thursday), so a Shop week can overlap two Monday-based week
+// versions of one set. Exactly one per set: every version containing shopFrom (two only where the original banners ran
+// together), else the one with the largest overlap (tie -> later)
+{
+  const v = (key, ev, start, end, o = {}) => e(key, ev, { periods: [4], vip: true, family: 'SQ22', weekOf: key.split('@')[0], campaign: { start, end }, ...o });
+  const ws = { catalog: index.catalog, entries: [
+    e('ja', 7020, { periods: [4], vip: true, family: 'SQ22' }),
+    v('ja@2020-08-31', 7848, '2020-08-31', '2020-09-06'), v('ja@2020-09-07', 7849, '2020-09-07', '2020-09-13'),
+    v('sk@2020-09-07', 7878, '2020-09-07', '2020-09-13'),
+    v('md@2020-06-01', 7905, '2020-06-01', '2020-06-28'), v('md@2020-06-01#2', 7906, '2020-06-01', '2020-06-07'), v('md@2020-06-08', 7907, '2020-06-08', '2020-06-14'),
+    v('tie@2020-01-03', 7910, '2020-01-03', '2020-01-05'), v('tie@2020-01-06', 7911, '2020-01-06', '2020-01-08'),
+  ] };
+  const at = (from, to) => keysOf(sp.currentEntries(ws, { period: 4, shopFrom: from, shopTo: to }));
+  check(at('2020-09-03', '2020-09-09') === 'ja@2020-08-31,sk@2020-09-07', `Thursday Shop week: the version containing shopFrom only; VIP! Skill (no version on 09-03) by overlap (${at('2020-09-03', '2020-09-09')})`);
+  check(at('2020-09-07', '2020-09-13') === 'ja@2020-09-07,sk@2020-09-07', `Monday Shop week: that week's versions (${at('2020-09-07', '2020-09-13')})`);
+  check(at('2020-08-27', '2020-09-02') === 'ja@2020-08-31', `Thursday before: no version contains shopFrom -> the overlapping one replaces the fallback (${at('2020-08-27', '2020-09-02')})`);
+  check(at('2020-09-10', '2020-09-16') === 'ja@2020-09-07,sk@2020-09-07', 'Thursday after: the version containing shopFrom');
+  check(at('2020-06-04', '2020-06-10') === 'ja,md@2020-06-01,md@2020-06-01#2', `two original banners running together stay two; the next week's version is left out (${at('2020-06-04', '2020-06-10')})`);
+  check(at('2020-06-11', '2020-06-17') === 'ja,md@2020-06-01,md@2020-06-08', 'both containing shopFrom: both');
+  check(at('2020-01-02', '2020-01-08') === 'ja,tie@2020-01-06', `no version contains shopFrom, equal overlap: the later one (${at('2020-01-02', '2020-01-08')})`);
+}
 if (errors.length) { console.error(`test-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }
 console.log('test-special: OK');

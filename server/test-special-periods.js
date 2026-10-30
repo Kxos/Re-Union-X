@@ -153,6 +153,10 @@ const allIds = [...E.map((e) => e.evStageId), ...CAMP.map(([, c]) => c.evStageId
 check(new Set(allIds).size === allIds.length, 'evStageIds unique across entries, campaigns and week versions');
 check(WV.every(([k]) => new Date(k.slice(k.indexOf('@') + 1, k.indexOf('@') + 11) + 'T00:00:00Z').getUTCDay() === 1), 'week versions start on a Monday');
 check(WV.every(([, v]) => !v.banner || BANNER_RE.test(v.banner)), 'week version banners are khuxwiki names');
+// bench rev 223 fix: every week version has its own original banner (khuxwiki «Special - VIP <week title> banner KHUX.png»)
+const ownArt = WV.filter(([, v]) => !v.dropped);
+check(ownArt.every(([, v]) => v.banner && /^Special - VIP .+ banner KHUX\.png$/.test(v.banner)), `week versions without their own banner: ${ownArt.filter(([, v]) => !v.banner).map(([k]) => k).slice(0, 8)} (${ownArt.filter(([, v]) => !v.banner).length})`);
+check(new Set(ownArt.filter(([k]) => k.startsWith('vip-jewels-avatar@')).map(([, v]) => v.banner)).size === ownArt.filter(([k]) => k.startsWith('vip-jewels-avatar@')).length, 'Jewels & Avatar Parts: a different banner every week');
 check(WV.filter(([, v]) => v.dropped).map(([k, v]) => `${k}:${v.evStageId}`).join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701,vip-skill@2021-01-04#2:7893', 'fix round 1: the two clipped 2019-03-04 Medal Quest rows dropped, ids 7700 / 7701 reserved; round 18: the repeated VIP! Skill row of 2021-01-04, id 7893 reserved');
 check(WV.filter(([k]) => k.startsWith('vip-skill@')).map(([, v]) => v.evStageId).join() === Array.from({ length: 25 }, (_, i) => 7876 + i).join(), 'round 18: VIP! Skill week versions frozen at 7876-7900, after the round-17 max 7875');
 const BANNERS = process.env.KHUX_SPECIAL_BANNERS || 'D:\\Progetto_Restauro_KH_UX\\reference\\special_banners';

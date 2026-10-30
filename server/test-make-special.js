@@ -560,6 +560,18 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
     if (both.length) clash.push(`${v.key} / ${c.key}: ${both}`);
   }
   check(!clash.length, `real build: 7★ medals of a week version also given by an overlapping campaign: ${clash.join('; ')}`);
+  // bench rev 223: Shop weeks starting on Thursday (tranche days) list one version per set too: the one containing the
+  // first day; two only when two original banners of the set ran on that day
+  const jaThu = listedAt0('2020-09-03').filter((e) => e.weekOf === 'vip-jewels-avatar').map((e) => e.key);
+  check(jaThu.join() === 'vip-jewels-avatar@2020-08-31', `real build: Shop week Thu 2020-09-03: one Jewels & Avatar Parts version (${jaThu})`);
+  const extra = [];
+  for (let d = '2018-10-01'; d <= '2021-05-31'; d = addD(d, 1)) {
+    if (![1, 4].includes(new Date(d + 'T00:00:00Z').getUTCDay())) continue;
+    const by = {};
+    for (const en of listedAt0(d)) if (en.weekOf) (by[en.weekOf] ||= []).push(en);
+    for (const [set, vs] of Object.entries(by)) if (vs.length > 1 && !vs.every((v) => v.campaign.start <= d && v.campaign.end >= d)) extra.push(`${d} ${set}: ${vs.map((v) => v.key)}`);
+  }
+  check(!extra.length, `real build: Monday / Thursday Shop weeks with two versions of a set that did not run together: ${extra.slice(0, 5).join('; ')}`);
   // ruling: two versions of one set in the same week where the original banners overlapped (faithful), each with a _note
   const twoWeeks = [], twoKeys = new Set();
   for (let w = '2018-10-01'; w <= '2021-05-24'; w = addD(w, 7)) {
