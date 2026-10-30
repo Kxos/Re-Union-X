@@ -41,6 +41,7 @@ const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
 const gachaSeasons = require('./gacha-seasons');
 const medalBoost = require('./medal-boost');
+const special = require('./special'); // scheda Special di Quests: periodi, lucchetti, fissaggio
 // Pet / 6° slot (server/pet.js): KHUX_PET=1, default spento
 const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_ENABLED } = require('./pet');
 
@@ -157,6 +158,7 @@ function route(url) {
   if (p === '/gacha/list') return 'gachalist';
   if (p === '/gacha/draw') return 'gachadraw';
   if (p.startsWith('/web/gacha/')) return 'gachaweb'; // catalogo, dettagli, odds, immagini dei banner
+  if (p.startsWith('/web/special/')) return 'specialweb'; // immagini dei banner Special
   if (p.includes('system/status')) return 'status';
   if (p.includes('system/login')) return 'login';
   if (p.includes('system/coppa')) return 'coppa';
@@ -330,7 +332,10 @@ function ret() {
     commonVersionDat: sessionRevision(),
     darkVersionRes: REVISION,
     darkVersionDat: sessionRevision(),
-    functionFlags: 0,
+    // bit 4: i banner Special chiusi (isLock 1) si vedono con il lucchetto e il pulsante rosso «Unlock All». Il client
+    // lo legge una volta sola al login (banco 30-10), quindi vale per tutta la sessione; effetto collaterale: il
+    // pulsante dello Shop «Buy discounted 3,000 Jewel pack!» diventa rosa e non fa nulla (spiegato nelle Notices)
+    functionFlags: specialIndex().entries.length ? 4 : 0,
     serverTime: serverTime(),
     // "error" (con "viewUrl") e "isCommunicationMaintenance" sono facoltativi
   };
@@ -530,6 +535,11 @@ function servedMasterRows(name, realMs) {
       detailUrl: String(r.detailUrl || '').startsWith('/') ? WEB_BASE + r.detailUrl : r.detailUrl,
       ...(ends.has(r.drawMedalTypeId) ? { displayTimeLeft: 1, endDate: clock.fakeString(ends.get(r.drawMedalTypeId), off) }
         : leave.has(r.drawMedalTypeId) ? { displayTimeLeft: 1, endDate: clock.fakeString(clock.weekStartOf(leave.get(r.drawMedalTypeId)), off) } : {}) }));
+  }
+  // evStage (banner Special, make-special.js): come per drawMedalType bannerUrl/detailUrl sono percorsi
+  if (name === 'evStage') {
+    const abs = (u) => (String(u || '').startsWith('/') ? WEB_BASE + u : u);
+    return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl) }));
   }
   // moogleshop: le offerte a tempo (display 1, «N days left») scadono ogni lunedi' come le Weekly, in ora finta
   // (make-moogleshop.js fissava endDate alla generazione: «2137 days left», I-021)
@@ -1149,6 +1159,18 @@ function rewardRowById(rewardId) {
   return masterRows('reward').find((r) => r.rewardId === rewardId);
 }
 
+// dropItemTypeIds di un nemico: per ogni premio della riga il suo tipo se e' un materiale (5) o una medaglia (3, quest
+// Special), 0 altrove, senza gli 0 in coda (le righe della storia, tutte di tipo 5, danno [5] come prima).
+// /stage/clear da' solo queste posizioni (banco 30-10: prima dava ogni tipo 5 della riga anche dove il client aveva 0)
+const ENEMY_DROP_TYPES = [ENEMY_DROP_TYPE, 3];
+function enemyDropTypes(rewardId) {
+  const row = rewardRowById(rewardId);
+  if (!row) return [];
+  const types = row.type.slice(0, 4).map((t) => (ENEMY_DROP_TYPES.includes(t) ? t : 0));
+  while (types.length && !types[types.length - 1]) types.pop();
+  return types;
+}
+
 // dropItemTypeIds di un forziere: per ogni premio della riga il suo tipo, 0 dove il
 // premio e' del nemico (materiale: nel forziere resta vuoto)
 function chestDropTypes(rewardId) {
@@ -1175,7 +1197,8 @@ function stageTreasures(stageId) {
 // Drop dei nemici: userEnemyDropItems[] (uniqueEnemyId, dropItemTypeIds
 // int[] <= 4, stealType), come per i forzieri. uniqueEnemyId = ultimo numero del
 // record del nemico nella mappa (x, y, enemyId, 1, 1, 1, 1, id). Il contenuto e' la
-// riga di reward del nemico (make-game-tables.js). Sul banco: con tipo 5 (materiale) il
+// riga di reward del nemico (make-game-tables.js; 1 se l'uid non ha record), tipi per posizione
+// (enemyDropTypes). Sul banco: con tipo 5 (materiale) il
 // nemico lascia un sacchetto argento, contato dall'HUD in alto; in CONGRATULATIONS i
 // sacchetti si aprono e rivelano l'oggetto. Non tutti gli uid dei nemici compaiono
 // come record nella mappa (es. 1 nel Prologue): si mandano tutti quelli da 1 al
@@ -1187,7 +1210,8 @@ function stageEnemyDrops(stageId) {
   const max = Math.max(0, ...poi.enemies.map((e) => e.uid));
   const ids = [];
   for (let id = 1; id <= max; id++) if (!chests.has(id)) ids.push(id);
-  return ids.map((id) => ({ uniqueEnemyId: id, dropItemTypeIds: [ENEMY_DROP_TYPE], stealType: 0 }));
+  const rows = new Map(poi.enemies.map((e) => [e.uid, e.reward]));
+  return ids.map((id) => ({ uniqueEnemyId: id, dropItemTypeIds: enemyDropTypes(rows.get(id) ?? 1), stealType: 0 }));
 }
 
 // Trick Steal del pet (I-137): il client manda isSteal a /stage/start se un trick aperto ha invokeType 1;
@@ -1206,7 +1230,7 @@ function applySteal(stageId, drops, rng = Math.random, mult = stealMultiplier())
   if (mult < 2) return drops;
   const rows = new Map((poiOf(stageId)?.enemies || []).map((e) => [e.uid, e.reward]));
   // solo i nemici con un record nella mappa: gli altri uid (mandati per sicurezza, es. 1) non compaiono mai (banco 20-10)
-  const withDrop = drops.filter((d) => rows.has(d.uniqueEnemyId) && rewardRowById(rows.get(d.uniqueEnemyId))?.type.includes(ENEMY_DROP_TYPE));
+  const withDrop = drops.filter((d) => rows.has(d.uniqueEnemyId) && enemyDropTypes(rows.get(d.uniqueEnemyId)).some(Boolean));
   // solo banco: KHUX_BENCH_STEAL_UID forza il nemico rubato (prova del crash di I-137)
   const forced = Number(process.env.KHUX_BENCH_STEAL_UID || 0);
   const hit = forced ? withDrop.find((d) => d.uniqueEnemyId === forced) : withDrop.find(() => rng() < STEAL_CHANCE);
@@ -1315,6 +1339,11 @@ const GACHA_IMG = process.env.KHUX_GACHA_IMG || path.join(__dirname, 'game_data'
 const GACHA_IMG_KEPT = process.env.KHUX_GACHA_IMG_KEPT || path.join(__dirname, 'game_data', 'gacha_img_kept');
 // Icone originali delle valute del Catalog (recon/tools/shop_icons.py): solo le chiavi della lista, mai un percorso libero
 const SHOP_ICONS = process.env.KHUX_SHOP_ICONS || path.join(__dirname, 'game_data', 'shop_icons');
+// Scheda Special: indice delle quest (server/make-special.js) e immagini dei banner (recon/tools/make_special_banners.py),
+// dati di gioco fuori dal repo
+const SPECIAL_FILE = process.env.KHUX_SPECIAL_INDEX || path.join(__dirname, 'game_data', 'special.json');
+const SPECIAL_IMG = process.env.KHUX_SPECIAL_IMG || path.join(__dirname, 'game_data', 'special_img');
+let specialMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
 // File del banner con il bollino (generato se manca o se l'originale e' piu' recente); se non riesce, quello normale
@@ -2151,8 +2180,9 @@ function respondStageClear(res, req) {
   player.stageScores = player.stageScores || {};
   const first = !(stageId in player.stageScores); // mai completato prima
   // l'ultimo stage completato avanza solo (rigiocare il Prologue non lo riporta indietro)
-  // (non le Proud: id 1 000 000 + numero, la schermata Quests confronta lastClearStageId con misc 106)
-  if (stage?.stageKind !== PROUD_KIND && stageNumber(stageId) >= stageNumber(player.lastClearStageId)) player.lastClearStageId = stageId;
+  // solo la storia (stageKind 1): non le Proud (id 1 000 000 + numero, la schermata Quests confronta lastClearStageId con
+  // misc 106) ne' le quest Special (stageKind 2, id 970000+: banco 30-10, una Special lo portava a 970001)
+  if (stage?.stageKind === 1 && stageNumber(stageId) >= stageNumber(player.lastClearStageId)) player.lastClearStageId = stageId;
   // munny e materiali raccolti (sacchetti dei nemici, forzieri) come li riporta il client
   player.money = (player.money || 0) + (Number(req?.getPoint?.money) || 0);
   // gauge degli attacchi speciali: resta salvata nel keyblade (userKeyblades[].burst), non
@@ -2165,13 +2195,14 @@ function respondStageClear(res, req) {
   for (const m of req?.getMaterials || []) grantItem(5, m.materialId, m.number);
   // sacchetti dei nemici: il client riporta solo gli uid (getEnemyDropItems), il
   // contenuto e' la riga di reward del nemico nella mappa (1 se l'uid non ha record),
-  // come in CONGRATULATIONS (es. Spring Water x12 in Combat 102)
+  // come in CONGRATULATIONS (es. Spring Water x12 in Combat 102); solo le posizioni mandate a /stage/start
+  // (enemyDropTypes: materiali e medaglie delle quest Special)
   const enemyRows = new Map((poiOf(playedId)?.enemies || []).map((e) => [e.uid, e.reward]));
   const steal = player.steal?.stageId === playedId ? player.steal : null;
   for (const uid of req?.getEnemyDropItems || []) {
     const row = rewardRowById(enemyRows.get(uid) ?? 1);
     const k = steal && steal.uid === uid ? steal.mult : 1; // drop rubato dal pet (Steal): x skillValue3
-    row?.type.forEach((t, i) => { if (t === ENEMY_DROP_TYPE) grantItem(t, row.id[i], row.num[i] * k); });
+    if (row) enemyDropTypes(row.rewardId).forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
   }
   player.steal = null;
   // premio del primo completamento («Quest Complete!»: es. Combat 101, 300 jewel)
@@ -2216,6 +2247,7 @@ function respondStageClear(res, req) {
     grantItem(stage?.submissionRewardType?.[n - 1], stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
   }
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
+  if (isSpecialStage(stageId)) specialResetCheck(realNow()); // Daily Cid: segna la settimana in cui il giro e' completo
   // stage completato, con il record di Lux (Lux Record nell'elenco delle missioni); uno skip (Skip Ticket o
   // Skip Ticket+, I-203) segna la missione come superata ma non alza il record (decisione dell'utente, 23-10)
   const skipped = !!player.currentStageSkip;
@@ -3800,7 +3832,10 @@ function respondUserDeck(res) {
 // highScoreRank uint obbligatorio; eventCategory int facoltativo (radice).
 // Senza eventi il client mostra Txt_NoEvent. Per provare un evento: save/event.json con
 // l'array events (forma in docs/notes/server.md).
-function respondStageEvent(res) {
+// eventCategory 1 = scheda Special di Quests (banco 29-10): l'elenco del periodo della storia (server/special.js),
+// dalla missione misc 122 (6) in poi; le altre categorie (2 = Events) leggono ancora save/event.json, per le prove.
+function respondStageEvent(res, body) {
+  if (Number(body?.eventCategory) === 1) return send(res, 200, { ret: ret(), events: specialEventsNow(), highScoreRank: 0 });
   let events = [];
   const evPath = path.join(path.dirname(SAVE_FILE), 'event.json');
   if (fs.existsSync(evPath)) {
@@ -3808,6 +3843,96 @@ function respondStageEvent(res) {
   }
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
+// ---------------------------------------------------------------------------
+// Scheda Special (docs/superpowers/specs/2026-10-30-special-tab-design.md)
+// ---------------------------------------------------------------------------
+// Indice delle quest Special (game_data/special.json, make-special.js): catalogo (banner 7000 con la quest di
+// allenamento) e quest dei periodi. Letto una volta; senza file la scheda resta vuota (avviso una volta sola).
+function specialIndex() {
+  if (specialMemo) return specialMemo;
+  try {
+    specialMemo = JSON.parse(fs.readFileSync(SPECIAL_FILE, 'utf8'));
+    if (!Array.isArray(specialMemo.entries)) specialMemo.entries = [];
+  } catch (e) {
+    console.warn(`[special] ${SPECIAL_FILE} assente o non valido (${e.message}): scheda Special vuota`);
+    specialMemo = { catalog: null, entries: [] };
+  }
+  return specialMemo;
+}
+const SPECIAL_FIRST = 970000, SPECIAL_LAST = 979999; // stageId delle quest Special (make-special.js)
+const isSpecialStage = (stageId) => Number(stageId) >= SPECIAL_FIRST && Number(stageId) <= SPECIAL_LAST;
+// la scheda si apre con la missione di storia misc 122 (6), come il pulsante del client
+const specialUnlocked = () => stageNumber(lastStoryStageId()) >= miscValue(122, 6);
+
+// Daily Cid (resetGroup): quando tutte le quest del gruppo hanno i 3 obiettivi se ne segna la settimana
+// (player.special.resetDone[gruppo]); dalla settimana dopo (special.resetDue, con l'indice intero come gruppo) gli
+// obiettivi del gruppo si azzerano e player.special.cidReset = settimana dell'azzeramento (unico gruppo: «cid»)
+function specialResetCheck(realMs) {
+  const index = specialIndex(), week = clock.weekIndex(realMs);
+  const groups = [...new Map(index.entries.filter((en) => en.resetGroup).map((en) => [en.resetGroup, en])).values()];
+  if (!groups.length) return;
+  const sp = (player.special ||= {}), marks = (sp.resetDone ||= {});
+  player.clearMissions ||= {};
+  let changed = false;
+  for (const en of groups) {
+    const g = en.resetGroup;
+    if (marks[g] === undefined && special.resetDue(en, player.clearMissions, -Infinity, week, index)) { marks[g] = week; changed = true; }
+    if (marks[g] !== undefined && special.resetDue(en, player.clearMissions, marks[g], week, index)) {
+      for (const m of index.entries.filter((x) => x.resetGroup === g)) for (const id of m.stageIds) delete player.clearMissions[id];
+      delete marks[g];
+      sp.cidReset = week;
+      changed = true;
+      console.log(`[special] gruppo ${g}: obiettivi azzerati (settimana ${week})`);
+    }
+  }
+  if (changed) savePlayer();
+}
+
+// ctx di special.specialEvents: periodo dalla settimana dello Shop della storia (storyCtx().shopFrom), giorno di gioco,
+// VIP delle Weekly Missions, quest fissata, scadenze in ora finta, stato degli stage come nell'elenco della storia
+function specialCtx(realMs = realNow()) {
+  specialResetCheck(realMs);
+  const story = storyCtx(), scores = player.stageScores || {};
+  return {
+    period: special.periodOf(story.shopFrom), weekday: special.weekdayOf(realMs), vip: vipActive(realMs),
+    pinnedKey: player.special?.pinned || '', shopFrom: story.shopFrom, shopTo: story.shopTo,
+    nowStr: serverTimeAt(realMs), dayEndStr: serverTimeAt(clock.dayEnd(realMs)), weekEndStr: serverTimeAt(clock.weekEnd(realMs)),
+    imgBase: WEB_BASE,
+    stageState: (id) => ({ score: scores[id] || 0, playStatus: id in scores ? STAGE_CLEARED : 0, clearMissionIds: stageClearMissions(id) }),
+  };
+}
+// events[] della scheda Special: vuoto prima della missione 6 o senza indice
+function specialEventsNow(realMs = realNow()) {
+  const index = specialIndex();
+  if (!index.catalog || !specialUnlocked()) return [];
+  return special.specialEvents(index, specialCtx(realMs));
+}
+// «Progress» della scheda Special (I-037): obiettivi compiuti / 3 x stage delle quest aperte adesso (isLock 0 o 2,
+// compresa la fissata), senza la quest di allenamento del catalogo; nessuna quest = 0/1 come prima
+function specialAchievement(realMs = realNow()) {
+  const catalogId = specialIndex().catalog?.evStageId;
+  const ids = new Set(specialEventsNow(realMs).filter((e) => e.isLock !== 1 && e.eventStageId !== catalogId)
+    .flatMap((e) => e.stages.map((s) => s.stageId)));
+  if (!ids.size) return ACHIEVEMENT_EMPTY;
+  const done = player.clearMissions || {};
+  let numerator = 0;
+  for (const id of ids) numerator += new Set((done[id] || []).filter((m) => m >= 1 && m <= 3)).size;
+  return { numerator, denominator: 3 * ids.size };
+}
+// GET /web/special/img/<eventStageId>.png e <id>-kept.png (banner della quest fissata): immagini 640x140 di
+// game_data/special_img, 404 se mancano
+function respondSpecialWeb(res, url) {
+  const p = url.split('?')[0];
+  const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
+  const img = /^\/web\/special\/img\/(\d+)(-kept)?\.png$/i.exec(p);
+  if (!img) return notFound();
+  const file = path.join(SPECIAL_IMG, `${Number(img[1])}${img[2] ? '-kept' : ''}.png`);
+  if (!fs.existsSync(file)) return notFound();
+  const b = fs.readFileSync(file);
+  res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
+  return res.end(b);
+}
+
 // GET /user/notice (azione 241): raidNotice {isSelfRaid, isOthersRaid} uint,
 // obbligatori. Il client lo chiede scegliendo «Coliseum» nel popup PvP_SelectWindow.
 // GET /colosseum (azione 124): colosseumInfo {colosseumStageId int, status int},
@@ -4005,8 +4130,9 @@ function respondProudList(res) {
 // numeratore >= denominatore, quindi 0/0 = COMPLETE (il difetto di prima: tutte le categorie complete).
 // - main = Story: obiettivi compiuti delle missioni Standard (1-979) e Proud (note di versione 2.2.0: «completion
 //   percentage for Standard Mode and Proud Mode challenges»); denominatore = tutti gli obiettivi di quelle missioni.
-// - strength (Special), event (Events), multi (Union Cross): modalita' non ancora presenti nel server: 0/1 = «Progress:
-//   0%» senza COMPLETE (nessuna sfida compiuta), finche' non ci saranno.
+// - strength (Special): obiettivi delle quest Special aperte adesso (specialAchievement).
+// - event (Events), multi (Union Cross): modalita' non ancora presenti nel server: 0/1 = «Progress: 0%» senza COMPLETE
+//   (nessuna sfida compiuta), finche' non ci saranno.
 // - colosseumRank 0 e pvpRanking con rank 0: il client scrive «---» (nessuna classifica).
 const ACHIEVEMENT_EMPTY = { numerator: 0, denominator: 1 };
 function storyAchievement() {
@@ -4023,13 +4149,13 @@ function storyAchievement() {
   return { numerator, denominator };
 }
 function respondStageAchievements(res) {
-  const main = storyAchievement();
+  const main = storyAchievement(), strength = specialAchievement();
   const cap = (v) => Math.min(0x7fff, v); // il client li legge come short
   send(res, 200, {
     ret: ret(),
     stageAchievement: {
       mainNumerator: cap(main.numerator), mainDenominator: cap(main.denominator),
-      strengthNumerator: ACHIEVEMENT_EMPTY.numerator, strengthDenominator: ACHIEVEMENT_EMPTY.denominator,
+      strengthNumerator: cap(strength.numerator), strengthDenominator: cap(strength.denominator),
       eventNumerator: ACHIEVEMENT_EMPTY.numerator, eventDenominator: ACHIEVEMENT_EMPTY.denominator,
       multiNumerator: ACHIEVEMENT_EMPTY.numerator, multiDenominator: ACHIEVEMENT_EMPTY.denominator,
       colosseumRank: 0,
@@ -4162,6 +4288,7 @@ function handler(scheme) {
       if (kind === 'gachalist') return respondGachaList(res);
       if (kind === 'gachadraw') return respondGachaDraw(res, entry.bodyDecoded);
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
+      if (kind === 'specialweb') return respondSpecialWeb(res, req.url);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
@@ -4219,7 +4346,7 @@ function handler(scheme) {
       if (kind === 'stagecontinue') return respondStageContinue(res, req.url.split('?')[0], entry.bodyDecoded);
       if (kind === 'stageclear') return respondStageClear(res, entry.bodyDecoded);
       if (kind === 'aprecover') return respondApRecover(res);
-  if (kind === 'stageevent') return respondStageEvent(res);
+  if (kind === 'stageevent') return respondStageEvent(res, entry.bodyDecoded);
   if (kind === 'usernotice') return send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: 0, isOthersRaid: 0 } });
   if (kind === 'useroption') return respondUserOption(res, entry.bodyDecoded);
   if (kind === 'colosseum') return respondColosseum(res);
@@ -4566,6 +4693,9 @@ module.exports._test = {
   respondProudList, proudUnlocked, lastProudNumber, poiStageId, stageTreasures, stageEnemyDrops,
   // server/test-achievements.js (I-037)
   respondStageAchievements,
+  // server/test-special-server.js (scheda Special)
+  respondStageEvent, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, ret, WEB_BASE,
+  weekIndex: clock.weekIndex,
   // server/test-gacha-server.js
   sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
 };
