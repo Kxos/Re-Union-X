@@ -53,7 +53,7 @@ const isDailyCid = (entry) => entry.family === 'SQ12' || /^cid/.test(entry.reset
 // Recurring VIP sets (round 17): a week version (weekOf = the set's entry key, campaign = its week) replaces its set's
 // entry in the weeks it is listed; the entry stays for the weeks without a known version (fallback).
 const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => {
-  const list = index.entries.filter((en) => {
+  let list = index.entries.filter((en) => {
     if (!en.periods.includes(period) || en.removed) return false;
     if (weekday && isDailyCid(en) && !ownDay(en, weekday)) return false;
     if ((en.from && shopFrom < en.from) || (en.to && shopFrom > en.to)) return false;
@@ -62,6 +62,20 @@ const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => {
   });
   const weekly = new Set(list.filter((en) => en.weekOf).map((en) => en.weekOf));
   if (!weekly.size) return list;
+  // one Shop week, one version per set (bench rev 223: Shop weeks start on the tranche day, so a Thursday-to-Wednesday
+  // week overlaps two Monday-based versions): every version whose window contains shopFrom (two only where the
+  // original banners ran together), else the one with the largest overlap (tie -> the later one)
+  const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000) + 1;
+  const overlap = (en) => days(en.campaign.start > shopFrom ? en.campaign.start : shopFrom, en.campaign.end < shopTo ? en.campaign.end : shopTo);
+  const keep = new Set();
+  for (const set of weekly) {
+    const vs = list.filter((en) => en.weekOf === set);
+    const hold = vs.filter((en) => en.campaign.start <= shopFrom && en.campaign.end >= shopFrom);
+    if (hold.length) hold.forEach((en) => keep.add(en));
+    else keep.add(vs.reduce((a, b) => (overlap(b) > overlap(a) || (overlap(b) === overlap(a) && (b.campaign.start > a.campaign.start
+      || (b.campaign.start === a.campaign.start && b.evStageId > a.evStageId))) ? b : a)));
+  }
+  list = list.filter((en) => !en.weekOf || keep.has(en));
   // the versions take the place of their set's entry (the tab keeps its order)
   const listed = new Set(list.map((en) => en.key));
   return list.filter((en) => !(en.weekOf && listed.has(en.weekOf)))
