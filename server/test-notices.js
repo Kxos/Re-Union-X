@@ -120,6 +120,8 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/training/.test(t) && /Give Up/.test(t), 'Special: allenamento');
   check(/no Lux and no drops/.test(t) && /three objectives give a little Munny, once/.test(t) && !/no Lux and no rewards/.test(t), 'Special: allenamento, munny degli obiettivi una volta (31-10)');
   check(/reconstructed/.test(t), 'Special: drop ricostruiti');
+  check(/only today's variant/.test(t) && /Daily Challenge: Cid/.test(t), 'Special: solo il Daily Cid di oggi (round 2, 31-10)');
+  check(/details/.test(t) && /addition of this server/.test(t) && /had none/.test(t), 'Special: pagina dei dettagli del catalogo, aggiunta del server (round 2)');
   check(/limited VIP campaigns/.test(t) && /week/.test(t) && /one quest of its theme/.test(t), 'Special: campagne VIP settimanali (Task 12)');
   check(/closest/.test(t) && /left out/.test(t) && /VIP! Skill/.test(t), 'Special: premi inesistenti sostituiti o tolti, VIP! Skill assente');
 }
