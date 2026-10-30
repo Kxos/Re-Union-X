@@ -119,6 +119,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/Unlock All/.test(t) && /message/.test(t) && /Weekly Missions VIP/.test(t) && !/no function/.test(t), 'Special: Unlock All shows a message');
   check(/training/.test(t) && /Give Up/.test(t), 'Special: allenamento');
   check(/no Lux and no drops/.test(t) && /three objectives give a little Munny, once/.test(t) && !/no Lux and no rewards/.test(t), 'Special: allenamento, munny degli obiettivi una volta (31-10)');
+  check(/VIP: all Special Quests open/.test(t) && /time left/.test(t), 'Special: VIP bar wording');
   check(/reconstructed/.test(t), 'Special: drop ricostruiti');
   check(/only today's variant/.test(t) && /Daily Challenge: Cid/.test(t), 'Special: solo il Daily Cid di oggi (round 2, 31-10)');
   check(/details/.test(t) && /addition of this server/.test(t) && /had none/.test(t), 'Special: pagina dei dettagli del catalogo, aggiunta del server (round 2)');

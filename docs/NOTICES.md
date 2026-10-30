@@ -43,6 +43,8 @@ Weekday quests open on their original weekdays. The others are shown with a **pa
 
 **Daily Challenge: Cid** lists **only today's variant**, as in the original game: VIP does not open the Cid quests of the other days.
 
+While VIP is active, a bar at the bottom of the Special tab shows "VIP: all Special Quests open" and the time left (the wording is ours: the original text is unknown).
+
 Tapping **Unlock All** or a locked banner shows a **message** about the Weekly Missions VIP, because nothing is sold. Because locked banners are shown, the Shop button "Buy discounted 3,000 Jewel pack!" lights up, and it shows the same message.
 
 ### Special Catalog

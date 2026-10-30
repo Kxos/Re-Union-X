@@ -18,6 +18,7 @@ const OUT = process.env.KHUX_MASTER_DIR || path.join(__dirname, 'master_data');
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'recon', 'out', 'master_types_ww431.json'), 'utf8'));
 
 const PASS_SHOP_IDS = [103, 1103, 203, 1203, 303, 1303];
+const VIP_BAR_TEXT = 'VIP: all Special Quests open'; // left label of the bar on Quests > Special (useBenefitExplanation)
 const PRODUCT_ID = 'reunionx.vip.weekly.na'; // non esiste su Google Play: la richiesta del client fallisce
 
 function blank() {
@@ -25,7 +26,7 @@ function blank() {
   for (const [f, t] of schema.shop) row[f] = t.startsWith('string') ? '' : 0;
   return row;
 }
-const shopRows = () => PASS_SHOP_IDS.map((shopId) => ({ ...blank(), shopId, productId: PRODUCT_ID, benefitId: VIP_BENEFIT_ID, status: 1, os: 0, display: 0 }));
+const shopRows = () => PASS_SHOP_IDS.map((shopId) => ({ ...blank(), shopId, productId: PRODUCT_ID, benefitId: VIP_BENEFIT_ID, benefitExplanation: VIP_BAR_TEXT, useBenefitExplanation: VIP_BAR_TEXT, status: 1, os: 0, display: 0 }));
 
 if (require.main === module) {
   fs.mkdirSync(OUT, { recursive: true });
@@ -33,4 +34,4 @@ if (require.main === module) {
   fs.writeFileSync(path.join(OUT, 'shop.json'), JSON.stringify(rows));
   console.log(`shop.json: ${rows.length} righe del pass VIP (${PASS_SHOP_IDS.join(', ')}); poi alzare KHUX_REVISION`);
 }
-module.exports = { shopRows, PASS_SHOP_IDS, PRODUCT_ID };
+module.exports = { shopRows, PASS_SHOP_IDS, PRODUCT_ID, VIP_BAR_TEXT };
