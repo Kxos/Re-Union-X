@@ -59,13 +59,14 @@ const CLIENT_DROPPED = [95100, 95200];
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\special\\special_quests.json';
 // training quest (spec 7): 0 AP, target Shadow on path A; the dummy and the CP chests of path B come with its map
-// (Tasks 4 and 10). Objective rewards: none (TRAINING_OBJECTIVE_REWARD_TYPE below).
+// (Tasks 4 and 10). Objective rewards: a little Munny, once (TRAINING_OBJECTIVE_REWARD_TYPE below).
 // Room: the 1st District (DB_0004_00_00), a long street with the start in its middle (two paths, gen_story_maps.py
 // build_training); the room the name «Training Grounds» picked (DB_0027_00_00) has 2 walkable grid points.
-// reward type of the three training objectives: 0 = none (switch back to 4 = Munny if type 0 breaks the screen)
-const TRAINING_OBJECTIVE_REWARD_TYPE = 0;
+// reward of the three training objectives: Munny x100 each, first time only (user 31-10: «give Munny so the slots are
+// not empty»; type 0 left the reward slots blank). respondStageClear grants nothing else from the training run.
+const TRAINING_OBJECTIVE_REWARD_TYPE = 4, TRAINING_OBJECTIVE_MUNNY = 100;
 const TRAINING = { name: 'Training Grounds', world: 'Daybreak Town', room: '1st District', target: 'Shadow', level: 1,
-  objectives: ['Defeat the target enemy -> Munny x1', 'Complete without having to continue -> Munny x1', 'Defeat Shadow x 1 -> Munny x1'] };
+  objectives: ['Defeat the target enemy -> Munny x100', 'Complete without having to continue -> Munny x100', 'Defeat Shadow x 1 -> Munny x100'] };
 // a «Title x1» objective without a title name in the catalogue (MOG quests): Avatar Coin x5, like the other small
 // objective rewards of the Special quests (builder's call)
 const TITLE_FALLBACK = [14, 0, 5];
@@ -327,9 +328,9 @@ function build(rules, catalogue, masterRows) {
   // training quest behind the catalogue banner
   const training = stageRow(TRAINING_STAGE, { quest: TRAINING.name, world: TRAINING.world, room: TRAINING.room, target: TRAINING.target,
     level: String(TRAINING.level), objectives: TRAINING.objectives }, 0, null);
-  // no objective reward: type 0, item 0, num 0 (Task 15; what the client draws for type 0 is for the bench to tell)
+  // objective rewards: Munny (type 4, item 0) x TRAINING_OBJECTIVE_MUNNY each
   Object.assign(stageRows[stageRows.length - 1], { submissionRewardType: [TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE],
-    submissionItemId: [0, 0, 0], submissionItemNum: [0, 0, 0] });
+    submissionItemId: [0, 0, 0], submissionItemNum: Array(3).fill(TRAINING_OBJECTIVE_MUNNY) });
   const enemyRows = [dummyRow(masterRows)];
   const maxGauge = Math.max(0, ...(masterRows.keyblade || []).map((k) => k.maxBurstGauge || 0));
   const cpChests = Math.max(1, Math.ceil(maxGauge * GAUGE_UNIT / CP_PER_CHEST));

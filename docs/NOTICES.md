@@ -47,7 +47,7 @@ Tapping **Unlock All** or a locked banner shows a **message** about the Weekly M
 
 The first banner is the **Special Catalog**. **Details** opens the catalogue of every period. You can keep **one quest** from the past: it appears under the catalogue with a KEPT banner, like the kept banner of the Shop (**not original**). A quest replaced by a better later version cannot be kept. Kept weekday quests can be played on any day; kept VIP quests need the VIP benefit.
 
-Tapping the Special Catalog banner starts a **training** quest: it costs no AP, gives no Lux and no rewards. One path leads to a Shadow that clears the quest; the other leads to a training dummy that cannot be defeated, so leave it with **Give Up**. The chests on that path fill your special attack gauge, which is not kept after the quest.
+Tapping the Special Catalog banner starts a **training** quest: it costs no AP and gives no Lux and no drops; its three objectives give a little Munny, once. One path leads to a Shadow that clears the quest; the other leads to a training dummy that cannot be defeated, so leave it with **Give Up**. The chests on that path fill your special attack gauge, which is not kept after the quest.
 
 ### Not available
 
