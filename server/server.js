@@ -2280,9 +2280,7 @@ function respondStageClear(res, req) {
   if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
-  for (const n of cleared.filter((n) => !before.includes(n))) {
-    grantItem(stage?.submissionRewardType?.[n - 1], stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
-  }
+  for (const n of cleared.filter((n) => !before.includes(n))) grantObjectiveReward(stage, n);
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
   if (isSpecialStage(stageId)) specialResetCheck(realNow()); // Daily Cid: segna la settimana in cui il giro e' completo
   // stage completato, con il record di Lux (Lux Record nell'elenco delle missioni); uno skip (Skip Ticket o
@@ -2931,18 +2929,31 @@ function respondPresentReceive(res, body) {
   });
 }
 
+// Premio dell'obiettivo n (1-3) di una riga stage: l'oggetto (grantItem) e, per una medaglia con submissionSkillId (VIP! Skill,
+// round 18: Scrooge 6★ con la skill assegnata, make-special.js skillPart), la skill a submissionSkillLv (0: maxLv) sulle
+// copie appena date, come i regali con skill dello Shop (giveSkill). Spazio medaglie: come ogni altro premio (grantItem).
+function grantObjectiveReward(stage, n) {
+  const type = stage?.submissionRewardType?.[n - 1];
+  const before = (player.medals || []).length;
+  grantItem(type, stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
+  const skillId = stage?.submissionSkillId?.[n - 1];
+  if (type === 3 && skillId) giveSkill((player.medals || []).slice(before), skillId, stage?.submissionSkillLv?.[n - 1]);
+}
+
 // Skill al livello massimo sulle medaglie appena ricevute (regalo con skillId: Scrooge «with the X Skill» dei
 // Skills to Thrill, catalogo bonus [3, Scrooge, 1, skillId]; le Scrooge originali la portano al massimo)
-function giveSkill(medals, skillId) {
+// level: livello voluto (obiettivi con submissionSkillLv), limitato a 1..maxLv; senza, maxLv
+function giveSkill(medals, skillId, level) {
   const t = medalSkillTables();
   const row = t.byId.get(skillId);
   if (!row) { console.log(`  [skill] regalo con skill ${skillId} assente da skill.json`); return; }
   const expRow = t.expRows.get(row.expType);
+  const maxLv = row.maxLv || 1, lv = Number(level) > 0 ? Math.min(maxLv, Math.trunc(Number(level))) : maxLv;
   player.medalSkills = player.medalSkills || {};
   for (const m of medals) {
     player.nextUserSkillId = (player.nextUserSkillId || 0) + 1;
-    player.medalSkills[m.userMedalId] = { userSkillId: player.nextUserSkillId, skillId, level: row.maxLv || 1,
-      exp: expRow ? medalSkill.expToReach(expRow, row.maxLv || 1) : 0, getDatetime: realNow() };
+    player.medalSkills[m.userMedalId] = { userSkillId: player.nextUserSkillId, skillId, level: lv,
+      exp: expRow ? medalSkill.expToReach(expRow, lv) : 0, getDatetime: realNow() };
   }
 }
 
@@ -4753,6 +4764,8 @@ module.exports._test = {
   kbEvo, ownedKeyblades, grantKeyblade, grantMissingKeyblades, userKeybladesData, userDecksData, masterRows,
   // server/test-keyblade-unlock.js
   respondUserCreate, respondStageClear, grantDeckSkillExp,
+  // server/test-objective-skill.js (VIP! Skill, round 18)
+  grantObjectiveReward, giveSkill,
   // server/test-skill-migration.js
   migrateSkills, migrateMedalMap,
   // server/test-clock-migration.js

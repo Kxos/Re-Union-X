@@ -126,6 +126,12 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const st = built.stage(3);
   check(st && st.objectives.length === 2 && st.objectives[0].text === 'Defeat Huey x 2' && st.objectives[0].reward === 'Mythril x4'
     && st.objectives[1].text === 'Defeat the Huey within 1 turn' && st.objectives[1].reward === 'Avatar Coin x5', `buildNames.stage ${JSON.stringify(st)}`);
+  // round 18 (VIP! Skill): a medal reward with an assigned skill shows it, «Scrooge (ATK B X Max & Lux++ LV 20) x1»
+  const bs = pages.buildNames((n) => ({ medal: [{ medalId: 90126, name: 'Scrooge' }], skill: [{ skillId: 1209, name: 'ATK B X Max & Lux++' }],
+    stage: [{ stageId: 4, validSubmission: 2, submissionName: ['Complete without having to continue', 'Complete without having to continue'],
+      submissionRewardType: [3, 3, 0], submissionItemId: [90126, 90126, 0], submissionItemNum: [1, 1, 0], submissionSkillId: [1209, 0, 0], submissionSkillLv: [20, 0, 0] }] }[n] || []));
+  check(bs.stage(4).objectives[0].reward === 'Scrooge (ATK B X Max & Lux++ LV 20) x1' && bs.stage(4).objectives[1].reward === 'Scrooge x1'
+    && bs.objective(4).join() === 'Scrooge (ATK B X Max & Lux++ LV 20),Scrooge', `buildNames: skill of a medal reward ${JSON.stringify(bs.stage(4))}`);
 }
 // round 2: the catalogue lists every Daily Cid variant; only today's is «In Special now», the others say their day
 {

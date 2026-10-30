@@ -147,6 +147,12 @@ function buildNames(rows) {
   const table = ([t, key]) => (maps[t] ??= new Map((rows(t) || []).map((m) => [m[key], m])));
   const name = (type, id) => (TABLES[type] ? table(TABLES[type]).get(id)?.name : ITEM_NAMES[type]);
   const stageRow = (sid) => table(['stage', 'stageId']).get(sid);
+  // objective reward i of a stage row; a medal with an assigned skill (VIP! Skill, round 18): «Scrooge (ATK B X Max & Lux++ LV 20)»
+  const objName = (r, i) => {
+    const t = r.submissionRewardType?.[i], nm = t ? name(t, r.submissionItemId?.[i]) : '';
+    const sk = nm && t === 3 && r.submissionSkillId?.[i] ? table(['skill', 'skillId']).get(r.submissionSkillId[i])?.name : '';
+    return sk ? `${nm} (${sk} LV ${r.submissionSkillLv?.[i] || '?'})` : nm;
+  };
   // «Defeat the ${1:%s} within ${2:%d :#turn:#turns}» -> «Defeat the Huey within 1 turn»; %s = enemy / Keyblade / skill name
   const objText = (r, i) => {
     const n = r.submissionNum?.[i] ?? 0, what = ID_TABLES[r.submissionIdType?.[i]] ? table(ID_TABLES[r.submissionIdType[i]]).get(r.submissionId[i])?.name : '';
@@ -163,14 +169,14 @@ function buildNames(rows) {
     objectiveTypes: (sid) => (stageRow(sid)?.submissionRewardType || []).filter(Boolean),
     objective: (sid) => {
       const r = stageRow(sid);
-      return r ? (r.submissionRewardType || []).map((t, i) => name(t, r.submissionItemId[i])).filter(Boolean) : [];
+      return r ? (r.submissionRewardType || []).map((t, i) => objName(r, i)).filter(Boolean) : [];
     },
     stage: (sid) => {
       const r = stageRow(sid);
       if (!r) return null;
       const count = Math.min(3, r.validSubmission ?? (r.submissionName || []).filter(Boolean).length);
       return { objectives: Array.from({ length: count }, (_, i) => {
-        const t = r.submissionRewardType?.[i], nm = t ? name(t, r.submissionItemId?.[i]) : '';
+        const nm = objName(r, i);
         return { text: objText(r, i), reward: nm ? `${nm} x${r.submissionItemNum?.[i] ?? 1}` : '' };
       }) };
     },

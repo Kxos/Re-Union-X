@@ -133,7 +133,17 @@ function lookups(m) {
     titleId: (name) => ((m.title || []).find((r) => r.title === name) || {}).titleId || 0,
     keybladeId: (name) => ((m.keyblade || []).find((k) => k.name === name && !k.lv) || {}).keybladeId || 0,
     skillId: (name) => ((m.skill || []).find((s) => s.name === name) || {}).skillId || 0,
+    skillRow: (name) => (m.skill || []).find((s) => s.name === name) || null,
   };
+}
+
+// a medal reward with an assigned skill (VIP! Skill, round 18): «Scrooge 6★ {ATK B X Max & Lux++} x1» = the medal
+// «Scrooge 6★» carrying the master skill «ATK B X Max & Lux++» at its maxLv (the originals: «1 6★ ATK B X Max & Lux++»
+// with the Scrooge 6★ image, khuxwiki VIP! Skill). -> {reward: «Scrooge 6★», skill: «ATK B X Max & Lux++»} (skill null
+// without braces)
+function skillPart(reward) {
+  const m = /^(.*?)\s*\{([^{}]+)\}$/.exec(String(reward || '').trim());
+  return m ? { reward: m[1].trim(), skill: m[2].trim() } : { reward: String(reward || '').trim(), skill: null };
 }
 
 // objective reward -> [type, id, num]: materials, munny, draw tickets and avatar parts here, the rest (Avatar Coin,
@@ -162,17 +172,28 @@ function subsOf(objectives, rewardsOverride, target, L, report, where) {
       ? { name: 'Defeat the target enemy', req: 12, dt: 4, it: 1, id: ctx.target, n: 99 }
       : objectiveCodes(o.text, ctx);
     if (!c) { report.stopgaps.push([where, i + 1, o.text]); c = { name: o.text, req: 10, dt: 1, it: 0, id: 0, n: 0 }; }
+    const sp = skillPart(o.reward);
+    o.reward = sp.reward;
     let rw = rewardOf(o, L);
     if (!rw && o.reward === 'Title') { report.titleFallbacks.push([where, i + 1]); rw = TITLE_FALLBACK; }
     if (!rw) throw new Error(`special: ${where} objective ${i + 1}: reward «${o.reward}» not found in the master`);
-    return [c, rw];
+    // assigned skill (round 18): only on a medal; submissionSkillType 1 as the original medal rewards (1/0/1 = no
+    // skill, LV 1), here with the skill id and its maxLv
+    let sk = [0, 0, 0];
+    if (sp.skill) {
+      const row = L.skillRow ? L.skillRow(sp.skill) : null;
+      if (!row) throw new Error(`special: ${where} objective ${i + 1}: skill «${sp.skill}» not in the skill table`);
+      if (rw[0] !== 3) throw new Error(`special: ${where} objective ${i + 1}: skill «${sp.skill}» on a reward that is not a medal`);
+      sk = [1, row.skillId, row.maxLv || 1];
+    }
+    return [c, rw, sk];
   });
   const pad = (f) => [0, 1, 2].map((i) => (i < subs.length ? f(subs[i]) : 0));
   return { validSubmission: subs.length,
     submissionRequire: pad(([c]) => c.req), submissionName: [0, 1, 2].map((i) => (i < subs.length ? subs[i][0].name : '')),
     submissionDataType: pad(([c]) => c.dt), submissionIdType: pad(([c]) => c.it), submissionId: pad(([c]) => c.id),
     submissionNum: pad(([c]) => c.n), submissionRewardType: pad(([, r]) => r[0]), submissionItemId: pad(([, r]) => r[1]),
-    submissionSkillType: [0, 0, 0], submissionSkillId: [0, 0, 0], submissionSkillLv: [0, 0, 0],
+    submissionSkillType: pad(([, , k]) => k[0]), submissionSkillId: pad(([, , k]) => k[1]), submissionSkillLv: pad(([, , k]) => k[2]),
     submissionItemNum: pad(([, r]) => r[2]) };
 }
 
@@ -344,8 +365,17 @@ function weeklyLabel(s, title) {
   return `${t} x1`;
 }
 const weekKey = (entryKey, start) => `${entryKey}@${start}`;
+// consecutive Mondays of a sorted week list -> runs ([[w1, w2], [w5]])
+function runsOf(weeks) {
+  const out = [];
+  for (const w of weeks) {
+    const last = out[out.length - 1];
+    if (last && addDays(last[last.length - 1], 7) === w) last.push(w); else out.push([w]);
+  }
+  return out;
+}
 
-function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weeklyAliased: [] }) {
+function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weeklyAliased: [], weeklySkills: [] }) {
   const W = rules.weekly;
   if (!W || !W.sets) return [];
   const table = catalogue.vip_recurring_weekly || {};
@@ -359,7 +389,11 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
   let next = WEEKLY_EV_FIRST;
   const nextId = () => { while (used.has(next)) next++; used.add(next); return next++; };
   const aliases = W.aliases || {};
-  const resolves = (label) => !!label && !!rewardOf(splitObjective(`x -> ${label}`), L);
+  const resolves = (label) => {
+    if (!label) return false;
+    const o = splitObjective(`x -> ${label}`), sp = skillPart(o.reward);
+    return !!rewardOf({ ...o, reward: sp.reward }, L) && (!sp.skill || !!(L.skillRow && L.skillRow(sp.skill)));
+  };
   const parts = (L.avatarParts || []);
   // «Spiky x1» -> «Spiky (♂) x1» when the master has the part in one gender only
   const genderOf = (name) => [...new Set(parts.filter((r) => r.name === name).map((r) => r.gender))].sort();
@@ -375,25 +409,36 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
     for (const row of table[setName] || []) {
       const allWeeks = weeksOf(row.dates), weeks = allWeeks.filter((w) => w >= lo && w <= hi);
       if (!weeks.length) continue;
-      const start = weeks[0], end = [addDays(weeks[weeks.length - 1], 6), hi].sort()[0];
-      let key = weekKey(spec.entry, start);
-      for (let n = 2; keys.has(key); n++) key = `${weekKey(spec.entry, start)}#${n}`;
-      keys.add(key);
-      seenKeys.add(key);
-      if ((frozen[key] || {}).dropped) continue;
-      const rewards = row.rewards.slice(0, 3).map((r, i) => {
-        let label = weeklyLabel(r, row.banner);
-        if (!label) return null;
-        let [, name, qty] = /^(.*) x(\d+)$/.exec(label);
-        if (Object.prototype.hasOwnProperty.call(aliases, name)) {
-          if (aliases[name] === null) { report.weeklyLeftOut.push([key, i + 1, name]); return `${WEEKLY_FILLER} x1`; }
-          report.weeklyAliased.push([key, i + 1, name, aliases[name]]);
-          name = aliases[name];
-        }
-        const g = !/\((?:♂|♀)\)$/.test(name) && genderOf(name);
-        if (g && g.length === 1) name = `${name} (${g[0] === 1 ? '♂' : '♀'})`;
-        label = `${name} x${qty}`;
-        return label;
+      // a row whose weeks are not consecutive (VIP! Skill 4: 09/28, 10/19, 11/09/20, alternating with VIP! Skill 5):
+      // one version per run of consecutive weeks, so the weeks between show the other row (or the fallback)
+      runsOf(weeks).forEach((run, ri) => {
+        const start = run[0], end = [addDays(run[run.length - 1], 6), hi].sort()[0];
+        let key = weekKey(spec.entry, start);
+        for (let n = 2; keys.has(key); n++) key = `${weekKey(spec.entry, start)}#${n}`;
+        keys.add(key);
+        seenKeys.add(key);
+        if ((frozen[key] || {}).dropped) return;
+        const rewards = row.rewards.slice(0, 3).map((r, i) => {
+          let label = weeklyLabel(r, row.banner);
+          if (!label) return null;
+          let [, name, qty] = /^(.*) x(\d+)$/.exec(label);
+          if (Object.prototype.hasOwnProperty.call(aliases, name)) {
+            if (aliases[name] === null) { report.weeklyLeftOut.push([key, i + 1, name]); return `${WEEKLY_FILLER} x1`; }
+            report.weeklyAliased.push([key, i + 1, name, aliases[name]]);
+            name = aliases[name];
+          }
+          // skill-assigned medal (round 18, spec.skills: catalogue skill text -> master skill name): «ATK B X Max & Lux++ 6★»
+          // -> the carrier medal of that rarity with the skill, «Scrooge 6★ {ATK B X Max & Lux++}»
+          const sk = spec.skills && /^(.*) (\d)★$/.exec(name);
+          if (sk && Object.prototype.hasOwnProperty.call(spec.skills, sk[1]) && !sk[1].startsWith('_')) {
+            if (!spec.skillCarrier) throw new Error(`special: weekly set «${setName}»: skills without skillCarrier`);
+            report.weeklySkills.push([key, i + 1, sk[1], spec.skills[sk[1]]]);
+            name = `${spec.skillCarrier} ${sk[2]}★ {${spec.skills[sk[1]]}}`;
+          }
+          const g = !/\((?:♂|♀)\)$/.test(name) && genderOf(name);
+          if (g && g.length === 1) name = `${name} (${g[0] === 1 ? '♂' : '♀'})`;
+          label = `${name} x${qty}`;
+          return label;
       });
       // spirit parts (bothGenders): ♂ and ♀ in slots 2-3 when slot 3 is the filler
       if (spec.bothGenders && rewards[1] && rewards[2] === `${WEEKLY_FILLER} x1`) {
@@ -405,7 +450,8 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
       const fz = frozen[key] || {};
       out.push({ key, evStageId: fz.evStageId || nextId(), name: en.name, family: en.family, periods: [periodOfDay(start, rules.periods)],
         days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '', campaign: { start, end }, banner: fz.banner || en.banner || '',
-        weekOf: en.key, weekTitle: String(row.banner || '').trim(), ...(start !== allWeeks[0] ? { clippedFrom: allWeeks[0] } : {}), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
+        weekOf: en.key, weekTitle: String(row.banner || '').trim(), ...(ri === 0 && start !== allWeeks[0] ? { clippedFrom: allWeeks[0] } : {}), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
+      });
     }
   }
   if (unknown.length) throw new Error(`special: weekly rewards not in the master (add rules.weekly.aliases): ${unknown.join('; ')}`);
@@ -416,7 +462,7 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
 
 function build(rules, catalogue, masterRows) {
   const L = lookups(masterRows);
-  const report = { stopgaps: [], titleFallbacks: [], weeklyLeftOut: [], weeklyAliased: [] };
+  const report = { stopgaps: [], titleFallbacks: [], weeklyLeftOut: [], weeklyAliased: [], weeklySkills: [] };
   // reference rows: last story row 1-525 of each world, then the last story row of all
   const story = (masterRows.stage || []).filter((r) => r.stageKind === 1 && r.stageId < 100000 && r.id <= 525).sort((a, b) => a.id - b.id);
   if (!story.length) throw new Error('special: no story rows in the stage table');
@@ -603,4 +649,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { build, patch, weeksOf, weeklyLabel, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };
+module.exports = { build, patch, weeksOf, weeklyLabel, runsOf, skillPart, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };

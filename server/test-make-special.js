@@ -331,6 +331,42 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   check(sw(977000).mapName === 'White Rabbit\'s House' && sw(977000).useAp === 0 && sw(977000).name === 'Beta', 'versions on the set\'s quest (room, AP, name)');
   check(ow.report.weeklyLeftOut.length === 1 && ow.report.weeklyLeftOut[0][2] === 'Lost Part' && ow.report.weeklyAliased.length === 2, 'report: left out / aliased');
   check(!wk.some((x) => /Skill/.test(x.weekTitle)), 'VIP! Skill: not a set, no versions');
+  // round 18: VIP! Skill. A set with skills {catalogue skill text -> master skill name} and skillCarrier: «1 6★ <skill>» ->
+  // the carrier medal of that rarity with the skill at its maxLv (submissionSkillType 1 / Id / Lv); weeks that are not
+  // consecutive -> one version per run
+  check(ms.skillPart('Scrooge 6★ {ATK B X Max & Lux++}').reward === 'Scrooge 6★' && ms.skillPart('Scrooge 6★ {ATK B X Max & Lux++}').skill === 'ATK B X Max & Lux++'
+    && ms.skillPart('Moogle 6★').skill === null, 'skillPart');
+  check(JSON.stringify(ms.runsOf(['2020-09-28', '2020-10-19', '2020-10-26', '2020-11-09'])) === JSON.stringify([['2020-09-28'], ['2020-10-19', '2020-10-26'], ['2020-11-09']]), 'runsOf');
+  {
+    const catS = { ...catW, vip_recurring_weekly: { 'VIP! Skill': [
+      { banner: 'VIP! Skill', dates: '06/01/20 - 06/07/20; 06/15/20 - 06/21/20', rewards: ['1 6★ ATK B X Max & Lux++', '1 6★ Magic Mirror', '1 6★ Moogle'] },
+      { banner: 'VIP! Skill 2', dates: '06/08/20 - 06/14/20', rewards: ['1 6★ Defense Boost VII Max', '1 6★ ATK B X Max & Lux++', '1 6★ Moogle |}'] },
+    ] } };
+    const masterS = { ...masterW, medal: [...masterW.medal, { medalId: 90126, name: 'Scrooge', rare: 6 }, { medalId: 90136, name: 'Magic Mirror', rare: 6 }],
+      skill: [{ skillId: 1209, name: 'ATK B X Max & Lux++', maxLv: 20 }, { skillId: 1157, name: 'Defense Boost VII Max', maxLv: 20 }] };
+    const rulesS = { ...rules, entries: [...rules.entries, { key: 'skill', evStageId: 7004, quests: ['Beta'], name: 'VIP! Skill', family: 'SQ22', periods: [4], days: 'all', vip: true,
+      replacedBy: null, removed: '', resetGroup: '', useAp: [0], rewards: ['Scrooge 6★ {Defense Boost VII Max} x1', 'Magic Mirror 6★ x1', 'Moogle 6★ x1'], drops: [] }] };
+    const weeklyS = { sets: { 'VIP! Skill': { entry: 'skill', skillCarrier: 'Scrooge', skills: { 'ATK B X Max & Lux++': 'ATK B X Max & Lux++', 'Defense Boost VII Max': 'Defense Boost VII Max' } } } };
+    const os = ms.build({ ...rulesS, weekly: weeklyS }, catS, masterS);
+    const vs = os.index.entries.filter((x) => x.weekOf === 'skill');
+    check(vs.map((x) => `${x.key}:${x.campaign.start}/${x.campaign.end}`).join() === 'skill@2020-06-01:2020-06-01/2020-06-07,skill@2020-06-15:2020-06-15/2020-06-21,skill@2020-06-08:2020-06-08/2020-06-14',
+      `skill set: one version per run of weeks (${vs.map((x) => `${x.key}:${x.campaign.start}/${x.campaign.end}`)})`);
+    const rowOf = (k) => os.stageRows.find((r) => r.stageId === vs.find((x) => x.key === k).stageIds[0]);
+    const a = rowOf('skill@2020-06-01'), b = rowOf('skill@2020-06-08');
+    check(a.submissionRewardType.join() === '3,3,3' && a.submissionItemId.join() === '90126,90136,90016' && a.submissionItemNum.join() === '1,1,1', `skill week: Scrooge 6★ carrier (${a.submissionItemId})`);
+    check(a.submissionSkillType.join() === '1,0,0' && a.submissionSkillId.join() === '1209,0,0' && a.submissionSkillLv.join() === '20,0,0', `skill week: skill 1209 at maxLv 20 on objective 1 (${a.submissionSkillId}/${a.submissionSkillLv})`);
+    check(b.submissionItemId.join() === '90126,90126,90016' && b.submissionSkillId.join() === '1157,1209,0' && b.submissionSkillLv.join() === '20,20,0', `skill week 2: two skill medals (${b.submissionSkillId})`);
+    const fb = os.stageRows.find((r) => r.stageId === os.index.entries.find((x) => x.key === 'skill').stageIds[0]);
+    check(fb.submissionItemId[0] === 90126 && fb.submissionSkillId.join() === '1157,0,0', 'set entry (fallback): rewards with «{skill}» parsed too');
+    check(os.report.weeklySkills.length === 4, `report: skill rewards (${os.report.weeklySkills.length})`);
+    const sp0 = require('./special');
+    const lsS = (from, to) => sp0.currentEntries(os.index, { period: 4, shopFrom: from, shopTo: to }).filter((x) => x.vip && /^skill/.test(x.key)).map((x) => x.key).join();
+    check(lsS('2020-06-08', '2020-06-14') === 'skill@2020-06-08' && lsS('2020-06-15', '2020-06-21') === 'skill@2020-06-15' && lsS('2020-06-22', '2020-06-28') === 'skill',
+      `skill set listing per week (${lsS('2020-06-08', '2020-06-14')} / ${lsS('2020-06-15', '2020-06-21')} / ${lsS('2020-06-22', '2020-06-28')})`);
+    const badS = (w, why, m = masterS) => { let t = false; try { ms.build({ ...rulesS, weekly: w }, catS, m); } catch { t = true; } check(t, why); };
+    badS({ sets: { 'VIP! Skill': { ...weeklyS.sets['VIP! Skill'], skills: { ...weeklyS.sets['VIP! Skill'].skills, 'ATK B X Max & Lux++': 'No Such Skill' } } } }, 'unknown skill name rejected');
+    badS({ sets: { 'VIP! Skill': { ...weeklyS.sets['VIP! Skill'], skillCarrier: undefined } } }, 'skills without a carrier rejected');
+  }
   check(ow.evStageRows.filter((r) => r.eventStageId >= 7700).map((r) => `${r.eventStageId}:${r.validStageId}`).join() === '7700:1,7705:1,7701:1', 'one evStage row per version');
   check(ow.maps.filter((m) => m.stageId >= 977000).length === 3 && ow.maps.filter((m) => m.stageId >= 977000).every((m) => m.targetReward === 1 && m.enemies.flat().every((x) => x.reward === 1) && m.level === 15), 'a map per version: row 1 on every enemy, level of the set\'s quest');
   check(ow.stageRows.every((r) => r.stageId < 980000 && ![95100, 95200].includes(r.stageId)), 'stage ids < 980000, never 95100 / 95200');
@@ -437,7 +473,7 @@ check(real.periods[3].from === '2020-05-23' && real.periods[3].to === '2020-11-1
 check(Array.isArray(require('./special').PERIODS) && require('./special').PERIODS.length === 5, 'special.js reads the periods array');
 const p4 = real.entries.filter((e) => e.periods.includes(4));
 check(p4.filter((e) => e.resetGroup === 'cid').length === 7, '7 Daily Cid entries');
-check(p4.filter((e) => e.vip).length === 9, '9 VIP entries (6 + VIP! Materials 1-2 and VIP! Jewels & Spirit Part, Task 12)');
+check(p4.filter((e) => e.vip).length === 10, '10 VIP entries (6 + VIP! Materials 1-2 and VIP! Jewels & Spirit Part, Task 12; VIP! Skill, round 18)');
 check(real.entries.filter((e) => e.removed === 'no-use').length === 2, 'Mythril Madness and Adamantite removed');
 check(new Set(real.entries.map((e) => e.evStageId)).size === real.entries.length && new Set(real.entries.map((e) => e.key)).size === real.entries.length, 'unique keys and evStageIds');
 const MASTER = path.join(__dirname, 'master_data');
@@ -448,7 +484,7 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
     material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
   const live = real.entries.filter((e) => !e.removed);
   const weeklyV = all.index.entries.filter((e) => e.weekOf);
-  check(all.evStageRows.length === 1 + live.length + 120 + 174, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 174 week versions)`);
+  check(all.evStageRows.length === 1 + live.length + 120 + 198, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 198 week versions)`);
   // the 120 WW week-limited VIP campaigns (Task 12)
   const sp = require('./special');
   const camps = all.index.entries.filter((e) => e.campaign && !e.weekOf);
@@ -493,13 +529,13 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   // round 17: the recurring VIP sets follow the weekly rotation (catalogue vip_recurring_weekly, appendix B)
   const perSet = {};
   for (const e of weeklyV) perSet[e.weekOf] = (perSet[e.weekOf] || 0) + 1;
-  check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 46, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2 }),
+  check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 46, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2, 'vip-skill': 24 }),
     `real build: week versions per set ${JSON.stringify(perSet)}`);
   check(weeklyV.every((e) => real.weekly.versions[e.key]?.evStageId === e.evStageId && e.evStageId >= 7700 && e.evStageId <= 7999), 'real build: week version ids frozen in special_periods.json (7700-7999)');
-  check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 176, 'real build: 176 frozen week-version ids (2 dropped, reserved)');
+  check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 201, 'real build: 201 frozen week-version ids (3 dropped, reserved)');
   // fix round 1 (ruling): the two clipped Medal Quest rows of 2019-03-04 are the campaigns' (C49538 / C49546, C50518): dropped, ids reserved
   const dropped = Object.entries(real.weekly.versions).filter(([k, v]) => !k.startsWith('_') && v.dropped).map(([k, v]) => `${k}:${v.evStageId}`);
-  check(dropped.join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701' && !all.evStageRows.some((r) => [7700, 7701].includes(r.eventStageId)), `real build: dropped versions ${dropped}`);
+  check(dropped.join() === 'vip-medal@2019-03-04:7700,vip-medal@2019-03-04#2:7701,vip-skill@2021-01-04#2:7893' && !all.evStageRows.some((r) => [7700, 7701, 7893].includes(r.eventStageId)), `real build: dropped versions ${dropped}`);
   // cross-check: no week version gives a 7★ medal that a campaign of an overlapping week already gives
   const rare7 = new Set(t('medal').filter((m) => m.rare === 7).map((m) => m.medalId));
   const medals7 = (en) => en.stageIds.flatMap((id) => { const r = all.stageRows.find((x) => x.stageId === id); return r.submissionItemId.filter((m, i) => r.submissionRewardType[i] === 3 && rare7.has(m)); });
@@ -521,7 +557,38 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
     `real build: weeks with two versions of a set ${twoWeeks}`);
   check([...twoKeys].every((k) => /two/.test(real.weekly.versions[k]._note || '')) && Object.entries(real.weekly.versions).filter(([, v]) => /two versions/.test(v._note || '')).length === twoKeys.size,
     `real build: _note on exactly the versions sharing a week (${[...twoKeys].filter((k) => !real.weekly.versions[k]._note)})`);
-  check(!weeklyV.some((e) => /skill/i.test(e.weekOf)), 'real build: no VIP! Skill versions');
+  // round 18: VIP! Skill. Skill resolution of every reward text of the catalogue table (tmp/vipskill/SKILLS.md): the
+  // master skill id, maxLv 20, carrier Scrooge 6★ (90126)
+  const SKILL_IDS = { 'ATK B VIII Max & Paralysis': 1172, 'Attack Boost X Max': 1142, 'ATK B X Max & Lux++': 1209, 'AB IX Max & Lux++ & GA 2': 1222,
+    'ATK B XIII Max & Paralysis': 1176, 'Defense Boost VII Max': 1157, 'ATK B XIV Max & GA 2': 1262, 'AB X Max & Lux++ & GA 2': 1223,
+    'ATK B XIV Max & Paralysis': 1177, 'ATK B XIV Max & Sleep': 1163, 'ATK B XIII Max & GA 0': 1261, 'AB X Max & Lux++ & GA 1': 1224,
+    'ATK B XI Max & Lux++': 1211, 'ATK B XIV Max & GA 1': 1263, 'AB X Max & Lux++ & GA 0': 1225, 'ATK B XIV Max & GA 0': 1264,
+    'DEF Boost VIII Max': 1158, 'Attack Boost XV Max': 1147 };
+  const catAll = JSON.parse(fs.readFileSync(SRC, 'utf8'));
+  const texts = [...new Set(catAll.vip_recurring_weekly['VIP! Skill'].flatMap((r) => r.rewards).map((x) => ms.weeklyLabel(x).replace(/ 6★ x1$/, ''))
+    .filter((n) => !['Moogle', 'Magic Mirror', 'Huey & Dewey & Louie'].includes(n)))].sort();
+  check(texts.join('|') === Object.keys(SKILL_IDS).sort().join('|'), `VIP! Skill reward texts: ${texts.join(' | ')}`);
+  const skillT = t('skill'), skillSet = real.weekly.sets['VIP! Skill'];
+  for (const [txt, id] of Object.entries(SKILL_IDS)) {
+    const row = skillT.find((r) => r.name === skillSet.skills[txt]);
+    check(row && row.skillId === id && row.maxLv === 20, `skill «${txt}» -> ${row ? `${row.skillId} LV ${row.maxLv}` : 'missing'} (want ${id} LV 20)`);
+  }
+  check(skillSet.entry === 'vip-skill' && skillSet.skillCarrier === 'Scrooge', 'VIP! Skill set: entry vip-skill, carrier Scrooge');
+  const skillV = weeklyV.filter((e) => e.weekOf === 'vip-skill');
+  const srow = (en) => all.stageRows.find((r) => r.stageId === en.stageIds[0]);
+  const skillCells = skillV.flatMap((en) => { const r = srow(en); return [0, 1, 2].filter((i) => r.submissionSkillId[i]).map((i) => [r, i]); });
+  check(skillCells.length === 40 && skillCells.every(([r, i]) => r.submissionRewardType[i] === 3 && r.submissionItemId[i] === 90126 && r.submissionItemNum[i] === 1
+    && r.submissionSkillType[i] === 1 && Object.values(SKILL_IDS).includes(r.submissionSkillId[i]) && r.submissionSkillLv[i] === 20),
+    `real build: VIP! Skill rewards = Scrooge 6★ x1 with a table skill at LV 20 (${skillCells.length} of 40)`);
+  const skillEntryStage = srow(all.index.entries.find((e) => e.key === 'vip-skill')).stageId;
+  check(all.stageRows.filter((r) => r.stageId !== skillEntryStage && !skillV.some((en) => en.stageIds.includes(r.stageId)))
+    .every((r) => r.submissionSkillId.every((x) => x === 0)), 'real build: no assigned skill outside VIP! Skill');
+  const skAt = (from) => listedAt0(from).filter((e) => e.key === 'vip-skill' || e.weekOf === 'vip-skill').map((e) => e.key).join();
+  check(skAt('2020-09-07') === 'vip-skill@2020-09-07' && skAt('2020-10-19') === 'vip-skill@2020-10-19' && skAt('2020-10-12') === 'vip-skill@2020-10-12'
+    && skAt('2020-10-05') === 'vip-skill' && skAt('2021-01-04') === 'vip-skill@2021-01-04' && skAt('2021-03-01') === '' && skAt('2019-05-20') === '',
+    `real build: VIP! Skill listing per week (${['2020-09-07', '2020-10-19', '2020-10-12', '2020-10-05', '2021-01-04', '2021-03-01', '2019-05-20'].map(skAt)})`);
+  const s907 = srow(skillV.find((e) => e.key === 'vip-skill@2020-09-07'));
+  check(s907.submissionItemId.join() === '90126,90156,90016' && s907.submissionSkillId.join() === '1209,0,0', 'real build: week 2020-09-07 = Scrooge 6★ ATK B X Max & Lux++, Magic Mirror 6★, Moogle 6★');
   const medalOf = (label) => { const m = t('medal').filter((x) => `${x.name} ${x.rare}★` === label).sort((a, b) => a.medalId - b.medalId)[0]; return m ? m.medalId : -1; };
   const listedAt = (from) => sp.currentEntries(all.index, { period: sp.periodOf(from, real.periods), shopFrom: from, shopTo: addD(from, 6) });
   const medalAt = (from) => listedAt(from).filter((e) => e.key === 'vip-medal' || e.weekOf === 'vip-medal');

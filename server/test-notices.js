@@ -125,7 +125,9 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/recurring VIP quests/.test(t) && /change every week/.test(t) && /original rewards/.test(t) && /some weeks had two/.test(t) && /not known/.test(t), 'Special: recurring VIP quests change every week with their original rewards (round 17)');
   check(/details/.test(t) && /addition of this server/.test(t) && /had none/.test(t), 'Special: pagina dei dettagli del catalogo, aggiunta del server (round 2)');
   check(/limited VIP campaigns/.test(t) && /week/.test(t) && /one quest of its theme/.test(t), 'Special: campagne VIP settimanali (Task 12)');
-  check(/closest/.test(t) && /left out/.test(t) && /VIP! Skill/.test(t), 'Special: premi inesistenti sostituiti o tolti, VIP! Skill assente');
+  check(/closest/.test(t) && /left out/.test(t), 'Special: premi inesistenti sostituiti o tolti');
+  check(!/VIP! Skill\*\* quest is not available/.test(t) && !/VIP! Skill[^.]*not available/.test(t), 'Special: VIP! Skill no longer «not available» (round 18)');
+  check(/VIP! Skill/.test(t) && /Scrooge 6★/.test(t) && /maximum level/.test(t) && /as in the original/.test(t) && /none is replaced/.test(t), 'Special: VIP! Skill gives its skills as in the original (Scrooge 6★, max level), no substitution (round 18)');
   check(/Anniversary Extravaganza: Limited VIP Boards!/.test(t) && /Limited VIP Coin Skill Board!/.test(t) && /original banners are lost/.test(t), 'Special: two campaign banners reconstructed (round 3, 30-10)');
 }
 n.NOTICES.push({ date: '1', tag: 'X', title: 'a<b>"&', body: ['<script>'] });
