@@ -137,13 +137,23 @@ check(mA && mA.world === 1 && mA.room === 'Fountain Square' && mA.name === 'Alph
   && mA.targetId === 11003 && mA.level === 25 && mA.rooms === 1 && Array.isArray(mA.treasures) && mA.treasures.length === 0, 'map entry fields');
 check(mA && mA.enemies.length >= 3 && mA.enemies.every((g) => g.length && g.reduce((n, x) => n + x.n, 0) <= 5), '>= 3 groups of at most 5');
 check(mA && members(mA).every((x) => x.enemyId !== 11003), 'the target is not in the normal groups');
-const carriers = mA ? members(mA).filter((x) => x.reward !== 1) : [];
+const carriers = mA ? members(mA).filter((x) => x.name !== 'King Pretender' && x.name !== 'Great Pretender') : [];
 check(carriers.length === 2 && carriers.map((x) => x.reward).join() === alpha.dropRewardIds.join() && carriers.every((x) => x.n === 1),
   'one drop carrier per drop row, reward = the drop row');
+// fix round 1 (bench rev 215): every enemy of a Special map with drops carries one of the entry's drop rows (round-robin,
+// one enemy per member), the target too (targetReward); no enemy on row 1; entries without drops: row 0 (no drop)
+for (const m of maps.filter((x) => x.stageId !== 970000)) {
+  const en = index.entries.find((e) => e.stageIds.includes(m.stageId));
+  const ok = (r) => (en.dropRewardIds.length ? en.dropRewardIds.includes(r) : r === 0);
+  check(members(m).every((x) => ok(x.reward) && x.n === 1), `map ${m.stageId}: every enemy on a drop row of the entry (or 0 without drops)`);
+  check(ok(m.targetReward), `map ${m.stageId}: targetReward ${m.targetReward}`);
+}
+check(mA && new Set(members(mA).filter((x) => x.name === 'King Pretender').map((x) => x.reward)).size === 2, 'round-robin over both drop rows on the normal enemies');
+check(mA && members(mA).filter((x) => x.name === 'King Pretender').length === 6, 'still 2 normal enemies per group, one member each');
 check(carriers[0] && carriers[0].name === 'Prize Egg' && carriers[0].enemyId === 1006, 'medal drop: Prize Egg carrier');
 check(mA && members(mA).some((x) => x.enemyId === 1002 && x.name === 'Great Pretender' && x.n === 1), 'objective enemy Great Pretender x1 on the map');
 const mT = maps.find((m) => m.stageId === 970000);
-check(mT && mT.target === 'Shadow' && mT.targetId === 1 && members(mT).every((x) => x.reward === 1), 'training map: Shadow, no drops');
+check(mT && mT.target === 'Shadow' && mT.targetId === 1 && members(mT).every((x) => x.reward === 1) && (mT.targetReward || 1) === 1, 'training map: Shadow, no drops (row 1 as before)');
 
 // objectives override per quest name (catalogue quest without objectives or with a typo) and from / to in the index
 {
@@ -162,6 +172,7 @@ const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
 bad([{ ...rules.entries[0], series: ['Nope'] }], 'entry without quests rejected');
 bad([{ ...rules.entries[0], drops: [{ type: 3, id: 12345, num: 1 }] }], 'drop not in the medal table rejected');
+bad([{ ...rules.entries[0], objectives: { 'Alpha III': ['a -> Munny x1', 'b -> Munny x1', 'c -> Munny x1'] } }], 'objectives override for a quest the entry does not pick rejected');
 
 // patch: twice on a temp master copy gives identical files; old 970123 row dropped
 const dir = fs.mkdtempSync(path.join(TMP, 'special-'));
@@ -235,6 +246,7 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(['cid-mon', 'mog', 'evolve-legendary', 'skill-exp', 'vip-medal'].every((k) => all.index.entries.find((e) => e.key === k).stageIds[0]
     === 970000 + (real.entries.find((e) => e.key === k).evStageId - 7000) * 10), 'real build: period-4 stage ids unchanged');
   check(all.index.entries.find((e) => e.key === 'cid-vip-mon').to === '2017-04-19', 'real build: from / to in the index');
+  check(all.maps.filter((m) => m.stageId !== 970000).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no Special map enemy on reward row 1');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
   console.log(`(real build: ${all.stageRows.length} stage, ${all.evStageRows.length} evStage, ${all.rewardRows.length} reward rows, ${all.maps.length} maps; `
     + `entries per period ${[1, 2, 3, 4, 5].map((n) => live.filter((e) => e.periods.includes(n)).length).join('/')})`);

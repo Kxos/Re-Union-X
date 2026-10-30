@@ -5,7 +5,7 @@
 Needs the local map data (maps_x, a real MAP template, server/master_data/enemy.json); skipped when missing.
 One special entry in Fountain Square: checks the STG and the part exist, the target is the first enemy of the
 only target area and the farthest enemy from the start (walking distance on the collision), the drop carrier keeps
-its reward row and the level, the POI file is merged (old entries kept), validate_maps.py reports no errors.
+its reward row and the level, every member keeps its own reward (0 = no drop) and the target takes targetReward, the POI file is merged (old entries kept), validate_maps.py reports no errors.
 """
 import json
 import os
@@ -42,11 +42,11 @@ def check(cond, msg):
 
 
 SID, ROOM_NAME = 970999, 'Fountain Square'
-G = lambda carrier=None: ([{'name': 'Shadow', 'enemyId': 80001, 'n': 2, 'reward': 1}]  # noqa: E731
+G = lambda carrier=None: ([{'name': 'Shadow', 'enemyId': 80001, 'n': 1, 'reward': 970123}, {'name': 'Shadow', 'enemyId': 80001, 'n': 1, 'reward': 0}]  # noqa: E731
                           + ([carrier] if carrier else []))
 entry = {'stageId': SID, 'world': 1, 'name': 'Test Special', 'room': ROOM_NAME, 'target': 'Shadow', 'targetId': 10001,
          'level': 30, 'enemies': [G({'name': 'Prize Egg', 'enemyId': 1006, 'n': 1, 'reward': 970123}), G(), G()],
-         'treasures': [], 'rooms': 1}
+         'treasures': [], 'rooms': 1, 'targetReward': 970124}
 os.makedirs(TMP, exist_ok=True)
 tmp = tempfile.mkdtemp(prefix='khux_special_maps_', dir=TMP)
 try:
@@ -73,8 +73,10 @@ try:
         check(sum(e['enemyId'] == 10001 for e in ens) == 1, 'the target once')
         check(all(e['level'] == 30 for e in ens), 'level 30 on every enemy record')
         car = [e for e in ens if e['reward'] == 970123]
-        check(len(car) == 1 and car[0]['enemyId'] == 1006, 'drop carrier Prize Egg with reward 970123')
-        check(all(e['reward'] == 1 for e in ens if e['enemyId'] != 1006), 'other enemies reward 1')
+        check(len(car) == 4 and sum(e['enemyId'] == 1006 for e in car) == 1, 'drop carrier Prize Egg + 3 Shadows with reward 970123')
+        check(sum(e['reward'] == 0 for e in ens) == 3, 'members with reward 0 keep 0 (no drop)')
+        check([e['reward'] for e in ens if e['enemyId'] == 10001] == [970124], 'target carries targetReward 970124')
+        check(not any(e['reward'] == 1 for e in ens), 'no enemy on reward row 1')
         # target in the farthest area: walking distance (free pixels with > 16 of room, 8-px cells) start -> enemy
         import numpy as np
         from scipy import ndimage
@@ -115,7 +117,7 @@ try:
     p = json.load(open(poi, encoding='utf-8'))
     check('1010' in p, 'POI: old entries kept')
     pe = p.get(str(SID), {}).get('enemies', [])
-    check(len(pe) == 8 and any(e['reward'] == 970123 and e['enemyId'] == 1006 for e in pe), 'POI: special entry with the drop row')
+    check(len(pe) == 8 and any(e['reward'] == 970123 and e['enemyId'] == 1006 for e in pe) and any(e['reward'] == 970124 for e in pe), 'POI: special entry with the drop rows')
     v = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'validate_maps.py'), out, CLS, '--json', os.path.join(tmp, 'v.json')],
                        capture_output=True, text=True, encoding='utf-8', errors='replace')
     vr = json.load(open(os.path.join(tmp, 'v.json'), encoding='utf-8')) if os.path.exists(os.path.join(tmp, 'v.json')) else {}
