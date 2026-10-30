@@ -20,6 +20,10 @@ const { SKILL_TABLES } = gd;
 
 // Versione dello stile del bollino «KEPT IN SHOP»: sta nell'URL (<id>-kept<N>.png) cosi' il client non riusa le vecchie immagini
 const KEPT_STYLE = 2;
+// Versione della grafica della piastra «Banner Catalog» (recon/tools/make_shop_art.py catalog_banner): sta nell'URL
+// (9001-v<N>.png, il file resta 9001.png) cosi' il client, che tiene le immagini per URL, scarica quella nuova
+const CATALOG_PLATE_STYLE = 2;
+const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYLE}.png`;
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1' }; // payType 8: player.drawTickets[currency]
 const TICKET_CURRENCIES = ['draw', 'holiday', 'spooky', 'moogle'];
@@ -139,7 +143,7 @@ function shopLeaveWeeks(catalog, { storyQuest, week, rot: rot0, sizes, show, sea
 // grigio, il tocco non manda richieste; Details apre il catalogo (detailUrl del master).
 function catalogRow() {
   return gd.drawMedalTypeRow({ drawMedalTypeId: gd.CATALOG_ID, name: 'Banner Catalog', payType: 6, price: 1, sortId: 1,
-    bannerUrl: `/web/gacha/img/${gd.CATALOG_ID}.png`, detailUrl: '/web/gacha/catalog', comment: 'Open Details to browse all banners' });
+    bannerUrl: CATALOG_PLATE_URL, detailUrl: '/web/gacha/catalog', comment: 'Open Details to browse all banners' });
 }
 
 // sortId: il client raggruppa le piastre in una mappa per sortId della lista (non quello del master,
@@ -259,7 +263,7 @@ function guardWarrant(w, b, ex, catalog, validComment, safeMedalId, nameOf = nul
 }
 
 function catalogPlate(webBase) {
-  return plate({ drawMedalTypeId: gd.CATALOG_ID, payType: 6, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1);
+  return { ...plate({ drawMedalTypeId: gd.CATALOG_ID, payType: 6, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1), bannerUrl: `${webBase}${CATALOG_PLATE_URL}` };
 }
 
 // Limiti giornalieri: al cambio di giorno (clock.dayIndex) si azzera solo «used».
@@ -850,7 +854,7 @@ function catalogPage(banners, ctx) {
 }
 
 module.exports = {
-  KEPT_STYLE, PAY_ICON_KEYS,
+  KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };
