@@ -32,7 +32,7 @@ const PIN_JS = 'var KHUX_PIN={1:["Pinned!","Leave and re-enter Special to see it
 // colours of the Shop (gacha.js page / CATALOG_CSS): now green, kept gold, can be kept blue, locked and off grey
 const PILL_CSS = '.s{display:inline-block;border-radius:12px;padding:0 10px;font-size:13px;line-height:1.7;margin:3px 0 0;background:#1a6fa8;color:#fff}'
   + '.s .ic{width:1.25em;height:1.25em;margin:-.2em .3em 0 -.2em}'
-  + '.s-now{background:#2e9e3e;font-weight:bold}.s-pinned{background:#b8860b;font-weight:bold}.s-can{background:#1a6fa8}'
+  + '.s-vipnow{background:#2a7a5c}.s-now{background:#2e9e3e;font-weight:bold}.s-pinned{background:#b8860b;font-weight:bold}.s-can{background:#1a6fa8}'
   + '.s-locked{background:#5a6470;color:#e0e6ea}.s-off{background:#4a5560;color:#d0d8de}.s-other{background:transparent;border:1px solid #8aa3b3;color:#b9cfdc}'
   + 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-width:none;vertical-align:middle;margin:-.15em .3em 0 0;border:0;border-radius:0}'
   + '.pk{margin-top:6px;border:2px solid #ffe08a;border-radius:10px;color:#fff;font:bold 14px sans-serif;padding:3px 14px;background:linear-gradient(#e0a020,#a8700a);cursor:pointer;text-decoration:none;display:inline-block}'
@@ -56,14 +56,14 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   // every row: the same 5px side bar (colour by status, like the Shop's .b.now / .b.pinned) and the same padding, so
   // banners and text line up; banner at half size (640x140 -> 320x70), the text wraps under it on a narrow phone
   + '.q{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:10px 0 10px 10px;border-left:5px solid #5d8aa6;border-bottom:1px solid #2f5d78}'
-  + '.q.now{border-left-color:#2e9e3e}.q.pinned{border-left-color:#b8860b}.q.can{border-left-color:#1a6fa8}.q.locked{border-left-color:#7d8894}.q.off{border-left-color:#6a7580}.q.other{border-left-color:#5d8aa6}'
+  + '.q.vipnow{border-left-color:#2a7a5c}.q.now{border-left-color:#2e9e3e}.q.pinned{border-left-color:#b8860b}.q.can{border-left-color:#1a6fa8}.q.locked{border-left-color:#7d8894}.q.off{border-left-color:#6a7580}.q.other{border-left-color:#5d8aa6}'
   + '.q.off .im img{opacity:.5;filter:grayscale(.7)}.q.locked .im img{opacity:.6;filter:grayscale(.6)}'
   + '.im{flex:0 0 auto;width:320px;max-width:100%}.im img{width:100%}.info{flex:1 1 170px;min-width:0;line-height:1.4}'
   + '.nm{font-weight:bold;color:#fff;text-decoration:none}.d{color:#b9cfdc;font-size:14px}'
   + PILL_CSS
   // group rows: a strip of day / variant chips, each in the colour of its own status
   + '.chs{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.ch{display:inline-block;border:1px solid transparent;border-radius:10px;padding:0 7px;font-size:12.5px;line-height:1.7;color:#fff;text-decoration:none;white-space:nowrap}'
-  + '.ch .ic{width:1.1em;height:1.1em;margin:-.2em .2em 0 -.15em}.c-now{background:#2e9e3e;font-weight:bold}.c-pinned{background:#b8860b;font-weight:bold}.c-can{background:#1a6fa8}'
+  + '.ch .ic{width:1.1em;height:1.1em;margin:-.2em .2em 0 -.15em}.c-now{background:#2e9e3e;font-weight:bold}.c-vipnow{background:#2a7a5c}.c-pinned{background:#b8860b;font-weight:bold}.c-can{background:#1a6fa8}'
   + '.c-locked{background:#5a6470;color:#e0e6ea}.c-off{background:#3d4750;color:#b0bac2}.c-other{background:transparent;border-color:#8aa3b3;color:#b9cfdc}'
   + '.pinmsg{display:none;position:sticky;bottom:6px;background:#2e9e3e;border-radius:8px;padding:6px 10px;font-size:16px;margin-top:10px}.pinmsg small{display:block;font-size:13px}'
   + '.pinmsg.off{background:#1a6fa8}.pinmsg.err{background:#b02020}'
@@ -207,6 +207,17 @@ function statusOf(en, ctx, { byKey, pinned, current }) {
     return { show: 'now', cls: 'locked', pill: pill('locked', 'lock', 'VIP only (locked)'), button: null,
       why: 'It is in Special now, locked: it needs the VIP benefit of the Weekly Missions.' };
   }
+  // a weekday quest on another day: what the Special tab shows today (special.lockOf: 2 open thanks to VIP, 1 padlock);
+  // its banner is in the tab either way, so the SHOW value stays «now» (round 8)
+  const lock = ctx.weekday ? special.lockOf(en, { weekday: ctx.weekday, vip: !!ctx.vip, pinned: false }) : 0;
+  if (lock === 2) {
+    return { show: 'now', cls: 'vipnow', pill: pill('vipnow', 'vip', 'Open today with VIP'), button: null,
+      why: `Not its day (${esc(daysText(en))}): it is open today thanks to the VIP benefit.` };
+  }
+  if (lock === 1) {
+    return { show: 'now', cls: 'locked', pill: pill('locked', 'lock', `Locked today · opens on ${esc(daysText(en))}`), button: null,
+      why: `It is in Special with a padlock today: it opens on ${esc(daysText(en))}, or every day with the VIP benefit of the Weekly Missions.` };
+  }
   return { show: 'now', cls: 'now', pill: pill('now', 'now', 'Open in Special now'), button: null, why: 'It is in Special now.' };
 }
 
@@ -336,11 +347,12 @@ function catalogPage(index, ctx = {}) {
 `;
   };
   const groupRow = (list, p) => {
-    const sts = list.map(statusFor), best = sts.reduce((a, b) => (SHOW_RANK.indexOf(b.show) < SHOW_RANK.indexOf(a.show) ? b : a));
+    const rank = (st) => SHOW_RANK.indexOf(st.show) * 3 + Math.max(0, ['now', 'vipnow', 'locked'].indexOf(st.cls));
+    const sts = list.map(statusFor), best = sts.reduce((a, b) => (rank(b) < rank(a) ? b : a));
     const head = list[0], href = detailHref(head.evStageId), anyFirst = list.some((en) => per(en) === p);
     const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
     const chips = list.map((en, j) => {
-      const st = sts[j], k = st.cls === 'locked' ? 'lock' : CHIP_ICON[st.show];
+      const st = sts[j], k = st.cls === 'locked' ? 'lock' : st.cls === 'vipnow' ? 'vip' : CHIP_ICON[st.show];
       return `<a class="ch c-${st.cls}"${per(en) === p ? ` id="q${en.evStageId}"` : ''} data-eid="${en.evStageId}" href="${detailHref(en.evStageId)}" title="${esc(en.name)}">${k ? icon(k) : ''}${esc(variantOf(en))}</a>`;
     }).join('');
     const keepable = list.filter((en, j) => sts[j].button !== null);
@@ -401,7 +413,7 @@ const DETAIL_CSS = 'table{width:100%;margin:6px 0 10px;border-collapse:collapse;
   + '.kv th{width:32%}.ob td.r{width:38%;color:#ffcd4a}.banner{width:100%;max-width:640px;margin:6px 0}'
   + 'ul.pl{margin:4px 0 8px;padding-left:22px}ul.pl li{margin:2px 0}.dr{color:#ffcd4a}'
   + '.why{border-left:4px solid #8aa3b3;background:#0a4466;padding:6px 12px;margin:8px 0 4px;font-size:15px;line-height:1.6}'
-  + '.why.now{border-color:#2e9e3e}.why.pinned{border-color:#b8860b}.why.can{border-color:#1a6fa8}.why.locked,.why.off{border-color:#7d8894}'
+  + '.why.now,.why.vipnow{border-color:#2e9e3e}.why.pinned{border-color:#b8860b}.why.can{border-color:#1a6fa8}.why.locked,.why.off{border-color:#7d8894}'
   + 'h3{color:#ffcd4a;font-size:17px;margin:14px 0 2px}'
   + '.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;background:linear-gradient(rgba(2,24,40,0),rgba(2,24,40,.92) 35%)}'
   + '.back{display:inline-block;padding:7px 26px 8px;border-radius:10px;border:2px solid #9fd4ff;color:#fff;text-decoration:none;'
