@@ -190,5 +190,17 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const d4 = pages.detailPage(ix, 7601, ctx4);
   check(d4.includes('s-now') && !d4.includes('Replaced by'), 'details: current replaced entry not «replaced»');
 }
+// round 5: «later» rows name the Story quest that unlocks them (ctx.unlockQuestOf, built by server.js)
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [e('l5', 7701, { periods: [5] }), e('l9', 7702, { periods: [5], name: 'Never' })] };
+  const ctxU = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', unlockQuestOf: (en) => (en.key === 'l5' ? 946 : null) };
+  const h = pages.catalogPage(ix, ctxU);
+  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  check(r(7701).includes('Unlocks at Story Quest 946') && r(7701).includes('data-show="later"'), 'later row: unlocking quest');
+  check(r(7702).includes('Not reached in this version of the Story') && r(7702).includes('data-show="later"'), 'later row never reached');
+  const d = pages.detailPage(ix, 7701, ctxU);
+  check(d.includes('Unlocks at Story Quest 946') && d.includes('Story Quest 946'), 'details: unlocking quest');
+  check(pages.catalogPage(ix, { ...ctxU, unlockQuestOf: undefined }).includes('Reached later in the Story'), 'no lookup: generic text');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
