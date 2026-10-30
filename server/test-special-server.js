@@ -139,7 +139,7 @@ check(raw(t.respondSpecialWeb, '/web/special/img/99999.png').code === 404, 'img 
 check(raw(t.respondSpecialWeb, '/web/special/img/7000-kept.png').code === 404, 'img 7000-kept: non 404');
 check(raw(t.respondSpecialWeb, '/web/special/img/../special.json').code === 404, 'percorso fuori dalla cartella: non 404');
 const cat = raw(t.respondSpecialWeb, '/web/special/catalog?m=1');
-check(cat.code === 200 && /text/html/.test(cat.headers['Content-Type']) && cat.body.toString('utf8').includes('id="q7001"'), `catalogo: ${cat.code}`);
+check(cat.code === 200 && cat.headers['Content-Type'].startsWith('text/html') && cat.body.toString('utf8').includes('id="q7001"'), `catalogo: ${cat.code}`);
 
 try { fs.unlinkSync(SAVE); } catch { /* gia' tolto */ }
 if (errors.length) { log(`FAIL (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
