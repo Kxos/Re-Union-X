@@ -46,6 +46,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { imgPath } = require('./special');
 const { objectiveCodes, objectiveReward, wikiLv, WIKI_WORLD } = require('./make-story-oltre');
 
 // bench 30-10 (Task 1): K = stageKind 2
@@ -196,7 +197,7 @@ function evStageRow(evStageId, stageIds, { resetFlag = 0, detailUrl = '' } = {})
   const row = { eventStageId: evStageId, parentEventStageId: 0, validStageId: stageIds.length, stageId: [...stageIds],
     validStageWidthId: 0, stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag, eventCategory: 1,
     eventType: 0, scoreMedalListId: 0, scoreStartReward: 0, scoreEndReward: 0, rankingId: 0,
-    bannerUrl: `/web/special/img/${evStageId}.png`, mypageBanner: 0, detailUrl, startTime: START, endTime: END,
+    bannerUrl: imgPath(evStageId), mypageBanner: 0, detailUrl, startTime: START, endTime: END,
     endDispTime: END, boardEndTime: END };
   for (const d of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) row[`week${d}`] = 1;
   row.benefitId = 0;

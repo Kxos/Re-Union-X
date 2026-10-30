@@ -87,7 +87,7 @@ check(sp.lockOf(wk.entries[0], { weekday: 'Wed', vip: false, pinned: true }) ===
   const kp = sp.specialEvents(wk, { period: 4, weekday: 'Wed', vip: false, pinnedKey: 'C1', shopFrom: '2020-06-01', shopTo: '2020-06-07',
     dayEndStr: 'D', weekEndStr: 'W', imgBase: '' });
   const k1 = kp.find((x) => x.eventStageId === 7501);
-  check(kp.length === 2 && k1 && k1.isLock === 1 && k1.bannerUrl.endsWith('7501-kept.png') && k1.endTime === 'W', 'pinned old campaign kept, locked without VIP');
+  check(kp.length === 2 && k1 && k1.isLock === 1 && k1.bannerUrl.endsWith('/v' + sp.SPECIAL_IMG_VERSION + '/7501-kept.png') && k1.endTime === 'W', 'pinned old campaign kept, locked without VIP');
 }
 
 // currentEntries: optional from / to of an entry (days 'YYYY-MM-DD', inclusive) against the Shop week start
@@ -117,9 +117,9 @@ check(ev.every((x) => EV.every((k) => k in x) && Object.keys(x).length === EV.le
 check(ev.every((x) => x.stages.every((s) => ST.every((k) => k in s))), 'every stage has the 5 keys');
 check(ev[1].stages[1].useAp === 8 && ev[1].stages[0].score === 71030, 'useAp and stageState used');
 check(ev[1].isLock === 1 && ev[2].isLock === 1, 'closed entries isLock 1 (Wed, no vip)');
-check(ev[1].bannerUrl === 'http://h/web/special/img/7103.png', 'bannerUrl');
+check(ev[1].bannerUrl === 'http://h/web/special/img/v' + sp.SPECIAL_IMG_VERSION + '/7103.png', 'bannerUrl');
 const kept = sp.specialEvents(index, ctx({ pinnedKey: 'old' }));
-check(kept[1].eventStageId === 7101 && kept[1].bannerUrl.endsWith('7101-kept.png'), 'kept element second, -kept banner');
+check(kept[1].eventStageId === 7101 && kept[1].bannerUrl.endsWith('/v' + sp.SPECIAL_IMG_VERSION + '/7101-kept.png'), 'kept element second, -kept banner');
 check(kept[1].isLock === 2 && kept[1].endTime === 'WEEKEND', 'pinned Tue-only entry on Wed: isLock 2');
 const same = sp.specialEvents(index, ctx({ pinnedKey: 'cur' }));
 check(same.filter((x) => x.eventStageId === 7103).length === 1 && !same.some((x) => x.bannerUrl.includes('-kept')), 'current pin shown once, no -kept');

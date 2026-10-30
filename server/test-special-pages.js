@@ -32,7 +32,7 @@ check(row(7104).includes('Not restored: its materials have no use in this versio
 check(row(7101).includes('Remove from Special') && row(7101).includes('data-pin="/web/special/unpin"'), 'pinned');
 check(row(7102).includes('📌 Keep in Special') && row(7102).includes('Replaces: N-kb') && row(7102).includes('data-pin="/web/special/pin/7102"'), 'pinnable');
 check(row(7106).includes('VIP only'), 'VIP');
-check(row(7101).includes('/web/special/img/7101.png') && row(7101).includes('Tue'), 'image and days');
+check(row(7101).includes('/web/special/img/v' + require('./special').SPECIAL_IMG_VERSION + '/7101.png') && row(7101).includes('Tue'), 'image and days');
 check(row(7102).includes('Every day'), 'every day');
 // Task 13: tabs, filters sheet, data attributes, half-size banners
 check(html.includes('class="tab on" data-p="all"'), 'All tab default');

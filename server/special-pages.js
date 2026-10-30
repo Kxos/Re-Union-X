@@ -191,7 +191,7 @@ function catalogPage(index, ctx = {}) {
     else { show = 'now'; st = '<div class="st">Open in Special now</div>'; }
     const days = en.days === 'all' ? 'Every day' : (en.days || []).join(', ');
     return `<div class="q${isPinned ? ' pinned' : ''}${later ? ' lt' : ''}" id="q${id}" data-period="${per(en)}" data-type="${typesOf(en)}" data-show="${show}" data-search="${esc(search(en))}">`
-      + `<div class="im"><img loading="lazy" width="320" height="70" src="/web/special/img/${id}.png" alt=""></div>`
+      + `<div class="im"><img loading="lazy" width="320" height="70" src="${special.imgPath(id)}" alt=""></div>`
       + `<div class="info"><div class="nm">${esc(en.name)}</div><div class="d">${esc(days)}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>${st}${button}</div></div>
 `;
   };
