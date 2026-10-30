@@ -3941,6 +3941,27 @@ function respondSpecialWeb(res, url) {
   return res.end(b);
 }
 
+// POST /web/special/pin/<eventStageId> e /web/special/unpin (spec Special 6), dai pulsanti del catalogo. Fissa solo le
+// quest di periodi passati (special.pinnable); una alla volta (player.special.pinned = chiave). Risposta JSON {ok, why?}.
+function respondSpecialPost(res, url) {
+  const p = url.split('?')[0];
+  const json = (code, o) => { const b = Buffer.from(JSON.stringify(o), 'utf8'); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': b.length }); res.end(b); };
+  if (/^\/web\/special\/unpin$/i.test(p)) {
+    if (player.special) delete player.special.pinned;
+    savePlayer();
+    return json(200, { ok: true });
+  }
+  const m = /^\/web\/special\/pin\/(\d+)$/i.exec(p);
+  if (!m) return json(404, { ok: false, why: 'unknown route' });
+  const en = specialIndex().entries.find((x) => x.evStageId === Number(m[1]));
+  if (!en) return json(404, { ok: false, why: 'unknown quest' });
+  const can = special.pinnable(en, special.periodOf(storyCtx().shopFrom));
+  if (!can.ok) return json(409, { ok: false, why: can.why });
+  (player.special ||= {}).pinned = en.key;
+  savePlayer();
+  return json(200, { ok: true });
+}
+
 // GET /user/notice (azione 241): raidNotice {isSelfRaid, isOthersRaid} uint,
 // obbligatori. Il client lo chiede scegliendo «Coliseum» nel popup PvP_SelectWindow.
 // GET /colosseum (azione 124): colosseumInfo {colosseumStageId int, status int},
@@ -4296,7 +4317,7 @@ function handler(scheme) {
       if (kind === 'gachalist') return respondGachaList(res);
       if (kind === 'gachadraw') return respondGachaDraw(res, entry.bodyDecoded);
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
-      if (kind === 'specialweb') return respondSpecialWeb(res, req.url);
+      if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
@@ -4702,7 +4723,7 @@ module.exports._test = {
   // server/test-achievements.js (I-037)
   respondStageAchievements,
   // server/test-special-server.js (scheda Special)
-  respondStageEvent, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, ret, WEB_BASE,
+  respondStageEvent, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, respondSpecialPost, ret, WEB_BASE,
   weekIndex: clock.weekIndex,
   // server/test-gacha-server.js
   sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
