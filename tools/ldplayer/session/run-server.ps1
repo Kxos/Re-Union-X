@@ -1,4 +1,4 @@
-# Avvia il server KHUX per il banco LDPlayer (vedi HANDOFF, «Come riprendere il lavoro»).
+# Avvia il server KHUX per il banco LDPlayer (vedi HANDOFF, Â«Come riprendere il lavoroÂ»).
 # La chiave delle risorse non sta nel repository: la legge recon/tools/private_tools.py (configurazione locale).
 # Log: D:\Progetto_Restauro_KH_UX\logs\server.log (lo leggono cycle.ps1 e relogin.ps1).
 #   powershell -File run-server.ps1 [-Revision N] [-TutorialFinished] [-RealNow <ISO>]
@@ -17,7 +17,7 @@
 # fatto da server/make-test-save.js)
 # -EnemyAtk N: attacco dei nemici x N (KHUX_BENCH_ENEMY_ATK, solo banco: per finire a terra e provare Second
 # Chance); la revisione servita cambia, quindi il client riscarica il master sia accendendola sia spegnendola
-param([int]$Revision = 217, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0, [string]$Vip)
+param([int]$Revision = 219, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0, [string]$Vip)
 $repo = Split-Path (Split-Path (Split-Path $PSScriptRoot))
 $logs = 'D:\Progetto_Restauro_KH_UX\logs'
 New-Item -ItemType Directory -Force $logs | Out-Null
