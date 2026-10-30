@@ -22,7 +22,7 @@ const { SKILL_TABLES } = gd;
 const KEPT_STYLE = 2;
 // Versione della grafica della piastra «Banner Catalog» (recon/tools/make_shop_art.py catalog_banner): sta nell'URL
 // (9001-v<N>.png, il file resta 9001.png) cosi' il client, che tiene le immagini per URL, scarica quella nuova
-const CATALOG_PLATE_STYLE = 2;
+const CATALOG_PLATE_STYLE = 3;
 const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYLE}.png`;
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1' }; // payType 8: player.drawTickets[currency]
