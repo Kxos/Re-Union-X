@@ -1367,6 +1367,8 @@ const SHOP_ICONS = process.env.KHUX_SHOP_ICONS || path.join(__dirname, 'game_dat
 // dati di gioco fuori dal repo
 const SPECIAL_FILE = process.env.KHUX_SPECIAL_INDEX || path.join(__dirname, 'game_data', 'special.json');
 const SPECIAL_IMG = process.env.KHUX_SPECIAL_IMG || path.join(__dirname, 'game_data', 'special_img');
+// icone del catalogo Special (recon/tools/special_icons.py: originali del client o disegnate): solo le chiavi della lista
+const SPECIAL_ICONS = process.env.KHUX_SPECIAL_ICONS || path.join(__dirname, 'game_data', 'special_icons');
 let specialMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
@@ -3954,13 +3956,27 @@ function specialAchievement(realMs = realNow()) {
   return { numerator, denominator: 3 * ids.size };
 }
 // GET /web/special/img/<eventStageId>.png e <id>-kept.png (banner della quest fissata): immagini 640x140 di
-// game_data/special_img, 404 se mancano
+// game_data/special_img, 404 se mancano. /web/special/detail/<evStageId>: dettagli di una quest (dal catalogo con
+// ?from=catalog: barra BACK); /web/special/icon/<chiave>.png: icone di chip e pill (SPECIAL_ICON_KEYS)
 function respondSpecialWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
+  const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   if (p === '/web/special/catalog') {
-    const b = Buffer.from(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows) }), 'utf8'); // names: search box (drop and objective rewards)
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
+    return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows) })); // names: search box (drop and objective rewards)
+  }
+  const det = /^\/web\/special\/detail\/(\d+)$/i.exec(p);
+  if (det) {
+    const fromCatalog = new URLSearchParams(url.split('?')[1] || '').get('from') === 'catalog';
+    const html = specialPages.detailPage(specialIndex(), Number(det[1]), { ...specialCtx(), names: specialPages.buildNames(masterRows), fromCatalog });
+    return html ? page(html) : notFound();
+  }
+  const ic = /^\/web\/special\/icon\/([a-z]+)\.png$/.exec(p);
+  if (ic) {
+    const file = specialPages.SPECIAL_ICON_KEYS.includes(ic[1]) && path.join(SPECIAL_ICONS, `${ic[1]}.png`);
+    if (!file || !fs.existsSync(file)) return notFound();
+    const b = fs.readFileSync(file);
+    res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length, 'Cache-Control': 'public, max-age=3600' });
     return res.end(b);
   }
   const img = /^\/web\/special\/img\/(?:v\d+\/)?(\d+)(-kept)?\.png$/i.exec(p);

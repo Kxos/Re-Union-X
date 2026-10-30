@@ -504,6 +504,7 @@ All overridable by an environment variable, but the defaults point to the author
 | `deep_donors.py:48`, `extra_donors.py:38` | enemy graphics (via `make_jp_enemies.py`) | **yes** |
 | `make_missing_part.py:42`, `gen_tours_v2.py:54`, `check_rooms.py:39` | maps / checks | yes |
 | `shop_icons.py:14` | `DEFAULT_BASE` = local reference data folder (`KHUX_JP_DATA`) | no |
+| `special_icons.py:18` | `DEFAULT_BASE` = local reference data folder (`KHUX_JP_DATA`): original icons of the Special Catalog (the others are drawn) | no |
 
 ### Not in files, but machine state
 
