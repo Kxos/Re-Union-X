@@ -74,8 +74,8 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const sh = (id) => (/data-show="([^"]*)"/.exec(r(id)) || [])[1];
   check(r(7201).includes('Open today') && sh(7201) === 'now', 'current entry: open now');
   check(r(7202).includes('This period, not this week') && !r(7202).includes('Open today') && sh(7202) !== 'now', `entry outside its from/to: ${sh(7202)}`);
-  check(r(7203).includes('Open today') && sh(7203) === 'now', 'campaign of this week: open now');
-  check(r(7204).includes('Week of Feb 1, 2016') && !r(7204).includes('Open today') && sh(7204) !== 'now', `campaign of another week: ${sh(7204)}`);
+  check(r(7203).includes('This week · VIP only — locked') && sh(7203) === 'now', 'campaign of this week: in the tab (VIP)');
+  check(r(7204).includes('Coming in February 2016') && !r(7204).includes('This week') && sh(7204) !== 'now', `campaign of another week: ${sh(7204)}`);
   // the locked VIP banner is still in the Special tab (isLock 1): it stays under «In Special now»
   check(r(7205).includes('VIP only — locked') && !r(7205).includes('Open today') && sh(7205) === 'now', 'current VIP entry without VIP: locked');
   const hv = pages.catalogPage(ix, { ...ctx, vip: true });
@@ -96,8 +96,8 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
   check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
   const cls = (id) => (/class="([^"]*)"/.exec(itemOf(html, id)) || [])[1];
-  check(cls(7101) === 'row pinned' && cls(7102) === 'row can' && cls(7103) === 'row off' && cls(7104) === 'row off' && cls(7105) === 'row off' && cls(7108) === 'row cr now', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
-  check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-now"'), 'status pills');
+  check(cls(7101) === 'row pinned' && cls(7102) === 'row can' && cls(7103) === 'row off' && cls(7104) === 'row off' && cls(7105) === 'row off' && cls(7108) === 'row cr locked', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
+  check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-locked"'), 'status pills');
   check(/\.row\{[^}]*border-left:5px solid/.test(html) && /\.row\.now\{border-left-color:#2e9e3e/.test(html) && /\.row\.pinned\{border-left-color:#b8860b/.test(html) && /\.row\.can\{border-left-color:#1a6fa8/.test(html), 'side bars');
   check(/\.row\.off \.im img,\.row\.off \.th img\{[^}]*opacity/.test(html) && /\.row\.locked \.im img\{[^}]*opacity/.test(html), 'dimmed banners');
   check(row(7102).includes('href="/web/special/quest/7102?from=catalog"') && (row(7102).match(/ href="\/web\/special\/quest\/7102/g) || []).length === 3, 'banner, name and «›» open the details');
@@ -186,8 +186,8 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const ids = (h.match(/ id="[^"]+"/g) || []); check(ids.length === new Set(ids).size, 'unique element ids');
   // campaigns: the same minimal rows in the year / month list
   const camps = h.slice(h.indexOf('id="camps"'), h.indexOf('<div class="ov"'));
-  check((camps.match(/<div class="row cr /g) || []).length === 2 && camps.includes('width="160" height="35"') && !camps.includes('width="320"'), 'campaign rows: small thumbnails');
-  check(camps.includes('Jun 12, 2017 – Jun 18, 2017') && camps.includes('<summary>2017 ▸ Jun (<span class="mc">1</span>)</summary>') && /<details class="cm" data-y="2019" data-m="2019-03" open>/.test(camps), 'campaign dates, months, current month open');
+  check((camps.match(/<div class="row cr /g) || []).length === 2 && camps.includes('width="320" height="70"') && !camps.includes('class="pk"'), 'campaign rows: like the quest rows, no Keep');
+  check(camps.includes('Jun 12, 2017 – Jun 18, 2017') && camps.includes('>June 2017</div>') && /class="yc on" data-yr="2019"/.test(camps), 'campaign dates, month labels, the Shop week year selected');
   // tabs / summary
   check(h.includes('<span class="n1">9 quests</span> · 2 campaigns · all periods, no filters') && h.includes('id="tcall">11<') && h.includes('id="tc4">5<'), `summary and tabs: ${(/<div class="sum"[^>]*>(.*?)<\/div>/.exec(h) || [])[1]} ${(h.match(/id="tc[^"]+">\d+</g) || []).join(' ')}`);
   // the quest's details page: versions newest first, their own Keep buttons, day text
@@ -201,7 +201,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(qp.indexOf('2016–2017 · VIP') > qp.indexOf('2018–2020 · Free') && /id="v1"[\s\S]*data-pin="\/web\/special\/pin\/7301"/.test(qp), 'Power: the VIP version (older, second) with its own Keep');
   check(/<details class="vq" open><summary>Quests · 2018–2020 · Free<\/summary>/.test(qp) && /<details class="vq"><summary>Quests · 2016–2017 · VIP<\/summary>/.test(qp), 'quests per version, newest open');
   check(qp.includes('class="back" href="/web/special/catalog#q7302"'), 'BACK to the row');
-  check(pages.detailPage(ix, 7351, c4).includes('Jun 12, 2017 – Jun 18, 2017'), 'campaign details: its week');
+  check(pages.detailPage(ix, 7351, c4).includes('Week of Jun 12, 2017'), 'campaign details: its week');
   // REWARDS on rows
   const nm = { drop: (rid) => (rid === 1 ? ['Huey', 'Mythril'] : []), objective: () => [],
     dropTypes: (rid) => (rid === 1 ? [3, 5] : []), objectiveTypes: (sid) => (sid === 78140 ? [2, 20, 20] : []) };
@@ -224,7 +224,8 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
     const hh = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Tue' });
     const nCamp = real.entries.filter((en) => en.campaign).length;
     const fams = new Set(real.entries.filter((en) => !en.campaign && en.periods).map((en) => en.name.replace(/\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/, '').replace(/\s+\d+$/, '')));
-    check((hh.match(/<div class="row cr /g) || []).length === nCamp && nCamp === 120, `real campaigns ${(hh.match(/<div class="row cr /g) || []).length}`);
+    const crs = hh.split('<div class="row cr ').slice(1);
+    check(nCamp === 120 && crs.length < nCamp && crs.reduce((t, x) => t + +(/data-nv="(\d+)"/.exec(x) || [0, 0])[1], 0) === nCamp, `real campaigns: ${crs.length} rows for ${nCamp} weeks`);
     check((hh.match(/<div class="row (?!cr )/g) || []).length === fams.size, `real quest rows ${(hh.match(/<div class="row (?!cr )/g) || []).length} = families ${fams.size}`);
     const realIds = (hh.match(/ id="[^"]+"/g) || []); check(realIds.length === new Set(realIds).size, 'real page: unique ids');
   }
@@ -324,5 +325,45 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(h0().includes('class="mt"') && h0().includes('Matches') && h0().includes('id="none"') && h0().includes('No quests match'), '«Matches:» line and «No quests match» message');
 }
 function h0() { return html; }
+// round 14 (user 31-10): VIP campaigns in the same minimal rows; weeks with the same art merged; a year selector
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('ka9', 7401, { name: 'Key Art #9 VIP Quests!', periods: [2], vip: true, family: 'SQ21', campaign: { start: '2017-06-12', end: '2017-06-18' }, banner: 'Special - VIP Key Art 9 Challenge banner KHUX.png' }),
+    e('ka9b', 7402, { name: 'Key Art #9 Pt.2 & Combo VIP Quests!', periods: [2], vip: true, family: 'SQ21', campaign: { start: '2017-06-19', end: '2017-06-25' }, banner: 'Special - VIP Key Art 9 Challenge 2 banner KHUX.png' }),
+    e('brooms', 7403, { name: 'VIP Magic Broom Quests!', periods: [2], vip: true, family: 'SQ21', campaign: { start: '2017-07-03', end: '2017-07-09' }, banner: 'Special - VIP Brooms banner KHUX.png' }),
+    e('kept', 7404, { name: 'Kept Campaign', periods: [2], vip: true, family: 'SQ21', campaign: { start: '2016-11-07', end: '2016-11-13' }, banner: 'k.png' }),
+    e('now', 7405, { name: 'This Week Campaign', periods: [4], vip: true, family: 'SQ21', campaign: { start: '2019-03-04', end: '2019-03-10' }, banner: 'n.png' }),
+    e('future', 7406, { name: 'Future Campaign', periods: [5], vip: true, family: 'SQ21', campaign: { start: '2020-03-02', end: '2020-03-08' }, banner: 'f.png' }),
+  ] };
+  const c = { period: 4, pinnedKey: 'kept', periods: PERIODS, shopFrom: '2019-03-04', shopTo: '2019-03-10', weekday: 'Tue', vip: false, unlockQuestOf: () => 951 };
+  const h = pages.catalogPage(ix, c), hv = pages.catalogPage(ix, { ...c, vip: true });
+  const camps = h.slice(h.indexOf('id="camps"'), h.indexOf('<div class="ov"'));
+  const rows = camps.split('<div class="row cr').slice(1).map((x) => x.slice(0, x.indexOf('</div>' + String.fromCharCode(10))));
+  const line = (x) => (/<span class="s s-[a-z]+">(?:<img[^>]*>)?([^<]*)<\/span>/.exec(x || '') || [])[1];
+  const rowOf = (t, list = rows) => list.find((x) => x.includes(`>${t}</a>`)) || '';
+  check(rows.length === 5 && !camps.includes('class="pk"'), `campaign rows: ${rows.length}, no Keep buttons in the list`);
+  check(rows.every((x) => x.includes('width="320" height="70"') && x.includes('class="go"') && (x.match(/<span class="s s-/g) || []).length === 1), 'same row as the quests: half-size banner, one status line, «›»');
+  const ka = rowOf('Key Art #9 VIP Quests');
+  check(ka && ka.includes('2 weeks · Jun 12, 2017 – Jun 25, 2017') && ka.includes('data-eid="7401 7402"') && ka.includes('data-nv="2"'), `merged Key Art #9 row: ${ka.slice(0, 160)}`);
+  check(line(ka) === 'June 2017 · can be kept with VIP' && /^ can"/.test(ka), `past: ${line(ka)}`);
+  check(line(rowOf('Kept Campaign')) === 'Kept in Special', 'kept');
+  check(line(rowOf('This Week Campaign')) === 'This week · VIP only — locked' && line(rowOf('This Week Campaign', hv.slice(hv.indexOf('id="camps"')).split('<div class="row cr').slice(1))) === 'This week · VIP', 'this week, without and with VIP');
+  check(line(rowOf('Future Campaign')) === 'Coming in March 2020 · Story Quest 951' && /^ off"/.test(rowOf('Future Campaign')), `future: ${line(rowOf('Future Campaign'))}`);
+  // year selector (the Shop week's year selected), month labels
+  check(camps.includes('data-defy="2019"') && /<button type="button" class="yc" data-yr="all">All years <span class="yn">5<\/span><\/button>/.test(camps)
+    && /<button type="button" class="yc on" data-yr="2019">2019 <span class="yn">1<\/span><\/button>/.test(camps) && /data-yr="2017">2017 <span class="yn">2<\/span>/.test(camps), 'year chips with counts, the Shop week year on');
+  check(camps.includes('<div class="ml" data-y="2017" data-m="2017-06">June 2017</div>') && camps.includes('>July 2017</div>') && !camps.includes('<details'), 'plain month labels, no accordions');
+  check(rows.every((x) => /data-y="\d{4}"/.test(x)) && /yr==='all'\|\|r\.y===yr/.test(h) && /if\(cur\.q\)yr=ys\.length===1\?ys\[0\]:'all'/.test(h), 'script: year filter; a search goes to its year');
+  check(/attr\(d,'data-y'\)\)\{yr=attr\(d,'data-y'\)/.test(h), 'BACK selects the year of the row');
+  // filters and search still find campaigns
+  check(rows.every((x) => ['data-type', 'data-show', 'data-search', 'data-periods', 'data-reward'].every((a) => x.includes(a + '="'))) && ka.includes('Key Art #9 Pt.2 &amp; Combo VIP Quests!'), 'filter and search attributes (both week titles)');
+  // details page: each week a version with its own Keep button
+  const d = pages.detailPage(ix, 7402, { ...c, fromCatalog: true });
+  const vers = (d.match(/<div class="ver [^"]*" id="v\d"><h3>[^<]*<\/h3>/g) || []).map((x) => />([^<]*)<\/h3>/.exec(x)[1]);
+  check(d.includes('<title>Key Art #9 VIP Quests</title>') && vers.join() === 'Week of Jun 19, 2017,Week of Jun 12, 2017', `details weeks: ${vers}`);
+  check(d.includes('data-pin="/web/special/pin/7401"') && d.includes('data-pin="/web/special/pin/7402"'), 'each week its own Keep button');
+  check(d.includes('class="back" href="/web/special/catalog#q7402"') && (h.match(/ id="q7402"/g) || []).length === 1, 'BACK to the row');
+  check(pages.familiesOf(ix.entries).filter((x) => x.campaign).length === 5, 'familiesOf merges consecutive weeks of the same art');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
