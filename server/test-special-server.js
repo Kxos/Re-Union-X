@@ -192,6 +192,18 @@ if (fs.existsSync(path.join(iconDir, 'vip.png'))) {
 } else console.log('(icone Special assenti: python -I recon/tools/special_icons.py)');
 check(raw(t.respondSpecialWeb, '/web/special/icon/nope.png').code === 404 && raw(t.respondSpecialWeb, '/web/special/icon/../special.png').code === 404, 'icona fuori lista: 404');
 
+// round 5: «later» con la quest della storia che la apre (righe story del catalogo dello Shop): periodo 5 = quest 946
+{
+  const en5 = t.specialIndex().entries.find((x) => Math.min(...x.periods) === 5 && !x.campaign && !x.from);
+  const sc = t.player.stageScores; const keep = { ...sc };
+  for (const k of Object.keys(sc)) delete sc[k];
+  sc[sid(925)] = 1; // periodo 4
+  const dh = raw(t.respondSpecialWeb, `/web/special/detail/${en5.evStageId}`).body.toString('utf8');
+  check(dh.includes('Unlocks at Story Quest 946'), `periodo 5 dalla quest 946: ${(/class="s s-off">(?:<img[^>]*>)?[^<]*/.exec(dh) || [''])[0]}`);
+  for (const k of Object.keys(sc)) delete sc[k];
+  Object.assign(sc, keep);
+}
+
 // 11. fissare una quest: POST /web/special/pin/<evStageId> e /web/special/unpin
 const post = (url) => { const r = raw(t.respondSpecialPost, url); return { code: r.code, body: JSON.parse(r.body.toString('utf8')) }; };
 check(server.route('/web/special/pin/7060') === 'specialweb', 'rotta pin');

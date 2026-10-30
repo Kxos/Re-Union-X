@@ -171,5 +171,18 @@ check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
   check(sp.isDailyCid(cidIx.entries[0]) && sp.isDailyCid(cidIx.entries[7]) && !sp.isDailyCid(cidIx.entries[14]), 'isDailyCid');
 }
 
+// round 5: the Story quest that unlocks an entry: first tranche of the Shop catalogue's story rows ([qFrom, qTo, date])
+// whose date is on or after the entry's start (first period's from, its own from if later, a campaign's start)
+{
+  const story = [[1, 10, '2016-01-01'], [11, 20, '2016-06-01'], [21, 25, '2016-09-19'], [26, 30, '2016-09-19'], [31, 40, '2018-03-01'], [41, 50, '2020-02-01']];
+  check(sp.unlockQuest(story, e('a', 1, { periods: [2] }), PERIODS) === 21, `period 2 (from 2016-09-19): quest ${sp.unlockQuest(story, e('a', 1, { periods: [2] }), PERIODS)}`);
+  check(sp.unlockQuest(story, e('b', 2, { periods: [3, 4] }), PERIODS) === 31, 'period 3 (from 2018-02-02): first tranche after, 31');
+  check(sp.unlockQuest(story, e('c', 3, { periods: [3], from: '2019-01-07' }), PERIODS) === 41, 'own from later than the period: 41');
+  check(sp.unlockQuest(story, e('d', 4, { periods: [2], campaign: { start: '2016-06-01', end: '2016-06-07' } }), PERIODS) === 11, 'campaign start on a tranche date: 11');
+  check(sp.unlockQuest(story, e('f', 5, { periods: [2], campaign: { start: '2016-06-02', end: '2016-06-08' } }), PERIODS) === 21, 'campaign start after a tranche date: next tranche 21');
+  check(sp.unlockQuest(story, e('g', 6, { periods: [5] }), PERIODS) === null, 'never reached: null');
+  check(sp.unlockQuest([], e('h', 7, { periods: [2] }), PERIODS) === null, 'no story rows: null');
+}
+
 if (errors.length) { console.error(`test-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }
 console.log('test-special: OK');

@@ -59,6 +59,18 @@ const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => index.e
 });
 
 // a quest can be pinned only when its period is already past (campaigns use their own period)
+// Story quest that unlocks an entry (catalogue «later» rows, round 5): story = the Shop catalogue's rows
+// [qFrom, qTo, date] (the tranche dates that also move the Shop week); the first tranche whose date is on or after the
+// entry's start: a campaign's start, else the from of its first period or its own `from` when later. null = no tranche
+// reaches it in this version of the Story.
+const unlockQuest = (story, entry, periods = loadPeriods()) => {
+  const p1 = periods.find((p) => p.n === Math.min(...entry.periods));
+  const start = entry.campaign ? entry.campaign.start : [p1 ? p1.from : '', entry.from || ''].sort().pop();
+  const day = [...new Set((story || []).map((r) => r[2]))].sort().find((d) => d >= start);
+  if (!day) return null;
+  return Math.min(...story.filter((r) => r[2] === day).map((r) => r[0]));
+};
+
 const pinnable = (entry, period) => {
   if (isCatalog(entry)) return { ok: false, why: 'training' };
   if (entry.removed) return { ok: false, why: 'removed' };
@@ -114,5 +126,5 @@ const resetDue = (entry, done, lastResetWeek, week, group) => {
 
 module.exports = {
   get PERIODS() { return loadPeriods(); },
-  SPECIAL_IMG_VERSION, imgPath, periodOf, isDailyCid, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
+  SPECIAL_IMG_VERSION, imgPath, periodOf, isDailyCid, unlockQuest, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
 };

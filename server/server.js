@@ -3960,17 +3960,19 @@ function specialAchievement(realMs = realNow()) {
 // GET /web/special/img/<eventStageId>.png e <id>-kept.png (banner della quest fissata): immagini 640x140 di
 // game_data/special_img, 404 se mancano. /web/special/detail/<evStageId>: dettagli di una quest (dal catalogo con
 // ?from=catalog: barra BACK); /web/special/icon/<chiave>.png: icone di chip e pill (SPECIAL_ICON_KEYS)
+// quest della storia che apre una voce «later» del catalogo (special.unlockQuest sulle righe story del catalogo dello Shop)
+const specialUnlockQuest = (en) => special.unlockQuest(gachaCatalog().story, en, special.PERIODS);
 function respondSpecialWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
   const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   if (p === '/web/special/catalog') {
-    return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows) })); // names: search box (drop and objective rewards)
+    return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest })); // names: search box (drop and objective rewards)
   }
   const det = /^\/web\/special\/detail\/(\d+)$/i.exec(p);
   if (det) {
     const fromCatalog = new URLSearchParams(url.split('?')[1] || '').get('from') === 'catalog';
-    const html = specialPages.detailPage(specialIndex(), Number(det[1]), { ...specialCtx(), names: specialPages.buildNames(masterRows), fromCatalog });
+    const html = specialPages.detailPage(specialIndex(), Number(det[1]), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest, fromCatalog });
     return html ? page(html) : notFound();
   }
   const ic = /^\/web\/special\/icon\/([a-z]+)\.png$/.exec(p);

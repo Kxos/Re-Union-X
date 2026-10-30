@@ -152,8 +152,13 @@ const pill = (c, k, text) => `<span class="s s-${c}">${pillInner([c, k, text])}<
 function statusOf(en, ctx, { byKey, pinned, current }) {
   const cur = ctx.period, isPinned = en.key === (ctx.pinnedKey || '');
   if (Math.min(...en.periods) > cur) {
-    return { show: 'later', cls: 'off', pill: pill('off', 'later', 'Reached later in the Story'), button: null,
-      why: 'Its period comes later in the Story: it opens when your Story reaches it.' };
+    // ctx.unlockQuestOf(en) (server.js, special.unlockQuest on the Shop catalogue's story rows): the Story quest that
+    // unlocks it, null when no quest of this version reaches it; without the lookup the generic text
+    const q = ctx.unlockQuestOf ? ctx.unlockQuestOf(en) : undefined;
+    const text = q === undefined ? 'Reached later in the Story' : q === null ? 'Not reached in this version of the Story' : `Unlocks at Story Quest ${q}`;
+    const why = q === undefined ? 'Its period comes later in the Story: it opens when your Story reaches it.'
+      : q === null ? 'Its period comes after the last Story quest of this version.' : `Its period comes later in the Story: it opens when you reach Story Quest ${q}.`;
+    return { show: 'later', cls: 'off', pill: pill('off', 'later', text), button: null, why };
   }
   if (en.removed) {
     return { show: 'removed', cls: 'off', pill: pill('off', 'removed', 'Not restored: its materials have no use in this version'), button: null,
