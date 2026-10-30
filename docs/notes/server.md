@@ -338,6 +338,17 @@ The screens have their own APIs, described in the area files: medals
   "eventStageId":<id evento>,"showIcon":1,"bannerUrl":"","eventType":1,"status":1,
   "endTime":"2026-12-31 23:59:59","newStageId":<id>,"isLock":0,"complete":0}]`.
   `eventStageId` and the stages must exist in the master tables (id at 0 = crash): to be verified.
+- Bench 30-10 (rev 207-211, Special Catalog spike; static analysis in `D:\Progetto_Restauro_KH_UX\tmp\special_banner\out`):
+  - **Master `evStage` row** (parser 0xef9ab4): every field mandatory; `validStageId` = **count** of `stageId`
+    entries and `stageId` holds only those (max 5, like `validSetCloth`/`setCloth`); `startTime`, `endTime`,
+    `endDispTime` **and `boardEndTime`** must be parsable dates ("" = «Master data error (200 ERROR)»).
+  - **List filter** (`SceneAdventureSelect::initEventBanner` 0xd95fb0): only `isLock` 1 (hidden unless an
+    unidentified client flag is set) and events containing stage 95100/95200 are dropped; no master lookup,
+    category, time or weekday check. `isLock` 2 = visible banner with the red «Available» plate.
+  - **Tap** on a visible banner always opens that event's quest list (`eventType` 1/2/4 = board/raid modes,
+    others: master `eventCategory` 4 = High Score, else plain list). It cannot be disabled.
+  - **Details button**: shown when master `evStage.detailUrl` is not empty, also on Special banners; opens the
+    Information2 WebView with `detailUrl?<session params>` (no `?` in the URL). Verified with `/web/beginner`.
 
 <a id="keyblade"></a>
 ## Owned keyblades (I-050)
