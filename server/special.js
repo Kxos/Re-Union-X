@@ -86,7 +86,7 @@ const specialEvents = (index, ctx) => {
     out.push(build(pin, pin.evStageId, { isLock, endTime: endOf(pin, isLock), kept: true }));
   }
   for (const en of current) {
-    const isLock = lockOf(en, { weekday, vip, pinned: en.key === pinnedKey });
+    const isLock = lockOf(en, { weekday, vip, pinned: en.key === pinnedKey && pinnable(en, period).ok });
     out.push(build(en, en.evStageId, { isLock, endTime: endOf(en, isLock), kept: false }));
   }
   return out;

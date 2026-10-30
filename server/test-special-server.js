@@ -165,6 +165,42 @@ check(raw(t.respondSpecialWeb, '/web/special/img/../special.json').code === 404,
 const cat = raw(t.respondSpecialWeb, '/web/special/catalog?m=1');
 check(cat.code === 200 && cat.headers['Content-Type'].startsWith('text/html') && cat.body.toString('utf8').includes('id="q7001"'), `catalogo: ${cat.code}`);
 
+// 11. fissare una quest: POST /web/special/pin/<evStageId> e /web/special/unpin
+const post = (url) => { const r = raw(t.respondSpecialPost, url); return { code: r.code, body: JSON.parse(r.body.toString('utf8')) }; };
+check(server.route('/web/special/pin/7060') === 'specialweb', 'rotta pin');
+at('2026-11-10T09:00:00Z'); // martedi', periodo 4: Olympia (lunedi', periodi 1-2) e' passata
+p.special = p.special || {}; delete p.special.pinned;
+let r = post('/web/special/pin/7060');
+check(r.code === 200 && r.body.ok === true && p.special.pinned === 'km-olympia', `pin Olympia: ${r.code} ${p.special.pinned}`);
+list = ev(1).events;
+check(list[1]?.eventStageId === 7060 && list[1].bannerUrl.endsWith('/7060-kept.png') && list[1].isLock === 2, `KEPT secondo: ${list[1]?.eventStageId} isLock ${list[1]?.isLock}`);
+r = post('/web/special/pin/7011'); // quest corrente (periodo 4): non fissabile
+check(r.code === 409 && r.body.ok === false && r.body.why && p.special.pinned === 'km-olympia', `pin corrente: ${r.code}`);
+r = post('/web/special/pin/7056'); // sostituita da evolve-legendary
+check(r.code === 409 && p.special.pinned === 'km-olympia', `pin sostituita: ${r.code} ${p.special.pinned}`);
+r = post('/web/special/pin/7064');
+check(r.code === 200 && p.special.pinned === 'km-lady-luck', `secondo pin sostituisce: ${p.special.pinned}`);
+list = ev(1).events;
+check(list.filter((e) => e.bannerUrl.includes('-kept')).length === 1 && list[1].eventStageId === 7064, 'un solo KEPT, il nuovo');
+check(post('/web/special/pin/99999').code === 404, 'id sconosciuto: non 404');
+// un pin gia' fissato diventa la quest del giorno: lunedi' Olympia e' aperta di suo (isLock 0)
+at('2026-11-12T09:00:00Z'); // giovedi': Lady Luck e' il suo giorno
+check(ev(1).events[1].isLock === 0, 'KEPT nel suo giorno: isLock 0');
+at('2026-11-10T09:00:00Z');
+r = post('/web/special/unpin');
+check(r.code === 200 && r.body.ok === true && !p.special.pinned, 'unpin');
+check(!ev(1).events.some((e) => e.bannerUrl.includes('-kept')), 'dopo unpin nessun KEPT');
+// Review Focus 3: chiave fuori indice = niente KEPT e niente errore; VIP fissata senza VIP = KEPT con isLock 1
+p.special.pinned = 'chiave-inesistente';
+check(!ev(1).events.some((e) => e.bannerUrl.includes('-kept')), 'chiave fuori indice: nessun KEPT');
+const vipPast = t.specialIndex().entries.find((en) => en.vip && Math.max(...en.periods) < 4 && !en.replacedBy && !en.removed);
+if (vipPast) {
+  p.special.pinned = vipPast.key;
+  const k = ev(1).events[1];
+  check(k.eventStageId === vipPast.evStageId && k.bannerUrl.includes('-kept') && k.isLock === 1, `VIP fissata senza VIP: ${k.eventStageId} isLock ${k.isLock}`);
+} else errors.push('nessuna quest VIP passata nell\'indice per il test');
+delete p.special.pinned;
+
 try { fs.unlinkSync(SAVE); } catch { /* gia' tolto */ }
 if (errors.length) { log(`FAIL (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 log('test-special-server: OK');

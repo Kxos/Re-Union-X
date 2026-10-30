@@ -101,6 +101,7 @@ check(kept[1].eventStageId === 7101 && kept[1].bannerUrl.endsWith('7101-kept.png
 check(kept[1].isLock === 2 && kept[1].endTime === 'WEEKEND', 'pinned Tue-only entry on Wed: isLock 2');
 const same = sp.specialEvents(index, ctx({ pinnedKey: 'cur' }));
 check(same.filter((x) => x.eventStageId === 7103).length === 1 && !same.some((x) => x.bannerUrl.includes('-kept')), 'current pin shown once, no -kept');
+check(same.find((x) => x.eventStageId === 7103).isLock === 1, 'current pinned entry follows its own rules (Wed, no vip: closed)');
 check(sp.specialEvents(index, ctx({ pinnedKey: 'nope' })).length === 3, 'unknown pinnedKey ignored');
 check(sp.specialEvents(index, ctx({ pinnedKey: 'oldRepl' })).length === 3, 'replaced pin not kept');
 check(sp.specialEvents(index, ctx({ pinnedKey: 'gone' })).length === 3, 'removed pin not kept');
