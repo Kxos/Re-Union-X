@@ -853,6 +853,9 @@ require('./make-story-oltre').patch(OUT);
 // Proud Mode (I-200): righe stageKind 4 1 000 000 + stageId della storia 1-979, dopo la storia completa (make-proud.js);
 // la 1001010 del 5.0.1 resta. KHUX_PROUD=0 lo spegne
 require('./make-proud').patch(OUT);
+// Special tab (Quests > Special): stage rows 970000-979999 (stageKind 2), evStage 7000+, drop rows 970000+ and
+// game_data/special.json from server/special_periods.json and the private catalogue (make-special.js)
+require('./make-special').patch(OUT);
 // tabelle ricostruite da noi (server/tables: mission = missioni giornaliere/settimanali dalla
 // khuxwiki, vedi le note in testa a ciascun generatore): copiate cosi' come sono
 const TABLES = path.join(__dirname, 'tables');
