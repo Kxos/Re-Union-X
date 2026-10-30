@@ -116,7 +116,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/Special Catalog/.test(t) && /one quest/.test(t), 'Special: catalogo, una quest');
   check(/Weekly Missions/.test(t), 'Special: VIP dalle missioni settimanali');
   check(/Adamantite Ore Challenge/.test(t) && /Mythril Madness/.test(t) && /no use/.test(t), 'Special: sfide non ripristinate');
-  check(/Unlock All/.test(t) && /no function/.test(t), 'Special: Unlock All');
+  check(/Unlock All/.test(t) && /message/.test(t) && /Weekly Missions VIP/.test(t) && !/no function/.test(t), 'Special: Unlock All shows a message');
   check(/training/.test(t) && /Give Up/.test(t), 'Special: allenamento');
   check(/reconstructed/.test(t), 'Special: drop ricostruiti');
   check(/limited VIP campaigns/.test(t) && /week/.test(t) && /one quest of its theme/.test(t), 'Special: campagne VIP settimanali (Task 12)');

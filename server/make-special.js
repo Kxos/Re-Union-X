@@ -58,9 +58,11 @@ const CLIENT_DROPPED = [95100, 95200];
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\special\\special_quests.json';
 // training quest (spec 7): 0 AP, target Shadow on path A; the dummy and the CP chests of path B come with its map
-// (Tasks 4 and 10). Objective rewards: no original row has a reward of type 0, so the smallest reward, 1 munny.
+// (Tasks 4 and 10). Objective rewards: none (TRAINING_OBJECTIVE_REWARD_TYPE below).
 // Room: the 1st District (DB_0004_00_00), a long street with the start in its middle (two paths, gen_story_maps.py
 // build_training); the room the name «Training Grounds» picked (DB_0027_00_00) has 2 walkable grid points.
+// reward type of the three training objectives: 0 = none (switch back to 4 = Munny if type 0 breaks the screen)
+const TRAINING_OBJECTIVE_REWARD_TYPE = 0;
 const TRAINING = { name: 'Training Grounds', world: 'Daybreak Town', room: '1st District', target: 'Shadow', level: 1,
   objectives: ['Defeat the target enemy -> Munny x1', 'Complete without having to continue -> Munny x1', 'Defeat Shadow x 1 -> Munny x1'] };
 // a «Title x1» objective without a title name in the catalogue (MOG quests): Avatar Coin x5, like the other small
@@ -319,6 +321,9 @@ function build(rules, catalogue, masterRows) {
   // training quest behind the catalogue banner
   const training = stageRow(TRAINING_STAGE, { quest: TRAINING.name, world: TRAINING.world, room: TRAINING.room, target: TRAINING.target,
     level: String(TRAINING.level), objectives: TRAINING.objectives }, 0, null);
+  // no objective reward: type 0, item 0, num 0 (Task 15; what the client draws for type 0 is for the bench to tell)
+  Object.assign(stageRows[stageRows.length - 1], { submissionRewardType: [TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE],
+    submissionItemId: [0, 0, 0], submissionItemNum: [0, 0, 0] });
   const enemyRows = [dummyRow(masterRows)];
   const maxGauge = Math.max(0, ...(masterRows.keyblade || []).map((k) => k.maxBurstGauge || 0));
   const cpChests = Math.max(1, Math.ceil(maxGauge * GAUGE_UNIT / CP_PER_CHEST));

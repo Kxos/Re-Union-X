@@ -114,7 +114,7 @@ check(a1 && a1.submissionRewardType.join() === '14,3,5' && a1.submissionItemId.j
 check(b && b.submissionRewardType.join() === '2,3,5' && b.submissionItemNum.join() === '1400,2,3', 'rewards override of the entry');
 check(tr && tr.name === 'Training Grounds' && tr.validSubmission === 3 && tr.submissionRequire.join() === '12,10,4'
   && tr.submissionId.join() === '1,0,1', 'training objectives: target, no continue, Shadow x1');
-check(tr && tr.submissionRewardType.every((t) => t === 4) && tr.submissionItemNum.join() === '1,1,1', 'training rewards: 1 munny each');
+check(tr && tr.submissionRewardType.every((t) => t === 0) && tr.submissionItemId.every((t) => t === 0) && tr.submissionItemNum.join() === '0,0,0', 'training rewards: none (type 0, item 0, num 0)');
 
 // drop reward rows: one prize per row (position 0), after the current maximum
 check(rewardRows.length === 3 && rewardRows.every((r) => r.rewardId > 1 && r.type.length === 1), 'one reward row per drop + the CP chest row');
