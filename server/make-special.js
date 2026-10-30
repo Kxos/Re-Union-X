@@ -23,10 +23,13 @@
 // - server/game_data/special.json: the index read by special.js / server.js (catalog + entries, Task 2 shape, plus the
 //   map data Task 4 needs: world, room, target, level and drop rows per stage);
 // - server/game_data/special_maps.json: the stage list for recon/tools/gen_story_maps.py (config key "special"):
-//   {stageId, world (worldId), name, room, target, targetId, level (wiki level, for the level field of the enemy
-//   records, as the original maps), enemies: [[{name, enemyId, n, reward}] per group], treasures: [], rooms: 1}. Target = the 1xxxx form of the enemy (as on the original maps; the same id goes into
-//   the objectives); groups = 2 of the target enemy each, plus one carrier per drop row (enemy record reward = the drop
-//   row) and the enemies of «Defeat X» objectives with their objective id. Carriers (builder's call): EXP medals on a
+//   {stageId, world (worldId), name, room, target, targetId, targetReward, level (wiki level, for the level field of the
+//   enemy records, as the original maps), enemies: [[{name, enemyId, n, reward}] per group], treasures: [], rooms: 1}.
+//   Target = the 1xxxx form of the enemy (as on the original maps; the same id goes into the objectives); groups = 2 of
+//   the target enemy each, plus one carrier per drop row (enemy record reward = the drop row) and the enemies of
+//   «Defeat X» objectives with their objective id. Every enemy (one member each) and the target carry one of the
+//   entry's drop rows, round-robin (the original Special quests dropped the family items from every enemy; bench rev
+//   215); an entry without drops puts 0 (no row: no drop) on every enemy; the training map keeps row 1 (spec 7). Carriers (builder's call): EXP medals on a
 //   Growth Egg, Moogle (munny) on a Munny Egg, everything else on a Prize Egg.
 // Wired at the end of make-game-tables.js (after make-proud). KHUX_SPECIAL=0 turns it off; without the private
 // catalogue it is skipped with a warning (clean PC). After a run: raise the master revision.
@@ -202,6 +205,8 @@ function build(rules, catalogue, masterRows) {
     const quests = (en.quests ? en.quests.map((n) => catalogue.quests.find((q) => q.quest === n)).filter(Boolean)
       : catalogue.quests.filter((q) => (en.series || []).includes(q.series)))
       .map((q) => (en.objectives && en.objectives[q.quest] ? { ...q, objectives: en.objectives[q.quest] } : q));
+    const stray = Object.keys(en.objectives || {}).filter((n) => !quests.some((q) => q.quest === n));
+    if (stray.length) throw new Error(`special: ${en.key}: objectives for quests the entry does not pick: ${stray.join(', ')}`);
     if (!quests.length || (en.quests && quests.length !== en.quests.length)) throw new Error(`special: ${en.key}: quests not found in the catalogue`);
     const base = { key: en.key, evStageId: en.evStageId, name: en.name, family: en.family, periods: en.periods, days: en.days,
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
@@ -240,7 +245,11 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
   const stages = [...index.catalog.stages, ...index.entries.flatMap((e) => e.stages.map((s) => ({ ...s, dropRewardIds: e.dropRewardIds })))];
   return stages.map((s) => {
     const row = stageRows.find((r) => r.stageId === s.stageId);
-    const normal = { name: s.target, enemyId: L.mapEnemyId(s.target, false), n: TARGET_PER_GROUP, reward: 1 };
+    // reward of each enemy: the entry's drop rows round-robin; 0 = no drop for an entry without drops; training: row 1
+    const training = s.stageId === TRAINING_STAGE, rr = s.dropRewardIds || [];
+    let k = 0;
+    const next = () => (training ? 1 : rr.length ? rr[k++ % rr.length] : 0);
+    const normal = () => Array.from({ length: TARGET_PER_GROUP }, () => ({ name: s.target, enemyId: L.mapEnemyId(s.target, false), n: 1, reward: next() }));
     const carriers = (s.dropRewardIds || []).map((rid) => {
       const rw = rewardRows.find((r) => r.rewardId === rid);
       const name = carrierOf(rw.type[0] === 3 ? medalName.get(rw.id[0]) : '');
@@ -250,18 +259,19 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
     const extra = [];
     row.submissionId.forEach((id, i) => {
       if (row.submissionIdType[i] !== 1 || !id || id === s.targetId || extra.some((x) => x.enemyId === id)) return;
-      extra.push({ name: enemyName.get(id) || '', enemyId: id, n: row.submissionRequire[i] === 4 ? Math.max(1, row.submissionNum[i]) : 1, reward: 1 });
+      const n = row.submissionRequire[i] === 4 ? Math.max(1, row.submissionNum[i]) : 1;
+      for (let j = 0; j < n; j++) extra.push({ name: enemyName.get(id) || '', enemyId: id, n: 1, reward: next() });
     });
     const size = (g) => g.reduce((n, x) => n + x.n, 0);
     const total = TARGET_PER_GROUP * GROUPS_MIN + [...carriers, ...extra].reduce((n, x) => n + x.n, 0);
-    const groups = Array.from({ length: Math.max(GROUPS_MIN, Math.ceil(total / GROUP_MAX)) }, () => [{ ...normal }]);
+    const groups = Array.from({ length: Math.max(GROUPS_MIN, Math.ceil(total / GROUP_MAX)) }, () => normal());
     // carriers and objective enemies spread over the groups (fewest enemies first)
     for (const x of [...carriers, ...extra]) {
       const fit = groups.filter((gr) => size(gr) + x.n <= GROUP_MAX).sort((a, b) => size(a) - size(b))[0];
       if (fit) fit.push(x); else groups.push([x]);
     }
     return { stageId: s.stageId, world: s.worldId, name: s.quest, room: s.room, target: s.target, targetId: s.targetId,
-      level: s.wikiLv || 1, enemies: groups, treasures: [], rooms: 1 };
+      targetReward: next(), level: s.wikiLv || 1, enemies: groups, treasures: [], rooms: 1 };
   });
 }
 

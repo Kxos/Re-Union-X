@@ -95,6 +95,8 @@ const cidVip = cid.filter((e) => e.vip), cidFree = cid.filter((e) => !e.vip);
 check(cidVip.length === 7 && cidVip.every((e) => e.periods.join() === '1,2' && e.from === '2016-05-19' && e.to === '2017-04-19'
   && String(e.useAp) === '12' && e.resetGroup && e.resetGroup !== 'cid'), 'Daily Cid VIP: 7 entries 2016-05-19..2017-04-19, 12 AP, own reset group');
 check(cidFree.length === 7 && cidFree.every((e) => e.periods.join() === '2,3,4' && e.from === '2017-04-20' && e.resetGroup === 'cid'), 'Daily Cid free from 2017-04-20 (periods 2-4)');
+check(cidFree.every((e) => e.replacedBy === 'dwq-cost'), 'free Daily Cid replaced by Day of the Weekly Quest: Get Cost Medals! (dwq-cost)');
+check(cidFree.every((e) => !require('./special').pinnable(e, 5).ok && require('./special').pinnable(e, 5).why === 'replaced'), 'free Daily Cid not pinnable in period 5');
 check(cidVip.every((e) => byKey.get(e.replacedBy) && byKey.get(e.replacedBy).family === 'SQ12' && String(byKey.get(e.replacedBy).days) === String(e.days)), 'Daily Cid VIP replaced by the free quest of the same day');
 
 // Upgrade Quests (SQ13 as VIP) from 2016-06-16, replaced by the free 2018 quests

@@ -18,7 +18,8 @@ Special quests (cfg['special'], written by server/make-special.js): a JSON list
 treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules as the one-room story quests
 (groups along the distance from the start, target alone in the arena at the farthest point), output
 mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
-reward goes into the enemy record (drop rows of make-special.js), level into every enemy record of the stage.
+reward goes into the enemy record (drop rows of make-special.js; 0 = no drop), targetReward into the target's record,
+level into every enemy record of the stage.
 
 Per ogni missione (stageBinId 1..N di thethiny = numero della missione):
 - stanza: rooms[nome] se noto, altrimenti una stanza dello stesso mondo (prefisso del
@@ -1070,7 +1071,8 @@ if cfg.get('special'):
         groups = [{'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId'))
                                for x in (g if isinstance(g, list) else [g])], 'target': False, 'room': room_name}
                   for g in sp.get('enemies', [])]
-        groups.append({'members': [(sp['target'], 1, 1, sp.get('targetId'))], 'target': True, 'room': room_name})
+        # the target carries a drop row of the entry too (targetReward, make-special.js); absent -> row 1 as before
+        groups.append({'members': [(sp['target'], 1, sp.get('targetReward', 1), sp.get('targetId'))], 'target': True, 'room': room_name})
         start, dist = walk_grid(folder)
         part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
         target_id = ens[-1][2]                      # the target group is placed last (arena)
