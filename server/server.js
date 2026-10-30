@@ -41,7 +41,8 @@ const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
 const gachaSeasons = require('./gacha-seasons');
 const medalBoost = require('./medal-boost');
-const special = require('./special'); // scheda Special di Quests: periodi, lucchetti, fissaggio
+const specialPages = require('./special-pages'); // pagine web Special (catalogo)
+const special = require('./special');// scheda Special di Quests: periodi, lucchetti, fissaggio
 // Pet / 6° slot (server/pet.js): KHUX_PET=1, default spento
 const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_ENABLED } = require('./pet');
 
@@ -3926,6 +3927,11 @@ function specialAchievement(realMs = realNow()) {
 function respondSpecialWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
+  if (p === '/web/special/catalog') {
+    const b = Buffer.from(specialPages.catalogPage(specialIndex(), specialCtx()), 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
+    return res.end(b);
+  }
   const img = /^\/web\/special\/img\/(\d+)(-kept)?\.png$/i.exec(p);
   if (!img) return notFound();
   const file = path.join(SPECIAL_IMG, `${Number(img[1])}${img[2] ? '-kept' : ''}.png`);
