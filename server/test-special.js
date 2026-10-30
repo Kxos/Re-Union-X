@@ -184,5 +184,22 @@ check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
   check(sp.unlockQuest([], e('h', 7, { periods: [2] }), PERIODS) === null, 'no story rows: null');
 }
 
+// round 6: complete (crown right of the banner) = 1 when every stage of the element has all its objectives done
+{
+  const done = { 970000: [1, 2, 3], 71030: [1, 2, 3], 71031: [1, 2], 71010: [1, 2, 3], 71011: [3, 1, 2] };
+  const st = (id) => ({ score: 0, playStatus: id in done ? 2 : 0, clearMissionIds: done[id] || [] });
+  const cx = (o) => ctx({ weekday: 'Tue', stageState: st, ...o });
+  const out = sp.specialEvents(index, cx({ pinnedKey: 'old' }));
+  const el = (id) => out.find((x) => x.eventStageId === id);
+  check(el(7000).complete === 1, `catalog with [1,2,3]: complete ${el(7000).complete}`);
+  check(el(7103).complete === 0, `one stage missing an objective: complete ${el(7103).complete}`);
+  check(el(7101).complete === 1, `KEPT element, all done (any order): complete ${el(7101).complete}`);
+  check(el(7104).complete === 0, 'nothing done: 0');
+  // a stage with fewer objectives (ctx.objectiveCount): 2 of 2 is complete
+  const two = sp.specialEvents(index, cx({ objectiveCount: (id) => (id === 71031 ? 2 : 3) }));
+  check(two.find((x) => x.eventStageId === 7103).complete === 1, 'stage with 2 objectives, both done: complete 1');
+  check(sp.specialEvents(index, ctx({})).every((x) => x.complete === 0), 'no objectives done: all 0');
+}
+
 if (errors.length) { console.error(`test-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }
 console.log('test-special: OK');
