@@ -22,7 +22,7 @@ const idx = (s) => html.indexOf(s);
 check(idx('id="p1"') > 0 && idx('id="p1"') < idx('id="p2"') && idx('id="p4"') < idx('id="p5"'), 'five period sections in order');
 check((html.match(/class="per/g) || []).length >= 5, 'five sections');
 check(/Period 4[\s\S]{0,200}Now/.test(html) && (html.match(/>Now</g) || []).length === 1, 'current period marked Now once');
-const row = (id) => { const s = html.indexOf(`id="q${id}"`); return s < 0 ? '' : html.slice(s, html.indexOf('</div></div>', s)); };
+const row = (id) => { const s = html.indexOf(`id="q${id}"`); return s < 0 ? '' : html.slice(s, html.indexOf('</div>\n', s)); };
 check(row(7105) && !row(7105).includes('data-pin') && row(7105).includes('Reached later in the Story'), 'later: no pin, text');
 check(row(7103).includes('Replaced by N-kb') && !row(7103).includes('data-pin'), 'replaced');
 check(row(7104).includes('Not restored: its materials have no use in this version') && !row(7104).includes('data-pin'), 'removed');
