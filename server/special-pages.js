@@ -13,7 +13,7 @@ const niceDay = (d) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ''); retur
 // Icons of the chips, pills and Keep button (user 31-10: no emoji): /web/special/icon/<key>.png from
 // server/game_data/special_icons (recon/tools/special_icons.py: original client icons where they exist, the others drawn
 // in the game's style). Only these keys are served. A missing file leaves an empty square of fixed size.
-const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material'];
+const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material', 'unlocked'];
 const icon = (k) => `<img class="ic" src="/web/special/icon/${k}.png" alt="">`;
 const KEEP_LABEL = `${icon('pin')}Keep in Special`, REMOVE_LABEL = 'Remove from Special';
 
@@ -100,7 +100,7 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.o .ic{pointer-events:none}'
   + '.o.on{background:#00a6bb;border-color:#7beaf7;color:#fff;font-weight:bold}'
   // SHOW chips: when chosen, the colour of the row pill of that status
-  + '.o.st-now.on{background:#2e9e3e;border-color:#7be08a}.o.st-kept.on{background:#b8860b;border-color:#ffe08a}.o.st-can.on{background:#1a6fa8;border-color:#62a7ff}'
+  + '.o.st-unl.on{background:#1a6fa8;border-color:#62a7ff}.o.st-now.on{background:#2e9e3e;border-color:#7be08a}.o.st-kept.on{background:#b8860b;border-color:#ffe08a}.o.st-can.on{background:#1a6fa8;border-color:#62a7ff}'
   + '.o.st-replaced.on,.o.st-removed.on,.o.st-later.on{background:#5a6470;border-color:#9aa4ae}'
   + '.foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.ok{padding:6px 20px}.reset{color:#b9cfdc;font-size:14px}';
 
@@ -114,8 +114,12 @@ const TYPE_OPTS = [['all', 'All'], ['weekday', 'Weekday', 'weekday'], ['daily', 
 // SHOW chips, from the status logic of the row: can (past quest, can be kept), now (listed in Special this Shop week,
 // VIP ones locked without VIP too), kept, replaced, removed (not restored), later (period not reached in the Story yet);
 // `other` (current period, not this week) has no chip: All only
-const SHOW_OPTS = [['all', 'All quests'], ['can', 'Can be kept now', 'pin'], ['now', 'In Special now', 'now'], ['kept', 'Kept', 'pin'],
+const SHOW_OPTS = [['all', 'All quests'], ['now', 'In Special now', 'now'], ['unl', 'Unlocked, not in Special now', 'unlocked'], ['can', 'Can be kept now', 'pin'], ['kept', 'Kept', 'pin'],
   ['replaced', 'Replaced', 'replaced'], ['removed', 'Not restored', 'removed'], ['later', 'Later in the Story', 'later']];
+// chips covering several statuses (round 15, like the Shop's SHOW): «In Special now» = the banners of the Special tab
+// (listed this week, open or with a padlock, and the KEPT one); «Unlocked, not in Special now» = reached by the Story but
+// not in the tab (past quests, replaced ones, other weeks / days of the current period); later and not restored: neither
+const SHOW_SETS = { now: ['now', 'kept'], unl: ['can', 'replaced', 'other'] };
 // REWARDS chips (round 7): reward types of the drops and objective rewards of an entry
 const REWARD_OPTS = [['all', 'All'], ['medal', 'Medals', 'medal'], ['avatar', 'Avatar parts', 'avatar'], ['jewel', 'Jewels', 'jewel'], ['material', 'Materials', 'material']];
 const REWARD_OF_TYPE = { 3: 'medal', 20: 'avatar', 2: 'jewel', 5: 'material' };
@@ -287,7 +291,7 @@ const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 // its Keep button) opens its details page. khuxRow (PIN_JS, after a pin / unpin) moves the statuses: the new kept entry
 // gold, the old one back to «can be kept»; the row shows its best entry again (khuxRank, the same rank as the server).
 const JS = `(function(){
-var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__;
+var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__,SHOWSET=__SHOWSET__;
 __RANK__
 __MATCH__
 function $(id){return document.getElementById(id);}
@@ -304,7 +308,7 @@ function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
 function match(r,s,anyPeriod){
 if(!anyPeriod&&s.p!=='all'&&r.ps.indexOf(' '+s.p+' ')<0)return false;
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
-if(s.show!=='all'&&(' '+r.ss.join(' ')+' ').indexOf(' '+s.show+' ')<0)return false;
+if(s.show!=='all'){var want=SHOWSET[s.show]||[s.show],ok=false;for(var w=0;w<want.length;w++)if((' '+r.ss.join(' ')+' ').indexOf(' '+want[w]+' ')>=0)ok=true;if(!ok)return false;}
 if(s.reward!=='all'&&r.rw.indexOf(' '+s.reward+' ')<0)return false;
 return !s.q||hits(r,s.q,1).length>0;}
 // item names of the row matching the query (one name at a time, khuxMatch), at most max
@@ -519,7 +523,7 @@ function catalogPage(index, ctx = {}) {
   const pillJs = (k) => ({ cls: PILLS[k][0], html: pillInner(PILLS[k]) });
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
-    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__REWARD__', labels(REWARD_OPTS))
+    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__SHOWSET__', JSON.stringify(SHOW_SETS)).replace('__REWARD__', labels(REWARD_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
     .replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -622,4 +626,4 @@ function detailPage(index, evStageId, ctx = {}) {
     + `${details}${back}<script>${PIN_JS}</script></body></html>`;
 }
 
-module.exports = { catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch };
+module.exports = { SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch };
