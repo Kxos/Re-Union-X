@@ -52,6 +52,26 @@ try:
         {'key': 'viptab', 'evStageId': 7005, 'name': 'Tab', 'family': 'SQ22', 'banner': 'Special - VIP Tab banner KHUX.png', 'removed': ''},
     ]}
     r = m.build_all(index, src, out, 'palette')
+    # round 2: notice images (any size) are fitted to 640x140 with the centre kept: a 640x300 image whose title band is
+    # in the middle (rows 110-190, white) keeps the whole band; the dark top and bottom margins are cut
+    nt = Image.new('RGB', (640, 300), (10, 10, 10))
+    nt.paste((250, 250, 250), (40, 110, 600, 190))
+    nt.save(os.path.join(src, 'Notice 1 Board banner (notice image).png'))
+    nw = Image.new('RGB', (1000, 140), (10, 10, 10))
+    nw.paste((250, 250, 250), (300, 20, 700, 120))
+    nw.save(os.path.join(src, 'Notice 2 Board banner (notice image).png'))
+    nix = {'catalog': {}, 'entries': [
+        {'key': 'n1', 'evStageId': 7101, 'name': 'N1', 'family': 'SQ21', 'banner': 'Notice 1 Board banner (notice image).png', 'removed': ''},
+        {'key': 'n2', 'evStageId': 7102, 'name': 'N2', 'family': 'SQ21', 'banner': 'Notice 2 Board banner (notice image).png', 'removed': ''}]}
+    nout = os.path.join(tmp, 'nout')
+    rn = m.build_all(nix, src, nout, 'full')
+    n1 = Image.open(os.path.join(nout, '7101.png')).convert('L')
+    n2 = Image.open(os.path.join(nout, '7102.png')).convert('L')
+    check(rn['original'] == 2 and n1.size == (640, 140) and n2.size == (640, 140), 'notice images fitted to 640x140 %s' % rn)
+    white = lambda im: sum(1 for p in pixels(im) if p > 200)  # noqa: E731
+    check(white(n1) >= 0.9 * 560 * 80 and n1.getpixel((320, 70)) > 200 and n1.getpixel((320, 2)) < 60,
+          'tall notice image: title band (centre) kept, margins cut (%d white)' % white(n1))
+    check(n2.getpixel((320, 70)) > 200 and n2.getpixel((5, 70)) < 60, 'wide notice image: centre kept')
     size = lambda f: Image.open(os.path.join(out, f)).size  # noqa: E731
     for f in ('7000.png', '7001.png', '7001-kept.png', '7002.png', '7002-kept.png', '7003.png', '7003-kept.png', '7004.png', '7004-kept.png', '7005.png', '7005-kept.png'):
         check(os.path.exists(os.path.join(out, f)) and size(f) == (640, 140), '%s: 640x140' % f)
@@ -133,9 +153,14 @@ try:
             rules = json.load(f)
         c = m.source_counts(rules, REF)
         named = sum(1 for e in rules['entries'] if e.get('banner')) + sum(1 for k, v in rules['campaigns'].items() if not k.startswith('_') and v.get('banner'))
-        check(c['missing'] == [] and c['original'] == named and c['original'] >= 175 and c['plate'] == 7,
+        check(c['missing'] == [] and c['original'] == named and c['original'] >= 180 and c['plate'] == 2,
               'real rules: originals vs plates %s (named %d)' % (c, named))
         print('real rules: %d originals, %d plates' % (c['original'], c['plate']))
+        # round 2: the Limited VIP Board notice images become the banner unchanged in content (640x140 already)
+        for n in ('Notice 71999 Limited Winter VIP Board banner (notice image).png', 'Notice 72714 New Year Limited VIP Boards banner (notice image).png'):
+            orig = Image.open(os.path.join(REF, n)).convert('RGB')
+            got = m.mbi.fit(Image.open(os.path.join(REF, n))).convert('RGB')
+            check(got.size == (640, 140) and mean(ImageChops.difference(got, orig.resize((640, 140)))) < 2, 'notice image %s kept as banner' % n)
     else:
         print('(reference banners %s missing: real-rules check skipped)' % REF)
 finally:
