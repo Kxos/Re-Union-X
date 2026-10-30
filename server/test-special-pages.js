@@ -278,5 +278,22 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const d = pages.detailPage(ix, 7901, { ...c, vip: false });
   check(d.includes('Locked today · opens on Mon') && !d.includes('Open in Special now'), 'details page');
 }
+// round 9: one rank for the group's best member, on the server and in the page script (regroup after a pin)
+{
+  const rk = pages.khuxRank, page = new Function(`${pages.RANK_JS};return khuxRank;`)();
+  const cases = [['now', 'now'], ['now', 'vipnow'], ['now', 'locked'], ['can', 'can'], ['kept', 'pinned'], ['other', 'other'], ['replaced', 'off'], ['later', 'off'], ['removed', 'off']];
+  check(cases.every(([a, b]) => rk(a, b) === page(a, b)), 'same rank in node and in the page');
+  check(cases.every((c, i) => i === 0 || rk(...cases[i - 1]) < rk(...c)), `rank order ${cases.map((c) => rk(...c))}`);
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('o1', 7951, { name: 'Old (Monday)', periods: [1], days: ['Mon'], banner: 'old.png' }),
+    e('o2', 7952, { name: 'Old (Tuesday)', periods: [1, 4], days: ['Tue'], banner: 'old.png' }),
+    e('kp', 7953, { name: 'Kept One', periods: [2] }),
+  ] };
+  const h = pages.catalogPage(ix, { period: 4, pinnedKey: 'kp', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' });
+  const g = h.slice(h.indexOf('id="g7951-p1"'), h.indexOf('</div>' + String.fromCharCode(10), h.indexOf('id="g7951-p1"')));
+  check(g.includes('<div class="rp">Replaces: Kept One</div>') && g.indexOf('class="rp"') < g.indexOf('class="pk"'), 'group with one keepable member: «Replaces» before its pin button');
+  check(/class="ch c-can"[^>]*data-cls="can"[^>]*data-pill="[^"]*Past quest/.test(g), 'chips carry their status class and pill');
+  check(h.includes('function khuxRank(') && h.includes('function regroup(') && /CHIP_ICON=\{/.test(h), 'page script: rank, regroup, chip icons');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
