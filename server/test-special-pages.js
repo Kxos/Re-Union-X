@@ -173,5 +173,22 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const ix2 = { catalog: { evStageId: 7000 }, entries: [e('a', 7010, { name: 'Same', periods: [1], replacedBy: 'b' }), e('b', 7011, { name: 'Same', periods: [3] })] };
   check(pages.catalogPage(ix2, { period: 4, periods: PERIODS }).includes('Replaced by Same — from Period 3'), 'same name, no date: first period name');
 }
+// round 4 (bench k5): «Replaced by» only for an entry already in the past (its last period before the current one);
+// a replaced entry of the current period has the normal current status
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('cid-tue', 7601, { name: 'Cid (Tuesday)', periods: [2, 3, 4], days: ['Tue'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
+    e('cid-wed', 7602, { name: 'Cid (Wednesday)', periods: [2, 3, 4], days: ['Wed'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
+    e('dwq', 7603, { name: 'Day of the Weekly Quest', periods: [5], days: ['Tue'] }),
+  ] };
+  const ctx4 = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue', vip: false };
+  const h4 = pages.catalogPage(ix, ctx4), h5 = pages.catalogPage(ix, { ...ctx4, period: 5 });
+  const r = (h, id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  check(r(h4, 7601).includes('data-show="now"') && r(h4, 7601).includes('Open in Special now') && !r(h4, 7601).includes('Replaced by'), `current replaced entry, today: ${r(h4, 7601).slice(0, 200)}`);
+  check(r(h4, 7602).includes('data-show="other"') && r(h4, 7602).includes('Listed on Wed only') && !r(h4, 7602).includes('Replaced by'), 'current replaced entry, other day: listed on its day');
+  check(r(h5, 7601).includes('data-show="replaced"') && r(h5, 7601).includes('Replaced by Day of the Weekly Quest'), 'past replaced entry: replaced');
+  const d4 = pages.detailPage(ix, 7601, ctx4);
+  check(d4.includes('s-now') && !d4.includes('Replaced by'), 'details: current replaced entry not «replaced»');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');

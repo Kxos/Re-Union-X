@@ -159,7 +159,9 @@ function statusOf(en, ctx, { byKey, pinned, current }) {
     return { show: 'removed', cls: 'off', pill: pill('off', 'removed', 'Not restored: its materials have no use in this version'), button: null,
       why: 'This quest is not restored: the materials it gave have no use in this version.' };
   }
-  if (en.replacedBy) {
+  // replaced only once the entry is in the past for the player (as special.pinnable): in its own periods it is a current
+  // quest with the normal statuses (bench k5: the free Daily Cid in period 4, replaced from period 5)
+  if (en.replacedBy && Math.max(...en.periods) < cur) {
     const rep = byKey.get(en.replacedBy);
     let by = rep?.name || en.replacedBy;
     // the replacing entry with the same name (period-1 VIP Daily Cid -> free Daily Cid): say what tells them apart
