@@ -118,7 +118,8 @@ for (const e of live) {
 // Task 14: original khuxwiki banner art (tmp\banner_hunt MAPPING.json) on every entry and on the campaigns that have one;
 // round 2 (31-10, originals research): the three entries got khuxwiki art too (VIP Materials; the spirit part banner of
 // the week of its rewards), the Winter / New Year Limited VIP Boards their notice images (640x140); C44151 and C48395
-// (no image anywhere) keep the generated plate
+// (no image anywhere) have no `banner`; round 3 (30-10): they carry a `reconstruct` spec instead (make_special_banners
+// rebuilds them from local in-game board screenshots, file names only)
 const BANNER_RE = /^Special - .+ banner KHUX\.png$/;
 const NOTICE_RE = /^Notice \d+ .+ banner \(notice image\)\.png$/;
 const CAMP = Object.entries(rules.campaigns || {}).filter(([k]) => !k.startsWith('_'));
@@ -130,6 +131,10 @@ check(/^Special - VIP Get .+ spirit parts? and 1400 Jewels! banner KHUX\.png$/.t
 check(E.every((e) => !e.banner || BANNER_RE.test(e.banner)), 'entry banners are khuxwiki «Special - ... banner KHUX.png» names');
 const plateCamps = CAMP.filter(([, c]) => !c.banner).map(([k]) => k).sort();
 check(plateCamps.join() === 'C44151,C48395', `campaigns on the plate: ${plateCamps}`);
+const RECON = ['C44151', 'C48395'];
+check(RECON.every((k) => { const r = rules.campaigns[k].reconstruct || {}; return ['board', 'icon', 'tile'].every((f) => typeof r[f] === 'string' && r[f] && !/[\\/]/.test(r[f]))
+  && r.title && /^reconstructed/.test(r._note || ''); }), 'C44151 / C48395: reconstruct spec (file names only, _note reconstructed)');
+check(CAMP.filter(([, c]) => c.reconstruct).map(([k]) => k).join() === RECON.join(), 'reconstruct only on the campaigns without an original');
 check(CAMP.every(([, c]) => !c.banner || BANNER_RE.test(c.banner) || NOTICE_RE.test(c.banner)), 'campaign banners are khuxwiki or notice image names');
 check(rules.campaigns.C71999?.banner === 'Notice 71999 Limited Winter VIP Board banner (notice image).png'
   && rules.campaigns.C72714?.banner === 'Notice 72714 New Year Limited VIP Boards banner (notice image).png', 'Limited VIP Boards: notice images');
@@ -139,6 +144,8 @@ if (fs.existsSync(BANNERS)) {
   const have = new Set(fs.readdirSync(BANNERS));
   const lost = [...E.map((e) => e.banner), ...CAMP.map(([, c]) => c.banner)].filter((b) => b && !have.has(b));
   check(!lost.length, `banner files missing in ${BANNERS}: ${[...new Set(lost)].join(' | ')}`);
+  const rlost = RECON.flatMap((k) => ['board', 'icon', 'tile'].map((f) => (rules.campaigns[k].reconstruct || {})[f])).filter((b) => !have.has(b));
+  check(!rlost.length, `reconstruct sources missing in ${BANNERS}: ${rlost.join(' | ')}`);
 } else console.log(`(banner folder ${BANNERS} missing: file checks skipped)`);
 
 // catalogue: every series / quest named exists

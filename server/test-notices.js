@@ -125,6 +125,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/details/.test(t) && /addition of this server/.test(t) && /had none/.test(t), 'Special: pagina dei dettagli del catalogo, aggiunta del server (round 2)');
   check(/limited VIP campaigns/.test(t) && /week/.test(t) && /one quest of its theme/.test(t), 'Special: campagne VIP settimanali (Task 12)');
   check(/closest/.test(t) && /left out/.test(t) && /VIP! Skill/.test(t), 'Special: premi inesistenti sostituiti o tolti, VIP! Skill assente');
+  check(/Anniversary Extravaganza: Limited VIP Boards!/.test(t) && /Limited VIP Coin Skill Board!/.test(t) && /original banners are lost/.test(t), 'Special: two campaign banners reconstructed (round 3, 30-10)');
 }
 n.NOTICES.push({ date: '1', tag: 'X', title: 'a<b>"&', body: ['<script>'] });
 p = n.noticesPage(U(2026, 10, 16, 15));
