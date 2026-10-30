@@ -53,9 +53,20 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.tag{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:14px;padding:0 4px 0 10px;margin:3px 4px 0 0;font-size:14px;line-height:1.6}'
   + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px}'
   + '.hide{display:none}'
-  // every row: the same 5px side bar (colour by status, like the Shop's .b.now / .b.pinned) and the same padding, so
-  // banners and text line up; banner at half size (640x140 -> 320x70), the text wraps under it on a narrow phone
-  + '.q{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:10px 0 10px 10px;border-left:5px solid #5d8aa6;border-bottom:1px solid #2f5d78}'
+  // every card / campaign row: the same 5px side bar (colour by status, like the Shop's .b.now / .b.pinned) and the same
+  // padding; banner at half size (640x140 -> 320x70), the text wraps under it on a narrow phone
+  + '.card,.cr{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:10px 0 10px 10px;border-left:5px solid #5d8aa6;border-bottom:1px solid #2f5d78}'
+  + '.card.vipnow,.cr.vipnow{border-left-color:#2a7a5c}.card.now,.cr.now{border-left-color:#2e9e3e}.card.pinned,.cr.pinned{border-left-color:#b8860b}.card.can,.cr.can{border-left-color:#1a6fa8}'
+  + '.card.locked,.cr.locked{border-left-color:#7d8894}.card.off,.cr.off{border-left-color:#6a7580}.card.off .im img,.cr.off .th img{opacity:.5;filter:grayscale(.7)}.card.locked .im img{opacity:.6;filter:grayscale(.6)}'
+  // the period timeline of a card: one column per period (the current one marked), a version under its periods
+  + '.tl{flex:1 1 100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:4px}'
+  + '.tp{font-size:10.5px;line-height:1.3;text-align:center;color:#9fb7c6;background:#06283e;border-radius:4px;padding:2px 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tp.cur{background:#2e9e3e;color:#fff;font-weight:bold}'
+  + '.vr.one{min-width:max-content}.vr{display:flex;flex-wrap:wrap;gap:3px;align-items:center;background:rgba(255,255,255,.06);border-radius:6px;padding:3px}.vr.hl{background:rgba(0,212,237,.22);box-shadow:inset 0 0 0 1px #00d4ed}.vr.dim{opacity:.45}'
+  + '.vc{display:inline-block;border:1px solid transparent;border-radius:10px;padding:0 8px;font-size:12.5px;line-height:1.7;color:#fff;text-decoration:none;white-space:nowrap;font-weight:bold}.vc .ic{width:1.1em;height:1.1em;margin:-.2em .2em 0 -.15em}'
+  // VIP campaigns: compact rows with a small banner, by year and month (details / summary)
+  + '.camps h3{color:#ffcd4a;font-size:16px;margin:12px 0 2px}.cm summary{cursor:pointer;color:#00d4ed;font-size:15px;padding:4px 0;border-bottom:1px solid #2f5d78}'
+  + '.cr{padding:6px 0 6px 8px;gap:2px 10px}.th{flex:0 0 160px}.th img{width:160px;height:35px}.cr .info{flex:1 1 150px}.cr .nm{font-size:15px}.cr .d{font-size:12.5px}'
+  + '.q{display:flex}'
   + '.q.vipnow{border-left-color:#2a7a5c}.q.now{border-left-color:#2e9e3e}.q.pinned{border-left-color:#b8860b}.q.can{border-left-color:#1a6fa8}.q.locked{border-left-color:#7d8894}.q.off{border-left-color:#6a7580}.q.other{border-left-color:#5d8aa6}'
   + '.q.off .im img{opacity:.5;filter:grayscale(.7)}.q.locked .im img{opacity:.6;filter:grayscale(.6)}'
   + '.im{flex:0 0 auto;width:320px;max-width:100%}.im img{width:100%}.info{flex:1 1 170px;min-width:0;line-height:1.4}'
@@ -235,73 +246,81 @@ const keepButton = (id, on, extra = '') => `<a href="#" class="pk" data-id="${id
 const daysText = (en) => (en.days === 'all' ? 'Every day' : (en.days || []).join(', '));
 const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 
-// ES5, no external script. Rows: one read of the attributes at start; filtering toggles " hide" on the row, and on
-// the period section when none of its rows is visible. A row is one entry or a group of entries sharing a banner
-// (data-eid / data-show: space-separated, one per member; data-n: members). khuxRow (called by PIN_JS after a pin /
-// unpin) moves the statuses: the new kept entry gold, the old one back to «can be kept» (a group: its chips).
+// ES5, no external script (round 12: one card per quest, a compact VIP Campaigns list). Items = quest cards (.card) and
+// campaign rows (.cr), read once at start: members (data-eid / data-show, one per entry; each entry also has a .mb
+// element carrying data-cls / data-pill), the periods it has, types, rewards, item names (« | »), versions. A period tab
+// is a filter (cards with a version in it; that version highlighted). khuxRow (PIN_JS, after a pin / unpin) moves the
+// statuses: the new kept entry gold, the old one back to «can be kept»; version chips and card bar / pill follow
+// (khuxRank, the same rank as the server).
 const JS = `(function(){
 var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__,CHIP_ICON=__CHIP_ICON__;
 __RANK__
 __MATCH__
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,ids:(attr(el,'data-eid')||'').split(' '),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',ss:(attr(el,'data-show')||'').split(' '),rw:' '+(attr(el,'data-reward')||'')+' ',n:+attr(el,'data-n')||1,ns:(attr(el,'data-search')||'').split(' | '),mt:el.querySelector('.mt'),nf:+attr(el,'data-nf'),q:attr(el,'data-search')||''};});
-var secs=[].map.call(document.querySelectorAll('.sec'),function(el){return {el:el,p:attr(el,'data-p')};});
+function q(el,s){return el.querySelector(s);}
+var items=[].map.call(document.querySelectorAll('.card,.cr'),function(el){return {el:el,camp:el.className.indexOf('cr')===0,ids:(attr(el,'data-eid')||'').split(' '),ss:(attr(el,'data-show')||'').split(' '),
+ps:' '+attr(el,'data-periods')+' ',t:' '+attr(el,'data-type')+' ',rw:' '+(attr(el,'data-reward')||'')+' ',ns:(attr(el,'data-search')||'').split(' | '),nv:+attr(el,'data-nv')||1,mt:q(el,'.mt')};});
+var months=[].map.call(document.querySelectorAll('.cm'),function(el){return {el:el,y:attr(el,'data-y'),c:q(el,'.mc'),o:el.open};});
+var years=[].map.call(document.querySelectorAll('.cy'),function(el){return {el:el,y:attr(el,'data-y')};});
 var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null;
 function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
-// a row per entry (or group) and period: the All tab uses the first rows only (r.f), so nothing is counted twice there
 function match(r,s,anyPeriod){
-if(!anyPeriod){if(s.p==='all'&&!r.f)return false;if(s.p!=='all'&&r.p!==s.p)return false;}
+if(!anyPeriod&&s.p!=='all'&&r.ps.indexOf(' '+s.p+' ')<0)return false;
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
 if(s.show!=='all'&&(' '+r.ss.join(' ')+' ').indexOf(' '+s.show+' ')<0)return false;
 if(s.reward!=='all'&&r.rw.indexOf(' '+s.reward+' ')<0)return false;
 return !s.q||hits(r,s.q,1).length>0;}
-// item names of the row matching the query (one name at a time, khuxMatch), at most max
+// item names of the card / row matching the query (one name at a time, khuxMatch), at most max
 function hits(r,q,max){var o=[],i;for(i=0;i<r.ns.length&&o.length<max;i++)if(khuxMatch(q,r.ns[i]))o.push(r.ns[i]);return o;}
-function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
+function count(s){var n=0;for(var i=0;i<items.length;i++)if(match(items[i],s))n++;return n;}
 function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.reward!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function plural(n){return n+' quest'+(n===1?'':'s');}
+function plural(n,w){return n+' '+w+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
+function hide(el,h){el.className=el.className.replace(/ hide/g,'')+(h?' hide':'');}
 function render(){
-var c={all:0},n=0,m=0,i,r,on,sh={};
-for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){if(r.f)c.all++;c[r.p]=(c[r.p]||0)+1;}
-on=match(r,cur);if(on){n++;m+=cur.p==='all'?r.nf:r.n;sh[r.p]=1;}r.el.className=r.el.className.replace(/ hide/g,'')+(on?'':' hide');}
-for(i=0;i<secs.length;i++)secs[i].el.className='sec'+(sh[secs[i].p]?'':' hide');
+var c={all:0},n=0,m=0,k=0,i,j,r,on,p;
+for(i=0;i<items.length;i++){r=items[i];if(match(r,cur,true)){c.all++;for(p in PN)if(r.ps.indexOf(' '+p+' ')>=0)c[p]=(c[p]||0)+1;}
+on=match(r,cur);hide(r.el,!on);if(on){if(r.camp)k++;else{n++;m+=r.nv;}}
+if(!r.camp)[].forEach.call(r.el.querySelectorAll('.vr'),function(v){var x=cur.p!=='all'&&(' '+attr(v,'data-periods')+' ').indexOf(' '+cur.p+' ')>=0,d=cur.p!=='all'&&!x;v.className=v.className.replace(/ (hl|dim)/g,'')+(x?' hl':'')+(d?' dim':'');});}
+// campaign months / years: hidden when empty, counts of the visible rows
+for(i=0;i<months.length;i++){var vis=[].filter.call(months[i].el.querySelectorAll('.cr'),function(x){return x.className.indexOf(' hide')<0;}).length;months[i].c.textContent=vis;hide(months[i].el,!vis);months[i].el.open=nf(cur)?!!vis:months[i].o;}
+for(i=0;i<years.length;i++){var yv=0;for(j=0;j<months.length;j++)if(months[j].y===years[i].y&&months[j].el.className.indexOf(' hide')<0)yv++;hide(years[i].el,!yv);}
+$('cc').textContent=k;hide($('camps'),!k);hide($('cards'),!n);
 [].forEach.call(document.querySelectorAll('.tab'),function(t){var p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
-var k=nf(cur),h='<span class="n1">'+plural(n)+'</span>';
-if(m!==n)h+=' <small class="n">('+m+' with every day and variant)</small>';
-if(cur.p!=='all')h+=' from <b>'+esc(PN[cur.p])+'</b>';
-if(!k)h+=cur.p==='all'?' · all periods, no filters':' · no filters';
-else{h+=cur.p==='all'?' match:':' match your filters:';
+var f=nf(cur),h='<span class="n1">'+plural(n,'quest')+'</span> · '+plural(m,'version')+' · '+plural(k,'campaign');
+if(cur.p!=='all')h+=' in <b>'+esc(PN[cur.p])+'</b>';
+if(!f)h+=cur.p==='all'?' · all periods, no filters':' · no filters';
+else{h+=' match your filters:';
 if(cur.type!=='all')h+=' '+tag('type',LAB.type[cur.type]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
 if(cur.reward!=='all')h+=' '+tag('reward',LAB.reward[cur.reward]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
-$('sum').innerHTML=h;$('fdot').textContent=k?k:'';
-// why a row matched (only while searching), and a message when nothing does
-for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
-var none=$('none');none.textContent=n?'':(cur.q?'No quests match "'+cur.q+'"':'No quests match your filters');none.style.display=n?'none':'';}
-// one member of a row changes status: a single row gets the new bar and pill, a group the new chip colour
-function paint(r,cls,html){r.el.className='q '+cls+(/ hide/.test(r.el.className)?' hide':'');var s=r.el.querySelector('.s');if(s){s.className='s s-'+cls;s.innerHTML=html;}}
-// a group: the chip of the member, then the row bar and pill of the best member again (khuxRank, as on the server)
-function regroup(r){var b=-1,bc='',bh='',j,ch;for(j=0;j<r.ids.length;j++){ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(!ch)continue;
-var c=attr(ch,'data-cls'),k=khuxRank(r.ss[j],c);if(b<0||k<b){b=k;bc=c;bh=PILL[r.ss[j]]?PILL[r.ss[j]].html:attr(ch,'data-pill');}}
-if(b>=0)paint(r,bc,bh);}
-function setMember(r,j,show){var p=PILL[show];r.ss[j]=show;r.el.setAttribute('data-show',r.ss.join(' '));
-if(r.ids.length===1){paint(r,p.cls,p.html);return;}
-var ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(ch){ch.className='ch c-'+p.cls;ch.setAttribute('data-cls',p.cls);var ic=ch.querySelector('.ic');if(ic&&CHIP_ICON[show])ic.src='/web/special/icon/'+CHIP_ICON[show]+'.png';}
-regroup(r);}
-window.khuxRow=function(id,on){var name='',i,j,r;for(i=0;i<rows.length;i++){r=rows[i];for(j=0;j<r.ids.length;j++){if(r.ss[j]==='kept')setMember(r,j,'can');
-if(r.ids[j]===id){setMember(r,j,on?'kept':'can');if(on){var t=r.ids.length===1?r.el.querySelector('.nm'):r.el.querySelector('.ch[data-eid="'+id+'"]');name=t?(attr(t,'title')||t.textContent):'';}}}}
-for(i=0;i<rows.length;i++){r=rows[i];var pk=r.el.querySelector('.pk');if(!pk)continue;var st=r.ss[r.ids.indexOf(attr(pk,'data-id'))],x=r.el.querySelector('.rp');
+$('sum').innerHTML=h;$('fdot').textContent=f?f:'';
+// why a card / row matched (only while searching), and a message when nothing does
+for(i=0;i<items.length;i++){r=items[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
+var none=$('none'),any=n+k;none.textContent=any?'':(cur.q?'No quests match "'+cur.q+'"':'No quests match your filters');none.style.display=any?'none':'';}
+// status changes (pin / unpin): member element, the chip of its version, the card or row bar and pill
+function setCls(el,cls){el.className=el.className.replace(/\\bc-[a-z]+/,'c-'+cls);}
+function best(r,els){var b=-1,o=null,j,e,k;for(j=0;j<els.length;j++){e=els[j];k=khuxRank(r.ss[r.ids.indexOf(attr(e,'data-eid'))],attr(e,'data-cls'));if(b<0||k<b){b=k;o=e;}}return o;}
+function pillOf(r,e){var s=r.ss[r.ids.indexOf(attr(e,'data-eid'))];return PILL[s]?PILL[s].html:attr(e,'data-pill');}
+function paint(r){var e=best(r,r.el.querySelectorAll('.mb'));if(!e)return;var cls=attr(e,'data-cls'),base=r.camp?'cr':'card';
+r.el.className=base+' '+cls+(/ hide/.test(r.el.className)?' hide':'');var s=q(r.el,'.s');if(s){s.className='s s-'+cls;s.innerHTML=pillOf(r,e);}}
+function setMember(r,j,show){var p=PILL[show],e=q(r.el,'.mb[data-eid="'+r.ids[j]+'"]');r.ss[j]=show;r.el.setAttribute('data-show',r.ss.join(' '));if(!e)return;
+setCls(e,p.cls);e.setAttribute('data-cls',p.cls);var ic=q(e,'.ic');if(ic&&CHIP_ICON[show])ic.src='/web/special/icon/'+CHIP_ICON[show]+'.png';
+var vr=e.parentNode,vc=vr&&q(vr,'.vc');if(vc&&vc!==e){var b=best(r,vr.querySelectorAll('.mb'));if(b)setCls(vc,attr(b,'data-cls'));}
+paint(r);}
+window.khuxRow=function(id,on){var name='',i,j,r;for(i=0;i<items.length;i++){r=items[i];for(j=0;j<r.ids.length;j++){if(r.ss[j]==='kept')setMember(r,j,'can');
+if(r.ids[j]===id){setMember(r,j,on?'kept':'can');if(on){var t=q(r.el,'.mb[data-eid="'+id+'"]');name=t?attr(t,'title'):'';}}}}
+for(i=0;i<items.length;i++){r=items[i];var pk=q(r.el,'.pk');if(!pk)continue;var st=r.ss[r.ids.indexOf(attr(pk,'data-id'))],x=q(r.el,'.rp');
 if(!x&&st==='can'&&name){x=document.createElement('div');x.className='rp';pk.parentNode.parentNode.insertBefore(x,pk.parentNode);}
 if(x){x.textContent='Replaces\\u003a '+name;x.style.display=name&&st==='can'?'':'none';}}
 render();};
 function sync(){
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var g=attr(box,'data-g');[].forEach.call(box.children,function(o){o.className=o.className.replace(/ on/g,'')+(attr(o,'data-v')===dr[g]?' on':'');});});
-$('fok').textContent='Show '+plural(count(dr));}
+$('fok').textContent='Show '+plural(count(dr),'result');}
 function openF(){dr=copy(cur);$('fq').value=dr.q;if(document.body.className.indexOf('fo')<0)document.body.className+=' fo';sync();}
 function closeF(){dr=null;document.body.className=document.body.className.replace(/ ?fo/g,'');}
 $('fbtn').onclick=openF;$('fx').onclick=closeF;$('dim').onclick=closeF;
@@ -314,11 +333,12 @@ $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x')
 if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='reward'||x==='all')cur.reward='all';if(x==='q'||x==='all')cur.q='';render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 render();
-var h=location.hash&&document.getElementById(location.hash.slice(1));if(h&&h.scrollIntoView)h.scrollIntoView();
+// BACK from a details page: #q<id>; a campaign inside a closed month opens it first
+var h=location.hash&&document.getElementById(location.hash.slice(1));if(h){var d=h;while(d&&d.tagName!=='DETAILS')d=d.parentNode;if(d)d.open=true;if(h.scrollIntoView)h.scrollIntoView();}
 })();`;
 
-// group rows (round 7, user 31-10): entries of one period section with the same banner art (the seven Daily Cid days,
-// VIP! Materials and Materials 2...) take one row. Best member status first: it gives the row its bar and pill.
+// cards (round 12, user 31-10): one card per quest family, its versions on a period timeline, days / variants as chips.
+// Best member status first: it gives the card (and a version chip) its colour and pill.
 // the player's own pin before «can be kept» (ruling 31-10: a kept member takes over the group row)
 const SHOW_RANK = ['now', 'kept', 'can', 'other', 'replaced', 'later', 'removed'];
 const CHIP_ICON = { now: 'now', can: 'pin', kept: 'pin', replaced: 'replaced', later: 'later', removed: 'removed' };
@@ -341,87 +361,133 @@ function catalogPage(index, ctx = {}) {
   const periods = ctx.periods || special.PERIODS, cur = ctx.period;
   const names = { drop: () => [], objective: () => [], dropTypes: () => [], objectiveTypes: () => [], ...(ctx.names || {}) };
   const data = pageData(index, ctx), { entries } = data;
-  const per = (en) => Math.min(...en.periods);
-  // searchable text of an entry: its name, its quests' names, the drop items and the objective rewards (lower case)
+  const pIndex = (n) => periods.findIndex((p) => p.n === n);
   const stagesOf = (en) => (en.stages && en.stages.length ? en.stages : [{ dropRewardIds: en.dropRewardIds }]);
-  const search = (en) => {
+  // item names of an entry (FIND, «Matches:»): its name, its quests' names, the drop items and the objective rewards, as
+  // written, without repeats (case aside)
+  const namesOf = (en) => {
     const parts = [en.name];
     for (const s of stagesOf(en)) {
       if (s.quest) parts.push(s.quest);
       for (const rid of s.dropRewardIds || []) parts.push(...names.drop(rid));
     }
     for (const sid of en.stageIds || []) parts.push(...names.objective(sid));
-    const seen = new Set();
-    return parts.map((x) => String(x).replace(/\s+/g, ' ').replace(/ \| /g, ' / ').trim())
-      .filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase())).join(' | ');
+    return parts.map((x) => String(x).replace(/\s+/g, ' ').replace(/ \| /g, ' / ').trim()).filter(Boolean);
   };
+  const searchOf = (list) => { const seen = new Set(); return list.flatMap(namesOf).filter((x) => !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase())).join(' | '); };
   // REWARDS chips: reward types of the drop rows and of the objective rewards (3 medal, 20 avatar part, 2 Jewels, 5 material)
   const rewards = (en) => {
     const types = [...stagesOf(en).flatMap((s) => (s.dropRewardIds || []).flatMap((rid) => names.dropTypes(rid))),
       ...(en.stageIds || []).flatMap((sid) => names.objectiveTypes(sid))];
     return REWARD_OPTS.slice(1).filter(([v]) => types.some((t) => REWARD_OF_TYPE[t] === v)).map(([v]) => v).join(' ');
   };
+  const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
   const statusMemo = new Map();
   const statusFor = (en) => { if (!statusMemo.has(en)) statusMemo.set(en, statusOf(en, ctx, data)); return statusMemo.get(en); };
-  // one row per entry (or group) and period (bench 31-10: the current period lists every quest it has); the first one of
-  // an entry (its first period) carries id="q<id>" (hash of the details BACK) and data-first, the All tab shows only those
-  const row = (en, p) => {
-    const id = en.evStageId, href = detailHref(id), first = p === per(en), st = statusFor(en);
-    const button = st.button === null ? '' : keepButton(id, st.button, ' onclick="return khuxClick(this)"');
-    return `<div class="q ${st.cls}" id="q${id}${first ? '' : `-p${p}`}" data-eid="${id}"${first ? ' data-first="1"' : ''} data-period="${p}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}" data-reward="${rewards(en)}" data-n="1" data-nf="${first ? 1 : 0}">`
-      + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(id)}" alt=""></a>`
-      + `<div class="info"><a class="nm" href="${href}">${esc(en.name)}</a><div class="d">${esc(daysText(en))}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>`
-      + `${st.pill}${st.rp || ''}${button ? `<div>${button}</div>` : ''}<div class="mt"></div></div></div>
-`;
+  const bestOf = (list) => list.reduce((a, b) => (khuxRank(statusFor(b).show, statusFor(b).cls) < khuxRank(statusFor(a).show, statusFor(a).cls) ? b : a));
+  const inner = (st) => st.pill.replace(/^<span[^>]*>|<\/span>$/g, '');
+  // a member element (one per entry): its status class and pill go with it, for the page script after a pin
+  const mbAttrs = (en) => { const st = statusFor(en); return `data-eid="${en.evStageId}" data-cls="${st.cls}" data-pill="${esc(inner(st))}" title="${esc(en.name)}"`; };
+  const chipIcon = (st) => (st.cls === 'locked' ? 'lock' : st.cls === 'vipnow' ? 'vip' : CHIP_ICON[st.show]);
+  const items = (list) => list.map((en) => en.evStageId).join(' ');
+  const keepFor = (list) => {
+    const keepable = list.filter((en) => statusFor(en).button !== null);
+    if (keepable.length !== 1) return '';
+    const st = statusFor(keepable[0]);
+    return `${st.rp || ''}<div>${keepButton(keepable[0].evStageId, st.button, ' onclick="return khuxClick(this)"')}</div>`;
   };
-  const groupRow = (list, p) => {
-    const sts = list.map(statusFor), best = sts.reduce((a, b) => (khuxRank(b.show, b.cls) < khuxRank(a.show, a.cls) ? b : a));
-    const head = list[0], href = detailHref(head.evStageId), anyFirst = list.some((en) => per(en) === p);
-    const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
-    const chips = list.map((en, j) => {
-      const st = sts[j], k = st.cls === 'locked' ? 'lock' : st.cls === 'vipnow' ? 'vip' : CHIP_ICON[st.show];
-      return `<a class="ch c-${st.cls}"${per(en) === p ? ` id="q${en.evStageId}"` : ''} data-eid="${en.evStageId}" data-cls="${st.cls}" data-pill="${esc(st.pill.replace(/^<span[^>]*>|<\/span>$/g, ''))}" href="${detailHref(en.evStageId)}" title="${esc(en.name)}">${k ? icon(k) : ''}${esc(variantOf(en))}</a>`;
-    }).join('');
-    const keepable = list.filter((en, j) => sts[j].button !== null);
-    const button = keepable.length === 1 ? `${statusFor(keepable[0]).rp || ''}<div>${keepButton(keepable[0].evStageId, statusFor(keepable[0]).button, ' onclick="return khuxClick(this)"')}</div>` : '';
-    const days = list.every((en) => Array.isArray(en.days) && en.days.length === 1);
-    return `<div class="q ${best.cls}" id="g${head.evStageId}-p${p}" data-eid="${list.map((en) => en.evStageId).join(' ')}"${anyFirst ? ' data-first="1"' : ''} data-period="${p}" data-type="${uniq(list.map(typesOf))}" data-show="${sts.map((s) => s.show).join(' ')}" data-search="${esc(list.map(search).join(' | '))}" data-reward="${uniq(list.map(rewards))}" data-n="${list.length}" data-nf="${list.filter((en) => per(en) === p).length}">`
-      + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`
-      + `<div class="info"><span class="nm">${esc(familyTitle(head.name))}</span><div class="d">${list.length} ${days ? 'days' : 'variants'}${list.every((en) => en.vip) ? ' · <span class="vip">VIP only</span>' : ''}</div>`
-      + `${best.pill}<div class="chs">${chips}</div>${button}<div class="mt"></div></div></div>
-`;
+
+  // ---- quest cards: permanent entries by family title; inside, versions = same periods, VIP rule and banner ----
+  const families = [], byTitle = new Map();
+  for (const en of entries.filter((x) => !x.campaign)) {
+    const t = familyTitle(en.name);
+    if (!byTitle.has(t)) { const f = { title: t, list: [] }; families.push(f); byTitle.set(t, f); }
+    byTitle.get(t).list.push(en);
+  }
+  const yearsOf = (v) => {
+    const a = periods[pIndex(Math.min(...v[0].periods))], b = periods[pIndex(Math.max(...v[0].periods))];
+    const from = [a ? a.from : '', ...v.map((en) => en.from || '')].sort().pop(), to = [b ? b.to : '9999', ...v.map((en) => en.to || '9999')].sort()[0];
+    const y1 = from.slice(0, 4), y2 = to.slice(0, 4);
+    return y1 === y2 ? y1 : `${y1}–${y2.slice(2)}`;
   };
-  // the rows of a section: entries with the same (non-empty) banner art together, in the order of their first entry
-  const rowsOf = (p) => {
-    const groups = [], byBanner = new Map();
-    for (const en of entries.filter((x) => x.periods.includes(p))) {
-      const g = en.banner ? byBanner.get(en.banner) : null;
-      if (g) g.push(en); else { const ng = [en]; groups.push(ng); if (en.banner) byBanner.set(en.banner, ng); }
+  const card = (f) => {
+    const vmap = new Map();
+    for (const en of f.list) {
+      const k = `${en.periods.join(',')}|${en.vip ? 1 : 0}|${en.banner || en.evStageId}`;
+      if (!vmap.has(k)) vmap.set(k, []);
+      vmap.get(k).push(en);
     }
-    return groups;
+    const versions = [...vmap.values()].sort((a, b) => Math.min(...a[0].periods) - Math.min(...b[0].periods));
+    const mixed = versions.some((v) => v[0].vip) && versions.some((v) => !v[0].vip);
+    const latest = versions[versions.length - 1], head = latest[0], all = versions.flat(), bestEn = bestOf(all), bst = statusFor(bestEn);
+    const href = detailHref(head.evStageId);
+    const vrow = (v, vi) => {
+      const ps = v[0].periods, s = pIndex(Math.min(...ps)) + 1, e = pIndex(Math.max(...ps)) + 2;
+      const label = `${mixed ? (v[0].vip ? 'VIP ' : 'Free ') : ''}${yearsOf(v)}`;
+      const vb = bestOf(v), vst = statusFor(vb), k = chipIcon(vst);
+      const chip = (en, cls, text) => { const st = statusFor(en), ik = chipIcon(st);
+        return `<a class="${cls} c-${st.cls}" id="q${en.evStageId}" ${mbAttrs(en)} href="${detailHref(en.evStageId)}">${ik ? icon(ik) : ''}${esc(text)}</a>`; };
+      const body = v.length === 1 ? chip(v[0], 'vc mb', label)
+        : `<a class="vc c-${vst.cls}" href="${detailHref(vb.evStageId)}">${k ? icon(k) : ''}${esc(label)}</a>${v.map((en) => chip(en, 'ch mb', variantOf(en))).join('')}`;
+      return `<div class="vr${v.length === 1 ? ' one' : ''}" style="grid-column:${s} / ${e};grid-row:${vi + 2}" data-periods="${ps.join(' ')}">${body}</div>`;
+    };
+    const days = latest.length > 1 ? `${latest.length} ${latest.every((en) => Array.isArray(en.days) && en.days.length === 1) ? 'days' : 'variants'}` : daysText(head);
+    const tl = periods.map((p) => `<span class="tp${p.n === cur ? ' cur' : ''}">${esc(p.name)}</span>`).join('') + versions.map(vrow).join('');
+    return `<div class="card ${bst.cls}" id="c${all[0].evStageId}" data-eid="${items(all)}" data-show="${all.map((en) => statusFor(en).show).join(' ')}" data-periods="${uniq(all.map((en) => en.periods.join(' ')))}"`
+      + ` data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${versions.length}">`
+      + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`
+      + `<div class="info"><a class="nm" href="${href}">${esc(f.title)}</a><div class="d">${esc(days)}${all.every((en) => en.vip) ? ' · <span class="vip">VIP only</span>' : ''}`
+      + `${versions.length > 1 ? ` · ${versions.length} versions` : ''}</div>${bst.pill}${keepFor(all)}<div class="mt"></div></div>`
+      + `<div class="tl">${tl}</div></div>
+`;
   };
-  const secRows = new Map(periods.map((p) => [p.n, rowsOf(p.n)]));
-  const sections = periods.map((p) => {
-    const rows = secRows.get(p.n).map((g) => (g.length === 1 ? row(g[0], p.n) : groupRow(g, p.n))).join('');
-    return `<div class="sec" data-p="${p.n}"><h2 class="per" id="p${p.n}">${esc(p.name)}</h2>`
-      + `<div class="n">${niceDay(p.from)} – ${niceDay(p.to)}</div>${rows || '<p class="n">No quests.</p>'}</div>`;
-  }).join('');
+  const cards = families.map(card);
+
+  // ---- VIP campaigns: compact rows by year and month; the month of the current Shop week open ----
+  const camps = entries.filter((x) => x.campaign).sort((a, b) => (a.campaign.start < b.campaign.start ? -1 : a.campaign.start > b.campaign.start ? 1 : a.evStageId - b.evStageId));
+  const campRow = (en) => {
+    const st = statusFor(en), href = detailHref(en.evStageId), ik = chipIcon(st);
+    return `<div class="cr ${st.cls}" id="q${en.evStageId}" data-eid="${en.evStageId}" data-show="${st.show}" data-periods="${en.periods.join(' ')}" data-type="${typesOf(en)}"`
+      + ` data-reward="${rewards(en)}" data-search="${esc(searchOf([en]))}" data-nv="1">`
+      + `<a class="th" href="${href}"><img loading="lazy" width="160" height="35" src="${special.imgPath(en.evStageId)}" alt=""></a>`
+      + `<div class="info"><a class="nm" href="${href}">${esc(en.name)}</a><div class="d">${niceDay(en.campaign.start)} – ${niceDay(en.campaign.end)}</div>`
+      + `${st.pill} <a class="ch mb c-${st.cls}" ${mbAttrs(en)} href="${href}">${ik ? icon(ik) : ''}Details</a>${keepFor([en])}<div class="mt"></div></div></div>
+`;
+  };
+  const byYear = new Map();
+  for (const en of camps) {
+    const y = en.campaign.start.slice(0, 4), m = en.campaign.start.slice(0, 7);
+    if (!byYear.has(y)) byYear.set(y, new Map());
+    const ms = byYear.get(y);
+    if (!ms.has(m)) ms.set(m, []);
+    ms.get(m).push(en);
+  }
+  const campHtml = [...byYear].map(([y, ms]) => `<div class="cy" data-y="${y}"><h3>${y}</h3>${[...ms].map(([m, list]) => {
+    const open = list.some((en) => data.current.has(en));
+    return `<details class="cm" data-y="${y}" data-m="${m}"${open ? ' open' : ''}><summary>${y} ▸ ${MONTHS[+m.slice(5, 7) - 1]} (<span class="mc">${list.length}</span>)</summary>${list.map(campRow).join('')}</details>`;
+  }).join('')}</div>`).join('');
+
   const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
   const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
-  // All: the rows that hold the first period of one of their entries
-  const n = [...secRows].reduce((t, [pn, gs]) => t + gs.filter((g) => g.some((en) => per(en) === pn)).length, 0), nq = `${n} quest${n === 1 ? '' : 's'}`;
+  const nv = families.reduce((t, f) => t + new Set(f.list.map((en) => `${en.periods.join(',')}|${en.vip ? 1 : 0}|${en.banner || en.evStageId}`)).size, 0);
+  const count = (pn) => families.filter((f) => f.list.some((en) => en.periods.includes(pn))).length + camps.filter((en) => en.periods.includes(pn)).length;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   const pillJs = (k) => ({ cls: PILLS[k][0], html: pillInner(PILLS[k]) });
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__REWARD__', labels(REWARD_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
     .replace('__CHIP_ICON__', JSON.stringify(CHIP_ICON)).replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
+  const total = families.length + camps.length;
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
-    + '<p class="n">Quests from past periods can be kept in Special. Only one can be kept at a time. Tap a banner, or a day, for its details.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, secRows.get(p.n).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
-    + `<div class="sum" id="sum"><span class="n1">${nq}</span> · all periods, no filters</div><div id="none" class="none" style="display:none"></div>${sections}`
+    + '<p class="n">One card per quest, with its versions under the periods of the game. Past versions can be kept in Special (one at a time). Tap a banner, a version or a day for its details.</p>'
+    + `<div class="tabs" id="tabs">${tab('all', 'All', total)}${periods.map((p) => tab(p.n, p.name, count(p.n), p.n === cur)).join('')}</div><div class="tabline"></div>`
+    + `<div class="sum" id="sum"><span class="n1">${plural(families.length, 'quest')}</span> · ${plural(nv, 'version')} · ${plural(camps.length, 'campaign')} · all periods, no filters</div>`
+    + '<div id="none" class="none" style="display:none"></div>'
+    + `<div id="cards">${cards.join('') || '<p class="n">No quests.</p>'}</div>`
+    + `<div class="camps" id="camps"><h2>VIP Campaigns (<span id="cc">${camps.length}</span>)</h2><p class="n">Limited VIP campaigns of the original game, one week each, by month.</p>${campHtml}</div>`
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Quest or reward name" autocomplete="off"></div>'
@@ -429,7 +495,7 @@ function catalogPage(index, ctx = {}) {
     + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS)}</div>`
     + `<h4>REWARDS</h4><div class="opts" data-g="reward">${opts(REWARD_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
-    + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${nq}</button></div></div>`
+    + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(total, 'result')}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${PIN_JS}</script><script>${js}</script></body></html>`;
 }
 

@@ -21,11 +21,11 @@ const index = {
 };
 const names = { drop: (rid) => (rid === 1 ? ['Huey Ver. A', 'Mythril Shard'] : []), objective: (sid) => (sid === 71020 ? ['Cid Ver. B'] : []) };
 const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, periods: PERIODS, names, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon' });
-const idx = (s) => html.indexOf(s);
-check(idx('id="p1"') > 0 && idx('id="p1"') < idx('id="p2"') && idx('id="p4"') < idx('id="p5"'), 'five period sections in order');
-check((html.match(/class="per/g) || []).length >= 5, 'five sections');
+// round 12: the item (quest card or campaign row) that holds the element id="q<id>"
+function itemOf(h, id) { const s0 = h.indexOf(`id="q${id}"`); if (s0 < 0) return ''; const a = Math.max(h.lastIndexOf('<div class="card ', s0), h.lastIndexOf('<div class="cr ', s0)); return h.slice(a, h.indexOf('</div>' + String.fromCharCode(10), s0)); }
+check((html.match(/<span class="tp/g) || []).length === 5 * 7 && (html.match(/<span class="tp cur">/g) || []).length === 7, 'a five-period timeline on every card, the current period marked');
 check(/Period 4[\s\S]{0,200}Now/.test(html) && (html.match(/>Now</g) || []).length === 1, 'current period marked Now once');
-const row = (id) => { const s = html.indexOf(`id="q${id}"`); return s < 0 ? '' : html.slice(s, html.indexOf('</div>\n', s)); };
+const row = (id) => itemOf(html, id);
 check(row(7105) && !row(7105).includes('data-pin') && row(7105).includes('Reached later in the Story'), 'later: no pin, text');
 check(row(7103).includes('Replaced by N-kb') && !row(7103).includes('data-pin'), 'replaced');
 check(row(7104).includes('Not restored: its materials have no use in this version') && !row(7104).includes('data-pin'), 'removed');
@@ -39,13 +39,13 @@ check(html.includes('class="tab on" data-p="all"'), 'All tab default');
 for (const p of PERIODS) check(html.includes('data-p="' + p.n + '"') && html.includes('id="tc' + p.n + '"'), 'tab ' + p.n);
 check(html.includes('id="tc1">3<') && html.includes('id="tcall">8<'), 'tab counts (3 in period 1, 8 total)');
 const attr = (id, a) => { const r = row(id), m = new RegExp(a + '="([^"]*)"').exec(r.slice(0, r.indexOf('>') + 1)); return m ? m[1] : null; };
-for (const id of [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108]) check(['data-period', 'data-type', 'data-show', 'data-search'].every((a) => attr(id, a) !== null), 'row attrs ' + id);
+for (const id of [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108]) check(['data-periods', 'data-type', 'data-show', 'data-search'].every((a) => attr(id, a) !== null), 'row attrs ' + id);
 check(attr(7102, 'data-search').toLowerCase().includes('huey') && attr(7102, 'data-search').toLowerCase().includes('mythril') && attr(7102, 'data-search').toLowerCase().includes('quest two'), 'search has drop names');
 check(attr(7107, 'data-search') === 'N-cid', 'search plain name (as written)');
-check(attr(7102, 'data-period') === '1' && attr(7101, 'data-period') === '2', 'data-period');
+check(attr(7102, 'data-periods') === '1' && attr(7101, 'data-periods') === '2' && attr(7103, 'data-periods') === '1 2', 'data-periods');
 check(attr(7107, 'data-type') === 'daily' && attr(7106, 'data-type').split(' ').includes('vip') && attr(7108, 'data-type') === 'camp' && attr(7101, 'data-type') === 'weekday', 'types');
 check(attr(7101, 'data-show') === 'kept' && attr(7102, 'data-show') === 'can' && attr(7103, 'data-show') === 'replaced' && attr(7104, 'data-show') === 'removed' && attr(7105, 'data-show') === 'later' && attr(7106, 'data-show') === 'can' && attr(7108, 'data-show') === 'now', 'shows');
-check(html.includes('id="sum"') && html.includes('>8 quests</span> · all periods, no filters') && html.includes('id="fbtn"'), 'summary and filters button');
+check(html.includes('id="sum"') && html.includes('>7 quests</span> · 7 versions · 1 campaign · all periods, no filters') && html.includes('id="fbtn"'), 'summary and filters button');
 check(html.includes('id="sheet"') && html.includes('data-g="type"') && html.includes('data-g="show"') && html.includes('id="fq"') && html.includes('id="freset"') && html.includes('id="fok"'), 'filters sheet');
 check(html.includes('FIND') && html.includes('TYPE') && html.includes('SHOW') && html.includes('Daily Cid') && html.includes('Later in the Story'), 'sheet groups');
 check(row(7102).includes('width="320"') && row(7102).includes('height="70"') && html.includes('.im{'), 'half-size banner');
@@ -71,7 +71,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   ] };
   const ctx = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon' };
   const h = pages.catalogPage(ix, { ...ctx, vip: false });
-  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>\n', s0)); };
+  const r = (id) => itemOf(h, id);
   const sh = (id) => (/data-show="([^"]*)"/.exec(r(id)) || [])[1];
   check(r(7201).includes('Open in Special now') && sh(7201) === 'now', 'current entry: open now');
   check(r(7202).includes('This period, not this week') && !r(7202).includes('Open in Special now') && sh(7202) !== 'now', `entry outside its from/to: ${sh(7202)}`);
@@ -80,7 +80,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   // the locked VIP banner is still in the Special tab (isLock 1): it stays under «In Special now»
   check(r(7205).includes('VIP only (locked)') && !r(7205).includes('Open in Special now') && sh(7205) === 'now', 'current VIP entry without VIP: locked');
   const hv = pages.catalogPage(ix, { ...ctx, vip: true });
-  const rv = hv.slice(hv.indexOf('id="q7205"'), hv.indexOf('</div>\n', hv.indexOf('id="q7205"')));
+  const rv = itemOf(hv, 7205);
   check(rv.includes('Open in Special now') && !rv.includes('(locked)'), 'current VIP entry with VIP: open now');
   check((h.match(/data-show="now"/g) || []).length === 3, `SHOW «In Special now»: ${(h.match(/data-show="now"/g) || []).length} rows`);
 }
@@ -96,15 +96,15 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(!html.includes('📌'), 'no pin emoji in the page');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
   check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
-  const cls = (id) => { const s0 = html.indexOf(`id="q${id}"`); return (/class="([^"]*)"/.exec(html.slice(html.lastIndexOf('<div', s0), s0 + 200)) || [])[1]; };
-  check(cls(7101) === 'q pinned' && cls(7102) === 'q can' && cls(7103) === 'q off' && cls(7104) === 'q off' && cls(7105) === 'q off' && cls(7108) === 'q now', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
+  const cls = (id) => (/class="([^"]*)"/.exec(itemOf(html, id)) || [])[1];
+  check(cls(7101) === 'card pinned' && cls(7102) === 'card can' && cls(7103) === 'card off' && cls(7104) === 'card off' && cls(7105) === 'card off' && cls(7108) === 'cr now', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
   check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-now"'), 'status pills');
-  check(/\.q\{[^}]*border-left:5px solid/.test(html) && /\.q\.now\{border-left-color:#2e9e3e/.test(html) && /\.q\.pinned\{border-left-color:#b8860b/.test(html) && /\.q\.can\{border-left-color:#1a6fa8/.test(html), 'side bars');
-  check(/\.q\.off \.im img\{[^}]*opacity/.test(html) && /\.q\.locked \.im img\{[^}]*opacity/.test(html), 'dimmed banners');
-  check(row(7102).includes('href="/web/special/detail/7102?from=catalog"') && (row(7102).match(/\/web\/special\/detail\/7102/g) || []).length === 2, 'banner and name open the details');
+  check(/\.card,\.cr\{[^}]*border-left:5px solid/.test(html) && /\.card\.now,\.cr\.now\{border-left-color:#2e9e3e/.test(html) && /\.card\.pinned,\.cr\.pinned\{border-left-color:#b8860b/.test(html) && /\.card\.can,\.cr\.can\{border-left-color:#1a6fa8/.test(html), 'side bars');
+  check(/\.card\.off \.im img,\.cr\.off \.th img\{[^}]*opacity/.test(html) && /\.card\.locked \.im img\{[^}]*opacity/.test(html), 'dimmed banners');
+  check(row(7102).includes('href="/web/special/detail/7102?from=catalog"') && (row(7102).match(/\/web\/special\/detail\/7102/g) || []).length === 3, 'banner, name and version chip open the details');
   const ix = { catalog: { evStageId: 7000 }, entries: [e('vipnow', 7205, { periods: [4], vip: true, days: 'all', family: 'SQ22' })] };
   const hl = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', vip: false });
-  check(/class="q locked"/.test(hl) && hl.includes('class="s s-locked"') && hl.includes('/web/special/icon/lock.png'), 'VIP locked: grey bar, padlock pill');
+  check(/class="card locked"/.test(hl) && hl.includes('class="s s-locked"') && hl.includes('/web/special/icon/lock.png'), 'VIP locked: grey bar, padlock pill');
   // details page
   const stageInfo = (sid) => (sid === 71020 ? { objectives: [{ text: 'Defeat Shadow x 3', reward: 'Cid Ver. B x1' }, { text: 'Complete without having to continue', reward: 'Munny x100' }] } : null);
   const dn = { ...names, stage: stageInfo };
@@ -131,35 +131,103 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
 {
   const ix = { catalog: { evStageId: 7000 }, entries: ['Mon', 'Tue'].map((d, i) => e('cid-' + d, 7501 + i, { periods: [4], days: [d], family: 'SQ12', resetGroup: 'cid' })) };
   const h = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', vip: true });
-  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>'+String.fromCharCode(10), s0)); };
+  const r = (id) => itemOf(h, id);
   check(r(7501).includes('data-show="now"') && r(7501).includes('Open in Special now'), 'Cid of today: now');
   check(r(7502).includes('data-show="other"') && r(7502).includes('Listed on Tue only') && !r(7502).includes('Open in Special now'), `Cid of another day: ${r(7502).slice(0, 300)}`);
 }
-// round 3 (bench rev 220): an entry is listed under EVERY period it belongs to; «All» shows each entry once
+// round 12 (user 31-10): one card per quest with its versions on a period timeline; period tabs are filters; the VIP
+// campaigns in a compact list by year and month
 {
-  const sec = (h, n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
-  const rowsIn = (h, n) => (sec(h, n).match(/<div class="q /g) || []).length;
-  // fixture: kb [2], kb2 [1], repl [1,2], gone [1], later [5], vipq [3], cid [2], camp [3,4]
-  check(rowsIn(html, 1) === 3 && rowsIn(html, 2) === 3 && rowsIn(html, 3) === 2 && rowsIn(html, 4) === 1 && rowsIn(html, 5) === 1,
-    `rows per period section: ${[1, 2, 3, 4, 5].map((n) => rowsIn(html, n))}`);
-  check(html.includes('id="tc2">3<') && html.includes('id="tc3">2<') && html.includes('id="tc4">1<') && html.includes('id="tcall">8<'), 'tab counts per period (entries in that period), All unique');
-  check((html.match(/data-first="1"/g) || []).length === 8, `one first row per entry: ${(html.match(/data-first="1"/g) || []).length}`);
-  check((html.match(/ id="q7103"/g) || []).length === 1 && html.includes('id="q7103-p2"'), 'unique element ids for repeated rows');
-  check(/data-eid="7103"[^>]*data-period="2"|data-period="2"[^>]*data-eid="7103"/.test(html), 'repeated row carries the entry id');
-  check(sec(html, 2).includes('Replaced by N-kb') && sec(html, 1).includes('Replaced by N-kb'), 'same status in every section');
-  check(/if\(s\.p==='all'&&!r\.f\)return false/.test(html), 'All tab: first rows only');
-  // real counts of the local index (bench 31-10: 33 / 113 / 64 / 23 / 19)
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('vip-power', 7301, { name: 'EXP & Evolve Medals: Power', periods: [1, 2], vip: true, from: '2016-06-16', banner: 'up-power.png' }),
+    e('exp-power', 7302, { name: 'EXP & Evolve Medals: Power', periods: [3, 4, 5], days: ['Tue'], banner: 'power.png' }),
+    ...DAYS.map((d, i) => e('cid-vip-' + d, 7311 + i, { name: `Daily Challenge: Cid (${FULL[i]})`, periods: [1, 2], days: [d], vip: true, family: 'SQ12', resetGroup: 'cid-vip',
+      from: '2016-05-19', to: '2017-04-19', replacedBy: 'cid-' + d, banner: 'vipcid.png' })),
+    ...DAYS.map((d, i) => e('cid-' + d, 7321 + i, { name: `Daily Challenge: Cid (${FULL[i]})`, periods: [2, 3, 4], days: [d], family: 'SQ12', resetGroup: 'cid', from: '2017-04-20', banner: 'cid.png' })),
+    e('mat', 7331, { name: 'VIP! Materials', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
+    e('mat2', 7332, { name: 'VIP! Materials 2', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
+    e('c1', 7341, { name: 'Key Art #9 VIP Quests!', periods: [2], vip: true, campaign: { start: '2017-06-12', end: '2017-06-18' }, family: 'SQ21', banner: 'c1.png' }),
+    e('c2', 7342, { name: 'Pt. 2 Quests', periods: [2], vip: true, campaign: { start: '2017-06-19', end: '2017-06-25' }, family: 'SQ21', banner: 'c2.png' }),
+    e('c3', 7343, { name: 'Winter Board', periods: [4], vip: true, campaign: { start: '2019-03-04', end: '2019-03-10' }, family: 'SQ21', banner: 'c3.png' }),
+  ] };
+  const c4 = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2019-03-04', shopTo: '2019-03-10', weekday: 'Tue', vip: false };
+  const h = pages.catalogPage(ix, c4);
+  const cards = h.split('<div class="card ').slice(1).map((x) => x.slice(0, x.indexOf('</div>' + String.fromCharCode(10))));
+  const cardOf = (t) => cards.filter((x) => x.includes(`>${t}</a>`));
+  // EXP & Evolve Power: one card, two version chips under their periods, each with its own status
+  const pw = cardOf('EXP &amp; Evolve Medals: Power');
+  check(pw.length === 1, `one card for EXP & Evolve Power (${pw.length})`);
+  const vrs = (x) => (x.match(/<div class="vr[^"]*"[^>]*>[\s\S]*?<\/div>/g) || []);
+  const v = vrs(pw[0] || '');
+  check(v.length === 2 && v[0].includes('grid-column:1 / 3') && v[0].includes('data-periods="1 2"') && v[1].includes('grid-column:3 / 6'), `Power versions on the timeline: ${v.map((x) => x.slice(0, 80))}`);
+  check(/class="vc mb c-can"[^>]*data-eid="7301"/.test(v[0]) && /class="vc mb c-now"[^>]*data-eid="7302"/.test(v[1]), 'version chips coloured by their status (past VIP version can be kept, current one open)');
+  check(v[0].includes('>VIP 2016–17<') || v[0].includes('VIP 2016–18'), `version label with years: ${v[0]}`);
+  check(v[1].includes('href="/web/special/detail/7302?from=catalog"'), 'version chip opens its details');
+  check((pw[0] || '').startsWith('now') && (pw[0] || '').includes('class="s s-now"') && (pw[0] || '').includes('2 versions'), 'card bar and pill: best version');
+  check((pw[0] || '').includes('/web/special/img/v' + require('./special').SPECIAL_IMG_VERSION + '/7302.png'), 'card banner: the most recent version');
+  check((pw[0] || '').includes('<span class="tp cur">Period 4</span>') && ((pw[0] || '').match(/class="tp/g) || []).length === 5, 'timeline: five periods, the current one marked');
+  // Daily Cid: one card, two versions (VIP 2016-17 and free 2017-), seven day chips each
+  const cid = cardOf('Daily Challenge: Cid');
+  check(cid.length === 1, `one Cid card (${cid.length})`);
+  const cv = vrs(cid[0] || '');
+  const days = (x) => (x.match(/<a class="ch mb [^"]*"/g) || []).length;
+  check(cv.length === 2 && days(cv[0]) === 7 && days(cv[1]) === 7, `Cid: 2 versions with 7 days each (${cv.map(days)})`);
+  check(/>VIP 2016/.test(cv[0]) && />Free 2017/.test(cv[1]), `Cid version labels: ${cv.map((x) => (/class="vc[^>]*>(?:<img[^>]*>)?([^<]*)/.exec(x) || [])[1])}`);
+  check(/class="ch mb c-now"[^>]*data-eid="7322"/.test(cv[1]) && /class="ch mb c-other"[^>]*data-eid="7321"/.test(cv[1]) && /class="ch mb c-off"[^>]*data-eid="7311"/.test(cv[0]), 'day chips: today open, other days listed, VIP version replaced');
+  check(/class="vc c-now"/.test(cv[1]) && /class="vc c-off"/.test(cv[0]), 'version chip of a multi-day version: its best day');
+  // VIP! Materials 1 / 2: one card, one version, two variant chips
+  const mat = cardOf('VIP! Materials');
+  check(mat.length === 1 && vrs(mat[0]).length === 1 && days(mat[0]) === 2 && mat[0].includes('>1<') && mat[0].includes('>2<'), 'Materials: one card, variants 1 and 2');
+  // period tabs are filters: counts = cards (+ campaign rows) that have a version in the period; each item lists its periods
+  check(h.includes('id="tc1">2<') && h.includes('id="tc2">4<') && h.includes('id="tc4">4<') && h.includes('id="tcall">6<'), `tab counts: ${(h.match(/id="tc[^"]+">\d+</g) || []).join(' ')}`);
+  check(/data-periods="1 2 3 4 5"/.test(cardOf('EXP &amp; Evolve Medals: Power')[0] ? h.slice(h.indexOf('<div class="card', h.indexOf('id="q7301"') - 3000)) : ''), 'card lists all its periods');
+  check(/r\.ps\.indexOf\(' '\+s\.p\+' '\)<0/.test(h) && /\(x\?' hl':''\)\+\(d\?' dim':''\)/.test(h), 'script: period tab filters cards and highlights the version');
+  // campaigns: a separate compact section by year and month, no half-size banners
+  const camps = h.slice(h.indexOf('id="camps"'), h.indexOf('<div class="ov"'));
+  check(camps.includes('VIP Campaigns (<span id="cc">3</span>)') && (camps.match(/<div class="cr /g) || []).length === 3, 'campaigns section: 3 rows');
+  check(!camps.includes('width="320"') && !camps.includes('width="640"') && camps.includes('width="160" height="35"'), 'campaign rows: small thumbnails only');
+  check(camps.includes('<summary>2017 ▸ Jun (<span class="mc">2</span>)</summary>') && camps.includes('data-y="2019"') && camps.includes('data-y="2017"'), 'grouped by year and month');
+  check(/<details class="cm" data-y="2019" data-m="2019-03" open>/.test(camps) && /<details class="cm" data-y="2017" data-m="2017-06">/.test(camps), 'the month of the current Shop week is open');
+  check(camps.includes('Jun 12, 2017 – Jun 18, 2017') && /class="ch mb c-[a-z]+"[^>]*data-eid="7341"[^>]*>(?:<img[^>]*>)?Details</.test(camps), 'campaign row: dates and a details chip');
+  check(!cards.some((x) => x.includes('Key Art #9')), 'no campaign among the cards');
+  // filters apply to cards and campaign rows alike
+  for (const k of ['data-type', 'data-show', 'data-reward', 'data-search', 'data-periods', 'data-eid', 'data-nv']) check(cards.every((x) => x.includes(k + '="')) && (camps.match(new RegExp(k + '="', 'g')) || []).length >= 3, 'filter attribute ' + k);
+  check(cards.every((x) => x.includes('class="mt"')) && (camps.match(/class="mt"/g) || []).length === 3, '«Matches:» line in cards and rows');
+  // summary: cards, versions, campaigns
+  check(h.includes('<span class="n1">3 quests</span> · 5 versions · 3 campaigns · all periods, no filters'), `summary: ${(/<div class="sum"[^>]*>(.*?)<\/div>/.exec(h) || [])[1]}`);
+  check(/plural\(n,'quest'\)\+'<\/span> · '\+plural\(m,'version'\)\+' · '\+plural\(k,'campaign'\)/.test(h), 'script summary counts');
+  const ids = (h.match(/ id="[^"]+"/g) || []); check(ids.length === new Set(ids).size, 'unique element ids');
+  check(['7301', '7302', '7311', '7327', '7331', '7341'].every((id) => (h.match(new RegExp(` id="q${id}"`, 'g')) || []).length === 1), 'one q<id> anchor per entry');
+  // pin on the card only when exactly one entry of it can be kept
+  check((pw[0] || '').includes('data-pin="/web/special/pin/7301"'), 'Power card: the one keepable version, pin on the card');
+  check(!(cid[0] || '').includes('class="pk"'), 'Cid card: no keepable day, no pin');
+  // REWARDS (round 7) on cards
+  const nm = { drop: (rid) => (rid === 1 ? ['Huey', 'Mythril'] : []), objective: () => [],
+    dropTypes: (rid) => (rid === 1 ? [3, 5] : []), objectiveTypes: (sid) => (sid === 78140 ? [2, 20, 20] : []) };
+  const hr = pages.catalogPage({ catalog: { evStageId: 7000 }, entries: [
+    e('exp', 7813, { name: 'EXP Medals', periods: [4], days: ['Tue'], stages: [{ quest: 'EXP', dropRewardIds: [1] }] }),
+    e('ava', 7814, { name: 'VIP! Jewels & Avatar Parts', periods: [4], vip: true, family: 'SQ22', stageIds: [78140] }),
+  ] }, { ...c4, names: nm });
+  const reward = (id) => (/data-reward="([^"]*)"/.exec(itemOf(hr, id)) || [])[1] || '';
+  check(reward(7813).split(' ').includes('medal') && reward(7813).split(' ').includes('material'), `EXP quest: medals and materials (${reward(7813)})`);
+  check(reward(7814).split(' ').includes('avatar') && reward(7814).split(' ').includes('jewel') && !reward(7814).includes('medal'), `avatar VIP quest: avatar parts, jewels (${reward(7814)})`);
+  const sheet = hr.slice(hr.indexOf('id="sheet"'), hr.indexOf('class="foot"'));
+  check(sheet.includes('REWARDS') && sheet.includes('data-g="reward"') && ['medal', 'avatar', 'jewel', 'material'].every((k) => sheet.includes(`data-v="${k}"`) && sheet.includes(`/web/special/icon/${k}.png`)), 'REWARDS chips with icons');
+  check(/r\.rw/.test(hr) && /s\.reward/.test(hr), 'script filters by reward');
+  const bn = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], stage: [{ stageId: 3, submissionRewardType: [20, 14, 0], submissionItemId: [1, 0, 0] }] }[n] || []));
+  check(bn.dropTypes(5).join() === '3,5,2' && bn.objectiveTypes(3).join() === '20,14' && bn.dropTypes(99).length === 0, 'buildNames reward types');
+  // real local index: 120 campaign rows by year and month, one card per family
   let real = null; try { real = require('./game_data/special.json'); } catch { /* no local index */ }
   if (real) {
     const sp = require('./special');
-    const h = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Mon' });
-    const want = sp.PERIODS.map((p) => real.entries.filter((en) => en.periods && !en.training && en.periods.includes(p.n)).length);
-    // round 7: entries sharing a banner are one row; the members of the rows of a section add up to its entries
-    const secOf = (n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
-    const members = sp.PERIODS.map((p) => (secOf(p.n).match(/ data-n="(\d+)"/g) || []).reduce((t, m) => t + +/\d+/.exec(m)[0], 0));
-    const rowsN = sp.PERIODS.map((p) => (secOf(p.n).match(/<div class="q /g) || []).length);
-    const got = sp.PERIODS.map((p) => +(new RegExp(`id="tc${p.n}">(\\d+)<`).exec(h) || [])[1]);
-    check(members.join() === want.join() && got.join() === rowsN.join() && got[3] > 3 && got[1] < want[1], `real sections: members ${members} (want ${want}), tabs ${got} = rows ${rowsN}`);
+    const hh = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Tue' });
+    const cs = hh.slice(hh.indexOf('id="camps"'), hh.indexOf('<div class="ov"'));
+    const nCamp = real.entries.filter((en) => en.campaign).length;
+    check((cs.match(/<div class="cr /g) || []).length === nCamp && nCamp === 120 && !cs.includes('width="320"'), `real campaigns: ${(cs.match(/<div class="cr /g) || []).length} rows (${nCamp})`);
+    const fams = new Set(real.entries.filter((en) => !en.campaign && en.periods).map((en) => en.name.replace(/\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/, '').replace(/\s+\d+$/, '')));
+    check((hh.match(/<div class="card /g) || []).length === fams.size, `real cards ${(hh.match(/<div class="card /g) || []).length} = families ${fams.size}`);
+    const realIds = (hh.match(/ id="[^"]+"/g) || []); check(realIds.length === new Set(realIds).size, 'real page: unique ids');
   }
 }
 // round 3 (b): «Replaced by» with the same name says what tells them apart
@@ -180,13 +248,13 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
 // a replaced entry of the current period has the normal current status
 {
   const ix = { catalog: { evStageId: 7000 }, entries: [
-    e('cid-tue', 7601, { name: 'Cid (Tuesday)', periods: [2, 3, 4], days: ['Tue'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
-    e('cid-wed', 7602, { name: 'Cid (Wednesday)', periods: [2, 3, 4], days: ['Wed'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
+    e('cid-tue', 7601, { name: 'Cid T', periods: [2, 3, 4], days: ['Tue'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
+    e('cid-wed', 7602, { name: 'Cid W', periods: [2, 3, 4], days: ['Wed'], family: 'SQ12', resetGroup: 'cid', replacedBy: 'dwq' }),
     e('dwq', 7603, { name: 'Day of the Weekly Quest', periods: [5], days: ['Tue'] }),
   ] };
   const ctx4 = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue', vip: false };
   const h4 = pages.catalogPage(ix, ctx4), h5 = pages.catalogPage(ix, { ...ctx4, period: 5 });
-  const r = (h, id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  const r = (h, id) => itemOf(h, id);
   check(r(h4, 7601).includes('data-show="now"') && r(h4, 7601).includes('Open in Special now') && !r(h4, 7601).includes('Replaced by'), `current replaced entry, today: ${r(h4, 7601).slice(0, 200)}`);
   check(r(h4, 7602).includes('data-show="other"') && r(h4, 7602).includes('Listed on Wed only') && !r(h4, 7602).includes('Replaced by'), 'current replaced entry, other day: listed on its day');
   check(r(h5, 7601).includes('data-show="replaced"') && r(h5, 7601).includes('Replaced by Day of the Weekly Quest'), 'past replaced entry: replaced');
@@ -198,62 +266,12 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const ix = { catalog: { evStageId: 7000 }, entries: [e('l5', 7701, { periods: [5] }), e('l9', 7702, { periods: [5], name: 'Never' })] };
   const ctxU = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', unlockQuestOf: (en) => (en.key === 'l5' ? 946 : null) };
   const h = pages.catalogPage(ix, ctxU);
-  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  const r = (id) => itemOf(h, id);
   check(r(7701).includes('Unlocks at Story Quest 946') && r(7701).includes('data-show="later"'), 'later row: unlocking quest');
   check(r(7702).includes('Not reached in this version of the Story') && r(7702).includes('data-show="later"'), 'later row never reached');
   const d = pages.detailPage(ix, 7701, ctxU);
   check(d.includes('Unlocks at Story Quest 946') && d.includes('Story Quest 946'), 'details: unlocking quest');
   check(pages.catalogPage(ix, { ...ctxU, unlockQuestOf: undefined }).includes('Reached later in the Story'), 'no lookup: generic text');
-}
-// round 7: entries of a section sharing a banner are one group row with day / variant chips; REWARDS filter
-{
-  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const ix = { catalog: { evStageId: 7000 }, entries: [
-    ...DAYS.map((d, i) => e('cid-' + d, 7801 + i, { name: `Daily Challenge: Cid (${FULL[i]})`, periods: [2, 3, 4], days: [d], family: 'SQ12', resetGroup: 'cid', banner: 'cid.png' })),
-    e('mat', 7811, { name: 'VIP! Materials', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
-    e('mat2', 7812, { name: 'VIP! Materials 2', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
-    e('exp', 7813, { name: 'EXP Medals', periods: [4], days: ['Tue'], banner: 'exp.png', stages: [{ quest: 'EXP', dropRewardIds: [1] }] }),
-    e('ava', 7814, { name: 'VIP! Jewels & Avatar Parts', periods: [4], vip: true, family: 'SQ22', banner: 'ava.png', stageIds: [78140] }),
-    e('old1', 7815, { name: 'Old Quest', periods: [1], days: ['Mon'], banner: 'old.png' }),
-    e('old2', 7816, { name: 'Old Quest 2', periods: [1], days: ['Mon'], banner: 'old.png' }),
-  ] };
-  const nm = { drop: (rid) => (rid === 1 ? ['Huey', 'Mythril'] : []), objective: () => [],
-    dropTypes: (rid) => (rid === 1 ? [3, 5] : []), objectiveTypes: (sid) => (sid === 78140 ? [2, 20, 20] : []) };
-  const h = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue', vip: true, names: nm });
-  const secOf = (n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
-  const rowsOf = (n) => secOf(n).split('<div class="q ').slice(1);
-  const cidRow = rowsOf(4).find((r) => r.includes('Daily Challenge: Cid'));
-  check(rowsOf(4).filter((r) => r.includes('Daily Challenge: Cid')).length === 1 && cidRow, 'Cid days: one row in the period');
-  const chips = (r) => (r.match(/<a class="ch [^"]*"[^>]*>/g) || []);
-  check(chips(cidRow).length === 7, `Cid row: 7 chips (${chips(cidRow).length})`);
-  check(cidRow.includes('>Daily Challenge: Cid<') && !/>Daily Challenge: Cid \(/.test(cidRow), 'family title without the day');
-  const chip = (r, id) => chips(r).find((c) => c.includes(`data-eid="${id}"`)) || '';
-  check(/class="ch c-now"/.test(chip(cidRow, 7802)) && /class="ch c-other"/.test(chip(cidRow, 7801)) && /class="ch c-other"/.test(chip(cidRow, 7807)), `chip statuses: ${chip(cidRow, 7802)} ${chip(cidRow, 7801)}`);
-  check(chip(cidRow, 7802).includes('href="/web/special/detail/7802?from=catalog"'), 'chip opens the details');
-  check(cidRow.includes('>Tue<') && cidRow.includes('>Sun<'), 'chip labels: days');
-  check(cidRow.includes('class="s s-now"') && cidRow.startsWith('now'), 'group pill and bar: best member (now)');
-  check(cidRow.includes(' data-n="7"') && cidRow.includes('7 days'), 'group: 7 members, «7 days» line');
-  check(/data-show="[^"]*\bnow\b[^"]*\bother\b|data-show="[^"]*\bother\b[^"]*\bnow\b/.test(cidRow), 'group data-show lists the member statuses');
-  // ids: anchors q<id> once each (first period of the member), group rows with their own ids
-  check((h.match(/ id="q7802"/g) || []).length === 1 && secOf(2).includes('id="q7802"'), 'chip anchor q<id> in the first period only');
-  const ids = (h.match(/ id="[^"]+"/g) || []); check(ids.length === new Set(ids).size, 'unique element ids');
-  const matRow = rowsOf(4).find((r) => r.includes('VIP! Materials'));
-  check(rowsOf(4).filter((r) => r.includes('VIP! Materials')).length === 1 && chips(matRow).length === 2 && matRow.includes('>1<') && matRow.includes('>2<') && matRow.includes('2 variants'), 'Materials 1 / 2: one row, chips 1 and 2');
-  // pin button on the row only when exactly one member can be kept (Old Quest / Old Quest 2 in period 1: two -> none)
-  const oldRow = rowsOf(1).find((r) => r.includes('Old Quest'));
-  check(oldRow && chips(oldRow).length === 2 && !oldRow.includes('class="pk"'), 'two keepable members: pin only on the details page');
-  const ix1 = { catalog: { evStageId: 7000 }, entries: [ix.entries[11], { ...ix.entries[12], periods: [1, 4] }] };
-  const h1 = pages.catalogPage(ix1, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' });
-  check((h1.match(/class="pk"/g) || []).length === 1 && h1.includes('data-pin="/web/special/pin/7815"'), 'one keepable member: its pin button on the row');
-  // REWARDS
-  const reward = (id) => (new RegExp(`data-eid="${id}"[^>]*data-reward="([^"]*)"`).exec(h) || [])[1] || '';
-  check(reward(7813).split(' ').includes('medal') && reward(7813).split(' ').includes('material'), `EXP quest: medals and materials (${reward(7813)})`);
-  check(reward(7814).split(' ').includes('avatar') && reward(7814).split(' ').includes('jewel') && !reward(7814).includes('medal'), `avatar VIP quest: avatar parts, jewels (${reward(7814)})`);
-  const sheet = h.slice(h.indexOf('id="sheet"'), h.indexOf('class="foot"'));
-  check(sheet.includes('REWARDS') && sheet.includes('data-g="reward"') && ['medal', 'avatar', 'jewel', 'material'].every((k) => sheet.includes(`data-v="${k}"`) && sheet.includes(`/web/special/icon/${k}.png`)), 'REWARDS chips with icons');
-  check(/r\.rw/.test(h) && /cur\.reward|s\.reward/.test(h), 'script filters by reward');
-  const bn = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], stage: [{ stageId: 3, submissionRewardType: [20, 14, 0], submissionItemId: [1, 0, 0] }] }[n] || []));
-  check(bn.dropTypes(5).join() === '3,5,2' && bn.objectiveTypes(3).join() === '20,14' && bn.dropTypes(99).length === 0, 'buildNames reward types');
 }
 // round 8: a current weekday quest on another day follows the Special tab (special.lockOf): locked today, or open with VIP
 {
@@ -266,15 +284,15 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   ] };
   const c = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' };
   const h = pages.catalogPage(ix, { ...c, vip: false }), hv = pages.catalogPage(ix, { ...c, vip: true });
-  const r = (hh, id) => { const s0 = hh.indexOf(`id="q${id}"`); return s0 < 0 ? '' : hh.slice(hh.lastIndexOf('<', s0), hh.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  const r = (hh, id) => itemOf(hh, id);
   check(r(h, 7901).includes('Locked today · opens on Mon') && r(h, 7901).includes('class="s s-locked"') && r(h, 7901).includes('/web/special/icon/lock.png')
     && r(h, 7901).includes('data-show="now"') && !r(h, 7901).includes('Open in Special now'), `Mon quest on Tue without VIP: ${r(h, 7901).slice(0, 160)}`);
-  check(/class="q locked"/.test(r(h, 7901)), 'grey bar');
+  check(/class="card locked"/.test(r(h, 7901)), 'grey bar');
   check(r(h, 7903).includes('Locked today · opens on Mon, Wed'), 'two days');
-  check(r(hv, 7901).includes('Open today with VIP') && r(hv, 7901).includes('/web/special/icon/vip.png') && /class="q vipnow"/.test(r(hv, 7901)) && r(hv, 7901).includes('data-show="now"'), 'Mon quest on Tue with VIP');
+  check(r(hv, 7901).includes('Open today with VIP') && r(hv, 7901).includes('/web/special/icon/vip.png') && /class="card vipnow"/.test(r(hv, 7901)) && r(hv, 7901).includes('data-show="now"'), 'Mon quest on Tue with VIP');
   check(r(h, 7902).includes('Open in Special now') && r(hv, 7902).includes('Open in Special now'), 'own day: open');
-  const grp = h.slice(h.indexOf('id="g7904-p4"'), h.indexOf('</div>' + String.fromCharCode(10), h.indexOf('id="g7904-p4"')));
-  check(/class="ch c-locked"[^>]*data-eid="7904"/.test(grp) && grp.includes('class="s s-locked"'), `group chips locked today: ${grp.slice(0, 200)}`);
+  const grp = itemOf(h, 7904);
+  check(/class="ch mb c-locked"[^>]*data-eid="7904"/.test(grp) && grp.includes('class="s s-locked"'), `group chips locked today: ${grp.slice(0, 200)}`);
   const d = pages.detailPage(ix, 7901, { ...c, vip: false });
   check(d.includes('Locked today · opens on Mon') && !d.includes('Open in Special now'), 'details page');
 }
@@ -290,10 +308,10 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
     e('kp', 7953, { name: 'Kept One', periods: [2] }),
   ] };
   const h = pages.catalogPage(ix, { period: 4, pinnedKey: 'kp', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' });
-  const g = h.slice(h.indexOf('id="g7951-p1"'), h.indexOf('</div>' + String.fromCharCode(10), h.indexOf('id="g7951-p1"')));
+  const g = itemOf(h, 7951);
   check(g.includes('<div class="rp">Replaces: Kept One</div>') && g.indexOf('class="rp"') < g.indexOf('class="pk"'), 'group with one keepable member: «Replaces» before its pin button');
-  check(/class="ch c-can"[^>]*data-cls="can"[^>]*data-pill="[^"]*Past quest/.test(g), 'chips carry their status class and pill');
-  check(h.includes('function khuxRank(') && h.includes('function regroup(') && /CHIP_ICON=\{/.test(h), 'page script: rank, regroup, chip icons');
+  check(/class="vc mb c-can"[^>]*data-cls="can"[^>]*data-pill="[^"]*Past quest/.test(g), 'chips carry their status class and pill');
+  check(h.includes('function khuxRank(') && h.includes('function best(') && h.includes('function paint(') && /CHIP_ICON=\{/.test(h), 'page script: rank, regroup, chip icons');
 }
 // round 11: FIND matches at word starts, item name by item name (khuxMatch, shared with the page)
 {
