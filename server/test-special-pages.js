@@ -95,7 +95,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(!/\p{Extended_Pictographic}/u.test(sheet.replace(/<div class="search">[\s\S]*?<\/div>/, '')), 'no emoji in the chips');
   check(!html.includes('📌'), 'no pin emoji in the page');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
-  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
+  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
   const cls = (id) => { const s0 = html.indexOf(`id="q${id}"`); return (/class="([^"]*)"/.exec(html.slice(html.lastIndexOf('<div', s0), s0 + 200)) || [])[1]; };
   check(cls(7101) === 'q pinned' && cls(7102) === 'q can' && cls(7103) === 'q off' && cls(7104) === 'q off' && cls(7105) === 'q off' && cls(7108) === 'q now', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
   check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-now"'), 'status pills');
@@ -154,9 +154,12 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
     const sp = require('./special');
     const h = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Mon' });
     const want = sp.PERIODS.map((p) => real.entries.filter((en) => en.periods && !en.training && en.periods.includes(p.n)).length);
+    // round 7: entries sharing a banner are one row; the members of the rows of a section add up to its entries
+    const secOf = (n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
+    const members = sp.PERIODS.map((p) => (secOf(p.n).match(/ data-n="(\d+)"/g) || []).reduce((t, m) => t + +/\d+/.exec(m)[0], 0));
+    const rowsN = sp.PERIODS.map((p) => (secOf(p.n).match(/<div class="q /g) || []).length);
     const got = sp.PERIODS.map((p) => +(new RegExp(`id="tc${p.n}">(\\d+)<`).exec(h) || [])[1]);
-    check(got.join() === want.join() && got[3] > 3, `real tab counts ${got} (want ${want})`);
-    check(+(/id="tcall">(\d+)</.exec(h) || [])[1] === real.entries.filter((en) => en.periods && !en.training).length, 'real All count = entries');
+    check(members.join() === want.join() && got.join() === rowsN.join() && got[3] > 3 && got[1] < want[1], `real sections: members ${members} (want ${want}), tabs ${got} = rows ${rowsN}`);
   }
 }
 // round 3 (b): «Replaced by» with the same name says what tells them apart
@@ -201,6 +204,56 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const d = pages.detailPage(ix, 7701, ctxU);
   check(d.includes('Unlocks at Story Quest 946') && d.includes('Story Quest 946'), 'details: unlocking quest');
   check(pages.catalogPage(ix, { ...ctxU, unlockQuestOf: undefined }).includes('Reached later in the Story'), 'no lookup: generic text');
+}
+// round 7: entries of a section sharing a banner are one group row with day / variant chips; REWARDS filter
+{
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    ...DAYS.map((d, i) => e('cid-' + d, 7801 + i, { name: `Daily Challenge: Cid (${FULL[i]})`, periods: [2, 3, 4], days: [d], family: 'SQ12', resetGroup: 'cid', banner: 'cid.png' })),
+    e('mat', 7811, { name: 'VIP! Materials', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
+    e('mat2', 7812, { name: 'VIP! Materials 2', periods: [4, 5], vip: true, family: 'SQ23', banner: 'mat.png' }),
+    e('exp', 7813, { name: 'EXP Medals', periods: [4], days: ['Tue'], banner: 'exp.png', stages: [{ quest: 'EXP', dropRewardIds: [1] }] }),
+    e('ava', 7814, { name: 'VIP! Jewels & Avatar Parts', periods: [4], vip: true, family: 'SQ22', banner: 'ava.png', stageIds: [78140] }),
+    e('old1', 7815, { name: 'Old Quest', periods: [1], days: ['Mon'], banner: 'old.png' }),
+    e('old2', 7816, { name: 'Old Quest 2', periods: [1], days: ['Mon'], banner: 'old.png' }),
+  ] };
+  const nm = { drop: (rid) => (rid === 1 ? ['Huey', 'Mythril'] : []), objective: () => [],
+    dropTypes: (rid) => (rid === 1 ? [3, 5] : []), objectiveTypes: (sid) => (sid === 78140 ? [2, 20, 20] : []) };
+  const h = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue', vip: true, names: nm });
+  const secOf = (n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
+  const rowsOf = (n) => secOf(n).split('<div class="q ').slice(1);
+  const cidRow = rowsOf(4).find((r) => r.includes('Daily Challenge: Cid'));
+  check(rowsOf(4).filter((r) => r.includes('Daily Challenge: Cid')).length === 1 && cidRow, 'Cid days: one row in the period');
+  const chips = (r) => (r.match(/<a class="ch [^"]*"[^>]*>/g) || []);
+  check(chips(cidRow).length === 7, `Cid row: 7 chips (${chips(cidRow).length})`);
+  check(cidRow.includes('>Daily Challenge: Cid<') && !/>Daily Challenge: Cid \(/.test(cidRow), 'family title without the day');
+  const chip = (r, id) => chips(r).find((c) => c.includes(`data-eid="${id}"`)) || '';
+  check(/class="ch c-now"/.test(chip(cidRow, 7802)) && /class="ch c-other"/.test(chip(cidRow, 7801)) && /class="ch c-other"/.test(chip(cidRow, 7807)), `chip statuses: ${chip(cidRow, 7802)} ${chip(cidRow, 7801)}`);
+  check(chip(cidRow, 7802).includes('href="/web/special/detail/7802?from=catalog"'), 'chip opens the details');
+  check(cidRow.includes('>Tue<') && cidRow.includes('>Sun<'), 'chip labels: days');
+  check(cidRow.includes('class="s s-now"') && cidRow.startsWith('now'), 'group pill and bar: best member (now)');
+  check(cidRow.includes(' data-n="7"') && cidRow.includes('7 days'), 'group: 7 members, «7 days» line');
+  check(/data-show="[^"]*\bnow\b[^"]*\bother\b|data-show="[^"]*\bother\b[^"]*\bnow\b/.test(cidRow), 'group data-show lists the member statuses');
+  // ids: anchors q<id> once each (first period of the member), group rows with their own ids
+  check((h.match(/ id="q7802"/g) || []).length === 1 && secOf(2).includes('id="q7802"'), 'chip anchor q<id> in the first period only');
+  const ids = (h.match(/ id="[^"]+"/g) || []); check(ids.length === new Set(ids).size, 'unique element ids');
+  const matRow = rowsOf(4).find((r) => r.includes('VIP! Materials'));
+  check(rowsOf(4).filter((r) => r.includes('VIP! Materials')).length === 1 && chips(matRow).length === 2 && matRow.includes('>1<') && matRow.includes('>2<') && matRow.includes('2 variants'), 'Materials 1 / 2: one row, chips 1 and 2');
+  // pin button on the row only when exactly one member can be kept (Old Quest / Old Quest 2 in period 1: two -> none)
+  const oldRow = rowsOf(1).find((r) => r.includes('Old Quest'));
+  check(oldRow && chips(oldRow).length === 2 && !oldRow.includes('class="pk"'), 'two keepable members: pin only on the details page');
+  const ix1 = { catalog: { evStageId: 7000 }, entries: [ix.entries[11], { ...ix.entries[12], periods: [1, 4] }] };
+  const h1 = pages.catalogPage(ix1, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' });
+  check((h1.match(/class="pk"/g) || []).length === 1 && h1.includes('data-pin="/web/special/pin/7815"'), 'one keepable member: its pin button on the row');
+  // REWARDS
+  const reward = (id) => (new RegExp(`data-eid="${id}"[^>]*data-reward="([^"]*)"`).exec(h) || [])[1] || '';
+  check(reward(7813).split(' ').includes('medal') && reward(7813).split(' ').includes('material'), `EXP quest: medals and materials (${reward(7813)})`);
+  check(reward(7814).split(' ').includes('avatar') && reward(7814).split(' ').includes('jewel') && !reward(7814).includes('medal'), `avatar VIP quest: avatar parts, jewels (${reward(7814)})`);
+  const sheet = h.slice(h.indexOf('id="sheet"'), h.indexOf('class="foot"'));
+  check(sheet.includes('REWARDS') && sheet.includes('data-g="reward"') && ['medal', 'avatar', 'jewel', 'material'].every((k) => sheet.includes(`data-v="${k}"`) && sheet.includes(`/web/special/icon/${k}.png`)), 'REWARDS chips with icons');
+  check(/r\.rw/.test(h) && /cur\.reward|s\.reward/.test(h), 'script filters by reward');
+  const bn = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], stage: [{ stageId: 3, submissionRewardType: [20, 14, 0], submissionItemId: [1, 0, 0] }] }[n] || []));
+  check(bn.dropTypes(5).join() === '3,5,2' && bn.objectiveTypes(3).join() === '20,14' && bn.dropTypes(99).length === 0, 'buildNames reward types');
 }
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
