@@ -125,9 +125,27 @@ try:
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
+# final review: a member or target with reward row 0 (no row: the client crashes after /stage/start) stops the generator
+for bad, what in (({**entry, 'enemies': [[{'name': 'Shadow', 'enemyId': 80001, 'n': 1, 'reward': 0}]]}, 'member'),
+                  ({**entry, 'targetReward': 0}, 'target')):
+    tmp = tempfile.mkdtemp(prefix='khux_special_maps_', dir=TMP)
+    try:
+        json.dump({}, open(os.path.join(tmp, 'stage_poi.json'), 'w'))
+        json.dump([bad], open(os.path.join(tmp, 'special.json'), 'w'))
+        cfg = {'rooms': os.path.join(HERE, 'story_rooms.json'), 'template': TEMPLATE, 'cls_dir': CLS, 'enemies': ENEMIES,
+               'out': os.path.join(tmp, 'stage'), 'report': os.path.join(tmp, 'report.json'),
+               'poi': os.path.join(tmp, 'stage_poi.json'), 'special': os.path.join(tmp, 'special.json')}
+        json.dump(cfg, open(os.path.join(tmp, 'cfg.json'), 'w'))
+        r = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfg.json')],
+                           capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(r.returncode != 0 and 'AssertionError' in r.stderr and 'reward' in r.stderr,
+              '%s with reward 0: generator exit %d (%s)' % (what, r.returncode, r.stderr[-300:]))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
 if errors:
     print('ERRORS (%d)' % len(errors))
     for e in errors:
         print(' -', e)
     sys.exit(1)
-print('OK: special map %d (STG, part, farthest target, drop carrier, POI merge, validate_maps)' % SID)
+print('OK: special map %d (STG, part, farthest target, drop carrier, POI merge, validate_maps, reward 0 rejected)' % SID)

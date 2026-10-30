@@ -61,8 +61,9 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
 // Keyblade Materials); SQ11 -> skill (Skill EXP); anything else (EXP/Evolve/Munny/Mythril/Adamantite... by weekday)
 // -> weekday. A VIP-only quest of another family counts as vip only.
 const TYPE_OPTS = [['all', 'All'], ['weekday', 'Weekday'], ['daily', 'Daily Cid'], ['vip', 'VIP'], ['mog', 'MOG / Keyblade'], ['skill', 'Skill'], ['camp', 'Campaigns']];
-// SHOW chips, from the status logic of the row: can (past quest, can be kept), now (open in Special now), kept, replaced,
-// removed (not restored), later (period not reached in the Story yet)
+// SHOW chips, from the status logic of the row: can (past quest, can be kept), now (listed in Special this Shop week,
+// VIP ones locked without VIP too), kept, replaced, removed (not restored), later (period not reached in the Story yet);
+// `other` (current period, not this week) has no chip: All only
 const SHOW_OPTS = [['all', 'All quests'], ['can', 'Can be kept now'], ['now', 'In Special now'], ['kept', 'Kept'], ['replaced', 'Replaced'], ['removed', 'Not restored'], ['later', 'Later in the Story']];
 function typesOf(en) {
   const t = [];
@@ -155,6 +156,8 @@ function catalogPage(index, ctx = {}) {
   const byKey = new Map(index.entries.map((en) => [en.key, en]));
   const pinned = byKey.get(pinnedKey);
   const per = (en) => Math.min(...en.periods);
+  // quests of this Shop week, as the Special tab lists them (special.specialEvents): ctx.period / shopFrom / shopTo
+  const current = new Set(cur === undefined ? [] : special.currentEntries({ entries }, ctx));
   // searchable text of an entry: its name, its quests' names, the drop items and the objective rewards (lower case)
   const search = (en) => {
     const parts = [en.name];
@@ -180,7 +183,12 @@ function catalogPage(index, ctx = {}) {
       st = '<div class="st">Past quest: can be kept in Special</div>';
       if (pinned) st += `<div class="rp">Replaces: ${esc(pinned.name)}</div>`;
       button = btn(1, '📌 Keep in Special');
-    } else { show = 'now'; st = '<div class="st">Open in Special now</div>'; }
+    } else if (!current.has(en)) {
+      // current period, but not listed this Shop week: a campaign of another week, or an entry outside its from / to
+      show = 'other';
+      st = `<div class="st none">${en.campaign ? `Week of ${niceDay(en.campaign.start)}` : 'This period, not this week'}</div>`;
+    } else if (en.vip && !ctx.vip) { show = 'now'; st = '<div class="st none">VIP only (locked)</div>'; }
+    else { show = 'now'; st = '<div class="st">Open in Special now</div>'; }
     const days = en.days === 'all' ? 'Every day' : (en.days || []).join(', ');
     return `<div class="q${isPinned ? ' pinned' : ''}${later ? ' lt' : ''}" id="q${id}" data-period="${per(en)}" data-type="${typesOf(en)}" data-show="${show}" data-search="${esc(search(en))}">`
       + `<div class="im"><img loading="lazy" width="320" height="70" src="/web/special/img/${id}.png" alt=""></div>`

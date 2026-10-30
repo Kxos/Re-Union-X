@@ -20,7 +20,7 @@ const index = {
   ],
 };
 const names = { drop: (rid) => (rid === 1 ? ['Huey Ver. A', 'Mythril Shard'] : []), objective: (sid) => (sid === 71020 ? ['Cid Ver. B'] : []) };
-const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, periods: PERIODS, names });
+const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, periods: PERIODS, names, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon' });
 const idx = (s) => html.indexOf(s);
 check(idx('id="p1"') > 0 && idx('id="p1"') < idx('id="p2"') && idx('id="p4"') < idx('id="p5"'), 'five period sections in order');
 check((html.match(/class="per/g) || []).length >= 5, 'five sections');
@@ -58,5 +58,29 @@ const built = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2]
 check(built.drop(5).join() === 'Huey,Mythril,Jewels' && built.objective(3).join() === 'Mythril,Avatar Coin' && built.drop(99).length === 0, 'buildNames');
 const none = pages.catalogPage(index, { period: 4, pinnedKey: '', vip: false, periods: PERIODS });
 check(!none.includes('Replaces:'), 'no Replaces without a pin');
+// final review: the status of a current-period entry comes from special.currentEntries (the quests of this Shop week)
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('open', 7201, { periods: [4] }),
+    e('notyet', 7202, { periods: [4], from: '2016-03-01' }),
+    e('campnow', 7203, { periods: [4], campaign: { start: '2016-01-11', end: '2016-01-17' } }),
+    e('camplater', 7204, { periods: [4], campaign: { start: '2016-02-01', end: '2016-02-07' } }),
+    e('vipnow', 7205, { periods: [4], vip: true, days: 'all', family: 'SQ22' }),
+  ] };
+  const ctx = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon' };
+  const h = pages.catalogPage(ix, { ...ctx, vip: false });
+  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>\n', s0)); };
+  const sh = (id) => (/data-show="([^"]*)"/.exec(r(id)) || [])[1];
+  check(r(7201).includes('Open in Special now') && sh(7201) === 'now', 'current entry: open now');
+  check(r(7202).includes('This period, not this week') && !r(7202).includes('Open in Special now') && sh(7202) !== 'now', `entry outside its from/to: ${sh(7202)}`);
+  check(r(7203).includes('Open in Special now') && sh(7203) === 'now', 'campaign of this week: open now');
+  check(r(7204).includes('Week of Feb 1, 2016') && !r(7204).includes('Open in Special now') && sh(7204) !== 'now', `campaign of another week: ${sh(7204)}`);
+  // the locked VIP banner is still in the Special tab (isLock 1): it stays under «In Special now»
+  check(r(7205).includes('VIP only (locked)') && !r(7205).includes('Open in Special now') && sh(7205) === 'now', 'current VIP entry without VIP: locked');
+  const hv = pages.catalogPage(ix, { ...ctx, vip: true });
+  const rv = hv.slice(hv.indexOf('id="q7205"'), hv.indexOf('</div>\n', hv.indexOf('id="q7205"')));
+  check(rv.includes('Open in Special now') && !rv.includes('(locked)'), 'current VIP entry with VIP: open now');
+  check((h.match(/data-show="now"/g) || []).length === 3, `SHOW «In Special now»: ${(h.match(/data-show="now"/g) || []).length} rows`);
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');

@@ -34,6 +34,8 @@ const byId = (list, id) => list.find((e) => e.eventStageId === id);
 // 1. sblocco dopo la missione 6 (misc 122): prima nessun evento Special
 p.stageScores = {}; p.clearMissions = {};
 check(ev(1).events.length === 0, 'giocatore nuovo: Special non vuoto');
+// revisione finale: il bit 4 di functionFlags solo a scheda sbloccata (prima il pulsante dello Shop cambiava per niente)
+check(t.ret().functionFlags === 0, `functionFlags prima della missione 6: ${t.ret().functionFlags}`);
 p.stageScores[sid(5)] = 1;
 check(ev(1).events.length === 0, 'missione 5: Special non vuoto');
 p.stageScores[sid(6)] = 1;
@@ -208,7 +210,10 @@ delete p.special.pinned;
   const mats = JSON.stringify(p.materials || {}), medals = (p.medals || []).length, ap0 = p.ap;
   const moneyB = p.money, luxB = p.lux;
   delete p.clearMissions[970000]; delete p.stageScores[970000];
-  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  const ts = call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  // revisione finale: nessun drop nell'allenamento (i record della mappa restano sulla riga 1)
+  check(ts.userEnemyDropItems.length > 0 && ts.userEnemyDropItems.every((d) => Array.isArray(d.dropItemTypeIds) && d.dropItemTypeIds.length === 0),
+    `allenamento: drop ${JSON.stringify(ts.userEnemyDropItems.filter((d) => d.dropItemTypeIds.length))}`);
   const tc = call(t.respondStageClear, { burst: 120000, getPoint: { lux: 500, money: 300, exp: 50 }, getMaterials: [{ materialId: 1, number: 5 }],
     getEnemyDropItems: [1, 2, 3], clearMissionIds: [1, 2] });
   check(p.keybladeBurst === 55000, `allenamento: gauge ${p.keybladeBurst}`);
@@ -221,6 +226,14 @@ delete p.special.pinned;
   call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
   call(t.respondStageContinue, '/stage/retire', { burst: 0 });
   check(p.keybladeBurst === 55000, `allenamento Give Up: gauge ${p.keybladeBurst}`);
+  // revisione finale: il Continue dell'allenamento non costa jewel, quello di una quest vera si'
+  p.freeStone = 500;
+  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  call(t.respondStageContinue, '/stage/continue', {});
+  check(p.freeStone === 500, `allenamento Continue: jewel ${p.freeStone}`);
+  call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
+  call(t.respondStageContinue, '/stage/continue', {});
+  check(p.freeStone === 400, `quest vera Continue: jewel ${p.freeStone}`);
   // una quest vera dopo l'allenamento salva ancora la gauge
   call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
   call(t.respondStageContinue, '/stage/retire', { burst: 0 });
