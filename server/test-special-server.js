@@ -117,6 +117,17 @@ check(cid.every((id) => !(p.clearMissions[id] || []).length), `Daily Cid non azz
 check(p.special && p.special.cidReset === t.weekIndex(Date.now()), `cidReset ${p.special && p.special.cidReset}`);
 check((p.clearMissions[970030] || []).length === 0 && (p.clearMissions[970100] || []).join() === '3', 'reset del Cid su altri stage');
 
+// 9b. giro completo di domenica, clear di lunedi': il reset avviene prima e non cancella gli obiettivi del clear
+for (const id of cid) p.clearMissions[id] = [1, 2, 3];
+at('2026-11-08T09:00:00Z'); // domenica
+ev(1);
+check(cid.every((id) => (p.clearMissions[id] || []).length === 3), '9b: azzerato di domenica');
+at('2026-11-09T09:00:00Z'); // lunedi'
+call(t.respondStageStart, { stageId: 970020, eventId: 7002, userKeybladeId: 0 });
+call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 10 } });
+check((p.clearMissions[970020] || []).join() === '1,2,3', `9b: obiettivi del clear azzerati: ${p.clearMissions[970020]}`);
+check((p.clearMissions[970030] || []).length === 0, '9b: gli altri stage del Cid azzerati');
+
 // 10. immagini dei banner: /web/special/img/<id>.png e -kept
 check(server.route('/web/special/img/7012.png?m=1') === 'specialweb', 'rotta specialweb');
 const img = raw(t.respondSpecialWeb, '/web/special/img/7012.png?m=1');
