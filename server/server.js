@@ -3960,7 +3960,7 @@ function specialAchievement(realMs = realNow()) {
   return { numerator, denominator: 3 * ids.size };
 }
 // GET /web/special/img/<eventStageId>.png e <id>-kept.png (banner della quest fissata): immagini 640x140 di
-// game_data/special_img, 404 se mancano. /web/special/detail/<evStageId>: dettagli di una quest (dal catalogo con
+// game_data/special_img, 404 se mancano. /web/special/quest/<id> (e il vecchio /detail/<id>): pagina della quest (dal catalogo con
 // ?from=catalog: barra BACK); /web/special/icon/<chiave>.png: icone di chip e pill (SPECIAL_ICON_KEYS)
 // quest della storia che apre una voce «later» del catalogo (special.unlockQuest sulle righe story del catalogo dello Shop)
 const specialUnlockQuest = (en) => special.unlockQuest(gachaCatalog().story, en, special.PERIODS);
@@ -3971,7 +3971,7 @@ function respondSpecialWeb(res, url) {
   if (p === '/web/special/catalog') {
     return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest })); // names: search box (drop and objective rewards)
   }
-  const det = /^\/web\/special\/detail\/(\d+)$/i.exec(p);
+  const det = /^\/web\/special\/(?:quest|detail)\/(\d+)$/i.exec(p); // round 13: /quest/<id>; /detail/<id> (vecchi link) e' la stessa pagina
   if (det) {
     const fromCatalog = new URLSearchParams(url.split('?')[1] || '').get('from') === 'catalog';
     const html = specialPages.detailPage(specialIndex(), Number(det[1]), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest, fromCatalog });

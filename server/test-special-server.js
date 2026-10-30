@@ -185,6 +185,12 @@ check(/<h3>Objectives<\/h3>/.test(detHtml) && detHtml.includes('Defeat the targe
 check(!raw(t.respondSpecialWeb, '/web/special/detail/7012').body.toString('utf8').includes('class="back"'), 'dettagli senza from=catalog: niente BACK');
 check(raw(t.respondSpecialWeb, '/web/special/detail/99999').code === 404 && raw(t.respondSpecialWeb, '/web/special/detail/7000').code === 404
   && raw(t.respondSpecialWeb, '/web/special/detail/abc').code === 404, 'dettagli: id sconosciuto 404');
+// round 13: pagina della quest /web/special/quest/<id> (qualunque voce della quest); il vecchio /detail/<id> resta valido
+{
+  const qh = raw(t.respondSpecialWeb, "/web/special/quest/7002?from=catalog"), qb = qh.body.toString("utf8");
+  check(qh.code === 200 && qb.includes("<title>Daily Challenge: Cid</title>") && qb.includes("class=\"ver ") && qb.includes("class=\"back\""), `quest 7002: ${qh.code}`);
+  check(raw(t.respondSpecialWeb, "/web/special/quest/99999").code === 404 && raw(t.respondSpecialWeb, "/web/special/detail/7002").body.toString("utf8").includes("<title>Daily Challenge: Cid</title>"), "quest: 404 e vecchio indirizzo");
+}
 const iconDir = path.join(__dirname, 'game_data', 'special_icons');
 if (fs.existsSync(path.join(iconDir, 'vip.png'))) {
   const ic = raw(t.respondSpecialWeb, '/web/special/icon/vip.png');
