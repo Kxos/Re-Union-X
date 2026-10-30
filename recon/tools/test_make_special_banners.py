@@ -63,6 +63,7 @@ try:
     check(all(near(cat.getpixel(xy), shop.getpixel(xy)) for xy in ((3, 70), (8, 70), (320, 4), (320, 135))), 'catalog plate in the Shop catalog style')
     check(ImageChops.difference(cat, shop).getbbox() is not None, 'catalog plate has its own title')
     check(m.plate_color('SQ13') == m.plate_color('SQ13') and m.plate_color('SQ13') != m.plate_color('SQ22'), 'family colours')
+    check(m.plate_color('SQ21') == m.plate_color('SQ22') == m.plate_color('SQ23'), 'VIP campaigns (SQ21) and Materials (SQ23): the VIP pink of SQ22')
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

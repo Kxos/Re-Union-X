@@ -283,7 +283,7 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
 }
 
 // errors on bad rules
-const bad =(r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
+const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
 bad([{ ...rules.entries[0], series: ['Nope'] }], 'entry without quests rejected');
 bad([{ ...rules.entries[0], drops: [{ type: 3, id: 12345, num: 1 }] }], 'drop not in the medal table rejected');
@@ -371,6 +371,23 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
     check(sp.lockOf(e, { weekday: 'Mon', vip: false, pinned: true }) === 1 && sp.lockOf(e, { weekday: 'Mon', vip: true, pinned: false }) === 0, `${e.key}: VIP only`);
   }
   check(new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: campaign stage ids unique');
+  // fix round 1 (I-1): the campaigns of 2019-01-28..03-03 are the first weeks of the recurring VIP sets; in those weeks
+  // no recurring-set reward is listed twice (fillers Jewel, Avatar Coin and Moogle 6★ apart) and the recurring
+  // entries vip-medal / vip-jewels-avatar start on 2019-03-04
+  const rewardsOf = (en) => en.stageIds.flatMap((id) => { const r = all.stageRows.find((x) => x.stageId === id);
+    return r.submissionRewardType.map((t, i) => `${t}:${r.submissionItemId[i]}`); })
+    .filter((k) => !['2:0', '14:0', '3:90016', '0:0'].includes(k));
+  for (let w = '2019-01-28'; w <= '2019-02-25'; w = addD(w, 7)) {
+    const listed = sp.currentEntries(all.index, { period: 3, shopFrom: w, shopTo: addD(w, 6) });
+    const seen = new Map(); const twice = [];
+    for (const en of listed.filter((x) => x.vip)) for (const k of new Set(rewardsOf(en))) { if (seen.has(k)) twice.push(`${k} (${seen.get(k)} + ${en.key})`); else seen.set(k, en.key); }
+    check(!twice.length, `week ${w}: rewards listed twice ${twice.join(', ')}`);
+    check(!listed.some((x) => x.key === 'vip-medal' || x.key === 'vip-jewels-avatar'), `week ${w}: recurring vip-medal / vip-jewels-avatar listed next to the campaign`);
+  }
+  check(real.entries.find((e) => e.key === 'vip-medal').from === '2019-03-04' && real.entries.find((e) => e.key === 'vip-jewels-avatar').from === '2019-03-04', 'vip-medal / vip-jewels-avatar from 2019-03-04');
+  // fix round 1 (I-2): the banner plate font has no «★»: campaign names without it (quest names keep it)
+  check(camps.every((e) => !/★/.test(e.name)), `campaign names with ★: ${camps.filter((e) => /★/.test(e.name)).map((e) => e.key)}`);
+  check(['C49538', 'C49546', 'C50025'].every((k) => all.index.entries.find((e) => e.key === k).stages.some((st) => /★/.test(st.quest))), 'quest names keep ★');
   check(all.stageRows.every((r) => r.validSubmission === 3), 'real build: 3 objectives on every stage');
   check(all.report.stopgaps.length === 0, `real build: stopgap objectives ${JSON.stringify(all.report.stopgaps)}`);
   const mog = all.index.entries.find((e) => e.key === 'mog');

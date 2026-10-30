@@ -150,7 +150,7 @@ const NOTICES = [
       'Tapping the Special Catalog banner starts a **training** quest: it costs no AP, gives no Lux and no rewards. One path leads to a Shadow that clears the quest; the other leads to a training dummy that cannot be defeated, so leave it with **Give Up**. The chests on that path fill your special attack gauge, which is not kept after the quest.',
       '## Not available',
       'The **Adamantite Ore Challenge** and **Mythril Madness** are not available: their materials have **no use** in this version of the game.',
-      'The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost; a VIP campaign whose quests are not known has one quest of its theme.'] },
+      'The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost; a VIP campaign whose quests are not known has one quest of its theme. Rewards that do not exist in this version are replaced by the closest one or left out, and the **VIP! Skill** quest is not available.'] },
   // missioni di storia 526-979 (I-009, piano docs/superpowers/plans/2026-10-21-missioni-526-979.md, make-story-oltre.js):
   // parti ricostruite (617/661, nemici, livelli dei nemici 876-979, keyblade, 978) e tappabuchi rimasti dei mondi nuovi;
   // obiettivi (codici del client) e trofei (materiali 61-63) originali dal 21-10; aspetto Dark Road della stessa specie
