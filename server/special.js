@@ -50,13 +50,23 @@ const isDailyCid = (entry) => entry.family === 'SQ12' || /^cid/.test(entry.reset
 // 'YYYY-MM-DD', inclusive) split a period: checked against the start of the Shop week (e.g. Daily Cid VIP to
 // 2017-04-19, free from 2017-04-20). With a weekday in the context, a Daily Cid entry is listed only on its own day
 // (the catalogue page passes the day too; without one every entry of the period is kept).
-const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => index.entries.filter((en) => {
-  if (!en.periods.includes(period) || en.removed) return false;
-  if (weekday && isDailyCid(en) && !ownDay(en, weekday)) return false;
-  if ((en.from && shopFrom < en.from) || (en.to && shopFrom > en.to)) return false;
-  if (!en.campaign) return true;
-  return en.campaign.start <= shopTo && en.campaign.end >= shopFrom;
-});
+// Recurring VIP sets (round 17): a week version (weekOf = the set's entry key, campaign = its week) replaces its set's
+// entry in the weeks it is listed; the entry stays for the weeks without a known version (fallback).
+const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => {
+  const list = index.entries.filter((en) => {
+    if (!en.periods.includes(period) || en.removed) return false;
+    if (weekday && isDailyCid(en) && !ownDay(en, weekday)) return false;
+    if ((en.from && shopFrom < en.from) || (en.to && shopFrom > en.to)) return false;
+    if (!en.campaign) return true;
+    return en.campaign.start <= shopTo && en.campaign.end >= shopFrom;
+  });
+  const weekly = new Set(list.filter((en) => en.weekOf).map((en) => en.weekOf));
+  if (!weekly.size) return list;
+  // the versions take the place of their set's entry (the tab keeps its order)
+  const listed = new Set(list.map((en) => en.key));
+  return list.filter((en) => !(en.weekOf && listed.has(en.weekOf)))
+    .flatMap((en) => (weekly.has(en.key) ? list.filter((v) => v.weekOf === en.key) : [en]));
+};
 
 // a quest can be pinned only when its period is already past (campaigns use their own period)
 // Story quest that unlocks an entry (catalogue «later» rows, round 5): story = the Shop catalogue's rows

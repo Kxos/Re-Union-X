@@ -294,8 +294,70 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   badC({ C100: frozen.C100, C101: { ...C101, evStageId: 7501 }, C102 }, 'two campaigns with the same frozen evStageId rejected');
 }
 
+// round 17: recurring VIP sets follow the weekly rotation. Catalogue `vip_recurring_weekly` rows -> week versions of the
+// set's entry (key <entry>@<first Monday>, campaign = the row's weeks, weekOf = the entry), own stage per version with
+// the row's rewards; ids frozen in rules.weekly.versions, new ones from 7700; aliases rename or leave out rewards
+{
+  check(ms.weeksOf('02/25/10 - 03/03/19; 03/04/19 - 03/10/19').join() === '2019-02-25,2019-03-04', `weeksOf: typo year -> the Sunday's week (${ms.weeksOf('02/25/10 - 03/03/19; 03/04/19 - 03/10/19')})`);
+  check(ms.weeksOf('07/22/19 - 07/28/19 - 07/29/19 - 08/04/19').join() === '2019-07-22,2019-07-29', 'weeksOf: missing «;»');
+  check(ms.weeksOf('01/30/20 - 01/26/20').join() === '2020-01-20' && ms.weeksOf('09/09/19 - 00/15/19').join() === '2019-09-09'
+    && ms.weeksOf('06/10/19 - 06/16/29').join() === '2019-06-10' && ms.weeksOf('03/23/20 - 03/23/20').join() === '2020-03-23', 'weeksOf: other typos');
+  check(ms.weeklyLabel('1400 Jewels') === 'Jewel x1400' && ms.weeklyLabel('8 6★ Trait Medal #205') === 'Trait Medal #205 6★ x8'
+    && ms.weeklyLabel('1 6★ Moogle |}') === 'Moogle 6★ x1' && ms.weeklyLabel('Chocolate Cap (♂)') === 'Chocolate Cap (♂) x1'
+    && ms.weeklyLabel('10 Power Gems') === 'Power Gems x10' && ms.weeklyLabel('1 7★', 'SN++ - Key Art 8') === 'SN++ - Key Art 8 7★ x1', 'weeklyLabel');
+  const catW = { ...catalogue, vip_recurring_weekly: { 'VIP! Beta': [
+    { banner: 'Get Star!', dates: '06/01/20 - 06/07/20; 06/08/20 - 06/14/20', rewards: ['1 7★ Star', '8 6★ Cid', '1 6★ Moogle'] },
+    { banner: 'Gems x10', dates: '06/15/29 - 06/21/20', rewards: ['10 Power Gems', '1 6★ Cid', '1 6★ Moogle |}'] },
+    { banner: 'Star again', dates: '06/15/20 - 06/21/20', rewards: ['1 7★', '1 6★ Old Medal', 'Lost Part'] },
+    { banner: 'Too early', dates: '05/04/20 - 05/10/20', rewards: ['1 7★ Star', '1 6★ Moogle', '1 6★ Moogle'] },
+  ], 'VIP! Skill': [{ banner: 'Skill', dates: '06/01/20 - 06/07/20', rewards: ['1 6★ ATK B X Max', '1 6★ Moogle', '1 6★ Moogle'] }] } };
+  const masterW = { ...master, medal: [...master.medal, { medalId: 600, name: 'Star', rare: 7 }, { medalId: 90016, name: 'Moogle', rare: 6 }],
+    material: [...master.material, { materialId: 48, name: 'Power Gem' }] };
+  const weekly = { sets: { 'VIP! Beta': { entry: 'beta' } }, aliases: { 'Star again 7★': 'Star 7★', 'Old Medal 6★': 'Cid 6★', 'Lost Part': null },
+    versions: { 'beta@2020-06-15': { evStageId: 7705, banner: 'Special - VIP Gems x10 banner KHUX.png' } } };
+  const ow = ms.build({ ...rules, weekly }, catW, masterW);
+  const wk = ow.index.entries.filter((x) => x.weekOf);
+  check(wk.map((x) => `${x.key}:${x.evStageId}`).join() === 'beta@2020-06-01:7700,beta@2020-06-15:7705,beta@2020-06-15#2:7701', `week versions: keys / frozen ids (${wk.map((x) => `${x.key}:${x.evStageId}`)})`);
+  const W = (k) => wk.find((x) => x.key === k) || { campaign: {}, stageIds: [], periods: [] };
+  check(W('beta@2020-06-01').campaign.start === '2020-06-01' && W('beta@2020-06-01').campaign.end === '2020-06-14' && W('beta@2020-06-15').campaign.end === '2020-06-21', 'windows: first Monday to last Sunday');
+  check(wk.every((x) => x.vip && x.days === 'all' && x.weekOf === 'beta' && x.periods.join() === '4' && x.name === 'Beta' && x.family === 'SQ22' && x.replacedBy === null), 'versions: VIP, every day, weekOf, period of the start, the set name');
+  check(W('beta@2020-06-01').weekTitle === 'Get Star!' && W('beta@2020-06-15').banner === 'Special - VIP Gems x10 banner KHUX.png' && W('beta@2020-06-01').banner === '', 'week title; frozen banner, else the entry\'s');
+  check(!wk.some((x) => /Too early/.test(x.weekTitle)), 'a row before the entry\'s window is left out');
+  check(W('beta@2020-06-01').stageIds.join() === '977000' && W('beta@2020-06-15').stageIds.join() === '977050' && W('beta@2020-06-15#2').stageIds.join() === '977010', 'own stage ids per version');
+  const sw = (id) => ow.stageRows.find((r) => r.stageId === id) || {};
+  check(sw(977000).submissionRewardType.join() === '3,3,3' && sw(977000).submissionItemId.join() === '600,90076,90016' && sw(977000).submissionItemNum.join() === '1,8,1', `week 1 rewards: the 7★ of its row (${sw(977000).submissionItemId})`);
+  check(sw(977050).submissionRewardType.join() === '5,3,3' && sw(977050).submissionItemId.join() === '48,90076,90016' && sw(977050).submissionItemNum.join() === '10,1,1', 'gems week: Power Gem x10');
+  check(sw(977010).submissionItemId.join() === '600,90076,90016', 'aliases: banner-named medal, renamed medal, left out -> Moogle 6★');
+  check(sw(977000).mapName === 'White Rabbit\'s House' && sw(977000).useAp === 0 && sw(977000).name === 'Beta', 'versions on the set\'s quest (room, AP, name)');
+  check(ow.report.weeklyLeftOut.length === 1 && ow.report.weeklyLeftOut[0][2] === 'Lost Part' && ow.report.weeklyAliased.length === 2, 'report: left out / aliased');
+  check(!wk.some((x) => /Skill/.test(x.weekTitle)), 'VIP! Skill: not a set, no versions');
+  check(ow.evStageRows.filter((r) => r.eventStageId >= 7700).map((r) => `${r.eventStageId}:${r.validStageId}`).join() === '7700:1,7705:1,7701:1', 'one evStage row per version');
+  check(ow.maps.filter((m) => m.stageId >= 977000).length === 3 && ow.maps.filter((m) => m.stageId >= 977000).every((m) => m.targetReward === 1 && m.enemies.flat().every((x) => x.reward === 1) && m.level === 15), 'a map per version: row 1 on every enemy, level of the set\'s quest');
+  check(ow.stageRows.every((r) => r.stageId < 980000 && ![95100, 95200].includes(r.stageId)), 'stage ids < 980000, never 95100 / 95200');
+  // the Special tab: the week's version instead of the set's entry; two versions are two stages with their own objectives
+  const sp = require('./special');
+  const ls = (from, to) => sp.currentEntries(ow.index, { period: 4, shopFrom: from, shopTo: to }).filter((x) => x.vip).map((x) => x.key).join();
+  check(ls('2020-06-08', '2020-06-14') === 'beta@2020-06-01', `week 2020-06-08: its version only (${ls('2020-06-08', '2020-06-14')})`);
+  check(ls('2020-06-15', '2020-06-21') === 'beta@2020-06-15,beta@2020-06-15#2', `week with two rows: both (${ls('2020-06-15', '2020-06-21')})`);
+  check(ls('2020-06-22', '2020-06-28') === 'beta', 'week without a row: the set\'s entry (fallback)');
+  const done = { 977050: [1, 2, 3] };
+  const evs = sp.specialEvents(ow.index, { period: 4, weekday: 'Mon', vip: true, pinnedKey: '', shopFrom: '2020-06-15', shopTo: '2020-06-21',
+    dayEndStr: 'D', weekEndStr: 'W', imgBase: '', stageState: (id) => ({ score: 0, playStatus: id in done ? 2 : 0, clearMissionIds: done[id] || [] }) });
+  check(evs.find((x) => x.eventStageId === 7705)?.complete === 1 && evs.find((x) => x.eventStageId === 7701)?.complete === 0, 'objectives per week version (stage), not shared');
+  // ids stay frozen when the table grows / reorders; a frozen key without a row and an unknown reward are rejected
+  const catW2 = { ...catW, vip_recurring_weekly: { 'VIP! Beta': [catW.vip_recurring_weekly['VIP! Beta'][2], { banner: 'New', dates: '06/22/20 - 06/28/20', rewards: ['1 7★ Star', '1 6★ Moogle', '1 6★ Moogle'] }, ...catW.vip_recurring_weekly['VIP! Beta']] } };
+  const frozenAll = Object.fromEntries(wk.map((x) => [x.key, { evStageId: x.evStageId }]));
+  const ow2 = ms.build({ ...rules, weekly: { ...weekly, versions: frozenAll } }, catW2, masterW);
+  const ids2 = Object.fromEntries(ow2.index.entries.filter((x) => x.weekOf).map((x) => [x.key, x.evStageId]));
+  check(ids2['beta@2020-06-01'] === 7700 && ids2['beta@2020-06-15'] === 7705 && ids2['beta@2020-06-15#2'] === 7701 && ids2['beta@2020-06-22'] === 7702, `frozen ids kept, new version next free (${JSON.stringify(ids2)})`);
+  const badW = (w, why, cat = catW) => { let t = false; try { ms.build({ ...rules, weekly: w }, cat, masterW); } catch { t = true; } check(t, why); };
+  badW({ ...weekly, versions: { ...weekly.versions, 'beta@2020-07-06': { evStageId: 7800 } } }, 'frozen version without a table row rejected');
+  badW({ ...weekly, aliases: {} }, 'reward not in the master without an alias rejected');
+  badW({ ...weekly, sets: { 'VIP! Beta': { entry: 'nope' } } }, 'set on an unknown entry rejected');
+}
+
 // errors on bad rules
-const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
+const bad =(r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
 bad([{ ...rules.entries[0], series: ['Nope'] }], 'entry without quests rejected');
 bad([{ ...rules.entries[0], drops: [{ type: 3, id: 12345, num: 1 }] }], 'drop not in the medal table rejected');
@@ -366,10 +428,11 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const all = ms.build(real, JSON.parse(fs.readFileSync(SRC, 'utf8')), { stage: t('stage'), enemy: t('enemy'), medal: t('medal'),
     material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
   const live = real.entries.filter((e) => !e.removed);
-  check(all.evStageRows.length === 1 + live.length + 120, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns)`);
+  const weeklyV = all.index.entries.filter((e) => e.weekOf);
+  check(all.evStageRows.length === 1 + live.length + 120 + 176, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 176 week versions)`);
   // the 120 WW week-limited VIP campaigns (Task 12)
   const sp = require('./special');
-  const camps = all.index.entries.filter((e) => e.campaign);
+  const camps = all.index.entries.filter((e) => e.campaign && !e.weekOf);
   check(camps.length === 120 && camps.every((e, i) => e.evStageId === 7501 + i && /^C\d+$/.test(e.key)), `real build: 120 campaigns 7501-7620 (${camps.length})`);
   // final review: the frozen ids are the ones of the live index (server/game_data/special.json, read only)
   check(camps.every((e) => real.campaigns[e.key].evStageId === e.evStageId), 'real build: campaign ids not frozen in special_periods.json');
@@ -407,6 +470,26 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(real.entries.find((e) => e.key === 'vip-medal').from === '2019-03-04' && real.entries.find((e) => e.key === 'vip-jewels-avatar').from === '2019-03-04', 'vip-medal / vip-jewels-avatar from 2019-03-04');
   // fix round 1 (I-2): the banner plate font has no «★»: campaign names without it (quest names keep it)
   check(camps.every((e) => !/★/.test(e.name)), `campaign names with ★: ${camps.filter((e) => /★/.test(e.name)).map((e) => e.key)}`);
+  // round 17: the recurring VIP sets follow the weekly rotation (catalogue vip_recurring_weekly, appendix B)
+  const perSet = {};
+  for (const e of weeklyV) perSet[e.weekOf] = (perSet[e.weekOf] || 0) + 1;
+  check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 48, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2 }),
+    `real build: week versions per set ${JSON.stringify(perSet)}`);
+  check(weeklyV.every((e) => real.weekly.versions[e.key]?.evStageId === e.evStageId && e.evStageId >= 7700 && e.evStageId <= 7999), 'real build: week version ids frozen in special_periods.json (7700-7999)');
+  check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 176, 'real build: 176 frozen week versions');
+  check(!weeklyV.some((e) => /skill/i.test(e.weekOf)), 'real build: no VIP! Skill versions');
+  const medalOf = (label) => { const m = t('medal').filter((x) => `${x.name} ${x.rare}★` === label).sort((a, b) => a.medalId - b.medalId)[0]; return m ? m.medalId : -1; };
+  const listedAt = (from) => sp.currentEntries(all.index, { period: sp.periodOf(from, real.periods), shopFrom: from, shopTo: addD(from, 6) });
+  const medalAt = (from) => listedAt(from).filter((e) => e.key === 'vip-medal' || e.weekOf === 'vip-medal');
+  const goofy = medalAt('2020-05-25');
+  check(goofy.length === 1 && goofy[0].key === 'vip-medal@2020-05-25' && all.stageRows.find((r) => r.stageId === goofy[0].stageIds[0]).submissionItemId[0] === medalOf('SN++ - KH III Goofy 7★'),
+    `real build: week 2020-05-25 lists its Medal Quest version with SN++ - KH III Goofy 7★ (${goofy.map((e) => e.key)})`);
+  const cidW = medalAt('2020-06-01'), donW = medalAt('2020-06-08');
+  check(cidW.length === 1 && donW.length === 1 && cidW[0].stageIds[0] !== donW[0].stageIds[0]
+    && all.stageRows.find((r) => r.stageId === cidW[0].stageIds[0]).submissionItemId[0] === medalOf('SN++ - KH III Cid 7★')
+    && all.stageRows.find((r) => r.stageId === donW[0].stageIds[0]).submissionItemId[0] === medalOf('SN++ - KH III Donald 7★'), 'real build: two weeks = two stages with their own rewards');
+  check(medalAt('2020-05-11').map((e) => e.key).join() === 'vip-medal' && medalAt('2020-06-15').map((e) => e.key).join() === 'vip-medal', 'real build: weeks without a row keep the representative vip-medal (fallback)');
+  check(listedAt('2019-07-22').filter((e) => e.weekOf === 'vip-gems').length === 2 && !listedAt('2019-07-22').some((e) => e.key === 'vip-gems'), 'real build: two Gems rows in one week, both listed, no fallback');
   check(['C49538', 'C49546', 'C50025'].every((k) => all.index.entries.find((e) => e.key === k).stages.some((st) => /★/.test(st.quest))), 'quest names keep ★');
   check(all.stageRows.every((r) => r.validSubmission === 3), 'real build: 3 objectives on every stage');
   check(all.report.stopgaps.length === 0, `real build: stopgap objectives ${JSON.stringify(all.report.stopgaps)}`);
@@ -421,6 +504,7 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(all.maps.every((m) => m.targetReward > 0 && m.enemies.flat().every((x) => x.reward > 0)), 'real build: no Special map enemy on reward 0');
   check(all.maps.filter((m) => withDrops.has(m.stageId)).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no enemy on row 1 in a quest with drops');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
+  check(all.stageRows.every((r) => r.stageId < 980000 && ![95100, 95200].includes(r.stageId)), 'real build: no stage 95100 / 95200, all < 980000');
   // enemy level (bench 30-10: MOG at LV 1): every map entry carries the catalogue Lv of its quest (gen_story_maps.py
   // writes it into STG [11], the card / enemy level, and into every enemy record); addLevel stays 0 so it is not added twice
   const cat = JSON.parse(fs.readFileSync(SRC, 'utf8')).quests;

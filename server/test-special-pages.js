@@ -223,8 +223,9 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   if (real) {
     const sp = require('./special');
     const hh = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Tue' });
-    const nCamp = real.entries.filter((en) => en.campaign).length;
-    const fams = new Set(real.entries.filter((en) => !en.campaign && en.periods).map((en) => en.name.replace(/\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/, '').replace(/\s+\d+$/, '')));
+    const nCamp = real.entries.filter((en) => en.campaign && !en.weekOf).length;
+    // round 17: the week versions of a recurring VIP set (weekOf) join their set's row
+    const fams = new Set(real.entries.filter((en) => !(en.campaign && !en.weekOf) && en.periods).map((en) => en.name.replace(/\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/, '').replace(/\s+\d+$/, '')));
     const crs = hh.split('<div class="row cr ').slice(1);
     check(nCamp === 120 && crs.length < nCamp && crs.reduce((t, x) => t + +(/data-nv="(\d+)"/.exec(x) || [0, 0])[1], 0) === nCamp, `real campaigns: ${crs.length} rows for ${nCamp} weeks`);
     check((hh.match(/<div class="row (?!cr )/g) || []).length === fams.size, `real quest rows ${(hh.match(/<div class="row (?!cr )/g) || []).length} = families ${fams.size}`);
@@ -365,6 +366,33 @@ function h0() { return html; }
   check(d.includes('data-pin="/web/special/pin/7401"') && d.includes('data-pin="/web/special/pin/7402"'), 'each week its own Keep button');
   check(d.includes('class="back" href="/web/special/catalog#q7402"') && (h.match(/ id="q7402"/g) || []).length === 1, 'BACK to the row');
   check(pages.familiesOf(ix.entries).filter((x) => x.campaign).length === 5, 'familiesOf merges consecutive weeks of the same art');
+}
+// round 17: a recurring VIP set with week versions (weekOf) is ONE quest row with the set's entry and every week as a
+// version (newest first on the details page); not a campaign row; each week version has its own Keep button
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('vm', 7021, { name: 'VIP! Medal Quest', periods: [3, 4], vip: true, days: 'all', family: 'SQ22', from: '2019-03-04', banner: 'Special - VIP SN++ - KH III Goofy banner KHUX.png' }),
+    e('camp', 7501, { name: 'Some Campaign', periods: [3], vip: true, family: 'SQ21', campaign: { start: '2019-01-07', end: '2019-01-13' }, banner: 'c.png' }),
+    e('vm@2019-03-04', 7700, { name: 'VIP! Medal Quest', periods: [3], vip: true, family: 'SQ22', weekOf: 'vm', weekTitle: 'Get one 7★ KH III Sora!', campaign: { start: '2019-03-04', end: '2019-03-17' }, banner: 'Special - VIP SN++ - KH III Goofy banner KHUX.png' }),
+    e('vm@2019-04-22', 7703, { name: 'VIP! Medal Quest', periods: [3], vip: true, family: 'SQ22', weekOf: 'vm', weekTitle: '7★ Illustrated KH II Sora & Riku (EX)', campaign: { start: '2019-04-22', end: '2019-04-28' }, banner: 'Special - VIP SN++ - KH III Goofy banner KHUX.png' }),
+    e('vm@2020-06-01', 7724, { name: 'VIP! Medal Quest', periods: [4], vip: true, family: 'SQ22', weekOf: 'vm', weekTitle: 'SN++ - KH III Cid', campaign: { start: '2020-06-01', end: '2020-06-07' }, banner: 'Special - VIP SN++ - KH III Goofy banner KHUX.png' }),
+  ] };
+  const c = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Tue', vip: true };
+  const fams = pages.familiesOf(ix.entries);
+  const vf = fams.find((f) => f.title === 'VIP! Medal Quest');
+  check(fams.length === 2 && vf && !vf.campaign && vf.list.length === 4 && vf.versions.length === 4 && vf.key === 7021, `one quest row for the set: ${fams.map((f) => `${f.title}:${f.list.length}/${f.versions && f.versions.length}`)}`);
+  const h = pages.catalogPage(ix, c);
+  const r = itemOf(h, 7021);
+  check(r && !r.startsWith('<div class="row cr') && r.includes('data-eid="7021 7700 7703 7724"') && r.includes('data-nv="4"'), `catalogue: one row, 4 versions (${r.slice(0, 200)})`);
+  check(!(/data-type="([^"]*)"/.exec(r) || [, ''])[1].split(' ').includes('camp') && (/data-type="([^"]*)"/.exec(r) || [, ''])[1].split(' ').includes('vip'), 'week versions are VIP, not campaigns');
+  check(h.includes('>1 quest</span> · 1 campaign'), 'summary: the set counts once, the campaign stays a campaign');
+  check(r.includes('This week · VIP'), `row status: this week's version (${r.slice(r.indexOf('<span class="s'), r.indexOf('<span class="s') + 120)})`);
+  const d = pages.detailPage(ix, 7703, c);
+  const vers = (d.match(/<div class="ver [^"]*" id="v\d"><h3>[^<]*<\/h3>/g) || []).map((x) => />([^<]*)<\/h3>/.exec(x)[1]);
+  check(vers.join('|') === 'Week of Jun 1, 2020|Week of Apr 22, 2019|Mar 4 – Mar 17, 2019|2019 · VIP only', `details: weeks newest first, then the set's entry (${vers.join('|')})`);
+  check(d.includes('SN++ - KH III Cid') && d.includes('Get one 7★ KH III Sora!'), 'details: the original week titles');
+  const dp = pages.detailPage(ix, 7703, { ...c, period: 5, shopFrom: '2020-11-16', shopTo: '2020-11-22' });
+  check(['7700', '7703', '7724'].every((id) => dp.includes(`data-pin="/web/special/pin/${id}"`)), 'details: a Keep button per past week version');
 }
 // round 15 (user 31-10): «In Special now» = exactly the banners of the Special tab (special.specialEvents for the same
 // ctx, the KEPT one included); new «Unlocked, not in Special now» = reached by the Story (not later, not removed) and not
