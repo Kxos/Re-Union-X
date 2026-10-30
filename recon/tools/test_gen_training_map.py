@@ -129,9 +129,17 @@ try:
         check(all(np.isfinite(v) for v in (sT, sD, tD)), 'start, target and dummy reachable on the collision')
         shared = (sT + sD - tD) / 2
         check(shared < 0.25 * min(sT, sD), 'start at the branch point (shared walk %.0f cells, start->target %.0f, start->dummy %.0f)' % (shared, sT, sD))
+        # one neat row (user, bench 30-10 tr9.png): same map y (= same screen row), equal spacing >= 80, every chest
+        # walkable (finite walk from the start) and away from the start and the dummy
+        cx = sorted(c['x'] for c in chests)
+        gaps = {b - a for a, b in zip(cx, cx[1:])}
+        check(len({c['y'] for c in chests}) == 1 and len(gaps) == 1 and min(gaps) >= 80,
+              'chests in one row, same y, equal spacing >= 80 (got %s)' % [(c['x'], c['y']) for c in chests])
         for c in chests:
             v = node(c['x'], c['y'])
-            check(dD[v] < dT[v] and dS[v] < sD, 'chest %s on path B before the dummy (to dummy %.0f, to target %.0f, from start %.0f/%.0f)'
+            check(np.isfinite(dS[v]) and ((c['x'] - S[0]) ** 2 + (c['y'] - S[1]) ** 2) ** 0.5 >= 120
+                  and ((c['x'] - D[0]) ** 2 + (c['y'] - D[1]) ** 2) ** 0.5 >= 120, 'chest %s reachable, >= 120 from start and dummy' % ((c['x'], c['y']),))
+            check(dD[v] < dT[v] and dS[v] < sD,'chest %s on path B before the dummy (to dummy %.0f, to target %.0f, from start %.0f/%.0f)'
                   % ((c['x'], c['y']), dD[v], dT[v], dS[v], sD))
         # a Shadow is on path A when the walk from it to the dummy goes back through the start (shares little with
         # the walk start -> dummy) and the walk to the target does not
