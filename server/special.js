@@ -3,6 +3,11 @@
 
 const clock = require('./clock');
 
+// Version segment of every Special banner URL (/web/special/img/v<N>/<id>.png): the client caches banner images by URL, so
+// bump SPECIAL_IMG_VERSION whenever recon/tools/make_special_banners.py output changes, then bump the master revision.
+const SPECIAL_IMG_VERSION = 2;
+const imgPath = (name) => `/web/special/img/v${SPECIAL_IMG_VERSION}/${name}.png`;
+
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 // special_periods.json ({periods, entries}, make-special.js) is read on first use, so the tests can run with their
@@ -67,7 +72,7 @@ const specialEvents = (index, ctx) => {
     }),
     eventStageId: evStageId,
     showIcon: 1,
-    bannerUrl: `${imgBase}/web/special/img/${evStageId}${kept ? '-kept' : ''}.png`,
+    bannerUrl: `${imgBase}${imgPath(`${evStageId}${kept ? '-kept' : ''}`)}`,
     eventType: 0,
     status: 1,
     endTime,
@@ -103,5 +108,5 @@ const resetDue = (entry, done, lastResetWeek, week, group) => {
 
 module.exports = {
   get PERIODS() { return loadPeriods(); },
-  periodOf, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
+  SPECIAL_IMG_VERSION, imgPath, periodOf, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
 };

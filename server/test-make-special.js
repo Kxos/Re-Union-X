@@ -78,7 +78,7 @@ check(evStageRows.every((r) => JSON.stringify(Object.keys(r)) === JSON.stringify
 check(evStageRows.every((r) => r.validStageId === r.stageId.length && r.validStageId >= 1 && r.validStageId <= 5), 'validStageId = stageId count, 1..5');
 check(evStageRows.every((r) => ['startTime', 'endTime', 'endDispTime', 'boardEndTime'].every((k) => DATE.test(r[k]))), 'evStage dates');
 check(evStageRows.every((r) => r.detailUrl === (r.eventStageId === 7000 ? '/web/special/catalog' : '')), 'detailUrl only on 7000');
-check(evStageRows.every((r) => r.bannerUrl === `/web/special/img/${r.eventStageId}.png`), 'bannerUrl');
+check(evStageRows.every((r) => r.bannerUrl === `/web/special/img/v${require('./special').SPECIAL_IMG_VERSION}/${r.eventStageId}.png`), 'bannerUrl');
 check(evStageRows.every((r) => r.eventCategory === 1), 'eventCategory 1');
 const ev = (id) => evStageRows.find((r) => r.eventStageId === id);
 check(ev(7001) && ev(7001).resetFlag === 1 && ev(7002).resetFlag === 0 && ev(7000).resetFlag === 0, 'resetFlag from resetGroup');

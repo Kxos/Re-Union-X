@@ -3963,7 +3963,7 @@ function respondSpecialWeb(res, url) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
     return res.end(b);
   }
-  const img = /^\/web\/special\/img\/(\d+)(-kept)?\.png$/i.exec(p);
+  const img = /^\/web\/special\/img\/(?:v\d+\/)?(\d+)(-kept)?\.png$/i.exec(p);
   if (!img) return notFound();
   const file = path.join(SPECIAL_IMG, `${Number(img[1])}${img[2] ? '-kept' : ''}.png`);
   if (!fs.existsSync(file)) return notFound();
