@@ -4,7 +4,12 @@
 //
 // Regola del client: «Progress: N%» con N = numeratore * 100 / denominatore (troncato), COMPLETE quando
 // numeratore >= denominatore. Story = obiettivi compiuti di Standard (1-979) + Proud su tutti i loro obiettivi;
-// Special/Events/Union Cross, che il server non ha ancora, 0/1 (0% senza COMPLETE).
+// Events/Union Cross, che il server non ha ancora, 0/1 (0% senza COMPLETE).
+// Special (Task 7): objectives done / 3 x stages of the Special quests open now (server specialAchievement). With the
+// private catalogue the index is built in memory from server/special_periods.json (temp file, KHUX_SPECIAL_INDEX) and
+// the clock is fixed on a Tuesday without VIP: story 1-100 is period 1 (EXP Power 3 + Evolve Power 2 + Treasure Trove
+// 1 stage = 0/18), the whole story period 5 (MOG 5 + EXP & Evolve Power 1 + Day of the Weekly Quest EXP 1 = 0/21).
+// Without it: the game_data index, expected value from the open events.
 // Casi: giocatore nuovo, storia parziale, storia tutta superata con e senza tutti gli obiettivi, Proud parziale e
 // completa, salvataggio vecchio senza clearMissions. Non tocca server/save: KHUX_SAVE punta a un file temporaneo.
 'use strict';
@@ -17,6 +22,24 @@ const SAVE = path.join(os.tmpdir(), `khux-test-achievements-${process.pid}.json`
 try { fs.unlinkSync(SAVE); } catch { /* nuovo */ }
 process.env.KHUX_MASTER_DIR = MASTER;
 process.env.KHUX_SAVE = SAVE;
+delete process.env.KHUX_VIP;
+const NOW = Date.parse('2026-10-27T09:00:00Z'); // Tuesday 09:00 UTC (game day Tuesday)
+Date.now = () => NOW;
+// Special index of the authored rules (temp folder on D:, project rule), when the private catalogue is here
+const SRC = process.env.KHUX_SPECIAL_SRC || 'D:\\Progetto_Restauro_KH_UX\\private\\events\\special\\special_quests.json';
+const TMP = process.env.KHUX_TMP || 'D:\\Progetto_Restauro_KH_UX\\tmp';
+let INDEX = null;
+if (fs.existsSync(SRC)) {
+  const t = (n) => JSON.parse(fs.readFileSync(path.join(MASTER, n + '.json'), 'utf8'));
+  const own = (r) => r.stageId >= 970000 && r.stageId <= 979999;
+  const built = require('./make-special').build(require('./special_periods.json'), JSON.parse(fs.readFileSync(SRC, 'utf8')), {
+    stage: t('stage').filter((r) => !own(r)), reward: t('reward').filter((r) => r.rewardId < 970000), enemy: t('enemy'), medal: t('medal'),
+    material: t('material'), skill: t('skill'), title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts') });
+  fs.mkdirSync(TMP, { recursive: true });
+  INDEX = path.join(TMP, `khux-test-achievements-special-${process.pid}.json`);
+  fs.writeFileSync(INDEX, JSON.stringify(built.index));
+  process.env.KHUX_SPECIAL_INDEX = INDEX;
+} else console.log(`(private catalogue ${SRC} missing: Special from server/game_data/special.json)`);
 const log = console.log;
 const quiet = (fn) => { console.log = () => {}; try { return fn(); } finally { console.log = log; } };
 const errors = [];
@@ -39,8 +62,15 @@ const p = t.player;
 const view = (n, d) => (n >= d ? 'COMPLETE' : `${Math.trunc((n * 100) / d)}%`);
 const ach = () => call(t.respondStageAchievements).stageAchievement;
 const story0 = (a) => view(a.mainNumerator, a.mainDenominator);
-const emptyOk = (a, when) => {
-  for (const k of ['strength', 'event', 'multi']) {
+// Special expected now: 3 per stage of the open quests (isLock 0/2) without the catalogue banner, none done; no quest 0/1
+const strengthNow = () => {
+  const n = t.specialEvents().filter((e) => e.isLock !== 1 && e.eventStageId !== 7000).reduce((s, e) => s + e.stages.length, 0);
+  return n ? [0, 3 * n] : [0, 1];
+};
+const emptyOk = (a, when, exact) => {
+  const [sn, sd] = exact || strengthNow();
+  check(a.strengthNumerator === sn && a.strengthDenominator === sd, `${when}: Special ${a.strengthNumerator}/${a.strengthDenominator} (expected ${sn}/${sd})`);
+  for (const k of ['event', 'multi']) {
     check(a[k + 'Numerator'] === 0 && a[k + 'Denominator'] === 1, `${when}: ${k} ${a[k + 'Numerator']}/${a[k + 'Denominator']} (atteso 0/1)`);
   }
   check(a.colosseumRank === 0 && a.pvpRanking && a.pvpRanking.userPvpRanking && a.pvpRanking.userPvpRanking.rank === 0,
@@ -58,7 +88,7 @@ check(Number.isInteger(a.pvpRanking.rankingStatus) && ['rank', 'class', 'point']
 
 // 1. giocatore nuovo: 0%, nessuna categoria COMPLETE
 check(a.mainNumerator === 0 && a.mainDenominator === TOTAL && story0(a) === '0%', `nuovo: ${a.mainNumerator}/${a.mainDenominator}`);
-emptyOk(a, 'nuovo');
+emptyOk(a, 'nuovo', [0, 1]); // Special locked before story quest 6
 
 // 2. storia parziale: 1-100 superate, ognuna con 2 obiettivi su 3 (la 978 non c'entra)
 for (const r of story.slice(0, 100)) { p.stageScores[r.stageId] = 10; p.clearMissions[r.stageId] = [1, 2]; }
@@ -72,7 +102,8 @@ check(ach().mainNumerator === 200, `duplicati/fuori intervallo contati: ${ach().
 // missioni di prova (tour 991001-991008) e stage sconosciuti fuori dal conto
 p.clearMissions[991001] = [1, 2, 3]; p.clearMissions[123456789] = [1];
 check(ach().mainNumerator === 200, 'tour/stage sconosciuti contati');
-emptyOk(ach(), 'storia parziale');
+check(!INDEX || t.specialCtx().period === 1, `story 1-100: period ${t.specialCtx().period} (expected 1)`);
+emptyOk(ach(), 'storia parziale', INDEX ? [0, 18] : null);
 
 // 3. tutta la storia superata ma senza tutti gli obiettivi: niente COMPLETE (e la Proud manca)
 for (const r of story) { p.stageScores[r.stageId] = 10; p.clearMissions[r.stageId] = [1]; }
@@ -102,7 +133,8 @@ check(a.mainNumerator === TOTAL - 1 && story0(a) === '99%', `un obiettivo mancan
 p.clearMissions[lastObj.stageId] = [1, 2, 3];
 a = ach();
 check(a.mainNumerator === TOTAL && a.mainDenominator === TOTAL && story0(a) === 'COMPLETE', `tutto: ${a.mainNumerator}/${a.mainDenominator}`);
-emptyOk(a, 'tutto');
+check(!INDEX || t.specialCtx().period === 5, `whole story: period ${t.specialCtx().period} (expected 5)`);
+emptyOk(a, 'tutto', INDEX ? [0, 21] : null);
 
 // 8. salvataggio vecchio senza clearMissions: risponde 0%
 delete p.clearMissions;
@@ -113,5 +145,6 @@ p.clearMissions = {};
 // 9. la rotta (GET con la query cifrata del client)
 check(require('./server').route('/stage/achievements?m=1&i=1&v=x') === 'stageachievements', 'rotta /stage/achievements');
 try { fs.unlinkSync(SAVE); } catch { /* tolto */ }
+if (INDEX) try { fs.unlinkSync(INDEX); } catch { /* removed */ }
 if (errors.length) { log(`ERRORI (${errors.length}):\n  ` + errors.slice(0, 60).join('\n  ')); process.exit(1); }
-log(`OK: /stage/achievements (Story ${STORY_OBJ} + Proud ${PROUD_OBJ} obiettivi, Special/Events/Union Cross 0/1)`);
+log(`OK: /stage/achievements (Story ${STORY_OBJ} + Proud ${PROUD_OBJ} obiettivi, Special ${INDEX ? 'periods 1 and 5: 0/18, 0/21' : 'from game_data'}, Events/Union Cross 0/1)`);

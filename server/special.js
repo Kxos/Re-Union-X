@@ -37,9 +37,12 @@ const isOpen = (entry, st) => lockOf(entry, st) !== 1;
 
 const isCatalog = (entry) => !entry.periods || entry.key === 'catalog' || entry.training === true;
 
-// entries of the period, plus the campaigns whose window overlaps the shop week
+// entries of the period, plus the campaigns whose window overlaps the shop week. Optional entry `from` / `to` (days
+// 'YYYY-MM-DD', inclusive) split a period: checked against the start of the Shop week (e.g. Daily Cid VIP to
+// 2017-04-19, free from 2017-04-20)
 const currentEntries = (index, { period, shopFrom, shopTo }) => index.entries.filter((en) => {
   if (!en.periods.includes(period) || en.removed) return false;
+  if ((en.from && shopFrom < en.from) || (en.to && shopFrom > en.to)) return false;
   if (!en.campaign) return true;
   return en.campaign.start <= shopTo && en.campaign.end >= shopFrom;
 });

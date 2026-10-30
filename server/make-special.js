@@ -3,7 +3,9 @@
 // docs/superpowers/specs/2026-10-30-special-tab-design.md sections 5-8). Inputs:
 // - server/special_periods.json (versioned, ours): periods {n, name, from, to} and the entries (key, evStageId, quests
 //   picked by catalogue `series` or `quest` name, family, periods, days, vip, replacedBy, removed, resetGroup, useAp?,
-//   rewards? (objective rewards that replace the catalogue ones, e.g. the «(See table)» VIP quests), drops);
+//   rewards? (objective rewards that replace the catalogue ones, e.g. the «(See table)» VIP quests), objectives?
+//   ({quest: reconstructed «text -> reward» lines} for a catalogue quest without any or with a typo), from? / to?
+//   (days inside the periods, copied into the index), drops);
 // - the private catalogue of the original Special quests (KHUX_SPECIAL_SRC, default
 //   D:\Progetto_Restauro_KH_UX\private\events\special\special_quests.json; never copied into the repo): per quest world,
 //   room, AP, level, target and the three objectives «text -> reward».
@@ -195,12 +197,18 @@ function build(rules, catalogue, masterRows) {
     if (!(en.evStageId > EV_FIRST && en.evStageId <= EV_LAST) || seenEv.has(en.evStageId)) throw new Error(`special: ${en.key}: evStageId ${en.evStageId} missing, out of range or repeated`);
     if (seenKey.has(en.key)) throw new Error(`special: key ${en.key} repeated`);
     seenEv.add(en.evStageId); seenKey.add(en.key);
-    const quests = en.quests ? en.quests.map((n) => catalogue.quests.find((q) => q.quest === n)).filter(Boolean)
-      : catalogue.quests.filter((q) => (en.series || []).includes(q.series));
+    // en.objectives {quest name: three «text -> reward» lines}: reconstructed objectives for a catalogue quest without
+    // any (Keyblade Materials: Divine Rose) or with a typo the objective codes cannot read
+    const quests = (en.quests ? en.quests.map((n) => catalogue.quests.find((q) => q.quest === n)).filter(Boolean)
+      : catalogue.quests.filter((q) => (en.series || []).includes(q.series)))
+      .map((q) => (en.objectives && en.objectives[q.quest] ? { ...q, objectives: en.objectives[q.quest] } : q));
     if (!quests.length || (en.quests && quests.length !== en.quests.length)) throw new Error(`special: ${en.key}: quests not found in the catalogue`);
     const base = { key: en.key, evStageId: en.evStageId, name: en.name, family: en.family, periods: en.periods, days: en.days,
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
       resetGroup: en.resetGroup || '', banner: en.banner || '' };
+    // optional days that split a period (special.currentEntries checks them against the Shop week)
+    if (en.from) base.from = en.from;
+    if (en.to) base.to = en.to;
     // removed (no use in the 4.3.1 client, spec 6): listed in the catalogue page only, no rows
     if (base.removed) { entries.push({ ...base, stageIds: [], useAp: [], stages: [], dropRewardIds: [] }); continue; }
     if (quests.length > 5) throw new Error(`special: ${en.key}: ${quests.length} quests, at most 5 per banner`);
