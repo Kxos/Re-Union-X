@@ -59,6 +59,9 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.row.vipnow{border-left-color:#2a7a5c}.row.now{border-left-color:#2e9e3e}.row.pinned{border-left-color:#b8860b}.row.can{border-left-color:#1a6fa8}.row.locked{border-left-color:#7d8894}.row.off{border-left-color:#6a7580}'
   + '.row.off .im img,.row.off .th img{opacity:.5;filter:grayscale(.7)}.row.locked .im img{opacity:.6;filter:grayscale(.6)}'
   + '.row .nm{display:block;margin-bottom:2px}.row .s{font-size:14px}'
+  + '.yrs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}.yc{border:1px solid #5d8aa6;border-radius:16px;padding:3px 12px;font:14px sans-serif;color:#d9e6ee;background:#083048;cursor:pointer}'
+  + '.yc.on{background:#00a6bb;border-color:#7beaf7;color:#fff;font-weight:bold}.yc .yn{color:#ffa500;font-size:12px}.yc.on .yn{color:#fff}'
+  + '.ml{color:#00d4ed;font-size:13px;letter-spacing:1px;padding:10px 0 2px;border-bottom:1px solid #2f5d78;text-transform:uppercase}'
   + '.go{position:absolute;right:4px;top:50%;margin-top:-18px;font-size:30px;line-height:36px;color:#9fd4ff;text-decoration:none;width:22px;text-align:center}'
   + '.card,.cr{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:10px 0 10px 10px;border-left:5px solid #5d8aa6;border-bottom:1px solid #2f5d78}'
   + '.card.vipnow,.cr.vipnow{border-left-color:#2a7a5c}.card.now,.cr.now{border-left-color:#2e9e3e}.card.pinned,.cr.pinned{border-left-color:#b8860b}.card.can,.cr.can{border-left-color:#1a6fa8}'
@@ -176,7 +179,9 @@ function buildNames(rows) {
 const PILLS = { kept: ['pinned', 'pin', 'Kept in Special'], can: ['can', 'pin', 'Old quest — can be kept'] };
 const pillInner = ([, k, text]) => `${k ? icon(k) : ''}${text}`;
 const pill = (c, k, text) => `<span class="s s-${c}">${pillInner([c, k, text])}</span>`;
-function statusOf(en, ctx, { byKey, pinned, current }) {
+function statusOf(en, ctx, data) {
+  if (en.campaign) return campaignStatus(en, ctx, data);
+  const { byKey, pinned, current } = data;
   const cur = ctx.period, isPinned = en.key === (ctx.pinnedKey || '');
   if (Math.min(...en.periods) > cur) {
     // ctx.unlockQuestOf(en) (server.js, special.unlockQuest on the Shop catalogue's story rows): the Story quest that
@@ -238,6 +243,29 @@ function statusOf(en, ctx, { byKey, pinned, current }) {
   return { show: 'now', cls: 'now', pill: pill('now', 'now', `Open today${Array.isArray(en.days) && ctx.weekday ? ` (${ctx.weekday})` : ''}`), button: null, why: 'It is in Special now.' };
 }
 
+// a VIP campaign week (round 14): «This week · VIP» / «This week · VIP only — locked», «Kept in Special», «June 2017 ·
+// can be kept with VIP» (kept campaigns need VIP), «Coming in June 2017 · Story Quest N», another week of the period
+function campaignStatus(en, ctx, { pinned, current }) {
+  const cur = ctx.period, my = monthYear(en.campaign.start);
+  if (Math.min(...en.periods) > cur) {
+    const q = ctx.unlockQuestOf ? ctx.unlockQuestOf(en) : undefined;
+    return { show: 'later', cls: 'off', pill: pill('off', 'later', `Coming in ${my}${q ? ` · Story Quest ${q}` : q === null ? ' · not reached in this version' : ''}`), button: null,
+      why: q ? `It comes with your Story: it opens when you reach Story Quest ${q}.` : 'It comes later in the Story.' };
+  }
+  if (en.key === (ctx.pinnedKey || '')) return { show: 'kept', cls: 'pinned', pill: pill(...PILLS.kept), button: 0, why: 'You keep this campaign in Special (it needs the VIP benefit).' };
+  if (special.pinnable(en, cur).ok) {
+    return { show: 'can', cls: 'can', pill: pill('can', 'pin', `${my} · can be kept with VIP`), button: 1,
+      rp: pinned ? `<div class="rp">Replaces: ${esc(pinned.name)}</div>` : '', why: 'Its week is over: you can keep it in Special; like every VIP campaign it needs the VIP benefit.' };
+  }
+  if (current.has(en)) {
+    return ctx.vip ? { show: 'now', cls: 'now', pill: pill('now', 'now', 'This week · VIP'), button: null, why: 'It is in Special this week.' }
+      : { show: 'now', cls: 'locked', pill: pill('locked', 'lock', 'This week · VIP only — locked'), button: null, why: 'It is in Special this week, locked: it needs the VIP benefit of the Weekly Missions.' };
+  }
+  return en.campaign.start > (ctx.shopTo || '')
+    ? { show: 'other', cls: 'other', pill: pill('other', '', `Coming in ${my}`), button: null, why: 'A later week of the current period.' }
+    : { show: 'other', cls: 'other', pill: pill('other', '', `${my} · not in Special now`), button: null, why: 'An earlier week of the current period: it can be kept once the period is over.' };
+}
+
 // shared by catalogue and details: entries of the catalogue, keys, the pinned entry and the quests of this Shop week
 function pageData(index, ctx) {
   const entries = index.entries.filter((en) => en.periods && en.key !== 'catalog' && !en.training);
@@ -268,9 +296,10 @@ function q(el,s){return el.querySelector(s);}
 var items=[].map.call(document.querySelectorAll('.row'),function(el){var mp=[];try{mp=JSON.parse(attr(el,'data-mpill')||'[]');}catch(e){}
 return {el:el,camp:/\\bcr\\b/.test(el.className),ids:(attr(el,'data-eid')||'').split(' '),ss:(attr(el,'data-show')||'').split(' '),mc:(attr(el,'data-mcls')||'').split(' '),mp:mp,
 ps:' '+attr(el,'data-periods')+' ',t:' '+attr(el,'data-type')+' ',rw:' '+(attr(el,'data-reward')||'')+' ',ns:(attr(el,'data-search')||'').split(' | '),nv:+attr(el,'data-nv')||1,mt:q(el,'.mt')};});
-var months=[].map.call(document.querySelectorAll('.cm'),function(el){return {el:el,y:attr(el,'data-y'),c:q(el,'.mc'),o:el.open};});
-var years=[].map.call(document.querySelectorAll('.cy'),function(el){return {el:el,y:attr(el,'data-y')};});
-var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null;
+var mls=[].map.call(document.querySelectorAll('.ml'),function(el){return {el:el,m:attr(el,'data-m')};});
+var ycs=[].map.call(document.querySelectorAll('.yc'),function(el){return {el:el,y:attr(el,'data-yr'),n:q(el,'.yn')};});
+for(var i0=0;i0<items.length;i0++){items[i0].y=attr(items[i0].el,'data-y');items[i0].mc0=items[i0].mc.slice();items[i0].mp0=items[i0].mp.slice();}
+var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null,yr=attr($('camps'),'data-defy')||'all';
 function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
 function match(r,s,anyPeriod){
 if(!anyPeriod&&s.p!=='all'&&r.ps.indexOf(' '+s.p+' ')<0)return false;
@@ -288,12 +317,15 @@ function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria
 function hide(el,h){el.className=el.className.replace(/ hide/g,'')+(h?' hide':'');}
 function render(){
 var c={all:0},n=0,k=0,i,j,r,on,p;
+// campaigns: per year counts of the matching rows; a search goes to the one year it finds (or All years)
+var yc={all:0},ys=[];for(i=0;i<items.length;i++){r=items[i];if(r.camp&&match(r,cur)){yc.all++;if(!yc[r.y]){yc[r.y]=0;ys.push(r.y);}yc[r.y]++;}}
+if(cur.q)yr=ys.length===1?ys[0]:'all';
+for(i=0;i<ycs.length;i++){ycs[i].n.textContent=yc[ycs[i].y]||0;ycs[i].el.className='yc'+(ycs[i].y===yr?' on':'');}
 for(i=0;i<items.length;i++){r=items[i];if(match(r,cur,true)){c.all++;for(p in PN)if(r.ps.indexOf(' '+p+' ')>=0)c[p]=(c[p]||0)+1;}
-on=match(r,cur);hide(r.el,!on);if(on){if(r.camp)k++;else n++;}}
-// campaign months / years: hidden when empty, counts of the visible rows; opened while a filter finds something in them
-for(i=0;i<months.length;i++){var vis=[].filter.call(months[i].el.querySelectorAll('.row'),function(x){return x.className.indexOf(' hide')<0;}).length;months[i].c.textContent=vis;hide(months[i].el,!vis);months[i].el.open=nf(cur)?!!vis:months[i].o;}
-for(i=0;i<years.length;i++){var yv=0;for(j=0;j<months.length;j++)if(months[j].y===years[i].y&&months[j].el.className.indexOf(' hide')<0)yv++;hide(years[i].el,!yv);}
-$('cc').textContent=k;hide($('camps'),!k);hide($('quests'),!n);
+on=match(r,cur)&&(!r.camp||yr==='all'||r.y===yr);hide(r.el,!on);if(on){if(r.camp)k++;else n++;}}
+// month labels: only above visible rows
+for(i=0;i<mls.length;i++){var e=mls[i].el.nextSibling,vis=false;while(e&&!/\\bml\\b/.test(e.className||'')){if(e.className&&e.className.indexOf(' hide')<0)vis=true;e=e.nextSibling;}hide(mls[i].el,!vis);}
+$('cc').textContent=yc.all;hide($('camps'),!yc.all);hide($('quests'),!n);
 [].forEach.call(document.querySelectorAll('.tab'),function(t){var p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
 var f=nf(cur),h='<span class="n1">'+plural(n,'quest')+'</span> · '+plural(k,'campaign');
 if(cur.p!=='all')h+=' in <b>'+esc(PN[cur.p])+'</b>';
@@ -311,7 +343,7 @@ var none=$('none'),any=n+k;none.textContent=any?'':(cur.q?'No quests match "'+cu
 // status changes (pin / unpin): the member's status, then the row shows its best member (bar and status line)
 function paint(r){var b=-1,o=0,j,k;for(j=0;j<r.ids.length;j++){k=khuxRank(r.ss[j],r.mc[j]);if(b<0||k<b){b=k;o=j;}}
 r.el.className='row'+(r.camp?' cr':'')+' '+r.mc[o]+(/ hide/.test(r.el.className)?' hide':'');var s=q(r.el,'.s');if(s){s.className='s s-'+r.mc[o];s.innerHTML=r.mp[o];}}
-function setMember(r,j,show){var p=PILL[show];r.ss[j]=show;r.mc[j]=p.cls;r.mp[j]=p.html;r.el.setAttribute('data-show',r.ss.join(' '));paint(r);}
+function setMember(r,j,show){var p=PILL[show];r.ss[j]=show;r.mc[j]=p.cls;r.mp[j]=show==='can'&&r.mc0[j]==='can'?r.mp0[j]:p.html;r.el.setAttribute('data-show',r.ss.join(' '));paint(r);}
 window.khuxRow=function(id,on){var name='',i,j,r;for(i=0;i<items.length;i++){r=items[i];for(j=0;j<r.ids.length;j++){if(r.ss[j]==='kept')setMember(r,j,'can');
 if(r.ids[j]===id){setMember(r,j,on?'kept':'can');if(on)name=attr(r.el,'data-name');}}}
 for(i=0;i<items.length;i++){r=items[i];var pk=q(r.el,'.pk');if(!pk)continue;var st=r.ss[r.ids.indexOf(attr(pk,'data-id'))],x=q(r.el,'.rp');
@@ -333,10 +365,11 @@ $('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.show='all';d
 $('fok').onclick=function(){if(!dr)return;var s=dr;s.p=cur.p;closeF();cur=s;render();};
 $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x'))t=t.parentNode;var x=attr(t,'data-x');if(!x)return;e.preventDefault();
 if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='reward'||x==='all')cur.reward='all';if(x==='q'||x==='all')cur.q='';render();};
+$('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 render();
-// BACK from a details page: #q<id>; a campaign inside a closed month opens it first
-var h=location.hash&&document.getElementById(location.hash.slice(1));if(h){var d=h;while(d&&d.tagName!=='DETAILS')d=d.parentNode;if(d)d.open=true;if(h.scrollIntoView)h.scrollIntoView();}
+// BACK from a details page: #q<id>; a campaign row of another year selects its year first
+var h=location.hash&&document.getElementById(location.hash.slice(1));if(h){var d=h;while(d&&!/\\brow\\b/.test(d.className||''))d=d.parentNode;if(d&&attr(d,'data-y')){yr=attr(d,'data-y');render();}if(h.scrollIntoView)h.scrollIntoView();}
 })();`;
 
 // the best entry of a quest (round 7-13): it gives the row its colour and its status line.
@@ -363,24 +396,45 @@ const variantOf = (en) => (Array.isArray(en.days) && en.days.length === 1 ? en.d
 // Campaigns are families of one entry. key = the first entry's evStageId (/web/special/quest/<key>).
 function familiesOf(entries) {
   const out = [], byTitle = new Map();
-  for (const en of entries) {
-    const t = en.campaign ? `\u0000${en.evStageId}` : familyTitle(en.name);
-    if (!byTitle.has(t)) { const f = { title: en.campaign ? en.name : familyTitle(en.name), list: [], campaign: !!en.campaign }; out.push(f); byTitle.set(t, f); }
+  for (const en of entries.filter((x) => !x.campaign)) {
+    const t = familyTitle(en.name);
+    if (!byTitle.has(t)) { const f = { title: t, list: [], campaign: false }; out.push(f); byTitle.set(t, f); }
     byTitle.get(t).list.push(en);
   }
+  // campaigns (round 14): by date; the same banner art again within a week of the previous one's end -> the same row
+  const camps = entries.filter((x) => x.campaign).sort((a, b) => (a.campaign.start < b.campaign.start ? -1 : a.campaign.start > b.campaign.start ? 1 : a.evStageId - b.evStageId));
+  let last = null;
+  for (const en of camps) {
+    const prev = last && last.list[last.list.length - 1];
+    if (prev && en.banner && artKey(prev.banner) === artKey(en.banner) && daysBetween(prev.campaign.end, en.campaign.start) <= 8) last.list.push(en);
+    else { last = { list: [en], campaign: true }; out.push(last); }
+  }
+  for (const c of out.filter((x) => x.campaign)) c.title = campaignTitle(c.list);
   for (const f of out) {
     const vmap = new Map();
     for (const en of f.list) {
-      const k = `${en.periods.join(',')}|${en.vip ? 1 : 0}|${en.banner || en.evStageId}`;
+      const k = en.campaign ? `w${en.evStageId}` : `${en.periods.join(',')}|${en.vip ? 1 : 0}|${en.banner || en.evStageId}`;
       if (!vmap.has(k)) vmap.set(k, []);
       vmap.get(k).push(en);
     }
-    f.versions = [...vmap.values()].sort((a, b) => Math.min(...a[0].periods) - Math.min(...b[0].periods));
+    f.versions = [...vmap.values()].sort((a, b) => Math.min(...a[0].periods) - Math.min(...b[0].periods) || (a[0].campaign ? (a[0].campaign.start < b[0].campaign.start ? -1 : 1) : 0));
     f.key = f.list[0].evStageId;
     f.mixed = f.versions.some((v) => v[0].vip) && f.versions.some((v) => !v[0].vip);
   }
   return out;
 }
+// the art of a campaign banner: «… Challenge 2 banner KHUX.png» is the second week of «… Challenge banner KHUX.png»
+const artKey = (b) => String(b).replace(/ \d+( banner KHUX\.png)$/i, '$1');
+const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+// title of a merged campaign row: the first week's title without its tail («Pt. 2…», «& More!», «& Combo…», «!»)
+function campaignTitle(list) {
+  if (list.length === 1) return list[0].name;
+  const t = list[0].name.replace(/\s+(?:Pt\.?|Part)\s*\d+.*$/i, '').replace(/\s*(?:&|and|\+)\s*(?:Much,?\s*Much\s*)?More!?\s*$/i, '')
+    .replace(/\s*&\s*Combo.*$/i, '').replace(/\s*\+\s*(?:More|0 AP Campaign)\b.*$/i, '').replace(/!+\s*$/, '').trim();
+  return t || list[0].name;
+}
+const FULL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthYear = (d) => (/^(\d{4})-(\d\d)/.test(d || '') ? `${FULL_MONTHS[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}` : '');
 const questHref = (key) => `/web/special/quest/${key}?from=catalog`;
 // years of a version: from max(first period from, entries' from) to min(last period to, entries' to)
 function versionYears(v, periods) {
@@ -435,30 +489,29 @@ function catalogPage(index, ctx = {}) {
   const row = (f) => {
     const all = f.list, head = f.versions[f.versions.length - 1][0], best = statusFor(bestOf(all)), href = questHref(f.key);
     const anchors = all.slice(1).map((en) => `<i id="q${en.evStageId}"></i>`).join('');
-    const img = f.campaign ? `<a class="th" href="${href}"><img loading="lazy" width="160" height="35" src="${special.imgPath(head.evStageId)}" alt=""></a>`
-      : `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`;
-    const dates = f.campaign ? `<div class="d">${niceDay(head.campaign.start)} – ${niceDay(head.campaign.end)}</div>` : '';
-    return `<div class="row${f.campaign ? ' cr' : ''} ${best.cls}" id="q${f.key}" data-href="${href}" data-name="${esc(f.title)}" data-eid="${all.map((en) => en.evStageId).join(' ')}"`
+    const img = `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`;
+    // campaigns: the weeks as a short line (no Keep button in the list: keeping is on the details page)
+    const dates = f.campaign ? `<div class="d">${all.length > 1 ? `${all.length} weeks · ` : ''}${niceDay(all[0].campaign.start)} – ${niceDay(all[all.length - 1].campaign.end)}</div>` : '';
+    const y = f.campaign ? all[0].campaign.start.slice(0, 4) : '';
+    return `<div class="row${f.campaign ? ' cr' : ''} ${best.cls}" id="q${f.key}"${y ? ` data-y="${y}"` : ''} data-href="${href}" data-name="${esc(f.title)}" data-eid="${all.map((en) => en.evStageId).join(' ')}"`
       + ` data-show="${all.map((en) => statusFor(en).show).join(' ')}" data-mcls="${all.map((en) => statusFor(en).cls).join(' ')}" data-mpill="${esc(JSON.stringify(all.map((en) => inner(statusFor(en)))))}"`
       + ` data-periods="${uniq(all.map((en) => en.periods.join(' ')))}" data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${f.versions.length}">`
       + `${img}<div class="info"><a class="nm" href="${href}">${esc(f.title)}</a>${anchors}${dates}${best.pill}`
-      + `${keepFor(all, ' onclick="return khuxClick(this)"')}<div class="mt"></div></div><a class="go" href="${href}" aria-label="Details">›</a></div>
+      + `${f.campaign ? '' : keepFor(all, ' onclick="return khuxClick(this)"')}<div class="mt"></div></div><a class="go" href="${href}" aria-label="Details">›</a></div>
 `;
   };
-  const fams = familiesOf(data.entries), quests = fams.filter((f) => !f.campaign), camps = fams.filter((f) => f.campaign)
-    .sort((a, b) => (a.list[0].campaign.start < b.list[0].campaign.start ? -1 : a.list[0].campaign.start > b.list[0].campaign.start ? 1 : a.key - b.key));
-  const byYear = new Map();
-  for (const f of camps) {
-    const s = f.list[0].campaign.start, y = s.slice(0, 4), m = s.slice(0, 7);
-    if (!byYear.has(y)) byYear.set(y, new Map());
-    const ms = byYear.get(y);
-    if (!ms.has(m)) ms.set(m, []);
-    ms.get(m).push(f);
-  }
-  const campHtml = [...byYear].map(([y, ms]) => `<div class="cy" data-y="${y}"><h3>${y}</h3>${[...ms].map(([m, list]) => {
-    const open = list.some((f) => data.current.has(f.list[0]));
-    return `<details class="cm" data-y="${y}" data-m="${m}"${open ? ' open' : ''}><summary>${y} ▸ ${MONTHS[+m.slice(5, 7) - 1]} (<span class="mc">${list.length}</span>)</summary>${list.map(row).join('')}</details>`;
-  }).join('')}</div>`).join('');
+  const fams = familiesOf(data.entries), quests = fams.filter((f) => !f.campaign), camps = fams.filter((f) => f.campaign);
+  // campaigns by date with a plain month label between months; a YEAR selector (the year of the Shop week by default)
+  let lastM = '';
+  const campRows = camps.map((f) => {
+    const m = f.list[0].campaign.start.slice(0, 7), label = m !== lastM ? `<div class="ml" data-y="${m.slice(0, 4)}" data-m="${m}">${monthYear(m + '-01')}</div>` : '';
+    lastM = m;
+    return label + row(f);
+  }).join('');
+  const years = [...new Set(camps.map((f) => f.list[0].campaign.start.slice(0, 4)))];
+  const shopYear = String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
+  const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
+  const yearsHtml = `<div class="yrs" id="yrs">${yearChip('all', 'All years', camps.length)}${years.map((y) => yearChip(y, y, camps.filter((f) => f.list[0].campaign.start.startsWith(y)).length)).join('')}</div>`;
   const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
   const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
   const count = (pn) => fams.filter((f) => f.list.some((en) => en.periods.includes(pn))).length;
@@ -477,7 +530,7 @@ function catalogPage(index, ctx = {}) {
     + `<div class="sum" id="sum"><span class="n1">${plural(quests.length, 'quest')}</span> · ${plural(camps.length, 'campaign')} · all periods, no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
     + `<div id="quests">${quests.map(row).join('') || '<p class="n">No quests.</p>'}</div>`
-    + `<div class="camps" id="camps"><h2>VIP Campaigns (<span id="cc">${camps.length}</span>)</h2><p class="n">Limited VIP campaigns of the original game, one week each, by month.</p>${campHtml}</div>`
+    + `<div class="camps" id="camps" data-defy="${defYear}"><h2>VIP Campaigns (<span id="cc">${camps.length}</span>)</h2><p class="n">Limited VIP campaigns of the original game, by date. Tap one for its weeks and rewards.</p>${yearsHtml}${campRows}</div>`
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Quest or reward name" autocomplete="off"></div>'
@@ -538,7 +591,7 @@ function detailPage(index, evStageId, ctx = {}) {
     }).join('');
   };
   const verLabel = (v) => {
-    if (v[0].campaign) return `${niceDay(v[0].campaign.start)} – ${niceDay(v[0].campaign.end)}`;
+    if (v[0].campaign) return `Week of ${niceDay(v[0].campaign.start)}`;
     const [y1, y2] = versionYears(v, periods);
     return `${y1 === y2 ? y1 : `${y1}–${y2}`}${f.mixed ? ` · ${v[0].vip ? 'VIP' : 'Free'}` : v[0].vip ? ' · VIP only' : ''}`;
   };
