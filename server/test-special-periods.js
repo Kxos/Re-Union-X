@@ -115,6 +115,24 @@ for (const e of live) {
   `${e.key}: missing fields`);
 }
 
+// Task 14: original khuxwiki banner art (tmp\banner_hunt MAPPING.json) on every entry and on the campaigns that have one;
+// the four Limited VIP Board campaigns (no Special banner on the wiki) and three entries keep the generated plate
+const BANNER_RE = /^Special - .+ banner KHUX\.png$/;
+const CAMP = Object.entries(rules.campaigns || {}).filter(([k]) => !k.startsWith('_'));
+const plateEntries = E.filter((e) => !e.banner).map((e) => e.key).sort();
+check(plateEntries.join() === 'vip-materials,vip-materials-2,vip-spirit-part', `entries on the plate: ${plateEntries}`);
+check(E.every((e) => !e.banner || BANNER_RE.test(e.banner)), 'entry banners are khuxwiki «Special - ... banner KHUX.png» names');
+const plateCamps = CAMP.filter(([, c]) => !c.banner).map(([k]) => k).sort();
+check(plateCamps.join() === 'C44151,C48395,C71999,C72714', `campaigns on the plate: ${plateCamps}`);
+check(CAMP.every(([, c]) => !c.banner || BANNER_RE.test(c.banner)), 'campaign banners are khuxwiki names');
+check(CAMP.filter(([, c]) => c.banner).length === 116, `campaigns with an original: ${CAMP.filter(([, c]) => c.banner).length} (116)`);
+const BANNERS = process.env.KHUX_SPECIAL_BANNERS || 'D:\\Progetto_Restauro_KH_UX\\reference\\special_banners';
+if (fs.existsSync(BANNERS)) {
+  const have = new Set(fs.readdirSync(BANNERS));
+  const lost = [...E.map((e) => e.banner), ...CAMP.map(([, c]) => c.banner)].filter((b) => b && !have.has(b));
+  check(!lost.length, `banner files missing in ${BANNERS}: ${[...new Set(lost)].join(' | ')}`);
+} else console.log(`(banner folder ${BANNERS} missing: file checks skipped)`);
+
 // catalogue: every series / quest named exists
 const SRC = process.env.KHUX_SPECIAL_SRC || 'D:\\Progetto_Restauro_KH_UX\\private\\events\\special\\special_quests.json';
 if (fs.existsSync(SRC)) {
