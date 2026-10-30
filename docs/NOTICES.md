@@ -53,7 +53,7 @@ Tapping the Special Catalog banner starts a **training** quest: it costs no AP, 
 
 The **Adamantite Ore Challenge** and **Mythril Madness** are not available: their materials have **no use** in this version of the game.
 
-The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost; a VIP campaign whose quests are not known has one quest of its theme.
+The drop rates and some rewards of the Special Quests are **reconstructed**, because the original data is lost; a VIP campaign whose quests are not known has one quest of its theme. Rewards that do not exist in this version are replaced by the closest one or left out, and the **VIP! Skill** quest is not available.
 
 ## Support Medal Cost
 
