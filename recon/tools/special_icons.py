@@ -2,8 +2,8 @@
 
 Original game icons where the client has one (Square Enix assets: NOT in the repo): copied from the JP 4.3.1 dump into
 server/game_data/special_icons/<key>.png (git-ignored folder), each fitted into 48x48 RGBA, proportions kept, transparent
-margin, like shop_icons.py. Where the client has no such icon (calendar, pin, swap arrows, hourglass, play mark) a small
-icon in the game's style is drawn here with Pillow (gold / blue gradients, dark outline): those are our own drawings.
+margin, like shop_icons.py. Where the client has no such icon (calendar, pin, swap arrows, hourglass, play mark, medal,
+open padlock) a flat status dot in the Shop catalogue's colours is drawn here with Pillow: those are our own drawings.
 
 Usage: python -I recon/tools/special_icons.py [BASE_JP] [OUT_DIR]
        BASE_JP also from env KHUX_JP_BASE (folder jp_final_4.3.1 with cocostudio/ and img/).
@@ -80,80 +80,92 @@ RED = ((255, 150, 150, 255), (200, 30, 40, 255))
 WHITE = ((255, 255, 255, 255), (200, 220, 235, 255))
 
 
-def draw_weekday():
-    """Calendar page: blue body, red top band with two rings, white sheet with a grid of days."""
+# Drawn icons in the Shop catalogue's look (round 15, user: «the Shop's filter icons look better»): a flat status dot
+# in the colour of the Shop pills (s-now green, s-pinned gold, s-later / unlocked blue, s-locked grey) with a white
+# glyph, like the «▶» / padlock marks of the Shop's SHOW chips and pills. No gradients, no illustrations.
+DOT = {'now': (46, 158, 62), 'pin': (184, 134, 11), 'unlocked': (26, 111, 168), 'later': (90, 100, 112),
+       'replaced': (90, 100, 112), 'weekday': (10, 143, 163), 'medal': (184, 134, 11)}
+WHITE_GLYPH = (255, 255, 255, 255)
+
+
+def dot(color):
+    """BIG x BIG canvas with the flat round dot (a lighter 1/16 ring, like the Shop pills' border)."""
     c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    fill_shape(c, lambda d: d.rounded_rectangle((22, 34, 170, 172), 18, fill=255), *BLUE)
-    fill_shape(c, lambda d: d.rounded_rectangle((22, 34, 170, 74), 18, fill=255), *RED, width=0)
-    fill_shape(c, lambda d: d.rectangle((38, 84, 154, 160), fill=255), *WHITE, width=0)
     d = ImageDraw.Draw(c)
-    for x in (58, 134):  # rings
-        d.rounded_rectangle((x - 8, 18, x + 8, 54), 8, fill=(230, 236, 242, 255), outline=OUTLINE, width=5)
-    for row in range(3):
-        for col in range(4):
-            x, y = 48 + col * 27, 92 + row * 23
-            d.rectangle((x, y, x + 16, y + 13), fill=(30, 110, 200, 255) if (row, col) != (1, 2) else (214, 60, 40, 255))
+    ring = tuple(min(255, v + 70) for v in color) + (255,)
+    d.ellipse((4, 4, BIG - 4, BIG - 4), fill=ring)
+    d.ellipse((14, 14, BIG - 14, BIG - 14), fill=color + (255,))
+    return c, d
+
+
+def draw_now():
+    c, d = dot(DOT['now'])
+    d.polygon([(76, 54), (76, 138), (144, 96)], fill=WHITE_GLYPH)
     return c
 
 
 def draw_pin():
-    """Push pin, tilted: gold head, dark outline, silver needle."""
-    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    d = ImageDraw.Draw(c)
-    d.line((70, 122, 26, 166), fill=OUTLINE, width=18)
-    d.line((70, 122, 30, 162), fill=(210, 220, 230, 255), width=8)
-    def head(m):
-        m.polygon([(96, 20), (172, 96), (150, 112), (80, 42)], fill=255)  # top disc
-        m.polygon([(104, 58), (134, 88), (92, 130), (62, 100)], fill=255)  # body
-        m.polygon([(56, 84), (108, 136), (96, 148), (44, 96)], fill=255)  # base disc
-    fill_shape(c, head, *GOLD)
+    """Push pin, tilted like the usual pin mark: cap, body, collar and needle on a layer turned by 35 degrees."""
+    c, _ = dot(DOT['pin'])
+    g = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
+    d = ImageDraw.Draw(g)
+    d.rounded_rectangle((68, 36, 124, 52), 6, fill=WHITE_GLYPH)   # cap
+    d.rectangle((80, 52, 112, 92), fill=WHITE_GLYPH)              # body
+    d.rounded_rectangle((60, 92, 132, 106), 6, fill=WHITE_GLYPH)  # collar
+    d.line((96, 106, 96, 156), fill=WHITE_GLYPH, width=8)         # needle
+    g = g.rotate(-35, resample=Image.BICUBIC, center=(96, 96))
+    c.alpha_composite(g)
     return c
 
 
-def draw_replaced():
-    """Two curved arrows in a circle (swap): blue on a light disc."""
-    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    fill_shape(c, lambda d: d.ellipse((14, 14, 178, 178), fill=255), *WHITE)
-    d = ImageDraw.Draw(c)
-    blue = (30, 110, 200, 255)
-    d.arc((44, 44, 148, 148), 200, 340, fill=blue, width=18)
-    d.arc((44, 44, 148, 148), 20, 160, fill=blue, width=18)
-    d.polygon([(140, 60), (168, 92), (128, 98)], fill=blue)   # head of the upper arrow
-    d.polygon([(52, 132), (24, 100), (64, 94)], fill=blue)    # head of the lower arrow
+def draw_unlocked():
+    c, d = dot(DOT['unlocked'])
+    d.arc((70, 38, 122, 92), 180, 360, fill=WHITE_GLYPH, width=12)   # shackle, open on the right
+    d.line((76, 64, 76, 96), fill=WHITE_GLYPH, width=12)
+    d.rounded_rectangle((60, 90, 132, 146), 8, fill=WHITE_GLYPH)      # body
+    d.ellipse((88, 106, 104, 122), fill=DOT['unlocked'] + (255,))
     return c
 
 
 def draw_later():
-    """Hourglass: gold frame, blue sand."""
-    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    fill_shape(c, lambda d: d.polygon([(52, 34), (140, 34), (104, 96), (140, 158), (52, 158), (88, 96)], fill=255), *WHITE)
-    d = ImageDraw.Draw(c)
-    d.polygon([(70, 52), (122, 52), (96, 88)], fill=(90, 170, 240, 255))
-    d.polygon([(96, 112), (130, 150), (62, 150)], fill=(30, 110, 200, 255))
-    fill_shape(c, lambda m: (m.rounded_rectangle((36, 16, 156, 38), 8, fill=255), m.rounded_rectangle((36, 154, 156, 176), 8, fill=255)), *GOLD, width=6)
+    c, d = dot(DOT['later'])
+    d.rectangle((62, 46, 130, 56), fill=WHITE_GLYPH)
+    d.rectangle((62, 136, 130, 146), fill=WHITE_GLYPH)
+    d.polygon([(70, 56), (122, 56), (96, 96), (122, 136), (70, 136), (96, 96)], fill=WHITE_GLYPH)
+    d.polygon([(82, 62), (110, 62), (96, 84)], fill=DOT['later'] + (255,))
     return c
 
 
-def draw_now():
-    """Green play mark (the Shop's «▶ In the Shop now»): green disc with a white triangle."""
-    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    fill_shape(c, lambda d: d.ellipse((14, 14, 178, 178), fill=255), *GREEN)
-    ImageDraw.Draw(c).polygon([(74, 52), (74, 140), (146, 96)], fill=(255, 255, 255, 255))
+def draw_replaced():
+    c, d = dot(DOT['replaced'])
+    d.line((60, 76, 124, 76), fill=WHITE_GLYPH, width=12)
+    d.polygon([(118, 56), (146, 76), (118, 96)], fill=WHITE_GLYPH)
+    d.line((68, 118, 132, 118), fill=WHITE_GLYPH, width=12)
+    d.polygon([(74, 98), (46, 118), (74, 138)], fill=WHITE_GLYPH)
+    return c
+
+
+def draw_weekday():
+    c, d = dot(DOT['weekday'])
+    d.rounded_rectangle((56, 56, 136, 140), 8, outline=WHITE_GLYPH, width=9)
+    d.rectangle((56, 56, 136, 78), fill=WHITE_GLYPH)
+    d.line((76, 44, 76, 64), fill=WHITE_GLYPH, width=9)
+    d.line((116, 44, 116, 64), fill=WHITE_GLYPH, width=9)
+    for x in (74, 96, 118):
+        for y in (96, 120):
+            d.rectangle((x - 6, y - 6, x + 6, y + 6), fill=WHITE_GLYPH)
     return c
 
 
 def draw_medal():
-    """Medal (no generic medal icon in the client): gold rim, blue face, white star."""
-    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
-    fill_shape(c, lambda d: d.ellipse((14, 14, 178, 178), fill=255), *GOLD)
-    fill_shape(c, lambda d: d.ellipse((38, 38, 154, 154), fill=255), *BLUE, width=4)
     import math
-    pts = [(96 + (44 if i % 2 == 0 else 19) * math.sin(i * math.pi / 5), 98 - (44 if i % 2 == 0 else 19) * math.cos(i * math.pi / 5)) for i in range(10)]
-    ImageDraw.Draw(c).polygon(pts, fill=(255, 255, 255, 255))
+    c, d = dot(DOT['medal'])
+    pts = [(96 + (52 if i % 2 == 0 else 22) * math.sin(i * math.pi / 5), 100 - (52 if i % 2 == 0 else 22) * math.cos(i * math.pi / 5)) for i in range(10)]
+    d.polygon(pts, fill=WHITE_GLYPH)
     return c
 
 
-DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal}
+DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal, 'unlocked': draw_unlocked}
 
 
 def main(argv):

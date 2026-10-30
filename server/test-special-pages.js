@@ -1,6 +1,7 @@
 // Special catalogue page test: node server/test-special-pages.js
 'use strict';
 const pages = require('./special-pages');
+const special = require('./special');
 const errors = [];
 const check = (ok, msg) => { if (!ok) errors.push(msg); };
 const PERIODS = [1, 2, 3, 4, 5].map((n) => ({ n, name: `Period ${n}`, from: `20${15 + n}-01-01`, to: `20${15 + n}-12-31` }));
@@ -94,7 +95,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(!/\p{Extended_Pictographic}/u.test(sheet.replace(/<div class="search">[\s\S]*?<\/div>/, '')), 'no emoji in the chips');
   check(!html.includes('📌'), 'no pin emoji in the page');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
-  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
+  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material,unlocked', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
   const cls = (id) => (/class="([^"]*)"/.exec(itemOf(html, id)) || [])[1];
   check(cls(7101) === 'row pinned' && cls(7102) === 'row can' && cls(7103) === 'row off' && cls(7104) === 'row off' && cls(7105) === 'row off' && cls(7108) === 'row cr locked', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
   check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-locked"'), 'status pills');
@@ -364,6 +365,80 @@ function h0() { return html; }
   check(d.includes('data-pin="/web/special/pin/7401"') && d.includes('data-pin="/web/special/pin/7402"'), 'each week its own Keep button');
   check(d.includes('class="back" href="/web/special/catalog#q7402"') && (h.match(/ id="q7402"/g) || []).length === 1, 'BACK to the row');
   check(pages.familiesOf(ix.entries).filter((x) => x.campaign).length === 5, 'familiesOf merges consecutive weeks of the same art');
+}
+// round 15 (user 31-10): «In Special now» = exactly the banners of the Special tab (special.specialEvents for the same
+// ctx, the KEPT one included); new «Unlocked, not in Special now» = reached by the Story (not later, not removed) and not
+// in the tab. Like the Shop's «In the Shop now» / «Unlocked, not in the Shop now».
+{
+  check(SHOW_OPTS_OF(html).now === 'In Special now' && SHOW_OPTS_OF(html).unl === 'Unlocked, not in Special now', `SHOW chips: ${JSON.stringify(SHOW_OPTS_OF(html))}`);
+  check(/class="o st-unl" data-v="unl">/.test(html) && html.includes('/web/special/icon/unlocked.png'), 'chip «Unlocked, not in Special now» with its icon');
+  check(/\.o\.st-unl\.on\{[^}]*#1a6fa8/.test(html), 'chip colour like the Shop (blue)');
+  check(/SHOWSET=\{"now":\["now","kept"\],"unl":\["can","replaced","other"\]\}/.test(html) && /SHOWSET\[s\.show\]/.test(html), 'script: the two chips cover several statuses');
+  check(pages.SHOW_SETS.now.join() === 'now,kept' && pages.SHOW_SETS.unl.join() === 'can,replaced,other', 'shared status sets');
+  // entry -> its status in the page (one per entry, from the rows' data-eid / data-show)
+  const statusesOf = (h) => {
+    const m = new Map();
+    for (const r of h.split('<div class="row').slice(1)) {
+      const ids = (/data-eid="([^"]*)"/.exec(r) || [])[1].split(' '), ss = (/data-show="([^"]*)"/.exec(r) || [])[1].split(' ');
+      ids.forEach((id, j) => m.set(+id, ss[j]));
+    }
+    return m;
+  };
+  const sets = (h) => { const st = statusesOf(h), now = [], unl = [];
+    for (const [id, s] of st) { if (pages.SHOW_SETS.now.includes(s)) now.push(id); if (pages.SHOW_SETS.unl.includes(s)) unl.push(id); }
+    return { st, now: now.sort((a, b) => a - b), unl: unl.sort((a, b) => a - b) }; };
+  const tabIds = (ix, c) => special.specialEvents({ ...ix, catalog: { stageIds: [970000], useAp: [0], ...ix.catalog } }, { imgBase: '', dayEndStr: 'D', weekEndStr: 'W', ...c })
+    .map((x) => x.eventStageId).filter((id) => id !== ix.catalog.evStageId).sort((a, b) => a - b);
+  // fixture: kept, current (today, other day, VIP), Daily Cid days, campaigns of this and another week, past, later, removed
+  const fx = { catalog: { evStageId: 7000 }, entries: [
+    e('tue', 7601, { periods: [4], days: ['Tue'] }), e('mon', 7602, { periods: [4], days: ['Mon'] }), e('vipq', 7603, { periods: [4], vip: true, family: 'SQ22' }),
+    e('cid-tue', 7604, { name: 'C (Tuesday)', periods: [4], days: ['Tue'], family: 'SQ12', resetGroup: 'cid' }), e('cid-wed', 7605, { name: 'C (Wednesday)', periods: [4], days: ['Wed'], family: 'SQ12', resetGroup: 'cid' }),
+    e('campnow', 7606, { periods: [4], vip: true, campaign: { start: '2019-03-04', end: '2019-03-10' } }), e('camplater', 7607, { periods: [4], vip: true, campaign: { start: '2019-05-06', end: '2019-05-12' } }),
+    e('kept', 7608, { periods: [2] }), e('old', 7609, { periods: [1, 2] }), e('repl', 7610, { periods: [1], replacedBy: 'old' }),
+    e('later', 7611, { periods: [5] }), e('gone', 7612, { periods: [1], removed: 'no-use' }), e('notyet', 7613, { periods: [4], from: '2019-06-01' }),
+  ] };
+  for (const vip of [false, true]) {
+    const c = { period: 4, pinnedKey: 'kept', periods: PERIODS, shopFrom: '2019-03-04', shopTo: '2019-03-10', weekday: 'Tue', vip };
+    const s = sets(pages.catalogPage(fx, c));
+    check(s.now.join() === tabIds(fx, c).join(), `fixture vip=${vip}: «In Special now» ${s.now} = tab ${tabIds(fx, c)}`);
+    check(s.unl.join() === '7605,7607,7609,7610,7613', `fixture vip=${vip}: «Unlocked, not in Special now» ${s.unl}`);
+    check(s.st.get(7611) === 'later' && s.st.get(7612) === 'removed', 'later and removed in neither');
+  }
+  // real local index, story in period 4, Tuesday, without and with VIP
+  let real = null; try { real = require('./game_data/special.json'); } catch { /* no local index */ }
+  if (real) {
+    const pin = real.entries.find((en) => special.pinnable(en, 4).ok && !en.campaign);
+    for (const vip of [false, true]) {
+      const c = { period: 4, pinnedKey: pin.key, periods: special.PERIODS, shopFrom: '2020-06-02', shopTo: '2020-06-08', weekday: 'Tue', vip };
+      const s = sets(pages.catalogPage(real, c)), tab = tabIds(real, c);
+      check(s.now.join() === tab.join(), `real vip=${vip}: «In Special now» ${s.now.length} entries vs tab ${tab.length}: ${s.now.filter((x) => !tab.includes(x))} / ${tab.filter((x) => !s.now.includes(x))}`);
+      const reached = [...s.st].filter(([, x]) => x !== 'later' && x !== 'removed').map(([id]) => id).sort((a, b) => a - b);
+      check(s.unl.join() === reached.filter((id) => !tab.includes(id)).join(), `real vip=${vip}: «Unlocked, not in Special now» = reached minus tab`);
+    }
+  }
+}
+function SHOW_OPTS_OF(h) { const box = h.slice(h.indexOf('data-g="show"'), h.indexOf('class="foot"')); return Object.fromEntries([...box.matchAll(/data-v="([a-z]+)">(?:<img[^>]*>)?([^<]*)</g)].map((m) => [m[1], m[2]])); }
+// round 15 (+ user bug): the KEPT banner is in the tab -> «In Special now», never «Unlocked, not in Special now»; also a
+// kept campaign and a kept single day of a quest with one quest per day
+{
+  const sts = (h) => { const m = new Map(); for (const r of h.split('<div class="row').slice(1)) { const ids = (/data-eid="([^"]*)"/.exec(r) || [])[1].split(' '), ss = (/data-show="([^"]*)"/.exec(r) || [])[1].split(' '); ids.forEach((id, j) => m.set(+id, ss[j])); } return m; };
+  const fx = { catalog: { evStageId: 7000 }, entries: [
+    e('d-mon', 7701, { name: 'Days (Monday)', periods: [1], days: ['Mon'], banner: 'd.png' }), e('d-tue', 7702, { name: 'Days (Tuesday)', periods: [1], days: ['Tue'], banner: 'd.png' }),
+    e('oldcamp', 7703, { name: 'Old Campaign', periods: [2], vip: true, campaign: { start: '2017-06-12', end: '2017-06-18' } }),
+  ] };
+  for (const [key, id] of [['d-mon', 7701], ['oldcamp', 7703]]) {
+    for (const vip of [false, true]) {
+      const c = { period: 4, pinnedKey: key, periods: PERIODS, shopFrom: '2019-03-04', shopTo: '2019-03-10', weekday: 'Tue', vip };
+      const h = pages.catalogPage(fx, c), st = sts(h);
+      const tab = special.specialEvents({ ...fx, catalog: { stageIds: [970000], useAp: [0], ...fx.catalog } }, { imgBase: '', dayEndStr: 'D', weekEndStr: 'W', ...c }).map((x) => x.eventStageId).filter((x) => x !== 7000);
+      check(tab.join() === String(id) && pages.SHOW_SETS.now.includes(st.get(id)) && !pages.SHOW_SETS.unl.includes(st.get(id)), `kept ${key} (vip=${vip}): tab ${tab}, status ${st.get(id)}`);
+      check([...st].filter(([x]) => x !== id).every(([, s]) => !pages.SHOW_SETS.now.includes(s)), `kept ${key}: nothing else «In Special now»`);
+    }
+  }
+  // the row of the kept day shows «Kept in Special» (its best entry) and counts under «In Special now»
+  const h = pages.catalogPage(fx, { period: 4, pinnedKey: 'd-mon', periods: PERIODS, shopFrom: '2019-03-04', shopTo: '2019-03-10', weekday: 'Tue' });
+  const row = itemOf(h, 7701);
+  check(/^<div class="row pinned"/.test(row) && row.includes('Kept in Special') && /data-show="kept can"/.test(row), `kept day: row ${row.slice(0, 120)}`);
 }
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
