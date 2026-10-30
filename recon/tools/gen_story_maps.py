@@ -25,7 +25,8 @@ docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (gr
 "chests" (reward row of each chest). Two paths from the start (build_training): the start is the middle of the longest
 walk of the room (geodesic diameter), so the two halves go in opposite directions; path A (the longer half) ends at
 the target arena with the normal groups along it, path B holds the dummy group TRAIN_DUMMY_STEPS grid steps of walk
-from the start (visible from it, where the half is long enough) with the chests spaced on the walk before it.
+from the start (visible from it, where the half is long enough) with the chests before it in one row (same y,
+TRAIN_CHEST_GAP apart; fallback: spaced on the walk).
 
 Per ogni missione (stageBinId 1..N di thethiny = numero della missione):
 - stanza: rooms[nome] se noto, altrimenti una stanza dello stesso mondo (prefisso del
@@ -385,6 +386,8 @@ def build_part(folder, start, dist, groups, nchests, level=1):
 
 # ---------------------------------------------------------------- training map (docstring)
 TRAIN_DUMMY_STEPS = 12      # walk start -> dummy in grid steps (480 units): on screen from the start
+TRAIN_CHEST_GAP = 80        # chest row: spacing (2 grid steps)
+TRAIN_CHEST_KEEP = 120      # chest row: distance from the start and from every enemy
 
 
 def build_training(folder, groups, target, dummy, chest_rewards, level=1):
@@ -457,10 +460,21 @@ def build_training(folder, groups, target, dummy, chest_rewards, level=1):
     dm = on_walk(side_b, dB, tB, min(TRAIN_DUMMY_STEPS, dS[tB]))
     place(dummy, dm, side_b, False)
     place(target, tA, side_a, True)
-    # chests evenly spaced on the walk start -> dummy, never on an enemy or on the start
+    # chests: one neat row (user, bench 30-10): grid points of path B on the same y (same screen row), TRAIN_CHEST_GAP
+    # apart, all before the dummy (walk), >= TRAIN_CHEST_KEEP from the start, the dummy and every enemy; the row with the
+    # shortest walk from the start wins. No such row: evenly spaced on the walk start -> dummy (as before)
     dDm = geodesic(pc, side_b | {S}, dm)
     used = {(e[0], e[1]) for e in ens} | {S}
     chests, n = [], len(chest_rewards)
+    ok = {p for p in side_b if p in dDm and dS[p] < dS[dm] and all(dd(p, u) >= TRAIN_CHEST_KEEP for u in used)}
+    rows_ = [[(x0 + k * TRAIN_CHEST_GAP, y) for k in range(n)] for x0, y in sorted(ok)]
+    rows_ = [r for r in rows_ if n and all(p in ok for p in r)]
+    if rows_:
+        best = min(rows_, key=lambda r: (sum(dS[p] for p in r), r[0][1], r[0][0]))
+        for (x, y), rw in zip(best, chest_rewards):
+            chests.append((x, y, rw, 15, uid))
+            uid += 1
+        chest_rewards = []
     for k, rw in enumerate(chest_rewards):
         want = dS[dm] * (k + 1) / (n + 1)
         cand = [p for p in side_b if p not in used and p in dDm and dS[p] < dS[dm]]
