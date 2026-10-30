@@ -18,6 +18,8 @@ tab of the originals (measured on «VIP Get Draw Tickets x30»: band y 6-33, sol
 straight cut, white ~18 px lettering with a dark outline); on a banner that already has such a tab the KEPT tab replaces
 it (widened to cover it). The Shop's KEPT tag (kept_banner_badge.badge) is not used here and stays unchanged.
 None for the catalogue banner, which is never pinned.
+Needs Pillow; the catalogue figures also need numpy and btf.py / lwf_rig.py (recon/tools). When those or the rigs are
+missing a WARNING line on stderr names the figure left out and why; the banner is still written.
 """
 import argparse
 import hashlib
@@ -48,6 +50,14 @@ CATALOG_STRIPS = [
 ]
 # enemy rigs of the game dump (LWF + BTF parts, local only): 1 = Shadow, 7 = Large Body (training quest 970000)
 ENEMIES = os.path.join(ROOT, 'tmp', 'thethiny_x', 'bundle2016', 'files', 'lwf', 'character', 'enemy')
+FIGURES = {7: 'Large Body', 1: 'Shadow'}
+
+
+def warn(msg):
+    """a WARNING line on stderr (missing local art: the banner is still written, without that piece)"""
+    print('WARNING: ' + msg, file=sys.stderr)
+
+
 # gradient (top, bottom) per family; the hues of the original banners of each family where there is one
 FAMILY = {
     'SQ12': ((0x8a, 0x6a, 0x08), (0xc8, 0x9c, 0x1c)),   # Daily Cid: gold
@@ -127,9 +137,12 @@ def kept_tab(im):
     d = ImageDraw.Draw(alpha)
     d.rectangle([0, y0, xs, y1 - 1], fill=255)
     for x in range(xs, xf):
-        d.line([(x, y0), (x, y1 - 1)], fill=int(255 * (1 - (x - xs) / (xf - xs))))
-    L = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    L.paste(kept.vgrad((W, H), kept.GOLD_HI, kept.GOLD_LO, y0, y1), (0, 0), alpha)
+        t = (x - xs) / (xf - xs)
+        d.line([(x, y0), (x, y1 - 1)], fill=int(255 * (1 - t * t * (3 - 2 * t))))   # smoothstep fade-out
+    # alpha set on the gold itself: paste() with a mask would also blend the colour towards the transparent black of
+    # the layer, the dark edge of the fade (fix round 1)
+    L = kept.vgrad((W, H), kept.GOLD_HI, kept.GOLD_LO, y0, y1)
+    L.putalpha(alpha)
     edge = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     de = ImageDraw.Draw(edge)
     de.rectangle([0, y1 - S, xf, y1 - 1], fill=kept.GOLD_DK)                 # dark lower edge
@@ -139,7 +152,9 @@ def kept_tab(im):
     ImageDraw.Draw(L).text((9 * S, (y0 + y1) / 2 + S * .5), KEPT_TEXT, font=make_shop_art.font(18 * S),
                            fill=(255, 255, 255, 255), anchor='lm', stroke_width=int(2.2 * S), stroke_fill=BROWN)
     sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    sh.putalpha(alpha.filter(ImageFilter.GaussianBlur(1.5 * S)).point(lambda v: v * 90 // 255))
+    # drop shadow only under the solid part: it fades out much faster than the band (cube of the band alpha), so
+    # it never shows through the half-transparent fade as a dark edge (fix round 1)
+    sh.putalpha(alpha.point(lambda v: v ** 3 // 255 ** 2).filter(ImageFilter.GaussianBlur(1.5 * S)).point(lambda v: v * 90 // 255))
     out = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     out.paste(sh, (0, 2 * S))
     L = Image.alpha_composite(out, L)
@@ -150,12 +165,18 @@ def kept_tab(im):
 def enemy_figure(eid, root=None):
     """RGBA of an enemy in its wait pose, drawn from the local LWF rig (None when the rig is missing). The ground
     shadow piece (alpha < 1) is left out; flash masks are ignored (the two training enemies have none)."""
-    import numpy as np
-    import btf
-    from lwf_rig import LWF
     d = os.path.join(root or ENEMIES, str(eid), 'wait')
     p = os.path.join(d, 'wait.lwf')
+    name = FIGURES.get(eid, 'enemy %s' % eid)
+    try:
+        import numpy as np
+        import btf
+        from lwf_rig import LWF
+    except ImportError as e:
+        warn('%s left out of the catalog banner: %s (btf.py / lwf_rig.py of recon/tools and numpy are needed)' % (name, e))
+        return None
     if not os.path.exists(p):
+        warn('%s left out of the catalog banner: enemy rig %s not found' % (name, p))
         return None
     L = LWF(p)
     tex = {}
@@ -266,7 +287,9 @@ def catalog_banner(src_dir, enemies=None):
     floor = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
     ImageDraw.Draw(floor).ellipse((436, 122, 636, 144), fill=(0, 0, 0, 140))
     im = Image.alpha_composite(im, floor.filter(ImageFilter.GaussianBlur(3)))
-    if enemies:
+    if not enemies:
+        warn('Large Body and Shadow left out of the catalog banner: no enemy rig folder given (--enemies)')
+    else:
         for eid, h, x, yb in ((7, 100, 506, 137), (1, 64, 446, 135)):
             fig = enemy_figure(eid, enemies)
             if fig is not None:
@@ -337,7 +360,7 @@ def main():
     a = ap.parse_args()
     with open(a.index, encoding='utf-8') as f:
         index = json.load(f)
-    r = build_all(index, a.src, a.out, a.mode, a.enemies if os.path.isdir(a.enemies) else None)
+    r = build_all(index, a.src, a.out, a.mode, a.enemies)
     print('special banners: %d originals, %d plates, %d catalog -> %s' % (r['original'], r['plate'], r['catalog'], a.out))
 
 

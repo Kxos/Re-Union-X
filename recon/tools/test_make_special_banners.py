@@ -102,6 +102,27 @@ try:
         check(mean(ImageChops.difference(withf, nof)) > 6, 'Large Body + Shadow on the right of the catalog banner')
     else:
         print('(local enemy rigs %s missing: figure checks skipped)' % m.ENEMIES)
+    # fix round 1: a missing rig folder (or missing imports) is reported with a WARNING line, the banner is still made
+    import contextlib
+    import io
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+        nofig = m.catalog_banner(src, os.path.join(tmp, 'no_rigs'))
+    log = buf.getvalue()
+    check(nofig.size == (640, 140), 'catalog banner without rigs: 640x140')
+    check('WARNING' in log and 'Large Body' in log and 'Shadow' in log and 'no_rigs' in log,
+          'missing rigs: WARNING naming both figures and the path (%r)' % log)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+        m.catalog_banner(src, None)
+    check('WARNING' in buf.getvalue(), 'no rig folder given: WARNING printed')
+    # fix round 1: the end of the KEPT tab fade has no dark edge: on a white banner the fade columns get
+    # monotonically lighter (no darker band than the solid gold before it)
+    wk = m.kept_tab(Image.new('RGB', (640, 140), (255, 255, 255))).convert('L')
+    col = [sum(wk.getpixel((x, y)) for y in range(10, 30)) / 20 for x in range(m.TAB_SOLID - 2, m.TAB_SOLID + m.TAB_FADE + 4)]
+    solid_l = col[0]
+    check(min(col) >= solid_l - 6, 'KEPT fade: nothing darker than the solid tab (min %.0f, solid %.0f)' % (min(col), solid_l))
+    check(all(b >= a - 3 for a, b in zip(col, col[1:])), 'KEPT fade gets lighter towards the right: %s' % [int(v) for v in col])
     check(m.plate_color('SQ13') == m.plate_color('SQ13') and m.plate_color('SQ13') != m.plate_color('SQ22'), 'family colours')
     check(m.plate_color('SQ21') == m.plate_color('SQ22') == m.plate_color('SQ23'), 'VIP campaigns (SQ21) and Materials (SQ23): the VIP pink of SQ22')
     # Task 14: the real rules resolve every mapped banner (entries + campaigns) to an original of reference\special_banners
