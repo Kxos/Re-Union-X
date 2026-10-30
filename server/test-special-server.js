@@ -208,7 +208,7 @@ if (vipPast) {
 } else errors.push('nessuna quest VIP passata nell\'indice per il test');
 delete p.special.pinned;
 
-// 7. quest di allenamento 970000 (Task 11): niente gauge, Lux, munny, materiali, drop, EXP e premi degli obiettivi;
+// 7. quest di allenamento 970000 (Task 11): niente gauge, Lux, munny della partita, materiali, drop, EXP; obiettivi: Munny x100 una volta;
 // restano punteggio e obiettivi. Anche il Give Up non tocca la gauge
 {
   p.keybladeBurst = 55000; p.money = 1000; p.lux = 700;
@@ -228,6 +228,18 @@ delete p.special.pinned;
   check(JSON.stringify(p.clearMissions[970000]) === '[1,2]', `allenamento: obiettivi ${JSON.stringify(p.clearMissions[970000])}`);
   check(p.stageScores[970000] === 0, `allenamento: punteggio ${p.stageScores[970000]}`);
   check(p.ap === ap0, 'allenamento: AP cambiati');
+  // polish 31-10: i tre obiettivi danno Munny x100 la prima volta (make-special.js); la riga del master locale puo' essere
+  // ancora quella vecchia (tipo 0): la si porta in memoria ai valori di make-special, senza scrivere master_data
+  const trRow = t.masterRows('stage').find((r) => r.stageId === 970000);
+  Object.assign(trRow, { submissionRewardType: [4, 4, 4], submissionItemId: [0, 0, 0], submissionItemNum: [100, 100, 100] });
+  delete p.clearMissions[970000];
+  const money0 = p.money;
+  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  call(t.respondStageClear, { getPoint: { lux: 500, money: 300, exp: 50 }, getMaterials: [], getEnemyDropItems: [1], clearMissionIds: [1, 2, 3] });
+  check(p.money === money0 + 300 && p.lux === luxB, `allenamento: obiettivi la prima volta +300 munny (${p.money - money0}), lux ${p.lux}`);
+  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  call(t.respondStageClear, { getPoint: { lux: 500, money: 300, exp: 50 }, getMaterials: [], getEnemyDropItems: [1], clearMissionIds: [1, 2, 3] });
+  check(p.money === money0 + 300, `allenamento: secondo clear +0 munny (${p.money - money0 - 300})`);
   call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
   call(t.respondStageContinue, '/stage/retire', { burst: 0 });
   check(p.keybladeBurst === 55000, `allenamento Give Up: gauge ${p.keybladeBurst}`);

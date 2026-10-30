@@ -2210,8 +2210,8 @@ function respondStageClear(res, req) {
   // misc 106) ne' le quest Special (stageKind 2, id 970000+: banco 30-10, una Special lo portava a 970001)
   if (stage?.stageKind === 1 && stageNumber(stageId) >= stageNumber(player.lastClearStageId)) player.lastClearStageId = stageId;
   // munny e materiali raccolti (sacchetti dei nemici, forzieri) come li riporta il client
-  // Allenamento (970000, Special): solo punteggio e obiettivi; niente gauge, munny, materiali, drop, Lux, contatori,
-  // EXP di skill ne' premi degli obiettivi (la quest e' un banco di prova, il client mostra CONGRATULATIONS dai suoi dati)
+  // Allenamento (970000, Special): solo punteggio, obiettivi e i loro premi (Munny x100 ciascuno, la prima volta:
+  // utente 31-10, make-special.js); niente gauge, munny della partita, materiali, drop, Lux, contatori ne' EXP di skill
   const training = playedId === TRAINING_STAGE_ID;
   if (!training) player.money = (player.money || 0) + (Number(req?.getPoint?.money) || 0);
   // gauge degli attacchi speciali: resta salvata nel keyblade (userKeyblades[].burst), non
@@ -2276,7 +2276,7 @@ function respondStageClear(res, req) {
   if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
-  for (const n of training ? [] : cleared.filter((n) => !before.includes(n))) {
+  for (const n of cleared.filter((n) => !before.includes(n))) {
     grantItem(stage?.submissionRewardType?.[n - 1], stage?.submissionItemId?.[n - 1], stage?.submissionItemNum?.[n - 1]);
   }
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
@@ -3893,7 +3893,7 @@ function specialIndex() {
   return specialMemo;
 }
 const SPECIAL_FIRST = 970000, SPECIAL_LAST = 979999; // stageId delle quest Special (make-special.js)
-const TRAINING_STAGE_ID = 970000; // Training Grounds (special.json catalog): quest senza premi, vedi respondStageClear
+const TRAINING_STAGE_ID = 970000; // Training Grounds (special.json catalog): solo i premi degli obiettivi, vedi respondStageClear
 const isSpecialStage = (stageId) => Number(stageId) >= SPECIAL_FIRST && Number(stageId) <= SPECIAL_LAST;
 // la scheda si apre con la missione di storia misc 122 (6), come il pulsante del client
 const specialUnlocked = () => stageNumber(lastStoryStageId()) >= miscValue(122, 6);
