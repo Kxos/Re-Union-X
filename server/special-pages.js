@@ -61,6 +61,7 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.im{flex:0 0 auto;width:320px;max-width:100%}.im img{width:100%}.info{flex:1 1 170px;min-width:0;line-height:1.4}'
   + '.nm{font-weight:bold;color:#fff;text-decoration:none}.d{color:#b9cfdc;font-size:14px}'
   + PILL_CSS
+  + '.mt{color:#9fe0ff;font-size:12.5px;margin-top:4px;display:none}.none{background:#06283e;border-radius:6px;padding:14px 10px;margin:8px 0;text-align:center;color:#ffcd4a;font-size:16px}'
   // group rows: a strip of day / variant chips, each in the colour of its own status
   + '.chs{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.ch{display:inline-block;border:1px solid transparent;border-radius:10px;padding:0 7px;font-size:12.5px;line-height:1.7;color:#fff;text-decoration:none;white-space:nowrap}'
   + '.ch .ic{width:1.1em;height:1.1em;margin:-.2em .2em 0 -.15em}.c-now{background:#2e9e3e;font-weight:bold}.c-vipnow{background:#2a7a5c}.c-pinned{background:#b8860b;font-weight:bold}.c-can{background:#1a6fa8}'
@@ -241,9 +242,10 @@ const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 const JS = `(function(){
 var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__,CHIP_ICON=__CHIP_ICON__;
 __RANK__
+__MATCH__
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,ids:(attr(el,'data-eid')||'').split(' '),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',ss:(attr(el,'data-show')||'').split(' '),rw:' '+(attr(el,'data-reward')||'')+' ',n:+attr(el,'data-n')||1,nf:+attr(el,'data-nf'),q:attr(el,'data-search')||''};});
+var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,ids:(attr(el,'data-eid')||'').split(' '),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',ss:(attr(el,'data-show')||'').split(' '),rw:' '+(attr(el,'data-reward')||'')+' ',n:+attr(el,'data-n')||1,ns:(attr(el,'data-search')||'').split(' | '),mt:el.querySelector('.mt'),nf:+attr(el,'data-nf'),q:attr(el,'data-search')||''};});
 var secs=[].map.call(document.querySelectorAll('.sec'),function(el){return {el:el,p:attr(el,'data-p')};});
 var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null;
 function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
@@ -253,7 +255,9 @@ if(!anyPeriod){if(s.p==='all'&&!r.f)return false;if(s.p!=='all'&&r.p!==s.p)retur
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
 if(s.show!=='all'&&(' '+r.ss.join(' ')+' ').indexOf(' '+s.show+' ')<0)return false;
 if(s.reward!=='all'&&r.rw.indexOf(' '+s.reward+' ')<0)return false;
-return !s.q||r.q.indexOf(s.q.toLowerCase())>=0;}
+return !s.q||hits(r,s.q,1).length>0;}
+// item names of the row matching the query (one name at a time, khuxMatch), at most max
+function hits(r,q,max){var o=[],i;for(i=0;i<r.ns.length&&o.length<max;i++)if(khuxMatch(q,r.ns[i]))o.push(r.ns[i]);return o;}
 function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
 function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.reward!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -275,7 +279,10 @@ if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
 if(cur.reward!=='all')h+=' '+tag('reward',LAB.reward[cur.reward]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
-$('sum').innerHTML=h;$('fdot').textContent=k?k:'';}
+$('sum').innerHTML=h;$('fdot').textContent=k?k:'';
+// why a row matched (only while searching), and a message when nothing does
+for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
+var none=$('none');none.textContent=n?'':(cur.q?'No quests match "'+cur.q+'"':'No quests match your filters');none.style.display=n?'none':'';}
 // one member of a row changes status: a single row gets the new bar and pill, a group the new chip colour
 function paint(r,cls,html){r.el.className='q '+cls+(/ hide/.test(r.el.className)?' hide':'');var s=r.el.querySelector('.s');if(s){s.className='s s-'+cls;s.innerHTML=html;}}
 // a group: the chip of the member, then the row bar and pill of the best member again (khuxRank, as on the server)
@@ -320,6 +327,12 @@ const CHIP_ICON = { now: 'now', can: 'pin', kept: 'pin', replaced: 'replaced', l
 const CLS_RANK = ['now', 'vipnow', 'locked'];
 const RANK_JS = `function khuxRank(show,cls){var s=${JSON.stringify(SHOW_RANK)}.indexOf(show),c=${JSON.stringify(CLS_RANK)}.indexOf(cls);return s*3+(c<0?0:c);}`;
 const khuxRank = new Function(`${RANK_JS};return khuxRank;`)();
+// FIND (round 11, user: «key» found Mickey and Keyblade quests): every query word must start a word of ONE item name
+// (quest name, drop, objective reward); words = runs of letters and digits, so «Key Art #3» -> key, art, 3. Shared
+// by the page script and node (tests), like the rank.
+const MATCH_JS = 'function khuxWords(t){var a=String(t).toLowerCase().split(/[^a-z0-9\\u00c0-\\u024f]+/),o=[],i;for(i=0;i<a.length;i++)if(a[i])o.push(a[i]);return o;}'
+  + 'function khuxMatch(q,name){var qs=khuxWords(q),ws=khuxWords(name),i,j,ok;for(i=0;i<qs.length;i++){ok=false;for(j=0;j<ws.length;j++)if(ws[j].indexOf(qs[i])===0){ok=true;break;}if(!ok)return false;}return true;}';
+const khuxMatch = new Function(`${MATCH_JS};return khuxMatch;`)();
 const DAY_SUFFIX = /\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/;
 const familyTitle = (name) => String(name).replace(DAY_SUFFIX, '').replace(/\s+\d+$/, '');
 const variantOf = (en) => (Array.isArray(en.days) && en.days.length === 1 ? en.days[0] : (/\s(\d+)$/.exec(en.name) || [, '1'])[1]);
@@ -338,7 +351,9 @@ function catalogPage(index, ctx = {}) {
       for (const rid of s.dropRewardIds || []) parts.push(...names.drop(rid));
     }
     for (const sid of en.stageIds || []) parts.push(...names.objective(sid));
-    return [...new Set(parts.map((x) => String(x).toLowerCase().replace(/\s+/g, ' ').trim()).filter(Boolean))].join(' | ');
+    const seen = new Set();
+    return parts.map((x) => String(x).replace(/\s+/g, ' ').replace(/ \| /g, ' / ').trim())
+      .filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase())).join(' | ');
   };
   // REWARDS chips: reward types of the drop rows and of the objective rewards (3 medal, 20 avatar part, 2 Jewels, 5 material)
   const rewards = (en) => {
@@ -356,7 +371,7 @@ function catalogPage(index, ctx = {}) {
     return `<div class="q ${st.cls}" id="q${id}${first ? '' : `-p${p}`}" data-eid="${id}"${first ? ' data-first="1"' : ''} data-period="${p}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}" data-reward="${rewards(en)}" data-n="1" data-nf="${first ? 1 : 0}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(id)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(en.name)}</a><div class="d">${esc(daysText(en))}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>`
-      + `${st.pill}${st.rp || ''}${button ? `<div>${button}</div>` : ''}</div></div>
+      + `${st.pill}${st.rp || ''}${button ? `<div>${button}</div>` : ''}<div class="mt"></div></div></div>
 `;
   };
   const groupRow = (list, p) => {
@@ -373,7 +388,7 @@ function catalogPage(index, ctx = {}) {
     return `<div class="q ${best.cls}" id="g${head.evStageId}-p${p}" data-eid="${list.map((en) => en.evStageId).join(' ')}"${anyFirst ? ' data-first="1"' : ''} data-period="${p}" data-type="${uniq(list.map(typesOf))}" data-show="${sts.map((s) => s.show).join(' ')}" data-search="${esc(list.map(search).join(' | '))}" data-reward="${uniq(list.map(rewards))}" data-n="${list.length}" data-nf="${list.filter((en) => per(en) === p).length}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`
       + `<div class="info"><span class="nm">${esc(familyTitle(head.name))}</span><div class="d">${list.length} ${days ? 'days' : 'variants'}${list.every((en) => en.vip) ? ' · <span class="vip">VIP only</span>' : ''}</div>`
-      + `${best.pill}<div class="chs">${chips}</div>${button}</div></div>
+      + `${best.pill}<div class="chs">${chips}</div>${button}<div class="mt"></div></div></div>
 `;
   };
   // the rows of a section: entries with the same (non-empty) banner art together, in the order of their first entry
@@ -400,17 +415,17 @@ function catalogPage(index, ctx = {}) {
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__REWARD__', labels(REWARD_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
-    .replace('__CHIP_ICON__', JSON.stringify(CHIP_ICON)).replace('__RANK__', RANK_JS);
+    .replace('__CHIP_ICON__', JSON.stringify(CHIP_ICON)).replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
     + '<p class="n">Quests from past periods can be kept in Special. Only one can be kept at a time. Tap a banner, or a day, for its details.</p>'
     + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, secRows.get(p.n).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
-    + `<div class="sum" id="sum"><span class="n1">${nq}</span> · all periods, no filters</div>${sections}`
+    + `<div class="sum" id="sum"><span class="n1">${nq}</span> · all periods, no filters</div><div id="none" class="none" style="display:none"></div>${sections}`
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Quest or reward name" autocomplete="off"></div>'
-    + '<div class="hint">Matches quest names and the items they give (e.g. Huey, Mythril, Cid).</div>'
+    + '<div class="hint">Matches the start of words in quest names and in the items they give (e.g. Key Art, Mythril, Cid).</div>'
     + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS)}</div>`
     + `<h4>REWARDS</h4><div class="opts" data-g="reward">${opts(REWARD_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
@@ -468,4 +483,4 @@ function detailPage(index, evStageId, ctx = {}) {
     + `${quests}${back}<script>${PIN_JS}</script></body></html>`;
 }
 
-module.exports = { catalogPage, detailPage, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank };
+module.exports = { catalogPage, detailPage, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch };

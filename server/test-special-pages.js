@@ -40,8 +40,8 @@ for (const p of PERIODS) check(html.includes('data-p="' + p.n + '"') && html.inc
 check(html.includes('id="tc1">3<') && html.includes('id="tcall">8<'), 'tab counts (3 in period 1, 8 total)');
 const attr = (id, a) => { const r = row(id), m = new RegExp(a + '="([^"]*)"').exec(r.slice(0, r.indexOf('>') + 1)); return m ? m[1] : null; };
 for (const id of [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108]) check(['data-period', 'data-type', 'data-show', 'data-search'].every((a) => attr(id, a) !== null), 'row attrs ' + id);
-check(attr(7102, 'data-search').includes('huey') && attr(7102, 'data-search').includes('mythril') && attr(7102, 'data-search').includes('quest two'), 'search has drop names');
-check(attr(7107, 'data-search') === 'n-cid', 'search plain name');
+check(attr(7102, 'data-search').toLowerCase().includes('huey') && attr(7102, 'data-search').toLowerCase().includes('mythril') && attr(7102, 'data-search').toLowerCase().includes('quest two'), 'search has drop names');
+check(attr(7107, 'data-search') === 'N-cid', 'search plain name (as written)');
 check(attr(7102, 'data-period') === '1' && attr(7101, 'data-period') === '2', 'data-period');
 check(attr(7107, 'data-type') === 'daily' && attr(7106, 'data-type').split(' ').includes('vip') && attr(7108, 'data-type') === 'camp' && attr(7101, 'data-type') === 'weekday', 'types');
 check(attr(7101, 'data-show') === 'kept' && attr(7102, 'data-show') === 'can' && attr(7103, 'data-show') === 'replaced' && attr(7104, 'data-show') === 'removed' && attr(7105, 'data-show') === 'later' && attr(7106, 'data-show') === 'can' && attr(7108, 'data-show') === 'now', 'shows');
@@ -52,7 +52,7 @@ check(row(7102).includes('width="320"') && row(7102).includes('height="70"') && 
 const rowFor = (id) => row(id).includes('khuxClick');
 check(rowFor(7102) && rowFor(7101), 'pin buttons kept');
 const nonames = pages.catalogPage(index, { period: 4, pinnedKey: '', periods: PERIODS });
-check(nonames.includes('data-search="n-kb2 | quest two"'), 'works without names');
+check(nonames.includes('data-search="N-kb2 | Quest Two"'), 'works without names');
 const built = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], medal: [{ medalId: 9, name: 'Huey' }], material: [{ materialId: 8, name: 'Mythril' }],
   enemy: [{ enemyId: 77, name: 'Huey' }],
   stage: [{ stageId: 3, validSubmission: 2, submissionName: ['Defeat %s x %d', 'Defeat the ${1:%s} within ${2:%d :#turn:#turns}', ''], submissionIdType: [1, 1, 0],
@@ -295,5 +295,17 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(/class="ch c-can"[^>]*data-cls="can"[^>]*data-pill="[^"]*Past quest/.test(g), 'chips carry their status class and pill');
   check(h.includes('function khuxRank(') && h.includes('function regroup(') && /CHIP_ICON=\{/.test(h), 'page script: rank, regroup, chip icons');
 }
+// round 11: FIND matches at word starts, item name by item name (khuxMatch, shared with the page)
+{
+  const m = pages.khuxMatch, page = new Function(`${pages.MATCH_JS};return khuxMatch;`)();
+  const cases = [['key', 'Fantasia Mickey Ver. A', false], ['key', 'Key Art #3', true], ['key', 'Keyblade Materials', true],
+    ['key art', 'Key Art #19', true], ['key art', 'Keyblade Materials: Olympia', false], ['key', 'Monkey', false],
+    ['KEY  art', 'key art #19', true], ['#19', 'Key Art #19', true], ['art #1', 'Key Art #19', true], ['olympia', 'Keyblade Materials: Olympia', true],
+    ["donald's", "Donald's Hat", true], ['', 'anything', true]];
+  for (const [q, n, want] of cases) check(m(q, n) === want && page(q, n) === want, `khuxMatch(${q}, ${n}) = ${m(q, n)} (want ${want})`);
+  check(h0().includes('function khuxMatch(') && /split\(' \| '\)/.test(h0()), 'page script matches per item name');
+  check(h0().includes('class="mt"') && h0().includes('Matches') && h0().includes('id="none"') && h0().includes('No quests match'), '«Matches:» line and «No quests match» message');
+}
+function h0() { return html; }
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
