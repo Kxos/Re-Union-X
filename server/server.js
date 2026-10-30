@@ -3935,7 +3935,7 @@ function respondSpecialWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
   if (p === '/web/special/catalog') {
-    const b = Buffer.from(specialPages.catalogPage(specialIndex(), specialCtx()), 'utf8');
+    const b = Buffer.from(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows) }), 'utf8'); // names: search box (drop and objective rewards)
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
     return res.end(b);
   }
