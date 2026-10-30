@@ -235,6 +235,10 @@ delete p.special.pinned;
   const mats = JSON.stringify(p.materials || {}), medals = (p.medals || []).length, ap0 = p.ap;
   const moneyB = p.money, luxB = p.lux;
   delete p.clearMissions[970000]; delete p.stageScores[970000];
+  // i tre obiettivi danno Munny x100 la prima volta (make-special.js, polish 31-10); il master locale puo' avere ancora la
+  // riga vecchia (tipo 0): la si porta in memoria ai valori di make-special, senza scrivere master_data
+  const trRow = t.masterRows('stage').find((r) => r.stageId === 970000);
+  Object.assign(trRow, { submissionRewardType: [4, 4, 4], submissionItemId: [0, 0, 0], submissionItemNum: [100, 100, 100] });
   const ts = call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
   // revisione finale: nessun drop nell'allenamento (i record della mappa restano sulla riga 1)
   check(ts.userEnemyDropItems.length > 0 && ts.userEnemyDropItems.every((d) => Array.isArray(d.dropItemTypeIds) && d.dropItemTypeIds.length === 0),
@@ -242,16 +246,12 @@ delete p.special.pinned;
   const tc = call(t.respondStageClear, { burst: 120000, getPoint: { lux: 500, money: 300, exp: 50 }, getMaterials: [{ materialId: 1, number: 5 }],
     getEnemyDropItems: [1, 2, 3], clearMissionIds: [1, 2] });
   check(p.keybladeBurst === 55000, `allenamento: gauge ${p.keybladeBurst}`);
-  check(p.lux === luxB && p.money === moneyB, `allenamento: lux ${p.lux} money ${p.money}`);
+  check(p.lux === luxB && p.money === moneyB + 200, `allenamento: lux ${p.lux}, money ${p.money} (solo gli obiettivi 1 e 2: +200)`);
   check(JSON.stringify(p.materials || {}) === mats && (p.medals || []).length === medals, 'allenamento: materiali o medaglie cambiati');
   check(tc.getLux === 0, `allenamento: getLux ${tc.getLux}`);
   check(JSON.stringify(p.clearMissions[970000]) === '[1,2]', `allenamento: obiettivi ${JSON.stringify(p.clearMissions[970000])}`);
   check(p.stageScores[970000] === 0, `allenamento: punteggio ${p.stageScores[970000]}`);
   check(p.ap === ap0, 'allenamento: AP cambiati');
-  // polish 31-10: i tre obiettivi danno Munny x100 la prima volta (make-special.js); la riga del master locale puo' essere
-  // ancora quella vecchia (tipo 0): la si porta in memoria ai valori di make-special, senza scrivere master_data
-  const trRow = t.masterRows('stage').find((r) => r.stageId === 970000);
-  Object.assign(trRow, { submissionRewardType: [4, 4, 4], submissionItemId: [0, 0, 0], submissionItemNum: [100, 100, 100] });
   delete p.clearMissions[970000];
   const money0 = p.money;
   call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });

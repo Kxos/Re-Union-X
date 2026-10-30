@@ -27,7 +27,7 @@ const PIN_JS = 'var KHUX_PIN={1:["Pinned!","Leave and re-enter Special to see it
   + 'x.onerror=function(){khuxSay(box,"pinmsg err","Could not reach the server","Try again.");};x.send("");return false;}'
   + 'function khuxClick(el){return khuxPin(el,document.getElementById("pinmsg"),function(on){var id=el.getAttribute("data-id");'
   + 'var all=document.querySelectorAll("[data-id]"),i;for(i=0;i<all.length;i++){if(all[i].getAttribute("data-on")==="0")khuxSet(all[i],all[i].getAttribute("data-id"),false);}'
-  + 'if(on)khuxSet(el,id,true);if(window.khuxRow)window.khuxRow(id,on);});}';
+  + 'if(on){for(i=0;i<all.length;i++)if(all[i].getAttribute("data-id")===id&&all[i].className==="pk")khuxSet(all[i],id,true);}if(window.khuxRow)window.khuxRow(id,on);});}';
 
 // colours of the Shop (gacha.js page / CATALOG_CSS): now green, kept gold, can be kept blue, locked and off grey
 const PILL_CSS = '.s{display:inline-block;border-radius:12px;padding:0 10px;font-size:13px;line-height:1.7;margin:3px 0 0;background:#1a6fa8;color:#fff}'
@@ -160,7 +160,13 @@ function statusOf(en, ctx, { byKey, pinned, current }) {
       why: 'This quest is not restored: the materials it gave have no use in this version.' };
   }
   if (en.replacedBy) {
-    const by = byKey.get(en.replacedBy)?.name || en.replacedBy;
+    const rep = byKey.get(en.replacedBy);
+    let by = rep?.name || en.replacedBy;
+    // the replacing entry with the same name (period-1 VIP Daily Cid -> free Daily Cid): say what tells them apart
+    if (rep && rep.name === en.name) {
+      const p1 = (ctx.periods || special.PERIODS).find((p) => p.n === Math.min(...rep.periods));
+      by += ` — ${en.vip && !rep.vip ? 'free ' : ''}from ${rep.from ? niceDay(rep.from) : p1 ? p1.name : ''}`;
+    }
     return { show: 'replaced', cls: 'off', pill: pill('off', 'replaced', `Replaced by ${esc(by)}`), button: null,
       why: `In the original game this quest was replaced by ${esc(by)}, which is the one you can play.` };
   }
@@ -207,12 +213,13 @@ const JS = `(function(){
 var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__},PILL=__PILL__;
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,id:el.id.slice(1),p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',s:attr(el,'data-show'),q:attr(el,'data-search')||''};});
+var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,id:attr(el,'data-eid'),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',s:attr(el,'data-show'),q:attr(el,'data-search')||''};});
 var secs=[].map.call(document.querySelectorAll('.sec'),function(el){return {el:el,p:attr(el,'data-p')};});
 var cur={p:'all',type:'all',show:'all',q:''},dr=null;
 function copy(s){return {p:s.p,type:s.type,show:s.show,q:s.q};}
+// a row per entry and period: the All tab uses the first row of each entry only (r.f), so every count is of entries
 function match(r,s,anyPeriod){
-if(!anyPeriod&&s.p!=='all'&&r.p!==s.p)return false;
+if(!anyPeriod){if(s.p==='all'&&!r.f)return false;if(s.p!=='all'&&r.p!==s.p)return false;}
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
 if(s.show!=='all'&&r.s!==s.show)return false;
 return !s.q||r.q.indexOf(s.q.toLowerCase())>=0;}
@@ -223,7 +230,7 @@ function plural(n){return n+' quest'+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
 function render(){
 var c={all:0},n=0,i,r,on,sh={};
-for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){c.all++;c[r.p]=(c[r.p]||0)+1;}
+for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){if(r.f)c.all++;c[r.p]=(c[r.p]||0)+1;}
 on=match(r,cur);if(on){n++;sh[r.p]=1;}r.el.className=r.el.className.replace(/ hide/g,'')+(on?'':' hide');}
 for(i=0;i<secs.length;i++)secs[i].el.className='sec'+(sh[secs[i].p]?'':' hide');
 [].forEach.call(document.querySelectorAll('.tab'),function(t){var p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
@@ -277,17 +284,22 @@ function catalogPage(index, ctx = {}) {
     for (const sid of en.stageIds || []) parts.push(...names.objective(sid));
     return [...new Set(parts.map((x) => String(x).toLowerCase().replace(/\s+/g, ' ').trim()).filter(Boolean))].join(' | ');
   };
-  const row = (en) => {
-    const id = en.evStageId, st = statusOf(en, ctx, data), href = detailHref(id);
+  // one row per entry and period (bench 31-10: the current period lists every quest it has); the first one (its first
+  // period) carries id="q<id>" (hash of the details BACK) and data-first, the All tab shows only those
+  const statusMemo = new Map();
+  const row = (en, p) => {
+    const id = en.evStageId, href = detailHref(id), first = p === per(en);
+    if (!statusMemo.has(en)) statusMemo.set(en, statusOf(en, ctx, data));
+    const st = statusMemo.get(en);
     const button = st.button === null ? '' : keepButton(id, st.button, ' onclick="return khuxClick(this)"');
-    return `<div class="q ${st.cls}" id="q${id}" data-period="${per(en)}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}">`
+    return `<div class="q ${st.cls}" id="q${id}${first ? '' : `-p${p}`}" data-eid="${id}"${first ? ' data-first="1"' : ''} data-period="${p}" data-type="${typesOf(en)}" data-show="${st.show}" data-search="${esc(search(en))}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(id)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(en.name)}</a><div class="d">${esc(daysText(en))}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>`
       + `${st.pill}${st.rp || ''}${button ? `<div>${button}</div>` : ''}</div></div>
 `;
   };
   const sections = periods.map((p) => {
-    const rows = entries.filter((en) => per(en) === p.n).map(row).join('');
+    const rows = entries.filter((en) => en.periods.includes(p.n)).map((en) => row(en, p.n)).join('');
     return `<div class="sec" data-p="${p.n}"><h2 class="per" id="p${p.n}">${esc(p.name)}</h2>`
       + `<div class="n">${niceDay(p.from)} – ${niceDay(p.to)}</div>${rows || '<p class="n">No quests.</p>'}</div>`;
   }).join('');
@@ -303,7 +315,7 @@ function catalogPage(index, ctx = {}) {
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
     + '<p class="n">Quests from past periods can be kept in Special. Only one can be kept at a time. Tap a banner for its details.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, entries.filter((en) => per(en) === p.n).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
+    + `<div class="tabs" id="tabs">${tab('all', 'All', n)}${periods.map((p) => tab(p.n, p.name, entries.filter((en) => en.periods.includes(p.n)).length, p.n === cur)).join('')}</div><div class="tabline"></div>`
     + `<div class="sum" id="sum"><span class="n1">${nq}</span> · all periods, no filters</div>${sections}`
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'

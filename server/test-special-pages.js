@@ -135,5 +135,43 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(r(7501).includes('data-show="now"') && r(7501).includes('Open in Special now'), 'Cid of today: now');
   check(r(7502).includes('data-show="other"') && r(7502).includes('Listed on Tue only') && !r(7502).includes('Open in Special now'), `Cid of another day: ${r(7502).slice(0, 300)}`);
 }
+// round 3 (bench rev 220): an entry is listed under EVERY period it belongs to; «All» shows each entry once
+{
+  const sec = (h, n) => { const a = h.indexOf(`<div class="sec" data-p="${n}">`); const b = h.indexOf('<div class="sec"', a + 10); return h.slice(a, b < 0 ? h.indexOf('<div class="ov"') : b); };
+  const rowsIn = (h, n) => (sec(h, n).match(/<div class="q /g) || []).length;
+  // fixture: kb [2], kb2 [1], repl [1,2], gone [1], later [5], vipq [3], cid [2], camp [3,4]
+  check(rowsIn(html, 1) === 3 && rowsIn(html, 2) === 3 && rowsIn(html, 3) === 2 && rowsIn(html, 4) === 1 && rowsIn(html, 5) === 1,
+    `rows per period section: ${[1, 2, 3, 4, 5].map((n) => rowsIn(html, n))}`);
+  check(html.includes('id="tc2">3<') && html.includes('id="tc3">2<') && html.includes('id="tc4">1<') && html.includes('id="tcall">8<'), 'tab counts per period (entries in that period), All unique');
+  check((html.match(/data-first="1"/g) || []).length === 8, `one first row per entry: ${(html.match(/data-first="1"/g) || []).length}`);
+  check((html.match(/ id="q7103"/g) || []).length === 1 && html.includes('id="q7103-p2"'), 'unique element ids for repeated rows');
+  check(/data-eid="7103"[^>]*data-period="2"|data-period="2"[^>]*data-eid="7103"/.test(html), 'repeated row carries the entry id');
+  check(sec(html, 2).includes('Replaced by N-kb') && sec(html, 1).includes('Replaced by N-kb'), 'same status in every section');
+  check(/if\(s\.p==='all'&&!r\.f\)return false/.test(html), 'All tab: first rows only');
+  // real counts of the local index (bench 31-10: 33 / 113 / 64 / 23 / 19)
+  let real = null; try { real = require('./game_data/special.json'); } catch { /* no local index */ }
+  if (real) {
+    const sp = require('./special');
+    const h = pages.catalogPage(real, { period: 4, pinnedKey: '', periods: sp.PERIODS, shopFrom: '2020-06-01', shopTo: '2020-06-07', weekday: 'Mon' });
+    const want = sp.PERIODS.map((p) => real.entries.filter((en) => en.periods && !en.training && en.periods.includes(p.n)).length);
+    const got = sp.PERIODS.map((p) => +(new RegExp(`id="tc${p.n}">(\\d+)<`).exec(h) || [])[1]);
+    check(got.join() === want.join() && got[3] > 3, `real tab counts ${got} (want ${want})`);
+    check(+(/id="tcall">(\d+)</.exec(h) || [])[1] === real.entries.filter((en) => en.periods && !en.training).length, 'real All count = entries');
+  }
+}
+// round 3 (b): «Replaced by» with the same name says what tells them apart
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('cid-vip-mon', 7030, { name: 'Daily Challenge: Cid (Monday)', periods: [1, 2], vip: true, days: ['Mon'], family: 'SQ12', replacedBy: 'cid-mon', to: '2017-04-19' }),
+    e('cid-mon', 7001, { name: 'Daily Challenge: Cid (Monday)', periods: [2, 3, 4], days: ['Mon'], family: 'SQ12', from: '2017-04-20' }),
+    e('other', 7002, { name: 'Other', periods: [1], replacedBy: 'newer' }),
+    e('newer', 7003, { name: 'Newer', periods: [3] }),
+  ] };
+  const h = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon' });
+  check(h.includes('Replaced by Daily Challenge: Cid (Monday) — free from Apr 20, 2017'), 'same name: «— free from <date>»');
+  check(h.includes('Replaced by Newer<') || h.includes('Replaced by Newer</'), 'different name: plain «Replaced by»');
+  const ix2 = { catalog: { evStageId: 7000 }, entries: [e('a', 7010, { name: 'Same', periods: [1], replacedBy: 'b' }), e('b', 7011, { name: 'Same', periods: [3] })] };
+  check(pages.catalogPage(ix2, { period: 4, periods: PERIODS }).includes('Replaced by Same — from Period 3'), 'same name, no date: first period name');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
