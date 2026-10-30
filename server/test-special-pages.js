@@ -127,5 +127,13 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(st && st.objectives.length === 2 && st.objectives[0].text === 'Defeat Huey x 2' && st.objectives[0].reward === 'Mythril x4'
     && st.objectives[1].text === 'Defeat the Huey within 1 turn' && st.objectives[1].reward === 'Avatar Coin x5', `buildNames.stage ${JSON.stringify(st)}`);
 }
+// round 2: the catalogue lists every Daily Cid variant; only today's is «In Special now», the others say their day
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: ['Mon', 'Tue'].map((d, i) => e('cid-' + d, 7501 + i, { periods: [4], days: [d], family: 'SQ12', resetGroup: 'cid' })) };
+  const h = pages.catalogPage(ix, { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', vip: true });
+  const r = (id) => { const s0 = h.indexOf(`id="q${id}"`); return s0 < 0 ? '' : h.slice(s0, h.indexOf('</div>'+String.fromCharCode(10), s0)); };
+  check(r(7501).includes('data-show="now"') && r(7501).includes('Open in Special now'), 'Cid of today: now');
+  check(r(7502).includes('data-show="other"') && r(7502).includes('Listed on Tue only') && !r(7502).includes('Open in Special now'), `Cid of another day: ${r(7502).slice(0, 300)}`);
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
