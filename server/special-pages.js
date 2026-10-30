@@ -239,7 +239,8 @@ const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 // (data-eid / data-show: space-separated, one per member; data-n: members). khuxRow (called by PIN_JS after a pin /
 // unpin) moves the statuses: the new kept entry gold, the old one back to «can be kept» (a group: its chips).
 const JS = `(function(){
-var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__;
+var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__,CHIP_ICON=__CHIP_ICON__;
+__RANK__
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
 var rows=[].map.call(document.querySelectorAll('.q'),function(el){return {el:el,ids:(attr(el,'data-eid')||'').split(' '),f:attr(el,'data-first')==='1',p:attr(el,'data-period'),t:' '+attr(el,'data-type')+' ',ss:(attr(el,'data-show')||'').split(' '),rw:' '+(attr(el,'data-reward')||'')+' ',n:+attr(el,'data-n')||1,nf:+attr(el,'data-nf'),q:attr(el,'data-search')||''};});
@@ -276,14 +277,20 @@ if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;$('fdot').textContent=k?k:'';}
 // one member of a row changes status: a single row gets the new bar and pill, a group the new chip colour
+function paint(r,cls,html){r.el.className='q '+cls+(/ hide/.test(r.el.className)?' hide':'');var s=r.el.querySelector('.s');if(s){s.className='s s-'+cls;s.innerHTML=html;}}
+// a group: the chip of the member, then the row bar and pill of the best member again (khuxRank, as on the server)
+function regroup(r){var b=-1,bc='',bh='',j,ch;for(j=0;j<r.ids.length;j++){ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(!ch)continue;
+var c=attr(ch,'data-cls'),k=khuxRank(r.ss[j],c);if(b<0||k<b){b=k;bc=c;bh=PILL[r.ss[j]]?PILL[r.ss[j]].html:attr(ch,'data-pill');}}
+if(b>=0)paint(r,bc,bh);}
 function setMember(r,j,show){var p=PILL[show];r.ss[j]=show;r.el.setAttribute('data-show',r.ss.join(' '));
-if(r.ids.length===1){r.el.className='q '+p.cls+(/ hide/.test(r.el.className)?' hide':'');var s=r.el.querySelector('.s');if(s){s.className='s s-'+p.cls;s.innerHTML=p.html;}return;}
-var ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(ch){ch.className='ch c-'+p.cls;var ic=ch.querySelector('.ic');if(ic)ic.src='/web/special/icon/pin.png';}}
+if(r.ids.length===1){paint(r,p.cls,p.html);return;}
+var ch=r.el.querySelector('.ch[data-eid="'+r.ids[j]+'"]');if(ch){ch.className='ch c-'+p.cls;ch.setAttribute('data-cls',p.cls);var ic=ch.querySelector('.ic');if(ic&&CHIP_ICON[show])ic.src='/web/special/icon/'+CHIP_ICON[show]+'.png';}
+regroup(r);}
 window.khuxRow=function(id,on){var name='',i,j,r;for(i=0;i<rows.length;i++){r=rows[i];for(j=0;j<r.ids.length;j++){if(r.ss[j]==='kept')setMember(r,j,'can');
 if(r.ids[j]===id){setMember(r,j,on?'kept':'can');if(on){var t=r.ids.length===1?r.el.querySelector('.nm'):r.el.querySelector('.ch[data-eid="'+id+'"]');name=t?(attr(t,'title')||t.textContent):'';}}}}
-for(i=0;i<rows.length;i++){r=rows[i];if(r.ids.length!==1)continue;var x=r.el.querySelector('.rp');
-if(!x&&r.ss[0]==='can'&&name){x=document.createElement('div');x.className='rp';var s=r.el.querySelector('.s');s.parentNode.insertBefore(x,s.nextSibling);}
-if(x){x.textContent='Replaces\\u003a '+name;x.style.display=name&&r.ss[0]==='can'?'':'none';}}
+for(i=0;i<rows.length;i++){r=rows[i];var pk=r.el.querySelector('.pk');if(!pk)continue;var st=r.ss[r.ids.indexOf(attr(pk,'data-id'))],x=r.el.querySelector('.rp');
+if(!x&&st==='can'&&name){x=document.createElement('div');x.className='rp';pk.parentNode.parentNode.insertBefore(x,pk.parentNode);}
+if(x){x.textContent='Replaces\\u003a '+name;x.style.display=name&&st==='can'?'':'none';}}
 render();};
 function sync(){
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var g=attr(box,'data-g');[].forEach.call(box.children,function(o){o.className=o.className.replace(/ on/g,'')+(attr(o,'data-v')===dr[g]?' on':'');});});
@@ -307,6 +314,11 @@ var h=location.hash&&document.getElementById(location.hash.slice(1));if(h&&h.scr
 // VIP! Materials and Materials 2...) take one row. Best member status first: it gives the row its bar and pill.
 const SHOW_RANK = ['now', 'can', 'kept', 'other', 'replaced', 'later', 'removed'];
 const CHIP_ICON = { now: 'now', can: 'pin', kept: 'pin', replaced: 'replaced', later: 'later', removed: 'removed' };
+// rank of a member status (lower = better): SHOW order, then open > open with VIP > locked. The same function runs in
+// the page script (regroup after a pin / unpin) and here (groupRow), from this one source.
+const CLS_RANK = ['now', 'vipnow', 'locked'];
+const RANK_JS = `function khuxRank(show,cls){var s=${JSON.stringify(SHOW_RANK)}.indexOf(show),c=${JSON.stringify(CLS_RANK)}.indexOf(cls);return s*3+(c<0?0:c);}`;
+const khuxRank = new Function(`${RANK_JS};return khuxRank;`)();
 const DAY_SUFFIX = /\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/;
 const familyTitle = (name) => String(name).replace(DAY_SUFFIX, '').replace(/\s+\d+$/, '');
 const variantOf = (en) => (Array.isArray(en.days) && en.days.length === 1 ? en.days[0] : (/\s(\d+)$/.exec(en.name) || [, '1'])[1]);
@@ -347,16 +359,15 @@ function catalogPage(index, ctx = {}) {
 `;
   };
   const groupRow = (list, p) => {
-    const rank = (st) => SHOW_RANK.indexOf(st.show) * 3 + Math.max(0, ['now', 'vipnow', 'locked'].indexOf(st.cls));
-    const sts = list.map(statusFor), best = sts.reduce((a, b) => (rank(b) < rank(a) ? b : a));
+    const sts = list.map(statusFor), best = sts.reduce((a, b) => (khuxRank(b.show, b.cls) < khuxRank(a.show, a.cls) ? b : a));
     const head = list[0], href = detailHref(head.evStageId), anyFirst = list.some((en) => per(en) === p);
     const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
     const chips = list.map((en, j) => {
       const st = sts[j], k = st.cls === 'locked' ? 'lock' : st.cls === 'vipnow' ? 'vip' : CHIP_ICON[st.show];
-      return `<a class="ch c-${st.cls}"${per(en) === p ? ` id="q${en.evStageId}"` : ''} data-eid="${en.evStageId}" href="${detailHref(en.evStageId)}" title="${esc(en.name)}">${k ? icon(k) : ''}${esc(variantOf(en))}</a>`;
+      return `<a class="ch c-${st.cls}"${per(en) === p ? ` id="q${en.evStageId}"` : ''} data-eid="${en.evStageId}" data-cls="${st.cls}" data-pill="${esc(st.pill.replace(/^<span[^>]*>|<\/span>$/g, ''))}" href="${detailHref(en.evStageId)}" title="${esc(en.name)}">${k ? icon(k) : ''}${esc(variantOf(en))}</a>`;
     }).join('');
     const keepable = list.filter((en, j) => sts[j].button !== null);
-    const button = keepable.length === 1 ? `<div>${keepButton(keepable[0].evStageId, statusFor(keepable[0]).button, ' onclick="return khuxClick(this)"')}</div>` : '';
+    const button = keepable.length === 1 ? `${statusFor(keepable[0]).rp || ''}<div>${keepButton(keepable[0].evStageId, statusFor(keepable[0]).button, ' onclick="return khuxClick(this)"')}</div>` : '';
     const days = list.every((en) => Array.isArray(en.days) && en.days.length === 1);
     return `<div class="q ${best.cls}" id="g${head.evStageId}-p${p}" data-eid="${list.map((en) => en.evStageId).join(' ')}"${anyFirst ? ' data-first="1"' : ''} data-period="${p}" data-type="${uniq(list.map(typesOf))}" data-show="${sts.map((s) => s.show).join(' ')}" data-search="${esc(list.map(search).join(' | '))}" data-reward="${uniq(list.map(rewards))}" data-n="${list.length}" data-nf="${list.filter((en) => per(en) === p).length}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`
@@ -387,7 +398,8 @@ function catalogPage(index, ctx = {}) {
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__REWARD__', labels(REWARD_OPTS))
-    .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }));
+    .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
+    .replace('__CHIP_ICON__', JSON.stringify(CHIP_ICON)).replace('__RANK__', RANK_JS);
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
@@ -455,4 +467,4 @@ function detailPage(index, evStageId, ctx = {}) {
     + `${quests}${back}<script>${PIN_JS}</script></body></html>`;
 }
 
-module.exports = { catalogPage, detailPage, buildNames, typesOf, SPECIAL_ICON_KEYS };
+module.exports = { catalogPage, detailPage, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank };
