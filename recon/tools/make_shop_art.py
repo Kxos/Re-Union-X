@@ -15,7 +15,7 @@ make_special_banners.catalog_banner, whose helpers are imported): darkened obliq
 the gold lettering with brown outline of the originals, a subtitle saying what the plate does (the tap does nothing,
 the plate is grey; Details opens the catalogue, where one banner can be kept in the Shop), medal art on the right
 (CATALOG_MEDALS, the client's img/medal/Medal_L_<id>.png of the local medal_gen pack, --medals; BTF or PNG; left out
-with a WARNING when missing), an «ALL BANNERS» sticker and an arrow pointing to the Details button.
+with a WARNING when missing), and an «ALL BANNERS» sticker (no tap arrow: the user, 30-10).
 New art: raise CATALOG_PLATE_STYLE in server/gacha.js (the URL changes), node server/make-banners.js, revision bump.
     python -I recon/tools/make_shop_art.py <stage_gen\\files> <server\\game_data> [--medals D]
 """
@@ -134,15 +134,6 @@ def catalog_banner(strips_dir, medals_dir=None):
     ImageDraw.Draw(im).text((22, 104), CATALOG_SUB, font=font(18), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=(20, 16, 40, 255))
     im.alpha_composite(sb.sticker('ALL BANNERS', w=136, h=42, angle=8), (392, -6))
-    # the Details button sits right of the plate: arrow pointing to the right edge, a light ripple on the edge
-    rp = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
-    dr = ImageDraw.Draw(rp)
-    tx, ty = 632, 118
-    for r, a in ((6, 255), (12, 190), (18, 110)):
-        dr.ellipse((tx - r * .7, ty - r, tx + r * .7, ty + r), outline=(255, 255, 255, a), width=2)
-    im = Image.alpha_composite(im, rp)
-    arrow = sb.tap_arrow(40).transpose(Image.FLIP_LEFT_RIGHT)        # tip at the bottom-right corner
-    im.alpha_composite(arrow, (tx - 42, ty - 38))
     ImageDraw.Draw(im).rounded_rectangle((1, 1, 638, 138), radius=8, outline=GOLD, width=3)
     return im
 

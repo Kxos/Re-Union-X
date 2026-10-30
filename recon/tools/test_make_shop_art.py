@@ -43,6 +43,8 @@ check(bare.size == (640, 140), 'size 640x140 (no local art): %s' % (bare.size,))
 check(ImageChops.difference(bare.convert('RGB'), old).getbbox() is not None, 'differs from the old plain plate')
 check(gold(bare, (14, 22, 400, 78)) > 1500, 'gold title on the left: %d px' % gold(bare, (14, 22, 400, 78)))
 check(gold(old, (14, 22, 95, 78)) < 50 < gold(bare, (14, 22, 95, 78)), 'title starts at the left edge (the old one was centred)')
+a = np.asarray(bare.convert('RGB').crop((570, 60, 636, 136))).astype(int)
+check(int((a.min(axis=2) > 230).sum()) == 0, 'no tap arrow or ripple at the bottom right (user 30-10)')
 
 # with fake strips and medals: they show up (the plate changes) and the title stays readable
 strips = os.path.join(tmp, 'gacha_img')
