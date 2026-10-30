@@ -20,6 +20,10 @@
 //   the server adds the host). The client ignores week*/benefit* (bench 30-10): the server decides open/locked;
 // - reward rows 970000+: one per drop, prize at position 0 (type 5 material, or type 3 medal: bench 30-10, the client
 //   shows a medal dropped by an enemy when /stage/start sends 3 at its position). Task 4 puts them on the enemies;
+// - training (spec 7, Task 10): enemy row DUMMY_ENEMY_ID (the unkillable training dummy, a Large Body copy) and reward
+//   row CP_REWARD_ID (the CP chests of path B); index catalog.dummyEnemyId / catalog.rewardIds; the training map entry
+//   gets training: true, dummy: [{name, enemyId, n, reward 1}] and chests: [CP_REWARD_ID per chest] (two-path map of
+//   gen_story_maps.py build_training);
 // - server/game_data/special.json: the index read by special.js / server.js (catalog + entries, Task 2 shape, plus the
 //   map data Task 4 needs: world, room, target, level and drop rows per stage);
 // - server/game_data/special_maps.json: the stage list for recon/tools/gen_story_maps.py (config key "special"):
@@ -53,11 +57,25 @@ const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\special\\special_quests.json';
 // training quest (spec 7): 0 AP, target Shadow on path A; the dummy and the CP chests of path B come with its map
 // (Tasks 4 and 10). Objective rewards: no original row has a reward of type 0, so the smallest reward, 1 munny.
-const TRAINING = { name: 'Training Grounds', world: 'Daybreak Town', room: 'Training Grounds', target: 'Shadow', level: 1,
+// Room: the 1st District (DB_0004_00_00), a long street with the start in its middle (two paths, gen_story_maps.py
+// build_training); the room the name «Training Grounds» picked (DB_0027_00_00) has 2 walkable grid points.
+const TRAINING = { name: 'Training Grounds', world: 'Daybreak Town', room: '1st District', target: 'Shadow', level: 1,
   objectives: ['Defeat the target enemy -> Munny x1', 'Complete without having to continue -> Munny x1', 'Defeat Shadow x 1 -> Munny x1'] };
 // a «Title x1» objective without a title name in the catalogue (MOG quests): Avatar Coin x5, like the other small
 // objective rewards of the Special quests (builder's call)
 const TITLE_FALLBACK = [14, 0, 5];
+// Training dummy (spec 7, Task 10): an enemy row copied from the Large Body (its look, no new graphics), the same HP at
+// every level, no exp/munny/lux. HP: the client keeps enemy HP as int64 (I-206: 979 Ephemer & Skuld are served at
+// 6.5e11); 9e14 is the largest round value whose x10000 (a client rate in ten-thousandths, as the heal of an attack
+// row) still fits an int64 and that a double holds exactly. Self heal: the original «Big Self Heal» row 2101 (Wibble
+// Wobble; attack + heal 3500, motion 1) as second skill, usable at any HP (skillRequire 2): with HP this large the
+// original condition (4, HP below a share) would never come true. Without row 2101 in the master: HP only.
+const DUMMY_ENEMY_ID = 970007, DUMMY_TEMPLATE = 'Large Body', DUMMY_NAME = 'Training Dummy', DUMMY_HP = 900000000000000;
+const DUMMY_HEAL = 2101, DUMMY_HEAL_ODDS = 3000;
+const DUMMY_FLAVOR = 'A training dummy that never falls. Test your Medals and specials here, then leave with Give Up.';
+// CP chests of path B: one reward row (id fixed, own range) with one prize type 8 (special gauge, 1 gauge = 10000) of
+// 60000, the largest original CP chest (row 82); count = ceil(largest keyblade maxBurstGauge x 10000 / 60000)
+const CP_REWARD_ID = REWARD_LAST, CP_PER_CHEST = 60000, GAUGE_UNIT = 10000;
 
 const num = (s) => parseInt(String(s || '').replace(/,/g, ''), 10) || 0;
 // «12 / 20 / 30» -> 12 (tier I), «zero» -> 0
@@ -66,6 +84,7 @@ const stageIdOf = (evStageId, i) => STAGE_FIRST + (evStageId - EV_FIRST) * 10 + 
 const isOwnStage = (r) => r.stageId >= STAGE_FIRST && r.stageId <= STAGE_LAST;
 const isOwnEv = (r) => r.eventStageId >= EV_FIRST && r.eventStageId <= EV_LAST;
 const isOwnReward = (r) => r.rewardId >= REWARD_FIRST && r.rewardId <= REWARD_LAST;
+const isOwnEnemy = (r) => r.enemyId === DUMMY_ENEMY_ID;
 // enemies of a map group: at most 5 (as the story groups), at least 3 normal groups
 const GROUP_MAX = 5, GROUPS_MIN = 3, TARGET_PER_GROUP = 2;
 const carrierOf = (medalName) => (/^(Huey|Dewey|Louie)\b/.test(medalName || '') ? 'Growth Egg'
@@ -149,6 +168,26 @@ function subsOf(objectives, rewardsOverride, target, L, report, where) {
     submissionItemNum: pad(([, r]) => r[2]) };
 }
 
+// training dummy enemy row (DUMMY_* above): the 8xxxx Large Body row, else its smallest id
+function dummyRow(masterRows) {
+  const is8 = (e) => (e.enemyId >= 80000 && e.enemyId < 90000 ? 1 : 0);
+  const tpl = (masterRows.enemy || []).filter((e) => e.name === DUMMY_TEMPLATE && !isOwnEnemy(e))
+    .sort((a, b) => is8(b) - is8(a) || a.enemyId - b.enemyId)[0];
+  if (!tpl) throw new Error(`special: no «${DUMMY_TEMPLATE}» enemy row for the training dummy`);
+  const row = JSON.parse(JSON.stringify(tpl));
+  const flat = (k, v) => { if (Array.isArray(row[k])) row[k] = row[k].map(() => v); };
+  Object.assign(row, { enemyId: DUMMY_ENEMY_ID, name: DUMMY_NAME, flavor: DUMMY_FLAVOR });
+  flat('hp', DUMMY_HP);
+  for (const k of ['exp', 'money', 'raidPoint', 'lux']) flat(k, 0);
+  if ((masterRows.enemyAttack || []).some((a) => a.enemyAttackId === DUMMY_HEAL)) {
+    // first skill of the template (its basic attack) kept, the heal second; arrays keep their length
+    const two = (arr, v) => { const o = [...(arr || [0, 0])]; while (o.length < 2) o.push(0); o[1] = v; return o.map((x, i) => (i > 1 ? 0 : x)); };
+    Object.assign(row, { validSkill: 2, skillId: two(row.skillId, DUMMY_HEAL), skillRequire: two(row.skillRequire, 2),
+      skillRequireArg: two(row.skillRequireArg, 0), skillOdds: two(row.skillOdds, DUMMY_HEAL_ODDS) });
+  }
+  return row;
+}
+
 function evStageRow(evStageId, stageIds, { resetFlag = 0, detailUrl = '' } = {}) {
   const row = { eventStageId: evStageId, parentEventStageId: 0, validStageId: stageIds.length, stageId: [...stageIds],
     validStageWidthId: 0, stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag, eventCategory: 1,
@@ -194,6 +233,9 @@ function build(rules, catalogue, masterRows) {
   // training quest behind the catalogue banner
   const training = stageRow(TRAINING_STAGE, { quest: TRAINING.name, world: TRAINING.world, room: TRAINING.room, target: TRAINING.target,
     level: String(TRAINING.level), objectives: TRAINING.objectives }, 0, null);
+  const enemyRows = [dummyRow(masterRows)];
+  const maxGauge = Math.max(0, ...(masterRows.keyblade || []).map((k) => k.maxBurstGauge || 0));
+  const cpChests = Math.max(1, Math.ceil(maxGauge * GAUGE_UNIT / CP_PER_CHEST));
   const evStageRows = [evStageRow(CATALOG_EV, [TRAINING_STAGE], { detailUrl: '/web/special/catalog' })];
 
   const seenEv = new Set([CATALOG_EV]), seenKey = new Set();
@@ -234,9 +276,16 @@ function build(rules, catalogue, masterRows) {
     evStageRows.push(evStageRow(en.evStageId, stageIds, { resetFlag: base.resetGroup ? 1 : 0 }));
     entries.push({ ...base, stageIds, useAp, stages, dropRewardIds });
   }
-  const index = { catalog: { evStageId: CATALOG_EV, stageIds: [TRAINING_STAGE], useAp: [0], stages: [{ ...training, training: true }] }, entries };
+  if (rewardRows.some((r) => r.rewardId >= CP_REWARD_ID)) throw new Error(`special: drop rows reach the CP chest row ${CP_REWARD_ID}`);
+  rewardRows.push({ rewardId: CP_REWARD_ID, validReward: 1, display: [1], type: [8], id: [0], assignSkillType: [0], assignSkillId: [0],
+    assignSkillLv: [0], num: [CP_PER_CHEST], odds: [10000] });
+  const index = { catalog: { evStageId: CATALOG_EV, stageIds: [TRAINING_STAGE], useAp: [0], stages: [{ ...training, training: true }],
+    dummyEnemyId: DUMMY_ENEMY_ID, rewardIds: [CP_REWARD_ID] }, entries };
   const maps = mapsOf(index, stageRows, rewardRows, masterRows, L);
-  return { stageRows, evStageRows, rewardRows, index, maps, report };
+  // training map (gen_story_maps.py build_training): path B with the dummy group and the CP chests
+  Object.assign(maps.find((m) => m.stageId === TRAINING_STAGE), { training: true,
+    dummy: [{ name: DUMMY_NAME, enemyId: DUMMY_ENEMY_ID, n: 1, reward: 1 }], chests: Array(cpChests).fill(CP_REWARD_ID) });
+  return { stageRows, evStageRows, rewardRows, enemyRows, index, maps, report };
 }
 
 // stage list for gen_story_maps.py (header comment): one map part per stage
@@ -298,24 +347,31 @@ function patch(masterDir, opts = {}) {
   // reward rows from 970000 up are ours only if the previous run listed them (special.json): anything else there (e.g. a
   // row make-game-tables.js made from the POI) would be overwritten silently, so it stops the run
   const prev = readJson(path.join(gameData, 'special.json'), { entries: [] });
-  const prevOwn = new Set((prev.entries || []).flatMap((e) => e.dropRewardIds || []));
+  const prevOwn = new Set([...(prev.entries || []).flatMap((e) => e.dropRewardIds || []), ...((prev.catalog || {}).rewardIds || [])]);
   const allReward = t('reward');
   const foreign = allReward.filter((r) => r.rewardId >= REWARD_FIRST && !(isOwnReward(r) && prevOwn.has(r.rewardId)));
   if (foreign.length) throw new Error(`special: reward rows ${foreign.map((r) => r.rewardId).join(', ')} at or above ${REWARD_FIRST} are not ours`);
   const reward = allReward.filter((r) => !isOwnReward(r));
-  const out = build(rules, catalogue, { stage, reward, enemy: t('enemy'), medal: t('medal'), material: t('material'), skill: t('skill'),
-    title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts') });
+  // enemy row DUMMY_ENEMY_ID: ours when it is the training dummy of a previous run, otherwise foreign
+  const allEnemy = t('enemy');
+  const foreignEnemy = allEnemy.filter((r) => isOwnEnemy(r) && r.name !== DUMMY_NAME);
+  if (foreignEnemy.length) throw new Error(`special: enemy row ${DUMMY_ENEMY_ID} («${foreignEnemy[0].name}») is not the training dummy`);
+  const enemy = allEnemy.filter((r) => !isOwnEnemy(r));
+  const out = build(rules, catalogue, { stage, reward, enemy, medal: t('medal'), material: t('material'), skill: t('skill'),
+    title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts'), enemyAttack: t('enemyAttack') });
   fs.writeFileSync(path.join(masterDir, 'stage.json'), JSON.stringify([...stage, ...out.stageRows]));
   fs.writeFileSync(path.join(masterDir, 'evStage.json'), JSON.stringify([...evStage, ...out.evStageRows]));
   fs.writeFileSync(path.join(masterDir, 'reward.json'), JSON.stringify([...reward, ...out.rewardRows]));
+  fs.writeFileSync(path.join(masterDir, 'enemy.json'), JSON.stringify([...enemy, ...out.enemyRows]));
   fs.mkdirSync(gameData, { recursive: true });
   fs.writeFileSync(path.join(gameData, 'special.json'), JSON.stringify(out.index, null, 1));
   fs.writeFileSync(path.join(gameData, 'special_maps.json'), JSON.stringify(out.maps, null, 1));
-  console.log(`special: +${out.stageRows.length} stage (stageKind ${STAGE_KIND}), +${out.evStageRows.length} evStage, +${out.rewardRows.length} reward; `
+  console.log(`special: +${out.stageRows.length} stage (stageKind ${STAGE_KIND}), +${out.evStageRows.length} evStage, +${out.rewardRows.length} reward, `
+    + `+${out.enemyRows.length} enemy (training dummy); `
     + `${out.report.stopgaps.length} stopgap objectives, ${out.report.titleFallbacks.length} titles -> Avatar Coin x5`);
   return out;
 }
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { build, patch, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, apOf, splitObjective };
+module.exports = { build, patch, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };
