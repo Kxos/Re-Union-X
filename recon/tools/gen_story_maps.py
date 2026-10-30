@@ -19,7 +19,7 @@ treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules 
 (groups along the distance from the start, target alone in the arena at the farthest point), output
 mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
 reward goes into the enemy record (drop rows of make-special.js, 1 when the quest has none), targetReward into the target's record,
-level into every enemy record of the stage.
+level into every enemy record of the stage and into STG [11] (the quest level of the card, as in the story stages).
 Training map (an entry with "training": true, the stage of the Special Catalog banner, spec 7 of
 docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (group [{name, enemyId, n, reward}]) and
 "chests" (reward row of each chest). Two paths from the start (build_training): the start is the middle of the longest
@@ -1220,8 +1220,10 @@ if cfg.get('special'):
             start, dist = walk_grid(folder)
             part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
         target_id = ens[-1][2]                      # the target group is placed last (arena)
+        # STG [11] = quest level, as every story stage (import_orig_stages.py: [11] = wiki Lv = enemy record level): the
+        # client shows it on the quest card («LV») and the enemies fight at it; [11] 1 showed LV 1 (MOG, bench 30-10)
         hdr = struct.pack('<16i', 4674643, 16, 1, start[0], start[1], 2, target_id, 1, len(areas), len(ens),
-                          0, 1, 0, 0, len(chests), 0)
+                          0, sp.get('level', 1), 0, 0, len(chests), 0)
         open(os.path.join(out, 'mappoi_stg%05d.bin' % sid), 'wb').write(hdr)
         open(os.path.join(out, 'mappoi_stg%05d_00.bin' % sid), 'wb').write(part)
         poi_add(sid, 0, ens, chests)

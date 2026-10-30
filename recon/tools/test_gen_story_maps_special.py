@@ -5,7 +5,7 @@
 Needs the local map data (maps_x, a real MAP template, server/master_data/enemy.json); skipped when missing.
 One special entry in Fountain Square: checks the STG and the part exist, the target is the first enemy of the
 only target area and the farthest enemy from the start (walking distance on the collision), the drop carrier keeps
-its reward row and the level, every member keeps its own reward and the target takes targetReward, the POI file is merged (old entries kept), validate_maps.py reports no errors.
+its reward row and the level (STG [11] and every enemy record), every member keeps its own reward and the target takes targetReward, the POI file is merged (old entries kept), validate_maps.py reports no errors.
 """
 import json
 import os
@@ -67,6 +67,10 @@ try:
     if os.path.exists(stg_p) and os.path.exists(part_p):
         h = struct.unpack('<16i', open(stg_p, 'rb').read()[:64])
         check(h[2] == 1 and h[6] == 10001, 'STG: 1 part, target 10001 (got %d, %d)' % (h[2], h[6]))
+        # the quest level the client shows (quest card «LV») and applies to the enemies is STG [11] (+0x2c), as in every
+        # story stage (import_orig_stages.py: [11] = wiki Lv = enemy record level); [11] 1 showed LV 1 (MOG bench 30-10)
+        check(h[11] == 30 and mapfile.parse_stg(open(stg_p, 'rb').read())['card_level_bonus'] == 30,
+              'STG [11] = quest level 30 (got %d)' % h[11])
         m = mapfile.parse_map(open(part_p, 'rb').read())
         ens = m['enemies']
         check(len(ens) == 3 * 2 + 1 + 1, '8 enemies (got %d)' % len(ens))
@@ -143,9 +147,36 @@ for bad, what in (({**entry, 'enemies': [[{'name': 'Shadow', 'enemyId': 80001, '
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+# real entries of make-special.js (server/game_data/special_maps.json): the MOG quest 970100 (catalogue Lv 160) resolves
+# to Lv 160 on the card (STG [11]) and on every enemy record; the training quest stays at Lv 1 (Shadow target, dummy)
+REAL = os.path.join(ROOT, 'server', 'game_data', 'special_maps.json')
+if os.path.exists(REAL):
+    real = {e['stageId']: e for e in json.load(open(REAL, encoding='utf-8'))}
+    tmp = tempfile.mkdtemp(prefix='khux_special_maps_', dir=TMP)
+    try:
+        json.dump({}, open(os.path.join(tmp, 'stage_poi.json'), 'w'))
+        json.dump([real[970100], real[970000]], open(os.path.join(tmp, 'special.json'), 'w'))
+        cfg = {'rooms': os.path.join(HERE, 'story_rooms.json'), 'template': TEMPLATE, 'cls_dir': CLS, 'enemies': ENEMIES,
+               'out': os.path.join(tmp, 'stage'), 'report': os.path.join(tmp, 'report.json'),
+               'poi': os.path.join(tmp, 'stage_poi.json'), 'special': os.path.join(tmp, 'special.json')}
+        json.dump(cfg, open(os.path.join(tmp, 'cfg.json'), 'w'))
+        r = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfg.json')],
+                           capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(r.returncode == 0, 'real entries: generator exit %d: %s' % (r.returncode, r.stderr[-500:]))
+        for sid, lv in ((970100, 160), (970000, 1)):
+            d = os.path.join(tmp, 'stage', 'mappoi_stg%d' % sid)
+            if not os.path.exists(d + '.bin'):
+                continue
+            card = mapfile.parse_stg(open(d + '.bin', 'rb').read())['card_level_bonus']
+            lvs = {e['level'] for e in mapfile.parse_map(open(d + '_00.bin', 'rb').read())['enemies']}
+            check(real[sid]['level'] == lv and card == lv and lvs == {lv},
+                  '%d: catalogue Lv %d -> STG [11] %d, enemy records %s' % (sid, real[sid]['level'], card, sorted(lvs)))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
 if errors:
     print('ERRORS (%d)' % len(errors))
     for e in errors:
         print(' -', e)
     sys.exit(1)
-print('OK: special map %d (STG, part, farthest target, drop carrier, POI merge, validate_maps, reward 0 rejected)' % SID)
+print('OK: special map %d (STG [11] level, MOG 970100 Lv 160, training Lv 1, part, farthest target, drop carrier, POI merge, validate_maps, reward 0 rejected)' % SID)
