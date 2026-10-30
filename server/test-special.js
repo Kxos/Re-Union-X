@@ -147,5 +147,28 @@ check(sp.resetDue(g1[0], full, 10, 11, { entries: g1 }), 'resetDue accepts an in
 check(!sp.resetDue(g1[0], { ...full, 22: [1, 2] }, 10, 11, g1), 'resetDue incomplete false');
 check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
 
+// round 2 (31-10, originals research): Daily Cid lists only today's variant, with or without VIP; the other days' Cid
+// entries are not listed at all (not locked, not opened by VIP). Same for the VIP Cid of period 1.
+{
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const cidIx = { catalog: index.catalog, entries: [
+    ...DAYS.map((d, i) => e('cid-' + d, 7301 + i, { periods: [4], days: [d], family: 'SQ12', resetGroup: 'cid' })),
+    ...DAYS.map((d, i) => e('cidvip-' + d, 7401 + i, { periods: [1], days: [d], family: 'SQ12', resetGroup: 'cid-vip', vip: true })),
+    e('other', 7310, { periods: [4], days: ['Mon'] }),
+  ] };
+  const cids = (o) => sp.specialEvents(cidIx, ctx(o)).filter((x) => x.eventStageId >= 7301 && x.eventStageId <= 7407 && x.eventStageId !== 7310);
+  const tv = cids({ weekday: 'Tue', vip: true });
+  check(tv.length === 1 && tv[0].eventStageId === 7302 && tv[0].isLock === 0, `Cid Tue with VIP: ${tv.map((x) => x.eventStageId + '/' + x.isLock)}`);
+  const wn = cids({ weekday: 'Wed', vip: false });
+  check(wn.length === 1 && wn[0].eventStageId === 7303 && wn[0].isLock === 0, `Cid Wed without VIP: ${wn.map((x) => x.eventStageId + '/' + x.isLock)}`);
+  check(sp.specialEvents(cidIx, ctx({ weekday: 'Tue', vip: true })).some((x) => x.eventStageId === 7310 && x.isLock === 2), 'other weekday entries still opened by VIP');
+  const p1 = (o) => sp.specialEvents(cidIx, ctx({ period: 1, shopFrom: '2016-06-06', shopTo: '2016-06-12', ...o })).filter((x) => x.eventStageId >= 7401 && x.eventStageId <= 7407);
+  const p1v = p1({ weekday: 'Fri', vip: true }), p1n = p1({ weekday: 'Fri', vip: false });
+  check(p1v.length === 1 && p1v[0].eventStageId === 7405 && p1v[0].isLock === 0, `VIP Cid Fri with VIP: ${p1v.map((x) => x.eventStageId + '/' + x.isLock)}`);
+  check(p1n.length === 1 && p1n[0].eventStageId === 7405 && p1n[0].isLock === 1, `VIP Cid Fri without VIP: locked ${p1n.map((x) => x.eventStageId + '/' + x.isLock)}`);
+  check(sp.currentEntries(cidIx, { period: 4, shopFrom: '2020-06-01', shopTo: '2020-06-07' }).length === 8, 'no weekday in the context: all Cid entries (catalogue without a day)');
+  check(sp.isDailyCid(cidIx.entries[0]) && sp.isDailyCid(cidIx.entries[7]) && !sp.isDailyCid(cidIx.entries[14]), 'isDailyCid');
+}
+
 if (errors.length) { console.error(`test-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }
 console.log('test-special: OK');

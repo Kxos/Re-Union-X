@@ -169,6 +169,12 @@ function statusOf(en, ctx, { byKey, pinned, current }) {
     return { show: 'can', cls: 'can', pill: pill(...PILLS.can), button: 1,
       rp: pinned ? `<div class="rp">Replaces: ${esc(pinned.name)}</div>` : '', why: 'Its period is over: you can keep it in Special (one quest at a time).' };
   }
+  if (!current.has(en) && ctx.weekday && special.isDailyCid(en) && Array.isArray(en.days) && !en.days.includes(ctx.weekday)
+    && special.currentEntries({ entries: [en] }, { ...ctx, weekday: undefined }).length) {
+    // Daily Cid of another day: the original listed only today's variant (special.currentEntries)
+    return { show: 'other', cls: 'other', pill: pill('other', '', `Listed on ${esc(en.days.join(', '))} only`), button: null,
+      why: "Daily Challenge: Cid lists only today's variant, as in the original game." };
+  }
   if (!current.has(en)) {
     // current period, but not listed this Shop week: a campaign of another week, or an entry outside its from / to
     return { show: 'other', cls: 'other', pill: pill('other', '', en.campaign ? `Week of ${niceDay(en.campaign.start)}` : 'This period, not this week'), button: null,

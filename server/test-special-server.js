@@ -112,7 +112,12 @@ at('2026-10-28T09:00:00Z');
 const late = call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 10 } });
 check(late.status === 0, `clear dopo il cambio di giorno: status ${late.status}`);
 check(medalsOf(90076) === cidMedals + 3 && (p.clearMissions[970020] || []).join() === '1,2,3', 'premi degli obiettivi dopo il cambio di giorno');
-check(byId(ev(1).events, 7002)?.isLock === 1, 'mercoledi\': Daily Cid del martedi\' ancora aperto');
+// round 2 (originale): solo il Daily Cid di oggi e' nell'elenco, con o senza VIP; gli altri giorni non compaiono
+const cidOf = (list) => list.filter((e) => e.eventStageId >= 7001 && e.eventStageId <= 7007).map((e) => `${e.eventStageId}/${e.isLock}`).join();
+check(!byId(ev(1).events, 7002) && cidOf(ev(1).events) === '7003/0', `mercoledi': solo il Cid del mercoledi' (${cidOf(ev(1).events)})`);
+process.env.KHUX_VIP = '1';
+check(cidOf(ev(1).events) === '7003/0', `mercoledi' con VIP: solo il Cid del mercoledi' (${cidOf(ev(1).events)})`);
+delete process.env.KHUX_VIP;
 
 // 7. righe evStage servite: indirizzi assoluti
 const evRows = t.servedMasterRows('evStage', Date.now());

@@ -42,11 +42,17 @@ const isOpen = (entry, st) => lockOf(entry, st) !== 1;
 
 const isCatalog = (entry) => !entry.periods || entry.key === 'catalog' || entry.training === true;
 
+// Daily Challenge: Cid (family SQ12, reset groups cid / cid-vip): in the original one quest cycling seven variants, so
+// only today's variant was listed and playable, VIP or not (khuxwiki, notice 18256; research 31-10)
+const isDailyCid = (entry) => entry.family === 'SQ12' || /^cid/.test(entry.resetGroup || '');
+
 // entries of the period, plus the campaigns whose window overlaps the shop week. Optional entry `from` / `to` (days
 // 'YYYY-MM-DD', inclusive) split a period: checked against the start of the Shop week (e.g. Daily Cid VIP to
-// 2017-04-19, free from 2017-04-20)
-const currentEntries = (index, { period, shopFrom, shopTo }) => index.entries.filter((en) => {
+// 2017-04-19, free from 2017-04-20). With a weekday in the context, a Daily Cid entry is listed only on its own day
+// (the catalogue page passes the day too; without one every entry of the period is kept).
+const currentEntries = (index, { period, shopFrom, shopTo, weekday }) => index.entries.filter((en) => {
   if (!en.periods.includes(period) || en.removed) return false;
+  if (weekday && isDailyCid(en) && !ownDay(en, weekday)) return false;
   if ((en.from && shopFrom < en.from) || (en.to && shopFrom > en.to)) return false;
   if (!en.campaign) return true;
   return en.campaign.start <= shopTo && en.campaign.end >= shopFrom;
@@ -108,5 +114,5 @@ const resetDue = (entry, done, lastResetWeek, week, group) => {
 
 module.exports = {
   get PERIODS() { return loadPeriods(); },
-  SPECIAL_IMG_VERSION, imgPath, periodOf, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
+  SPECIAL_IMG_VERSION, imgPath, periodOf, isDailyCid, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
 };
