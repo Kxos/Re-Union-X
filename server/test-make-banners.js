@@ -16,6 +16,7 @@ const catalog = { banners: [
 ].map((b) => ({ payType: 1, ...b })) };
 const rows = m.masterRows(catalog);
 check(rows.length === 1 + catalog.banners.length && rows[0].drawMedalTypeId === 9001 && rows[0].payType === 6, '1 + N righe, prima la piastra 9001');
+check(rows[0].bannerUrl === `/web/gacha/img/9001-v${require('./gacha').CATALOG_PLATE_STYLE}.png` && require('./gacha').CATALOG_PLATE_STYLE >= 2, `piastra 9001: url con la versione dell'immagine (${rows[0].bannerUrl})`);
 check(rows.every((r) => r.price >= 1), 'price >= 1');
 check(rows.every((r) => [1, 4, 5, 6, 7, 8].includes(r.payType)), 'payType ammessi');
 check(rows.find((r) => r.drawMedalTypeId === 10003).payType === 1 && rows.find((r) => r.drawMedalTypeId === 10006).payType === 1, 'payType 9 e 3 -> 1');

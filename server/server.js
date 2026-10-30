@@ -1627,9 +1627,11 @@ function respondGachaDraw(res, body) {
 function respondGachaWeb(res, url) {
   const p = url.split('?')[0];
   const html = (s, code = 200) => { const b = Buffer.from(s, 'utf8'); res.writeHead(code, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
-  const img = /^\/web\/gacha\/img\/(\d+)(?:-kept(\d+))?\.png$/i.exec(p);
+  const img = /^\/web\/gacha\/img\/(\d+)(?:-kept(\d+)|-v(\d+))?\.png$/i.exec(p);
   if (img) {
     if (img[2] && Number(img[2]) !== gacha.KEPT_STYLE) return html('not found', 404); // stile vecchio o sconosciuto
+    // -v<N>: versione della grafica, solo per la piastra Catalog (bannerUrl di gacha.catalogRow), file 9001.png
+    if (img[3] && (Number(img[1]) !== gachaData.CATALOG_ID || Number(img[3]) !== gacha.CATALOG_PLATE_STYLE)) return html('not found', 404);
     const file = img[2] ? keptImageFile(Number(img[1])) : path.join(GACHA_IMG, `${Number(img[1])}.png`);
     if (!fs.existsSync(file)) return html('not found', 404);
     const b = fs.readFileSync(file);

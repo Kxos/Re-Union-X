@@ -301,6 +301,17 @@ check(w.headers && String(w.body).includes('not found'), 'banner sconosciuto: pa
   check(String(raw(t.respondGachaWeb, '/web/gacha/img/99999-kept2.png').body).includes('not found'), 'immagine -kept: banner senza immagine -> 404');
   check(String(raw(t.respondGachaWeb, '/web/gacha/img/10001-kept.png').body).includes('not found') && String(raw(t.respondGachaWeb, '/web/gacha/img/10001-kept1.png').body).includes('not found'), 'immagine -kept: URL senza stile o di stile vecchio -> 404');
 }
+// piastra Catalog: /web/gacha/img/9001-v<stile>.png serve 9001.png (versione nell'URL: il client riscarica la nuova grafica)
+{
+  const v = require('./gacha').CATALOG_PLATE_STYLE;
+  fs.writeFileSync(path.join(IMG, '9001.png'), Buffer.from('catalog plate'));
+  const cur = raw(t.respondGachaWeb, `/web/gacha/img/9001-v${v}.png`);
+  check(cur.headers && cur.headers['Content-Type'] === 'image/png' && String(cur.body) === 'catalog plate', 'piastra Catalog: URL versionato servito');
+  const nf = (u) => String(raw(t.respondGachaWeb, u).body).includes('not found');
+  check(nf(`/web/gacha/img/9001-v${v - 1}.png`) && nf('/web/gacha/img/9001-v.png'), 'piastra Catalog: versione vecchia -> 404');
+  check(nf(`/web/gacha/img/10001-v${v}.png`), 'versione solo per la piastra Catalog');
+  check(String(raw(t.respondGachaWeb, '/web/gacha/img/9001.png').body) === 'catalog plate', 'piastra Catalog: URL senza versione ancora servito');
+}
 // icone delle valute: lista fissa di chiavi, PNG con Content-Type giusto, 404 per il resto
 {
   const PNG = Buffer.from('iVBORw0KGgo=', 'base64');

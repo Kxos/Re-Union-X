@@ -186,6 +186,7 @@ check(q.limitedDrawTicket1 === 2, 'biglietto Platinum scalato');
 const r = g.drawResultFields([501, 502], [501]);
 check(JSON.stringify(r) === JSON.stringify({ gachaBonus: { addType: 1, number: 0, userMedalIds: [] }, firstGetUserMedalIds: [501], userMedalIds: [501, 502], effectNumbers: [0, 0] }), 'campi del risultato');
 check(g.catalogRow().drawMedalTypeId === 9001 && g.catalogRow().payType === 6 && g.catalogPlate('http://h').price === 1, 'piastra Catalog');
+check(g.catalogRow().bannerUrl === `/web/gacha/img/9001-v${g.CATALOG_PLATE_STYLE}.png` && g.catalogPlate('http://h').bannerUrl === `http://h/web/gacha/img/9001-v${g.CATALOG_PLATE_STYLE}.png`, 'piastra Catalog: immagine versionata (il client la riscarica)');
 
 // piccole correzioni del Task 6
 check((() => { try { return g.shopBanners([inside], { storyQuest: 525, storyDay: '2016-12-08', sizes }).length === 1; } catch { return false; } })(), 'shopBanners senza show');
