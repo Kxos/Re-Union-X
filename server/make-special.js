@@ -29,7 +29,8 @@
 //   the target enemy each, plus one carrier per drop row (enemy record reward = the drop row) and the enemies of
 //   «Defeat X» objectives with their objective id. Every enemy (one member each) and the target carry one of the
 //   entry's drop rows, round-robin (the original Special quests dropped the family items from every enemy; bench rev
-//   215); an entry without drops puts 0 (no row: no drop) on every enemy; the training map keeps row 1 (spec 7). Carriers (builder's call): EXP medals on a
+//   215); an entry without drops and the training map (spec 7) put row 1 on every enemy, as the story maps (never 0: the
+//   client reads the enemy's reward row and crashes after /stage/start without it, recon/tools/stage_poi.py). Carriers (builder's call): EXP medals on a
 //   Growth Egg, Moogle (munny) on a Munny Egg, everything else on a Prize Egg.
 // Wired at the end of make-game-tables.js (after make-proud). KHUX_SPECIAL=0 turns it off; without the private
 // catalogue it is skipped with a warning (clean PC). After a run: raise the master revision.
@@ -245,10 +246,10 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
   const stages = [...index.catalog.stages, ...index.entries.flatMap((e) => e.stages.map((s) => ({ ...s, dropRewardIds: e.dropRewardIds })))];
   return stages.map((s) => {
     const row = stageRows.find((r) => r.stageId === s.stageId);
-    // reward of each enemy: the entry's drop rows round-robin; 0 = no drop for an entry without drops; training: row 1
-    const training = s.stageId === TRAINING_STAGE, rr = s.dropRewardIds || [];
+    // reward of each enemy: the entry's drop rows round-robin; row 1 for an entry without drops and for training
+    const rr = s.stageId === TRAINING_STAGE ? [] : s.dropRewardIds || [];
     let k = 0;
-    const next = () => (training ? 1 : rr.length ? rr[k++ % rr.length] : 0);
+    const next = () => (rr.length ? rr[k++ % rr.length] : 1);
     const normal = () => Array.from({ length: TARGET_PER_GROUP }, () => ({ name: s.target, enemyId: L.mapEnemyId(s.target, false), n: 1, reward: next() }));
     const carriers = (s.dropRewardIds || []).map((rid) => {
       const rw = rewardRows.find((r) => r.rewardId === rid);

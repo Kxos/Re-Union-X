@@ -18,7 +18,7 @@ Special quests (cfg['special'], written by server/make-special.js): a JSON list
 treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules as the one-room story quests
 (groups along the distance from the start, target alone in the arena at the farthest point), output
 mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
-reward goes into the enemy record (drop rows of make-special.js; 0 = no drop), targetReward into the target's record,
+reward goes into the enemy record (drop rows of make-special.js, 1 when the quest has none), targetReward into the target's record,
 level into every enemy record of the stage.
 
 Per ogni missione (stageBinId 1..N di thethiny = numero della missione):
