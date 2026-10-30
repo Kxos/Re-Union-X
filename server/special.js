@@ -5,7 +5,7 @@ const clock = require('./clock');
 
 // Version segment of every Special banner URL (/web/special/img/v<N>/<id>.png): the client caches banner images by URL, so
 // bump SPECIAL_IMG_VERSION whenever recon/tools/make_special_banners.py output changes, then bump the master revision.
-const SPECIAL_IMG_VERSION = 2;
+const SPECIAL_IMG_VERSION = 3; // 3: VIP Materials, spirit part and Limited VIP Board art (31-10)
 const imgPath = (name) => `/web/special/img/v${SPECIAL_IMG_VERSION}/${name}.png`;
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

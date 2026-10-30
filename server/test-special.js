@@ -118,6 +118,7 @@ check(ev.every((x) => x.stages.every((s) => ST.every((k) => k in s))), 'every st
 check(ev[1].stages[1].useAp === 8 && ev[1].stages[0].score === 71030, 'useAp and stageState used');
 check(ev[1].isLock === 1 && ev[2].isLock === 1, 'closed entries isLock 1 (Wed, no vip)');
 check(ev[1].bannerUrl === 'http://h/web/special/img/v' + sp.SPECIAL_IMG_VERSION + '/7103.png', 'bannerUrl');
+check(sp.SPECIAL_IMG_VERSION === 3, `SPECIAL_IMG_VERSION ${sp.SPECIAL_IMG_VERSION} (3: art of round 2, 31-10)`);
 const kept = sp.specialEvents(index, ctx({ pinnedKey: 'old' }));
 check(kept[1].eventStageId === 7101 && kept[1].bannerUrl.endsWith('/v' + sp.SPECIAL_IMG_VERSION + '/7101-kept.png'), 'kept element second, -kept banner');
 check(kept[1].isLock === 2 && kept[1].endTime === 'WEEKEND', 'pinned Tue-only entry on Wed: isLock 2');
