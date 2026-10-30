@@ -278,10 +278,10 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const d = pages.detailPage(ix, 7901, { ...c, vip: false });
   check(d.includes('Locked today · opens on Mon') && !d.includes('Open in Special now'), 'details page');
 }
-// round 9: one rank for the group's best member, on the server and in the page script (regroup after a pin)
+// round 9 (+ ruling: a kept member takes over the group row): one rank for the group's best member, on the server and in the page script (regroup after a pin)
 {
   const rk = pages.khuxRank, page = new Function(`${pages.RANK_JS};return khuxRank;`)();
-  const cases = [['now', 'now'], ['now', 'vipnow'], ['now', 'locked'], ['can', 'can'], ['kept', 'pinned'], ['other', 'other'], ['replaced', 'off'], ['later', 'off'], ['removed', 'off']];
+  const cases = [['now', 'now'], ['now', 'vipnow'], ['now', 'locked'], ['kept', 'pinned'], ['can', 'can'], ['other', 'other'], ['replaced', 'off'], ['later', 'off'], ['removed', 'off']];
   check(cases.every(([a, b]) => rk(a, b) === page(a, b)), 'same rank in node and in the page');
   check(cases.every((c, i) => i === 0 || rk(...cases[i - 1]) < rk(...c)), `rank order ${cases.map((c) => rk(...c))}`);
   const ix = { catalog: { evStageId: 7000 }, entries: [

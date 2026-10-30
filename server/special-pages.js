@@ -312,7 +312,8 @@ var h=location.hash&&document.getElementById(location.hash.slice(1));if(h&&h.scr
 
 // group rows (round 7, user 31-10): entries of one period section with the same banner art (the seven Daily Cid days,
 // VIP! Materials and Materials 2...) take one row. Best member status first: it gives the row its bar and pill.
-const SHOW_RANK = ['now', 'can', 'kept', 'other', 'replaced', 'later', 'removed'];
+// the player's own pin before «can be kept» (ruling 31-10: a kept member takes over the group row)
+const SHOW_RANK = ['now', 'kept', 'can', 'other', 'replaced', 'later', 'removed'];
 const CHIP_ICON = { now: 'now', can: 'pin', kept: 'pin', replaced: 'replaced', later: 'later', removed: 'removed' };
 // rank of a member status (lower = better): SHOW order, then open > open with VIP > locked. The same function runs in
 // the page script (regroup after a pin / unpin) and here (groupRow), from this one source.
