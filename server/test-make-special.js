@@ -421,6 +421,20 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(all.maps.every((m) => m.targetReward > 0 && m.enemies.flat().every((x) => x.reward > 0)), 'real build: no Special map enemy on reward 0');
   check(all.maps.filter((m) => withDrops.has(m.stageId)).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no enemy on row 1 in a quest with drops');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
+  // enemy level (bench 30-10: MOG at LV 1): every map entry carries the catalogue Lv of its quest (gen_story_maps.py
+  // writes it into STG [11], the card / enemy level, and into every enemy record); addLevel stays 0 so it is not added twice
+  const cat = JSON.parse(fs.readFileSync(SRC, 'utf8')).quests;
+  const lvOf = (name) => { const q = cat.find((c) => c.quest === name || name.startsWith(`${c.quest} (`)); return q ? parseInt(q.level, 10) : null; };
+  const quests = all.index.entries.flatMap((e) => e.stages);
+  const badLv = all.maps.filter((m) => m.stageId !== 970000).filter((m) => {
+    const st = quests.find((s) => s.stageId === m.stageId); const lv = lvOf(st.quest);
+    return !(m.level > 1 && (lv === null || m.level === lv));
+  });
+  check(!badLv.length, `real build: map level = catalogue Lv (${badLv.slice(0, 5).map((m) => `${m.stageId} ${m.level}`).join(', ')})`);
+  check(all.maps.find((m) => m.stageId === 970100)?.level === 160 && lvOf("A New Keyblade: Moogle O' Glory") === 160,
+    'real build: MOG 970100 at Lv 160');
+  check(all.stageRows.every((r) => r.addLevel === 0), 'real build: addLevel 0 on every Special stage row');
+  check(all.maps.find((m) => m.stageId === 970000)?.level === 1, 'real build: training at Lv 1');
   const rt = all.maps.find((m) => m.stageId === 970000), rd = all.enemyRows[0];
   check(rt && rt.training && rt.chests.length === 5 && rd && rd.displayId === 7 && rd.skillId[1] === 2101, 'real build: training map with 5 CP chests, dummy with the heal');
   check(!t('enemy').some((e) => e.enemyId === ms.DUMMY_ENEMY_ID && e.name !== 'Training Dummy'), 'real build: enemy id of the dummy free');
