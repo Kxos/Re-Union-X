@@ -255,5 +255,28 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   const bn = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2], id: [9, 8, 0] }], stage: [{ stageId: 3, submissionRewardType: [20, 14, 0], submissionItemId: [1, 0, 0] }] }[n] || []));
   check(bn.dropTypes(5).join() === '3,5,2' && bn.objectiveTypes(3).join() === '20,14' && bn.dropTypes(99).length === 0, 'buildNames reward types');
 }
+// round 8: a current weekday quest on another day follows the Special tab (special.lockOf): locked today, or open with VIP
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('mon', 7901, { name: 'Mon Quest', periods: [4], days: ['Mon'] }),
+    e('tue', 7902, { name: 'Tue Quest', periods: [4], days: ['Tue'] }),
+    e('mw', 7903, { name: 'MW Quest', periods: [4], days: ['Mon', 'Wed'] }),
+    e('g1', 7904, { name: 'Fam (Monday)', periods: [4], days: ['Mon'], banner: 'fam.png' }),
+    e('g2', 7905, { name: 'Fam (Wednesday)', periods: [4], days: ['Wed'], banner: 'fam.png' }),
+  ] };
+  const c = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Tue' };
+  const h = pages.catalogPage(ix, { ...c, vip: false }), hv = pages.catalogPage(ix, { ...c, vip: true });
+  const r = (hh, id) => { const s0 = hh.indexOf(`id="q${id}"`); return s0 < 0 ? '' : hh.slice(hh.lastIndexOf('<', s0), hh.indexOf('</div>' + String.fromCharCode(10), s0)); };
+  check(r(h, 7901).includes('Locked today · opens on Mon') && r(h, 7901).includes('class="s s-locked"') && r(h, 7901).includes('/web/special/icon/lock.png')
+    && r(h, 7901).includes('data-show="now"') && !r(h, 7901).includes('Open in Special now'), `Mon quest on Tue without VIP: ${r(h, 7901).slice(0, 160)}`);
+  check(/class="q locked"/.test(r(h, 7901)), 'grey bar');
+  check(r(h, 7903).includes('Locked today · opens on Mon, Wed'), 'two days');
+  check(r(hv, 7901).includes('Open today with VIP') && r(hv, 7901).includes('/web/special/icon/vip.png') && /class="q vipnow"/.test(r(hv, 7901)) && r(hv, 7901).includes('data-show="now"'), 'Mon quest on Tue with VIP');
+  check(r(h, 7902).includes('Open in Special now') && r(hv, 7902).includes('Open in Special now'), 'own day: open');
+  const grp = h.slice(h.indexOf('id="g7904-p4"'), h.indexOf('</div>' + String.fromCharCode(10), h.indexOf('id="g7904-p4"')));
+  check(/class="ch c-locked"[^>]*data-eid="7904"/.test(grp) && grp.includes('class="s s-locked"'), `group chips locked today: ${grp.slice(0, 200)}`);
+  const d = pages.detailPage(ix, 7901, { ...c, vip: false });
+  check(d.includes('Locked today · opens on Mon') && !d.includes('Open in Special now'), 'details page');
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
