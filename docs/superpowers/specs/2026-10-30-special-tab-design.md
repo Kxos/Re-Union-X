@@ -92,8 +92,15 @@ boundaries in data, not in code.
 - **VIP** = our VIP earned by finishing all Weekly Missions (`vipActive()`, benefit 100). With VIP: every weekday quest
   of the period is open on every day, and the VIP quests of the period are listed (original rule of the WJE pass,
   including its exception: the Adamantite challenges stay on their own day).
-- A quest that is closed today (weekday, or VIP without VIP) is **not listed** (`isLock` 1 hides it; the client has
-  no «closed today» banner and opens any visible banner) **(builder's call, proposed)**.
+- A quest that is closed today (weekday, or VIP without VIP) is **shown locked, as in the original** (user, verified
+  on the bench 30-10): the server sends `ret.functionFlags` bit 4 on every response and the event with `isLock` 1;
+  the client draws it darkened with a padlock and adds the original red **«Unlock All»** button (the weekly pass).
+  The client never reads the EvStage weekday/benefit fields: the server decides open/locked per quest.
+- Tapping a locked banner or «Unlock All» starts the original pass purchase flow (`/payment/info`, `/user/shop`,
+  `/shop/campaign`); our server does not answer `/shop/campaign`, so nothing opens and nothing can be bought (bench
+  30-10). The Notices explain that locked quests open on their weekday or with the Weekly Missions VIP and that
+  «Unlock All» has no function. Details still works on locked banners.
+- To check when building: whether `functionFlags` bit 4 changes anything outside the Special tab (it is global).
 - Period 5 content: the catalogue cannot say which free quests survived the 2020-11-16 renewal; keep the period-4 free
   quests (minus Daily Cid, explicitly removed) plus the four «Day of the Weekly Quest» quests **(builder's call,
   proposed)**.
