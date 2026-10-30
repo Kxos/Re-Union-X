@@ -337,7 +337,8 @@ function ret() {
     // bit 4: i banner Special chiusi (isLock 1) si vedono con il lucchetto e il pulsante rosso «Unlock All». Il client
     // lo legge una volta sola al login (banco 30-10), quindi vale per tutta la sessione; effetto collaterale: il
     // pulsante dello Shop «Buy discounted 3,000 Jewel pack!» diventa rosa e non fa nulla (spiegato nelle Notices)
-    functionFlags: specialIndex().entries.length ? 4 : 0,
+    // solo a scheda sbloccata (missione 6, misc 122): prima il bit cambierebbe il pulsante dello Shop senza motivo
+    functionFlags: specialIndex().entries.length && specialUnlocked() ? 4 : 0,
     serverTime: serverTime(),
     // "error" (con "viewUrl") e "isCommunicationMaintenance" sono facoltativi
   };
@@ -1213,7 +1214,9 @@ function stageEnemyDrops(stageId) {
   const ids = [];
   for (let id = 1; id <= max; id++) if (!chests.has(id)) ids.push(id);
   const rows = new Map(poi.enemies.map((e) => [e.uid, e.reward]));
-  return ids.map((id) => ({ uniqueEnemyId: id, dropItemTypeIds: enemyDropTypes(rows.get(id) ?? 1), stealType: 0 }));
+  // allenamento (970000): nessun drop, anche se i record della mappa restano sulla riga 1 (revisione finale Special)
+  const training = poiStageId(stageId) === TRAINING_STAGE_ID;
+  return ids.map((id) => ({ uniqueEnemyId: id, dropItemTypeIds: training ? [] : enemyDropTypes(rows.get(id) ?? 1), stealType: 0 }));
 }
 
 // Trick Steal del pet (I-137): il client manda isSteal a /stage/start se un trick aperto ha invokeType 1;
@@ -2106,7 +2109,8 @@ function respondStageContinue(res, path, body) {
   // rilegge userKeyblades; retire anche userData.stageResumption.
   // Il Continue costa CONTINUE_STONE jewel (provato l'11 ottobre: prima restavano invariati);
   // il client li rilegge con GET /user/stone subito dopo.
-  if (String(path).toLowerCase() === '/stage/continue') {
+  // (non l'allenamento: quest senza premi ne' costi, revisione finale Special)
+  if (String(path).toLowerCase() === '/stage/continue' && player.currentStageId !== TRAINING_STAGE_ID) {
     player.freeStone = Math.max(0, (player.freeStone || 0) - CONTINUE_STONE);
     savePlayer();
   }

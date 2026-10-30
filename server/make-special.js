@@ -205,7 +205,8 @@ function evStageRow(evStageId, stageIds, { resetFlag = 0, detailUrl = '' } = {})
 }
 
 // WW week-limited VIP campaigns (Task 12, spec 5.3): one entry per row of the catalogue's `vip_limited_campaigns_ww`
-// (catalogue order), key C<notice>, evStageId CAMPAIGN_EV_FIRST + row index (7501-7620 for the 120 rows), VIP, every
+// (catalogue order), key C<notice>, evStageId frozen in rules.campaigns[key].evStageId (7501-7620 for the 120 rows, the
+// catalogue order of 30-10; a campaign without one: next free id after the highest frozen one), VIP, every
 // day, period of the start day, campaign window {start, end} in days, end inclusive (the catalogue end is the next
 // Monday, exclusive; a row without dates takes start / end from the rules). Content (rules.campaigns[key].parts, at
 // most 5 quests in all), each part:
@@ -243,7 +244,11 @@ function campaignEntries(rules, catalogue) {
   };
   const withRewards = (objectives, rewards) => objectives.map((o, i) => `${splitObjective(o).text} -> ${rewards[i]}`);
   const setQty = (o, qty) => { const x = splitObjective(o); return `${x.text} -> ${x.reward} x${qty}`; };
-  return rows.map((r, i) => {
+  // frozen ids (final review): rules.campaigns[key].evStageId keeps a campaign's banner and stage ids (stageIdOf) when
+  // the catalogue rows are reordered or extended; a campaign without one takes the next id after the highest frozen
+  let next = Math.max(CAMPAIGN_EV_FIRST - 1, ...Object.keys(specs).filter((k) => !k.startsWith('_'))
+    .map((k) => Number(specs[k].evStageId) || 0)) + 1;
+  return rows.map((r) => {
     const key = `C${r.notice}`, sp = specs[key];
     if (!sp || !Array.isArray(sp.parts) || !sp.parts.length) throw new Error(`special: campaign ${key} («${r.title}») has no content in rules.campaigns`);
     const start = sp.start || r.start, end = sp.end || (r.end ? addDays(r.end, -1) : null);
@@ -282,7 +287,7 @@ function campaignEntries(rules, catalogue) {
       throw new Error(`special: ${key}: unknown part ${JSON.stringify(part)}`);
     }
     if (quests.length > 5) throw new Error(`special: campaign ${key}: ${quests.length} quests, at most 5 per banner`);
-    return { key, evStageId: CAMPAIGN_EV_FIRST + i, name: sp.name || campaignName(r.title), family: sp.family || 'SQ21',
+    return { key, evStageId: sp.evStageId || next++, name: sp.name || campaignName(r.title), family: sp.family || 'SQ21',
       periods: [periodOfDay(start, rules.periods)], days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '',
       campaign: { start, end }, banner: sp.banner || '', generic: !!sp.generic, notice: r.notice, questObjs: quests };
   });

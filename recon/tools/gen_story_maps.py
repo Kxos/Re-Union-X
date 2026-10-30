@@ -311,6 +311,14 @@ T_AREAS = [bytes(tmpl[ta0 + k * 0x44:ta0 + (k + 1) * 0x44]) for k in range(tna)]
 ARENA, NORMAL = T_AREAS[0], T_AREAS[1]
 
 
+def member_reward(m):
+    """reward row of a member (name, n[, reward, enemyId]): 1 for the wiki story members, the Special drop row otherwise;
+    row 0 does not exist (the client crashes after /stage/start), so it stops the run"""
+    rw = m[2] if len(m) > 2 else 1
+    assert rw > 0, 'enemy %s: reward row %r (must be > 0)' % (m[0], rw)
+    return rw
+
+
 def build_part(folder, start, dist, groups, nchests, level=1):
     far = max(dist, key=lambda p: (dist[p], -p[1]))
     maxd = dist[far] or 1
@@ -332,7 +340,7 @@ def build_part(folder, start, dist, groups, nchests, level=1):
             name, n = m[0], m[1]
             eid = (m[3] if len(m) > 3 and m[3] else None) or enemy_id(name, is_t and not members)
             if eid:
-                members += [(eid, m[2] if len(m) > 2 else 1)] * n
+                members += [(eid, member_reward(m))] * n
         if not members:
             continue
         rec = bytearray(ARENA if is_t else NORMAL)
@@ -423,7 +431,7 @@ def build_training(folder, groups, target, dummy, chest_rewards, level=1):
         for m in g['members']:
             eid = (m[3] if len(m) > 3 and m[3] else None) or enemy_id(m[0], is_t and not out_)
             if eid:
-                out_ += [(eid, m[2] if len(m) > 2 else 1)] * m[1]
+                out_ += [(eid, member_reward(m))] * m[1]
         return out_
 
     def place(g, center, pool, is_t):

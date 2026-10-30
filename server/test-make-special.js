@@ -280,6 +280,18 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   badC({ C100, C101, C102, C999: C102 }, 'content for an unknown campaign rejected');
   badC({ C100, C101, C102: { parts: [{ set: 'gamma' }, 'Alpha I', 'Alpha II', 'Alpha I'] } }, 'campaign with 6 quests rejected');
   badC({ C100, C101: { parts: C101.parts }, C102 }, 'campaign without a window rejected');
+  // final review: frozen evStageIds (rules.campaigns[key].evStageId). Rows shuffled and a new row added: the frozen keys
+  // keep their ids (and stage ids), the new campaign takes the next free id after the highest frozen one
+  const frozen = { C100: { ...C100, evStageId: 7501 }, C101: { ...C101, evStageId: 7502 }, C102: { ...C102, evStageId: 7503 } };
+  const rowsF = cat2.vip_limited_campaigns_ww;
+  const cat3 = { ...cat2, vip_limited_campaigns_ww: [rowsF[2], { id: 'E103-1', notice: 103, date: '2020-06-08', title: 'VIP New Week!', start: '2020-06-08', end: '2020-06-15' }, rowsF[0], rowsF[1]] };
+  const o3 = ms.build({ ...rules2, campaigns: { ...frozen, C103: { parts: ['Alpha II'] } } }, cat3, master2);
+  const ids3 = Object.fromEntries(o3.index.entries.filter((x) => x.campaign).map((x) => [x.key, x]));
+  check(ids3.C100?.evStageId === 7501 && ids3.C101?.evStageId === 7502 && ids3.C102?.evStageId === 7503,
+    `frozen evStageIds moved by a reordered catalogue: ${['C100', 'C101', 'C102'].map((k) => ids3[k]?.evStageId)}`);
+  check(ids3.C102?.stageIds.join() === C('C102').stageIds.join(), `frozen stage ids moved: ${ids3.C102?.stageIds} vs ${C('C102').stageIds}`);
+  check(ids3.C103?.evStageId === 7504 && ids3.C103.stageIds[0] === 975040, `new campaign: next free id (${ids3.C103?.evStageId})`);
+  badC({ C100: frozen.C100, C101: { ...C101, evStageId: 7501 }, C102 }, 'two campaigns with the same frozen evStageId rejected');
 }
 
 // errors on bad rules
@@ -359,6 +371,14 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const sp = require('./special');
   const camps = all.index.entries.filter((e) => e.campaign);
   check(camps.length === 120 && camps.every((e, i) => e.evStageId === 7501 + i && /^C\d+$/.test(e.key)), `real build: 120 campaigns 7501-7620 (${camps.length})`);
+  // final review: the frozen ids are the ones of the live index (server/game_data/special.json, read only)
+  check(camps.every((e) => real.campaigns[e.key].evStageId === e.evStageId), 'real build: campaign ids not frozen in special_periods.json');
+  const LIVE = path.join(__dirname, 'game_data', 'special.json');
+  if (fs.existsSync(LIVE)) {
+    const liveIds = new Map(JSON.parse(fs.readFileSync(LIVE, 'utf8')).entries.filter((e) => e.campaign).map((e) => [e.key, e]));
+    check(camps.every((e) => liveIds.get(e.key)?.evStageId === e.evStageId && liveIds.get(e.key).stageIds.join() === e.stageIds.join()),
+      'real build: campaign evStageIds / stageIds differ from the live game_data/special.json');
+  }
   check(camps.every((e) => e.vip && e.stageIds.length >= 1 && e.stageIds.length <= 5 && e.campaign.start <= e.campaign.end), 'real build: campaigns VIP, 1-5 quests, window start <= end');
   const addD = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
   for (const e of camps) {
