@@ -106,6 +106,12 @@ boundaries in data, not in code.
   proposed)**.
 - VIP sets that changed weekly in the original rotate **one original week per real Monday**, like the Shop rotation
   (I-165) **(builder's call, proposed)**.
+  Done in round 17 (user 31-10: «faithful»): each recurring VIP set (SQ22: Medal Quest, Gems, Draw Ticket, Dual Meow
+  Wow, Jewels & Spirit Part, Jewels & Avatar Parts, Subslot) has one **week version** per row of the catalogue's weekly
+  tables (appendix B, 176 versions): own stage and evStage id (7700-7875, frozen in `special_periods.json` `weekly`),
+  the row's three rewards, VIP, listed only in the Shop weeks it covers (it takes its set's place in the tab), pinnable
+  per version from a later period; the catalogue shows each set as one quest with its weeks as versions. Weeks without
+  a row keep the set's representative entry (fallback). VIP! Skill stays out (skill-assigned medals).
 - **All 120 WW week-limited VIP campaigns** are in scope (user, 30-10): each one appears in the rotation week that
   matches its original dates, with VIP, and is a separate catalogue entry pinnable under the VIP rule. Weeks without a
   campaign show only the permanent VIP quests of the period. They can be built after the permanent quests.

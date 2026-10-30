@@ -7,6 +7,8 @@
 //   ({quest: reconstructed «text -> reward» lines} for a catalogue quest without any or with a typo), from? / to?
 //   (days inside the periods, copied into the index), drops);
 //   plus campaignSets / campaigns: the content of the 120 WW week-limited VIP campaigns (Task 12, campaignEntries below);
+//   plus weekly: the week versions of the recurring VIP sets (round 17, weeklyEntries below; catalogue
+//   `vip_recurring_weekly`, evStage ids from 7700);
 // - the private catalogue of the original Special quests (KHUX_SPECIAL_SRC, default
 //   D:\Progetto_Restauro_KH_UX\private\events\special\special_quests.json; never copied into the repo): per quest world,
 //   room, AP, level, target and the three objectives «text -> reward».
@@ -127,7 +129,7 @@ function lookups(m) {
     return ids.find((i) => (target ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
   };
   return {
-    enemyId, medalId, materialId, avatarPartId, mapEnemyId,
+    enemyId, medalId, materialId, avatarPartId, mapEnemyId, avatarParts: m.avatarParts || [],
     titleId: (name) => ((m.title || []).find((r) => r.title === name) || {}).titleId || 0,
     keybladeId: (name) => ((m.keyblade || []).find((k) => k.name === name && !k.lv) || {}).keybladeId || 0,
     skillId: (name) => ((m.skill || []).find((s) => s.name === name) || {}).skillId || 0,
@@ -295,9 +297,116 @@ function campaignEntries(rules, catalogue) {
   });
 }
 
+// Recurring VIP sets, one version per week (round 17, user 31-10: «faithful»). The original recurring VIP quests
+// (SQ22: VIP! Medal Quest, VIP! Gems, ...) had their own contents and rewards every week: the catalogue's
+// `vip_recurring_weekly` lists them per set (rows {banner, dates «MM/DD/YY - MM/DD/YY; ...», rewards [3 texts]}).
+// rules.weekly: {sets: {<catalogue set name>: {entry, bothGenders?}}, aliases: {<reward name>: <master name> | null},
+// versions: {<key>: {evStageId, banner?}}}. Each table row becomes a «week version» of the set's entry (the
+// representative entry of special_periods.json): key <entry>@<first week> («#2» for a second row starting the same
+// week), VIP, every day, campaign window {first Monday, last Sunday} of the row's weeks clipped to the entry's own window
+// (from / to and its periods: the weeks before vip-medal / vip-jewels-avatar's from are the 2019 campaigns), period of
+// its start, weekOf = the entry's key, weekTitle = the row's banner title, the entry's quest (world, room, target,
+// level, AP, objective texts) with the row's three rewards. evStageId frozen in rules.weekly.versions (a new version: next
+// free id from WEEKLY_EV_FIRST); banner = the week's original banner when the hunt has it (frozen there), else the entry's.
+// Weeks of a row: every Monday and every Sunday (-> its Monday) of the dates, typos skipped (e.g. «02/25/10», «00/15/19»).
+// Rewards: «1 7★ X» -> «X 7★ x1», «1400 Jewels» -> «Jewel x1400», «N Name» -> «Name xN», «Name» -> «Name x1»; a
+// medal without name («1 7★») takes the row's banner title; an avatar part without gender takes the one the master has;
+// aliases rename a reward the 4.3.1 master lacks (closest) or leave it out (null: the slot gets WEEKLY_FILLER, the
+// set's own filler reward). bothGenders (spirit parts, as the entry vip-spirit-part): a gender-less part that exists
+// for both genders fills slots 2-3 (♂, ♀) when slot 3 is the filler. The entry keeps the weeks without a row
+// (special.currentEntries hides it in the weeks a version of it is listed).
+const WEEKLY_EV_FIRST = 7700, WEEKLY_FILLER = 'Moogle 6★';
+const WEEKLY_DAYS = ['2018-01-01', '2021-06-30'];
+const isoOf = (ms) => new Date(ms).toISOString().slice(0, 10);
+function weeksOf(dates) {
+  const out = new Set();
+  for (const [, mm, dd, yy] of String(dates || '').matchAll(/(\d{1,2})\/(\d{1,2})\/(\d{2})\b/g)) {
+    const d = `20${yy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`, ms = Date.parse(`${d}T00:00:00Z`);
+    if (Number.isNaN(ms) || isoOf(ms) !== d || d < WEEKLY_DAYS[0] || d > WEEKLY_DAYS[1]) continue;
+    const wd = new Date(ms).getUTCDay();
+    if (wd === 1) out.add(d); else if (wd === 0) out.add(addDays(d, -6));
+  }
+  return [...out].sort();
+}
+// catalogue reward text -> «Name xN» (null: a medal without a name)
+function weeklyLabel(s, title) {
+  const t = String(s).replace(/\s*\|\}\s*$/, '').trim();
+  let m = /^(\d+)\s+(\d)★\s*(.*)$/.exec(t);
+  if (m) {
+    const name = m[3] || String(title || '').replace(/^Get\s+(?:one\s+)?/i, '').replace(/!+$/, '').trim();
+    return name ? `${name} ${m[2]}★ x${m[1]}` : null;
+  }
+  m = /^([\d,]+)\s+(.+)$/.exec(t);
+  if (m) return `${m[2].replace(/^Jewels$/, 'Jewel')} x${num(m[1])}`;
+  return `${t} x1`;
+}
+const weekKey = (entryKey, start) => `${entryKey}@${start}`;
+
+function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weeklyAliased: [] }) {
+  const W = rules.weekly;
+  if (!W || !W.sets) return [];
+  const table = catalogue.vip_recurring_weekly || {};
+  const frozen = Object.fromEntries(Object.entries(W.versions || {}).filter(([k]) => !k.startsWith('_')));
+  const used = new Set(Object.values(frozen).map((v) => v.evStageId));
+  let next = WEEKLY_EV_FIRST;
+  const nextId = () => { while (used.has(next)) next++; used.add(next); return next++; };
+  const aliases = W.aliases || {};
+  const resolves = (label) => !!label && !!rewardOf(splitObjective(`x -> ${label}`), L);
+  const parts = (L.avatarParts || []);
+  // «Spiky x1» -> «Spiky (♂) x1» when the master has the part in one gender only
+  const genderOf = (name) => [...new Set(parts.filter((r) => r.name === name).map((r) => r.gender))].sort();
+  const out = [], unknown = [];
+  for (const [setName, spec] of Object.entries(W.sets).filter(([k]) => !k.startsWith('_'))) {
+    const en = rules.entries.find((x) => x.key === spec.entry);
+    if (!en || !en.quests || en.quests.length !== 1) throw new Error(`special: weekly set «${setName}»: entry ${spec.entry} missing or not a one-quest entry`);
+    const tpl = catalogue.quests.find((q) => q.quest === en.quests[0]);
+    if (!tpl) throw new Error(`special: weekly set «${setName}»: quest «${en.quests[0]}» not in the catalogue`);
+    const pFrom = rules.periods.find((p) => p.n === Math.min(...en.periods)).from, pTo = rules.periods.find((p) => p.n === Math.max(...en.periods)).to;
+    const lo = [pFrom, en.from || ''].sort().pop(), hi = [pTo, en.to || '9999'].sort()[0];
+    const keys = new Set();
+    for (const row of table[setName] || []) {
+      const weeks = weeksOf(row.dates).filter((w) => w >= lo && w <= hi);
+      if (!weeks.length) continue;
+      const start = weeks[0], end = [addDays(weeks[weeks.length - 1], 6), hi].sort()[0];
+      let key = weekKey(spec.entry, start);
+      for (let n = 2; keys.has(key); n++) key = `${weekKey(spec.entry, start)}#${n}`;
+      keys.add(key);
+      const rewards = row.rewards.slice(0, 3).map((r, i) => {
+        let label = weeklyLabel(r, row.banner);
+        if (!label) return null;
+        let [, name, qty] = /^(.*) x(\d+)$/.exec(label);
+        if (Object.prototype.hasOwnProperty.call(aliases, name)) {
+          if (aliases[name] === null) { report.weeklyLeftOut.push([key, i + 1, name]); return `${WEEKLY_FILLER} x1`; }
+          report.weeklyAliased.push([key, i + 1, name, aliases[name]]);
+          name = aliases[name];
+        }
+        const g = !/\((?:♂|♀)\)$/.test(name) && genderOf(name);
+        if (g && g.length === 1) name = `${name} (${g[0] === 1 ? '♂' : '♀'})`;
+        label = `${name} x${qty}`;
+        return label;
+      });
+      // spirit parts (bothGenders): ♂ and ♀ in slots 2-3 when slot 3 is the filler
+      if (spec.bothGenders && rewards[1] && rewards[2] === `${WEEKLY_FILLER} x1`) {
+        const name = rewards[1].replace(/ x\d+$/, ''), g = genderOf(name);
+        if (g.length === 2) { rewards[1] = `${name} (♂) x1`; rewards[2] = `${name} (♀) x1`; }
+      }
+      const bad = rewards.map((r, i) => [i + 1, r, row.rewards[i]]).filter(([, r]) => !resolves(r));
+      if (bad.length) unknown.push(`${key} ${bad.map(([i, r, src]) => `${i} «${src}» (${r})`).join(', ')}`);
+      const fz = frozen[key] || {};
+      out.push({ key, evStageId: fz.evStageId || nextId(), name: en.name, family: en.family, periods: [periodOfDay(start, rules.periods)],
+        days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '', campaign: { start, end }, banner: fz.banner || en.banner || '',
+        weekOf: en.key, weekTitle: String(row.banner || '').trim(), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
+    }
+  }
+  if (unknown.length) throw new Error(`special: weekly rewards not in the master (add rules.weekly.aliases): ${unknown.join('; ')}`);
+  const stray = Object.keys(frozen).filter((k) => !out.some((x) => x.key === k));
+  if (stray.length) throw new Error(`special: rules.weekly.versions without a table row: ${stray.join(', ')}`);
+  return out;
+}
+
 function build(rules, catalogue, masterRows) {
   const L = lookups(masterRows);
-  const report = { stopgaps: [], titleFallbacks: [] };
+  const report = { stopgaps: [], titleFallbacks: [], weeklyLeftOut: [], weeklyAliased: [] };
   // reference rows: last story row 1-525 of each world, then the last story row of all
   const story = (masterRows.stage || []).filter((r) => r.stageKind === 1 && r.stageId < 100000 && r.id <= 525).sort((a, b) => a.id - b.id);
   if (!story.length) throw new Error('special: no story rows in the stage table');
@@ -337,8 +446,9 @@ function build(rules, catalogue, masterRows) {
   const evStageRows = [evStageRow(CATALOG_EV, [TRAINING_STAGE], { detailUrl: '/web/special/catalog' })];
 
   const seenEv = new Set([CATALOG_EV]), seenKey = new Set();
-  // campaigns (Task 12) after the entries: the ids of the entries' stage and drop rows do not move
-  for (const en of [...rules.entries, ...campaignEntries(rules, catalogue)]) {
+  // campaigns (Task 12) and the weekly versions of the recurring VIP sets (round 17) after the entries: the ids of the
+  // entries' stage and drop rows do not move
+  for (const en of [...rules.entries, ...campaignEntries(rules, catalogue), ...weeklyEntries(rules, catalogue, L, report)]) {
     if (!(en.evStageId > EV_FIRST && en.evStageId <= EV_LAST) || seenEv.has(en.evStageId)) throw new Error(`special: ${en.key}: evStageId ${en.evStageId} missing, out of range or repeated`);
     if (seenKey.has(en.key)) throw new Error(`special: key ${en.key} repeated`);
     seenEv.add(en.evStageId); seenKey.add(en.key);
@@ -353,7 +463,8 @@ function build(rules, catalogue, masterRows) {
     const base = { key: en.key, evStageId: en.evStageId, name: en.name, family: en.family, periods: en.periods, days: en.days,
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
       resetGroup: en.resetGroup || '', banner: en.banner || '' };
-    if (en.questObjs) Object.assign(base, { generic: en.generic, notice: en.notice });
+    if (en.questObjs && !en.weekOf) Object.assign(base, { generic: en.generic, notice: en.notice });
+    if (en.weekOf) Object.assign(base, { weekOf: en.weekOf, weekTitle: en.weekTitle });
     // optional days that split a period (special.currentEntries checks them against the Shop week)
     if (en.from) base.from = en.from;
     if (en.to) base.to = en.to;
@@ -482,4 +593,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { build, patch, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };
+module.exports = { build, patch, weeksOf, weeklyLabel, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };

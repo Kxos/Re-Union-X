@@ -139,10 +139,22 @@ check(CAMP.every(([, c]) => !c.banner || BANNER_RE.test(c.banner) || NOTICE_RE.t
 check(rules.campaigns.C71999?.banner === 'Notice 71999 Limited Winter VIP Board banner (notice image).png'
   && rules.campaigns.C72714?.banner === 'Notice 72714 New Year Limited VIP Boards banner (notice image).png', 'Limited VIP Boards: notice images');
 check(CAMP.filter(([, c]) => c.banner).length === 118, `campaigns with an original: ${CAMP.filter(([, c]) => c.banner).length} (118)`);
+// round 17: recurring VIP sets follow the weekly rotation (rules.weekly, make-special.js weeklyEntries)
+const WK = rules.weekly || {};
+const WV = Object.entries(WK.versions || {}).filter(([k]) => !k.startsWith('_'));
+const WS = Object.entries(WK.sets || {}).filter(([k]) => !k.startsWith('_'));
+check(WS.map(([, v]) => v.entry).sort().join() === 'vip-draw-ticket,vip-dual-meow-wow,vip-gems,vip-jewels-avatar,vip-medal,vip-spirit-part,vip-subslot', `weekly sets: ${WS.map(([, v]) => v.entry)}`);
+check(WS.every(([, v]) => { const en = byKey.get(v.entry); return en && en.vip && en.family === 'SQ22' && (en.quests || []).length === 1 && !en.removed; }), 'weekly sets on one-quest VIP SQ22 entries');
+check(!WS.some(([k]) => /Skill/.test(k)), 'VIP! Skill is not a weekly set (skill-assigned medals)');
+check(WV.length === 176 && WV.every(([k, v]) => /^vip-[a-z-]+@\d{4}-\d\d-\d\d(#\d)?$/.test(k) && WS.some(([, s]) => k.startsWith(s.entry + '@')) && v.evStageId >= 7700 && v.evStageId <= 7999), `weekly versions: 176 keys <entry>@<Monday>, ids 7700-7999 (${WV.length})`);
+const allIds = [...E.map((e) => e.evStageId), ...CAMP.map(([, c]) => c.evStageId), ...WV.map(([, v]) => v.evStageId)];
+check(new Set(allIds).size === allIds.length, 'evStageIds unique across entries, campaigns and week versions');
+check(WV.every(([k]) => new Date(k.slice(k.indexOf('@') + 1, k.indexOf('@') + 11) + 'T00:00:00Z').getUTCDay() === 1), 'week versions start on a Monday');
+check(WV.every(([, v]) => !v.banner || BANNER_RE.test(v.banner)), 'week version banners are khuxwiki names');
 const BANNERS = process.env.KHUX_SPECIAL_BANNERS || 'D:\\Progetto_Restauro_KH_UX\\reference\\special_banners';
 if (fs.existsSync(BANNERS)) {
   const have = new Set(fs.readdirSync(BANNERS));
-  const lost = [...E.map((e) => e.banner), ...CAMP.map(([, c]) => c.banner)].filter((b) => b && !have.has(b));
+  const lost = [...E.map((e) => e.banner), ...CAMP.map(([, c]) => c.banner), ...WV.map(([, v]) => v.banner)].filter((b) => b && !have.has(b));
   check(!lost.length, `banner files missing in ${BANNERS}: ${[...new Set(lost)].join(' | ')}`);
   const rlost = RECON.flatMap((k) => ['board', 'icon', 'tile'].map((f) => (rules.campaigns[k].reconstruct || {})[f])).filter((b) => !have.has(b));
   check(!rlost.length, `reconstruct sources missing in ${BANNERS}: ${rlost.join(' | ')}`);

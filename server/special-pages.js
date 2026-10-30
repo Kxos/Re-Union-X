@@ -126,7 +126,7 @@ const REWARD_OF_TYPE = { 3: 'medal', 20: 'avatar', 2: 'jewel', 5: 'material' };
 const optLabel = ([, l, k]) => (k ? icon(k) : '') + esc(l);
 function typesOf(en) {
   const t = [];
-  if (en.campaign) t.push('camp');
+  if (en.campaign && !en.weekOf) t.push('camp'); // a week version of a recurring VIP set (round 17) is no campaign
   if (en.vip || en.family === 'SQ22') t.push('vip');
   if (en.family === 'SQ12') t.push('daily');
   if (en.family === 'SQ09' || en.family === 'SQ07') t.push('mog');
@@ -256,10 +256,11 @@ function campaignStatus(en, ctx, { pinned, current }) {
     return { show: 'later', cls: 'off', pill: pill('off', 'later', `Coming in ${my}${q ? ` · Story Quest ${q}` : q === null ? ' · not reached in this version' : ''}`), button: null,
       why: q ? `It comes with your Story: it opens when you reach Story Quest ${q}.` : 'It comes later in the Story.' };
   }
-  if (en.key === (ctx.pinnedKey || '')) return { show: 'kept', cls: 'pinned', pill: pill(...PILLS.kept), button: 0, why: 'You keep this campaign in Special (it needs the VIP benefit).' };
+  const what = en.weekOf ? 'week' : 'campaign';
+  if (en.key === (ctx.pinnedKey || '')) return { show: 'kept', cls: 'pinned', pill: pill(...PILLS.kept), button: 0, why: `You keep this ${what} in Special (it needs the VIP benefit).` };
   if (special.pinnable(en, cur).ok) {
     return { show: 'can', cls: 'can', pill: pill('can', 'pin', `${my} · can be kept with VIP`), button: 1,
-      rp: pinned ? `<div class="rp">Replaces: ${esc(pinned.name)}</div>` : '', why: 'Its week is over: you can keep it in Special; like every VIP campaign it needs the VIP benefit.' };
+      rp: pinned ? `<div class="rp">Replaces: ${esc(pinned.name)}</div>` : '', why: `Its week is over: you can keep it in Special; like every VIP ${en.weekOf ? 'quest' : 'campaign'} it needs the VIP benefit.` };
   }
   if (current.has(en)) {
     return ctx.vip ? { show: 'now', cls: 'now', pill: pill('now', 'now', 'This week · VIP'), button: null, why: 'It is in Special this week.' }
@@ -400,15 +401,19 @@ const variantOf = (en) => (Array.isArray(en.days) && en.days.length === 1 ? en.d
 // quest families (round 12-13): permanent entries with the same title (without day / variant suffix) are one quest;
 // inside, versions = same periods, VIP rule and banner (an empty banner is a version of its own), oldest first.
 // Campaigns are families of one entry. key = the first entry's evStageId (/web/special/quest/<key>).
+// Round 17: the week versions of a recurring VIP set (weekOf, with a campaign week) join their set's quest (same name),
+// one version per week, ordered by period and then week (the set's own entry first within its first period).
+const isCampaignRow = (en) => en.campaign && !en.weekOf;
+const startOf = (en) => (en.campaign ? en.campaign.start : en.from || '');
 function familiesOf(entries) {
   const out = [], byTitle = new Map();
-  for (const en of entries.filter((x) => !x.campaign)) {
+  for (const en of entries.filter((x) => !isCampaignRow(x))) {
     const t = familyTitle(en.name);
     if (!byTitle.has(t)) { const f = { title: t, list: [], campaign: false }; out.push(f); byTitle.set(t, f); }
     byTitle.get(t).list.push(en);
   }
   // campaigns (round 14): by date; the same banner art again within a week of the previous one's end -> the same row
-  const camps = entries.filter((x) => x.campaign).sort((a, b) => (a.campaign.start < b.campaign.start ? -1 : a.campaign.start > b.campaign.start ? 1 : a.evStageId - b.evStageId));
+  const camps = entries.filter(isCampaignRow).sort((a, b) => (a.campaign.start < b.campaign.start ? -1 : a.campaign.start > b.campaign.start ? 1 : a.evStageId - b.evStageId));
   let last = null;
   for (const en of camps) {
     const prev = last && last.list[last.list.length - 1];
@@ -423,7 +428,9 @@ function familiesOf(entries) {
       if (!vmap.has(k)) vmap.set(k, []);
       vmap.get(k).push(en);
     }
-    f.versions = [...vmap.values()].sort((a, b) => Math.min(...a[0].periods) - Math.min(...b[0].periods) || (a[0].campaign ? (a[0].campaign.start < b[0].campaign.start ? -1 : 1) : 0));
+    const byWeek = (a, b) => (!a[0].campaign && !b[0].campaign ? 0 : !a[0].campaign ? -1 : !b[0].campaign ? 1
+      : startOf(a[0]) < startOf(b[0]) ? -1 : startOf(a[0]) > startOf(b[0]) ? 1 : a[0].evStageId - b[0].evStageId);
+    f.versions = [...vmap.values()].sort((a, b) => Math.min(...a[0].periods) - Math.min(...b[0].periods) || byWeek(a, b));
     f.key = f.list[0].evStageId;
     f.mixed = f.versions.some((v) => v[0].vip) && f.versions.some((v) => !v[0].vip);
   }
@@ -439,6 +446,11 @@ function campaignTitle(list) {
     .replace(/\s*&\s*Combo.*$/i, '').replace(/\s*\+\s*(?:More|0 AP Campaign)\b.*$/i, '').replace(/!+\s*$/, '').trim();
   return t || list[0].name;
 }
+// «Week of Jun 1, 2020»; a version of several weeks (round 17): «Mar 4 – Mar 17, 2019»
+const weekLabel = ({ start, end }) => {
+  if (daysBetween(start, end) <= 6) return `Week of ${niceDay(start)}`;
+  return start.slice(0, 4) === end.slice(0, 4) ? `${niceDay(start).replace(/, \d{4}$/, '')} – ${niceDay(end)}` : `${niceDay(start)} – ${niceDay(end)}`;
+};
 const FULL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthYear = (d) => (/^(\d{4})-(\d\d)/.test(d || '') ? `${FULL_MONTHS[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}` : '');
 const questHref = (key) => `/web/special/quest/${key}?from=catalog`;
@@ -599,7 +611,7 @@ function detailPage(index, evStageId, ctx = {}) {
     }).join('');
   };
   const verLabel = (v) => {
-    if (v[0].campaign) return `Week of ${niceDay(v[0].campaign.start)}`;
+    if (v[0].campaign) return weekLabel(v[0].campaign);
     const [y1, y2] = versionYears(v, periods);
     return `${y1 === y2 ? y1 : `${y1}–${y2}`}${f.mixed ? ` · ${v[0].vip ? 'VIP' : 'Free'}` : v[0].vip ? ' · VIP only' : ''}`;
   };
@@ -613,7 +625,7 @@ function detailPage(index, evStageId, ctx = {}) {
         + (new Set(v.map((en) => `${statusFor(en).show}|${statusFor(en).cls}`)).size > 1 || v.some((en) => statusFor(en).button !== null)
           ? v.map((en) => `<div class="mem" id="m${en.evStageId}"><b>${esc(variantOf(en))}</b>${statusFor(en).pill}${button([en])}</div>`).join('') : '');
     return `<div class="ver ${vb.cls}" id="v${vi}"><h3>${esc(verLabel(v))}</h3>`
-      + `<p class="n">${v[0].campaign ? 'VIP campaign of the original game' : `Period${en0.periods.length > 1 ? 's' : ''}: ${pers}`}${limits ? ` · in Special ${limits}` : ''}</p>`
+      + `<p class="n">${v[0].weekOf ? `Week of the original game: «${esc(v[0].weekTitle || v[0].name)}»` : v[0].campaign ? 'VIP campaign of the original game' : `Period${en0.periods.length > 1 ? 's' : ''}: ${pers}`}${limits ? ` · in Special ${limits}` : ''}</p>`
       + `${vb.pill}<div class="why ${vb.cls}">${vb.why}</div>${days}${v.length === 1 ? button(v) : ''}</div>`;
   };
   const periodList = periods.filter((p) => f.list.some((en) => en.periods.includes(p.n)))

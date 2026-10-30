@@ -201,5 +201,28 @@ check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
   check(sp.specialEvents(index, ctx({})).every((x) => x.complete === 0), 'no objectives done: all 0');
 }
 
+// round 17: recurring VIP set with week versions (weekOf = the set's entry, campaign = the week): in a week with a
+// version only the version(s) are listed, the set's entry is hidden; in a week without one the entry (fallback)
+{
+  const ws = { catalog: index.catalog, entries: [
+    e('vm', 7021, { periods: [3, 4], vip: true, from: '2019-03-04', family: 'SQ22' }),
+    e('vm@2019-07-01', 7701, { periods: [3], vip: true, family: 'SQ22', weekOf: 'vm', campaign: { start: '2019-07-01', end: '2019-07-14' } }),
+    e('vm@2019-07-08', 7702, { periods: [3], vip: true, family: 'SQ22', weekOf: 'vm', campaign: { start: '2019-07-08', end: '2019-07-14' } }),
+    e('other', 7022, { periods: [3, 4], vip: true, family: 'SQ22' }),
+  ] };
+  const at3 = (from, to) => keysOf(sp.currentEntries(ws, { period: 3, shopFrom: from, shopTo: to }));
+  check(at3('2019-07-01', '2019-07-07') === 'vm@2019-07-01,other', `week with one version: version only (${at3('2019-07-01', '2019-07-07')})`);
+  check(at3('2019-07-08', '2019-07-14') === 'vm@2019-07-01,vm@2019-07-08,other', `week with two versions: both, no fallback (${at3('2019-07-08', '2019-07-14')})`);
+  check(at3('2019-07-15', '2019-07-21') === 'vm,other', `week without a version: the set's entry (${at3('2019-07-15', '2019-07-21')})`);
+  check(at3('2019-02-25', '2019-03-03') === 'other', 'before the entry from: neither');
+  const moved = { catalog: index.catalog, entries: [ws.entries[0], ws.entries[3], ws.entries[1]] };
+  check(keysOf(sp.currentEntries(moved, { period: 3, shopFrom: '2019-07-01', shopTo: '2019-07-07' })) === 'vm@2019-07-01,other', 'the version takes the place of its set entry in the tab');
+  check(!sp.pinnable(ws.entries[1], 3).ok && sp.pinnable(ws.entries[1], 4).ok, 'week version pinnable from a later period');
+  const ev = sp.specialEvents(ws, ctx({ period: 3, vip: true, shopFrom: '2019-07-01', shopTo: '2019-07-07' }));
+  check(ev.map((x) => x.eventStageId).join() === '7000,7701,7022' && ev[1].isLock === 0 && ev[1].endTime === 'WEEKEND', `tab: the week's version open with VIP (${ev.map((x) => x.eventStageId)})`);
+  const kp = sp.specialEvents(ws, ctx({ period: 4, vip: true, pinnedKey: 'vm@2019-07-08', shopFrom: '2020-06-01', shopTo: '2020-06-07' }));
+  check(kp.map((x) => x.eventStageId).join() === '7000,7702,7021,7022' && kp[1].bannerUrl.endsWith('/7702-kept.png'), `kept week version next to the fallback (${kp.map((x) => x.eventStageId)})`);
+}
+
 if (errors.length) { console.error(`test-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }
 console.log('test-special: OK');
