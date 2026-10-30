@@ -171,6 +171,21 @@ check(raw(t.respondSpecialWeb, '/web/special/img/7000-kept.png').code === 404, '
 check(raw(t.respondSpecialWeb, '/web/special/img/../special.json').code === 404, 'percorso fuori dalla cartella: non 404');
 const cat = raw(t.respondSpecialWeb, '/web/special/catalog?m=1');
 check(cat.code === 200 && cat.headers['Content-Type'].startsWith('text/html') && cat.body.toString('utf8').includes('id="q7001"'), `catalogo: ${cat.code}`);
+// polish 31-10: pagina dei dettagli /web/special/detail/<evStageId> (solo il percorso conta) e icone /web/special/icon/<chiave>.png
+check(server.route('/web/special/detail/7012?from=catalog') === 'specialweb', 'rotta dettagli');
+const det = raw(t.respondSpecialWeb, '/web/special/detail/7012?from=catalog');
+const detHtml = det.body.toString('utf8'), en7012 = t.specialIndex().entries.find((x) => x.evStageId === 7012);
+check(det.code === 200 && det.headers['Content-Type'].startsWith('text/html') && detHtml.includes(en7012.name.replace(/&/g, '&amp;')) && detHtml.includes('class="back"'), `dettagli 7012: ${det.code}`);
+check(/<h3>Objectives<\/h3>/.test(detHtml) && detHtml.includes('Defeat the target enemy within 1 turn') && detHtml.includes('Avatar Coin x5'), 'dettagli 7012: obiettivi dal master');
+check(!raw(t.respondSpecialWeb, '/web/special/detail/7012').body.toString('utf8').includes('class="back"'), 'dettagli senza from=catalog: niente BACK');
+check(raw(t.respondSpecialWeb, '/web/special/detail/99999').code === 404 && raw(t.respondSpecialWeb, '/web/special/detail/7000').code === 404
+  && raw(t.respondSpecialWeb, '/web/special/detail/abc').code === 404, 'dettagli: id sconosciuto 404');
+const iconDir = path.join(__dirname, 'game_data', 'special_icons');
+if (fs.existsSync(path.join(iconDir, 'vip.png'))) {
+  const ic = raw(t.respondSpecialWeb, '/web/special/icon/vip.png');
+  check(ic.code === 200 && ic.headers['Content-Type'] === 'image/png' && Buffer.compare(ic.body, fs.readFileSync(path.join(iconDir, 'vip.png'))) === 0, `icona vip: ${ic.code}`);
+} else console.log('(icone Special assenti: python -I recon/tools/special_icons.py)');
+check(raw(t.respondSpecialWeb, '/web/special/icon/nope.png').code === 404 && raw(t.respondSpecialWeb, '/web/special/icon/../special.png').code === 404, 'icona fuori lista: 404');
 
 // 11. fissare una quest: POST /web/special/pin/<evStageId> e /web/special/unpin
 const post = (url) => { const r = raw(t.respondSpecialPost, url); return { code: r.code, body: JSON.parse(r.body.toString('utf8')) }; };
