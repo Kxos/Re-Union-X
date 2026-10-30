@@ -143,6 +143,12 @@ at the offsets written in the header (+ 0x34), in this order and contiguous:
   with 3). With `cfg['poi']` it writes enemies and chests into `server/game_data/stage_poi.json` (adds to the
   existing file: copy it first into `reach\stage_poi.json`). Output in `stage_gen\story`, to be copied
   by hand into `stage_gen\files\stage` (it does not overwrite 1010-1050).
+- Special quests (30-10, Special tab Task 4): config key `"special"` = `server/game_data/special_maps.json` (written by
+  `server/make-special.js`); `"stages"`/`"quests"` may be left out. One part per stage (970000-979999), target alone
+  at the farthest point with the 1xxxx id of the objectives, drop carriers with the drop reward rows of make-special
+  (enemy record reward), wiki level in the enemy records. Config `stage_gen\special_cfg.json` -> `stage_gen\special`,
+  copied into `stage_gen\files\stage`; the POI is merged into `server/game_data/stage_poi.json`. Test:
+  `recon/tools/test_gen_story_maps_special.py`.
 - `walk_grid` kept only points with 80x80 free: corridors of 33-80 broke the grid and
   the entrance pocket was taken. Now, if the piece reaches less than 0.4 of the component, walking distances
   on the pixels (`geodesic`). 132 files / 88 stages regenerated.

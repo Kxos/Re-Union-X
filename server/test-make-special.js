@@ -33,7 +33,7 @@ const rules = {
   periods: [{ n: 1, name: 'p1', from: '2016-04-01', to: '2020-05-22' }, { n: 4, name: 'p4', from: '2020-05-23', to: '2020-11-15' }],
   entries: [
     { key: 'alpha', evStageId: 7001, series: ['Series A'], name: 'Alpha', family: 'SQ01', periods: [4], days: ['Mon'],
-      vip: false, replacedBy: null, removed: '', resetGroup: 'cid', drops: [{ type: 3, id: 90076, num: 1 }, { type: 5, id: 1, num: 1 }] },
+      vip: false, replacedBy: null, removed: '', resetGroup: 'cid', banner: 'Special - Alpha banner KHUX.png', drops: [{ type: 3, id: 90076, num: 1 }, { type: 5, id: 1, num: 1 }] },
     { key: 'beta', evStageId: 7002, quests: ['Beta'], name: 'Beta', family: 'SQ22', periods: [4], days: 'all', vip: true,
       replacedBy: null, removed: '', resetGroup: '', useAp: [0], rewards: ['Jewel x1400', 'Cid 6★ x2', 'Mythril Shard x3'], drops: [] },
     { key: 'gone', evStageId: 7003, series: ['Series A'], name: 'Gone', family: 'SQ06', periods: [1], days: ['Sat', 'Sun'],
@@ -47,7 +47,7 @@ const story = { stageId: 1010, stageBinId: 0, id: 1, name: 'Story 1', mapName: '
   bgmField: 11, bgmBattle: 12, bgmBoss: 13 };
 const master = {
   stage: [story, { ...story, stageId: 970123, id: 970123, stageKind: 2, name: 'old special' }],
-  enemy: [{ enemyId: 1, name: 'Shadow' }, { enemyId: 1003, name: 'King Pretender' }, { enemyId: 11003, name: 'King Pretender' },
+  enemy: [{ enemyId: 1, name: 'Shadow' }, { enemyId: 1006, name: 'Prize Egg' }, { enemyId: 1004, name: 'Growth Egg' }, { enemyId: 1003, name: 'King Pretender' }, { enemyId: 11003, name: 'King Pretender' },
     { enemyId: 1002, name: 'Great Pretender' }],
   medal: [{ medalId: 90076, name: 'Cid', rare: 6 }],
   material: [{ materialId: 1, name: 'Mythril Shard' }],
@@ -92,13 +92,14 @@ const a1 = row(970010), a2 = row(970011), b = row(970020), tr = row(970000);
 check(a1 && a2 && b && tr, 'stage ids: 970000 + (evStageId - 7000) * 10 + i');
 check(a1 && a1.useAp === 12 && a2.useAp === 20 && b.useAp === 0 && tr.useAp === 0, 'useAp: first number of «12 / 20 / 30», «zero» 0');
 check(a1 && a1.name === 'Alpha I' && a1.mapName === 'Fountain Square' && a1.worldId === 1, 'name, room and world');
-check(a1 && a1.thumbId === 77 && a1.raidBoss === 5001 && a1.bgmField === 11, 'cloned from the last story row of the world');
+check(a1 && a1.thumbId === 77 && a1.bgmField === 11, 'cloned from the last story row of the world');
+check(stageRows.every((r) => r.raidBoss === 0), 'raidBoss 0 on every Special and training row (not cloned from the story row)');
 check(b && b.worldId === 3, 'Wonderland world 3 (no story row: fallback to the last story row)');
 // objectives through objectiveCodes, like the story rows
-const ctx = { target: 1003, targetName: 'King Pretender', enemyId: (n) => ({ 'great pretender': 1002, 'king pretender': 1003 })[n.toLowerCase()] || 0 };
+const ctx = { target: 11003, targetName: 'King Pretender', enemyId: (n) => ({ 'great pretender': 1002, 'king pretender': 1003 })[n.toLowerCase()] || 0 };
 const c0 = objectiveCodes('Defeat the target enemy within 1 turn', ctx);
 check(a1 && a1.validSubmission === 3 && a1.submissionRequire[0] === c0.req && a1.submissionName[0] === c0.name
-  && a1.submissionId[0] === 1003 && a1.submissionNum[0] === 1 && a1.submissionDataType[0] === 4, 'objective 1 codes as in the story rows');
+  && a1.submissionId[0] === 11003 && a1.submissionNum[0] === 1 && a1.submissionDataType[0] === 4, 'objective 1 codes as in the story rows');
 check(a1 && a1.submissionRequire[1] === 4 && a1.submissionId[1] === 1002 && a1.submissionNum[1] === 1, '«Defeat Great Pretender x 1»');
 check(a1 && a1.submissionRequire[2] === 5 && a1.submissionNum[2] === 2, '«Use 2 or more special attacks»');
 check(a1 && a1.submissionRewardType.join() === '14,3,5' && a1.submissionItemId.join() === '0,90076,1'
@@ -119,9 +120,30 @@ check(index.entries.length === 3 && index.entries.every((e) => KEYS.every((k) =>
 const gone = index.entries.find((e) => e.key === 'gone');
 check(gone && gone.removed === 'no-use' && gone.stageIds.length === 0 && gone.useAp.length === 0, 'removed entry: index only');
 const alpha = index.entries.find((e) => e.key === 'alpha');
+check(alpha && alpha.banner === 'Special - Alpha banner KHUX.png' && gone.banner === '', 'index: banner file of the entry (make_special_banners.py)');
 check(alpha && alpha.stageIds.join() === '970010,970011' && alpha.useAp.join() === '12,20' && alpha.campaign === null, 'index stageIds/useAp');
 check(alpha && alpha.dropRewardIds.length === 2 && alpha.stages[0].wikiLv === 25 && alpha.stages[1].wikiLv === 30
-  && alpha.stages[0].targetId === 1003, 'index map data for Task 4 (wikiLv, target, drops)');
+  && alpha.stages[0].targetId === 11003, 'index map data for Task 4 (wikiLv, target, drops)');
+// the target is the 1xxxx form of the enemy (as on the original maps and in gen_story_maps.py), same id in the objectives
+check(tr && tr.submissionId[0] === 1, 'training target: Shadow 1 (the fixture has no 1xxxx Shadow)');
+
+// map list for gen_story_maps.py (Task 4): one entry per stage, target in the 1xxxx family, drop carriers with the
+// drop reward rows, enemies of «Defeat X» objectives with their objective id
+const maps = out.maps || [];
+check(maps.length === 4 && maps.map((m) => m.stageId).join() === '970000,970010,970011,970020', 'maps: one entry per stage');
+const mA = maps.find((m) => m.stageId === 970010);
+const members = (m) => m.enemies.flat();
+check(mA && mA.world === 1 && mA.room === 'Fountain Square' && mA.name === 'Alpha I' && mA.target === 'King Pretender'
+  && mA.targetId === 11003 && mA.level === 25 && mA.rooms === 1 && Array.isArray(mA.treasures) && mA.treasures.length === 0, 'map entry fields');
+check(mA && mA.enemies.length >= 3 && mA.enemies.every((g) => g.length && g.reduce((n, x) => n + x.n, 0) <= 5), '>= 3 groups of at most 5');
+check(mA && members(mA).every((x) => x.enemyId !== 11003), 'the target is not in the normal groups');
+const carriers = mA ? members(mA).filter((x) => x.reward !== 1) : [];
+check(carriers.length === 2 && carriers.map((x) => x.reward).join() === alpha.dropRewardIds.join() && carriers.every((x) => x.n === 1),
+  'one drop carrier per drop row, reward = the drop row');
+check(carriers[0] && carriers[0].name === 'Prize Egg' && carriers[0].enemyId === 1006, 'medal drop: Prize Egg carrier');
+check(mA && members(mA).some((x) => x.enemyId === 1002 && x.name === 'Great Pretender' && x.n === 1), 'objective enemy Great Pretender x1 on the map');
+const mT = maps.find((m) => m.stageId === 970000);
+check(mT && mT.target === 'Shadow' && mT.targetId === 1 && members(mT).every((x) => x.reward === 1), 'training map: Shadow, no drops');
 
 // errors on bad rules
 const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
@@ -144,6 +166,35 @@ try {
   check(!st.some((r) => r.stageId === 970123) && st.filter((r) => r.stageKind === 2).length === 4 && st[0].stageId === 1010, 'patch replaces own stage rows');
   check(JSON.parse(first[1]).length === 3 && JSON.parse(first[2]).length === 3, 'patch evStage and reward rows');
   check(JSON.parse(first[3]).catalog.evStageId === 7000, 'patch writes special.json');
+  const sm = fs.existsSync(path.join(dir, 'special_maps.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'special_maps.json'), 'utf8')) : null;
+  check(Array.isArray(sm) && sm.length === 4, 'patch writes special_maps.json');
+  // a reward row in the own range that the previous run did not write (e.g. make-game-tables from the POI) is foreign:
+  // the guard runs on the unfiltered table
+  const rw = JSON.parse(first[2]);
+  const rejects = (rows, why) => {
+    fs.writeFileSync(path.join(dir, 'reward.json'), JSON.stringify(rows));
+    let threw = false;
+    try { ms.patch(dir, opts); } catch { threw = true; }
+    check(threw, why);
+    fs.writeFileSync(path.join(dir, 'reward.json'), first[2]);
+  };
+  rejects([...rw, { ...rw[0], rewardId: 970050 }], 'foreign reward row 970050 (not listed by the previous run) rejected');
+  rejects([...rw, { ...rw[0], rewardId: 980000 }], 'foreign reward row 980000 rejected');
+  // off switch and missing private catalogue: skip with a message, no throw, nothing written
+  const before = snap();
+  const env = { off: process.env.KHUX_SPECIAL, src: process.env.KHUX_SPECIAL_SRC };
+  try {
+    process.env.KHUX_SPECIAL = '0';
+    check(ms.patch(dir, opts) === null && JSON.stringify(before) === JSON.stringify(snap()), 'KHUX_SPECIAL=0: skipped');
+    delete process.env.KHUX_SPECIAL;
+    process.env.KHUX_SPECIAL_SRC = path.join(dir, 'missing.json');
+    let r, err = null;
+    try { r = ms.patch(dir, { rules, gameDataDir: dir }); } catch (e) { err = e; }
+    check(!err && r === null && JSON.stringify(before) === JSON.stringify(snap()), `missing catalogue: skipped with a warning (${err && err.message})`);
+  } finally {
+    if (env.off === undefined) delete process.env.KHUX_SPECIAL; else process.env.KHUX_SPECIAL = env.off;
+    if (env.src === undefined) delete process.env.KHUX_SPECIAL_SRC; else process.env.KHUX_SPECIAL_SRC = env.src;
+  }
 } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 
 // --- authored rules (server/special_periods.json) -----------------------------------------------------------

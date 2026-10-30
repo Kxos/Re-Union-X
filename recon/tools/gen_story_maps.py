@@ -9,7 +9,16 @@ config: {"stages": stage_dec.json di thethiny, "quests": wiki\\quests.json,
          "world_links": recon/tools/world_links.json (facoltativo: uscite sulle porte vere),
          "worldtour": true (facoltativo: missioni «Tour» 991000 + worldId, "worldtour_report"),
          "rooms_check": rooms_check.json di check_rooms.py / "exclude_rooms": [...] (stanze incomplete,
-         trattate come assenti)}
+         trattate come assenti),
+         "special": server/game_data/special_maps.json (optional: Special quests, see below)}
+"stages" and "quests" may be left out for a run with only "special" (or zoo/tour) maps.
+
+Special quests (cfg['special'], written by server/make-special.js): a JSON list
+[{stageId, world (worldId), name, room, target, targetId, level, enemies: [[{name, enemyId, n, reward}] per group],
+treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules as the one-room story quests
+(groups along the distance from the start, target alone in the arena at the farthest point), output
+mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
+reward goes into the enemy record (drop rows of make-special.js), level into every enemy record of the stage.
 
 Per ogni missione (stageBinId 1..N di thethiny = numero della missione):
 - stanza: rooms[nome] se noto, altrimenti una stanza dello stesso mondo (prefisso del
@@ -51,8 +60,8 @@ import struct
 import sys
 
 cfg = json.load(open(sys.argv[1], encoding='utf-8-sig'))
-stages = json.load(open(cfg['stages'], encoding='utf-8'))
-quests = json.load(open(cfg['quests'], encoding='utf-8'))
+stages = json.load(open(cfg['stages'], encoding='utf-8')) if cfg.get('stages') else []
+quests = json.load(open(cfg['quests'], encoding='utf-8')) if cfg.get('quests') else []
 quests = quests if isinstance(quests, list) else list(quests.values())
 enemies = json.load(open(cfg['enemies'], encoding='utf-8'))
 rooms = json.load(open(cfg['rooms'], encoding='utf-8-sig'))
@@ -294,7 +303,7 @@ T_AREAS = [bytes(tmpl[ta0 + k * 0x44:ta0 + (k + 1) * 0x44]) for k in range(tna)]
 ARENA, NORMAL = T_AREAS[0], T_AREAS[1]
 
 
-def build_part(folder, start, dist, groups, nchests):
+def build_part(folder, start, dist, groups, nchests, level=1):
     far = max(dist, key=lambda p: (dist[p], -p[1]))
     maxd = dist[far] or 1
     by_d = sorted(dist, key=lambda p: dist[p])
@@ -310,10 +319,12 @@ def build_part(folder, start, dist, groups, nchests):
             cx, cy = min(by_d, key=lambda p: abs(dist[p] - want))
         near = sorted(dist, key=lambda p: (p[0] - cx) ** 2 + (p[1] - cy) ** 2)
         members = []
-        for name, n in (g['members'] if g else []):
-            eid = enemy_id(name, is_t and not members)
+        # members: (name, n) from the wiki; the Special maps add (name, n, reward, enemyId)
+        for m in (g['members'] if g else []):
+            name, n = m[0], m[1]
+            eid = (m[3] if len(m) > 3 and m[3] else None) or enemy_id(name, is_t and not members)
             if eid:
-                members += [eid] * n
+                members += [(eid, m[2] if len(m) > 2 else 1)] * n
         if not members:
             continue
         rec = bytearray(ARENA if is_t else NORMAL)
@@ -331,9 +342,9 @@ def build_part(folder, start, dist, groups, nchests):
             if y1 - y0 < 40:
                 y0, y1 = cy - 20, cy + 20
             struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
-        for k, eid in enumerate(members):
+        for k, (eid, rw) in enumerate(members):
             x, y = near[min(k * 3, len(near) - 1)]
-            ens.append((x, y, eid, 1, 1, 1, 1, uid))
+            ens.append((x, y, eid, 1, 1, level, rw, uid))
             uid += 1
         areas.append(bytes(rec))
     used = {(e[0], e[1]) for e in ens}
@@ -1049,6 +1060,31 @@ for s in sorted(stages, key=lambda r: r['stageBinId']):
     report.append({'mission': num, 'stageId': sid, 'name': s['name'], 'room': first_room, 'folder': folder,
                    'exact_room': first_room in rooms, 'enemies': len(ens), 'chests': len(chests),
                    'unknown_enemies': sorted(set(missing))})
+# Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above.
+if cfg.get('special'):
+    for sp in json.load(open(cfg['special'], encoding='utf-8')):
+        sid = sp['stageId']
+        # «Underground Waterway x4» (rooms played several times in the catalogue) -> the room name
+        room_name = re.sub(r'\s+x\d+$', '', sp.get('room') or sp['name'])
+        folder = room_folder(room_name, sp['world'])
+        groups = [{'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId'))
+                               for x in (g if isinstance(g, list) else [g])], 'target': False, 'room': room_name}
+                  for g in sp.get('enemies', [])]
+        groups.append({'members': [(sp['target'], 1, 1, sp.get('targetId'))], 'target': True, 'room': room_name})
+        start, dist = walk_grid(folder)
+        part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
+        target_id = ens[-1][2]                      # the target group is placed last (arena)
+        hdr = struct.pack('<16i', 4674643, 16, 1, start[0], start[1], 2, target_id, 1, len(areas), len(ens),
+                          0, 1, 0, 0, len(chests), 0)
+        open(os.path.join(out, 'mappoi_stg%05d.bin' % sid), 'wb').write(hdr)
+        open(os.path.join(out, 'mappoi_stg%05d_00.bin' % sid), 'wb').write(part)
+        poi_add(sid, 0, ens, chests)
+        names = [m[0] for g in groups for m in g['members'] if not m[3]]
+        report.append({'mission': 0, 'stageId': sid, 'name': sp['name'], 'room': room_name, 'folder': folder,
+                       'exact_room': room_name in rooms, 'enemies': len(ens), 'chests': len(chests), 'special': True,
+                       'drops': sum(e[6] != 1 for e in ens),
+                       'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name})})
+        print('special', sid, folder, len(ens), 'nemici')
 # Missioni «zoo» per provare i nemici: tutti gli enemyId di zoo_enemies, zoo_per_stage per
 # missione, in aree da 5 nella stanza zoo_room; stageId 990001.. (righe nel master con
 # KHUX_ZOO=1 in make-game-tables.js). All'avvio il campo carica la grafica di tutti.

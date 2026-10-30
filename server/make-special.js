@@ -19,8 +19,15 @@
 // - reward rows 970000+: one per drop, prize at position 0 (type 5 material, or type 3 medal: bench 30-10, the client
 //   shows a medal dropped by an enemy when /stage/start sends 3 at its position). Task 4 puts them on the enemies;
 // - server/game_data/special.json: the index read by special.js / server.js (catalog + entries, Task 2 shape, plus the
-//   map data Task 4 needs: world, room, target, level and drop rows per stage).
-// Wired at the end of make-game-tables.js (after make-proud). After a run: raise the master revision.
+//   map data Task 4 needs: world, room, target, level and drop rows per stage);
+// - server/game_data/special_maps.json: the stage list for recon/tools/gen_story_maps.py (config key "special"):
+//   {stageId, world (worldId), name, room, target, targetId, level (wiki level, for the level field of the enemy
+//   records, as the original maps), enemies: [[{name, enemyId, n, reward}] per group], treasures: [], rooms: 1}. Target = the 1xxxx form of the enemy (as on the original maps; the same id goes into
+//   the objectives); groups = 2 of the target enemy each, plus one carrier per drop row (enemy record reward = the drop
+//   row) and the enemies of «Defeat X» objectives with their objective id. Carriers (builder's call): EXP medals on a
+//   Growth Egg, Moogle (munny) on a Munny Egg, everything else on a Prize Egg.
+// Wired at the end of make-game-tables.js (after make-proud). KHUX_SPECIAL=0 turns it off; without the private
+// catalogue it is skipped with a warning (clean PC). After a run: raise the master revision.
 //
 //   node server/make-special.js [master folder]
 'use strict';
@@ -53,6 +60,10 @@ const stageIdOf = (evStageId, i) => STAGE_FIRST + (evStageId - EV_FIRST) * 10 + 
 const isOwnStage = (r) => r.stageId >= STAGE_FIRST && r.stageId <= STAGE_LAST;
 const isOwnEv = (r) => r.eventStageId >= EV_FIRST && r.eventStageId <= EV_LAST;
 const isOwnReward = (r) => r.rewardId >= REWARD_FIRST && r.rewardId <= REWARD_LAST;
+// enemies of a map group: at most 5 (as the story groups), at least 3 normal groups
+const GROUP_MAX = 5, GROUPS_MIN = 3, TARGET_PER_GROUP = 2;
+const carrierOf = (medalName) => (/^(Huey|Dewey|Louie)\b/.test(medalName || '') ? 'Growth Egg'
+  : /^Moogle\b/.test(medalName || '') ? 'Munny Egg' : 'Prize Egg');
 
 // «Defeat X x 1 -> Cid 6★ x1» -> {text, reward, qty}
 function splitObjective(s) {
@@ -79,8 +90,13 @@ function lookups(m) {
     if (!x) return 0;
     return ((m.avatarParts || []).find((r) => r.name === x[1] && r.gender === (x[2] === '♂' ? 1 : 2)) || {}).avatarPartsId || 0;
   };
+  // map form of an enemy (as enemy_id of gen_story_maps.py): target 1xxxx, others 8xxxx, otherwise the smallest id
+  const mapEnemyId = (name, target) => {
+    const ids = (m.enemy || []).filter((e) => lower(e.name) === lower(name)).map((e) => e.enemyId).sort((a, b) => a - b);
+    return ids.find((i) => (target ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
+  };
   return {
-    enemyId, medalId, materialId, avatarPartId,
+    enemyId, medalId, materialId, avatarPartId, mapEnemyId,
     titleId: (name) => ((m.title || []).find((r) => r.title === name) || {}).titleId || 0,
     keybladeId: (name) => ((m.keyblade || []).find((k) => k.name === name && !k.lv) || {}).keybladeId || 0,
     skillId: (name) => ((m.skill || []).find((s) => s.name === name) || {}).skillId || 0,
@@ -104,7 +120,7 @@ function rewardOf(o, L) {
 
 // three objectives of a quest -> fields of the stage row (same layout as setSubs in make-story-oltre.js)
 function subsOf(objectives, rewardsOverride, target, L, report, where) {
-  const ctx = { ...L, target: L.enemyId(target), targetName: target, header: null };
+  const ctx = { ...L, target: L.mapEnemyId(target, true), targetName: target, header: null };
   const subs = objectives.slice(0, 3).map((s, i) => {
     const o = splitObjective(s);
     if (rewardsOverride && rewardsOverride[i]) Object.assign(o, splitObjective(`x -> ${rewardsOverride[i]}`), { text: o.text });
@@ -163,9 +179,9 @@ function build(rules, catalogue, masterRows) {
       branchType: 0, disableContinue: 0, addLevel: 0, holdKeyblade: 0, validClearGetTitle: 0, clearGetTitle: 0,
       validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, validClearGetItem: 0, clearGetItemType: [], clearGetItemId: [],
       clearGetAssignSkillType: [], clearGetAssignSkillId: [], clearGetAssignSkillLv: [], clearGetItemNum: [], resetSubMission: 0,
-      combinedSubmissionFlag: 0 }, subsOf(q.objectives, rewards, q.target, L, report, `${stageId} ${q.quest}`));
+      combinedSubmissionFlag: 0, raidBoss: 0 }, subsOf(q.objectives, rewards, q.target, L, report, `${stageId} ${q.quest}`));
     stageRows.push(row);
-    return { stageId, quest: q.quest, world: q.world, worldId, room: q.room, target: q.target, targetId: L.enemyId(q.target),
+    return { stageId, quest: q.quest, world: q.world, worldId, room: q.room, target: q.target, targetId: L.mapEnemyId(q.target, true),
       attribute: q.attribute || '', wikiLv: wikiLv({ lvl: q.level }) };
   };
 
@@ -184,7 +200,7 @@ function build(rules, catalogue, masterRows) {
     if (!quests.length || (en.quests && quests.length !== en.quests.length)) throw new Error(`special: ${en.key}: quests not found in the catalogue`);
     const base = { key: en.key, evStageId: en.evStageId, name: en.name, family: en.family, periods: en.periods, days: en.days,
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
-      resetGroup: en.resetGroup || '' };
+      resetGroup: en.resetGroup || '', banner: en.banner || '' };
     // removed (no use in the 4.3.1 client, spec 6): listed in the catalogue page only, no rows
     if (base.removed) { entries.push({ ...base, stageIds: [], useAp: [], stages: [], dropRewardIds: [] }); continue; }
     if (quests.length > 5) throw new Error(`special: ${en.key}: ${quests.length} quests, at most 5 per banner`);
@@ -205,31 +221,77 @@ function build(rules, catalogue, masterRows) {
     entries.push({ ...base, stageIds, useAp, stages, dropRewardIds });
   }
   const index = { catalog: { evStageId: CATALOG_EV, stageIds: [TRAINING_STAGE], useAp: [0], stages: [{ ...training, training: true }] }, entries };
-  return { stageRows, evStageRows, rewardRows, index, report };
+  const maps = mapsOf(index, stageRows, rewardRows, masterRows, L);
+  return { stageRows, evStageRows, rewardRows, index, maps, report };
+}
+
+// stage list for gen_story_maps.py (header comment): one map part per stage
+function mapsOf(index, stageRows, rewardRows, masterRows, L) {
+  const enemyName = new Map((masterRows.enemy || []).map((e) => [e.enemyId, e.name]));
+  const medalName = new Map((masterRows.medal || []).map((r) => [r.medalId, r.name]));
+  const stages = [...index.catalog.stages, ...index.entries.flatMap((e) => e.stages.map((s) => ({ ...s, dropRewardIds: e.dropRewardIds })))];
+  return stages.map((s) => {
+    const row = stageRows.find((r) => r.stageId === s.stageId);
+    const normal = { name: s.target, enemyId: L.mapEnemyId(s.target, false), n: TARGET_PER_GROUP, reward: 1 };
+    const carriers = (s.dropRewardIds || []).map((rid) => {
+      const rw = rewardRows.find((r) => r.rewardId === rid);
+      const name = carrierOf(rw.type[0] === 3 ? medalName.get(rw.id[0]) : '');
+      return { name, enemyId: L.mapEnemyId(name, false), n: 1, reward: rid };
+    });
+    // «Defeat X x N» / «Defeat the X within N turns» on an enemy that is not the target: X on the map with the objective id
+    const extra = [];
+    row.submissionId.forEach((id, i) => {
+      if (row.submissionIdType[i] !== 1 || !id || id === s.targetId || extra.some((x) => x.enemyId === id)) return;
+      extra.push({ name: enemyName.get(id) || '', enemyId: id, n: row.submissionRequire[i] === 4 ? Math.max(1, row.submissionNum[i]) : 1, reward: 1 });
+    });
+    const size = (g) => g.reduce((n, x) => n + x.n, 0);
+    const total = TARGET_PER_GROUP * GROUPS_MIN + [...carriers, ...extra].reduce((n, x) => n + x.n, 0);
+    const groups = Array.from({ length: Math.max(GROUPS_MIN, Math.ceil(total / GROUP_MAX)) }, () => [{ ...normal }]);
+    // carriers and objective enemies spread over the groups (fewest enemies first)
+    for (const x of [...carriers, ...extra]) {
+      const fit = groups.filter((gr) => size(gr) + x.n <= GROUP_MAX).sort((a, b) => size(a) - size(b))[0];
+      if (fit) fit.push(x); else groups.push([x]);
+    }
+    return { stageId: s.stageId, world: s.worldId, name: s.quest, room: s.room, target: s.target, targetId: s.targetId,
+      level: s.wikiLv || 1, enemies: groups, treasures: [], rooms: 1 };
+  });
 }
 
 const readJson = (p, dflt) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return dflt; } };
 
 // appends the rows to the master tables (own rows of a previous run dropped first) and writes game_data/special.json
+// Returns null (nothing written) with KHUX_SPECIAL=0 or without the private catalogue.
 function patch(masterDir, opts = {}) {
+  if (process.env.KHUX_SPECIAL === '0') { console.log('special: off (KHUX_SPECIAL=0)'); return null; }
   const t = (name, dflt = []) => readJson(path.join(masterDir, name + '.json'), dflt);
   const rules = opts.rules || JSON.parse(fs.readFileSync(path.join(__dirname, 'special_periods.json'), 'utf8'));
   const src = process.env.KHUX_SPECIAL_SRC || DEFAULT_SRC;
   let catalogue = opts.catalogue;
   if (!catalogue) {
-    try { catalogue = JSON.parse(fs.readFileSync(src, 'utf8')); } catch (e) { throw new Error(`special: required source ${src}: ${e.message}`); }
+    try { catalogue = JSON.parse(fs.readFileSync(src, 'utf8')); } catch (e) {
+      console.warn(`special: skipped, private catalogue ${src} not readable (${e.code || e.message}): no Special rows`);
+      return null;
+    }
   }
+  const gameData = opts.gameDataDir || path.join(__dirname, 'game_data');
   const stage = t('stage').filter((r) => !isOwnStage(r));
   const evStage = t('evStage').filter((r) => !isOwnEv(r));
-  const reward = t('reward').filter((r) => !isOwnReward(r));
+  // reward rows from 970000 up are ours only if the previous run listed them (special.json): anything else there (e.g. a
+  // row make-game-tables.js made from the POI) would be overwritten silently, so it stops the run
+  const prev = readJson(path.join(gameData, 'special.json'), { entries: [] });
+  const prevOwn = new Set((prev.entries || []).flatMap((e) => e.dropRewardIds || []));
+  const allReward = t('reward');
+  const foreign = allReward.filter((r) => r.rewardId >= REWARD_FIRST && !(isOwnReward(r) && prevOwn.has(r.rewardId)));
+  if (foreign.length) throw new Error(`special: reward rows ${foreign.map((r) => r.rewardId).join(', ')} at or above ${REWARD_FIRST} are not ours`);
+  const reward = allReward.filter((r) => !isOwnReward(r));
   const out = build(rules, catalogue, { stage, reward, enemy: t('enemy'), medal: t('medal'), material: t('material'), skill: t('skill'),
     title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts') });
   fs.writeFileSync(path.join(masterDir, 'stage.json'), JSON.stringify([...stage, ...out.stageRows]));
   fs.writeFileSync(path.join(masterDir, 'evStage.json'), JSON.stringify([...evStage, ...out.evStageRows]));
   fs.writeFileSync(path.join(masterDir, 'reward.json'), JSON.stringify([...reward, ...out.rewardRows]));
-  const gameData = opts.gameDataDir || path.join(__dirname, 'game_data');
   fs.mkdirSync(gameData, { recursive: true });
   fs.writeFileSync(path.join(gameData, 'special.json'), JSON.stringify(out.index, null, 1));
+  fs.writeFileSync(path.join(gameData, 'special_maps.json'), JSON.stringify(out.maps, null, 1));
   console.log(`special: +${out.stageRows.length} stage (stageKind ${STAGE_KIND}), +${out.evStageRows.length} evStage, +${out.rewardRows.length} reward; `
     + `${out.report.stopgaps.length} stopgap objectives, ${out.report.titleFallbacks.length} titles -> Avatar Coin x5`);
   return out;

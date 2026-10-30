@@ -41,16 +41,16 @@ def icon():
     return im
 
 
-def banner():
-    """640x140: fondo blu sfumato, titolo e sottotitolo."""
+def banner(title='BANNER CATALOG', subtitle='Every original banner - open Details'):
+    """640x140: fondo blu sfumato, titolo e sottotitolo (the Special tab: make_special_banners.py)."""
     im = Image.new('RGBA', (640, 140), BLUE)
     d = ImageDraw.Draw(im)
     for y in range(140):
         c = int(40 + 60 * y / 139)
         d.line((0, y, 639, y), fill=(18, c, 120 + c // 2, 255))
     d.rounded_rectangle((6, 6, 633, 133), radius=10, outline=GOLD, width=4)
-    d.text((320, 52), 'BANNER CATALOG', font=font(46), fill=GOLD, anchor='mm', stroke_width=2, stroke_fill=(40, 30, 10, 255))
-    d.text((320, 102), 'Every original banner - open Details', font=font(24), fill=LIGHT, anchor='mm')
+    d.text((320, 52), title, font=font(46), fill=GOLD, anchor='mm', stroke_width=2, stroke_fill=(40, 30, 10, 255))
+    d.text((320, 102), subtitle, font=font(24), fill=LIGHT, anchor='mm')
     return im
 
 
