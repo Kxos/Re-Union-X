@@ -42,7 +42,7 @@ const gacha = require('./gacha');
 const gachaSeasons = require('./gacha-seasons');
 const medalBoost = require('./medal-boost');
 const specialPages = require('./special-pages'); // pagine web Special (catalogo)
-const special = require('./special');// scheda Special di Quests: periodi, lucchetti, fissaggio
+const special = require('./special'); // scheda Special di Quests: periodi, lucchetti, fissaggio
 // Pet / 6° slot (server/pet.js): KHUX_PET=1, default spento
 const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_ENABLED } = require('./pet');
 

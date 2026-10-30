@@ -1,20 +1,11 @@
 // Special tab web pages (WebView, opened from the Details button of the Special Catalog banner). Pure HTML, no
 // player or master access: server.js passes the index and the context (specialCtx).
 'use strict';
-const fs = require('fs');
-const path = require('path');
 const special = require('./special');
 
-const SPECIAL_IMG = path.join(__dirname, 'game_data', 'special_img');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const niceDay = (d) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ''); return m ? `${MONTHS[+m[2] - 1]} ${+m[3]}, ${m[1]}` : ''; };
-
-// banner image file (<id>.png or <id>-kept.png) of game_data/special_img, null when missing
-function bannerImage(file) {
-  if (!/^\d+(-kept)?\.png$/.test(file)) return null;
-  try { return fs.readFileSync(path.join(SPECIAL_IMG, file)); } catch { return null; }
-}
 
 // same pattern as the Shop catalogue (server/gacha.js): the element carries data-pin (POST URL) and data-on
 const PIN_JS = 'var KHUX_PIN={1:["Pinned!","Leave and re-enter Special to see it.","pinmsg"],0:["Removed.","Leave and re-enter Special.","pinmsg off"]};'
@@ -59,7 +50,8 @@ function catalogPage(index, ctx = {}) {
     } else st = '<div class="st">Open in Special now</div>';
     const days = en.days === 'all' ? 'Every day' : (en.days || []).join(', ');
     return `<div class="q${isPinned ? ' pinned' : ''}${Math.min(...en.periods) > cur ? ' dim' : ''}" id="q${id}"><img src="/web/special/img/${id}.png" alt="">`
-      + `<div class="nm">${esc(en.name)}</div><div class="d">${esc(days)}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>${st}${button}</div></div>`;
+      + `<div class="nm">${esc(en.name)}</div><div class="d">${esc(days)}${en.vip ? ' · <span class="vip">VIP only</span>' : ''}</div>${st}${button}</div>
+`;
   };
   const sections = periods.map((p) => {
     const rows = entries.filter((en) => Math.min(...en.periods) === p.n).map(row).join('');
@@ -72,4 +64,4 @@ function catalogPage(index, ctx = {}) {
     + `${sections}<div id="pinmsg" class="pinmsg"></div><script>${PIN_JS}</script></body></html>`;
 }
 
-module.exports = { catalogPage, bannerImage };
+module.exports = { catalogPage };

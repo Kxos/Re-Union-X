@@ -79,7 +79,17 @@ const lastBefore = p.lastClearStageId;
 const listBefore = JSON.stringify(call(t.respondStageList));
 const medalsOf = (id) => (p.medals || []).filter((m) => m.medalId === id).length;
 const mMain = medalOf(medalUid), mOther = otherUid === undefined ? null : medalOf(otherUid);
-const m5 = medalsOf(mMain.id), m9 = mOther ? medalsOf(mOther.id) : 0;
+// ogni id di medaglia e di materiale delle righe dei nemici: prima e dopo il clear devono cambiare solo i premi attesi
+const allRows = [...new Set([...poiRows.values(), 1])].map((id) => rewards.find((r) => r.rewardId === id)).filter(Boolean);
+const idsOf = (ty) => [...new Set(allRows.flatMap((r) => r.id.filter((_, i) => r.type[i] === ty)))];
+const medalIds = idsOf(3), matIds = idsOf(5);
+const matsOf = (id) => (p.materials || {})[id] || 0;
+const beforeMedal = new Map(medalIds.map((id) => [id, medalsOf(id)])), beforeMat = new Map(matIds.map((id) => [id, matsOf(id)]));
+const wantMedal = new Map(), wantMat = new Map();
+for (const uid of [medalUid, matUid]) { // solo le posizioni inviate (non 0) dei nemici riportati; Steal x2 sul nemico rubato
+  const row = rowOf(uid), k = uid === medalUid ? 2 : 1;
+  typesOf(uid).forEach((ty, i) => { if (!ty) return; const m = ty === 3 ? wantMedal : wantMat; m.set(row.id[i], (m.get(row.id[i]) || 0) + row.num[i] * k); });
+}
 const start = call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
 check(start.userEnemyDropItems.find((d) => d.uniqueEnemyId === medalUid)?.dropItemTypeIds.join() === typesOf(medalUid).join(), '/stage/start: drop della medaglia');
 p.steal = { stageId: 970120, uid: medalUid, mult: 2 }; // Steal del pet sulla medaglia: x2
@@ -88,8 +98,10 @@ check(clear.status === 0, `status ${clear.status}`);
 check(p.lastClearStageId === lastBefore, `lastClearStageId ${lastBefore} -> ${p.lastClearStageId}`);
 check(JSON.stringify(call(t.respondStageList)) === listBefore, 'elenco della storia cambiato');
 check(p.stageScores[970120] === 50, `stageScores[970120] ${p.stageScores[970120]}`);
-check(medalsOf(mMain.id) === m5 + mMain.num * 2 + (matUid !== medalUid && medalOf(matUid)?.id === mMain.id ? medalOf(matUid).num : 0), `medaglia ${mMain.id}: ${medalsOf(mMain.id) - m5} (attese ${mMain.num * 2}, Steal x2)`);
-check(medalsOf(90095) === m9, 'medaglia dell\'uid 9 data senza drop');
+check(medalsOf(mMain.id) - beforeMedal.get(mMain.id) === wantMedal.get(mMain.id), `medaglia ${mMain.id}: ${medalsOf(mMain.id) - beforeMedal.get(mMain.id)} (attese ${wantMedal.get(mMain.id)}, Steal x2)`);
+for (const id of medalIds) check(medalsOf(id) - beforeMedal.get(id) === (wantMedal.get(id) || 0), `medaglia ${id} cambiata fuori dalle posizioni inviate: ${medalsOf(id) - beforeMedal.get(id)}`);
+for (const id of matIds) check(matsOf(id) - beforeMat.get(id) === (wantMat.get(id) || 0), `materiale ${id} cambiato fuori dalle posizioni inviate`);
+check(!mOther || mOther.id === mMain.id || wantMedal.has(mOther.id) || medalsOf(mOther.id) === beforeMedal.get(mOther.id), 'medaglia di un nemico non riportato data senza drop');
 
 // 6. cambio di giorno a quest aperta (Review Focus 4): start martedi', clear mercoledi'
 const cidMedals = medalsOf(90076);
