@@ -45,10 +45,17 @@ const story = { stageId: 1010, stageBinId: 0, id: 1, name: 'Story 1', mapName: '
   afterDramaType: [], validClearGetItem: 1, clearGetItemType: [2], clearGetItemId: [0], clearGetAssignSkillType: [1],
   clearGetAssignSkillId: [0], clearGetAssignSkillLv: [1], clearGetItemNum: [50], validSubmission: 0, raidBoss: 5001,
   bgmField: 11, bgmBattle: 12, bgmBoss: 13 };
+// template of the training dummy (spec 7): the Large Body row (8xxxx form), curves of 5 points
+const LARGE_BODY = { enemyId: 89007, name: 'Large Body', displayId: 7, validGrowth: 5, baseLv: [1, 35, 100, 300, 999],
+  hp: [3784, 10940, 26100, 56439, 372497], attack: [1000, 1750, 2815, 6969, 17672], exp: [4, 4, 20, 20, 20], money: [13, 17, 219, 679, 2037],
+  raidPoint: [0, 0, 0, 0, 0], lux: [30, 30, 145, 350, 1050], validSkill: 2, skillId: [700, 701], skillRequire: [2, 4],
+  skillRequireArg: [0, 5000], skillOdds: [10000, 3000] };
 const master = {
   stage: [story, { ...story, stageId: 970123, id: 970123, stageKind: 2, name: 'old special' }],
   enemy: [{ enemyId: 1, name: 'Shadow' }, { enemyId: 1006, name: 'Prize Egg' }, { enemyId: 1004, name: 'Growth Egg' }, { enemyId: 1003, name: 'King Pretender' }, { enemyId: 11003, name: 'King Pretender' },
-    { enemyId: 1002, name: 'Great Pretender' }],
+    { enemyId: 1002, name: 'Great Pretender' }, LARGE_BODY],
+  enemyAttack: [{ enemyAttackId: 700, name: 'Attack' }, { enemyAttackId: 2101, name: 'Big Self Heal', heal: 3500 }],
+  keyblade: [{ keybladeId: 1, maxBurstGauge: 9 }, { keybladeId: 2, maxBurstGauge: 25 }, { keybladeId: 3, maxBurstGauge: 12 }],
   medal: [{ medalId: 90076, name: 'Cid', rare: 6 }],
   material: [{ materialId: 1, name: 'Mythril Shard' }],
   reward: [{ rewardId: 1, validReward: 1, display: [1], type: [5], id: [13], assignSkillType: [0], assignSkillId: [0],
@@ -110,7 +117,7 @@ check(tr && tr.name === 'Training Grounds' && tr.validSubmission === 3 && tr.sub
 check(tr && tr.submissionRewardType.every((t) => t === 4) && tr.submissionItemNum.join() === '1,1,1', 'training rewards: 1 munny each');
 
 // drop reward rows: one prize per row (position 0), after the current maximum
-check(rewardRows.length === 2 && rewardRows.every((r) => r.rewardId > 1 && r.type.length === 1), 'one reward row per drop');
+check(rewardRows.length === 3 && rewardRows.every((r) => r.rewardId > 1 && r.type.length === 1), 'one reward row per drop + the CP chest row');
 check(rewardRows[0] && rewardRows[0].type[0] === 3 && rewardRows[0].id[0] === 90076 && rewardRows[1].type[0] === 5, 'medal type 3, material type 5');
 
 // index
@@ -156,6 +163,35 @@ check(mA && members(mA).some((x) => x.enemyId === 1002 && x.name === 'Great Pret
 const mT = maps.find((m) => m.stageId === 970000);
 check(mT && mT.target === 'Shadow' && mT.targetId === 1 && members(mT).every((x) => x.reward === 1) && (mT.targetReward || 1) === 1, 'training map: Shadow, no drops (row 1 as before)');
 
+// training map (Task 10, spec 7): two paths in the 1st District (DB_0027_00_00, the room picked for «Training Grounds»,
+// has 2 walkable grid points), the unkillable dummy and the CP chests (prize type 8; the largest maxBurstGauge 25 x 10000
+// = 250000 CP, 60000 per chest as the largest original CP chest row 82 -> 5 chests)
+check(mT && mT.training === true && mT.room === '1st District', 'training map: training flag, 1st District');
+check(mT && Array.isArray(mT.dummy) && mT.dummy.length === 1 && mT.dummy[0].enemyId === ms.DUMMY_ENEMY_ID && mT.dummy[0].n === 1
+  && mT.dummy[0].reward === 1 && mT.dummy[0].name === 'Training Dummy', 'training map: dummy group (reward row 1, never 0)');
+check(mT && Array.isArray(mT.chests) && mT.chests.length === 5 && mT.chests.every((r) => r === ms.CP_REWARD_ID), `training map: 5 CP chests (got ${mT && JSON.stringify(mT.chests)})`);
+const cpRow = rewardRows.find((r) => r.rewardId === ms.CP_REWARD_ID);
+check(cpRow && cpRow.validReward === 1 && cpRow.type.join() === '8' && cpRow.num.join() === '60000' && cpRow.id.join() === '0'
+  && cpRow.odds.join() === '10000' && cpRow.display.join() === '1', 'CP chest reward row: one type-8 prize of 60000');
+check(ms.CP_REWARD_ID >= 970000 && ms.CP_REWARD_ID <= 979999 && rewardRows.filter((r) => r.rewardId === ms.CP_REWARD_ID).length === 1, 'CP row in the own reward range, once');
+const dummyRows = out.enemyRows || [];
+const dmy = dummyRows[0] || {};
+check(dummyRows.length === 1 && dmy.enemyId === ms.DUMMY_ENEMY_ID && dmy.name === 'Training Dummy' && dmy.displayId === 7, 'dummy enemy row: copy of Large Body (its look)');
+check(Array.isArray(dmy.hp) && dmy.hp.length === 5 && dmy.hp.every((v) => v === ms.DUMMY_HP) && ms.DUMMY_HP >= 6.5e11
+  && ms.DUMMY_HP * 10000 < 2 ** 63 && Number.isSafeInteger(ms.DUMMY_HP), 'dummy HP: the same huge value at every level (int64, x10000 safe)');
+check(['exp', 'money', 'lux', 'raidPoint'].every((k) => dmy[k] && dmy[k].every((v) => v === 0)), 'dummy: no exp, munny, lux');
+check(dmy.validSkill === 2 && dmy.skillId[0] === 700 && dmy.skillId[1] === 2101 && dmy.skillRequire[1] === 2 && dmy.skillRequireArg[1] === 0,
+  'dummy: original Big Self Heal row 2101 attached (always usable)');
+check(LARGE_BODY.hp[0] === 3784 && LARGE_BODY.skillId[1] === 701, 'the template row is not modified');
+check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardIds || []).join() === String(ms.CP_REWARD_ID), 'index catalog: dummy id and CP row');
+{
+  const noHeal = ms.build(rules, catalogue, { ...master, enemyAttack: [{ enemyAttackId: 700 }] }).enemyRows?.[0];
+  check(noHeal && noHeal.skillId.join() === '700,701' && noHeal.hp.every((v) => v === ms.DUMMY_HP), 'no heal row in the master: HP only');
+  let threw = false;
+  try { ms.build(rules, catalogue, { ...master, enemy: master.enemy.filter((e) => e.name !== 'Large Body') }); } catch { threw = true; }
+  check(threw, 'no Large Body in the master: error');
+}
+
 // objectives override per quest name (catalogue quest without objectives or with a typo) and from / to in the index
 {
   const ov = ['Collect 150 or more Lux -> Avatar Coin x5', 'Complete without having to continue -> Avatar Coin x5', 'Defeat Great Pretender x 1 -> Mythril Shard x1'];
@@ -182,13 +218,15 @@ try {
   fs.writeFileSync(path.join(dir, 'evStage.json'), '[]');
   const opts = { rules, catalogue, gameDataDir: dir };
   ms.patch(dir, opts);
-  const snap = () => ['stage', 'evStage', 'reward', 'special'].map((f) => fs.readFileSync(path.join(dir, f + '.json'), 'utf8'));
+  const snap = () => ['stage', 'evStage', 'reward', 'special', 'enemy'].map((f) => fs.readFileSync(path.join(dir, f + '.json'), 'utf8'));
   const first = snap();
   ms.patch(dir, opts);
   check(JSON.stringify(first) === JSON.stringify(snap()), 'patch is idempotent');
   const st = JSON.parse(first[0]);
   check(!st.some((r) => r.stageId === 970123) && st.filter((r) => r.stageKind === 2).length === 4 && st[0].stageId === 1010, 'patch replaces own stage rows');
-  check(JSON.parse(first[1]).length === 3 && JSON.parse(first[2]).length === 3, 'patch evStage and reward rows');
+  check(JSON.parse(first[1]).length === 3 && JSON.parse(first[2]).length === 4, 'patch evStage and reward rows (2 drops + CP row + row 1)');
+  check(JSON.parse(first[4]).filter((r) => r.enemyId === ms.DUMMY_ENEMY_ID).length === 1 && JSON.parse(first[4]).length === master.enemy.length + 1,
+    'patch adds the dummy enemy row once');
   check(JSON.parse(first[3]).catalog.evStageId === 7000, 'patch writes special.json');
   const sm = fs.existsSync(path.join(dir, 'special_maps.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'special_maps.json'), 'utf8')) : null;
   check(Array.isArray(sm) && sm.length === 4, 'patch writes special_maps.json');
@@ -236,7 +274,7 @@ const SRC = process.env.KHUX_SPECIAL_SRC || 'D:\\Progetto_Restauro_KH_UX\\privat
 if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const t = (n) => JSON.parse(fs.readFileSync(path.join(MASTER, n + '.json'), 'utf8'));
   const all = ms.build(real, JSON.parse(fs.readFileSync(SRC, 'utf8')), { stage: t('stage'), enemy: t('enemy'), medal: t('medal'),
-    material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade') });
+    material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
   const live = real.entries.filter((e) => !e.removed);
   check(all.evStageRows.length === 1 + live.length, `real build: ${all.evStageRows.length} evStage rows`);
   check(all.stageRows.every((r) => r.validSubmission === 3), 'real build: 3 objectives on every stage');
@@ -251,6 +289,9 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(all.maps.every((m) => m.targetReward > 0 && m.enemies.flat().every((x) => x.reward > 0)), 'real build: no Special map enemy on reward 0');
   check(all.maps.filter((m) => withDrops.has(m.stageId)).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no enemy on row 1 in a quest with drops');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
+  const rt = all.maps.find((m) => m.stageId === 970000), rd = all.enemyRows[0];
+  check(rt && rt.training && rt.chests.length === 5 && rd && rd.displayId === 7 && rd.skillId[1] === 2101, 'real build: training map with 5 CP chests, dummy with the heal');
+  check(!t('enemy').some((e) => e.enemyId === ms.DUMMY_ENEMY_ID && e.name !== 'Training Dummy'), 'real build: enemy id of the dummy free');
   console.log(`(real build: ${all.stageRows.length} stage, ${all.evStageRows.length} evStage, ${all.rewardRows.length} reward rows, ${all.maps.length} maps; `
     + `entries per period ${[1, 2, 3, 4, 5].map((n) => live.filter((e) => e.periods.includes(n)).length).join('/')})`);
 } else console.log('(local master or private catalogue missing: real build skipped)');

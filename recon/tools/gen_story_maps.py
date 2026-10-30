@@ -20,6 +20,12 @@ treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules 
 mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
 reward goes into the enemy record (drop rows of make-special.js, 1 when the quest has none), targetReward into the target's record,
 level into every enemy record of the stage.
+Training map (an entry with "training": true, the stage of the Special Catalog banner, spec 7 of
+docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (group [{name, enemyId, n, reward}]) and
+"chests" (reward row of each chest). Two paths from the start (build_training): the start is the middle of the longest
+walk of the room (geodesic diameter), so the two halves go in opposite directions; path A (the longer half) ends at
+the target arena with the normal groups along it, path B holds the dummy group TRAIN_DUMMY_STEPS grid steps of walk
+from the start (visible from it, where the half is long enough) with the chests spaced on the walk before it.
 
 Per ogni missione (stageBinId 1..N di thethiny = numero della missione):
 - stanza: rooms[nome] se noto, altrimenti una stanza dello stesso mondo (prefisso del
@@ -375,6 +381,113 @@ def build_part(folder, start, dist, groups, nchests, level=1):
     body += b'\0' * 64
     struct.pack_into('<3i', body, 0x28, A - 0x34, B - 0x34, C - 0x34)
     return bytes(body), areas, ens, chests
+
+
+# ---------------------------------------------------------------- training map (docstring)
+TRAIN_DUMMY_STEPS = 12      # walk start -> dummy in grid steps (480 units): on screen from the start
+
+
+def build_training(folder, groups, target, dummy, chest_rewards, level=1):
+    """One MAP part with two paths from the start (docstring). groups: normal groups (path A), target: the target
+    group, dummy: the dummy group (path B), chest_rewards: reward row of each chest. -> (part, areas, ens, chests,
+    start)."""
+    start0, dist0 = walk_grid(folder)
+    pc = _pc_all[folder]
+    d0 = geodesic(pc, set(dist0), start0)
+    pts = set(d0)
+    key = lambda d: lambda p: (d[p], -p[1], -p[0])  # noqa: E731
+    P = max(pts, key=key(d0))
+    dP = geodesic(pc, pts, P)
+    Q = max(dP, key=key(dP))
+    dQ = geodesic(pc, pts, Q)
+    diam = dQ[P]
+    both = [p for p in sorted(pts) if p in dP and p in dQ]
+    # start: on the longest walk (dP + dQ = diam), as near to its middle as possible
+    S = min(both, key=lambda p: (2 * (dP[p] + dQ[p] - diam) + abs(dP[p] - dQ[p]), p))
+    dS = geodesic(pc, pts, S)
+    # path A = the longer half (target), path B = the other one (dummy)
+    tA, tB, dA, dB = (Q, P, dQ, dP) if dS.get(Q, 0) >= dS.get(P, 0) else (P, Q, dP, dQ)
+    side_a = {p for p in both if p in dS and dA[p] < dB[p]}
+    side_b = {p for p in both if p in dS and dB[p] < dA[p]}
+
+    def on_walk(side, d_end, end, want):
+        """point of `side` nearest to the walk start -> end at `want` steps from the start"""
+        return min(side, key=lambda p: (2 * (dS[p] + d_end[p] - dS[end]) + abs(dS[p] - want), p))
+    areas, ens, uid = [], [], 2
+
+    def members_of(g, is_t):
+        out_ = []
+        for m in g['members']:
+            eid = (m[3] if len(m) > 3 and m[3] else None) or enemy_id(m[0], is_t and not out_)
+            if eid:
+                out_ += [(eid, m[2] if len(m) > 2 else 1)] * m[1]
+        return out_
+
+    def place(g, center, pool, is_t):
+        nonlocal uid
+        members = members_of(g, is_t)
+        if not members:
+            return
+        cx, cy = center
+        near = sorted(pool, key=lambda p: ((p[0] - cx) ** 2 + (p[1] - cy) ** 2, p))
+        rec = bytearray(ARENA if is_t else NORMAL)
+        struct.pack_into('<2i', rec, 0, len(ens), len(members))
+        struct.pack_into('<i', rec, 0x14, uid)
+        uid += 1
+        if is_t:
+            box = [p for p in near[:40] if abs(p[1] - cy) <= 60 and abs(p[0] - cx) <= 300]
+            xs = [p[0] for p in box] or [cx]
+            ys = [p[1] for p in box] or [cy]
+            x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+            if x1 - x0 < 80:
+                x0, x1 = cx - 40, cx + 40
+            if y1 - y0 < 40:
+                y0, y1 = cy - 20, cy + 20
+            struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
+        for k, (eid, rw) in enumerate(members):
+            x, y = near[min(k * 3, len(near) - 1)]
+            ens.append((x, y, eid, 1, 1, level, rw, uid))
+            uid += 1
+        areas.append(bytes(rec))
+    # path A: normal groups along the walk to the target (as build_part), the target arena at its end
+    lenA = dS[tA] or 1
+    for i, g in enumerate(groups):
+        place(g, on_walk(side_a, dA, tA, lenA * (i + 1) / (len(groups) + 1.5)), side_a, False)
+    # path B: the dummy TRAIN_DUMMY_STEPS steps from the start (or at the end of a shorter half)
+    dm = on_walk(side_b, dB, tB, min(TRAIN_DUMMY_STEPS, dS[tB]))
+    place(dummy, dm, side_b, False)
+    place(target, tA, side_a, True)
+    # chests evenly spaced on the walk start -> dummy, never on an enemy or on the start
+    dDm = geodesic(pc, side_b | {S}, dm)
+    used = {(e[0], e[1]) for e in ens} | {S}
+    chests, n = [], len(chest_rewards)
+    for k, rw in enumerate(chest_rewards):
+        want = dS[dm] * (k + 1) / (n + 1)
+        cand = [p for p in side_b if p not in used and p in dDm and dS[p] < dS[dm]]
+        if not cand:
+            break
+        x, y = min(cand, key=lambda p: (2 * (dS[p] + dDm[p] - dS[dm]) + abs(dS[p] - want), p))
+        used.add((x, y))
+        chests.append((x, y, rw, 15, uid))
+        uid += 1
+    body = bytearray(tmpl[:ta0])
+    nm = folder.encode()
+    body[0x0c:0x0c + 16] = nm + b'\0' * (16 - len(nm))
+    struct.pack_into('<2i', body, TX + 0x34, len(areas), len(ens))
+    for a in areas:
+        body += a
+    for e in ens:
+        body += struct.pack('<8i', *e)
+    A = len(body)
+    body += struct.pack('<i', len(chests))
+    for c in chests:
+        body += struct.pack('<5i', *c)
+    B = len(body)
+    body += struct.pack('<i', 0)
+    C = len(body)
+    body += b'\0' * 64
+    struct.pack_into('<3i', body, 0x28, A - 0x34, B - 0x34, C - 0x34)
+    return bytes(body), areas, ens, chests, S
 
 
 # ---------------------------------------------------------------- piu' stanze
@@ -1073,8 +1186,17 @@ if cfg.get('special'):
                   for g in sp.get('enemies', [])]
         # the target carries a drop row of the entry too (targetReward, make-special.js); absent -> row 1 as before
         groups.append({'members': [(sp['target'], 1, sp.get('targetReward', 1), sp.get('targetId'))], 'target': True, 'room': room_name})
-        start, dist = walk_grid(folder)
-        part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
+        if sp.get('training'):
+            # two paths: target (path A) and dummy + chests (path B), docstring
+            tgt = groups.pop()
+            dummy = {'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId')) for x in sp['dummy']],
+                     'target': False, 'room': room_name}
+            part, areas, ens, chests, start = build_training(folder, groups, tgt, dummy, sp.get('chests', []), sp.get('level', 1))
+            groups.append(dummy)
+            groups.append(tgt)
+        else:
+            start, dist = walk_grid(folder)
+            part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
         target_id = ens[-1][2]                      # the target group is placed last (arena)
         hdr = struct.pack('<16i', 4674643, 16, 1, start[0], start[1], 2, target_id, 1, len(areas), len(ens),
                           0, 1, 0, 0, len(chests), 0)
