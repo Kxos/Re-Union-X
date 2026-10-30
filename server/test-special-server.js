@@ -201,6 +201,32 @@ if (vipPast) {
 } else errors.push('nessuna quest VIP passata nell\'indice per il test');
 delete p.special.pinned;
 
+// 7. quest di allenamento 970000 (Task 11): niente gauge, Lux, munny, materiali, drop, EXP e premi degli obiettivi;
+// restano punteggio e obiettivi. Anche il Give Up non tocca la gauge
+{
+  p.keybladeBurst = 55000; p.money = 1000; p.lux = 700;
+  const mats = JSON.stringify(p.materials || {}), medals = (p.medals || []).length, ap0 = p.ap;
+  const moneyB = p.money, luxB = p.lux;
+  delete p.clearMissions[970000]; delete p.stageScores[970000];
+  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  const tc = call(t.respondStageClear, { burst: 120000, getPoint: { lux: 500, money: 300, exp: 50 }, getMaterials: [{ materialId: 1, number: 5 }],
+    getEnemyDropItems: [1, 2, 3], clearMissionIds: [1, 2] });
+  check(p.keybladeBurst === 55000, `allenamento: gauge ${p.keybladeBurst}`);
+  check(p.lux === luxB && p.money === moneyB, `allenamento: lux ${p.lux} money ${p.money}`);
+  check(JSON.stringify(p.materials || {}) === mats && (p.medals || []).length === medals, 'allenamento: materiali o medaglie cambiati');
+  check(tc.getLux === 0, `allenamento: getLux ${tc.getLux}`);
+  check(JSON.stringify(p.clearMissions[970000]) === '[1,2]', `allenamento: obiettivi ${JSON.stringify(p.clearMissions[970000])}`);
+  check(p.stageScores[970000] === 0, `allenamento: punteggio ${p.stageScores[970000]}`);
+  check(p.ap === ap0, 'allenamento: AP cambiati');
+  call(t.respondStageStart, { stageId: 970000, eventId: 7000, userKeybladeId: 0 });
+  call(t.respondStageContinue, '/stage/retire', { burst: 0 });
+  check(p.keybladeBurst === 55000, `allenamento Give Up: gauge ${p.keybladeBurst}`);
+  // una quest vera dopo l'allenamento salva ancora la gauge
+  call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
+  call(t.respondStageContinue, '/stage/retire', { burst: 0 });
+  check(p.keybladeBurst === 0, `quest vera: Give Up gauge ${p.keybladeBurst}`);
+}
+
 try { fs.unlinkSync(SAVE); } catch { /* gia' tolto */ }
 if (errors.length) { log(`FAIL (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 log('test-special-server: OK');
