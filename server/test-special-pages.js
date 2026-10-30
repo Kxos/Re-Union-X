@@ -440,5 +440,56 @@ function SHOW_OPTS_OF(h) { const box = h.slice(h.indexOf('data-g="show"'), h.ind
   const row = itemOf(h, 7701);
   check(/^<div class="row pinned"/.test(row) && row.includes('Kept in Special') && /data-show="kept can"/.test(row), `kept day: row ${row.slice(0, 120)}`);
 }
+// round 16 (bench rev 221): with SHOW «In Special now» the campaign rows of other years stayed visible (and the
+// summary said «0 campaigns»). The page script runs in headless Edge when it is installed: apply a SHOW filter, then
+// every row that is really displayed (computed style) must match it, the counts must agree, and the month labels / year
+// chips must follow. Skipped without Edge.
+{
+  const cp = require('child_process'), os = require('os'), path = require('path'), fs = require('fs');
+  const EDGE = process.env.KHUX_EDGE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+  if (!fs.existsSync(EDGE)) console.log('(headless Edge not found: browser checks of the catalogue skipped)');
+  else {
+    // the Shop week is Dec 30, 2019 - Jan 5, 2020: its campaign starts in 2019 while the week's first day is in 2019 too,
+    // and an old campaign (2017) and a kept quest; story in period 4
+    const fx = { catalog: { evStageId: 7000 }, entries: [
+      e('tue', 7801, { name: 'Tue Quest', periods: [4], days: ['Tue'] }), e('kept', 7802, { name: 'Kept Quest', periods: [3] }),
+      e('old', 7803, { name: 'Old Quest', periods: [2] }), e('later', 7804, { name: 'Later Quest', periods: [5] }),
+      e('cnow', 7811, { name: 'Year End Campaign', periods: [4], vip: true, campaign: { start: '2019-12-30', end: '2020-01-05' }, banner: 'y.png' }),
+      e('cold', 7812, { name: 'Old Campaign', periods: [2], vip: true, campaign: { start: '2017-08-07', end: '2017-08-13' }, banner: 'o.png' }),
+      e('cold2', 7813, { name: 'Older Campaign', periods: [2], vip: true, campaign: { start: '2017-09-04', end: '2017-09-10' }, banner: 'p.png' }),
+      e('cnext', 7814, { name: 'Next Year Campaign', periods: [4], vip: true, campaign: { start: '2020-02-03', end: '2020-02-09' }, banner: 'n.png' }),
+    ] };
+    const c = { period: 4, pinnedKey: 'kept', periods: PERIODS, shopFrom: '2020-01-02', shopTo: '2020-01-08', weekday: 'Tue', vip: false };
+    const tab = special.specialEvents({ ...fx, catalog: { stageIds: [970000], useAp: [0], ...fx.catalog } }, { imgBase: '', dayEndStr: 'D', weekEndStr: 'W', ...c })
+      .map((x) => x.eventStageId).filter((x) => x !== 7000).sort((a, b) => a - b);
+    const probe = `<script>window.addEventListener('load',function(){var R={};
+function shown(el){while(el&&el.nodeType===1){if(getComputedStyle(el).display==='none')return false;el=el.parentNode;}return true;}
+function rows(cr){return [].filter.call(document.querySelectorAll('.row'),function(r){return (r.className.indexOf(' cr')>=0)===cr&&shown(r);});}
+function ids(list){var o=[];list.forEach(function(r){o.push(r.getAttribute('data-eid'));});return o.join(',');}
+function state(tag){R[tag]={q:ids(rows(false)),c:ids(rows(true)),ml:[].filter.call(document.querySelectorAll('.ml'),shown).map(function(m){return m.getAttribute('data-m');}).join(','),
+sum:document.getElementById('sum').textContent,year:(document.querySelector('.yc.on')||{}).getAttribute?document.querySelector('.yc.on').getAttribute('data-yr'):'',
+yn:[].map.call(document.querySelectorAll('.yc'),function(y){return y.getAttribute('data-yr')+':'+y.querySelector('.yn').textContent;}).join(','),camps:shown(document.getElementById('camps'))};}
+function show(v){document.getElementById('fbtn').click();document.querySelector('.opts[data-g="show"] [data-v="'+v+'"]').click();document.getElementById('fok').click();}
+state('start');show('now');state('now');document.querySelector('.yc[data-yr="all"]').click();state('nowAll');show('unl');state('unl');
+var p=document.createElement('pre');p.id='probe';p.textContent=JSON.stringify(R);document.body.appendChild(p);});</script>`;
+    const file = path.join(os.tmpdir(), `khux-r16-${process.pid}.html`);
+    fs.writeFileSync(file, pages.catalogPage(fx, c).replace('</body>', probe + '</body>'));
+    let R = null;
+    try {
+      const out = cp.execFileSync(EDGE, ['--headless=new', '--disable-gpu', '--dump-dom', 'file:///' + file.replace(/\\/g, '/')], { encoding: 'utf8', timeout: 60000, stdio: ['ignore', 'pipe', 'ignore'] });
+      const m = /<pre id="probe">([^<]*)<\/pre>/.exec(out);
+      R = m ? JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')) : null;
+    } catch (err) { errors.push('headless Edge failed: ' + err.message); }
+    try { fs.unlinkSync(file); } catch { /* gone */ }
+    if (R) {
+      check(tab.join() === '7801,7802,7811', `fixture tab ${tab}`);
+      check(R.start.year === '2019' && R.start.c === '7811', `start: the year of this week's campaign (2019) selected: ${JSON.stringify(R.start)}`);
+      check(R.now.q === '7801,7802' && R.now.c === '7811' && R.now.ml === '2019-12' && R.now.camps === true, `«In Special now»: only tab rows displayed ${JSON.stringify(R.now)}`);
+      check(/^2 quests · 1 campaign /.test(R.now.sum), `summary agrees: ${R.now.sum}`);
+      check(R.nowAll.c === '7811' && R.nowAll.ml === '2019-12' && /all:1,2017:0,2019:1,2020:0/.test(R.nowAll.yn), `All years: still only the tab's campaign; chips ${R.nowAll.yn}`);
+      check(R.unl.q === '7803' && R.unl.c.split(',').sort().join() === '7812,7813,7814' && R.unl.ml === '2017-08,2017-09,2020-02', `«Unlocked, not in Special now»: ${JSON.stringify(R.unl)}`);
+    }
+  }
+}
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');
