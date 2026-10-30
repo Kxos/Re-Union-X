@@ -141,11 +141,12 @@ const carriers = mA ? members(mA).filter((x) => x.name !== 'King Pretender' && x
 check(carriers.length === 2 && carriers.map((x) => x.reward).join() === alpha.dropRewardIds.join() && carriers.every((x) => x.n === 1),
   'one drop carrier per drop row, reward = the drop row');
 // fix round 1 (bench rev 215): every enemy of a Special map with drops carries one of the entry's drop rows (round-robin,
-// one enemy per member), the target too (targetReward); no enemy on row 1; entries without drops: row 0 (no drop)
+// one enemy per member), the target too (targetReward); entries without drops: row 1 as the story maps (fix round 2:
+// reward 0 = missing row, client crash risk after /stage/start, recon/tools/stage_poi.py); never 0
 for (const m of maps.filter((x) => x.stageId !== 970000)) {
   const en = index.entries.find((e) => e.stageIds.includes(m.stageId));
-  const ok = (r) => (en.dropRewardIds.length ? en.dropRewardIds.includes(r) : r === 0);
-  check(members(m).every((x) => ok(x.reward) && x.n === 1), `map ${m.stageId}: every enemy on a drop row of the entry (or 0 without drops)`);
+  const ok = (r) => (en.dropRewardIds.length ? en.dropRewardIds.includes(r) : r === 1);
+  check(members(m).every((x) => ok(x.reward) && x.n === 1), `map ${m.stageId}: every enemy on a drop row of the entry (or 1 without drops)`);
   check(ok(m.targetReward), `map ${m.stageId}: targetReward ${m.targetReward}`);
 }
 check(mA && new Set(members(mA).filter((x) => x.name === 'King Pretender').map((x) => x.reward)).size === 2, 'round-robin over both drop rows on the normal enemies');
@@ -246,7 +247,9 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(['cid-mon', 'mog', 'evolve-legendary', 'skill-exp', 'vip-medal'].every((k) => all.index.entries.find((e) => e.key === k).stageIds[0]
     === 970000 + (real.entries.find((e) => e.key === k).evStageId - 7000) * 10), 'real build: period-4 stage ids unchanged');
   check(all.index.entries.find((e) => e.key === 'cid-vip-mon').to === '2017-04-19', 'real build: from / to in the index');
-  check(all.maps.filter((m) => m.stageId !== 970000).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no Special map enemy on reward row 1');
+  const withDrops = new Set(all.index.entries.filter((e) => e.dropRewardIds.length).flatMap((e) => e.stageIds));
+  check(all.maps.every((m) => m.targetReward > 0 && m.enemies.flat().every((x) => x.reward > 0)), 'real build: no Special map enemy on reward 0');
+  check(all.maps.filter((m) => withDrops.has(m.stageId)).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no enemy on row 1 in a quest with drops');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
   console.log(`(real build: ${all.stageRows.length} stage, ${all.evStageRows.length} evStage, ${all.rewardRows.length} reward rows, ${all.maps.length} maps; `
     + `entries per period ${[1, 2, 3, 4, 5].map((n) => live.filter((e) => e.periods.includes(n)).length).join('/')})`);
