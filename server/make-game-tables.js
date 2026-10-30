@@ -493,7 +493,9 @@ for (const extra of (process.env.KHUX_STAGE_POI_EXTRA || '').split(';').filter(B
   Object.assign(poi, JSON.parse(fs.readFileSync(extra, 'utf8')));
 }
 const chestRewards = new Set(Object.values(poi).flatMap((s) => s.chests.map((c) => c.reward)));
-const enemyRewards = new Set([1, ...Object.values(poi).flatMap((s) => s.enemies.map((e) => e.reward))]);
+// rows 970000-979999 are the drops of the Special quests: make-special.js writes them (at the end), not here
+const enemyRewards = new Set([1, ...Object.values(poi).flatMap((s) => s.enemies.map((e) => e.reward))
+  .filter((r) => !(r >= 970000 && r <= 979999))]);
 const realRewards = new Map((realTable('reward') || []).map((r) => [r.rewardId, r]));
 const rewards = [];
 for (const id of [...new Set([...chestRewards, ...enemyRewards])].sort((a, b) => a - b)) {

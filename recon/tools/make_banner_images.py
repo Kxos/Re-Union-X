@@ -55,10 +55,10 @@ def _font(size):
         return ImageFont.load_default()
 
 
-def plate(name):
-    """piastra generata: gradiente blu scuro, bordo oro di 3 px, nome bianco centrato"""
+def plate(name, top=(0x0d, 0x2a, 0x4a), bot=(0x17, 0x4a, 0x5c)):
+    """piastra generata: gradiente blu scuro, bordo oro di 3 px, nome bianco centrato
+    (top/bot: other gradient colours, used by make_special_banners.py for the family colour)"""
     im = Image.new('RGB', (W, H))
-    top, bot = (0x0d, 0x2a, 0x4a), (0x17, 0x4a, 0x5c)
     d = ImageDraw.Draw(im)
     for y in range(H):
         t = y / (H - 1)

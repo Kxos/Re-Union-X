@@ -91,7 +91,8 @@ def round_pin(L, cx, cy, r, head=((255, 236, 140), (206, 128, 18)), edge=GOLD_DK
     d.ellipse([cx - r * .55, cy - r * .62, cx + r * .05, cy - r * .12], fill=(255, 255, 255, 210))
 
 
-def tag_layer(size=(640, 140)):
+def tag_layer(size=(640, 140), words=('KEPT', 'IN SHOP')):
+    # words: yellow word + white word (the Special tab passes its own, make_special_banners.py)
     """Disegna la targhetta direttamente in coordinate banner (livello sovracampionato S volte)."""
     L = Image.new('RGBA', (size[0] * S, size[1] * S), (0, 0, 0, 0))
     y0, y1 = TY0 * S, TY1 * S
@@ -115,28 +116,33 @@ def tag_layer(size=(640, 140)):
     tx, end = px + 10 * S, xb + 1 * S
     fs = 24 * S
     while fs > 14 * S:
-        if tx + d.textlength('KEPT IN SHOP', font=font(fs)) + 2.6 * S <= end:
+        if tx + d.textlength(' '.join(words), font=font(fs)) + 2.6 * S <= end:
             break
         fs -= S / 4
     f = font(fs)
-    wk = d.textlength('KEPT ', font=f)
+    wk = d.textlength(words[0] + ' ', font=f)
     ty = ym + .5 * S
-    outlined_text(L, (tx, ty), 'KEPT', f, (255, 222, 60, 255), NAVY, int(2.4 * S))
-    outlined_text(L, (tx + wk, ty), 'IN SHOP', f, (255, 255, 255, 255), NAVY, int(2.4 * S))
+    outlined_text(L, (tx, ty), words[0], f, (255, 222, 60, 255), NAVY, int(2.4 * S))
+    outlined_text(L, (tx + wk, ty), words[1], f, (255, 255, 255, 255), NAVY, int(2.4 * S))
     return glow(L, 3 * S, alpha=150, dy=S)
 
 
-def main(src, dst):
-    im = Image.open(src).convert('RGBA')
+def badge(im, words=('KEPT', 'IN SHOP')):
+    """Copy of the banner image with the tag (RGBA)."""
+    im = im.convert('RGBA')
     w, h = im.size
     k = w / 640.0
-    badge = tag_layer()
+    tag = tag_layer(words=words)
     if k != 1:
-        badge = badge.resize((int(badge.width * k), int(badge.height * k)), Image.LANCZOS)
+        tag = tag.resize((int(tag.width * k), int(tag.height * k)), Image.LANCZOS)
     big = Image.new('RGBA', (w * S, h * S), (0, 0, 0, 0))
-    big.paste(badge, (int(320 * k * S - badge.width / 2), int(70 * k * S - badge.height / 2)), badge)
+    big.paste(tag, (int(320 * k * S - tag.width / 2), int(70 * k * S - tag.height / 2)), tag)
     over = big.resize((w, h), Image.LANCZOS)
-    Image.alpha_composite(im, over).save(dst, 'PNG')
+    return Image.alpha_composite(im, over)
+
+
+def main(src, dst):
+    badge(Image.open(src)).save(dst, 'PNG')
 
 
 if __name__ == '__main__':
