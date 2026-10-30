@@ -68,6 +68,28 @@ check(keysOf(sp.currentEntries(index, { period: 4, shopFrom: '2019-07-15', shopT
 check(keysOf(sp.currentEntries(index, { period: 4, shopFrom: '2019-07-22', shopTo: '2019-07-28' })) === 'cur,vipq', 'currentEntries campaign out of window');
 check(keysOf(sp.currentEntries(index, { period: 1, shopFrom: '2016-01-01', shopTo: '2016-01-07' })) === 'old,oldRepl', 'currentEntries skips removed');
 
+// WW week-limited VIP campaigns (Task 12): VIP, every day, window {start, end} inclusive; listed only in the Shop weeks
+// that overlap the window and only in their own period; pinnable from a later period; playable only with VIP
+const wk = { catalog: index.catalog, entries: [
+  e('C1', 7501, { periods: [2], vip: true, campaign: { start: '2017-02-20', end: '2017-02-26' } }),
+  e('C2', 7502, { periods: [2], vip: true, campaign: { start: '2017-02-27', end: '2017-03-12' } }),
+  e('C3', 7503, { periods: [3], vip: true, campaign: { start: '2018-08-31', end: '2018-10-09' } }),
+] };
+const wkAt = (period, shopFrom, shopTo) => keysOf(sp.currentEntries(wk, { period, shopFrom, shopTo }));
+check(wkAt(2, '2017-02-20', '2017-02-26') === 'C1', 'campaign week: only C1');
+check(wkAt(2, '2017-02-27', '2017-03-05') === 'C2' && wkAt(2, '2017-03-06', '2017-03-12') === 'C2', 'two-week campaign in both weeks, not the one before');
+check(wkAt(2, '2017-03-13', '2017-03-19') === '', 'week after the windows: no campaign');
+check(wkAt(2, '2017-02-23', '2017-03-01') === 'C1,C2', 'a Shop week across two campaign weeks lists both');
+check(wkAt(3, '2018-09-03', '2018-09-09') === 'C3' && wkAt(2, '2018-09-03', '2018-09-09') === '', 'campaign only in its own period');
+check(!sp.pinnable(wk.entries[0], 2).ok && sp.pinnable(wk.entries[0], 2).why === 'not-past' && sp.pinnable(wk.entries[0], 3).ok, 'campaign pinnable from a later period');
+check(sp.lockOf(wk.entries[0], { weekday: 'Wed', vip: false, pinned: true }) === 1 && sp.lockOf(wk.entries[0], { weekday: 'Wed', vip: true, pinned: true }) === 0, 'pinned campaign: VIP only');
+{
+  const kp = sp.specialEvents(wk, { period: 4, weekday: 'Wed', vip: false, pinnedKey: 'C1', shopFrom: '2020-06-01', shopTo: '2020-06-07',
+    dayEndStr: 'D', weekEndStr: 'W', imgBase: '' });
+  const k1 = kp.find((x) => x.eventStageId === 7501);
+  check(kp.length === 2 && k1 && k1.isLock === 1 && k1.bannerUrl.endsWith('7501-kept.png') && k1.endTime === 'W', 'pinned old campaign kept, locked without VIP');
+}
+
 // currentEntries: optional from / to of an entry (days 'YYYY-MM-DD', inclusive) against the Shop week start
 const dated = { catalog: index.catalog, entries: [
   e('vipCid', 7201, { periods: [1, 2], vip: true, from: '2016-05-19', to: '2017-04-19' }),

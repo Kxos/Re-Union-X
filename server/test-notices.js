@@ -119,6 +119,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/Unlock All/.test(t) && /no function/.test(t), 'Special: Unlock All');
   check(/training/.test(t) && /Give Up/.test(t), 'Special: allenamento');
   check(/reconstructed/.test(t), 'Special: drop ricostruiti');
+  check(/limited VIP campaigns/.test(t) && /week/.test(t) && /one quest of its theme/.test(t), 'Special: campagne VIP settimanali (Task 12)');
 }
 n.NOTICES.push({ date: '1', tag: 'X', title: 'a<b>"&', body: ['<script>'] });
 p = n.noticesPage(U(2026, 10, 16, 15));

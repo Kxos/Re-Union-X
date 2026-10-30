@@ -6,9 +6,11 @@
 //   rewards? (objective rewards that replace the catalogue ones, e.g. the «(See table)» VIP quests), objectives?
 //   ({quest: reconstructed «text -> reward» lines} for a catalogue quest without any or with a typo), from? / to?
 //   (days inside the periods, copied into the index), drops);
+//   plus campaignSets / campaigns: the content of the 120 WW week-limited VIP campaigns (Task 12, campaignEntries below);
 // - the private catalogue of the original Special quests (KHUX_SPECIAL_SRC, default
 //   D:\Progetto_Restauro_KH_UX\private\events\special\special_quests.json; never copied into the repo): per quest world,
 //   room, AP, level, target and the three objectives «text -> reward».
+//   Its `vip_limited_campaigns_ww` rows (id, notice, title, start, end) give the campaign entries 7501-7620.
 // Output (idempotent: own rows are dropped first):
 // - stage rows 970000-979999 with stageKind 2 (bench 30-10: a stageKind 2 row with id = stageId works as a Special
 //   quest; Begin sends eventId = the evStage id). Stage ids: 970000 + (evStageId - 7000) * 10 + position (max 5).
@@ -200,6 +202,90 @@ function evStageRow(evStageId, stageIds, { resetFlag = 0, detailUrl = '' } = {})
   return Object.assign(row, { groupPattern: 0, validMinute: 0 });
 }
 
+// WW week-limited VIP campaigns (Task 12, spec 5.3): one entry per row of the catalogue's `vip_limited_campaigns_ww`
+// (catalogue order), key C<notice>, evStageId CAMPAIGN_EV_FIRST + row index (7501-7620 for the 120 rows), VIP, every
+// day, period of the start day, campaign window {start, end} in days, end inclusive (the catalogue end is the next
+// Monday, exclusive; a row without dates takes start / end from the rules). Content (rules.campaigns[key].parts, at
+// most 5 quests in all), each part:
+// - «name»: a catalogue quest as it is;
+// - {set, n?}: the first n quests of rules.campaignSets[set] (quests, objectives?, drops?, useAp?, pack?); pack
+//   {objective, total}: the original set gave `total` items, one per quest: with n < total quests the last one gives
+//   the rest (objective `objective` (an index or a list) of the last quest gets x(total - n + 1));
+// - {featured: «Medal 6★», trait?}: the weekly featured-medal set (4 copies + 1400 Jewels, plus the trait medal from
+//   2018-06): two quests «VIP! <medal> (1)» [medal, medal, Jewel x1400] and «(2)» [medal, medal, trait]; without a
+//   trait medal [medal, medal, Jewel x700] twice;
+// - {quest, like?, rewards?, useAp?, drops?, dropsFrom?}: a quest named `quest` on the template `like` (a catalogue
+//   quest, default CAMPAIGN_TEMPLATE): world, room, target, level, AP and objective texts of the template, the three
+//   rewards replaced by `rewards` when given; dropsFrom = key of an entry whose drops it copies.
+// Drops are per quest (a part's drops on its quests only); the entry lists the union. Builder's calls in the rules
+// (`generic`: one quest of the theme when the notices give no content, `_note`).
+const CAMPAIGN_EV_FIRST = 7501, CAMPAIGN_TEMPLATE = 'VIP! Medal Quest', FEATURED_JEWELS = 1400;
+const addDays = (iso, n) => new Date(Date.parse(iso + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+const campaignName = (t) => String(t || '').replace(/^\[(?:Edited|Updated)[^\]]*\]\s*/, '').trim();
+const periodOfDay = (day, periods) => periods.reduce((n, p) => (day >= p.from ? p.n : n), periods[0].n);
+
+function campaignEntries(rules, catalogue) {
+  const rows = catalogue.vip_limited_campaigns_ww || [];
+  const specs = rules.campaigns || {}, sets = rules.campaignSets || {};
+  const stray = Object.keys(specs).filter((k) => !k.startsWith('_') && !rows.some((r) => `C${r.notice}` === k));
+  if (stray.length) throw new Error(`special: campaigns without a catalogue row: ${stray.join(', ')}`);
+  const cat = (name, where) => {
+    const q = catalogue.quests.find((x) => x.quest === name);
+    if (!q) throw new Error(`special: ${where}: quest «${name}» not in the catalogue`);
+    return q;
+  };
+  const entryDrops = (key, where) => {
+    const en = rules.entries.find((x) => x.key === key);
+    if (!en) throw new Error(`special: ${where}: dropsFrom «${key}» is not an entry`);
+    return en.drops || [];
+  };
+  const withRewards = (objectives, rewards) => objectives.map((o, i) => `${splitObjective(o).text} -> ${rewards[i]}`);
+  const setQty = (o, qty) => { const x = splitObjective(o); return `${x.text} -> ${x.reward} x${qty}`; };
+  return rows.map((r, i) => {
+    const key = `C${r.notice}`, sp = specs[key];
+    if (!sp || !Array.isArray(sp.parts) || !sp.parts.length) throw new Error(`special: campaign ${key} («${r.title}») has no content in rules.campaigns`);
+    const start = sp.start || r.start, end = sp.end || (r.end ? addDays(r.end, -1) : null);
+    if (!start || !end || end < start) throw new Error(`special: campaign ${key}: window ${start}..${end}`);
+    const quests = [];
+    for (const part of sp.parts) {
+      if (typeof part === 'string') { quests.push({ ...cat(part, key) }); continue; }
+      if (part.set) {
+        const set = sets[part.set];
+        if (!set) throw new Error(`special: ${key}: unknown set «${part.set}»`);
+        const n = part.n || set.quests.length;
+        set.quests.slice(0, n).forEach((name, j) => {
+          const q = cat(name, key);
+          let objectives = (set.objectives && set.objectives[name]) || q.objectives;
+          if (set.pack && j === n - 1 && n < set.pack.total) {
+            objectives = objectives.map((o, k) => ([].concat(set.pack.objective).includes(k) ? setQty(o, set.pack.total - n + 1) : o));
+          }
+          quests.push({ ...q, objectives, _drops: set.drops || [], _ap: set.useAp });
+        });
+        continue;
+      }
+      if (part.featured) {
+        const tpl = cat(CAMPAIGN_TEMPLATE, key), medal = part.featured, base = medal.replace(/\s*\d*★$/, '');
+        const sets2 = part.trait ? [[`${medal} x1`, `${medal} x1`, `Jewel x${FEATURED_JEWELS}`], [`${medal} x1`, `${medal} x1`, `${part.trait} x1`]]
+          : [0, 1].map(() => [`${medal} x1`, `${medal} x1`, `Jewel x${FEATURED_JEWELS / 2}`]);
+        sets2.forEach((rw, j) => quests.push({ ...tpl, quest: `VIP! ${base} (${j + 1})`, objectives: withRewards(tpl.objectives, rw), _drops: [] }));
+        continue;
+      }
+      if (part.quest) {
+        const tpl = cat(part.like || CAMPAIGN_TEMPLATE, key);
+        const drops = part.dropsFrom ? entryDrops(part.dropsFrom, key) : part.drops || [];
+        quests.push({ ...tpl, quest: part.quest, objectives: part.rewards ? withRewards(tpl.objectives, part.rewards) : tpl.objectives,
+          _drops: drops, _ap: part.useAp });
+        continue;
+      }
+      throw new Error(`special: ${key}: unknown part ${JSON.stringify(part)}`);
+    }
+    if (quests.length > 5) throw new Error(`special: campaign ${key}: ${quests.length} quests, at most 5 per banner`);
+    return { key, evStageId: CAMPAIGN_EV_FIRST + i, name: sp.name || campaignName(r.title), family: sp.family || 'SQ21',
+      periods: [periodOfDay(start, rules.periods)], days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '',
+      campaign: { start, end }, banner: sp.banner || '', generic: !!sp.generic, notice: r.notice, questObjs: quests };
+  });
+}
+
 function build(rules, catalogue, masterRows) {
   const L = lookups(masterRows);
   const report = { stopgaps: [], titleFallbacks: [] };
@@ -239,13 +325,14 @@ function build(rules, catalogue, masterRows) {
   const evStageRows = [evStageRow(CATALOG_EV, [TRAINING_STAGE], { detailUrl: '/web/special/catalog' })];
 
   const seenEv = new Set([CATALOG_EV]), seenKey = new Set();
-  for (const en of rules.entries) {
+  // campaigns (Task 12) after the entries: the ids of the entries' stage and drop rows do not move
+  for (const en of [...rules.entries, ...campaignEntries(rules, catalogue)]) {
     if (!(en.evStageId > EV_FIRST && en.evStageId <= EV_LAST) || seenEv.has(en.evStageId)) throw new Error(`special: ${en.key}: evStageId ${en.evStageId} missing, out of range or repeated`);
     if (seenKey.has(en.key)) throw new Error(`special: key ${en.key} repeated`);
     seenEv.add(en.evStageId); seenKey.add(en.key);
     // en.objectives {quest name: three «text -> reward» lines}: reconstructed objectives for a catalogue quest without
     // any (Keyblade Materials: Divine Rose) or with a typo the objective codes cannot read
-    const quests = (en.quests ? en.quests.map((n) => catalogue.quests.find((q) => q.quest === n)).filter(Boolean)
+    const quests = en.questObjs || (en.quests ? en.quests.map((n) => catalogue.quests.find((q) => q.quest === n)).filter(Boolean)
       : catalogue.quests.filter((q) => (en.series || []).includes(q.series)))
       .map((q) => (en.objectives && en.objectives[q.quest] ? { ...q, objectives: en.objectives[q.quest] } : q));
     const stray = Object.keys(en.objectives || {}).filter((n) => !quests.some((q) => q.quest === n));
@@ -254,23 +341,32 @@ function build(rules, catalogue, masterRows) {
     const base = { key: en.key, evStageId: en.evStageId, name: en.name, family: en.family, periods: en.periods, days: en.days,
       vip: !!en.vip, replacedBy: en.replacedBy || null, removed: en.removed || '', campaign: en.campaign || null,
       resetGroup: en.resetGroup || '', banner: en.banner || '' };
+    if (en.questObjs) Object.assign(base, { generic: en.generic, notice: en.notice });
     // optional days that split a period (special.currentEntries checks them against the Shop week)
     if (en.from) base.from = en.from;
     if (en.to) base.to = en.to;
     // removed (no use in the 4.3.1 client, spec 6): listed in the catalogue page only, no rows
     if (base.removed) { entries.push({ ...base, stageIds: [], useAp: [], stages: [], dropRewardIds: [] }); continue; }
     if (quests.length > 5) throw new Error(`special: ${en.key}: ${quests.length} quests, at most 5 per banner`);
-    const useAp = quests.map((q, i) => (en.useAp && en.useAp[i] !== undefined ? en.useAp[i] : en.useAp ? en.useAp[0] : apOf(q.ap)));
-    const dropRewardIds = (en.drops || []).map((d) => {
+    const useAp = quests.map((q, i) => (q._ap !== undefined ? q._ap : en.useAp && en.useAp[i] !== undefined ? en.useAp[i] : en.useAp ? en.useAp[0] : apOf(q.ap)));
+    // one reward row per distinct drop of the entry; campaign quests carry their own drops (q._drops)
+    const own = new Map();
+    const dropRow = (d) => {
+      const k = `${d.type}:${d.id}:${d.num || 1}`;
+      if (own.has(k)) return own.get(k);
       if ((d.type === 3 && !medals.has(d.id)) || (d.type === 5 && !materials.has(d.id)) || ![3, 5].includes(d.type)) {
         throw new Error(`special: ${en.key}: drop ${JSON.stringify(d)} not in the medal/material table`);
       }
       const rewardId = REWARD_FIRST + rewardRows.length;
       rewardRows.push({ rewardId, validReward: 1, display: [1], type: [d.type], id: [d.id], assignSkillType: [0], assignSkillId: [0],
         assignSkillLv: [0], num: [d.num || 1], odds: [10000] });
+      own.set(k, rewardId);
       return rewardId;
-    });
-    const stages = quests.map((q, i) => ({ ...stageRow(stageIdOf(en.evStageId, i), q, useAp[i], en.rewards), dropRewardIds }));
+    };
+    const entryDropIds = (en.drops || []).map(dropRow);
+    const stageDrops = quests.map((q) => (q._drops ? q._drops.map(dropRow) : entryDropIds));
+    const dropRewardIds = [...new Set([...entryDropIds, ...stageDrops.flat()])];
+    const stages = quests.map((q, i) => ({ ...stageRow(stageIdOf(en.evStageId, i), q, useAp[i], en.rewards), dropRewardIds: stageDrops[i] }));
     const stageIds = stages.map((s) => s.stageId);
     if (stageIds.some((id) => CLIENT_DROPPED.includes(id))) throw new Error(`special: ${en.key}: stage 95100/95200`);
     evStageRows.push(evStageRow(en.evStageId, stageIds, { resetFlag: base.resetGroup ? 1 : 0 }));
@@ -292,7 +388,7 @@ function build(rules, catalogue, masterRows) {
 function mapsOf(index, stageRows, rewardRows, masterRows, L) {
   const enemyName = new Map((masterRows.enemy || []).map((e) => [e.enemyId, e.name]));
   const medalName = new Map((masterRows.medal || []).map((r) => [r.medalId, r.name]));
-  const stages = [...index.catalog.stages, ...index.entries.flatMap((e) => e.stages.map((s) => ({ ...s, dropRewardIds: e.dropRewardIds })))];
+  const stages = [...index.catalog.stages, ...index.entries.flatMap((e) => e.stages)];
   return stages.map((s) => {
     const row = stageRows.find((r) => r.stageId === s.stageId);
     // reward of each enemy: the entry's drop rows round-robin; row 1 for an entry without drops and for training
