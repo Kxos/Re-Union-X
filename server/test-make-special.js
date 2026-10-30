@@ -145,6 +145,18 @@ check(mA && members(mA).some((x) => x.enemyId === 1002 && x.name === 'Great Pret
 const mT = maps.find((m) => m.stageId === 970000);
 check(mT && mT.target === 'Shadow' && mT.targetId === 1 && members(mT).every((x) => x.reward === 1), 'training map: Shadow, no drops');
 
+// objectives override per quest name (catalogue quest without objectives or with a typo) and from / to in the index
+{
+  const ov = ['Collect 150 or more Lux -> Avatar Coin x5', 'Complete without having to continue -> Avatar Coin x5', 'Defeat Great Pretender x 1 -> Mythril Shard x1'];
+  const r2 = ms.build({ ...rules, entries: [{ ...rules.entries[0], objectives: { 'Alpha II': ov }, from: '2016-05-19', to: '2017-04-19' }] }, catalogue, master);
+  const s0 = r2.stageRows.find((r) => r.stageId === 970010), s1 = r2.stageRows.find((r) => r.stageId === 970011);
+  check(s0 && s0.submissionRequire[0] === a1.submissionRequire[0], 'objectives override: other quests keep the catalogue ones');
+  check(s1 && s1.validSubmission === 3 && s1.submissionId[2] === 1002 && s1.submissionItemId[2] === 1 && s1.submissionRewardType[1] === 14, 'objectives override: Alpha II from the entry');
+  const en = r2.index.entries[0];
+  check(en.from === '2016-05-19' && en.to === '2017-04-19', 'index: from / to of the entry');
+  check(!('from' in alpha) && !('to' in alpha), 'index: no from / to when the entry has none');
+}
+
 // errors on bad rules
 const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
@@ -219,6 +231,13 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(all.report.stopgaps.length === 0, `real build: stopgap objectives ${JSON.stringify(all.report.stopgaps)}`);
   const mog = all.index.entries.find((e) => e.key === 'mog');
   check(mog && mog.stageIds.length === 5, 'MOG: 5 stages');
+  // every period (Task 7): stable ids of the period-4 entries, dates in the index, row counts
+  check(['cid-mon', 'mog', 'evolve-legendary', 'skill-exp', 'vip-medal'].every((k) => all.index.entries.find((e) => e.key === k).stageIds[0]
+    === 970000 + (real.entries.find((e) => e.key === k).evStageId - 7000) * 10), 'real build: period-4 stage ids unchanged');
+  check(all.index.entries.find((e) => e.key === 'cid-vip-mon').to === '2017-04-19', 'real build: from / to in the index');
+  check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
+  console.log(`(real build: ${all.stageRows.length} stage, ${all.evStageRows.length} evStage, ${all.rewardRows.length} reward rows, ${all.maps.length} maps; `
+    + `entries per period ${[1, 2, 3, 4, 5].map((n) => live.filter((e) => e.periods.includes(n)).length).join('/')})`);
 } else console.log('(local master or private catalogue missing: real build skipped)');
 
 if (errors.length) { console.error(`test-make-special: FAIL\n- ${errors.join('\n- ')}`); process.exit(1); }

@@ -68,6 +68,20 @@ check(keysOf(sp.currentEntries(index, { period: 4, shopFrom: '2019-07-15', shopT
 check(keysOf(sp.currentEntries(index, { period: 4, shopFrom: '2019-07-22', shopTo: '2019-07-28' })) === 'cur,vipq', 'currentEntries campaign out of window');
 check(keysOf(sp.currentEntries(index, { period: 1, shopFrom: '2016-01-01', shopTo: '2016-01-07' })) === 'old,oldRepl', 'currentEntries skips removed');
 
+// currentEntries: optional from / to of an entry (days 'YYYY-MM-DD', inclusive) against the Shop week start
+const dated = { catalog: index.catalog, entries: [
+  e('vipCid', 7201, { periods: [1, 2], vip: true, from: '2016-05-19', to: '2017-04-19' }),
+  e('freeCid', 7202, { periods: [2, 3], from: '2017-04-20' }),
+  e('always', 7203, { periods: [1, 2, 3] }),
+] };
+const at = (period, shopFrom) => keysOf(sp.currentEntries(dated, { period, shopFrom, shopTo: shopFrom }));
+check(at(1, '2016-05-16') === 'always', 'from: before the date not listed');
+check(at(1, '2016-05-19') === 'vipCid,always', 'from: listed on the date');
+check(at(2, '2017-04-19') === 'vipCid,always', 'to: listed on the date');
+check(at(2, '2017-04-20') === 'freeCid,always', 'to / from: switch on 2017-04-20');
+check(at(3, '2019-01-07') === 'freeCid,always', 'from: later periods keep the entry');
+check(sp.pinnable(dated.entries[0], 3).ok, 'from / to do not change pinnable');
+
 // specialEvents
 const stageState = (id) => ({ score: id, playStatus: 0, clearMissionIds: [] });
 const ctx = (o) => ({ period: 4, weekday: 'Wed', vip: false, pinnedKey: '', shopFrom: '2020-06-01', shopTo: '2020-06-07',
