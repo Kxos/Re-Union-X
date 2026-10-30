@@ -5,10 +5,11 @@ const clock = require('./clock');
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-// special_periods.json is read on first use, so the tests can run with their own periods
+// special_periods.json ({periods, entries}, make-special.js) is read on first use, so the tests can run with their
+// own periods
 let periodsCache = null;
 const loadPeriods = () => {
-  if (!periodsCache) periodsCache = require('./special_periods.json');
+  if (!periodsCache) periodsCache = require('./special_periods.json').periods;
   return periodsCache;
 };
 

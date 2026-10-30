@@ -537,5 +537,5 @@ function patch(masterDir, src) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { ROOM_WORLD, WIKI_WORLD, WORLD_THUMB, WORLD_BGM, NEW_WORLDS, thumbForRoom, readThumbs, buildWorldRows, buildRows, objectiveCodes, wikiLv, readDramas, defaultSources, patch,
+module.exports = { ROOM_WORLD, WIKI_WORLD, WORLD_THUMB, WORLD_BGM, NEW_WORLDS, thumbForRoom, readThumbs, buildWorldRows, buildRows, objectiveCodes, objectiveReward, wikiLv, readDramas, defaultSources, patch,
   countStopgaps, Q555_VARIANTS, TROPHY_BY_IMG, readHeaders };
