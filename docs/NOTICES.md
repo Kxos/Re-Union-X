@@ -41,7 +41,7 @@ The **Special** tab of the Quests screen is open once you finish Story Quest 6. 
 
 Weekday quests open on their original weekdays. The others are shown with a **padlock**. **VIP**, earned by finishing all the **Weekly Missions** (see the VIP Draws notice), opens every weekday quest on any day and shows the VIP quests. Quests opened this way carry an **Available** plate. The **limited VIP campaigns** of the original game return as VIP quests in the week of your Story that matches their original dates.
 
-The **Unlock All** button and tapping a locked banner have **no function**, because nothing is sold. Because locked banners are shown, the Shop button "Buy discounted 3,000 Jewel pack!" lights up, and it has no function either.
+Tapping **Unlock All** or a locked banner shows a **message** about the Weekly Missions VIP, because nothing is sold. Because locked banners are shown, the Shop button "Buy discounted 3,000 Jewel pack!" lights up, and it shows the same message.
 
 ### Special Catalog
 

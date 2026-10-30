@@ -210,6 +210,7 @@ function route(url) {
   if (p === '/user/present/receive') return 'presentreceive';
   if (p === '/user/material') return 'usermaterial';
   if (p === '/campaign') return 'campaign';
+  if (p === '/shop/campaign') return 'shopcampaign'; // popup di «Unlock All» (Task 15)
   if (p === '/ranking/reward/check') return 'rankingrewardcheck';
   if (routePartyRanking(p)) return routePartyRanking(p);
   if (chatRoutes.routeChat(p)) return chatRoutes.routeChat(p);
@@ -1307,6 +1308,25 @@ const MEDAL_MAX_STEP = 5, MEDAL_MAX_COST = 100;   // «Spend 100 Jewels ... by 5
 function maxMedal() {
   const base = Math.max(Number(process.env.KHUX_MAX_MEDAL || 300), (player.medals || []).length + 50);
   return Math.min(MEDAL_MAX_LIMIT, base + (player.medalMaxExtra || 0));
+}
+
+// GET /shop/campaign (azione 167): ultima richiesta della catena di «Unlock All» / pulsanti d'acquisto
+// (GET /payment/info, /user/shop, /shop/campaign; tmp/unlock_spike/FINDINGS.md, opzione A). Con l'header
+// x-sqex-hole-retry "0" (o assente) risponde HTTP 400 con ret.error: il client lo mostra come popup. Alla ritentata
+// (header diverso da "0") risponde 200 come prima. Anti-ciclo: mai due 400 in 10 s di tempo reale.
+// Lo stato HTTP si cambia con KHUX_CAMPAIGN_ERROR_STATUS (default 400; 503 al banco) senza toccare il codice.
+const CAMPAIGN_ERROR_TEXT = 'Jewels cannot be bought on this server.\nLocked Special quests open on their weekday,\n'
+  + 'or every day with the Weekly Missions VIP.\nSee Notices for details.';
+let campaignErrorAt = -Infinity;
+function respondShopCampaign(res, headers, statusOverride) {
+  const retry = String((headers || {})['x-sqex-hole-retry'] === undefined ? '0' : headers['x-sqex-hole-retry']).trim();
+  const now = realNow();
+  if (retry === '0' && now - campaignErrorAt >= 10000) {
+    campaignErrorAt = now;
+    const code = statusOverride || Number(process.env.KHUX_CAMPAIGN_ERROR_STATUS) || 400;
+    return send(res, code, { ret: { ...ret(), error: CAMPAIGN_ERROR_TEXT }, cpType: 0, cpTitle: '' });
+  }
+  return send(res, 200, { ret: ret(), cpType: 0, cpTitle: '' });
 }
 
 // POST /shop/medal/max (azione 71, Shop > Increase Storage), corpo {count} = scatti del cursore
@@ -4388,6 +4408,7 @@ function handler(scheme) {
   if (kind === 'colosseum') return respondColosseum(res);
       // GET /campaign (azione 143): campaigns, array di int (id delle campagne attive)
       if (kind === 'campaign') return send(res, 200, { ret: ret(), campaigns: [] });
+      if (kind === 'shopcampaign') return respondShopCampaign(res, req.headers);
       // POST /ranking/reward/check (azione 142): il client
       // vuole tre array in radice (lastRankingResults, rankingRewardIds, openRankingIds),
       // poi rankingReward: array vuoto = nessun premio di classifica.
@@ -4696,6 +4717,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
