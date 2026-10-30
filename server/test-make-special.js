@@ -204,8 +204,86 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   check(!('from' in alpha) && !('to' in alpha), 'index: no from / to when the entry has none');
 }
 
+// WW week-limited VIP campaigns (Task 12, spec 5.3): one entry per catalogue row `vip_limited_campaigns_ww`, key
+// C<notice>, evStageId 7501 + row index, VIP, every day, period of its start, campaign window {start, end} with the
+// end inclusive (the catalogue end is the next Monday, exclusive); content from rules.campaigns (catalogue quests,
+// shared sets, featured medal sets, custom quests on a template), drops per quest
+{
+  const cat2 = { ...catalogue, quests: [...catalogue.quests,
+    { quest: 'Gamma (1)', series: 'Gamma', world: 'Daybreak Town', room: 'Avenue', ap: '0', level: '25', target: 'King Pretender', objectives: [
+      'Defeat Great Pretender x 1 -> Cid 6★ x1', 'Complete without having to continue -> Avatar Coin x5', 'Complete without having to continue -> Avatar Coin x5'] },
+    { quest: 'Gamma (2)', series: 'Gamma', world: 'Daybreak Town', room: 'Avenue', ap: '0', level: '25', target: 'King Pretender', objectives: [
+      'Defeat Great Pretender x 1 -> Cid 6★ x1', 'Complete without having to continue -> Avatar Coin x5', 'Complete without having to continue -> Avatar Coin x5'] },
+    { quest: 'Gamma (3)', series: 'Gamma', world: 'Daybreak Town', room: 'Avenue', ap: '0', level: '25', target: 'King Pretender', objectives: [
+      'Defeat Great Pretender x 1 -> Cid 6★ x1', 'Complete without having to continue -> Avatar Coin x5', 'Complete without having to continue -> Avatar Coin x5'] },
+    { quest: 'VIP! Medal Quest', series: 'VIP! Medal Quest', world: 'Wonderland', room: 'White Rabbit\'s House', ap: 'zero', level: '15', target: 'King Pretender', objectives: [
+      'Complete without having to continue -> (See table) x1', 'Complete without having to continue -> (See table) x1', 'Complete without having to continue -> (See table) x1'] },
+  ], vip_limited_campaigns_ww: [
+    { id: 'E100-1', notice: 100, date: '2016-05-02', title: '[Edited May 3] VIP Star Week!', start: '2016-05-02', end: '2016-05-09' },
+    { id: 'E101-1', notice: 101, date: '2016-05-19', title: 'VIP Cid Week!', start: null, end: null },
+    { id: 'E102-1', notice: 102, date: '2020-06-01', title: 'VIP Gamma Week!', start: '2020-06-01', end: '2020-06-15' },
+  ] };
+  const master2 = { ...master, medal: [...master.medal, { medalId: 500, name: 'Star', rare: 6 }, { medalId: 501, name: 'Trait Medal #9', rare: 6 },
+    { medalId: 90016, name: 'Moogle', rare: 6 }] };
+  const rules2 = { ...rules,
+    campaignSets: { gamma: { quests: ['Gamma (1)', 'Gamma (2)', 'Gamma (3)'], pack: { objective: 0, total: 3 }, drops: [{ type: 3, id: 90076, num: 1 }] } },
+    campaigns: {
+      C100: { parts: [{ featured: 'Star 6★', trait: 'Trait Medal #9 6★' }, { quest: 'VIP! Star Bonus', rewards: ['Star 6★ x1', 'Moogle 6★ x1', 'Jewel x100'] }] },
+      C101: { start: '2016-05-19', end: '2016-05-22', generic: true, parts: [{ quest: 'VIP Cid Week!', like: 'Alpha I', useAp: 10, dropsFrom: 'alpha' }] },
+      C102: { name: 'Gamma Week', parts: [{ set: 'gamma', n: 2 }, 'Alpha II'] },
+    } };
+  const o = ms.build(rules2, cat2, master2);
+  const camps = o.index.entries.filter((x) => x.campaign);
+  check(camps.map((x) => `${x.key}:${x.evStageId}`).join() === 'C100:7501,C101:7502,C102:7503', `campaign keys / evStageIds (${camps.map((x) => x.key)})`);
+  const C = (k) => camps.find((x) => x.key === k) || { stages: [], stageIds: [], periods: [], dropRewardIds: [], campaign: {} };
+  check(camps.every((x) => x.vip === true && x.days === 'all' && x.replacedBy === null && !x.removed && x.family), 'campaigns: VIP, every day, not replaced');
+  check(C('C100').campaign.start === '2016-05-02' && C('C100').campaign.end === '2016-05-08' && C('C100').periods.join() === '1', 'C100: window to the Sunday, period of the start');
+  check(C('C101').campaign.start === '2016-05-19' && C('C101').campaign.end === '2016-05-22', 'C101: window from the rules when the catalogue has none');
+  check(C('C102').periods.join() === '4' && C('C102').campaign.end === '2020-06-14', 'C102: period 4, two-week window');
+  check(C('C100').name === 'VIP Star Week!' && C('C102').name === 'Gamma Week', 'campaign name: catalogue title without «[Edited ...]», or the rules name');
+  check(C('C101').generic === true && C('C100').generic === false, 'generic flag in the index');
+  // featured set: 2 quests, 4 medals + 1400 Jewels + the trait medal; custom quest on the VIP! Medal Quest template
+  check(C('C100').stageIds.join() === '975010,975011,975012', `C100 stage ids ${C('C100').stageIds}`);
+  const s = (id) => o.stageRows.find((r) => r.stageId === id) || { submissionItemId: [], submissionItemNum: [], submissionRewardType: [] };
+  check(s(975010).name === 'VIP! Star (1)' && s(975011).name === 'VIP! Star (2)' && s(975012).name === 'VIP! Star Bonus', 'featured / custom quest names');
+  check(s(975010).submissionRewardType.join() === '3,3,2' && s(975010).submissionItemId.join() === '500,500,0' && s(975010).submissionItemNum.join() === '1,1,1400', 'featured (1): 2 medals + 1400 Jewels');
+  check(s(975011).submissionItemId.join() === '500,500,501', 'featured (2): 2 medals + the trait medal');
+  check(s(975012).mapName === 'White Rabbit\'s House' && s(975012).useAp === 0 && s(975012).submissionItemNum.join() === '1,1,100', 'custom quest on the VIP! Medal Quest template');
+  check(C('C100').dropRewardIds.length === 0, 'C100: no drops');
+  // generic quest «like» a catalogue quest: its objectives, own name, AP and the drops of an entry
+  check(s(975020).name === 'VIP Cid Week!' && s(975020).useAp === 10 && s(975020).submissionItemId.join() === '0,90076,1', 'generic quest like Alpha I');
+  check(C('C101').dropRewardIds.length === 2, 'C101: drops of the entry «alpha»');
+  // set with n quests of a 3-item pack: the last quest takes the rest; catalogue quest after the set
+  check(C('C102').stageIds.join() === '975030,975031,975032' && s(975031).name === 'Gamma (2)' && s(975031).submissionItemNum[0] === 2
+    && s(975030).submissionItemNum[0] === 1, 'set gamma n 2: (2) gives Cid x2');
+  check(s(975032).name === 'Alpha II', 'catalogue quest after the set');
+  // drops per quest: the set quests carry the set drop, Beta (no drops) row 1; the entry lists the union
+  const st102 = C('C102').stages;
+  check(C('C102').dropRewardIds.length === 1 && st102[0].dropRewardIds.join() === C('C102').dropRewardIds.join() && st102[2].dropRewardIds.length === 0, 'drops per quest');
+  const mBeta = o.maps.find((m) => m.stageId === 975032), mG = o.maps.find((m) => m.stageId === 975030);
+  check(mBeta && mBeta.enemies.flat().every((x) => x.reward === 1) && mBeta.targetReward === 1, 'campaign quest without drops: row 1 on every enemy');
+  check(mG && mG.enemies.flat().every((x) => x.reward === C('C102').dropRewardIds[0]) && mG.targetReward === C('C102').dropRewardIds[0], 'campaign quest with drops: its drop row on every enemy');
+  check(o.evStageRows.filter((r) => r.eventStageId >= 7501).map((r) => r.validStageId).join() === '3,1,3', 'one evStage row per campaign');
+  // ids of the normal entries do not move
+  check(o.index.entries.find((x) => x.key === 'alpha').stageIds.join() === '970010,970011' && o.rewardRows[0].rewardId === rewardRows[0].rewardId, 'normal entry ids unchanged');
+  // window rules (special.currentEntries): listed in the weeks of its window only; pinnable from a later period; VIP only
+  const sp = require('./special');
+  const listed = (k, period, shopFrom, shopTo) => sp.currentEntries(o.index, { period, shopFrom, shopTo }).some((x) => x.key === k);
+  check(listed('C100', 1, '2016-05-02', '2016-05-08') && !listed('C100', 1, '2016-05-09', '2016-05-15') && !listed('C100', 1, '2016-04-25', '2016-05-01'), 'C100 only in its week');
+  check(listed('C102', 4, '2020-06-08', '2020-06-14') && !listed('C102', 4, '2020-06-15', '2020-06-21'), 'C102 in both weeks, not after');
+  check(!sp.pinnable(C('C100'), 1).ok && sp.pinnable(C('C100'), 2).ok && !sp.pinnable(C('C102'), 4).ok && sp.pinnable(C('C102'), 5).ok, 'campaign pinnable from a later period only');
+  check(sp.lockOf(C('C100'), { weekday: 'Mon', vip: false, pinned: true }) === 1 && sp.lockOf(C('C100'), { weekday: 'Mon', vip: true, pinned: true }) === 0, 'campaign playable only with VIP');
+  // errors: a catalogue row without content, content for an unknown row, more than 5 quests, missing window
+  const badC = (c, why, cat = cat2) => { let t = false; try { ms.build({ ...rules2, campaigns: c }, cat, master2); } catch { t = true; } check(t, why); };
+  const { C100, C101, C102 } = rules2.campaigns;
+  badC({ C100, C101 }, 'campaign row without content rejected');
+  badC({ C100, C101, C102, C999: C102 }, 'content for an unknown campaign rejected');
+  badC({ C100, C101, C102: { parts: [{ set: 'gamma' }, 'Alpha I', 'Alpha II', 'Alpha I'] } }, 'campaign with 6 quests rejected');
+  badC({ C100, C101: { parts: C101.parts }, C102 }, 'campaign without a window rejected');
+}
+
 // errors on bad rules
-const bad = (r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
+const bad =(r, why) => { let t = false; try { ms.build({ ...rules, entries: r }, catalogue, master); } catch { t = true; } check(t, why); };
 bad([{ ...rules.entries[0], evStageId: 7002 }, rules.entries[1]], 'duplicate evStageId rejected');
 bad([{ ...rules.entries[0], series: ['Nope'] }], 'entry without quests rejected');
 bad([{ ...rules.entries[0], drops: [{ type: 3, id: 12345, num: 1 }] }], 'drop not in the medal table rejected');
@@ -266,7 +344,7 @@ check(real.periods[3].from === '2020-05-23' && real.periods[3].to === '2020-11-1
 check(Array.isArray(require('./special').PERIODS) && require('./special').PERIODS.length === 5, 'special.js reads the periods array');
 const p4 = real.entries.filter((e) => e.periods.includes(4));
 check(p4.filter((e) => e.resetGroup === 'cid').length === 7, '7 Daily Cid entries');
-check(p4.filter((e) => e.vip).length === 6, '6 VIP entries');
+check(p4.filter((e) => e.vip).length === 9, '9 VIP entries (6 + VIP! Materials 1-2 and VIP! Jewels & Spirit Part, Task 12)');
 check(real.entries.filter((e) => e.removed === 'no-use').length === 2, 'Mythril Madness and Adamantite removed');
 check(new Set(real.entries.map((e) => e.evStageId)).size === real.entries.length && new Set(real.entries.map((e) => e.key)).size === real.entries.length, 'unique keys and evStageIds');
 const MASTER = path.join(__dirname, 'master_data');
@@ -276,7 +354,23 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const all = ms.build(real, JSON.parse(fs.readFileSync(SRC, 'utf8')), { stage: t('stage'), enemy: t('enemy'), medal: t('medal'),
     material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
   const live = real.entries.filter((e) => !e.removed);
-  check(all.evStageRows.length === 1 + live.length, `real build: ${all.evStageRows.length} evStage rows`);
+  check(all.evStageRows.length === 1 + live.length + 120, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns)`);
+  // the 120 WW week-limited VIP campaigns (Task 12)
+  const sp = require('./special');
+  const camps = all.index.entries.filter((e) => e.campaign);
+  check(camps.length === 120 && camps.every((e, i) => e.evStageId === 7501 + i && /^C\d+$/.test(e.key)), `real build: 120 campaigns 7501-7620 (${camps.length})`);
+  check(camps.every((e) => e.vip && e.stageIds.length >= 1 && e.stageIds.length <= 5 && e.campaign.start <= e.campaign.end), 'real build: campaigns VIP, 1-5 quests, window start <= end');
+  const addD = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+  for (const e of camps) {
+    const p = sp.periodOf(e.campaign.start, real.periods);
+    const has = (from, to, per = p) => sp.currentEntries(all.index, { period: per, shopFrom: from, shopTo: to }).includes(e);
+    check(e.periods.join() === String(p), `${e.key}: period ${e.periods} (start ${e.campaign.start})`);
+    check(has(e.campaign.start, addD(e.campaign.start, 6)), `${e.key}: not listed in its first week`);
+    check(!has(addD(e.campaign.end, 1), addD(e.campaign.end, 7)) && !has(addD(e.campaign.start, -7), addD(e.campaign.start, -1)), `${e.key}: listed outside its window`);
+    check(!sp.pinnable(e, p).ok && (p === 5 || sp.pinnable(e, p + 1).ok), `${e.key}: pinnable only from a later period`);
+    check(sp.lockOf(e, { weekday: 'Mon', vip: false, pinned: true }) === 1 && sp.lockOf(e, { weekday: 'Mon', vip: true, pinned: false }) === 0, `${e.key}: VIP only`);
+  }
+  check(new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: campaign stage ids unique');
   check(all.stageRows.every((r) => r.validSubmission === 3), 'real build: 3 objectives on every stage');
   check(all.report.stopgaps.length === 0, `real build: stopgap objectives ${JSON.stringify(all.report.stopgaps)}`);
   const mog = all.index.entries.find((e) => e.key === 'mog');
@@ -285,7 +379,8 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(['cid-mon', 'mog', 'evolve-legendary', 'skill-exp', 'vip-medal'].every((k) => all.index.entries.find((e) => e.key === k).stageIds[0]
     === 970000 + (real.entries.find((e) => e.key === k).evStageId - 7000) * 10), 'real build: period-4 stage ids unchanged');
   check(all.index.entries.find((e) => e.key === 'cid-vip-mon').to === '2017-04-19', 'real build: from / to in the index');
-  const withDrops = new Set(all.index.entries.filter((e) => e.dropRewardIds.length).flatMap((e) => e.stageIds));
+  // drops per quest (campaigns: a quest without drops in an entry with drops keeps row 1)
+  const withDrops = new Set(all.index.entries.flatMap((e) => e.stages.filter((s) => s.dropRewardIds.length).map((s) => s.stageId)));
   check(all.maps.every((m) => m.targetReward > 0 && m.enemies.flat().every((x) => x.reward > 0)), 'real build: no Special map enemy on reward 0');
   check(all.maps.filter((m) => withDrops.has(m.stageId)).every((m) => m.targetReward !== 1 && m.enemies.flat().every((x) => x.reward !== 1)), 'real build: no enemy on row 1 in a quest with drops');
   check(all.stageRows.every((r) => r.stageId >= 970000 && r.stageId <= 979999) && new Set(all.stageRows.map((r) => r.stageId)).size === all.stageRows.length, 'real build: stage ids unique, in range');
