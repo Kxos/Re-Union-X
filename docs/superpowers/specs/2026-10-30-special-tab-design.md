@@ -112,7 +112,8 @@ boundaries in data, not in code.
   the row's three rewards, VIP, listed only in the Shop weeks it covers (it takes its set's place in the tab), pinnable
   per version from a later period; the catalogue shows each set as one quest with its weeks as versions. Weeks without
   a row keep the set's representative entry (fallback).
-  Round 18: VIP! Skill joins as a weekly set (entry `vip-skill` 7092, 2019-05-27 to 2021-02-28; 25 frozen versions
+  Round 18: VIP! Skill joins as a weekly set **without fallback** (coordinator ruling 30-10: listed only in the weeks of
+  its rows; entry `vip-skill` 7092 is `weeklyOnly`: template only, no rows, id reserved; 2019-05-27 to 2021-02-28; 25 frozen versions
   7876-7900, 7893 dropped as a repeated wiki row). A skill reward «1 6★ <skill>» is a **Scrooge 6★** (90126, the image
   on khuxwiki) with that master skill at its maxLv 20: rules `sets["VIP! Skill"].skills` (18 texts, all exact master
   names) and `skillCarrier`, stage row `submissionSkillType 1 / submissionSkillId / submissionSkillLv`, granted by

@@ -41,7 +41,7 @@ The **Special** tab of the Quests screen is open once you finish Story Quest 6. 
 
 Weekday quests open on their original weekdays. The others are shown with a **padlock**. **VIP**, earned by finishing all the **Weekly Missions** (see the VIP Draws notice), opens every weekday quest on any day and shows the VIP quests. Quests opened this way carry an **Available** plate. The **limited VIP campaigns** of the original game return as VIP quests in the week of your Story that matches their original dates. The **recurring VIP quests** (VIP! Medal Quest, VIP! Gems, VIP! Draw Ticket, VIP! Skill and the others) **change every week** with their original rewards (some weeks had two); in the weeks whose contents are not known they show the rewards of one known week (**reconstructed**).
 
-**VIP! Skill** gives its skill medals as in the original game: a **Scrooge 6★** that carries the skill of its week at the **maximum level** (for example ATK B X Max & Lux++ at LV 20). All its skills exist in this version, so none is replaced.
+**VIP! Skill** gives its skill medals as in the original game: a **Scrooge 6★** that carries the skill of its week at the **maximum level** (for example ATK B X Max & Lux++ at LV 20). All its skills exist in this version, so none is replaced. VIP! Skill appears **only in its original weeks** (2019 and from September 2020): in the other weeks it is not offered.
 
 **Daily Challenge: Cid** lists **only today's variant**, as in the original game: VIP does not open the Cid quests of the other days.
 
