@@ -46,7 +46,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   const shop = n.NOTICES.find((x) => x.title === 'Shop').body;
   for (const s of ['Shop draw rates are reconstructed where the original game did not publish them (Medal rarities, guarantees and Skill rates are original): Draw Odds and each banner\'s Details say so.',
     'Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.',
-    'Free draws cost 1 Jewel. VIP Free Deals are open to everyone, with one free VIP draw per day in total.',
+    'Free draws cost 1 Jewel. All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).',
     'Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time.',
     'Some 2016-17 banners only drew Epic Medals; the game data no longer says which Medals were Epic, so these banners draw from their full sets.',
     'Blue Fairy Deal banners are in the Banner Catalog but cannot be drawn yet: Blue Fairies will come with a future update.',
@@ -75,7 +75,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/each of the 11 traits has the same chance/.test(tr), 'Traits: probabilita uniforme');
   check(/only from the Moogle Shop/.test(tr), 'Traits: i 5 trait della 4.1.0 solo nel Moogle Shop');
   // Trait Medal e linea dell'Album (I-084 parte B)
-  check(/Evolved versions count as the same Medal/.test(tr) && /Trait Medal #130/.test(tr), 'Traits: stessa medaglia = linea Album');
+  check(/Evolved versions count as the same Medal/.test(tr) && /reconstructed from the original deals/.test(tr), 'Traits: stessa medaglia = linea Album');
   check(/\*\*Trait Medals\*\* are back/.test(tr) && /only give EXP/.test(tr) && /black and white/.test(tr), 'Traits: Trait Medal');
 }
 {
@@ -111,7 +111,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
 {
   const sq = n.NOTICES.find((x) => x.title === 'Special Quests');
   const t = sq ? sq.body.join(' ') : '';
-  check(sq && sq.tag === 'IMPORTANT' && sq.date === '10/30', 'Special: IMPORTANT 10/30');
+  check(sq && sq.tag === 'IMPORTANT' && sq.date === '10/31', 'Special: IMPORTANT 10/31');
   check(/follows your Story/.test(t), 'Special: segue la storia');
   check(/Special Catalog/.test(t) && /one quest/.test(t), 'Special: catalogo, una quest');
   check(/Weekly Missions/.test(t), 'Special: VIP dalle missioni settimanali');
@@ -121,6 +121,11 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/no Lux and no drops/.test(t) && /three objectives give a little Munny, once/.test(t) && !/no Lux and no rewards/.test(t), 'Special: allenamento, munny degli obiettivi una volta (31-10)');
   check(/VIP: all Special Quests open/.test(t) && /time left/.test(t), 'Special: VIP bar wording');
   check(/reconstructed/.test(t), 'Special: drop ricostruiti');
+  check(/\*\*For now VIP cannot be earned\*\*/.test(t) && /rest of that week and the whole next week/.test(t), 'Special: VIP not earnable yet, its duration');
+  check(/given \*\*once\*\*/.test(t) && /reset the following week/.test(t), 'Special: rewards once, Cid reset');
+  check(/every \*\*Monday\*\*/i.test(t) && /go on with the Story/.test(t), 'Special: how the weeks and periods move');
+  check(/period is over/.test(t) && /once that period has ended/.test(t), 'Special: keep rule');
+  check(/placed by this restoration/.test(t) && /\*\*not included\*\*/.test(t), 'Special: generated maps declared');
   check(/only today's variant/.test(t) && /Daily Challenge: Cid/.test(t), 'Special: solo il Daily Cid di oggi (round 2, 31-10)');
   check(/recurring VIP quests/.test(t) && /change every week/.test(t) && /original rewards/.test(t) && /some weeks had two/.test(t) && /not known/.test(t), 'Special: recurring VIP quests change every week with their original rewards (round 17)');
   check(/details/.test(t) && /addition of this server/.test(t) && /had none/.test(t), 'Special: pagina dei dettagli del catalogo, aggiunta del server (round 2)');
