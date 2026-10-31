@@ -10,7 +10,10 @@ config: {"stages": stage_dec.json di thethiny, "quests": wiki\\quests.json,
          "worldtour": true (facoltativo: missioni «Tour» 991000 + worldId, "worldtour_report"),
          "rooms_check": rooms_check.json di check_rooms.py / "exclude_rooms": [...] (stanze incomplete,
          trattate come assenti),
-         "special": server/game_data/special_maps.json (optional: Special quests, see below)}
+         "special": server/game_data/special_maps.json (optional: Special quests, see below),
+         "special_rooms": recon/tools/special_rooms.json (optional: room name -> folder for the Special quests only),
+         "extra_cls_dir": folder map/<stanza>/<stanza>_cls.bin of those rooms when they are not in cls_dir (optional:
+         not listed in the stable room choice, so the other quests keep their room)}
 "stages" and "quests" may be left out for a run with only "special" (or zoo/tour) maps.
 
 Special quests (cfg['special'], written by server/make-special.js): a JSON list
@@ -127,6 +130,11 @@ def parse_enemies(q):
     return groups
 
 
+def cls_path(folder):
+    p = os.path.join(cfg['cls_dir'], 'map', folder, folder + '_cls.bin')
+    return p if os.path.exists(p) or not cfg.get('extra_cls_dir') else os.path.join(cfg['extra_cls_dir'], 'map', folder, folder + '_cls.bin')
+
+
 def room_folder(name, world):
     if name in rooms:
         return rooms[name]
@@ -188,7 +196,7 @@ def pixel_comp(cls, W, H, stride):
 def walk_grid(folder):
     if folder in _cls_cache:
         return _cls_cache[folder]
-    cls = open(os.path.join(cfg['cls_dir'], 'map', folder, folder + '_cls.bin'), 'rb').read()
+    cls = open(cls_path(folder), 'rb').read()
     W, H, stride = struct.unpack_from('<3i', cls, 4)
 
     def free(x, y):
@@ -712,7 +720,7 @@ def room_raw(folder, pts):
     from scipy import ndimage
     if folder not in _raw:
         pc, L, xs, ys = room_comp(folder, pts)
-        cls = open(os.path.join(cfg['cls_dir'], 'map', folder, folder + '_cls.bin'), 'rb').read()
+        cls = open(cls_path(folder), 'rb').read()
         W, H, stride = struct.unpack_from('<3i', cls, 4)
         free = np.unpackbits(np.frombuffer(cls, np.uint8, stride * H, 16).reshape(H, stride), axis=1)[:, :W] == 0
         lab = ndimage.label(free)[0]
@@ -1198,11 +1206,12 @@ for s in sorted(stages, key=lambda r: r['stageBinId']):
                    'unknown_enemies': sorted(set(missing))})
 # Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above.
 if cfg.get('special'):
+    special_rooms = json.load(open(cfg['special_rooms'], encoding='utf-8')) if cfg.get('special_rooms') else {}
     for sp in json.load(open(cfg['special'], encoding='utf-8')):
         sid = sp['stageId']
         # «Underground Waterway x4» (rooms played several times in the catalogue) -> the room name
         room_name = re.sub(r'\s+x\d+$', '', sp.get('room') or sp['name'])
-        folder = room_folder(room_name, sp['world'])
+        folder = special_rooms.get(room_name) or room_folder(room_name, sp['world'])
         groups = [{'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId'))
                                for x in (g if isinstance(g, list) else [g])], 'target': False, 'room': room_name}
                   for g in sp.get('enemies', [])]
@@ -1229,7 +1238,7 @@ if cfg.get('special'):
         poi_add(sid, 0, ens, chests)
         names = [m[0] for g in groups for m in g['members'] if not m[3]]
         report.append({'mission': 0, 'stageId': sid, 'name': sp['name'], 'room': room_name, 'folder': folder,
-                       'exact_room': room_name in rooms, 'enemies': len(ens), 'chests': len(chests), 'special': True,
+                       'exact_room': room_name in rooms or room_name in special_rooms, 'enemies': len(ens), 'chests': len(chests), 'special': True,
                        'drops': sum(e[6] != 1 for e in ens),
                        'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name})})
         print('special', sid, folder, len(ens), 'nemici')
