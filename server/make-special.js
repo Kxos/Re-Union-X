@@ -80,6 +80,10 @@ const TITLE_FALLBACK = [14, 0, 5];
 // original condition (4, HP below a share) would never come true. Without row 2101 in the master: HP only.
 const DUMMY_ENEMY_ID = 970007, DUMMY_TEMPLATE = 'Large Body', DUMMY_NAME = 'Training Dummy', DUMMY_HP = 900000000000000;
 const DUMMY_HEAL = 2101, DUMMY_HEAL_ODDS = 3000;
+// enemies of the training path A: the client adds up the Munny, EXP and Lux of the enemy rows by itself for
+// CONGRATULATIONS (bench 30-10: «Munny 131», nothing granted). Target: the original Shadow row 15001 (10001 with 0 Munny,
+// EXP and Lux; same HP and attack at Lv 1); the others: a copy of the Shadow 8xxxx row with these values at 0
+const TRAINING_TARGET_ID = 15001, TRAINING_SHADOW_ID = 970008;
 const DUMMY_FLAVOR = 'A training dummy that never falls. Test your Medals and specials here, then leave with Give Up.';
 // CP chests of path B: one reward row (id fixed, own range) with one prize type 8 (special gauge, 1 gauge = 10000) of
 // 60000, the largest original CP chest (row 82); count = ceil(largest keyblade maxBurstGauge x 10000 / 60000)
@@ -92,7 +96,7 @@ const stageIdOf = (evStageId, i) => STAGE_FIRST + (evStageId - EV_FIRST) * 10 + 
 const isOwnStage = (r) => r.stageId >= STAGE_FIRST && r.stageId <= STAGE_LAST;
 const isOwnEv = (r) => r.eventStageId >= EV_FIRST && r.eventStageId <= EV_LAST;
 const isOwnReward = (r) => r.rewardId >= REWARD_FIRST && r.rewardId <= REWARD_LAST;
-const isOwnEnemy = (r) => r.enemyId === DUMMY_ENEMY_ID;
+const isOwnEnemy = (r) => r.enemyId === DUMMY_ENEMY_ID || r.enemyId === TRAINING_SHADOW_ID;
 // enemies of a map group: at most 5 (as the story groups), at least 3 normal groups
 const GROUP_MAX = 5, GROUPS_MIN = 3, TARGET_PER_GROUP = 2;
 const carrierOf = (medalName) => (/^(Huey|Dewey|Louie)\b/.test(medalName || '') ? 'Growth Egg'
@@ -195,6 +199,18 @@ function subsOf(objectives, rewardsOverride, target, L, report, where) {
     submissionNum: pad(([c]) => c.n), submissionRewardType: pad(([, r]) => r[0]), submissionItemId: pad(([, r]) => r[1]),
     submissionSkillType: pad(([, , k]) => k[0]), submissionSkillId: pad(([, , k]) => k[1]), submissionSkillLv: pad(([, , k]) => k[2]),
     submissionItemNum: pad(([, r]) => r[2]) };
+}
+
+// normal Shadow of the training (TRAINING_SHADOW_ID above): the 8xxxx row, else the smallest id
+function trainingShadowRow(masterRows) {
+  const is8 = (e) => (e.enemyId >= 80000 && e.enemyId < 90000 ? 1 : 0);
+  const tpl = (masterRows.enemy || []).filter((e) => e.name === TRAINING.target && !isOwnEnemy(e))
+    .sort((a, b) => is8(b) - is8(a) || a.enemyId - b.enemyId)[0];
+  if (!tpl) throw new Error(`special: no «${TRAINING.target}» enemy row for the training`);
+  const row = JSON.parse(JSON.stringify(tpl));
+  row.enemyId = TRAINING_SHADOW_ID;
+  for (const k of ['exp', 'money', 'raidPoint', 'lux']) if (Array.isArray(row[k])) row[k] = row[k].map(() => 0);
+  return row;
 }
 
 // training dummy enemy row (DUMMY_* above): the 8xxxx Large Body row, else its smallest id
@@ -339,6 +355,9 @@ function campaignEntries(rules, catalogue) {
 // set's own filler reward). bothGenders (spirit parts, as the entry vip-spirit-part): a gender-less part that exists
 // for both genders fills slots 2-3 (♂, ♀) when slot 3 is the filler. The entry keeps the weeks without a row
 // (special.currentEntries hides it in the weeks a version of it is listed).
+// versions[key].quest: fields of the quest that differ in that version (VIP! Skill 2019, khuxwiki «Old» tab: room,
+// level, target, attribute); mapEnemies: the normal enemies of the original map, one group each, instead of the
+// generated groups.
 const WEEKLY_EV_FIRST = 7700, WEEKLY_FILLER = 'Moogle 6★';
 const WEEKLY_DAYS = ['2018-01-01', '2021-06-30'];
 const isoOf = (ms) => new Date(ms).toISOString().slice(0, 10);
@@ -450,7 +469,7 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
       const fz = frozen[key] || {};
       out.push({ key, evStageId: fz.evStageId || nextId(), name: en.name, family: en.family, periods: [periodOfDay(start, rules.periods)],
         days: 'all', vip: true, replacedBy: null, removed: '', resetGroup: '', campaign: { start, end }, banner: fz.banner || en.banner || '',
-        weekOf: en.key, weekTitle: String(row.banner || '').trim(), ...(ri === 0 && start !== allWeeks[0] ? { clippedFrom: allWeeks[0] } : {}), questObjs: [{ ...tpl }], rewards, useAp: en.useAp, drops: en.drops || [] });
+        weekOf: en.key, weekTitle: String(row.banner || '').trim(), ...(ri === 0 && start !== allWeeks[0] ? { clippedFrom: allWeeks[0] } : {}), questObjs: [{ ...tpl, ...fz.quest }], rewards, useAp: en.useAp, drops: en.drops || [] });
       });
     }
   }
@@ -487,7 +506,7 @@ function build(rules, catalogue, masterRows) {
       combinedSubmissionFlag: 0, raidBoss: 0 }, subsOf(q.objectives, rewards, q.target, L, report, `${stageId} ${q.quest}`));
     stageRows.push(row);
     return { stageId, quest: q.quest, world: q.world, worldId, room: q.room, target: q.target, targetId: L.mapEnemyId(q.target, true),
-      attribute: q.attribute || '', wikiLv: wikiLv({ lvl: q.level }) };
+      attribute: q.attribute || '', wikiLv: wikiLv({ lvl: q.level }), ...(q.mapEnemies ? { mapEnemies: q.mapEnemies } : {}) };
   };
 
   // training quest behind the catalogue banner
@@ -496,7 +515,14 @@ function build(rules, catalogue, masterRows) {
   // objective rewards: Munny (type 4, item 0) x TRAINING_OBJECTIVE_MUNNY each
   Object.assign(stageRows[stageRows.length - 1], { submissionRewardType: [TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE, TRAINING_OBJECTIVE_REWARD_TYPE],
     submissionItemId: [0, 0, 0], submissionItemNum: Array(3).fill(TRAINING_OBJECTIVE_MUNNY) });
-  const enemyRows = [dummyRow(masterRows)];
+  // zero-reward target when the master has its row (TRAINING_TARGET_ID above): objectives and map count that id
+  const trainingRow = stageRows[stageRows.length - 1];
+  if ((masterRows.enemy || []).some((e) => e.enemyId === TRAINING_TARGET_ID && e.name === TRAINING.target)) {
+    trainingRow.submissionId = trainingRow.submissionId.map((id) => (id ? TRAINING_TARGET_ID : 0));
+    training.targetId = TRAINING_TARGET_ID;
+  }
+  training.normalEnemyId = TRAINING_SHADOW_ID;
+  const enemyRows = [dummyRow(masterRows), trainingShadowRow(masterRows)];
   const maxGauge = Math.max(0, ...(masterRows.keyblade || []).map((k) => k.maxBurstGauge || 0));
   const cpChests = Math.max(1, Math.ceil(maxGauge * GAUGE_UNIT / CP_PER_CHEST));
   const evStageRows = [evStageRow(CATALOG_EV, [TRAINING_STAGE], { detailUrl: '/web/special/catalog' })];
@@ -580,7 +606,7 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
     const rr = s.stageId === TRAINING_STAGE ? [] : s.dropRewardIds || [];
     let k = 0;
     const next = () => (rr.length ? rr[k++ % rr.length] : 1);
-    const normal = () => Array.from({ length: TARGET_PER_GROUP }, () => ({ name: s.target, enemyId: L.mapEnemyId(s.target, false), n: 1, reward: next() }));
+    const normal = () => Array.from({ length: TARGET_PER_GROUP }, () => ({ name: s.target, enemyId: s.normalEnemyId || L.mapEnemyId(s.target, false), n: 1, reward: next() }));
     const carriers = (s.dropRewardIds || []).map((rid) => {
       const rw = rewardRows.find((r) => r.rewardId === rid);
       const name = carrierOf(rw.type[0] === 3 ? medalName.get(rw.id[0]) : '');
@@ -595,7 +621,8 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
     });
     const size = (g) => g.reduce((n, x) => n + x.n, 0);
     const total = TARGET_PER_GROUP * GROUPS_MIN + [...carriers, ...extra].reduce((n, x) => n + x.n, 0);
-    const groups = Array.from({ length: Math.max(GROUPS_MIN, Math.ceil(total / GROUP_MAX)) }, () => normal());
+    const groups = s.mapEnemies ? s.mapEnemies.map((name) => [{ name, enemyId: L.mapEnemyId(name, false), n: 1, reward: next() }])
+      : Array.from({ length: Math.max(GROUPS_MIN, Math.ceil(total / GROUP_MAX)) }, () => normal());
     // carriers and objective enemies spread over the groups (fewest enemies first)
     for (const x of [...carriers, ...extra]) {
       const fit = groups.filter((gr) => size(gr) + x.n <= GROUP_MAX).sort((a, b) => size(a) - size(b))[0];
@@ -635,8 +662,8 @@ function patch(masterDir, opts = {}) {
   const reward = allReward.filter((r) => !isOwnReward(r));
   // enemy row DUMMY_ENEMY_ID: ours when it is the training dummy of a previous run, otherwise foreign
   const allEnemy = t('enemy');
-  const foreignEnemy = allEnemy.filter((r) => isOwnEnemy(r) && r.name !== DUMMY_NAME);
-  if (foreignEnemy.length) throw new Error(`special: enemy row ${DUMMY_ENEMY_ID} («${foreignEnemy[0].name}») is not the training dummy`);
+  const foreignEnemy = allEnemy.filter((r) => isOwnEnemy(r) && r.name !== (r.enemyId === DUMMY_ENEMY_ID ? DUMMY_NAME : TRAINING.target));
+  if (foreignEnemy.length) throw new Error(`special: enemy row ${foreignEnemy[0].enemyId} («${foreignEnemy[0].name}») is not a training enemy`);
   const enemy = allEnemy.filter((r) => !isOwnEnemy(r));
   const out = build(rules, catalogue, { stage, reward, enemy, medal: t('medal'), material: t('material'), skill: t('skill'),
     title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts'), enemyAttack: t('enemyAttack') });
@@ -648,11 +675,11 @@ function patch(masterDir, opts = {}) {
   fs.writeFileSync(path.join(gameData, 'special.json'), JSON.stringify(out.index, null, 1));
   fs.writeFileSync(path.join(gameData, 'special_maps.json'), JSON.stringify(out.maps, null, 1));
   console.log(`special: +${out.stageRows.length} stage (stageKind ${STAGE_KIND}), +${out.evStageRows.length} evStage, +${out.rewardRows.length} reward, `
-    + `+${out.enemyRows.length} enemy (training dummy); `
+    + `+${out.enemyRows.length} enemy (training); `
     + `${out.report.stopgaps.length} stopgap objectives, ${out.report.titleFallbacks.length} titles -> Avatar Coin x5`);
   return out;
 }
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { build, patch, weeksOf, weeklyLabel, runsOf, skillPart, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, CP_REWARD_ID, apOf, splitObjective };
+module.exports = { build, patch, weeksOf, weeklyLabel, runsOf, skillPart, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, TRAINING_SHADOW_ID, TRAINING_TARGET_ID, CP_REWARD_ID, apOf, splitObjective };

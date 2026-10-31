@@ -176,7 +176,9 @@ check(cpRow && cpRow.validReward === 1 && cpRow.type.join() === '8' && cpRow.num
 check(ms.CP_REWARD_ID >= 970000 && ms.CP_REWARD_ID <= 979999 && rewardRows.filter((r) => r.rewardId === ms.CP_REWARD_ID).length === 1, 'CP row in the own reward range, once');
 const dummyRows = out.enemyRows || [];
 const dmy = dummyRows[0] || {};
-check(dummyRows.length === 1 && dmy.enemyId === ms.DUMMY_ENEMY_ID && dmy.name === 'Training Dummy' && dmy.displayId === 7, 'dummy enemy row: copy of Large Body (its look)');
+const tsh = dummyRows[1] || {};
+check(tsh.enemyId === ms.TRAINING_SHADOW_ID && tsh.name === 'Shadow', 'training Shadow row: copy named Shadow, own id');
+check(dummyRows.length === 2 && dmy.enemyId === ms.DUMMY_ENEMY_ID && dmy.name === 'Training Dummy' && dmy.displayId === 7, 'dummy enemy row: copy of Large Body (its look)');
 check(Array.isArray(dmy.hp) && dmy.hp.length === 5 && dmy.hp.every((v) => v === ms.DUMMY_HP) && ms.DUMMY_HP >= 6.5e11
   && ms.DUMMY_HP * 10000 < 2 ** 63 && Number.isSafeInteger(ms.DUMMY_HP), 'dummy HP: the same huge value at every level (int64, x10000 safe)');
 check(['exp', 'money', 'lux', 'raidPoint'].every((k) => dmy[k] && dmy[k].every((v) => v === 0)), 'dummy: no exp, munny, lux');
@@ -446,7 +448,7 @@ try {
   const st = JSON.parse(first[0]);
   check(!st.some((r) => r.stageId === 970123) && st.filter((r) => r.stageKind === 2).length === 4 && st[0].stageId === 1010, 'patch replaces own stage rows');
   check(JSON.parse(first[1]).length === 3 && JSON.parse(first[2]).length === 4, 'patch evStage and reward rows (2 drops + CP row + row 1)');
-  check(JSON.parse(first[4]).filter((r) => r.enemyId === ms.DUMMY_ENEMY_ID).length === 1 && JSON.parse(first[4]).length === master.enemy.length + 1,
+  check(JSON.parse(first[4]).filter((r) => r.enemyId === ms.DUMMY_ENEMY_ID).length === 1 && JSON.parse(first[4]).length === master.enemy.length + 2,
     'patch adds the dummy enemy row once');
   check(JSON.parse(first[3]).catalog.evStageId === 7000, 'patch writes special.json');
   const sm = fs.existsSync(path.join(dir, 'special_maps.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'special_maps.json'), 'utf8')) : null;
@@ -653,13 +655,30 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const quests = all.index.entries.flatMap((e) => e.stages);
   const badLv = all.maps.filter((m) => m.stageId !== 970000).filter((m) => {
     const st = quests.find((s) => s.stageId === m.stageId); const lv = lvOf(st.quest);
-    return !(m.level > 1 && (lv === null || m.level === lv));
+    const old = st.mapEnemies ? 25 : lv; // VIP! Skill 2019 (Curious Room LV 25): the catalogue row holds the 2020 level
+    return !(m.level > 1 && (lv === null || m.level === old));
   });
   check(!badLv.length, `real build: map level = catalogue Lv (${badLv.slice(0, 5).map((m) => `${m.stageId} ${m.level}`).join(', ')})`);
   check(all.maps.find((m) => m.stageId === 970100)?.level === 160 && lvOf("A New Keyblade: Moogle O' Glory") === 160,
     'real build: MOG 970100 at Lv 160');
   check(all.stageRows.every((r) => r.addLevel === 0), 'real build: addLevel 0 on every Special stage row');
   check(all.maps.find((m) => m.stageId === 970000)?.level === 1, 'real build: training at Lv 1');
+  // training (bench 30-10, «Munny 131» in CONGRATULATIONS): the client adds up the enemy rows, all at 0 on path A
+  const rtr = all.maps.find((m) => m.stageId === 970000), allEnemies = [...t('enemy').filter((e) => e.enemyId !== ms.DUMMY_ENEMY_ID && e.enemyId !== ms.TRAINING_SHADOW_ID), ...all.enemyRows];
+  const pathA = [rtr.targetId, ...rtr.enemies.flat().map((x) => x.enemyId)];
+  check(rtr.targetId === ms.TRAINING_TARGET_ID && pathA.every((id) => { const e = allEnemies.find((x) => x.enemyId === id); return e && e.name === 'Shadow' && [...e.money, ...e.exp, ...e.lux].every((v) => v === 0); }),
+    'real build: training path A enemies give no Munny, EXP or Lux');
+  check(all.stageRows.find((r) => r.stageId === 970000).submissionId.join() === `${ms.TRAINING_TARGET_ID},0,${ms.TRAINING_TARGET_ID}`, 'real build: training objectives count the zero-reward target');
+  check(all.enemyRows[1].hp[0] === t('enemy').find((e) => e.enemyId === 80001).hp[0] && all.enemyRows[1].attack[0] === t('enemy').find((e) => e.enemyId === 80001).attack[0], 'real build: training Shadows as strong as row 80001');
+  // VIP! Skill 2019 = the original Curious Room quest (khuxwiki «Old» tab), 2020 versions unchanged
+  for (const k of ['vip-skill@2019-05-27', 'vip-skill@2019-07-08']) {
+    const st = all.index.entries.find((e) => e.key === k).stages[0], mp = all.maps.find((m) => m.stageId === st.stageId);
+    const row = all.stageRows.find((r) => r.stageId === st.stageId);
+    check(st.room === 'Curious Room' && st.target === "Bag O' Jewels" && st.attribute === 'Speed' && st.wikiLv === 25 && row.useAp === 0 && row.mapName === 'Curious Room', `real build: ${k} on the 2019 room`);
+    check(mp.level === 25 && mp.targetId === 10023 && mp.enemies.length === 1 && mp.enemies[0].length === 1 && mp.enemies[0][0].name === "Bag O' Coins", `real build: ${k} map = target + Bag O' Coins`);
+  }
+  const v2020 = all.index.entries.find((e) => e.key === 'vip-skill@2020-09-07').stages[0];
+  check(v2020.room === "White Rabbit's House" && v2020.target === 'Gift Shadow' && v2020.wikiLv === 15 && !v2020.mapEnemies, "real build: VIP! Skill 2020 keeps White Rabbit's House LV 15");
   const rt = all.maps.find((m) => m.stageId === 970000), rd = all.enemyRows[0];
   check(rt && rt.training && rt.chests.length === 5 && rd && rd.displayId === 7 && rd.skillId[1] === 2101, 'real build: training map with 5 CP chests, dummy with the heal');
   check(!t('enemy').some((e) => e.enemyId === ms.DUMMY_ENEMY_ID && e.name !== 'Training Dummy'), 'real build: enemy id of the dummy free');
