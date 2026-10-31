@@ -1,3 +1,26 @@
 {
-  "Curious Room": "WL_0000_00_00"
+  "Abandoned Building": "AG_0001_14_00",
+  "Attic": "DB_0002_00_00",
+  "Avenue": "DB_0006_00_00",
+  "Back Garden": "WL_0001_03_00",
+  "Curious Room": "WL_0000_00_00",
+  "Dark Forest: Depths": "DW_0001_01_00",
+  "Dark Forest: Marsh": "DW_0025_00_00",
+  "Dwarf's Cottage": "DW_0002_00_00",
+  "Dwarf's Cottage: 1st Floor": "DW_0006_01_00",
+  "Entrance Hall": "BC_0000_00_00",
+  "Forest Thicket": "WL_0001_01_00",
+  "Guard Quarters: 1st Floor": "AG_0001_00_00",
+  "Market": "DB_0005_00_00",
+  "Merchant's Dwelling: 1st Floor": "AG_0001_08_00",
+  "Mine Car Tracks": "DW_0004_03_00",
+  "Mine: Section 10": "DW_0005_07_00",
+  "Morning Dew Grove: Fallen Tree": "WL_0020_00_00",
+  "Rooftop": "DB_0003_00_00",
+  "Scarab Sands": "AG_0003_10_00",
+  "Storehouse": "AG_0001_15_00",
+  "The Chateau: Garden": "CD_0005_00_00",
+  "Underground Waterway": "DB_0018_01_00",
+  "Underworld Entrance": "OC_0002_00_00",
+  "Waterfront Park": "DB_0008_00_00"
 }
