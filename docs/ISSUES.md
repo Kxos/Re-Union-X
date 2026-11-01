@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-219**).
+a new issue takes the number after the last one used (last: **I-220**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,7 @@ Last revision: 1 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-220 | TO VERIFY | **No popup for a title earned in a quest** (user bench 01-11). The original showed an orange REWARD window with the title name (khuxwiki `File:Title_award.png`, quest clear); the client opens one per entry of `userTitles` in the clear response (client analysis, private notes) and we always sent `[]`. Fix: `/stage/clear` sends only the titles this clear grants, with the `userTitleId` of `GET /user/title` (`server/test-title-popup.js`). Also: the 55 stages with `clearGetTitle` never granted their title; now granted at first clear, and once without popup for quests already cleared. Bench: quest 310 objective 2 gives title 13028. Other modes for when they are built: raid, Coliseum, Union Cross and PvP use the same popup, each reading `userTitles` in its own clear response (Coliseum also needs a battle field of unknown meaning); Present Box, missions and rankings have no popup path found, Avatar Boards have their own | [server](notes/server.md) | 01-11 |
 | I-013 | OPEN | Balance: Bandit + Red Nocturne (1240 part 2, quest from 27) wiped out 3040 HP at LV3 (11-10, placeholder data). Since then player HP, enemy attacks and enemy buffs are original (I-032, I-181, I-207 step 1): re-test with a low-rank save; close as OBSOLETE if it is the original difficulty | [battaglia](notes/battaglia.md#sconfitta) | 11-10 |
 | I-031 | OPEN | Death notice in the tutorial never captured | [battaglia](notes/battaglia.md#sconfitta) | 10-08 |
 | I-033 | OPEN | Generated special attacks: animations solved by I-180; **144** burst rows still named «Special Attack» (119 Puppies, Sea-Salt Ice Cream, 24 Kyroo [SAB LV 7-10]): names, descriptions and targets from the khuxwiki | [medaglie](notes/medaglie.md#burst) | 7da38e3, I-180 |
