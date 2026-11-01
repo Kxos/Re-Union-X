@@ -3016,3 +3016,44 @@ lwf/character/npc/9018/wait/wait_e38393e38383e38388e3839ee38383e383972032322e706
 lwf/character/npc/9018/wait/wait_e38393e38383e38388e3839ee38383e383972032332e706e67.png	jp	lwf/character/npc/9009/wait/wait_e38393e38383e38388e3839ee38383e383972035382e706e67.png
 lwf/character/npc/9018/wait/wait_e38393e38383e38388e3839ee38383e383972032342e706e67.png	jp	lwf/character/npc/9009/wait/wait_e38393e38383e38388e3839ee38383e383972035392e706e67.png
 lwf/character/npc/9018/wait/wait_e38393e38383e38388e3839ee38383e383972032352e706e67.png	b16	lwf/character/npc/9009/wait/wait_e38393e38383e38388e3839ee38383e383972036302e706e67.png
+
+# 48. Raid (I-221, spike): schermate e boss dai dati JP 4.3.1. Per ora il solo Trickmaster (0007); gli altri boss in Raid Parte 2
+lwf/character/raid/0007/atk1/	jp
+lwf/character/raid/0007/atk2/	jp
+lwf/character/raid/0007/knockback1/	jp
+lwf/character/raid/0007/knockback2/	jp
+lwf/character/raid/0007/wait/	jp
+lwf/raid/demo/start_0007/	jp
+lwf/raid/demo/escape_0007/	jp
+lwf/raid/demo/put_down_0007/	jp
+lwf/raid/bg/bg_AG1/	jp
+lwf/raid/bg/bg_BC1/	jp
+lwf/raid/bg/bg_CD1/	jp
+lwf/raid/bg/bg_CS1/	jp
+lwf/raid/bg/bg_DB1/	jp
+lwf/raid/bg/bg_DB2/	jp
+lwf/raid/bg/bg_DB3/	jp
+lwf/raid/bg/bg_DB4/	jp
+lwf/raid/bg/bg_DW1/	jp
+lwf/raid/bg/bg_ED1/	jp
+lwf/raid/bg/bg_HD1/	jp
+lwf/raid/bg/bg_KG1/	jp
+lwf/raid/bg/bg_NL1/	jp
+lwf/raid/bg/bg_OC1/	jp
+lwf/raid/bg/bg_SR1/	jp
+lwf/raid/bg/bg_WL1/	jp
+lwf/raid/bg/RB_0003_00_00_eff_back/	jp
+lwf/raid/bg/RB_0003_00_00_eff_back3/	jp
+lwf/raid/bg/RB_0003_00_00_eff_back4/	jp
+lwf/raid/bg/RB_0003_00_00_eff_back5/	jp
+lwf/raid/bg/RB_0003_00_00_eff_back6/	jp
+lwf/raid/bg/RB_0003_00_00_eff_db1/	jp
+lwf/raid/bg/RB_0003_00_00_eff_front/	jp
+lwf/raid/bg/RB_0003_00_00_eff_front2/	jp
+lwf/raid/bg/RB_0003_00_00_eff_oc1/	jp
+lwf/raid/bg/RB_0003_00_00_eff_oc2/	jp
+lwf/raid/bossbtn/	jp
+lwf/battleresult/Raid_Result/	jp
+lwf/battleresult/Raid_Clear/	jp
+lwf/battleresult/Raid_Defeated/	jp
+cocostudio/publish/raid_boss_*.png	jp
