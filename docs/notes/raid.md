@@ -56,3 +56,25 @@ Missing in the WW data, present in JP 4.3.1: `AdvRaidListScene_ver320`, `Adv_Rai
 `raidTimeStatus` values, whether a damaged bar and broken parts draw from `/raid/start`, `getPoint.raidPoint` with Eggcognito rows, the Give Up
 path and a fight outlasting `timeLeft`, 0 in `subdueId` or `mvpId`, `isEntry`/`isRelief`/`reliefFlag`, the home button's widgets, what the Raid
 button opens, fever.
+
+## Bench 1 November 2026 (spike, save `raidspike`, resources 91)
+
+- Spawn: `raidStatus` 4 once plays `start_0007`, then the list shows the boss (RAID BOSS ALERT, name, level, AP, Host, time left, HP). Works.
+- **Damage kept between attempts: confirmed.** After Give Up the boss comes back from the `hp` sent by `/raid/start` (149,720,581 of 150,000,000).
+- The demo and model images are missing from the JP data (LWF only): the 2016 bundle has them, and the 2016 ones win in `originals.tsv`.
+- List banner: `img/adventure/boss_L/RaidBoss_<id>.png`; without it the layout's default picture stays (a Darkside on every boss).
+- `/stage/clear` reports `getPoint.raidPoint` (192 on a normal quest) and `enemyDeadNumber`.
+More bench results, 1 November (user):
+
+- Broken parts stay broken on re-entering (the server sends `hp` 0), the boss stays stunned and attacks after the stun turns. Defeat and victory screens work; `BattleResultReidScene` and `BattleResultDefeatedScene` were missing and crash the client.
+- The rewards popup calls `/raid/member`: `cooperators` must hold the player, an empty list crashes (`std::out_of_range`).
+- RAID RESULTS draws the boss, level, MVP/Host, damage and the three reward columns from `/raid/reward`.
+- `raidTimeStatus`: **3 = victory** (image `Result_Clear_Raid`: «Raid Boss Defeated!»), 1 retreat / support request sent, 2 «The Raid Boss has escaped», 4 «A party member defeated the Raid Boss!», 5 «No available Raid Boss». 0 leaves the layout's default texts, which read as a party member's win.
+Final results of the spike, 1 November (user):
+
+- Title popup on a raid clear: `userTitles` in `/raid/clear` opens it before RAID RESULTS (`Clever`).
+- Flee: `raidStatus` 2 once plays `escape_0007` and the boss leaves the list; the game stays usable.
+- **Epic is within reach.** With 999,999,999,999 HP the `maxpower` deck removed 855,200,873,992 in a single attempt (best hit 30.6 billion), so the original timer can stand.
+- **The HP bar's maximum comes from the `raidEnemy` row**, not from `/raid/start`: a boss above its row looks as if it never loses HP. Part 2 needs rows with the real HP of each tier and period.
+- The first attempt's `useAp` 0 and a later one 10 work. The 3-minute return of weak points is not in the client: the server does it.
+- Images: the JP data carries Japanese text in some raid images (`Result_Clear_Raid`); the 2016 bundle has them in English. Check them all in Part 2. Not yet seen: `getPoint.raidPoint` with Eggcognito rows, `isEntry`, `isRelief`, the home button's widgets, what the quest list's Raid button opens, fever.
