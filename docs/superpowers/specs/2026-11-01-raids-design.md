@@ -38,6 +38,8 @@ All private and local, under `D:\Progetto_Restauro_KH_UX\private\events\sources\
   calendar of record**: it corrects the dates in `raid_values.json`.
 - `raid_values\` (`RAID_VALUES.md`, `raid_values.json`, `MISSING.md`): HP, coins, boards, every value with its source and
   confidence. Video frames behind the HP in `D:\Progetto_Restauro_KH_UX\tmp\raid_hp\`.
+- `raid_rewards\` (`a_weekly`, `b_events`, `c_coins_drops`, `d_video`, each with its `GAPS.md`, and `CORRECTIONS.md`, to apply
+  when the data is built): boards, coins, drops.
 - Original 2016 raid rows: `D:\Progetto_Restauro_KH_UX\external\thethiny_2026-10-13\KHUx-Server\data\` (`raidEnemy`,
   `raidEnemyAttack`, `raidReward`, `raidSetting`).
 
@@ -78,15 +80,33 @@ Confirmed on the original rules (khuxwiki, Raid Boss page; 2016 tables):
 
 **Raid Coins, alone.** Victory always, MVP/Host once (in the original the two do not stack when they are the same person,
 and alone they always are), All Points Defeated only if every weak point falls before the boss. This corrects the first
-idea of giving every share automatically. The original tables per level are used where found; missing tiers use the same-tier
-table, labelled inferred.
+idea of giving every share automatically. Each table pays **one slot among alternatives**, so a Gem Drop pays coins or one gem,
+not both; in some weeks medals replace coins in the two bonus columns (Heartless Tsum). Story raids pay items, not coins.
+
+From 12 August 2019, flat from LV 1 to 99:
+
+| Tier | Victory | MVP/Host | All Points |
+|---|---|---|---|
+| Beginner | 120 / 180 | 30 | 30 |
+| Intermediate | 150 / 225 | 45 | 45 |
+| Advanced | 180 / 270 | 60 | 60 |
+| Legendary | 210 / 315 | 75 | 75 |
+| Epic | 240 / 360 | 90 | 90 |
+
+From September 2018 to that date, by level: LV 1-9 40/60, 10, 10; LV 10-19 120/180, 30, 30; LV 20-29 150/220, 60, 60;
+LV 30-99 180/270, 60, 60. The odds of the higher Victory amount and of gems are unknown: use a rare chance for the high amount,
+about 10% (one player's report, weak), and rising gem odds by tier, both labelled reconstructed **(builder's call)**.
+
+**Boards.** Known for all 130 Weekly and Radiant rows (66 boards, 13 rows with an inferred layout) and all WW event rows
+that had one. Whether cells must be bought in order and boards unlock in sequence is not documented: buy in the wiki's cell
+order, as the rising costs suggest, and boards all open **(builder's call)**, to be replaced if footage shows otherwise.
 
 **Repeating (author).** Raids from the catalogue give Raid Coins every time, as if live. Each raid keeps its own boards,
 which can always be completed; each board reward can be taken once only.
 
 **Title popup.** Titles granted by a raid reach the client in the raid clear response, new titles only (I-220).
 
-**What counts as one raid (builder's call).** A census row at a tier: boards, one-time rewards, damage and boss level belong to it, and playing it live or from the catalogue shares the same progress, so no reward can be taken twice. The damage of a boss ends with its timer; the boss level stays within the raid.
+**What counts as one raid (builder's call).** Boards, coins and one-time rewards belong to the census row (the week): every source lists one board set per week, so all its tiers share them (inferred; video frames may confirm). Damage and boss level belong to the row at a tier. Playing live or from the catalogue shares the same progress, so no reward can be taken twice. The damage of a boss ends with its timer; the boss level stays within the raid.
 
 **Story boss frequency.** The original rule of the JP wiki: about 80 enemy kills spawn a boss, counted across quests, and a boss always appears on its fixed quests. Replays of story quests count; Special and event quests do not **(builder's call)**. The Ω roll above quest 555 is unknown: use the rule known below it, declared.
 
@@ -156,6 +176,6 @@ details within the Special style, and how the master revision and resource versi
 ## Known gaps
 
 From `HOLES.md` and `MISSING.md`: exact HP steps and bosses never read (Greedy Grouch, Holiday Sleigh, Guard Armor, Jack in the
-Box, normal Queen Bee), stage ids, quest Lux, drop odds, attack patterns after 2016, spawn formula beyond the egg count, some
-boards (Draw Ticket, Avatar Parts), JP rows after 2018-11-11. The game is built with what is known; a later source replaces a
+Box, normal Queen Bee), stage ids, quest Lux, drop odds, attack patterns after 2016, spawn formula beyond the egg count, reward odds, board order, whether coins and boards are shared across tiers (footage queue ready in `raid_rewards\d_video\tools`,
+YouTube refused new downloads on 1 November), Greedy Grouch and Loudmouth Parade rewards, JP rows after 2018-11-11. The game is built with what is known; a later source replaces a
 reconstructed value without a design change.
