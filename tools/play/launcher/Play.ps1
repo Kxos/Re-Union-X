@@ -82,7 +82,7 @@ try {
     }
     $t = 0
     while ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx 'getprop sys.boot_completed')) -ne '1') {
-        if ($t -ge 240) { Stop-With 6 "The emulator did not start in 4 minutes. Close LDPlayer and run Play again. If it happens again, send this file: $playLog" }
+        if ($t -ge 240) { Stop-With 6 "The emulator did not start in 4 minutes. Close LDPlayer and run Play again. If LDPlayer stops at 50%, Windows Hyper-V is usually the cause: see the section LDPLAYER STOPS AT 50% in README.txt. If it still happens, send this file: $playLog" }
         Start-Sleep 5; $t += 5
     }
     if ((ConvertTo-GuestText (Invoke-Guest $ld.Dir $idx "pm list packages $GAME")) -notmatch 'khuxww') {
