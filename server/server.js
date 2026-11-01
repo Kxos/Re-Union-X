@@ -947,17 +947,6 @@ if (player.created && player.spherePoint === undefined) {
   }
   console.log(`[save] Avatar Coin degli obiettivi gia' compiuti: ${player.spherePoint}`);
 }
-// Salvataggi di prima di I-220: i titoli di fine quest (clearGetTitle) non venivano assegnati: una volta, senza popup,
-// quelli delle quest gia' completate
-if (player.created && !player.clearTitlesGranted) {
-  player.clearTitlesGranted = 1;
-  const owned = new Set(player.titles || []);
-  const add = masterRows('stage').filter((r) => r.validClearGetTitle && r.clearGetTitle && r.stageId in (player.stageScores || {}) && !owned.has(r.clearGetTitle));
-  if (add.length) {
-    player.titles = [...(player.titles || []), ...new Set(add.map((r) => r.clearGetTitle))];
-    console.log(`[save] titoli di fine quest gia' guadagnati: ${add.length}`);
-  }
-}
 
 // Migrazione all'orologio finto (spec 3.7): orari salvati in ms reali. Le stringhe finte vecchie
 // (ora che ripartiva dal 15/5/2021) non hanno un istante reale: getDatetime spostati in blocco con la
@@ -2364,6 +2353,21 @@ function masterRows(name) {
     return rows.slice();
   } catch {
     return [];
+  }
+}
+
+// Salvataggi di prima di I-220: i titoli di fine quest (clearGetTitle) non venivano assegnati: una volta, senza popup,
+// quelli delle quest gia' completate. Qui e non al caricamento del salvataggio: prima di masterCache masterRows da' []
+if (player.created && !player.clearTitlesGranted) {
+  const stages = masterRows('stage');
+  if (stages.length) {
+    player.clearTitlesGranted = 1;
+    const owned = new Set(player.titles || []);
+    const add = stages.filter((r) => r.validClearGetTitle && r.clearGetTitle && r.stageId in (player.stageScores || {}) && !owned.has(r.clearGetTitle));
+    if (add.length) {
+      player.titles = [...(player.titles || []), ...new Set(add.map((r) => r.clearGetTitle))];
+      console.log(`[save] titoli di fine quest gia' guadagnati: ${add.length}`);
+    }
   }
 }
 
