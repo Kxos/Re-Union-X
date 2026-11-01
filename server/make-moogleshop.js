@@ -58,7 +58,8 @@ for (const id of [90078, 90146, 90056, 90066, 90084, 90083, 90082, 90081]) {
 // resistenze a veleno/paralisi/sonno, 0060/0061 nemici di terra/aria, 0070 raid,
 // 0080 attacco extra, 0090 STR, 0100 DEF, dalle immagini). Campi del valore: ability
 // (gauge), hp, poison/paralyze/sleep, enemyKind (1 terra, 2 aria) + enemyKindRate,
-// raidKindRate, addDamage, attack, defense.
+// raidKindRate, addDamage, attack, defense. I campi in percentuale sono decimillesimi, come nel
+// client (5000 = 50%; I-219); ability, hp, attack e defense sono valori interi.
 const traits = [];
 function trait(type, name, fields) {
   // il client passa il nome per un formato printf: «%» va raddoppiato (senza, «DEF -60»)
@@ -76,16 +77,16 @@ const MUNNY = 2;
 const T = {
   gauge2: trait(1, 'Max Gauges +2', { ability: 2 }),
   hp300: trait(2, 'Max HP +300', { hp: 300 }),
-  ground70: trait(6, 'Ground Enemy DEF -70%', { enemyKind: 1, enemyKindRate: 70 }),
-  aerial70: trait(6, 'Aerial Enemy DEF -70%', { enemyKind: 2, enemyKindRate: 70, category: 61 }),
-  extra50: trait(8, 'Extra Attack: 50% Power', { addDamage: 50 }),
+  ground70: trait(6, 'Ground Enemy DEF -70%', { enemyKind: 1, enemyKindRate: 7000 }),
+  aerial70: trait(6, 'Aerial Enemy DEF -70%', { enemyKind: 2, enemyKindRate: 7000, category: 61 }),
+  extra50: trait(8, 'Extra Attack: 50% Power', { addDamage: 5000 }),
   str1500: trait(9, 'STR +1500', { attack: 1500 }),
-  raid50: trait(7, 'Damage in Raids +50%', { raidKindRate: 50 }),
-  ground60: trait(6, 'Ground Enemy DEF -60%', { enemyKind: 1, enemyKindRate: 60 }),
-  aerial60: trait(6, 'Aerial Enemy DEF -60%', { enemyKind: 2, enemyKindRate: 60, category: 61 }),
-  extra40: trait(8, 'Extra Attack: 40% Power', { addDamage: 40 }),
+  raid50: trait(7, 'Damage in Raids +50%', { raidKindRate: 5000 }),
+  ground60: trait(6, 'Ground Enemy DEF -60%', { enemyKind: 1, enemyKindRate: 6000 }),
+  aerial60: trait(6, 'Aerial Enemy DEF -60%', { enemyKind: 2, enemyKindRate: 6000, category: 61 }),
+  extra40: trait(8, 'Extra Attack: 40% Power', { addDamage: 4000 }),
   str1000: trait(9, 'STR +1000', { attack: 1000 }),
-  raid40: trait(7, 'Damage in Raids +40%', { raidKindRate: 40 }),
+  raid40: trait(7, 'Damage in Raids +40%', { raidKindRate: 4000 }),
   def2000: trait(10, 'DEF +2000', { defense: 2000 }),
 };
 // offerte a tempo come nello screenshot (STR +1000 / DEF +2000 a 1.000 jewel, 3 scambi,

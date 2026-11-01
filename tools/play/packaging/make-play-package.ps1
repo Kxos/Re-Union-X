@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory)][string]$Out,
     [string]$LdInstaller = 'D:\Progetto_Restauro_KH_UX\LDPlayer\LDPlayer9\LDPlayer_0900053700.exe',
     [int]$Resources = 0,
-    [int]$Revision = 226,
+    [int]$Revision = 227,
     [string]$MaxSave,
     [string]$ProudSave
 )
