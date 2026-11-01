@@ -1724,7 +1724,7 @@ function selfPlayerElement(now, medal, partyId = 0) {
   return {
     supportUserId: 1, level: luxRankFor(player.lux), unionId: player.unionId, userName: player.name,
     ...playerTitleIds(), addKizunaPoint: 0,
-    keybladeId: favoriteKeyblade().keybladeId, partyId, isParty: partyId ? 1 : 0, isGuilt: 0, isLinkThumbnail: 0,
+    keybladeId: favoriteKeyblade().keybladeId, partyId, isParty: partyId ? 1 : 0, isGuilt: isGuiltUnlocked(), isLinkThumbnail: 0, // isGuilt 0: il client nasconde l'icona del tier (I-218)
     userMedal: medal, userSkills: userSkillsData(now).filter((s) => s.userMedalId === medal.userMedalId),
     userAvatar: userAvatarData(),
     lastActionDatetime: now, earnLuxRank: 0,
