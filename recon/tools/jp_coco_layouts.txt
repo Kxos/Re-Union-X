@@ -291,3 +291,5 @@ Adv_Raid_Boss_Dialog_Entrant_ver104.json            rev=0
 Adv_Raid_Boss_Dialog_Result_ver104.json
 Adv_Raid_Boss_List_Reward.json
 AdventureTop2_RaidInfo2_Start.json
+BattleResultReidScene.json
+BattleResultDefeatedScene.json
