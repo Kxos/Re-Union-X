@@ -136,7 +136,7 @@ against the story enemies of the same period. Declared in the Notices as reconst
 
 ## Graphics
 
-All 49 bosses have a model in the JP 4.3.1 data (22 links inferred, 3 of them from image and id order only); our WW resources
+All 49 bosses have a model LWF in the JP 4.3.1 data (22 links inferred, 3 of them from image and id order only), but textures are complete for only 27 of them (see `docs/notes/raid.md`, Texture coverage: correction after Part 1); our WW resources
 hold only the tutorial Darkside. Import them with the existing JP importers. This means a new resource version and packs
 near the current size limits, to be measured first.
 
