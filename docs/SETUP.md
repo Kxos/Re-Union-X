@@ -394,6 +394,22 @@ emulator** on a pinned Node.js for Android (`tools/play/packaging/termux-node.lo
 files that this project never distributes, so packages are private, personal and never published; this
 repository only holds the code that builds and runs them.
 
+## LDPlayer stops at 50% or does not start
+
+Windows Hyper-V and the features built on it stop LDPlayer from using hardware virtualization: the emulator
+stays at 50% or never finishes booting. A tester's PC with this problem started working after this fix:
+
+1. Open LDPlayer's page
+   [How to disable virtual machine service](https://www.ldplayer.net/support/how-to-disable-virtual-machine-service-to-avoid-lowering-emulator-performance.html)
+   and download its Hyper-V script, or use the Microsoft tool linked on the same page.
+2. **Read the warning first:** the script also disables Windows Hello (face, fingerprint and in some cases PIN
+   sign-in), Windows Sandbox, WSL2 and Hypervisor Platform.
+3. Run it as administrator and restart the PC.
+
+Google Play Games turns Hyper-V back on when opened, so restart the PC after using it. For the other causes
+of a stop at 50%, see LDPlayer's
+[g_bGuestPoweroff guide](https://www.ldplayer.net/support/how-to-fix-gbGuestPoweroff-error.html).
+
 ## Current limitations
 
 What is missing in the game is listed in the in-game Notices and in [ISSUES.md](ISSUES.md). This list is

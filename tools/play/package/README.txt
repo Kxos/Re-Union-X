@@ -34,8 +34,10 @@ WHAT YOU CAN DO
 ---------------
 The save starts with every story quest (1-979) and every Proud quest cleared, the whole
 Medal List and the strongest medals, so you can try every feature restored so far:
-story and Proud quests, Medal List, Level Up, Evolve, Moogle Shop, Shop, Missions,
-Avatar Boards, Spirit. Union Cross, raids, Coliseum, PvP and events do not exist yet.
+story and Proud quests, Special quests, Medal List, Level Up, Evolve, Moogle Shop, Shop,
+Missions, Avatar Boards, Spirit. Union Cross, raids, Coliseum, PvP and events do not exist
+yet, and most Special quests stay locked for now because they need VIP, which cannot be
+earned until raids and Union Cross exist.
 Every difference from the original game is explained in the in-game Notices.
 
 
@@ -48,3 +50,11 @@ Re-Union X Discord (#bug-reports) with:
   (server.prev.log is the game session before the last start of Play: send it after a crash).
 
 If Play shows an error, it tells you what to do and which log file to send.
+
+LDPLAYER STOPS AT 50% OR THE EMULATOR DOES NOT START?
+Windows Hyper-V is usually blocking it. LDPlayer provides a tool that turns it off:
+https://www.ldplayer.net/support/how-to-disable-virtual-machine-service-to-avoid-lowering-emulator-performance.html
+Read that page first: the tool also disables Windows Hello (face, fingerprint and sometimes
+PIN sign-in), Windows Sandbox, WSL2 and Hypervisor Platform. Run it as administrator, restart
+the PC, then double-click Play again. Google Play Games turns Hyper-V back on when you open it:
+restart the PC after using it.

@@ -10,6 +10,8 @@ $d = Join-Path $Package 'data'
 
 foreach ($p in 'Play.bat', 'README.txt', 'data\guest\node.tar', 'data\guest\licenses\nodejs-lts\copyright',
     'data\server\server.js', 'data\server\master_data', 'data\server\game_data\gacha_img', 'data\server\certs\server.crt',
+    'data\server\game_data\special.json', 'data\server\game_data\special_maps.json', 'data\server\game_data\special_img',
+    'data\server\game_data\special_icons', 'data\server\special_periods.json',
     'data\server\certs\ca.crt', 'data\recon\out\master_types_ww431.json', 'data\recon\out\api_responses_ww431.json',
     'data\game\khux-4.3.1.apk', 'data\start-save.json', 'data\package.env', 'data\package.json') {
     Check (Test-Path (Join-Path $Package $p)) "missing $p"
