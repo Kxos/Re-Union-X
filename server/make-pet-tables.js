@@ -127,12 +127,13 @@ function petSkillRows() {
 }
 
 // Special Traits (khwiki, pagina Medal, «Special Traits»): [nome, icona, campi del valore, % «Unlock Rate»]
+// addDamage, raidKindRate, enemyKindRate, poison, paralyze, sleep: decimillesimi, come nel client (12000 = 120%; I-219)
 const SPECIAL_TRAITS = [
-  ['Extra Attack: 120% Power', 80, { addDamage: 120 }, 0.2],
-  ['Damage in Raids +100%', 70, { raidKindRate: 100 }, 0.8],
-  ['Damage in Raids +30%', 70, { raidKindRate: 30 }, 2.4],
-  ['Damage in Raids +20%', 70, { raidKindRate: 20 }, 3.5],
-  ['Damage in Raids +10%', 70, { raidKindRate: 10 }, 3.5],
+  ['Extra Attack: 120% Power', 80, { addDamage: 12000 }, 0.2],
+  ['Damage in Raids +100%', 70, { raidKindRate: 10000 }, 0.8],
+  ['Damage in Raids +30%', 70, { raidKindRate: 3000 }, 2.4],
+  ['Damage in Raids +20%', 70, { raidKindRate: 2000 }, 3.5],
+  ['Damage in Raids +10%', 70, { raidKindRate: 1000 }, 3.5],
   ['STR +2000', 90, { attack: 2000 }, 1.4],
   ['STR +500', 90, { attack: 500 }, 2.0],
   ['STR +400', 90, { attack: 400 }, 3.5],
@@ -144,8 +145,8 @@ const SPECIAL_TRAITS = [
   ['DEF +600', 100, { defense: 600 }, 3.5],
   ['DEF +400', 100, { defense: 400 }, 3.5],
   ['DEF +200', 100, { defense: 200 }, 3.5],
-  ['Ground Enemy DEF -20%', 60, { enemyKind: 1, enemyKindRate: 20 }, 1.4],
-  ['Aerial Enemy DEF -20%', 61, { enemyKind: 2, enemyKindRate: 20 }, 1.4],
+  ['Ground Enemy DEF -20%', 60, { enemyKind: 1, enemyKindRate: 2000 }, 1.4],
+  ['Aerial Enemy DEF -20%', 61, { enemyKind: 2, enemyKindRate: 2000 }, 1.4],
   ['Max Gauges +3', 10, { ability: 3 }, 3.5],
   ['Max Gauges +2', 10, { ability: 2 }, 3.5],
   ['Max Gauges +1', 10, { ability: 1 }, 3.5],
@@ -155,15 +156,15 @@ const SPECIAL_TRAITS = [
   ['Max HP +700', 20, { hp: 700 }, 3.5],
   ['Max HP +600', 20, { hp: 600 }, 3.5],
   ['Max HP +500', 20, { hp: 500 }, 3.5],
-  ['Poison Resist 100%', 30, { poison: 100 }, 1.0],
-  ['Poison Resist 20%', 30, { poison: 20 }, 2.8],
-  ['Poison Resist 10%', 30, { poison: 10 }, 3.5],
-  ['Sleep Resist 100%', 50, { sleep: 100 }, 1.0],
-  ['Sleep Resist 20%', 50, { sleep: 20 }, 2.8],
-  ['Sleep Resist 10%', 50, { sleep: 10 }, 3.5],
-  ['Paralysis Resist 100%', 40, { paralyze: 100 }, 1.0],
-  ['Paralysis Resist 20%', 40, { paralyze: 20 }, 2.8],
-  ['Paralysis Resist 10%', 40, { paralyze: 10 }, 3.5],
+  ['Poison Resist 100%', 30, { poison: 10000 }, 1.0],
+  ['Poison Resist 20%', 30, { poison: 2000 }, 2.8],
+  ['Poison Resist 10%', 30, { poison: 1000 }, 3.5],
+  ['Sleep Resist 100%', 50, { sleep: 10000 }, 1.0],
+  ['Sleep Resist 20%', 50, { sleep: 2000 }, 2.8],
+  ['Sleep Resist 10%', 50, { sleep: 1000 }, 3.5],
+  ['Paralysis Resist 100%', 40, { paralyze: 10000 }, 1.0],
+  ['Paralysis Resist 20%', 40, { paralyze: 2000 }, 2.8],
+  ['Paralysis Resist 10%', 40, { paralyze: 1000 }, 3.5],
 ];
 const SPECIAL_TYPE = 2;
 const SPECIAL_FIRST_ID = 1001;
