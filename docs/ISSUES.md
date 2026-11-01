@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-220**).
+a new issue takes the number after the last one used (last: **I-221**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,7 @@ Last revision: 1 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-221 | IN PROGRESS | **Raids**: all original raids, solo, with a Raid Catalog ([design](superpowers/specs/2026-11-01-raids-design.md)). Part 1: bench spike on one Weekly boss | [raid](notes/raid.md) | 01-11 |
 | I-013 | OPEN | Balance: Bandit + Red Nocturne (1240 part 2, quest from 27) wiped out 3040 HP at LV3 (11-10, placeholder data). Since then player HP, enemy attacks and enemy buffs are original (I-032, I-181, I-207 step 1): re-test with a low-rank save; close as OBSOLETE if it is the original difficulty | [battaglia](notes/battaglia.md#sconfitta) | 11-10 |
 | I-031 | OPEN | Death notice in the tutorial never captured | [battaglia](notes/battaglia.md#sconfitta) | 10-08 |
 | I-033 | OPEN | Generated special attacks: animations solved by I-180; **144** burst rows still named «Special Attack» (119 Puppies, Sea-Salt Ice Cream, 24 Kyroo [SAB LV 7-10]): names, descriptions and targets from the khuxwiki | [medaglie](notes/medaglie.md#burst) | 7da38e3, I-180 |
