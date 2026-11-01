@@ -947,6 +947,17 @@ if (player.created && player.spherePoint === undefined) {
   }
   console.log(`[save] Avatar Coin degli obiettivi gia' compiuti: ${player.spherePoint}`);
 }
+// Salvataggi di prima di I-220: i titoli di fine quest (clearGetTitle) non venivano assegnati: una volta, senza popup,
+// quelli delle quest gia' completate
+if (player.created && !player.clearTitlesGranted) {
+  player.clearTitlesGranted = 1;
+  const owned = new Set(player.titles || []);
+  const add = masterRows('stage').filter((r) => r.validClearGetTitle && r.clearGetTitle && r.stageId in (player.stageScores || {}) && !owned.has(r.clearGetTitle));
+  if (add.length) {
+    player.titles = [...(player.titles || []), ...new Set(add.map((r) => r.clearGetTitle))];
+    console.log(`[save] titoli di fine quest gia' guadagnati: ${add.length}`);
+  }
+}
 
 // Migrazione all'orologio finto (spec 3.7): orari salvati in ms reali. Le stringhe finte vecchie
 // (ora che ripartiva dal 15/5/2021) non hanno un istante reale: getDatetime spostati in blocco con la
@@ -2238,10 +2249,13 @@ function respondStageClear(res, req) {
     if (row) enemyDropTypes(row.rewardId).forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
   }
   player.steal = null;
+  // titoli che questa partita assegna: solo questi vanno in userTitles, il client mostra un popup per ognuno (I-220)
+  const titlesBefore = new Set(player.titles || []);
   // premio del primo completamento («Quest Complete!»: es. Combat 101, 300 jewel)
   if (first && !training && stage?.validClearGetItem) {
     stage.clearGetItemType.forEach((t, i) => grantItem(t, stage.clearGetItemId[i], stage.clearGetItemNum[i]));
   }
+  if (first && !training && stage?.validClearGetTitle && stage.clearGetTitle) grantItem(7, stage.clearGetTitle, 1);
   // clearMissionIds: le missioni compiute in questa partita, come le riporta il corpo
   // della richiesta; il client le spunta nella schermata RESULTS. Vuoto = nessuna spunta.
   // Le missioni sui Lux (submissionRequire 29, «Collect %d or more Lux») il client non
@@ -2313,7 +2327,8 @@ function respondStageClear(res, req) {
     // userDecks, userAvatarParts, subslot, infine getLux
     userMedals: userMedalsData(now),
     userSkills: userSkillsData(now),
-    userTitles: [],
+    // solo i titoli nuovi di questa partita: la lista intera aprirebbe un popup per ogni titolo posseduto
+    userTitles: userTitlesData().filter((t) => !titlesBefore.has(t.titleId) && (player.titles || []).includes(t.titleId)),
     userKeyblades: userKeybladesData(),
     userDecks: userDecksData(),
     userAvatarParts: [],
@@ -4754,6 +4769,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  userTitlesData, // server/test-title-popup.js (I-220)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
