@@ -38,6 +38,16 @@ const listed = t.userTitlesData().find((x) => x.titleId === title);
 check(listed && clear.userTitles[0]?.userTitleId === listed.userTitleId, 'same userTitleId as GET /user/title');
 check(ids(play(objective.stageId, [2])) === '', 'objective already done: no popup');
 
+// a save from before the fix: completion titles of quests already cleared, once, in a fresh server process
+const OLD = `${SAVE}.old`;
+fs.writeFileSync(OLD, JSON.stringify({ created: true, name: 'Prova', stageScores: { [withTitle.stageId]: 1 }, titles: [] }));
+const load = () => JSON.parse(require('child_process').execFileSync(process.execPath, ['-e',
+  "const l=console.log;console.log=()=>{};const {_test:t}=require('./server');console.log=l;console.log(JSON.stringify({titles:t.player.titles,flag:t.player.clearTitlesGranted}));process.exit(0)"],
+  { cwd: __dirname, env: { ...process.env, KHUX_SAVE: OLD }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().split('\n').pop());
+const old = load();
+check(old.flag === 1 && old.titles?.join() === String(withTitle.clearGetTitle), `old save: titles ${old.titles}, flag ${old.flag}`);
+try { fs.unlinkSync(OLD); } catch { /* gone */ }
+
 try { fs.unlinkSync(SAVE); } catch { /* gone */ }
 if (errors.length) { console.error('test-title-popup: FAIL\n  ' + errors.join('\n  ')); process.exit(1); }
 console.log('test-title-popup: OK');
