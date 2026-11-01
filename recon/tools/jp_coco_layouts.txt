@@ -282,3 +282,12 @@ ActMapSpEnmUI_CountReset.json
 ActMapSpEnmUI_CounterAtk.json
 ActMapSpEnmUI_State.json
 ActMapSpEnmUI_Target.json
+
+# Raid (I-221): schermate assenti nei dati WW
+AdvRaidListScene_ver320.json
+Adv_Raid_Boss_List_ver320.json
+Adv_Raid_Boss_Block_ver320.json
+Adv_Raid_Boss_Dialog_Entrant_ver104.json            rev=0
+Adv_Raid_Boss_Dialog_Result_ver104.json
+Adv_Raid_Boss_List_Reward.json
+AdventureTop2_RaidInfo2_Start.json

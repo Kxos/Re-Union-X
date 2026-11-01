@@ -435,7 +435,8 @@ if ($Quick) {
   # miniature Story (11 ottobre), 32 MiB con la musica delle BGM Medals (15 ottobre, ~55 MB di audio)
   # 360 MiB dalla versione 50 (20-10 sera): animazioni originali degli attacchi speciali (originals.tsv #36, ~190 MB),
   # contenuto 307 MiB, ~53 MiB per i -Quick; oltre 4 GiB in tutto (misc.mp4.2, provato con la 48, I-171)
-  $dataSize = 360MB
+  # 420 MiB dalla versione 91 (raid, I-221): contenuto 380 MiB
+  $dataSize = 420MB
   $mergeOpt = @('--filler', 65536)   # riserva dell'indice per i cicli -Quick (4 KB finivano presto)
 }
 # cartelle mixture/medal/compose/<imageId>/Medal_L dell'animazione di Level Up/Evolve come alias di
