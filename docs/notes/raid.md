@@ -135,6 +135,8 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - HP and broken parts kept after Give Up (49,548,210,919 of 70 billion, parts 2 and 3 at 0).
 - Victory twice in a row: SUCCESS «The Raid Boss is defeated!», RAID RESULTS 180/60/60 Raid Coins, OMEGA label; the level goes up after the win.
 - Give Up (`raidTimeStatus` 1): YOU LOSE with Damage, Munny, Lux and the level bar; the text line under the title stays empty. Raid texts (`layouts/ui_texts`, ids 10320xxxx): 011 «The Raid Boss has escaped.», 010 «A party member defeated the Raid Boss!», 005 «No available Raid Boss.», 019 «A support request was sent to other players.», 016 empty. The original sent a support request on a lost raid, so 019 is the likely text of a loss; it is a multiplayer feature we do not have, and no status is proven to show it. The Defeated scene's layout JSON is not local, so the binding stays unread. Kept at 1: an empty line claims nothing false.
+- **Start after the timer** (deck screen open over it): before the fix «200 ERROR :122» and OK resent `/raid/start` forever; with the fix (44db985) the fight plays free, the result reads «The Raid Boss has escaped.» on that same text line (under CONGRATULATIONS when the client won the fight), then FAILURE «The Raid Boss escaped!», back to the home; no reward, level unchanged, boss gone.
+- The home calls `/user/notice` on entry; with `isSelfRaid` 1 it shows the red «Active request!» button and no WARNING frame (I-222).
 
 ## Open, for the bench
 
