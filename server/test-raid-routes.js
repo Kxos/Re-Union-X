@@ -460,6 +460,37 @@ const tests = {
     plain.call('list');
     assert.strictEqual(plain.player.raid.boss, null, 'no file, no boss');
   },
+  smoke_file_fresh_only() {
+    // review fix: a file left by a killed script is ignored after SMOKE_MAX_AGE_MS, read once per change, logged once
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-raid-smoke-'));
+    const file = path.join(dir, 'raid_smoke.json');
+    const logs = [];
+    const reader = routesRaid.smokeReader(file, (m) => logs.push(m));
+    const now = Date.now();
+    assert.strictEqual(reader(now), null, 'no file');
+    fs.writeFileSync(file, '﻿{"key": "WW-1/Beginner"}');
+    assert.strictEqual(reader(now), 'WW-1/Beginner', 'fresh, BOM dropped');
+    let reads = 0;
+    const realRead = fs.readFileSync;
+    fs.readFileSync = (...a) => { reads++; return realRead(...a); };
+    try { reader(now); reader(now); } finally { fs.readFileSync = realRead; }
+    assert.strictEqual(reads, 0, 'read once per change (mtime)');
+    const old = (now - routesRaid.SMOKE_MAX_AGE_MS - 60000) / 1000;
+    fs.utimesSync(file, old, old);
+    assert.strictEqual(reader(now), null, 'stale: ignored');
+    assert.strictEqual(reader(now), null);
+    assert.strictEqual(logs.filter((m) => /ignored/.test(m)).length, 1, 'logged once');
+    fs.writeFileSync(file, '{"key": "WW-2/Beginner"}');
+    assert.strictEqual(reader(Date.now()), 'WW-2/Beginner', 'rewritten: fresh again');
+    fs.writeFileSync(file, 'not json');
+    assert.strictEqual(reader(Date.now()), null, 'corrupt: nothing');
+    fs.rmSync(dir, { recursive: true, force: true });
+    // an unknown key is logged once, not at every call
+    const w = world();
+    w.smoke = 'nothing/Beginner';
+    w.call('list'); w.call('notice'); w.call('list');
+    assert.strictEqual(w.logs.filter((m) => /not an available entry/.test(m)).length, 1);
+  },
   calendar_week() {
     // Task 8: /stage/event and the Raid Boards follow the Shop week of the story (storyCtx), the kept raid joins them
     const w = world();
