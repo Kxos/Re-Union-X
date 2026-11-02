@@ -31,7 +31,7 @@ function world(opts = {}) {
     raidReward: [victory, coin.mvp, coin.all],
   };
   w.index = opts.index || { entries: [{ key: 'WW-1/Beginner', available: true, stageId: STAGE, evStageId: 8001, enemyId: ENEMY, modelId: 7, tier: 'Beginner',
-    upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07', level: 25 }], models: { 7: { fight: true, start: true, escape: true, put_down: true } } };
+    upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07', level: 25 }], models: { '0007': { fight: true, start: true, escape: true, put_down: true } } };
   w.raid = routesRaid({
     player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], raidIndex: () => w.index,
     realNow: () => w.now, serverTime: () => fmt(w.now), serverTimeAt: fmt,
@@ -43,7 +43,7 @@ function world(opts = {}) {
     apNow: () => w.ap, changeAp: (d) => { w.ap += d; }, raidUser: () => USER, supportUsers: (id) => (id ? [{ supportUserId: id }] : []),
     guiltLists: () => ({ guiltBurstFirstUserMedalIds: [], guiltBurstMaxUserMedalIds: [] }),
     battlePoints: (getPoint, burst) => { const lux = Number(getPoint?.lux) || 0; w.lux += lux; w.burst = burst; return lux; }, beginBattle: (k) => { w.keyblade = k; },
-    grantItem: (it) => { w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
+    grantItem: (it) => { if (w.grantHook) w.grantHook(); w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
     medalCount: () => w.medalCount, medalCap: () => w.medalCap,
     stageState: () => ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: () => 0.99, log: (m) => w.logs.push(m),
   });
@@ -184,6 +184,18 @@ const tests = {
     assert.strictEqual(b.getLux, 0);
     assert.strictEqual(w.player.raid.boss.parts[0].hp, 1000);
   },
+  clear_after_timer() {
+    const w = world();
+    w.spawn(); w.start();
+    w.now = w.player.raid.boss.endsAt + 1;
+    assert.strictEqual(w.clearParts([500, 100, 200]).raidTimeStatus, 2, 'lost past the timer: escaped');
+    assert.strictEqual(w.call('list').selfRaid.raidStatus, 2, 'the list still plays the flee');
+    assert.strictEqual(w.player.raid.boss, null);
+    const v = world();
+    v.spawn(); v.start();
+    v.now = v.player.raid.boss.endsAt + 1;
+    assert.strictEqual(v.clearParts([0, 100, 200]).raidTimeStatus, 3, 'a win past the timer stays a win');
+  },
   clear_titles_new_only() {
     const row = { ...coin.victory, validReward: 1, type: [7, 0, 0, 0], id: [777, 0, 0, 0], num: [1, 0, 0, 0] };
     const w = world({ victoryRow: row });
@@ -252,6 +264,15 @@ const tests = {
     assert.strictEqual(w.player.raid.boss, null);
     w.raid.onStageClear(STAGE, { raidPoint: 3000 });
     assert(w.player.raid.boss, 'two eggs in bonus time');
+  },
+  spawn_uses_padded_model_key() {
+    const w = world();
+    const boss = w.spawn();
+    assert.strictEqual(boss.status, 4, 'raid_models.json keys are folder names: model 7 is 0007');
+    assert.strictEqual(boss.hasEscapeDemo, true);
+    const none = world();
+    none.index.models = { 7: { fight: true, start: true, escape: true, put_down: true } };
+    assert.strictEqual(none.spawn().status, 3, 'the bare number is not a key');
   },
   spawn_row_missing_keeps_counter() {
     const w = world();
@@ -327,6 +348,30 @@ const tests = {
     assert.strictEqual(w.logs.length, 2);
     assert.strictEqual(w.player.raid.pending.length, 0);
     assert.strictEqual(w.grants.length, 0);
+  },
+  reward_throwing_grant_pays_nothing_twice() {
+    const row = { ...coin.victory, validReward: 1, type: [16, 0, 0, 0], id: [0, 0, 0, 0], num: [120, 0, 0, 0] };
+    const w = world({ victoryRow: row });
+    w.spawn(); w.start();
+    const raidId = w.player.raid.boss.raidId;
+    w.clearParts([0, 0, 0]);
+    w.now += 1000;
+    w.spawn(); w.start();
+    w.clearParts([0, 0, 0]);
+    assert.strictEqual(w.player.raid.pending.length, 2);
+    let n = 0;
+    w.grantHook = () => { if (++n === 2) throw new Error('boom'); }; // second item of the first entry
+    const first = w.call('reward');
+    w.grantHook = null;
+    assert(first, 'the route answers');
+    assert.strictEqual(first.raidRewards.length, 1, 'the failed entry is not shown, the good one is');
+    assert.notStrictEqual(first.raidRewards[0].raidId, raidId, 'the one shown is the second');
+    assert.strictEqual(w.player.raid.pending.length, 0, 'out of pending before delivery');
+    assert(w.logs.some((l) => /boom/.test(l)), 'logged');
+    const grants = w.grants.length;
+    const second = w.call('reward');
+    assert.deepStrictEqual(second.raidRewards, [], 'works on the next call');
+    assert.strictEqual(w.grants.length, grants, 'nothing paid twice');
   },
   reward_full_box() {
     const row = { ...coin.victory, validReward: 1, type: [3, 0, 0, 0], id: [55, 0, 0, 0], num: [1, 0, 0, 0] };
@@ -410,7 +455,7 @@ function wiring() {
   delete process.env.KHUX_SERVER_TIME;
   const FAKE = 989999; // far from any generated row
   fs.writeFileSync(process.env.KHUX_RAID_INDEX, JSON.stringify({ entries: [{ key: 'K/Beginner', available: true, stageId: FAKE, evStageId: 8999, enemyId: 2999990, modelId: 7, tier: 'Beginner', upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07' }], reasons: {} }));
-  fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ 7: { fight: true, start: true, escape: true, put_down: true } }));
+  fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ '0007': { fight: true, start: true, escape: true, put_down: true } }));
   fs.mkdirSync(process.env.KHUX_RAID_IMG);
   const realDateNow = Date.now;
   Date.now = () => TUE;
@@ -443,6 +488,14 @@ function wiring() {
   call(t.respondStageStart, { stageId: 1010, userKeybladeId: 0 });
   call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0, raidPoint: 3000 } });
   assert.strictEqual(p.raid.points, 3000, 'a story quest adds nothing for now');
+
+  // a raid error never costs a quest clear
+  const onClear = t.raid().onStageClear;
+  t.raid().onStageClear = () => { throw new Error('boom'); };
+  call(t.respondStageStart, { stageId: FAKE, userKeybladeId: 0 });
+  const survived = call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0, raidPoint: 3000 } });
+  assert(survived && survived.userData && Array.isArray(survived.userKeyblades), 'the clear answers whole');
+  t.raid().onStageClear = onClear;
 
   assert.strictEqual(web('/web/raid/img/8999.png').code, 404, 'no file: 404, nothing crashes');
   fs.writeFileSync(path.join(process.env.KHUX_RAID_IMG, '0.png'), 'default');

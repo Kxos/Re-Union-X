@@ -6,6 +6,7 @@ const DOWN_MS = 180000; // ...after this long
 const STATUS = { NONE: 0, GAVE_UP: 1, ESCAPE: 2, ACTIVE: 3, START: 4 };
 const RAID_TIME_VICTORY = 3;
 const RAID_TIME_GIVE_UP = 1; // provisional: Task 6 Step 5 picks the final one on the bench
+const RAID_TIME_ESCAPED = 2; // «The Raid Boss has escaped»: a fight lost past the timer
 
 const defaultFmt = (ms) => new Date(ms).toISOString().slice(0, 19).replace('T', ' ');
 
@@ -67,7 +68,7 @@ function clearFight(boss, parts, nowMs) {
   }
   const victory = boss.parts[0].hp === 0;
   const allPoints = victory && boss.parts.slice(1).every((p) => p.hp === 0);
-  return { victory, allPoints, raidTimeStatus: victory ? RAID_TIME_VICTORY : RAID_TIME_GIVE_UP };
+  return { victory, allPoints, raidTimeStatus: victory ? RAID_TIME_VICTORY : nowMs >= boss.endsAt ? RAID_TIME_ESCAPED : RAID_TIME_GIVE_UP };
 }
 
 module.exports = { RETURN_RATIO, DOWN_MS, STATUS, newBoss, listView, afterList, startFight, clearFight };
