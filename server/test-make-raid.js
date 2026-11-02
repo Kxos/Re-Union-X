@@ -57,7 +57,7 @@ function fixture() {
         { stageId: 1010, id: 1, stageKind: 1, worldId: 1, mapName: 'Fountain Square', raidBoss: 0, name: 'p', useAp: 0 }],
       evStage: [], enemy: [{ enemyId: 100, name: 'Eggcognito', raidPoint: [3000, 3000, 3000, 3000, 3000] }],
       world: [{ worldId: 1, raidBackground: 'bg_DB1' }, { worldId: 3, raidBackground: 'bg_WL1' }, { worldId: 7, raidBackground: 'bg_CD1' }] },
-    models: { 7: { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true }, 21: { fight: true, start: true, escape: true, put_down: true } },
+    models: { '0007': { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true }, '0021': { fight: true, start: true, escape: true, put_down: true } },
     config: { onlyCensusIds: [W1], stats, weeklyUpMinutes: 20, useAp: 10, brokenBackgrounds: ['bg_CD1', 'bg_ED1'], backgroundFallbackWorld: 1, tierQuestLv: { single: 25, Beginner: 25, Intermediate: 75, Advanced: 125, Legendary: 175, Epic: 225 },
       singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {}, reconstructedWhy: REAL_CONFIG.reconstructedWhy },
   };
@@ -210,7 +210,7 @@ const tests = {
     assert.strictEqual(out.stageRows[0].name, '(Advanced) Gem Drop: Raid Time!');
   },
   unavailable_not_emitted() {
-    const out = build((f) => { f.models[7] = { fight: false, start: true, escape: true, put_down: true }; });
+    const out = build((f) => { f.models['0007'] = { fight: false, start: true, escape: true, put_down: true }; });
     const e = entry(out, 'Trickmaster');
     assert.strictEqual(e.available, false);
     assert.strictEqual(e.why, 'graphics');
@@ -220,11 +220,19 @@ const tests = {
     assert.strictEqual(out.stageRows.length, 1, 'the other tier stays');
     assert.deepStrictEqual(out.evStageRows[0].stageId, [entry(out, 'Blue Trident Tail').stageId]);
     // put_down false is unavailable too; no models file: nothing at all
-    const noPutDown = build((f) => { f.models[7] = { fight: true, put_down: false }; });
+    const noPutDown = build((f) => { f.models['0007'] = { fight: true, put_down: false }; });
     assert.strictEqual(entry(noPutDown, 'Trickmaster').available, false);
     const none = build((f) => { f.models = null; });
     assert.ok(none.index.entries.every((x) => !x.available && x.why === 'graphics'));
     assert.deepStrictEqual([none.stageRows.length, none.enemyRows.length, none.evStageRows.length, none.maps.length], [0, 0, 0, 0]);
+  },
+  model_key_is_four_digits() {
+    const out = build((f) => { f.models = { '0007': { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true } }; });
+    assert.deepStrictEqual(out.index.entries.map((e) => [e.modelId, e.available, e.why]), [[7, true, null], [1003, true, null]]);
+    assert.strictEqual(entry(out, 'Trickmaster').modelId, 7, 'the index keeps the number, the file has the folder name');
+    // the unpadded form is not a key of the real file
+    const bare = build((f) => { f.models = { 7: { fight: true, put_down: true } }; });
+    assert.strictEqual(entry(bare, 'Trickmaster').why, 'graphics');
   },
   no_template_is_unavailable() {
     const out = build((f) => addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem'));
@@ -501,7 +509,7 @@ const tests = {
     addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
     f.config.onlyCensusIds = ['X', W1];
     delete f.models[1003];
-    delete f.models[7];
+    delete f.models['0007'];
     for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
     const warn = console.warn, log = console.log; const warned = [], logged = [];
     console.warn = (s) => warned.push(s); console.log = (s) => logged.push(s);
