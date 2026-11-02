@@ -54,6 +54,12 @@ try:
     assert rd('img/ui/g.png') == 'old', 'exact JP revision'
     assert rd('img/ui/g2.png') == 'plain-g', 'exact plain name'
     os.remove(os.path.join(jp, 'img/ui/g.png'))
+    # loc: generated files outside the repo (--loc)
+    loc = os.path.join(t, 'loc')
+    put(loc, 'lwf/raid/demo/start_0018/start_0018.lwf', 'patched')
+    io.run(io.parse(['lwf/raid/demo/start_0018/start_0018.lwf' + chr(9) + 'loc' + chr(9) + '=lwf/raid/demo/start_0018/start_0018.lwf']),
+           b16, jp, out, set(), None, None, loc)
+    assert rd('lwf/raid/demo/start_0018/start_0018.lwf') == 'patched', 'fonte loc'
     # IPA 4.4.0 gia' estratta
     i440 = os.path.join(t, 'i440')
     put(i440, 'img/union/Union_01.png', 'u1')
