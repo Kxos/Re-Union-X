@@ -270,7 +270,8 @@ function buildRaid({ census, values, rewards, orig2016, master, models, config, 
       const n = numbers.entries[keyOf(row, w)];
       const boss = (census.bosses || []).find((b) => b.ww === w.boss);
       const modelId = boss ? boss.raid_model_id : 0;
-      const m = models && modelId ? models[modelId] : null;
+      // raid_models.json is keyed by folder name: "0007", "1003"
+      const m = models && modelId ? models[String(modelId).padStart(4, '0')] : null;
       const questKey = w.tier === SINGLE ? 'Raid Time!' : `(${w.tier}) ${w.gem_drop ? 'Gem Drop: ' : ''}Raid Time!`;
       const quest = (values.quests || {})[questKey];
       const worldReal = mapWorld(w.map);
