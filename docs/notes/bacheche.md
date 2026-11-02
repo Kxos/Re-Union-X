@@ -137,7 +137,7 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
   - Balloon Mike & Sulley (407026), Balloon Axel (407047): Spirit parts with their original artwork, recovered from the
     identical files of the avatar accessories 208106/208137 ([home_profilo](home_profilo.md), `jp_pet_parts.py` avatar twin).
   - Still off (`boards.unmatched`): Starlight Ears (402028, a 51x60 texture «ビットマップ 1» missing) and Dazzling Disco
-    (410014, a 1x1 texture «ビットマップ 2» missing). Both names are in the 2020 global file list, but no local copy has the bytes.
+    (410014, a 1x1 texture «ビットマップ 2» missing): no local source has those two files. Notices, Differences, «Raid Boards».
 - **Server.** Standard boards open with the Lux level only if type 1. Raid Boards handed out = those of the current raids and
   of the kept raid (`routes-raid.js` `boardIds()`); their progress is `player.raidSphere[id]` and is never deleted, so a board
   that comes back (Catalog) keeps its nodes. `GET /user/sphere` lists them (and records `player.raidSphereSent`); a check

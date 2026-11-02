@@ -21,7 +21,10 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REV = re.compile(r'^(.*?)(?:\.(\d{8}))?\.(png|lwf)$')
-GENERIC = 'ビットマップ'.encode().hex()  # hex of the Flash default texture name «ビットマップ N.png»
+# Flash default texture name «ビットマップ N.png» (bitmap N), as it appears in the LWF texture table and in the file names:
+# UTF-8 hex after the part prefix (ac_hat1_e38393...png), so the comparison is on the hex. The plain string never matches
+# there: checked 2 Nov 2026, with it 402119 takes an unrelated earring «ビットマップ 1» from avatar 103183.
+GENERIC = 'ビットマップ'.encode().hex()
 
 
 def _latest(files):
