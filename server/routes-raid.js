@@ -53,7 +53,15 @@ const damageOf = (parts) => parts.reduce((sum, p) => sum + (usableCount(p.damage
 function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
   inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, beginBattle, grantItem, addPresent, medalCount, medalCap,
   stageState, webBase, rng = Math.random, log = console.log }) {
-  const state = () => rewards.raidState(player);
+  // Boss levels reset to LV 1 at the start of every month (original rule, notice 17888), and a boss that comes back in a later week starts at LV 1 again (notice 74823): the real-clock month of the server
+  // (clock.monthIndex, 1st 00:00 PST = 08:00 UTC, as Spirit Training). A boss alive keeps its level; levelsMonth is the month
+  // the stored levels belong to.
+  const monthOf = (ms) => clock.monthIndex(ms);
+  const state = () => {
+    const r = rewards.raidState(player), month = monthOf(realNow());
+    if (r.levelsMonth !== month) { r.levels = {}; r.levelOcc = {}; r.levelsMonth = month; savePlayer(); }
+    return r;
+  };
   const entries = () => (raidIndex().entries || []).filter((e) => e.available);
   const entryOfStage = (stageId) => {
     const id = Number(stageId);
@@ -144,7 +152,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   }
 
   function bossDefeated(r, boss, allPoints) {
-    r.levels[boss.key] = Math.min(MAX_LEVEL, boss.level + 1);
+    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[boss.key] = Math.min(MAX_LEVEL, boss.level + 1); (r.levelOcc ||= {})[boss.key] = boss.occ; } // a boss of an older month does not feed the new one
     r.lastFight = { raidId: boss.raidId, damage: boss.damage || 0 };
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
@@ -237,11 +245,12 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const body = enemyRow(entry.enemyId);
     const partRows = body && [body, ...body.parts.slice(0, body.validParts).map(enemyRow)];
     if (!partRows || partRows.some((x) => !x)) { log(`[raid] ${entry.key}: raidEnemy rows missing, no spawn`); return false; }
-    const level = r.levels[entry.key] || FIRST_LEVEL;
+    const level = (r.levelOcc || {})[entry.key] === entry.start ? r.levels[entry.key] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week) of the entry
     const model = (raidIndex().models || {})[String(entry.modelId).padStart(4, '0')] || {}; // keys are folder names, as in make-raid.js
     r.boss = fight.newBoss({ key: entry.key, tier: entry.tier, stageId: entry.stageId, enemy: body, level, upMinutes: entry.upMinutes, useAp: entry.useAp, nowMs,
       partRows: partRows.map((x) => ({ raidEnemyId: x.raidEnemyId, weakness: x.weakness, hp: atLevel(x, 'hp', level), attribute: x.attribute, rare: x.rare })),
       hasStartDemo: !!model.start, hasEscapeDemo: !!model.escape });
+    r.boss.month = monthOf(nowMs); r.boss.occ = entry.start;
     log(`[raid] boss ${entry.boss || entry.key} appears, LV ${level}`);
     return true;
   }
@@ -306,7 +315,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     return entry ? questApAt(entry, realMs) : null;
   }
 
-  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, boardIds };
+  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, boardIds, monthOf };
 }
 
 // Bench smoke file (save/raid_smoke.json {"key": ...}, written by tmp/raid_p2/smoke_raids.ps1 before every model): only a
