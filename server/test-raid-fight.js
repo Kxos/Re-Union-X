@@ -80,6 +80,15 @@ const tests = {
     const b = mk();
     assert.strictEqual(rf.clearFight(b, sent(b, [0, 1000, 400]), b.endsAt + 5 * MIN).victory, true);
   },
+  lost_after_timer_says_escaped() {
+    const b = mk();
+    assert.strictEqual(rf.clearFight(b, sent(b, [5, 0, 0]), b.endsAt - 1).raidTimeStatus, 1, 'before the timer: give up');
+    const c = mk();
+    assert.strictEqual(rf.clearFight(c, sent(c, [5, 0, 0]), c.endsAt).raidTimeStatus, 2, 'at the timer: escaped');
+    const d = mk();
+    const won = rf.clearFight(d, sent(d, [0, 1000, 400]), d.endsAt + 5 * MIN);
+    assert.strictEqual(won.raidTimeStatus, 3, 'a win past the timer stays a win');
+  },
   expired_boss() {
     let b = mk();
     const late = b.endsAt + 1;

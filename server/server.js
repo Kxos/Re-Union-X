@@ -2307,7 +2307,8 @@ function respondStageClear(res, req) {
   const skipped = !!player.currentStageSkip;
   player.currentStageSkip = 0;
   player.stageScores[stageId] = skipped ? (player.stageScores[stageId] || 0) : Math.max(player.stageScores[stageId] || 0, lux);
-  raid().onStageClear(playedId, req?.getPoint); // Eggcognito points: spawn of the raid boss
+  // Eggcognito points: spawn of the raid boss. A raid error must never turn a quest clear into «200 ERROR :116»
+  try { raid().onStageClear(playedId, req?.getPoint); } catch (e) { console.log(`[raid] onStageClear ${playedId}: ${e.message}`); }
   // EXP di skill del combattimento (getPoint.exp) a ogni medaglia del deck con una skill salvata
   const skillUps = training ? [] : grantDeckSkillExp(Number(req?.getPoint?.exp));
   if (skillUps.length) console.log(`[skill] salite di livello: userSkillId ${skillUps.join(', ')}`);

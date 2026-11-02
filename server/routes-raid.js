@@ -160,24 +160,34 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     });
   }
 
-  // Runs at every opening of the quest screen: bad entries go first. Delivered and removed together, so a repeat call
-  // finds nothing. Titles were granted at /raid/clear: granting again changes nothing and opens no popup.
+  // Runs at every opening of the quest screen: bad entries go first. The entries leave the save before delivery, so a
+  // repeat call finds nothing, and an entry that throws is logged and lost rather than locking the player out of Quests
+  // and paying its first items again at each opening. Titles were granted at /raid/clear: granting again opens no popup.
   function reward(res) {
     const r = state(), now = serverTime();
     const pending = rewards.sanitizePending(r.pending, rewardRow, log);
-    const raidRewards = pending.map((e) => {
-      const snap = inventorySnapshot(now);
-      const rows = { victory: rewardRow(e.rewardIds.victory), mvp: rewardRow(e.rewardIds.mvp), all: e.partAllId ? rewardRow(e.rewardIds.all) : undefined };
-      rewards.deliverEntry(e, rows, { medalCount: medalCount(), cap: medalCap(), grant: grantItem, present: addPresent });
-      const inv = inventoryBlocks(now, snap);
-      const hasParts = rewards.entryItems(e, rows).some((it) => it.type === 20);
-      return { raidId: e.raidId, level: e.level, subdueId: e.subdueId, mvpId: e.mvpId, partAllId: e.partAllId, parts: e.parts || [],
-        userMedals: inv.userMedals, userSkills: inv.userSkills, userTitles: [], userMaterials: inv.userMaterials, userAvatarParts: hasParts ? inv.userAvatarParts : [] };
-    });
     const had = r.pending.length;
     r.pending = [];
+    const raidRewards = [];
+    for (const e of pending) {
+      try {
+        raidRewards.push(deliver(e, now));
+      } catch (err) {
+        log(`[raid] pending ${e.raidId} not delivered: ${err.message}`);
+      }
+    }
     if (had) savePlayer();
     send(res, 200, { ret: ret(), userData: { userPoint: userPointData(now) }, raidRewards, ...guiltLists() });
+  }
+
+  function deliver(e, now) {
+    const snap = inventorySnapshot(now);
+    const rows = { victory: rewardRow(e.rewardIds.victory), mvp: rewardRow(e.rewardIds.mvp), all: e.partAllId ? rewardRow(e.rewardIds.all) : undefined };
+    rewards.deliverEntry(e, rows, { medalCount: medalCount(), cap: medalCap(), grant: grantItem, present: addPresent });
+    const inv = inventoryBlocks(now, snap);
+    const hasParts = rewards.entryItems(e, rows).some((it) => it.type === 20);
+    return { raidId: e.raidId, level: e.level, subdueId: e.subdueId, mvpId: e.mvpId, partAllId: e.partAllId, parts: e.parts || [],
+      userMedals: inv.userMedals, userSkills: inv.userSkills, userTitles: [], userMaterials: inv.userMaterials, userAvatarParts: hasParts ? inv.userAvatarParts : [] };
   }
 
   // The rewards popup calls this after the boss is gone: an empty list crashes, so the player is always there.
@@ -196,7 +206,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     const partRows = body && [body, ...body.parts.slice(0, body.validParts).map(enemyRow)];
     if (!partRows || partRows.some((x) => !x)) { log(`[raid] ${entry.key}: raidEnemy rows missing, no spawn`); return false; }
     const level = r.levels[entry.key] || FIRST_LEVEL;
-    const model = (raidIndex().models || {})[entry.modelId] || {};
+    const model = (raidIndex().models || {})[String(entry.modelId).padStart(4, '0')] || {}; // keys are folder names, as in make-raid.js
     r.boss = fight.newBoss({ key: entry.key, tier: entry.tier, stageId: entry.stageId, enemy: body, level, upMinutes: entry.upMinutes, useAp: entry.useAp, nowMs,
       partRows: partRows.map((x) => ({ raidEnemyId: x.raidEnemyId, weakness: x.weakness, hp: atLevel(x, 'hp', level), attribute: x.attribute, rare: x.rare })),
       hasStartDemo: !!model.start, hasEscapeDemo: !!model.escape });
