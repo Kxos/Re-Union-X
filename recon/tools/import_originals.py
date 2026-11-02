@@ -14,7 +14,8 @@ qui sostituiscono i nostri nel pacchetto generato. Elenco (recon/tools/originals
 - fonti: b16 (pacchetto WW inglese del 2016), jp (dati JP 4.3.1, nomi <nome>.<8 cifre>.<ext>: vince la
   revisione piu' alta, il suffisso si toglie), i440 (file dell'IPA 4.4.0 WW gia' estratti con res_get.py in
   --i440, es. catalog\ipa440_extract), jp501 (estratto dell'OBB JP 5.0.1 in --jp501, tmp/jp501/x: NPC della
-  sezione 45, I-197), separate da virgola in ordine di preferenza;
+  sezione 45, I-197), loc (files generated from originals outside the repo, in --loc, e.g. D:\Progetto_Restauro_KH_UX\raid_loc:
+  the raid demos with the English subtitle of raid_demo_english.py), separate da virgola in ordine di preferenza;
 - sorgente: percorso nella fonte se diverso dalla destinazione (stesso significato di glob e cartella); `=percorso`
   is that exact file, with no revision choice (an older JP revision name.<8 digits>.ext, or the plain name).
 
@@ -93,8 +94,9 @@ def served_names(paths):
     return names
 
 
-def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None):
-    roots = {'b16': (b16, 'b16'), 'jp': (jp, 'jp'), 'i440': (i440 or '', 'i440'), 'jp501': (jp501 or '', 'jp501')}
+def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None, loc=None):
+    roots = {'b16': (b16, 'b16'), 'jp': (jp, 'jp'), 'i440': (i440 or '', 'i440'), 'jp501': (jp501 or '', 'jp501'),
+             'loc': (loc or '', 'loc')}
     report = []
     for r in rows:
         hits, used = [], None
@@ -126,11 +128,12 @@ def main(argv):
     served = served_names(argv[argv.index('--served') + 1].split(',')) if '--served' in argv else frozenset()
     i440 = argv[argv.index('--i440') + 1] if '--i440' in argv else None
     jp501 = argv[argv.index('--jp501') + 1] if '--jp501' in argv else None
-    report = run(rows, b16, jp, out, served, i440, jp501)
+    loc = argv[argv.index('--loc') + 1] if '--loc' in argv else None
+    report = run(rows, b16, jp, out, served, i440, jp501, loc)
     if '--report' in argv:
         json.dump(report, open(argv[argv.index('--report') + 1], 'w', encoding='utf8'), indent=1)
     print('originali: %d righe, %d file (%s)' % (len(report), sum(r['files'] for r in report),
-          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440', 'jp501'))))
+          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440', 'jp501', 'loc'))))
 
 
 if __name__ == '__main__':
