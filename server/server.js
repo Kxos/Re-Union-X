@@ -1749,7 +1749,7 @@ function userPointData(now) {
     baseHp: playerHp(), hp: playerHp(), ap: ap.ap,
     maxHp: playerHp(), maxAp: maxAp(),
     lastApDatetime: serverTimeAt(ap.time), // da qui il client conta la ricarica
-    stageSpherePoint: 0, raidSpherePoint: 0, colosseumSpherePoint: 0,
+    stageSpherePoint: 0, raidSpherePoint: player.raidSpherePoint || 0, colosseumSpherePoint: 0,
     // da qui in poi uint
     specialPoint: 0, stageSkipTicket: player.stageSkipTicket || 0, superSkipTicket: player.superSkipTicket || 0, vipPoint: 0,
     // livello del Burst (pulsante rosso in battaglia, una volta per missione; il client non
@@ -2004,6 +2004,7 @@ function grantItem(type, id, num) {
   } else if (type === 2) player.freeStone = (player.freeStone || 0) + num;
   else if (type === 4) player.money = (player.money || 0) + num;
   else if (type === 14) player.spherePoint = (player.spherePoint || 0) + num;
+  else if (type === 15) player.raidSpherePoint = (player.raidSpherePoint || 0) + num; // Raid Coin (userPoint.raidSpherePoint)
   else if (type === 26) player.stageSkipTicket = (player.stageSkipTicket || 0) + num; // Skip Ticket (testo 102600058)
   else if (type === 28) player.superSkipTicket = (player.superSkipTicket || 0) + num; // Skip Ticket+ (102600065, «Force Skip»)
   // 11 Lux (testo 100200001)
