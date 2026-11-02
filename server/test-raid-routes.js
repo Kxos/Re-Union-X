@@ -108,6 +108,15 @@ const tests = {
     assert.strictEqual(w.player.raid.boss, null);
     assert(w.logs.some((l) => /dropped/.test(l)));
   },
+  orphan_boss_not_advertised() {
+    // a stored boss whose entry left the master (a model withheld after it spawned): the home's «Active request!» must not
+    // offer it, since starting it would crash the client
+    const w = world();
+    w.spawn();
+    w.tables.stage = [];
+    assert.strictEqual(w.call('notice').raidNotice.isSelfRaid, 0);
+    assert.strictEqual(w.player.raid.boss, null);
+  },
   start_charges_ap() {
     const w = world();
     w.spawn(); w.call('list');

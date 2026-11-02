@@ -229,6 +229,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   function notice(res) {
     const r = state(), nowMs = realNow();
     forceSmoke(r, nowMs);
+    dropOrphan(r);
     send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: alive(r.boss, nowMs) ? 1 : 0, isOthersRaid: 0 } });
   }
 

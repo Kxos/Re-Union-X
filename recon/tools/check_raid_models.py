@@ -10,6 +10,9 @@ exists next to it. Per model id the output has four flags:
     escape    lwf/raid/demo/escape_<id>     (played when raidStatus is 2)
     put_down  lwf/raid/demo/put_down_<id>   (played on every win; loaded without a null check)
 
+    slots     weak points of the wait LWF (see weak_slots); only when the LWF is on disk. make-raid.js keeps a boss
+              only if each slot N > 1 has a part of weakness N (a missing one crashes the client at fight load)
+
 A boss is AVAILABLE when fight and put_down are true. start / escape false only mean the server must never send
 raidStatus 4 / 2 for it. Models checked: those in --models (default recon/tools/raid_models.txt, one id per line,
 # comments) plus every folder found under lwf/character/raid.
@@ -41,6 +44,64 @@ def lwf_textures(data):
         if 0 <= idx < sn:
             names.append(strs[idx])
     return names
+
+
+def _section(data, k, width):
+    off, n = struct.unpack_from('<ii', data, 32 + 8 * k)
+    return [struct.unpack_from('<%di' % width, data, off + 4 * width * i) for i in range(n)]
+
+
+def weak_slots(path):
+    """Weak points of a raid model: N for every movie instance named parts<N> that holds a 'center' or 'attack' instance,
+    in any frame of the LWF. At fight load the client searches parts1-parts6 under 'char' and, for each one found, reads the
+    part in slot N and looks up its raidEnemy row (an empty slot is a null row: crash, docs/notes/raid.md «Weak points»).
+    Movies named parts<N> that hold only a picture are not weak points (Jack in the Box parts4/5, Darkside Omega).
+    None when the file has no movie tree (or is not an LWF)."""
+    try:
+        with open(path, 'rb') as f:
+            data = f.read()
+        sb = struct.unpack_from('<i', data, 32)[0]
+        strs = []
+        for o, n in _section(data, 35, 2):
+            strs.append(data[sb + o:sb + o + n].decode('utf-8', 'replace'))
+        inst = [strs[x[0]] for x in _section(data, 24, 1)]
+        objs, places = _section(data, 7, 2), _section(data, 26, 4)
+        moves = {1: _section(data, 27, 2), 2: _section(data, 28, 2), 3: _section(data, 29, 3)}
+        ctrls, frames, movies = _section(data, 30, 2), _section(data, 31, 2), _section(data, 33, 7)
+    except (struct.error, IndexError, OSError):
+        return None
+    if not movies:
+        return None
+    # per movie: (instance name, child movie id or None) of every placement in any frame
+    kids = []
+    for m in movies:
+        seen = set()
+        fo, fn = m[3], m[4]
+        for co, cn in frames[fo:fo + fn]:
+            for ct, cid in ctrls[co:co + cn]:
+                if ct == 0:
+                    p = cid
+                elif ct in moves and 0 <= cid < len(moves[ct]):
+                    p = moves[ct][cid][0]
+                else:
+                    continue                       # animation and other controls place nothing
+                if not 0 <= p < len(places):
+                    continue
+                _, oid, iid, _ = places[p]
+                oid &= 0xffff                      # high bits are flags (format 0x12: bit 31; 0x13: more)
+                if oid >= len(objs):
+                    continue
+                ot, oo = objs[oid]
+                name = inst[iid] if 0 <= iid < len(inst) else None
+                seen.add((name, oo if ot == 2 else None))
+        kids.append(seen)
+    marked = {i for i, s in enumerate(kids) if any(n in ('center', 'attack') for n, _ in s)}
+    out = set()
+    for s in kids:
+        for n, child in s:
+            if n and n.startswith('parts') and n[5:].isdigit() and child in marked:
+                out.add(int(n[5:]))
+    return sorted(out)
 
 
 def folder_ok(folder, name, served=None, rel=None, notes=None):
@@ -79,7 +140,11 @@ def check_model(files_dir, mid, served=None, notes=None):
     for k in DEMOS:
         name = '%s_%s' % (k, mid)
         res[k] = folder_ok(os.path.join(files_dir, 'lwf', 'raid', 'demo', name), name, served, 'lwf/raid/demo/' + name, notes)
-    return {k: res[k] for k in ('fight', 'start', 'escape', 'put_down')}
+    out = {k: res[k] for k in ('fight', 'start', 'escape', 'put_down')}
+    slots = weak_slots(os.path.join(base, 'wait', 'wait.lwf'))
+    if slots is not None:
+        out['slots'] = slots
+    return out
 
 
 def read_served(spec):

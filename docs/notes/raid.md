@@ -44,6 +44,14 @@ Shared: `Info` = `raidId` uint64, `level`, `useAp`, `timeLeft` and `feverTime` (
   action 120 runs opening the quest screen, so a bad pending reward could block that screen.
 - `raidEnemy.weakness` is the part's slot: send `parts[]` sorted so that index = `weakness - 1`, `partsId` = `weakness`.
 - The model is `raidDisplayId % 10000`. Part positions come from movies named in the model's LWF, so there is no hitbox table to serve.
+- <a id="weak-points"></a>**Weak points.** At fight load the client searches `parts1`-`parts6` under the `char` movie of the boss LWF and,
+  for each one found, takes the part in slot N (filled from the parts by `weakness`) and looks up its `raidEnemy` row to size
+  the tap marker. An empty slot gives id 0, the lookup returns nothing and the client dereferences it: SIGSEGV, fault address
+  0x10 (bench, 2 November: Queen Bee, Queen Bee Ω, Lion Headliner). So every weak point of the model needs a part of that
+  weakness. A weak point is a `parts<N>` movie that holds a `center` or `attack` marker; `parts<N>` movies with only a picture
+  (Jack in the Box, Darkside Ω `parts4`/`parts5`) are not found as weak points (26 of 26 smoked models agree with this rule).
+  `check_raid_models.py` writes them as `slots`, and `make-raid.js` marks an entry `parts` (unavailable, `missingSlots`) when a
+  slot has no part. An extra part with no weak point is harmless (Jack in the Box: 2 weak points, 3 parts).
 
 ## Resources
 
@@ -126,7 +134,7 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - **Titles** in a reward go out at `/raid/clear`, so the popup opens before RAID RESULTS; everything else is delivered at the first `/raid/reward` after the win, and the entry leaves the save with it.
 - **A fight lost past `timeLeft`** answers `raidTimeStatus` 2 (the boss has escaped) and `/raid/list` still plays the flee; a win past it stays 3. An entry that throws at `/raid/reward` is logged and lost, so the quest screen keeps working and nothing is paid twice.
 - **`/raid/member`**: `damage` is the sum of `parts[].damage` the client reported on that boss, kept in `player.raid.lastFight` after the boss is gone.
-- **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list`, since the client would crash on it.
+- **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list` and `/user/notice` (so the home's «Active request!» never offers it), since the client would crash on it.
 - **Banner.** `/web/raid/img/<evStageId>.png` from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404.
 
 ## Calendar (Part 2, Task 8: tests only, bench pending)
@@ -139,7 +147,7 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - **Families:** `raids.json` holds the Weekly and Radiant Reward rows plus the 3 pre-series rows of September and October 2018, every WW row with week data. `make-raid.js` builds all of them; `onlyCensusIds` in `raid_config.json` is now only a filter for tests and benches. Weekend-only and Daily raids, which open only on the real weekend or day, come with Task 10; `nowMs` is reserved for them.
 - **Bench smoke:** `server/save/raid_smoke.json` `{"key": "<entry key>"}` makes `/user/notice` and `/raid/list` force that entry's boss, whatever the week, replacing a stored boss of another key. It exists only on the bench (a script writes it before every model and removes it at the end). Only a file younger than 2 hours counts, so one left behind by a killed script is ignored (logged once) and cannot take over normal play; without the file nothing changes.
 - **A quest of another week still counts** when it is played, because its screen may stay open across the Monday. The kept raid of the Raid Catalog (Task 9) keeps its boards beside the current ones.
-- **Coverage, 2 November 2026** (`raid_models.json` with 29 models, templates below): 93 census rows with an available tier, 243 of 344 tier rows. The other 101 tier rows (16 bosses) are `graphics`. Along the story, 104 of the 150 Shop weeks from 2018-08-30 list a raid; the other 46 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
+- **Coverage, 2 November 2026** (`raid_models.json` with 29 models, templates below): 93 census rows with an available tier, 243 of 344 tier rows. The other 101 tier rows (16 bosses) are `graphics`. After the weak-point check (master revision 234): 87 census rows, 230 tier rows; 13 more are `parts` (Queen Bee, Queen Bee Ω, Lion Headliner). Along the story, 104 of the 150 Shop weeks from 2018-08-30 list a raid; the other 46 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
 - **Templates** (`modelTemplates`, inferred from the LWFs, medium-high confidence): Scourge, Wicked and Malicious Spider (9101-9103) use row `5000` Enraged Arachnid. The three share one rig, and `5000` is the 2016 recolour that already reused Savage Spider's moves. Egg Master (1008) uses `0007` Trickmaster: identical frame counts in all five fight animations, 2 parts. The spiders keep the attribute of their colour (`bossAttributes`: red Power, green Speed, blue Magic, as the census reads it), labelled `attribute`; Egg Master keeps Trickmaster's.
 - **Size:** all rows add about 2.4 MB to the master (243 stage, 93 evStage, 243 raidSetting, 810 raidEnemy, 945 raidReward, 42 raidEnemyAttack, 245 Raid Boards).
 
@@ -184,6 +192,18 @@ Final results of the spike, 1 November (user):
 
 ## Bench smoke 2 Nov
 
-Task 8 Step 5, master rev 233, resources 93, save `raid2` (maxpower party). Every available raid model was forced with `save/raid_smoke.json` (one entry per model, lowest tier) and taken to the fight: 26 models tried, **23 load** (`0001`-`0005`, `0007`-`0010`, `0012`, `0014`, `1000`-`1004`, `1006`-`1010`, `9102`, `9103`), **3 crash** the client on fight load: `0015` Queen Bee, `0016` Queen Bee Omega, `1005` Lion Headliner (reproduced). All three crashes are the same SIGSEGV null pointer (`fault addr 0x10`, frames `af9e24`/`eff5bc`/`146c57c`) after `/raid/start` and before the battle HUD; other bosses on the same maps load, so the cause is in the three models' data (asset or animation), still to analyse. Until then those three entries should not be offered.
+Task 8 Step 5, master rev 233, resources 93, save `raid2` (maxpower party). Every available raid model was forced with `save/raid_smoke.json` (one entry per model, lowest tier) and taken to the fight: 26 models tried, **23 load** (`0001`-`0005`, `0007`-`0010`, `0012`, `0014`, `1000`-`1004`, `1006`-`1010`, `9102`, `9103`), **3 crash** the client on fight load: `0015` Queen Bee, `0016` Queen Bee Omega, `1005` Lion Headliner (reproduced). All three crashes are the same SIGSEGV null pointer (`fault addr 0x10`, frames `af9e24`/`eff5bc`/`146c57c`) after `/raid/start` and before the battle HUD; other bosses on the same maps load, so the cause is in the three models' data.
+
+**Cause (found 2 November, [Weak points](#weak-points)):** the three models have more weak points than the 2016 rows have parts.
+Queen Bee and Queen Bee Ω: `parts1`-`parts5` (the July 2016 four-bee version), row with 1 part (the April 2016 version);
+Lion Headliner: `parts1`-`parts5`, row with 2 parts (R arm, L arm). The client looks up the `raidEnemy` row of the part in each
+weak point's slot; the empty slots give id 0, no row, null pointer. The crash frames are that lookup (master getter of the
+`raidEnemy` table, then a read at +0x10 of the missing row) inside the tap-marker constructor the fight calls per weak point.
+The original part rows of those versions are not known, so the three models are withheld (`why: parts`, 13 tier rows: Queen Bee
+4, Queen Bee Ω 2, Lion Headliner 7) until rows for the missing parts are found or the user chooses to reconstruct them. Master
+revision 234; bench: the stored Lion Headliner boss of `raid2` is dropped at `/user/notice`, the home shows no «Active request!»
+and the game stays up. Not yet seen on the bench: Darkside Ω's `atk1` holds weak points 4 and 5 that its `wait` does not; the
+fight reads the weak points once at load, so this is expected to be harmless, but no Darkside Ω fight has run long enough to
+show its first attack.
 
 Bench facts from the run: the forced boss shows the «ENCOUNTER» screen, which stays until tapped (no SKIP); the home does not poll `/user/notice`, so a new boss needs a relaunch or `/raid/list`; after a clear or a Give Up the game goes back to the RAID BOSS ALERT list; OPTIONS (1820,48), Give Up (1172,505), Withdraw OK (1220,708). The script and the per-model table stay in the private bench folder (`tmp/raid_p2`, `SMOKE.md`).

@@ -6,7 +6,7 @@
 //   model ids), raid_values.json (weeks, quests, HP), RAID_VALUES.md (part HP), raid_rewards/CORRECTIONS.md;
 // - the 2016 rows (KHUX_RAID_2016): raidEnemy, raidEnemyAttack;
 // - server/game_data/raid_models.json (model completeness): available = fight && put_down. No file: every boss is
-//   unavailable, with a warning.
+//   unavailable, with a warning. `slots` (weak points of the model) must all have a part, else the entry is `parts`.
 // One entry per tier row of a census row; every WW row with week data is built (onlyCensusIds of raid_config.json is a filter
 // for tests and benches, absent in the shipped file). Which rows run in the player's week is raid-calendar.js's business: it
 // reads censusId, start and end of the entries. Ids come from server/raid_ids.json (versioned, append-only), because they live in
@@ -320,6 +320,14 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const knots = single ? single.knots : null;
       const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single });
       if (rows.why) { entry.why = rows.why; return; }
+      // every weak point of the model (raid_models.json `slots`, parts<N> of its wait LWF) needs a part of weakness N: at fight
+      // load the client looks up a raidEnemy row for each one and crashes on an empty slot (docs/notes/raid.md «Weak points»)
+      const slots = m && Array.isArray(m.slots) ? m.slots : null;
+      if (slots) {
+        const have = new Set([1, ...rows.partRows.map((p) => p.weakness)]);
+        const lack = slots.filter((s) => !have.has(s));
+        if (lack.length) { entry.why = 'parts'; entry.missingSlots = lack; return; }
+      }
       // a boss on another boss's row (modelTemplates) keeps its own attribute where raid_config.json bossAttributes states it
       const attribute = (config.bossAttributes || {})[w.boss];
       if (attribute && !own) {
