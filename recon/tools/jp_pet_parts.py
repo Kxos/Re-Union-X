@@ -7,6 +7,10 @@ uguali sono stati tenuti una volta sola: 445 LWF e qualche texture mancano nelle
 che li condividono con un'altra (stessa specie: 001, 002 e 015 sono tutte «neko»). Si recuperano dalla
 cartella gemella con la stessa parte, la stessa texture (nome e dimensioni) e il numero piu' vicino;
 7 LWF hanno gemelle che differiscono di pochi float (posizioni): si prende la piu' vicina.
+Accessories (2 Nov 2026): a texture missing from every pet folder is taken from the avatar accessory of the
+same item (lwf/avatar/accessory/*/*) when exactly one avatar file has the same texture name (without the
+part prefix) and the same size: the dump kept the identical file once, under the avatar part (Balloon
+Mike & Sulley 407026 = avatar 208106, Balloon Axel 407047 = avatar 208137). Report key `avatar_twin`.
 
     python -I recon/tools/jp_pet_parts.py <JP_ROOT> (resoconto, non scrive nulla)
 """
@@ -17,6 +21,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REV = re.compile(r'^(.*?)(?:\.(\d{8}))?\.(png|lwf)$')
+GENERIC = 'ビットマップ'.encode().hex()  # hex of the Flash default texture name «ビットマップ N.png»
 
 
 def _latest(files):
@@ -84,7 +89,27 @@ def collect(jp_root, served=()):
     def nearest(cands, series):
         return min(cands, key=lambda c: (abs(_num(c[0]) - _num(series)), c[0]))[1]
 
-    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'skipped': []}
+    # avatar accessory textures: (name without the part prefix, size) -> [paths]
+    av_root = os.path.join(jp_root, 'lwf', 'avatar', 'accessory')
+    av_png = {}
+    for aid in sorted(os.listdir(av_root)) if os.path.isdir(av_root) else []:
+        ad = os.path.join(av_root, aid)
+        for part in sorted(os.listdir(ad)) if os.path.isdir(ad) else []:
+            pd = os.path.join(ad, part)
+            if not os.path.isdir(pd):
+                continue
+            for name, path in _latest(os.listdir(pd)).items():
+                if name.endswith('.png') and name.startswith(part + '_'):
+                    av_png.setdefault((name[len(part) + 1:], _png_size(os.path.join(pd, path))), []).append(os.path.join(pd, path))
+
+    def avatar_twin(part, name, size):
+        # never by a Flash default name («ビットマップ N.png», bitmap N): it says nothing about the picture
+        if not name.startswith(part + '_') or name[len(part) + 1:].startswith(GENERIC):
+            return None
+        cands = av_png.get((name[len(part) + 1:], tuple(size)), [])
+        return cands[0] if len(cands) == 1 else None
+
+    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'skipped': []}
     for (series, part), files in sorted(dirs.items()):
         base = 'lwf/pet/part/%s/%s/' % (series, part)
         if base + part + '.lwf' in served:
@@ -105,7 +130,12 @@ def collect(jp_root, served=()):
                 continue
             cands = png_by_key.get((name, tuple(size)), [])
             if not cands:
-                break
+                av = avatar_twin(part, name, size) if len(series) == 6 else None  # accessories only
+                if not av:
+                    break
+                pick[name] = av
+                report['avatar_twin'].append((series, part, os.path.relpath(av, jp_root)))
+                continue
             pick[name] = nearest(cands, series)
             report['png_twin'].append((series, part, os.path.relpath(pick[name], root)))
         else:
@@ -133,6 +163,8 @@ if __name__ == '__main__':
         sum(k.endswith('.png') and k.startswith('lwf/') for k in files),
         sum(k.startswith('img/') for k in files)))
     print('LWF dalla gemella: %d, texture dalla gemella: %d' % (len(rep['lwf_twin']), len(rep['png_twin'])))
+    for s in rep['avatar_twin']:
+        print('  avatar twin', *s)
     for s in rep['skipped']:
         print('  saltata', *s)
     print('serie escluse:', ' '.join(rep['missing_series']))
