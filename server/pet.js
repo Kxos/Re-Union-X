@@ -69,8 +69,21 @@ const ALL_PARTS = process.env.KHUX_PET_ALL_PARTS === '1';
 // Spirit Training (I-082). Valori NOSTRI: nessun dump delle risposte originali.
 // - attesa tra due allenamenti (khwiki: un trait ogni 20 ore), in ore
 const TRAIN_HOURS = Number(process.env.KHUX_PET_TRAIN_HOURS || 20);
-// - slot aperti oltre al primo (sempre aperto): 2-4 si sbloccavano con acquisti
-//   (Weekly Jewels, 10 draw, Jewel Box E) che il nostro server non vende; 1 = solo il primo
+// - slot 2-4 (lo slot 1 e' sempre aperto). Originale (notice NA 2019.04.22 «Information On Spirit Training», notice
+//   [WJE] 2019.07.29 «Unlock a Spirit Training slot!», khuxwiki Pet_System, testi del dialog «Training Slots»):
+//   2 = acquisto Weekly Jewels / Jewel Box + (il pass VIP settimanale) fino a domenica 23:59 PT; 3 = 5 estrazioni
+//   da 10 medaglie dei Deal a tempo (non i Ticket Draw), aperto 72 ore dalla quinta, le estrazioni fatte a slot
+//   aperto non contano; 4 = acquisto Jewel Box E, fino a fine mese. Qui niente acquisti: tabella delle regole
+//   (TRAIN_SLOT_RULES, decisione dell'utente 02-11): 2 = il nostro VIP settimanale (I-134, fino alla sua fine),
+//   3 = la regola originale delle estrazioni, 4 = tutte le missioni Limited mensili (Lux) del mese M completate,
+//   per il resto di M e tutto M+1 (come il VIP con le settimane). unlock: 'vip' (ctx.vipUntil), 'draws' (need,
+//   hours: player.pet.training.draws), 'monthly' (ctx.monthlyUntil), null = chiuso. Per cambiare una regola basta questa tabella.
+const TRAIN_SLOT_RULES = [
+  { slot: 2, unlock: 'vip' },
+  { slot: 3, unlock: 'draws', need: 5, hours: 72 },
+  { slot: 4, unlock: 'monthly' },
+];
+// KHUX_PET_TRAIN_SLOTS=N (prove al banco): slot 2..N aperti comunque fino a fine mese; 1 = solo le regole
 const TRAIN_SLOTS = Math.min(4, Math.max(1, Number(process.env.KHUX_PET_TRAIN_SLOTS || 1)));
 // - jewel chiesti da «Train Now» per riavviare subito (recoverStoneNum, testo 106200405); non
 //   vengono scalati
@@ -92,7 +105,8 @@ function routePet(p) {
 }
 
 // ctx: { ret, send, serverTime, masterRows, player, savePlayer, userMedalList, userMedalElement,
-//        schemaResponse, realNow, outTime, monthIndex, weekEnd, monthEnd }
+//        schemaResponse, realNow, outTime, monthIndex, weekEnd, monthEnd, vipUntil (ms reali di fine del VIP o 0),
+//        monthlyUntil (ms reali di fine dello slot 4 o 0) }
 function makePet(ctx) {
   const { player } = ctx;
 
@@ -207,9 +221,50 @@ function makePet(ctx) {
   // istanti salvati in ms reali (ctx.realNow); verso il client ctx.outTime li rende in ora finta
   function training() {
     const t = (state().training ||= { total: 0, monthly: 0, month: '', readyAt: 0, medals: [] });
-    const month = ctx.monthIndex(ctx.realNow());
+    const nowMs = ctx.realNow();
+    const month = ctx.monthIndex(nowMs);
     if (t.month !== month) { t.month = month; t.monthly = 0; }   // conteggio del mese
+    // readyAt piu' lontano di TRAIN_HOURS da adesso = orologio tornato indietro (es. un banco con -RealNow avanti
+    // di 37 giorni: «Training Ready in 906:46:26»): non valido, allenamento pronto
+    if (t.readyAt > nowMs + TRAIN_HOURS * HOUR) {
+      console.log(`  [pet] training: readyAt ${new Date(t.readyAt).toISOString()} oltre ${TRAIN_HOURS} ore, azzerato`);
+      t.readyAt = 0;
+      ctx.savePlayer();
+    }
     return t;
+  }
+
+  // Slot dello Spirit Training aperti adesso (TRAIN_SLOT_RULES): [{slot, until (ms reali)}], slot 1 escluso
+  function trainSlotsOpen(t, nowMs) {
+    const out = [];
+    for (const r of TRAIN_SLOT_RULES) {
+      let until = 0;
+      if (r.slot <= TRAIN_SLOTS) until = ctx.monthEnd(nowMs);
+      else if (r.unlock === 'vip') until = (ctx.vipUntil && ctx.vipUntil(nowMs)) || 0;
+      else if (r.unlock === 'draws') until = t.draws?.openUntil || 0;
+      else if (r.unlock === 'monthly') until = (ctx.monthlyUntil && ctx.monthlyUntil(nowMs)) || 0;
+      if (until > nowMs) out.push({ slot: r.slot, until });
+    }
+    return out;
+  }
+
+  // Estrazione riuscita (server.js respondGachaDraw): conta per la regola 'draws' solo un Deal da 10 medaglie pagato
+  // in Jewel (payType 1; non Ticket Draw, non i Free Deal giornalieri: freeDaily), e non mentre lo slot e' aperto
+  function noteDraw({ payType, lotCount, freeDaily }) {
+    const rule = TRAIN_SLOT_RULES.find((r) => r.unlock === 'draws');
+    if (!rule || payType !== 1 || lotCount !== 10 || freeDaily) return false;
+    const t = training();
+    const nowMs = ctx.realNow();
+    const d = (t.draws ||= { count: 0, openUntil: 0 });
+    if (d.openUntil > nowMs) return false;
+    d.count += 1;
+    if (d.count >= rule.need) { d.count = 0; d.openUntil = nowMs + rule.hours * HOUR; }
+    return true;
+  }
+  function drawsLeft(t, nowMs) {
+    const rule = TRAIN_SLOT_RULES.find((r) => r.unlock === 'draws');
+    if (!rule) return 0;
+    return t.draws?.openUntil > nowMs ? rule.need : rule.need - (t.draws?.count || 0);
   }
 
   // GET /pet/profile (170)
@@ -316,7 +371,8 @@ function makePet(ctx) {
     }
     if (String(method).toUpperCase() === 'POST') {
       const owned = new Map(ctx.userMedalList().map((m) => [m.userMedalId, m]));
-      const ids = (body?.userMedalIds || []).map(Number).filter((id) => owned.has(id)).slice(0, 4);
+      // al massimo una medaglia per slot aperto (1 + TRAIN_SLOT_RULES aperte)
+      const ids = (body?.userMedalIds || []).map(Number).filter((id) => owned.has(id)).slice(0, 1 + trainSlotsOpen(t, nowMs).length);
       const got = ids.map((id) => spiritTrait(t, id));
       t.medals = ids;
       t.total += 1;
@@ -336,17 +392,17 @@ function makePet(ctx) {
           : { userShuffleSkills: [], resumptionStatus: 0 },
       });
     }
-    // GET: slot 2..TRAIN_SLOTS aperti fino a fine mese; scadenze settimana/mese
-    const weekEnd = ctx.weekEnd(nowMs);
-    const monthEnd = ctx.monthEnd(nowMs);
-    const slots = [];
-    for (let n = 2; n <= TRAIN_SLOTS; n++) slots.push({ openMedalSlotNumber: n, openMedalSlotLimitDatetime: ctx.outTime(monthEnd) });
+    // GET: slot aperti dalle regole (TRAIN_SLOT_RULES) con la loro scadenza; limitDateimeWeekEnd/MonthEnd = scadenze
+    // mostrate sugli slot 2 e 4 chiusi; remainingDrawCount = estrazioni da 10 che mancano per lo slot 3
+    const slots = trainSlotsOpen(t, nowMs)
+      .map((s) => ({ openMedalSlotNumber: s.slot, openMedalSlotLimitDatetime: ctx.outTime(s.until) }));
     return ctx.send(res, 200, {
       ret: ctx.ret(),
       openMedalSlotDatas: slots,
-      limitDateimeWeekEnd: ctx.outTime(weekEnd),
-      limitDateimeMonthEnd: ctx.outTime(monthEnd),
-      remainingDrawCount: 10,
+      // slot 2: il nostro VIP guadagnato adesso vale fino alla fine della settimana dopo (vip-benefit.js)
+      limitDateimeWeekEnd: ctx.outTime(ctx.weekEnd(nowMs) + 7 * 24 * HOUR),
+      limitDateimeMonthEnd: ctx.outTime(ctx.monthEnd(nowMs)),
+      remainingDrawCount: drawsLeft(t, nowMs),
     });
   }
 
@@ -433,7 +489,7 @@ function makePet(ctx) {
   return {
     respondProfile, respondParts, respondCoordinateAll, respondCoordinateUpdate, respondName,
     respondSubslot, respondPreremove, onMedalRemoved, petSubslotData, respondExpedition,
-    ownedParts, grantPart,
+    ownedParts, grantPart, noteDraw, trainSlotsOpen: (nowMs = ctx.realNow()) => trainSlotsOpen(training(), nowMs),
   };
 }
 
@@ -449,4 +505,4 @@ function setPetBaseSlotMedal(player, userKeybladeId, value) {
   (player.petBaseSlots = player.petBaseSlots || {})[userKeybladeId] = Number(value) || 0;
 }
 
-module.exports = { ENABLED, routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal };
+module.exports = { ENABLED, routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, TRAIN_SLOT_RULES };
