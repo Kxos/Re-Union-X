@@ -241,3 +241,11 @@ fight reads the weak points once at load, so this is expected to be harmless, bu
 show its first attack.
 
 Bench facts from the run: the forced boss shows the «ENCOUNTER» screen, which stays until tapped (no SKIP); the home does not poll `/user/notice`, so a new boss needs a relaunch or `/raid/list`; after a clear or a Give Up the game goes back to the RAID BOSS ALERT list; OPTIONS (1820,48), Give Up (1172,505), Withdraw OK (1220,708). The script and the per-model table stay in the private bench folder (`tmp/raid_p2`, `SMOKE.md`).
+
+## Bench smoke rev 236
+
+Master rev 236, resources 96, save `raid2` (maxpower party), 2 November. Every model with an available entry was forced with `save/raid_smoke.json` (lowest tier) and taken to the fight: **42 models tried, 42 load, 0 crashes** (no tombstone). This includes the 19 never benched before: Queen Bee `0015`, Queen Bee Ω `0016`, Lion Headliner `1005` (crashed at rev 233, fixed by the rev 235 revisions), Scourge Spider `9101` and the 15 reconstructed bosses `0018`-`0028`, `0030`-`0032`, `1011`.
+
+Part bars (counted about 1 s after the first HUD frame; the first frame never shows them) match the expected count (weak points minus the body) wherever the screen was not covered: Queen Bee and Queen Bee Ω 1, Lion Headliner 2, Wicked and Malicious Spider 4, every reconstructed boss as its template (Assault Dragon, Adventurer, Gear Golem, Heartless Tsum, Greedy Grouch, Mysterious Sir 2; Jewel Princess 4; Closehanded Captain 3; the seven on the Behemoth or Queen Bee template 1). On some 2016 bosses a Special cut-in hid part of the screen, so fewer bars were seen there (none more than expected). One extra: Darkside (`0001`) shows one bar on its hand although `raid_models.json` lists no slots for it; it loads, so harmless.
+
+Seen on the way: the RAID BOSS ALERT card of Assault Dragon shows the layout's default Darkside picture (no list banner for `0018`). The per-model table and screenshots stay in the private bench folder (`tmp/raid_p2`, `SMOKE2.md`).
