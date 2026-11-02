@@ -333,6 +333,23 @@ const tests = {
     assert.ok(none.index.entries.every((x) => !x.available && x.why === 'graphics'));
     assert.deepStrictEqual([none.stageRows.length, none.enemyRows.length, none.evStageRows.length, none.maps.length], [0, 0, 0, 0]);
   },
+  weak_points_need_a_part() {
+    // slots of raid_models.json: the model's weak points (parts<N> of the wait LWF). The client dereferences a raidEnemy row
+    // for every one of them at fight load, so a slot with no part of that weakness crashes it (Queen Bee, Lion Headliner).
+    const ok = build((f) => { f.models['0007'].slots = [1, 2, 3]; f.models[1003].slots = [1, 2]; });
+    assert.deepStrictEqual(ok.index.entries.map((e) => [e.boss, e.available]), [['Trickmaster', true], ['Blue Trident Tail', true]]);
+    // an extra part with no weak point in the model is harmless (Jack in the Box: 2 weak points, 3 parts)
+    assert.strictEqual(entry(build((f) => { f.models['0007'].slots = [1, 2]; }), 'Trickmaster').available, true);
+    const out = build((f) => { f.models['0007'].slots = [1, 2, 3, 4, 5]; });
+    const e = entry(out, 'Trickmaster');
+    assert.deepStrictEqual([e.available, e.why, e.missingSlots], [false, 'parts', [4, 5]]);
+    assert.ok(!enemyOf(out, e.enemyId));
+    assert.ok(!out.stageRows.some((r) => r.stageId === e.stageId));
+    assert.ok(!out.settingRows.some((r) => r.raidSettingId === e.settingId));
+    assert.strictEqual(entry(out, 'Blue Trident Tail').available, true, 'the other boss stays');
+    // no slots in the file (LWF in the base resources, not parsed): no check
+    assert.strictEqual(entry(build(), 'Trickmaster').available, true);
+  },
   model_key_is_four_digits() {
     const out = build((f) => { f.models = { '0007': { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true } }; });
     assert.deepStrictEqual(out.index.entries.map((e) => [e.modelId, e.available, e.why]), [[7, true, null], [1003, true, null]]);

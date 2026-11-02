@@ -31,6 +31,57 @@ def fake_lwf(names):
     return bytes(head) + strdata + body
 
 
+def tree_lwf(movies, root):
+    """LWF with a display tree and no texture. movies: {movieId: [(instanceName or None, objType, objId), ...]} (one frame
+    each, objType 2 = movie, 3 = bitmap); root: the root movie id. Sections as check_raid_models reads them."""
+    names, inst, objs, places, ctrls, frames, mv = [], [], [], [], [], [], []
+
+    def sid(s):
+        if s not in names:
+            names.append(s)
+        return names.index(s)
+    for mid in range(max(movies) + 1):
+        items = movies.get(mid, [])
+        frames.append((len(ctrls), len(items)))
+        for n, ot, oo in items:
+            iid = -1
+            if n is not None:
+                if sid(n) not in inst:
+                    inst.append(sid(n))
+                iid = inst.index(sid(n))
+            objs.append((ot, oo))
+            places.append((0, (len(objs) - 1) | -0x80000000, iid, 0))
+            ctrls.append((0, len(places) - 1))
+        mv.append((len(items), 0, 0, mid, 1, 0, 0))
+    strdata = b''
+    ent = []
+    for s in names:
+        ent.append((len(strdata), len(s.encode())))
+        strdata += s.encode()
+    secs = {7: (objs, 2), 24: ([(x,) for x in inst], 1), 26: (places, 4), 30: (ctrls, 2), 31: (frames, 2), 33: (mv, 7), 35: (ent, 2)}
+    head = bytearray(324)
+    struct.pack_into('<i', head, 20, root)
+    struct.pack_into('<ii', head, 32, 324, len(strdata))
+    body = bytearray(strdata)
+    for k in range(36):
+        rows, w = secs.get(k, ([], 1))
+        struct.pack_into('<ii', head, 32 + 8 * k, 324 + len(body) if k else 324, len(rows))
+        for r in rows:
+            body += struct.pack('<%di' % w, *r)
+    return bytes(head) + bytes(body)
+
+
+def weak_model(root, mid, live, decor=()):
+    """Model whose wait LWF has char > all > parts<N>: live ones hold center + attack, decor ones only a bitmap."""
+    movies = {0: [('center', 3, 0), ('attack', 3, 1)], 1: [(None, 3, 2)]}
+    alln = 2
+    movies[alln] = [('parts%d' % n, 2, 0) for n in live] + [('parts%d' % n, 2, 1) for n in decor]
+    movies[3] = [('all', 2, alln)]
+    movies[4] = [('char', 2, 3)]
+    full_model(root, mid)
+    put(root, 'lwf/character/raid/%s/wait/wait.lwf' % mid, tree_lwf(movies, 4))
+
+
 def put(root, rel, data=b'x'):
     p = os.path.join(root, *rel.split('/'))
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -110,6 +161,22 @@ class Check(unittest.TestCase):
             self.assertFalse(crm.check_model(d, '0006', set())['put_down'])
             self.assertTrue(crm.check_model(d, '0006', {'lwf/raid/demo/put_down_0006/b.png'})['put_down'])
             self.assertFalse(crm.check_model(d, '0006', {'lwf/raid/demo/put_down_0006/zzz.png'})['put_down'])
+
+    def test_weak_point_slots(self):
+        # Lion Headliner 1005: five weak points (parts1-5 with center/attack); Jack in the Box 1004: parts4/5 are bitmap only
+        with tempfile.TemporaryDirectory() as d:
+            weak_model(d, '1005', [1, 2, 3, 4, 5])
+            weak_model(d, '1004', [1, 2], decor=[3, 4, 5])
+            self.assertEqual(crm.check_model(d, '1005')['slots'], [1, 2, 3, 4, 5])
+            self.assertEqual(crm.check_model(d, '1004')['slots'], [1, 2])
+            self.assertEqual(crm.weak_slots(os.path.join(d, 'lwf', 'character', 'raid', '1005', 'wait', 'wait.lwf')), [1, 2, 3, 4, 5])
+
+    def test_no_slots_without_a_tree(self):
+        # texture-only LWF (no movie) or no LWF on disk: no `slots` key, make-raid.js then skips the check
+        with tempfile.TemporaryDirectory() as d:
+            full_model(d, '0001')
+            self.assertNotIn('slots', crm.check_model(d, '0001'))
+            self.assertNotIn('slots', crm.check_model(d, '7777'))
 
     def test_available_and_main(self):
         with tempfile.TemporaryDirectory() as d:
