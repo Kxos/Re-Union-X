@@ -33,6 +33,7 @@ const medalTrait = require('./medal-trait');
 const loginBonus = require('./login-bonus');
 const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
+const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
 const chatRoutes = require('./routes-chat'); // chat del party (I-210)
@@ -160,6 +161,7 @@ function route(url) {
   if (p === '/gacha/draw') return 'gachadraw';
   if (p.startsWith('/web/gacha/')) return 'gachaweb'; // catalogo, dettagli, odds, immagini dei banner
   if (p.startsWith('/web/special/')) return 'specialweb'; // immagini dei banner Special
+  if (p.startsWith('/web/raid/')) return 'raidweb'; // raid banners
   if (p.includes('system/status')) return 'status';
   if (p.includes('system/login')) return 'login';
   if (p.includes('system/coppa')) return 'coppa';
@@ -221,6 +223,9 @@ function route(url) {
   if (p.startsWith('/multi/')) return routeMulti(p); // Union Cross: server/multi.js
   if (p.startsWith('/raid/list')) return 'raidlist';
   if (p.startsWith('/raid/reward')) return 'raidreward';
+  if (p === '/raid/start') return 'raidstart';
+  if (p === '/raid/clear') return 'raidclear';
+  if (p === '/raid/member') return 'raidmember';
   if (p === '/user/support' || p === '/user/support/update') return 'usersupport';
   if (p === '/stage/support/list') return 'supportlist';
   if (p === '/user/avatar' || p === '/user/avatar/all' || p === '/user/avatar/parts') return 'useravatar';
@@ -1370,6 +1375,10 @@ const SPECIAL_IMG = process.env.KHUX_SPECIAL_IMG || path.join(__dirname, 'game_d
 // icone del catalogo Special (recon/tools/special_icons.py: originali del client o disegnate): solo le chiavi della lista
 const SPECIAL_ICONS = process.env.KHUX_SPECIAL_ICONS || path.join(__dirname, 'game_data', 'special_icons');
 let specialMemo = null;
+const RAID_INDEX = process.env.KHUX_RAID_INDEX || path.join(__dirname, 'game_data', 'raids.json');
+const RAID_MODELS = process.env.KHUX_RAID_MODELS || path.join(__dirname, 'game_data', 'raid_models.json');
+const RAID_IMG = process.env.KHUX_RAID_IMG || path.join(__dirname, 'game_data', 'raid_img');
+let raidMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
 // File del banner con il bollino (generato se manca o se l'originale e' piu' recente); se non riesce, quello normale
@@ -1798,7 +1807,8 @@ function respondStageStart(res, req) {
   // prima l'AP (popup PopupNormal_AP_Recovery se non basta); /stage/retire non rimborsa
   // Q978 (onlyDrama, solo filmato): useAp 0, nessun POI -> nessun drop ne' forziere; il client salta la mappa
   // (StageSkipActionMap) e manda subito /stage/clear (task-1-report D-B)
-  const useAp = Number(stageRowOf(player.currentStageId)?.useAp) || 0;
+  // a raid quest's AP depends on the hour (routes-raid.js), the master row holds only the weekday value
+  const useAp = raid().stageAp(player.currentStageId) ?? (Number(stageRowOf(player.currentStageId)?.useAp) || 0);
   if (useAp) {
     const before = apState().ap;
     if (before < useAp) console.log(`[ap] stage ${player.currentStageId}: costo ${useAp} AP, disponibili ${before}`);
@@ -2179,6 +2189,20 @@ function grantDeckSkillExp(gained) {
   return ups;
 }
 
+// Lux of a battle (userPoint.lux/totalLux e luxRank nella risposta: dopo lo stage).
+// level up: si aggiunge un pieno di AP (il nuovo maxAp) a quello che c'era, anche
+// oltre il massimo (il client lo ammette: non ricarica sopra maxAp)
+function addBattleLux(lux) {
+  const rankBefore = luxRankFor(player.lux);
+  const apBefore = apState().ap; // con la soglia del livello di prima
+  player.lux += lux;
+  if (luxRankFor(player.lux) > rankBefore) {
+    player.ap = apBefore + maxAp();
+    player.apTime = realNow();
+    console.log(`[ap] level up ${rankBefore} -> ${luxRankFor(player.lux)}: AP ${apBefore} -> ${player.ap}/${maxAp()}`);
+  }
+}
+
 function respondStageClear(res, req) {
   // POST /stage/clear (azione 116). Risposta: userData.userPoint,
   // userData.userDetail, il risultato (stageRewardUserMedalIds[]
@@ -2252,16 +2276,7 @@ function respondStageClear(res, req) {
   // le riporta: le valuta il server sui Lux della partita (getPoint.lux), che
   // restituisce in getLux (la barra Lux di RESULTS).
   const lux = training ? 0 : Number(req?.getPoint?.lux) || 0;
-  const rankBefore = luxRankFor(player.lux);
-  const apBefore = apState().ap; // con la soglia del livello di prima
-  player.lux += lux; // userPoint.lux/totalLux e luxRank nella risposta: dopo lo stage
-  // level up: si aggiunge un pieno di AP (il nuovo maxAp) a quello che c'era, anche
-  // oltre il massimo (il client lo ammette: non ricarica sopra maxAp)
-  if (luxRankFor(player.lux) > rankBefore) {
-    player.ap = apBefore + maxAp();
-    player.apTime = realNow();
-    console.log(`[ap] level up ${rankBefore} -> ${luxRankFor(player.lux)}: AP ${apBefore} -> ${player.ap}/${maxAp()}`);
-  }
+  addBattleLux(lux);
   if (!training) {
     missionCount('quest', 1);
     missionCount('lux', lux);
@@ -2292,6 +2307,7 @@ function respondStageClear(res, req) {
   const skipped = !!player.currentStageSkip;
   player.currentStageSkip = 0;
   player.stageScores[stageId] = skipped ? (player.stageScores[stageId] || 0) : Math.max(player.stageScores[stageId] || 0, lux);
+  raid().onStageClear(playedId, req?.getPoint); // Eggcognito points: spawn of the raid boss
   // EXP di skill del combattimento (getPoint.exp) a ogni medaglia del deck con una skill salvata
   const skillUps = training ? [] : grantDeckSkillExp(Number(req?.getPoint?.exp));
   if (skillUps.length) console.log(`[skill] salite di livello: userSkillId ${skillUps.join(', ')}`);
@@ -3909,6 +3925,7 @@ function respondStageEvent(res, body) {
   if (fs.existsSync(evPath)) {
     try { events = JSON.parse(fs.readFileSync(evPath, 'utf8')); } catch (e) { console.log('[event] event.json non valido:', e.message); }
   }
+  if (Number(body?.eventCategory) === 2) events = [...raid().events(), ...events];
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
 // ---------------------------------------------------------------------------
@@ -4044,6 +4061,63 @@ function respondSpecialPost(res, url) {
   (player.special ||= {}).pinned = en.key;
   savePlayer();
   return json(200, { ok: true });
+}
+
+// game_data/raids.json + raid_models.json (make-raid.js, not versioned). Read once; without them the raid routes answer
+// empty, with one warning.
+function raidIndex() {
+  if (raidMemo) return raidMemo;
+  try {
+    raidMemo = { ...JSON.parse(fs.readFileSync(RAID_INDEX, 'utf8')), models: JSON.parse(fs.readFileSync(RAID_MODELS, 'utf8')) };
+    if (!Array.isArray(raidMemo.entries)) raidMemo.entries = [];
+  } catch (e) {
+    console.warn(`[raid] ${RAID_INDEX} or ${RAID_MODELS} absent or not valid (${e.message}): no raids`);
+    raidMemo = { entries: [], models: {} };
+  }
+  return raidMemo;
+}
+// A raid reports Lux, Munny and EXP as a stage does; the fight's keyblade keeps the gauge
+function raidBattlePoints(getPoint, burst) {
+  player.money = (player.money || 0) + (Number(getPoint?.money) || 0);
+  const lux = Number(getPoint?.lux) || 0;
+  addBattleLux(lux);
+  missionCount('lux', lux);
+  weeklyLux(lux);
+  grantDeckSkillExp(Number(getPoint?.exp));
+  if (typeof burst === 'number') setKeybladeBurst(burst);
+  return lux;
+}
+function grantRaidItem(item) {
+  const before = (player.medals || []).length;
+  grantItem(item.type, item.id, item.num);
+  if (item.type === 3 && item.skillId) giveSkill((player.medals || []).slice(before), item.skillId, item.skillLv);
+}
+var raidRoutes = null; // var: respondStageStart can run before this line
+function raid() {
+  return raidRoutes ??= routesRaid({
+    player, savePlayer, masterRows, raidIndex, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks, inventorySnapshot, send, ret, clock,
+    apNow: () => apState().ap, changeAp,
+    raidUser: () => ({ userId: 1, name: player.name, level: luxRankFor(player.lux), userAvatar: userAvatarData() }),
+    supportUsers: (id, now) => { const medal = id && sharedMedalData(now); return medal ? [selfPlayerElement(now, medal)] : []; },
+    guiltLists: () => guiltBurst().lists(),
+    battlePoints: raidBattlePoints,
+    beginBattle: (userKeybladeId) => { player.currentUserKeybladeId = Number(userKeybladeId) || USER_KEYBLADE_ID; },
+    grantItem: grantRaidItem,
+    addPresent: (item) => addPresent(item.type, item.id, item.num, 'Raid Boss reward', item.skillId),
+    medalCount: () => stackedMedalList().length, medalCap: maxMedal,
+    stageState: (id) => ({ score: player.stageScores?.[id] || 0, playStatus: id in (player.stageScores || {}) ? STAGE_CLEARED : 0, clearMissionIds: stageClearMissions(id) }),
+    webBase: WEB_BASE,
+  });
+}
+// GET /web/raid/img/<evStageId>.png: as /web/special/img, from game_data/raid_img. No banner of its own: 0.png, the plate of
+// make_special_banners.py; neither: 404.
+function respondRaidWeb(res, url) {
+  const m = /^\/web\/raid\/img\/(?:v\d+\/)?(\d+)\.png$/i.exec(url.split('?')[0]);
+  const file = m && [`${Number(m[1])}.png`, '0.png'].map((n) => path.join(RAID_IMG, n)).find((x) => fs.existsSync(x));
+  if (!file) { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); }
+  const b = fs.readFileSync(file);
+  res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
+  return res.end(b);
 }
 
 // GET /user/notice (azione 241): raidNotice {isSelfRaid, isOthersRaid} uint,
@@ -4402,6 +4476,7 @@ function handler(scheme) {
       if (kind === 'gachadraw') return respondGachaDraw(res, entry.bodyDecoded);
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
+      if (kind === 'raidweb') return respondRaidWeb(res, req.url);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
@@ -4460,7 +4535,7 @@ function handler(scheme) {
       if (kind === 'stageclear') return respondStageClear(res, entry.bodyDecoded);
       if (kind === 'aprecover') return respondApRecover(res);
   if (kind === 'stageevent') return respondStageEvent(res, entry.bodyDecoded);
-  if (kind === 'usernotice') return send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: 0, isOthersRaid: 0 } });
+  if (kind === 'usernotice') return raid().notice(res);
   if (kind === 'useroption') return respondUserOption(res, entry.bodyDecoded);
   if (kind === 'colosseum') return respondColosseum(res);
       // GET /campaign (azione 143): campaigns, array di int (id delle campagne attive)
@@ -4474,21 +4549,12 @@ function handler(scheme) {
         return send(res, 200, { ret: ret(), lastRankingResults: [], rankingRewardIds: [], openRankingIds: [], rankingReward: [] });
       }
       if (kind === 'pvp') return respondPvp(res, req.url.split('?')[0], req.method, entry.bodyDecoded);
-      // GET /raid/list/181221 (azione 240): selfRaid (
-      // raidStatus int, raid {raidId uint64, level, useAp, timeLeft, feverFlag,
-      // feverTime, stageId, parts[]}) e raids[] ({...raid, isRelief, isEntry}).
-      // Nessun raid: raidStatus 0.
-      if (kind === 'raidlist') {
-        const now = serverTime();
-        return send(res, 200, {
-          ret: ret(),
-          selfRaid: {
-            raidStatus: 0,
-            raid: { raidId: 0, level: 0, useAp: 0, timeLeft: now, feverFlag: 0, feverTime: now, stageId: 0, parts: [] },
-          },
-          raids: [],
-        });
-      }
+      // Raid (azioni 240, 122, 123, 120, 121): server/routes-raid.js
+      if (kind === 'raidlist') return raid().list(res);
+      if (kind === 'raidstart') return raid().start(res, entry.bodyDecoded);
+      if (kind === 'raidclear') return raid().clear(res, entry.bodyDecoded);
+      if (kind === 'raidreward') return raid().reward(res);
+      if (kind === 'raidmember') return raid().member(res, entry.bodyDecoded);
       // GET /user/support: la medaglia di supporto del giocatore (supportUser). Con
       // medalId 0 la home cerca la medaglia 0 e va in crash (riga nulla):
       // si usa la prima medaglia del deck, con la keyblade iniziale.
@@ -4531,16 +4597,6 @@ function handler(scheme) {
         return send(res, 200, { ret: ret(), userAvatar: userAvatarData() });
       }
       if (kind === 'useravatarupdate') return respondAvatarUpdate(res, entry.bodyDecoded);
-      // GET /raid/reward/151101 (azione 120): userData.userPoint,
-      // raidRewards[] e guiltBurstFirst/MaxUserMedalIds. Nessun premio.
-      if (kind === 'raidreward') {
-        return send(res, 200, {
-          ret: ret(),
-          userData: { userPoint: userPointData(serverTime()) },
-          raidRewards: [],
-          ...guiltBurst().lists(), // guiltBurstFirst/MaxUserMedalIds
-        });
-      }
       // GET /user/point (azione 2) e POST /user/sphere/reset (azione 62): solo
       // userData.userPoint
       if (kind === 'userpoint') return send(res, 200, { ret: ret(), userData: { userPoint: userPointData(serverTime()) } });
@@ -4775,6 +4831,7 @@ module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
+  raid, respondRaidWeb, // server/test-raid-routes.js
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)

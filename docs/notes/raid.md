@@ -111,6 +111,20 @@ No ATK or DEF of a raid is known after 2016. `server/raid_stats.json` holds our 
 
 Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the boss rows are the 2016 values, far below the Lux reported later (about 2 billion on a 2019 boss); part HP comes from the 2016 ratio, or from JP screenshots of 5 bosses where derived; below the cap of the one-tier era HP follows `singleEra.hpShare`, fitted to three readings.
 
+## Server routes (Part 2, Task 6: tests only, bench pending)
+
+`server/routes-raid.js`, a factory wired in `server.js`; state only in `player.raid`. Choices the plan left open, ours unless a source is named:
+
+- **Spawn.** Only clears of a raid event's quest count (stage ids 980000-989999; Task 11 adds the story). Points add up while a boss is stored, and it blocks a new one; at the threshold the counter restarts from 0, whatever was above it. Bonus hours and weekends are read in Pacific time, daylight saving included.
+- **Boss level** starts at 1 and stops at 99. `entry.level` of `raids.json` is the quest's level (225 on Epic), not the boss's.
+- **Quest AP** is charged at `/stage/start` and listed in `stages[].useAp` for the moment; the master row holds the weekday value. Before 2019-07-15, by the week's `ap`: `0 / 5` is bonus / the rest, `5 / 90` weekend / weekday, so bonus time costs the weekday value there.
+- **`/raid/start` refused** (not enough AP, or a boss that is gone): the answer has `ret` and `userPoint` only, so the client stops on an error rather than playing a fight that does not count. The client checks AP itself first, so only a stale screen should get here.
+- **`/raid/clear` with no fight running** (repeat, or the boss is gone): nothing changes, `getLux` 0, `raidTimeStatus` 5. Parts with an unusable `hp` are ignored: they keep their stored HP.
+- **Titles** in a reward go out at `/raid/clear`, so the popup opens before RAID RESULTS; everything else is delivered at the first `/raid/reward` after the win, and the entry leaves the save with it.
+- **`/raid/member`**: `damage` is the sum of `parts[].damage` the client reported on that boss, kept in `player.raid.lastFight` after the boss is gone.
+- **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list`, since the client would crash on it.
+- **Banner.** `/web/raid/img/<evStageId>.png` from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404.
+
 ## Open, for the bench
 
 `getPoint.raidPoint` with Eggcognito rows, a fight outlasting `timeLeft`, 0 in `subdueId` or `mvpId`, `isEntry`/`isRelief`/`reliefFlag`, the home button's widgets, what the Raid button opens, fever.
