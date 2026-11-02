@@ -670,6 +670,35 @@ const tests = {
     assert.deepStrictEqual(REAL_CONFIG.modelTemplates, { 'Scourge Spider': 5000, 'Wicked Spider': 5000, 'Malicious Spider': 5000, 'Egg Master': 7 });
     assert.deepStrictEqual(REAL_CONFIG.bossAttributes, { 'Scourge Spider': 1, 'Wicked Spider': 2, 'Malicious Spider': 3 });
   },
+  model_parts_cap() {
+    // Raids Part 2 serving: modelParts keeps only the first N parts of the template row (spiders in the weekly era: body +
+    // Spinneret, the template's first part, weakness 2; the spiderlings of 5000 had no bar from Sep 2018)
+    const out = build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
+      f.config.onlyCensusIds = ['X'];
+      f.config.modelTemplates = { 'Gear Golem': 7 };
+      f.config.modelParts = { 'Gear Golem': 1 };
+    });
+    const e = entry(out, 'Gear Golem');
+    assert.ok(e.available, e.why);
+    const body = enemyOf(out, e.enemyId);
+    assert.strictEqual(body.validParts, 1);
+    assert.deepStrictEqual(body.parts, [e.enemyId + 1, 0, 0, 0, 0, 0].slice(0, body.parts.length));
+    const part = enemyOf(out, e.enemyId + 1);
+    assert.strictEqual(part.weakness, 2);
+    assert.strictEqual(part.hp[0], Math.round(body.hp[0] * 7200 / 12000), 'HP share of the template part');
+    assert.ok(!enemyOf(out, e.enemyId + 2), 'no row for the capped part');
+    // a cap above the template's parts changes nothing; another boss is not capped
+    const wide = build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
+      f.config.onlyCensusIds = ['X'];
+      f.config.modelTemplates = { 'Gear Golem': 7 };
+      f.config.modelParts = { 'Gear Golem': 4, 'Trickmaster': 1 };
+    });
+    assert.strictEqual(enemyOf(wide, entry(wide, 'Gear Golem').enemyId).validParts, 2);
+    // the shipped config: the three spiders keep only the Spinneret
+    assert.deepStrictEqual(REAL_CONFIG.modelParts, { 'Scourge Spider': 1, 'Wicked Spider': 1, 'Malicious Spider': 1 });
+  },
   corrupt_or_missing_table_throws() {
     const setup = () => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
