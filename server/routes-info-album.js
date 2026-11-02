@@ -56,7 +56,7 @@ const DIFFERENCES_BODY = [
   '## Raid Boards',
   'The **Sora & Moogle B** Medal (JP 5th anniversary, a Raid Board reward) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.',
   'The Raid Board cell listed as a **6★ Fantasia Mickey A** gives the **5★ Fantasia Mickey A**: no 6★ version of that Medal is known, and the board pairs it with Magic Brooms, which evolve the 5★.',
-  'The **Starlight Ears** and **Dazzling Disco** Spirit parts are **left off** their Raid Boards: part of their artwork is lost, so those boards have one cell less than in the original game.',
+  'The **Starlight Ears** and **Dazzling Disco** Spirit parts (Raid Board rewards) each have one **reconstructed** texture: a small twinkling sparkle and a tiny dot were lost and are drawn with the matching sparkle of the same set.',
   '## Shop and draws',
   'Shop draw rates are reconstructed where the original game did not publish them (Medal rarities, guarantees and Skill rates are original): Draw Odds and each banner\'s Details say so.',
   'Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.',

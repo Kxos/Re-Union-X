@@ -41,7 +41,7 @@ check(p.includes('Next update: in less than an hour'), 'meno di un ora');
 }
 check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /no purchases/.test(x.body.join(' '))), 'acquisti nelle differenze');
 check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && ((t) => /## Raid Boards/.test(t) && /Sora & Moogle B/.test(t)
-  && /6★ Fantasia Mickey A\*\* gives the \*\*5★/.test(t) && /Starlight Ears\*\* and \*\*Dazzling Disco\*\* Spirit parts are \*\*left off/.test(t))(x.body.join('\n'))), 'Raid Boards nelle differenze');
+  && /6★ Fantasia Mickey A\*\* gives the \*\*5★/.test(t) && /Starlight Ears\*\* and \*\*Dazzling Disco\*\* Spirit parts \(Raid Board rewards\) each have one \*\*reconstructed\*\* texture/.test(t))(x.body.join('\n'))), 'Raid Boards nelle differenze');
 check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /maximum LV is \*\*999\*\*/.test(x.body.join(' ')) && /from LV 305 it is \*\*reconstructed\*\*/.test(x.body.join(' '))), 'livelli Lux ricostruiti nelle differenze');
 {
   const diff = n.NOTICES.find((x) => x.title === 'Differences from the original game').body;

@@ -3976,6 +3976,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402028,
+  "name": "Starlight Ears",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402030,
   "name": "Halloween Pointy Hat",
   "partsType": 2,
@@ -5282,6 +5290,14 @@
  {
   "petPartsId": 410011,
   "name": "Floating Trick or Treat",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410014,
+  "name": "Dazzling Disco",
   "partsType": 10,
   "combinationType": 0,
   "combinationFlag": 0,
