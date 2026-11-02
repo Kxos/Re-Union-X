@@ -1,0 +1,476 @@
+{
+ "note": "Our own deduction, not original data: no ATK or DEF of a raid is known after 2016. Replaced if a source appears. Rule and inputs: docs/notes/raid.md, section ATK and DEF.",
+ "generatedBy": "node server/make-raid.js --stats",
+ "inputs": [
+  "2016 raidEnemy rows of the weekly bosses",
+  "served enemy table",
+  "story enemy lists per quest (stage_poi)",
+  "quest levels of the wiki",
+  "story dates of the Shop catalogue",
+  "tier quest levels of the wiki",
+  "community report of a 50,000 STR threshold on Epic"
+ ],
+ "reconstructed": true,
+ "ratio": {
+  "median": 75,
+  "bosses": 23,
+  "knots": 96,
+  "refEnemyId": 80001
+ },
+ "tierShare": {
+  "Beginner": 0.348,
+  "Intermediate": 0.696,
+  "Advanced": 1,
+  "Legendary": 1.308,
+  "Epic": 1.617
+ },
+ "def": {
+  "base": 1000,
+  "omega": 1100,
+  "epic": 50000
+ },
+ "periods": [
+  {
+   "from": "2016-04-07",
+   "quests": [
+    1,
+    200
+   ],
+   "level": 30.5,
+   "storyAtk": 874,
+   "atk": {
+    "single": 65600,
+    "Beginner": 22800,
+    "Intermediate": 45600,
+    "Advanced": 65600,
+    "Legendary": 85800,
+    "Epic": 106000
+   }
+  },
+  {
+   "from": "2016-04-21",
+   "quests": [
+    201,
+    250
+   ],
+   "level": 72,
+   "storyAtk": 1218,
+   "atk": {
+    "single": 91400,
+    "Beginner": 31800,
+    "Intermediate": 63600,
+    "Advanced": 91400,
+    "Legendary": 119500,
+    "Epic": 147700
+   }
+  },
+  {
+   "from": "2016-05-05",
+   "quests": [
+    251,
+    275
+   ],
+   "level": 86,
+   "storyAtk": 1562,
+   "atk": {
+    "single": 117200,
+    "Beginner": 40800,
+    "Intermediate": 81600,
+    "Advanced": 117200,
+    "Legendary": 153300,
+    "Epic": 189400
+   }
+  },
+  {
+   "from": "2016-05-19",
+   "quests": [
+    276,
+    300
+   ],
+   "level": 96,
+   "storyAtk": 1669,
+   "atk": {
+    "single": 125200,
+    "Beginner": 43600,
+    "Intermediate": 87200,
+    "Advanced": 125200,
+    "Legendary": 163800,
+    "Epic": 202400
+   }
+  },
+  {
+   "from": "2016-06-02",
+   "quests": [
+    301,
+    325
+   ],
+   "level": 103,
+   "storyAtk": 1775,
+   "atk": {
+    "single": 133100,
+    "Beginner": 46400,
+    "Intermediate": 92700,
+    "Advanced": 133100,
+    "Legendary": 174200,
+    "Epic": 215200
+   }
+  },
+  {
+   "from": "2016-06-16",
+   "quests": [
+    326,
+    350
+   ],
+   "level": 107,
+   "storyAtk": 1929,
+   "atk": {
+    "single": 144700,
+    "Beginner": 50400,
+    "Intermediate": 100800,
+    "Advanced": 144700,
+    "Legendary": 189300,
+    "Epic": 233900
+   }
+  },
+  {
+   "from": "2016-06-30",
+   "quests": [
+    351,
+    375
+   ],
+   "level": 111,
+   "storyAtk": 2038,
+   "atk": {
+    "single": 152900,
+    "Beginner": 53300,
+    "Intermediate": 106400,
+    "Advanced": 152900,
+    "Legendary": 200000,
+    "Epic": 247100
+   }
+  },
+  {
+   "from": "2016-08-04",
+   "quests": [
+    401,
+    425
+   ],
+   "level": 119,
+   "storyAtk": 2312,
+   "atk": {
+    "single": 173400,
+    "Beginner": 60400,
+    "Intermediate": 120800,
+    "Advanced": 173400,
+    "Legendary": 226900,
+    "Epic": 280300
+   }
+  },
+  {
+   "from": "2016-10-13",
+   "quests": [
+    451,
+    475
+   ],
+   "level": 127,
+   "storyAtk": 2472,
+   "atk": {
+    "single": 185400,
+    "Beginner": 64600,
+    "Intermediate": 129100,
+    "Advanced": 185400,
+    "Legendary": 242600,
+    "Epic": 299700
+   }
+  },
+  {
+   "from": "2017-02-09",
+   "quests": [
+    541,
+    555
+   ],
+   "level": 142,
+   "storyAtk": 2641,
+   "atk": {
+    "single": 198100,
+    "Beginner": 69000,
+    "Intermediate": 137900,
+    "Advanced": 198100,
+    "Legendary": 259200,
+    "Epic": 320200
+   }
+  },
+  {
+   "from": "2017-08-25",
+   "quests": [
+    661,
+    665
+   ],
+   "level": 160,
+   "storyAtk": 2795,
+   "atk": {
+    "single": 209600,
+    "Beginner": 73000,
+    "Intermediate": 146000,
+    "Advanced": 209600,
+    "Legendary": 274300,
+    "Epic": 338900
+   }
+  },
+  {
+   "from": "2018-01-11",
+   "quests": [
+    716,
+    725
+   ],
+   "level": 171.5,
+   "storyAtk": 2940,
+   "atk": {
+    "single": 220500,
+    "Beginner": 76800,
+    "Intermediate": 153600,
+    "Advanced": 220500,
+    "Legendary": 288500,
+    "Epic": 356500
+   }
+  },
+  {
+   "from": "2018-04-12",
+   "quests": [
+    736,
+    750
+   ],
+   "level": 220,
+   "storyAtk": 3380,
+   "atk": {
+    "single": 253500,
+    "Beginner": 88300,
+    "Intermediate": 176500,
+    "Advanced": 253500,
+    "Legendary": 331700,
+    "Epic": 409800
+   }
+  },
+  {
+   "from": "2018-06-21",
+   "quests": [
+    761,
+    775
+   ],
+   "level": 240,
+   "storyAtk": 3641,
+   "atk": {
+    "single": 273100,
+    "Beginner": 95100,
+    "Intermediate": 190200,
+    "Advanced": 273100,
+    "Legendary": 357300,
+    "Epic": 441500
+   }
+  },
+  {
+   "from": "2018-08-16",
+   "quests": [
+    781,
+    790
+   ],
+   "level": 300,
+   "storyAtk": 4066,
+   "atk": {
+    "single": 305000,
+    "Beginner": 106300,
+    "Intermediate": 212400,
+    "Advanced": 305000,
+    "Legendary": 399000,
+    "Epic": 493000
+   }
+  },
+  {
+   "from": "2018-10-11",
+   "quests": [
+    801,
+    805
+   ],
+   "level": 850,
+   "storyAtk": 4595,
+   "atk": {
+    "single": 344600,
+    "Beginner": 120100,
+    "Intermediate": 240000,
+    "Advanced": 344600,
+    "Legendary": 450900,
+    "Epic": 557200
+   }
+  },
+  {
+   "from": "2018-11-08",
+   "quests": [
+    806,
+    810
+   ],
+   "level": 900,
+   "storyAtk": 10183,
+   "atk": {
+    "single": 763700,
+    "Beginner": 266100,
+    "Intermediate": 531900,
+    "Advanced": 763700,
+    "Legendary": 999200,
+    "Epic": 1234700
+   }
+  },
+  {
+   "from": "2018-12-05",
+   "quests": [
+    811,
+    815
+   ],
+   "level": 950,
+   "storyAtk": 11395,
+   "atk": {
+    "single": 854600,
+    "Beginner": 297800,
+    "Intermediate": 595200,
+    "Advanced": 854600,
+    "Legendary": 1118200,
+    "Epic": 1381700
+   }
+  },
+  {
+   "from": "2019-02-21",
+   "quests": [
+    836,
+    840
+   ],
+   "level": 1150,
+   "storyAtk": 12141,
+   "atk": {
+    "single": 910600,
+    "Beginner": 317300,
+    "Intermediate": 634100,
+    "Advanced": 910600,
+    "Legendary": 1191400,
+    "Epic": 1472100
+   }
+  },
+  {
+   "from": "2019-04-04",
+   "quests": [
+    846,
+    850
+   ],
+   "level": 1150,
+   "storyAtk": 13073,
+   "atk": {
+    "single": 980500,
+    "Beginner": 341600,
+    "Intermediate": 682800,
+    "Advanced": 980500,
+    "Legendary": 1282800,
+    "Epic": 1585200
+   }
+  },
+  {
+   "from": "2019-06-13",
+   "quests": [
+    861,
+    865
+   ],
+   "level": 1200,
+   "storyAtk": 14033,
+   "atk": {
+    "single": 1052500,
+    "Beginner": 366700,
+    "Intermediate": 732900,
+    "Advanced": 1052500,
+    "Legendary": 1377000,
+    "Epic": 1701600
+   }
+  },
+  {
+   "from": "2019-12-19",
+   "quests": [
+    896,
+    900
+   ],
+   "level": 1700,
+   "storyAtk": 15457,
+   "atk": {
+    "single": 1159300,
+    "Beginner": 403900,
+    "Intermediate": 807300,
+    "Advanced": 1159300,
+    "Legendary": 1516800,
+    "Epic": 1874200
+   }
+  },
+  {
+   "from": "2020-01-30",
+   "quests": [
+    901,
+    905
+   ],
+   "level": 1500,
+   "storyAtk": 20472,
+   "atk": {
+    "single": 1535400,
+    "Beginner": 535000,
+    "Intermediate": 1069200,
+    "Advanced": 1535400,
+    "Legendary": 2008900,
+    "Epic": 2482300
+   }
+  },
+  {
+   "from": "2021-03-25",
+   "quests": [
+    976,
+    976
+   ],
+   "level": 4500,
+   "storyAtk": 27435,
+   "atk": {
+    "single": 2057600,
+    "Beginner": 716900,
+    "Intermediate": 1432900,
+    "Advanced": 2057600,
+    "Legendary": 2692100,
+    "Epic": 3326600
+   }
+  },
+  {
+   "from": "2021-03-25",
+   "quests": [
+    977,
+    977
+   ],
+   "level": 5500,
+   "storyAtk": 40244,
+   "atk": {
+    "single": 3018300,
+    "Beginner": 1051700,
+    "Intermediate": 2101900,
+    "Advanced": 3018300,
+    "Legendary": 3949000,
+    "Epic": 4879800
+   }
+  },
+  {
+   "from": "2021-06-09",
+   "quests": [
+    979,
+    979
+   ],
+   "level": 5500,
+   "storyAtk": 58734,
+   "atk": {
+    "single": 4405100,
+    "Beginner": 1534900,
+    "Intermediate": 3067700,
+    "Advanced": 4405100,
+    "Legendary": 5763400,
+    "Epic": 7121800
+   }
+  }
+ ]
+}

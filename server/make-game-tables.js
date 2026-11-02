@@ -860,6 +860,9 @@ require('./make-proud').patch(OUT);
 // Special tab (Quests > Special): stage rows 970000-979999 (stageKind 2), evStage 7000+, drop rows 970000+ and
 // game_data/special.json from server/special_periods.json and the private catalogue (make-special.js)
 require('./make-special').patch(OUT);
+// Raids: stage rows 980000-989999, evStage 8001+, raidEnemy 2000000+, raidSetting 30000+, raidReward, game_data/raids.json and
+// raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off
+require('./make-raid').patch(OUT);
 // tabelle ricostruite da noi (server/tables: mission = missioni giornaliere/settimanali dalla
 // khuxwiki, vedi le note in testa a ciascun generatore): copiate cosi' come sono
 const TABLES = path.join(__dirname, 'tables');
