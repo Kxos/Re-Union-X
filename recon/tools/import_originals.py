@@ -15,7 +15,8 @@ qui sostituiscono i nostri nel pacchetto generato. Elenco (recon/tools/originals
   revisione piu' alta, il suffisso si toglie), i440 (file dell'IPA 4.4.0 WW gia' estratti con res_get.py in
   --i440, es. catalog\ipa440_extract), jp501 (estratto dell'OBB JP 5.0.1 in --jp501, tmp/jp501/x: NPC della
   sezione 45, I-197), separate da virgola in ordine di preferenza;
-- sorgente: percorso nella fonte se diverso dalla destinazione (stesso significato di glob e cartella).
+- sorgente: percorso nella fonte se diverso dalla destinazione (stesso significato di glob e cartella); `=percorso`
+  is that exact file, with no revision choice (an older JP revision name.<8 digits>.ext, or the plain name).
 
 --served: nomi gia' serviti dalle risorse WW (OBB 5.0.1, IPA 4.3.1; prima colonna dei TSV): con glob e cartelle si
 saltano (gli originali riempiono i buchi, non cambiano cio' che il client WW ha gia'); una destinazione singola si
@@ -58,6 +59,11 @@ def plain_listing(folder):
 def resolve(src, roots):
     """[(nome relativo, percorso sorgente)] per un percorso di fonte (file, glob o cartella)"""
     root, kind = roots
+    if src.startswith('='):
+        # '=path': that exact file, no revision choice (JP keeps older revisions as name.<8 digits>.ext and the plain
+        # name may be another version: the weekly-era spider LWFs of I-221 need a given one)
+        p = os.path.join(root, src[1:])
+        return [(os.path.basename(src[1:]), p)] if os.path.isfile(p) else []
     listing = jp_listing if kind == 'jp' else plain_listing
     if src.endswith('/'):
         return [(n, p) for n, p in sorted(listing(os.path.join(root, src)).items())]

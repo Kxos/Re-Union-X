@@ -46,6 +46,14 @@ try:
     io.run(io.parse(['img/wipe/wipe_1[1-4].png' + chr(9) + 'jp', 'img/wipe/wipe_[2-8].png' + chr(9) + 'jp']), b16, jp, out)
     assert rd('img/wipe/wipe_11.png') == 'w11' and rd('img/wipe/wipe_12.png') == 'w12' and rd('img/wipe/wipe_3.png') == 'w3', 'glob [..]'
     assert not [f for f in os.listdir(os.path.join(out, 'img/wipe')) if '[' in f], 'file letterale con ['
+    # '=path' names an exact file: an older JP revision, or the plain name when numbered revisions exist
+    shutil.rmtree(out)
+    put(jp, 'img/ui/g.png', 'plain-g')
+    io.run(io.parse(['img/ui/g.png' + chr(9) + 'jp' + chr(9) + '=img/ui/g.00100000.png',
+                     'img/ui/g2.png' + chr(9) + 'jp' + chr(9) + '=img/ui/g.png']), b16, jp, out)
+    assert rd('img/ui/g.png') == 'old', 'exact JP revision'
+    assert rd('img/ui/g2.png') == 'plain-g', 'exact plain name'
+    os.remove(os.path.join(jp, 'img/ui/g.png'))
     # IPA 4.4.0 gia' estratta
     i440 = os.path.join(t, 'i440')
     put(i440, 'img/union/Union_01.png', 'u1')
