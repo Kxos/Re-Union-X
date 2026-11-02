@@ -3086,3 +3086,547 @@ img/adventure/boss_L/	jp
 img/adventure/boss_L/	b16
 # 48d. Immagine inglese «Raid Boss Defeated!» al posto di quella JP del layout (I-221)
 cocostudio/publish/Result_Clear_Raid.png	b16
+
+# 49. Raid models (I-221, Raids Part 2 Task 1): the 29 bosses the pack carries (raid_models.txt; 0007 is in section 48).
+#     9102 and 9103 have no start demo (not in the 2016 package, JP images missing): the server never sends raidStatus 4 for them.
+#     JP first, then the 2016 English package, which wins where it has the file (the JP data lacks most images).
+lwf/character/raid/0001/atk1/	jp
+lwf/character/raid/0001/atk2/	jp
+lwf/character/raid/0001/knockback1/	jp
+lwf/character/raid/0001/knockback2/	jp
+lwf/character/raid/0001/wait/	jp
+lwf/raid/demo/start_0001/	jp
+lwf/raid/demo/escape_0001/	jp
+lwf/raid/demo/put_down_0001/	jp
+lwf/character/raid/0002/atk1/	jp
+lwf/character/raid/0002/atk2/	jp
+lwf/character/raid/0002/knockback1/	jp
+lwf/character/raid/0002/knockback2/	jp
+lwf/character/raid/0002/wait/	jp
+lwf/raid/demo/start_0002/	jp
+lwf/raid/demo/escape_0002/	jp
+lwf/raid/demo/put_down_0002/	jp
+lwf/character/raid/0003/atk1/	jp
+lwf/character/raid/0003/atk2/	jp
+lwf/character/raid/0003/knockback1/	jp
+lwf/character/raid/0003/knockback2/	jp
+lwf/character/raid/0003/wait/	jp
+lwf/raid/demo/start_0003/	jp
+lwf/raid/demo/escape_0003/	jp
+lwf/raid/demo/put_down_0003/	jp
+lwf/character/raid/0004/atk1/	jp
+lwf/character/raid/0004/atk2/	jp
+lwf/character/raid/0004/knockback1/	jp
+lwf/character/raid/0004/knockback2/	jp
+lwf/character/raid/0004/wait/	jp
+lwf/raid/demo/start_0004/	jp
+lwf/raid/demo/escape_0004/	jp
+lwf/raid/demo/put_down_0004/	jp
+lwf/character/raid/0005/atk1/	jp
+lwf/character/raid/0005/atk2/	jp
+lwf/character/raid/0005/knockback1/	jp
+lwf/character/raid/0005/knockback2/	jp
+lwf/character/raid/0005/wait/	jp
+lwf/raid/demo/start_0005/	jp
+lwf/raid/demo/escape_0005/	jp
+lwf/raid/demo/put_down_0005/	jp
+lwf/character/raid/0006/atk1/	jp
+lwf/character/raid/0006/atk2/	jp
+lwf/character/raid/0006/knockback1/	jp
+lwf/character/raid/0006/knockback2/	jp
+lwf/character/raid/0006/wait/	jp
+lwf/raid/demo/start_0006/	jp
+lwf/raid/demo/escape_0006/	jp
+lwf/raid/demo/put_down_0006/	jp
+lwf/character/raid/0008/atk1/	jp
+lwf/character/raid/0008/atk2/	jp
+lwf/character/raid/0008/knockback1/	jp
+lwf/character/raid/0008/knockback2/	jp
+lwf/character/raid/0008/wait/	jp
+lwf/raid/demo/start_0008/	jp
+lwf/raid/demo/escape_0008/	jp
+lwf/raid/demo/put_down_0008/	jp
+lwf/character/raid/0009/atk1/	jp
+lwf/character/raid/0009/atk2/	jp
+lwf/character/raid/0009/knockback1/	jp
+lwf/character/raid/0009/knockback2/	jp
+lwf/character/raid/0009/wait/	jp
+lwf/raid/demo/start_0009/	jp
+lwf/raid/demo/escape_0009/	jp
+lwf/raid/demo/put_down_0009/	jp
+lwf/character/raid/0010/atk1/	jp
+lwf/character/raid/0010/atk2/	jp
+lwf/character/raid/0010/knockback1/	jp
+lwf/character/raid/0010/knockback2/	jp
+lwf/character/raid/0010/wait/	jp
+lwf/raid/demo/start_0010/	jp
+lwf/raid/demo/escape_0010/	jp
+lwf/raid/demo/put_down_0010/	jp
+lwf/character/raid/0011/atk1/	jp
+lwf/character/raid/0011/atk2/	jp
+lwf/character/raid/0011/knockback1/	jp
+lwf/character/raid/0011/knockback2/	jp
+lwf/character/raid/0011/wait/	jp
+lwf/raid/demo/start_0011/	jp
+lwf/raid/demo/escape_0011/	jp
+lwf/raid/demo/put_down_0011/	jp
+lwf/character/raid/0012/atk1/	jp
+lwf/character/raid/0012/atk2/	jp
+lwf/character/raid/0012/knockback1/	jp
+lwf/character/raid/0012/knockback2/	jp
+lwf/character/raid/0012/wait/	jp
+lwf/raid/demo/start_0012/	jp
+lwf/raid/demo/escape_0012/	jp
+lwf/raid/demo/put_down_0012/	jp
+lwf/character/raid/0013/atk1/	jp
+lwf/character/raid/0013/atk2/	jp
+lwf/character/raid/0013/knockback1/	jp
+lwf/character/raid/0013/knockback2/	jp
+lwf/character/raid/0013/wait/	jp
+lwf/raid/demo/start_0013/	jp
+lwf/raid/demo/escape_0013/	jp
+lwf/raid/demo/put_down_0013/	jp
+lwf/character/raid/0014/atk1/	jp
+lwf/character/raid/0014/atk2/	jp
+lwf/character/raid/0014/knockback1/	jp
+lwf/character/raid/0014/knockback2/	jp
+lwf/character/raid/0014/wait/	jp
+lwf/raid/demo/start_0014/	jp
+lwf/raid/demo/escape_0014/	jp
+lwf/raid/demo/put_down_0014/	jp
+lwf/character/raid/0015/atk1/	jp
+lwf/character/raid/0015/atk2/	jp
+lwf/character/raid/0015/knockback1/	jp
+lwf/character/raid/0015/knockback2/	jp
+lwf/character/raid/0015/wait/	jp
+lwf/raid/demo/start_0015/	jp
+lwf/raid/demo/escape_0015/	jp
+lwf/raid/demo/put_down_0015/	jp
+lwf/character/raid/0016/atk1/	jp
+lwf/character/raid/0016/atk2/	jp
+lwf/character/raid/0016/knockback1/	jp
+lwf/character/raid/0016/knockback2/	jp
+lwf/character/raid/0016/wait/	jp
+lwf/raid/demo/start_0016/	jp
+lwf/raid/demo/escape_0016/	jp
+lwf/raid/demo/put_down_0016/	jp
+lwf/character/raid/1000/atk1/	jp
+lwf/character/raid/1000/atk2/	jp
+lwf/character/raid/1000/knockback1/	jp
+lwf/character/raid/1000/knockback2/	jp
+lwf/character/raid/1000/wait/	jp
+lwf/raid/demo/start_1000/	jp
+lwf/raid/demo/escape_1000/	jp
+lwf/raid/demo/put_down_1000/	jp
+lwf/character/raid/1001/atk1/	jp
+lwf/character/raid/1001/atk2/	jp
+lwf/character/raid/1001/knockback1/	jp
+lwf/character/raid/1001/knockback2/	jp
+lwf/character/raid/1001/wait/	jp
+lwf/raid/demo/start_1001/	jp
+lwf/raid/demo/escape_1001/	jp
+lwf/raid/demo/put_down_1001/	jp
+lwf/character/raid/1002/atk1/	jp
+lwf/character/raid/1002/atk2/	jp
+lwf/character/raid/1002/knockback1/	jp
+lwf/character/raid/1002/knockback2/	jp
+lwf/character/raid/1002/wait/	jp
+lwf/raid/demo/start_1002/	jp
+lwf/raid/demo/escape_1002/	jp
+lwf/raid/demo/put_down_1002/	jp
+lwf/character/raid/1003/atk1/	jp
+lwf/character/raid/1003/atk2/	jp
+lwf/character/raid/1003/knockback1/	jp
+lwf/character/raid/1003/knockback2/	jp
+lwf/character/raid/1003/wait/	jp
+lwf/raid/demo/start_1003/	jp
+lwf/raid/demo/escape_1003/	jp
+lwf/raid/demo/put_down_1003/	jp
+lwf/character/raid/1004/atk1/	jp
+lwf/character/raid/1004/atk2/	jp
+lwf/character/raid/1004/knockback1/	jp
+lwf/character/raid/1004/knockback2/	jp
+lwf/character/raid/1004/wait/	jp
+lwf/raid/demo/start_1004/	jp
+lwf/raid/demo/escape_1004/	jp
+lwf/raid/demo/put_down_1004/	jp
+lwf/character/raid/1005/atk1/	jp
+lwf/character/raid/1005/atk2/	jp
+lwf/character/raid/1005/knockback1/	jp
+lwf/character/raid/1005/knockback2/	jp
+lwf/character/raid/1005/wait/	jp
+lwf/raid/demo/start_1005/	jp
+lwf/raid/demo/escape_1005/	jp
+lwf/raid/demo/put_down_1005/	jp
+lwf/character/raid/1006/atk1/	jp
+lwf/character/raid/1006/atk2/	jp
+lwf/character/raid/1006/knockback1/	jp
+lwf/character/raid/1006/knockback2/	jp
+lwf/character/raid/1006/wait/	jp
+lwf/raid/demo/start_1006/	jp
+lwf/raid/demo/escape_1006/	jp
+lwf/raid/demo/put_down_1006/	jp
+lwf/character/raid/1007/atk1/	jp
+lwf/character/raid/1007/atk2/	jp
+lwf/character/raid/1007/knockback1/	jp
+lwf/character/raid/1007/knockback2/	jp
+lwf/character/raid/1007/wait/	jp
+lwf/raid/demo/start_1007/	jp
+lwf/raid/demo/escape_1007/	jp
+lwf/raid/demo/put_down_1007/	jp
+lwf/character/raid/1008/atk1/	jp
+lwf/character/raid/1008/atk2/	jp
+lwf/character/raid/1008/knockback1/	jp
+lwf/character/raid/1008/knockback2/	jp
+lwf/character/raid/1008/wait/	jp
+lwf/raid/demo/start_1008/	jp
+lwf/raid/demo/escape_1008/	jp
+lwf/raid/demo/put_down_1008/	jp
+lwf/character/raid/1009/atk1/	jp
+lwf/character/raid/1009/atk2/	jp
+lwf/character/raid/1009/knockback1/	jp
+lwf/character/raid/1009/knockback2/	jp
+lwf/character/raid/1009/wait/	jp
+lwf/raid/demo/start_1009/	jp
+lwf/raid/demo/escape_1009/	jp
+lwf/raid/demo/put_down_1009/	jp
+lwf/character/raid/1010/atk1/	jp
+lwf/character/raid/1010/atk2/	jp
+lwf/character/raid/1010/knockback1/	jp
+lwf/character/raid/1010/knockback2/	jp
+lwf/character/raid/1010/wait/	jp
+lwf/raid/demo/start_1010/	jp
+lwf/raid/demo/escape_1010/	jp
+lwf/raid/demo/put_down_1010/	jp
+lwf/character/raid/9102/atk1/	jp
+lwf/character/raid/9102/atk2/	jp
+lwf/character/raid/9102/knockback1/	jp
+lwf/character/raid/9102/knockback2/	jp
+lwf/character/raid/9102/wait/	jp
+lwf/raid/demo/escape_9102/	jp
+lwf/raid/demo/put_down_9102/	jp
+lwf/character/raid/9103/atk1/	jp
+lwf/character/raid/9103/atk2/	jp
+lwf/character/raid/9103/knockback1/	jp
+lwf/character/raid/9103/knockback2/	jp
+lwf/character/raid/9103/wait/	jp
+lwf/raid/demo/escape_9103/	jp
+lwf/raid/demo/put_down_9103/	jp
+lwf/character/raid/0001/atk1/	b16
+lwf/character/raid/0001/atk2/	b16
+lwf/character/raid/0001/knockback1/	b16
+lwf/character/raid/0001/knockback2/	b16
+lwf/character/raid/0001/wait/	b16
+lwf/raid/demo/start_0001/	b16
+lwf/raid/demo/escape_0001/	b16
+lwf/raid/demo/put_down_0001/	b16
+lwf/character/raid/0002/atk1/	b16
+lwf/character/raid/0002/atk2/	b16
+lwf/character/raid/0002/knockback1/	b16
+lwf/character/raid/0002/knockback2/	b16
+lwf/character/raid/0002/wait/	b16
+lwf/raid/demo/start_0002/	b16
+lwf/raid/demo/escape_0002/	b16
+lwf/raid/demo/put_down_0002/	b16
+lwf/character/raid/0003/atk1/	b16
+lwf/character/raid/0003/atk2/	b16
+lwf/character/raid/0003/knockback1/	b16
+lwf/character/raid/0003/knockback2/	b16
+lwf/character/raid/0003/wait/	b16
+lwf/raid/demo/start_0003/	b16
+lwf/raid/demo/escape_0003/	b16
+lwf/raid/demo/put_down_0003/	b16
+lwf/character/raid/0004/atk1/	b16
+lwf/character/raid/0004/atk2/	b16
+lwf/character/raid/0004/knockback1/	b16
+lwf/character/raid/0004/knockback2/	b16
+lwf/character/raid/0004/wait/	b16
+lwf/raid/demo/start_0004/	b16
+lwf/raid/demo/escape_0004/	b16
+lwf/raid/demo/put_down_0004/	b16
+lwf/character/raid/0005/atk1/	b16
+lwf/character/raid/0005/atk2/	b16
+lwf/character/raid/0005/knockback1/	b16
+lwf/character/raid/0005/knockback2/	b16
+lwf/character/raid/0005/wait/	b16
+lwf/raid/demo/start_0005/	b16
+lwf/raid/demo/escape_0005/	b16
+lwf/raid/demo/put_down_0005/	b16
+lwf/character/raid/0006/atk1/	b16
+lwf/character/raid/0006/atk2/	b16
+lwf/character/raid/0006/knockback1/	b16
+lwf/character/raid/0006/knockback2/	b16
+lwf/character/raid/0006/wait/	b16
+lwf/raid/demo/start_0006/	b16
+lwf/raid/demo/escape_0006/	b16
+lwf/raid/demo/put_down_0006/	b16
+lwf/character/raid/0008/atk1/	b16
+lwf/character/raid/0008/atk2/	b16
+lwf/character/raid/0008/knockback1/	b16
+lwf/character/raid/0008/knockback2/	b16
+lwf/character/raid/0008/wait/	b16
+lwf/raid/demo/start_0008/	b16
+lwf/raid/demo/escape_0008/	b16
+lwf/raid/demo/put_down_0008/	b16
+lwf/character/raid/0009/atk1/	b16
+lwf/character/raid/0009/atk2/	b16
+lwf/character/raid/0009/knockback1/	b16
+lwf/character/raid/0009/knockback2/	b16
+lwf/character/raid/0009/wait/	b16
+lwf/raid/demo/start_0009/	b16
+lwf/raid/demo/escape_0009/	b16
+lwf/raid/demo/put_down_0009/	b16
+lwf/character/raid/0010/atk1/	b16
+lwf/character/raid/0010/atk2/	b16
+lwf/character/raid/0010/knockback1/	b16
+lwf/character/raid/0010/knockback2/	b16
+lwf/character/raid/0010/wait/	b16
+lwf/raid/demo/start_0010/	b16
+lwf/raid/demo/escape_0010/	b16
+lwf/raid/demo/put_down_0010/	b16
+lwf/character/raid/0011/atk1/	b16
+lwf/character/raid/0011/atk2/	b16
+lwf/character/raid/0011/knockback1/	b16
+lwf/character/raid/0011/knockback2/	b16
+lwf/character/raid/0011/wait/	b16
+lwf/raid/demo/start_0011/	b16
+lwf/raid/demo/escape_0011/	b16
+lwf/raid/demo/put_down_0011/	b16
+lwf/character/raid/0012/atk1/	b16
+lwf/character/raid/0012/atk2/	b16
+lwf/character/raid/0012/knockback1/	b16
+lwf/character/raid/0012/knockback2/	b16
+lwf/character/raid/0012/wait/	b16
+lwf/raid/demo/start_0012/	b16
+lwf/raid/demo/escape_0012/	b16
+lwf/raid/demo/put_down_0012/	b16
+lwf/character/raid/0013/atk1/	b16
+lwf/character/raid/0013/atk2/	b16
+lwf/character/raid/0013/knockback1/	b16
+lwf/character/raid/0013/knockback2/	b16
+lwf/character/raid/0013/wait/	b16
+lwf/raid/demo/start_0013/	b16
+lwf/raid/demo/escape_0013/	b16
+lwf/raid/demo/put_down_0013/	b16
+lwf/character/raid/0014/atk1/	b16
+lwf/character/raid/0014/atk2/	b16
+lwf/character/raid/0014/knockback1/	b16
+lwf/character/raid/0014/knockback2/	b16
+lwf/character/raid/0014/wait/	b16
+lwf/raid/demo/start_0014/	b16
+lwf/raid/demo/escape_0014/	b16
+lwf/raid/demo/put_down_0014/	b16
+lwf/character/raid/0015/atk1/	b16
+lwf/character/raid/0015/atk2/	b16
+lwf/character/raid/0015/knockback1/	b16
+lwf/character/raid/0015/knockback2/	b16
+lwf/character/raid/0015/wait/	b16
+lwf/raid/demo/start_0015/	b16
+lwf/raid/demo/escape_0015/	b16
+lwf/raid/demo/put_down_0015/	b16
+lwf/character/raid/0016/atk1/	b16
+lwf/character/raid/0016/atk2/	b16
+lwf/character/raid/0016/knockback1/	b16
+lwf/character/raid/0016/knockback2/	b16
+lwf/character/raid/0016/wait/	b16
+lwf/raid/demo/start_0016/	b16
+lwf/raid/demo/escape_0016/	b16
+lwf/raid/demo/put_down_0016/	b16
+lwf/character/raid/1000/atk1/	b16
+lwf/character/raid/1000/atk2/	b16
+lwf/character/raid/1000/knockback1/	b16
+lwf/character/raid/1000/knockback2/	b16
+lwf/character/raid/1000/wait/	b16
+lwf/raid/demo/start_1000/	b16
+lwf/raid/demo/escape_1000/	b16
+lwf/raid/demo/put_down_1000/	b16
+lwf/character/raid/1001/atk1/	b16
+lwf/character/raid/1001/atk2/	b16
+lwf/character/raid/1001/knockback1/	b16
+lwf/character/raid/1001/knockback2/	b16
+lwf/character/raid/1001/wait/	b16
+lwf/raid/demo/start_1001/	b16
+lwf/raid/demo/escape_1001/	b16
+lwf/raid/demo/put_down_1001/	b16
+lwf/character/raid/1002/atk1/	b16
+lwf/character/raid/1002/atk2/	b16
+lwf/character/raid/1002/knockback1/	b16
+lwf/character/raid/1002/knockback2/	b16
+lwf/character/raid/1002/wait/	b16
+lwf/raid/demo/start_1002/	b16
+lwf/raid/demo/escape_1002/	b16
+lwf/raid/demo/put_down_1002/	b16
+lwf/character/raid/1003/atk1/	b16
+lwf/character/raid/1003/atk2/	b16
+lwf/character/raid/1003/knockback1/	b16
+lwf/character/raid/1003/knockback2/	b16
+lwf/character/raid/1003/wait/	b16
+lwf/raid/demo/start_1003/	b16
+lwf/raid/demo/escape_1003/	b16
+lwf/raid/demo/put_down_1003/	b16
+lwf/character/raid/1004/atk1/	b16
+lwf/character/raid/1004/atk2/	b16
+lwf/character/raid/1004/knockback1/	b16
+lwf/character/raid/1004/knockback2/	b16
+lwf/character/raid/1004/wait/	b16
+lwf/raid/demo/start_1004/	b16
+lwf/raid/demo/escape_1004/	b16
+lwf/raid/demo/put_down_1004/	b16
+lwf/character/raid/1005/atk1/	b16
+lwf/character/raid/1005/atk2/	b16
+lwf/character/raid/1005/knockback1/	b16
+lwf/character/raid/1005/knockback2/	b16
+lwf/character/raid/1005/wait/	b16
+lwf/raid/demo/start_1005/	b16
+lwf/raid/demo/escape_1005/	b16
+lwf/raid/demo/put_down_1005/	b16
+lwf/character/raid/1006/atk1/	b16
+lwf/character/raid/1006/atk2/	b16
+lwf/character/raid/1006/knockback1/	b16
+lwf/character/raid/1006/knockback2/	b16
+lwf/character/raid/1006/wait/	b16
+lwf/raid/demo/start_1006/	b16
+lwf/raid/demo/escape_1006/	b16
+lwf/raid/demo/put_down_1006/	b16
+lwf/character/raid/1007/atk1/	b16
+lwf/character/raid/1007/atk2/	b16
+lwf/character/raid/1007/knockback1/	b16
+lwf/character/raid/1007/knockback2/	b16
+lwf/character/raid/1007/wait/	b16
+lwf/raid/demo/start_1007/	b16
+lwf/raid/demo/escape_1007/	b16
+lwf/raid/demo/put_down_1007/	b16
+lwf/character/raid/1008/atk1/	b16
+lwf/character/raid/1008/atk2/	b16
+lwf/character/raid/1008/knockback1/	b16
+lwf/character/raid/1008/knockback2/	b16
+lwf/character/raid/1008/wait/	b16
+lwf/raid/demo/start_1008/	b16
+lwf/raid/demo/escape_1008/	b16
+lwf/raid/demo/put_down_1008/	b16
+lwf/character/raid/1009/atk1/	b16
+lwf/character/raid/1009/atk2/	b16
+lwf/character/raid/1009/knockback1/	b16
+lwf/character/raid/1009/knockback2/	b16
+lwf/character/raid/1009/wait/	b16
+lwf/raid/demo/start_1009/	b16
+lwf/raid/demo/escape_1009/	b16
+lwf/raid/demo/put_down_1009/	b16
+lwf/character/raid/1010/atk1/	b16
+lwf/character/raid/1010/atk2/	b16
+lwf/character/raid/1010/knockback1/	b16
+lwf/character/raid/1010/knockback2/	b16
+lwf/character/raid/1010/wait/	b16
+lwf/raid/demo/start_1010/	b16
+lwf/raid/demo/escape_1010/	b16
+lwf/raid/demo/put_down_1010/	b16
+lwf/character/raid/9102/atk1/	b16
+lwf/character/raid/9102/atk2/	b16
+lwf/character/raid/9102/knockback1/	b16
+lwf/character/raid/9102/knockback2/	b16
+lwf/character/raid/9102/wait/	b16
+lwf/character/raid/9103/atk1/	b16
+lwf/character/raid/9103/atk2/	b16
+lwf/character/raid/9103/knockback1/	b16
+lwf/character/raid/9103/knockback2/	b16
+lwf/character/raid/9103/wait/	b16
+# 49b. 9102 and 9103 escape / put_down: textures the JP extraction keeps once because they are identical to another file of the same
+#      model (int-DD) or of the twin (x-D). Copies named by the texture table rule, measured 99.36% right on the 31 models the
+#      2016 package has (RECOVERY, 1 Nov). Inferred, not original files: listed in docs/notes/raid.md.
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972034322e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034332e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972034342e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972034372e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972034382e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035302e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972035332e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035342e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972035352e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035362e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972035362e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035372e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972035392e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972036302e706e67.png
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972036332e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972036342e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035332e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035342e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035342e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035352e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035352e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035362e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035362e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035372e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035372e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035382e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035382e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035392e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972035392e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036302e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972036302e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036312e706e67.png
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972036332e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f312e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f312e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f322e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f322e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f332e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f332e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f342e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f352e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f352e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f362e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f362e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f372e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f372e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_726564666972655f726564666972655f382e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_726564666972655f726564666972655f382e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_77617465725f77617465725f312e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_77617465725f77617465725f312e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_77617465725f77617465725f322e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_77617465725f77617465725f322e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_77617465725f77617465725f332e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_77617465725f77617465725f332e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_77617465725f77617465725f342e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_77617465725f77617465725f342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034312e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034322e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720352e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034332e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720362e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720372e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034352e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720382e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034362e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720392e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031302e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031312e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972034392e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031322e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031332e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035312e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035322e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031352e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035332e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031362e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035342e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031372e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035352e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031382e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035362e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972031392e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035372e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032302e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035382e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032312e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972035392e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032322e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036302e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032332e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036312e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032342e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036322e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032352e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036332e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032362e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036342e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032372e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036352e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032382e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036362e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972032392e706e67.png
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e383972036372e706e67.png	jp	lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e383972033302e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f312e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f312e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f322e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f322e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f332e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f332e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f342e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f352e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f352e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f362e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f362e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f372e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f372e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_726564666972655f726564666972655f382e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_726564666972655f726564666972655f382e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_77617465725f77617465725f312e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_77617465725f77617465725f312e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_77617465725f77617465725f322e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_77617465725f77617465725f322e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_77617465725f77617465725f332e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_77617465725f77617465725f332e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_77617465725f77617465725f342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_77617465725f77617465725f342e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034312e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720342e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034322e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720352e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034332e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720362e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720372e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034352e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720382e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034362e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720392e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031302e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031312e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972034392e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031322e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031332e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035312e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031342e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035322e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031352e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035332e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031362e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031372e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035352e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031382e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035362e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972031392e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035372e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032302e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035382e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032312e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972035392e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032322e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036302e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032332e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036312e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032342e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036322e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032352e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036332e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032362e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036342e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032372e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036352e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032382e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036362e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972032392e706e67.png
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e383972036372e706e67.png	jp	lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e383972033302e706e67.png
