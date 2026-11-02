@@ -181,3 +181,9 @@ Final results of the spike, 1 November (user):
 - **The HP bar's maximum comes from the `raidEnemy` row**, not from `/raid/start`: a boss above its row looks as if it never loses HP. Part 2 needs rows with the real HP of each tier and period.
 - The first attempt's `useAp` 0 and a later one 10 work. The 3-minute return of weak points is not in the client: the server does it.
 - Images: the JP data carries Japanese text in some raid images (`Result_Clear_Raid`); the 2016 bundle has them in English. Check them all in Part 2. Not yet seen: `getPoint.raidPoint` with Eggcognito rows, `isEntry`, `isRelief`, the home button's widgets, what the quest list's Raid button opens, fever.
+
+## Bench smoke 2 Nov
+
+Task 8 Step 5, master rev 233, resources 93, save `raid2` (maxpower party). Every available raid model was forced with `save/raid_smoke.json` (one entry per model, lowest tier) and taken to the fight: 26 models tried, **23 load** (`0001`-`0005`, `0007`-`0010`, `0012`, `0014`, `1000`-`1004`, `1006`-`1010`, `9102`, `9103`), **3 crash** the client on fight load: `0015` Queen Bee, `0016` Queen Bee Omega, `1005` Lion Headliner (reproduced). All three crashes are the same SIGSEGV null pointer (`fault addr 0x10`, frames `af9e24`/`eff5bc`/`146c57c`) after `/raid/start` and before the battle HUD; other bosses on the same maps load, so the cause is in the three models' data (asset or animation), still to analyse. Until then those three entries should not be offered.
+
+Bench facts from the run: the forced boss shows the «ENCOUNTER» screen, which stays until tapped (no SKIP); the home does not poll `/user/notice`, so a new boss needs a relaunch or `/raid/list`; after a clear or a Give Up the game goes back to the RAID BOSS ALERT list; OPTIONS (1820,48), Give Up (1172,505), Withdraw OK (1220,708). The script and the per-model table stay in the private bench folder (`tmp/raid_p2`, `SMOKE.md`).
