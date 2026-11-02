@@ -135,3 +135,10 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
 
 To test the popups again: stop the server, `unlock` of 2100001 to [1..5], `spherePoint` 470,
 `sphereBonus.cost` 3, remove 2001 from `titles`, restart (with `relogin.ps1`).
+
+## Raid Boards, bench 2 November 2026 (rev 231, save `raid2`)
+
+- Quests → Events → Raid Time! → Raid Boards opens the list of the week's two boards (3000110, 3000111) with Raid Coins and «To Complete».
+- Board 3000110: path and costs drawn, one node bought (EXP Medal Huey, 870 → 770 Raid Coins), Unlock All (9,900) completes it: COMPLETE with an Evolve Medal, then the list shows COMPLETE 16/16.
+- Not original yet: the cards have no picture (no `sphere_incentive/<id>.png` for these ids) and the coin icon is the generic one (`img/incentive/SpherePointIcon_Raid.png` is not shipped).
+- Not seen yet: nodes paying Draw Tickets, Jewels, materials or Spirit parts (this week's boards pay medals only); to check when Task 8 serves other weeks.
