@@ -435,7 +435,7 @@ The **Sora & Moogle B** Medal (JP 5th anniversary, a Raid Board reward) is **rec
 
 The Raid Board cell listed as a **6★ Fantasia Mickey A** gives the **5★ Fantasia Mickey A**: no 6★ version of that Medal is known, and the board pairs it with Magic Brooms, which evolve the 5★.
 
-The **Starlight Ears** and **Dazzling Disco** Spirit parts are **left off** their Raid Boards: part of their artwork is lost, so those boards have one cell less than in the original game.
+The **Starlight Ears** and **Dazzling Disco** Spirit parts (Raid Board rewards) each have one **reconstructed** texture: a small twinkling sparkle and a tiny dot were lost and are drawn with the matching sparkle of the same set.
 
 ### Shop and draws
 

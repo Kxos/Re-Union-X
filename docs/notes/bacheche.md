@@ -136,8 +136,12 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
     recipe) and the wiki infobox lists `mickeya=1` without a rarity. Not checked against the board image (not downloaded).
   - Balloon Mike & Sulley (407026), Balloon Axel (407047): Spirit parts with their original artwork, recovered from the
     identical files of the avatar accessories 208106/208137 ([home_profilo](home_profilo.md), `jp_pet_parts.py` avatar twin).
-  - Still off (`boards.unmatched`): Starlight Ears (402028, a 51x60 texture «ビットマップ 1» missing) and Dazzling Disco
-    (410014, a 1x1 texture «ビットマップ 2» missing): no local source has those two files. Notices, Differences, «Raid Boards».
+  - Starlight Ears (402028), Dazzling Disco (410014): added later the same day (user: restore them with a reconstructed
+    texture if the original cannot be found). Each lacked one texture in every local source (a 51x60 «ビットマップ 1» twinkle
+    sparkle; a 1x1 «ビットマップ 2» star grain); rebuilt from the matching piece of the same set (402027 Starlight Bow's
+    sparkle; avatar 108225 Disco: Sparkles' grain), kept in the private `pet_parts_recon` folder with its record.
+    `raid_config.json` `boards.reconstructedTexture` labels their weeks `boardTexture`; `boards.unmatched` is empty, no cell
+    is left off. Notices, Differences, «Raid Boards». Previews on the Spirit: `D:\Progetto_Restauro_KH_UX	mp\pet_parts_recon\index.html`.
 - **Server.** Standard boards open with the Lux level only if type 1. Raid Boards handed out = those of the current raids and
   of the kept raid (`routes-raid.js` `boardIds()`); their progress is `player.raidSphere[id]` and is never deleted, so a board
   that comes back (Catalog) keeps its nodes. `GET /user/sphere` lists them (and records `player.raidSphereSent`); a check

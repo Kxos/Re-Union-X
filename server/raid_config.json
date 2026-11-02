@@ -48,18 +48,17 @@
     "singleEra": "One tier before 2019-08-12: stats grow up to a cap at LV 30 (one forum statement). Cap HP is read from footage; the shares below it are ours, fitted to the only readings: LV 2 above 2%, LV 4 above 3%, LV 24 about 50%. atkShare has no reading at all: it follows the shape of the 2016 rows. Knots are the coin level bands.",
     "statsRule": "Inputs of raid_stats.json. refEnemyId: the plain Shadow row, the reference story enemy. def: community calculators treat raid DEF as constant at about 1000, 1100 for Omega; epic: a player report of a threshold near 50,000 STR, read as DEF. The damage formula was not read, so that reading is an assumption.",
     "partHp": "Part HP: JP screenshots of 5 bosses as a share of the body where derived, the nearest date; otherwise the body-to-part ratio of the 2016 row at its first knot.",
-    "boards": "Raid Boards (raid-boards.js): unmatched lists reward names with no item in the master tables; their cells are left off the board and reported, never replaced by another item. aliases maps a wiki name to the item it means, with the reason; the week gets the label boardAlias.",
+    "boards": "Raid Boards (raid-boards.js): unmatched lists reward names with no item in the master tables; their cells are left off the board and reported, never replaced by another item. aliases maps a wiki name to the item it means, with the reason; the week gets the label boardAlias. reconstructedTexture lists the rewards drawn with a reconstructed texture (label boardTexture).",
     "boardPath": "The positions of the cells on the Raid Boards are ours: the wiki board images were not downloaded, so the cells follow one path from START in the wiki's order n. Whether cells had to be bought in order is not documented.",
     "boardSet": "Which boards ran this week is inferred: the board names are sourced, the layout of that week is not (2021-03-01 to 2021-06-29 and the one-day event of 2020-11-01).",
     "boardCost": "A board cost corrected from the wiki: Halloween Board 2019, cell 17 reads 700 on the wiki, but the page total and the cost ladder need 1,600 (inferred).",
-    "boardCells": "Some cells of this week's boards are missing: their reward (a Spirit part whose artwork is incomplete) has no item here, so the cell is left off rather than replaced.",
+    "boardCells": "Some cells of this week's boards are missing: their reward has no item here, so the cell is left off rather than replaced.",
+    "boardTexture": "A Spirit part of this week's boards (Starlight Ears, Dazzling Disco) is drawn with one reconstructed texture: the original is lost (a small sparkle, a tiny dot).",
     "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey Ver. A (no 6★ exists)."
   },
   "boards": {
-    "unmatched": {
-      "Starlight Ears": "Spirit part 402028: its artwork lacks one texture (51x60) in every local source; the item is not added until it is found.",
-      "Dazzling Disco": "Spirit part 410014: its artwork lacks one texture (1x1) in every local source; the item is not added until it is found."
-    },
+    "unmatched": {},
+    "reconstructedTexture": ["Starlight Ears", "Dazzling Disco"],
     "aliases": {
       "6★ Fantasia Mickey A": {"item": "5★ Fantasia Mickey Ver. A", "why": "Fantasia Mickey A exists only at 5★ (Roboloid's full medal list, the medal table); the board pairs it with Magic Brooms, the 5★ evolve recipe, and the wiki infobox lists it as mickeya=1 without a rarity: the 6★ is read as a slip of the wiki layout."}
     }

@@ -762,6 +762,10 @@ const tests = {
     assert.deepStrictEqual([masu.rewardSelect.slice(0, 3), masu.rewardId.slice(0, 3), masu.rewardValue.slice(0, 3)], [[3, 3, 41], [90156, 90085, 2], [1, 1, 10]]);
     assert.ok(entry(out, 'Trickmaster').reconstructed.includes('boardAlias'));
     assert.deepStrictEqual(out.report.boards.unmatched, []);
+    // a reward drawn with a reconstructed texture labels the week
+    const tx = build((f) => { withBoards(f); f.boards.boards[1].cells.push(cell(2, 50, 'Pet', 'Jessie Hat')); f.config.boards = { reconstructedTexture: ['Jessie Hat'] }; });
+    assert.ok(entry(tx, 'Trickmaster').reconstructed.includes('boardTexture'));
+    assert.ok(!entry(build((f) => withBoards(f)), 'Trickmaster').reconstructed.includes('boardTexture'));
   },
   master_size() {
     const out = build((f) => withBoards(f));
@@ -780,6 +784,7 @@ const tests = {
     console.log(`  (all ${weeks} Weekly and Radiant rows: ${all.sphereRows.length} boards, +${all.report.bytes} bytes = ${(all.report.bytes / 1048576).toFixed(2)} MB; `
       + `${all.report.unmatched.length} cells left off, boards with no cell: ${all.report.dropped.join(', ') || 'none'})`);
     assert.strictEqual(weeks, 130);
+    assert.deepStrictEqual(all.report.unmatched, [], 'every Raid Board reward is an item (2 Nov 2026)');
     assert.ok(all.report.bytes < 40 * 1048576, `${all.report.bytes} bytes`);
     assert.strictEqual(all.report.corrected.length, 1, 'Halloween Board 2019 cell 17');
     assert.strictEqual(new Set(all.sphereRows.map((r) => r.sphereBoardId)).size, all.sphereRows.length);

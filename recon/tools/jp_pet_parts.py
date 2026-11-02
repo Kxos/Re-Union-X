@@ -12,7 +12,12 @@ same item (lwf/avatar/accessory/*/*) when exactly one avatar file has the same t
 part prefix) and the same size: the dump kept the identical file once, under the avatar part (Balloon
 Mike & Sulley 407026 = avatar 208106, Balloon Axel 407047 = avatar 208137). Report key `avatar_twin`.
 
-    python -I recon/tools/jp_pet_parts.py <JP_ROOT> (resoconto, non scrive nulla)
+Own file at another pixel size (2 Nov 2026): an accessory texture whose own file exists but is stored at another size than
+the LWF declares is used as it is (the original game shipped such files: avatar 108225 has 12x13 for a declared 5x5,
+410014 the same); report key `own_resized`. Reconstructed textures: `recon_root` (the private pet_parts_recon/files
+folder, with its README) gives a file for a texture missing from every source; report key `reconstructed`.
+
+    python -I recon/tools/jp_pet_parts.py <JP_ROOT> [RECON_ROOT] (resoconto, non scrive nulla)
 """
 import os
 import re
@@ -63,7 +68,7 @@ def _num(series):
     return int(series)
 
 
-def collect(jp_root, served=()):
+def collect(jp_root, served=(), recon_root=None):
     """{nome servito: percorso JP} per tutte le parti e le icone non gia' servite, piu' il resoconto."""
     root = os.path.join(jp_root, 'lwf', 'pet', 'part')
     dirs = {}            # (serie, parte) -> {nome logico: percorso}
@@ -112,7 +117,7 @@ def collect(jp_root, served=()):
         cands = av_png.get((name[len(part) + 1:], tuple(size)), [])
         return cands[0] if len(cands) == 1 else None
 
-    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'skipped': []}
+    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'reconstructed': [], 'own_resized': [], 'skipped': []}
     for (series, part), files in sorted(dirs.items()):
         base = 'lwf/pet/part/%s/%s/' % (series, part)
         if base + part + '.lwf' in served:
@@ -134,11 +139,22 @@ def collect(jp_root, served=()):
             cands = png_by_key.get((name, tuple(size)), [])
             if not cands:
                 av = avatar_twin(part, name, size) if len(series) == 6 else None  # accessories only
-                if not av:
-                    break
-                pick[name] = av
-                report['avatar_twin'].append((series, part, os.path.relpath(av, jp_root)))
-                continue
+                if av:
+                    pick[name] = av
+                    report['avatar_twin'].append((series, part, os.path.relpath(av, jp_root)))
+                    continue
+                rc = os.path.join(recon_root, base + name) if recon_root else None
+                if rc and os.path.isfile(rc):
+                    pick[name] = rc
+                    report['reconstructed'].append((series, part, name))
+                    continue
+                if len(series) == 6 and name in files:
+                    # own file stored at another pixel size than the LWF declares: the original game shipped such
+                    # files too (avatar 108225 «Disco: Sparkles»: 12x13 for a declared 5x5), the client scales them
+                    pick[name] = files[name]
+                    report['own_resized'].append((series, part, name))
+                    continue
+                break
             pick[name] = nearest(cands, series)
             report['png_twin'].append((series, part, os.path.relpath(pick[name], root)))
         else:
@@ -160,7 +176,7 @@ def collect(jp_root, served=()):
 
 
 if __name__ == '__main__':
-    files, rep = collect(sys.argv[1])
+    files, rep = collect(sys.argv[1], recon_root=sys.argv[2] if len(sys.argv) > 2 else None)
     print('file: %d (lwf %d, png %d, icone %d)' % (
         len(files), sum(k.endswith('.lwf') for k in files),
         sum(k.endswith('.png') and k.startswith('lwf/') for k in files),
@@ -168,6 +184,9 @@ if __name__ == '__main__':
     print('LWF dalla gemella: %d, texture dalla gemella: %d' % (len(rep['lwf_twin']), len(rep['png_twin'])))
     for s in rep['avatar_twin']:
         print('  avatar twin', *s)
+    for k in ('reconstructed', 'own_resized'):
+        for s in rep[k]:
+            print('  %s' % k, s[0], s[1], s[2].encode('ascii', 'backslashreplace').decode())
     for s in rep['skipped']:
         print('  saltata', *s)
     print('serie escluse:', ' '.join(rep['missing_series']))

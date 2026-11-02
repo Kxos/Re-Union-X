@@ -427,7 +427,13 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   (2 Nov 2026: a texture missing from every pet folder is taken from the avatar accessory with the same texture name and
   size when exactly one exists, never by a «ビットマップ N» default name: Balloon Mike & Sulley 407026 = avatar 208106,
   Balloon Axel 407047 = avatar 208137, rows added to `pet_parts.tsv`, 670 rows; the rule also completes 402092, 407024,
-  407036, 407039, 410016, 410020, whose files are imported but which have no row yet: to add after a visual check)
+  407036, 407039, 410016, 410020, whose files are imported but which have no row yet: to add after a visual check.
+  Later that day: an own texture stored at another pixel size than the LWF declares is used as is, as the original game
+  did for avatar 108225 (`own_resized`): this completes 401010, 401011, 402118, 402119, 407004, 407009, 407011, 407015,
+  407043, 410010, 410019 too (files imported, no rows: none is a reward we serve yet; 407004 Balloon Snowman and 407043
+  Flying Carpet are event Raid Board rewards for Task 10). Textures lost from every source come from the private
+  `pet_parts_recon/files` folder (`recon_root`, record in its README): 402028 Starlight Ears and 410014 Dazzling Disco,
+  rows added, 672 rows)
   (among them Starlight Bow/Glasses and almost all the Limited Balloons). Also **25 original
   motions** `lwf/pet/motion` (wait, walk, battle_normal...: they have the accessory movies; shadow
   97x24 = NPC_SHADOW) instead of ours; battle_all, pvp_start/total_*,

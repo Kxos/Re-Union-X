@@ -182,6 +182,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   const fixes = parseBoardCorrections(correctionsMd);
   const declared = config.unmatched || {};
   const aliases = config.aliases || {};
+  const texture = new Set(config.reconstructedTexture || []); // rewards drawn with a reconstructed texture: label boardTexture
   const layouts = new Map((doc.boards || []).map((b) => [b.id, b]));
   const out = { sphereRows: [], arrayRows: [], masuRows: [], byCensus: {}, labels: {}, boardIds, report: { unmatched: [], corrected: [], dropped: [], bytes: 0 } };
   const unknown = new Map(), unmatched = new Map(), built = new Map();
@@ -226,6 +227,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       if (r.cells.some((c) => c.corrected)) labels.add('boardCost');
       if (r.dropped.length) labels.add('boardCells');
       if (r.cells.some((c) => c.alias)) labels.add('boardAlias');
+      if (r.cells.some((c) => texture.has(c.reward))) labels.add('boardTexture');
       for (const d of r.dropped) {
         const k = `${d.board}/${d.n}`;
         if (!unmatched.has(k)) unmatched.set(k, { ...d, weeks: 0 });
