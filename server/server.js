@@ -1615,6 +1615,8 @@ function respondGachaDraw(res, body) {
     }
     missionCount('draw', 1); // Beginner «Draw Medal»: una per richiesta riuscita, non per medaglia
     price = gacha.payDraw(banner, player, realMs, draw.featured);
+    // slot 3 dello Spirit Training: 5 Deal da 10 medaglie in Jewel (pet.js noteDraw)
+    if (PET_ENABLED) pet().noteDraw({ payType: banner.payType, lotCount: banner.lotCount, freeDaily: gacha.isFreeDaily(banner) });
   } catch (e) {
     for (const k of Object.keys(player)) delete player[k];
     Object.assign(player, JSON.parse(undo));
@@ -2766,6 +2768,7 @@ function missionCount(counter, n) {
     if (MISSION_COUNTER[row.conditionId] === counter && missionActive(row, nowMs)) missionState(row, nowMs).count += n;
   }
   vipRefresh(nowMs);
+  monthlyRefresh(nowMs);
 }
 
 // VIP benefit (I-134, vip-benefit.js): settimana guadagnata quando tutte le missioni settimanali attive sono
@@ -2786,6 +2789,28 @@ function vipBenefits(realMs = realNow()) {
   const end = (w) => serverTimeAt(clock.weekStartOf(w));
   if (process.env.KHUX_VIP === '1') return [{ benefitId: vipBenefit.VIP_BENEFIT_ID, endDatetime: end(clock.weekIndex(realMs) + 1) }];
   return vipActive(realMs) ? vipBenefit.userBenefits(player.vip, clock.weekIndex(realMs), end) : [];
+}
+// fine del VIP in ms reali (0 se spento): slot 2 dello Spirit Training (pet.js TRAIN_SLOT_RULES)
+function vipUntil(realMs = realNow()) {
+  if (process.env.KHUX_VIP === '1') return clock.weekStartOf(clock.weekIndex(realMs) + 1);
+  return vipActive(realMs) ? clock.weekStartOf(vipBenefit.activeUntilWeek(player.vip)) : 0;
+}
+// Limited mensili (campagna dei Lux del mese, missionType 4 del gruppo 'monthly') tutte completate o riscosse nel mese
+// M: slot 4 dello Spirit Training per il resto di M e per tutto M+1, come il VIP con le settimane (decisione
+// dell'utente 02-11, al posto del Jewel Box E). Si registra subito (player.monthlyEarned = clock.monthIndex), da
+// missionCount come vipRefresh, prima che il cambio di mese azzeri i contatori. Senza righe attive (campagna gia'
+// riscossa in un giro precedente) il mese non conta.
+function monthlyRefresh(realMs = realNow()) {
+  const rows = masterRows('mission').filter((r) => r.missionType === 4 && LIMITED_GROUP.get(r.id)?.kind === 'monthly' && missionActive(r, realMs));
+  const cur = (r) => { const s = player.missions?.[r.id]; return s && s.period === missionPeriod(r, realMs) ? { ...s, count: missionProgress(r, s) } : null; };
+  const month = clock.monthIndex(realMs);
+  if (vipBenefit.weekEarned(rows, cur) && !(player.monthlyEarned >= month)) player.monthlyEarned = month;
+}
+// fine dello slot 4 in ms reali (0 = chiuso): fine del mese dopo quello guadagnato
+function monthlyUntil(realMs = realNow()) {
+  monthlyRefresh(realMs);
+  const m = player.monthlyEarned, now = clock.monthIndex(realMs);
+  return Number.isInteger(m) && now >= m && now <= m + 1 ? clock.monthEndOf(m + 1) : 0;
 }
 
 // missions[] di /user/mission/list e /user/mission/receive: solo id del master (altrimenti il
@@ -4728,7 +4753,7 @@ function pet() {
   return petInstance ??= makePet({
     ret, send, serverTime, masterRows, player, savePlayer, userMedalList, userMedalElement, schemaResponse,
     realNow, outTime, monthIndex: clock.monthIndex, weekEnd: clock.weekEnd, monthEnd: clock.monthEnd,
-    medalResumption: medalResumptionData,
+    medalResumption: medalResumptionData, vipUntil, monthlyUntil,
   });
 }
 // petSubslot per le azioni 55/56: spento = il segnaposto di prima (tutto a 0)

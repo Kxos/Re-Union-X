@@ -471,6 +471,8 @@ Limited Missions that give Platinum Tickets or Draw Tickets appear only after a 
 
 There are no purchases: Jewels and items come from quests, missions and presents.
 
+Spirit Training slots that were bought in the original game open in other ways (**not original**): slot 2 ("Purchase Weekly Jewels") opens while you have the **VIP benefit** of the Weekly Missions, until it ends; slot 4 ("Purchase Jewel Box E") opens when you complete **all the monthly Limited Missions** (the month's Lux campaign), for the rest of that month and the whole next month, although its label says "Valid until the end of the month". Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.
+
 ## Missions
 
 **INFORMATION** · 10/16

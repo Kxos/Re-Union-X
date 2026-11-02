@@ -376,6 +376,25 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     (locked slots): our own in `TEXTS`. The slot view adds `cocostudio/publish/PetInfoAnim.ExportJson`
     (missing) with addArmatureFileInfo: the armature creation was not found, to be seen on the bench.
     After 244 the client requests /pet/profile and updates the dialog.
+  - <a id="training-slots"></a>**Training Slots 2-4** (02-11). Original unlock rules: notice NA 2019.04.22
+    «Information On Spirit Training» (Reddit Donators\ReLux Team, local): Jewel Box + (= the weekly VIP pass
+    «Weekly Jewels Extravaganza»; every [WJE] notice from 2019.07.29 lists «Unlock a Spirit Training slot!») until
+    Sunday 11:59 p.m. PT; Jewel Box E «31 days after purchase (overwrite)» (khuxwiki Pet_System and our text: until the
+    end of the month); 5 draws from limited-time 10-Medal Deals («Ticket Draw» deals do not qualify) open a slot until
+    72 hours after the 5th, draws made while it is open do not count. Slot numbers from the client and the bench dialog
+    (`D:\Progetto_Restauro_KH_UX\screenshots\slots.png`): slot 2 «Purchase Weekly Jewels to unlock» / «Valid for 6
+    days» (`limitDateimeWeekEnd`), slot 3 «N more 10-Medal draws to unlock» (`remainingDrawCount`, rich text) /
+    «Valid for 3 days», slot 4 «Purchase Jewel Box E to unlock» / «Valid until the end of the month» (106240102, our
+    text; `limitDateimeMonthEnd`). The khuxwiki table swaps slots 3 and 4; the client layout rules. Ours
+    (`server/pet.js` `TRAIN_SLOT_RULES`, one row per slot, user decisions 02-11): **2 = our weekly VIP** (I-134,
+    `vipUntil`: open until the VIP ends, i.e. the earned week + the next; the locked hint gets weekEnd + 7 days);
+    **3 = the original rule** (Jewel-paid `payType` 1 deals with `lotCount` 10, Free Deals excluded; counted by
+    `noteDraw` from `respondGachaDraw`, state `player.pet.training.draws {count, openUntil}`); **4 = all monthly Limited
+    missions** (the month's Lux campaign, up to the 10,000,000,000 Lux tier) completed in month M, recorded at once in
+    `player.monthlyEarned` (from `missionCount`, like `vipRefresh`) → open until the end of M+1 (`monthlyUntil`); the
+    client label still says «Valid until the end of the month». POST 244 trains at most one medal per open slot.
+    `KHUX_PET_TRAIN_SLOTS=N` still forces slots 2..N open (bench). A saved `readyAt` more than `TRAIN_HOURS` ahead
+    (clock moved back, e.g. after a `-RealNow` bench) counts as ready and is reset. Test: `node server/test-pet-training.js`.
   - **Outfits** (`Button_B`): scene `PetEditScene_ver230`,
     twin of `AvatarEditScene_ver131`: nodes `CenterUI_Left` (tab1..tab6 with `Txt_Tab` 106110401-406
     and button «Av_Make_Win_But», `Area` = list of `PetEdit_Panel_ver230` 298x122,
