@@ -115,6 +115,12 @@ Tools (20-10):
   served scenes (AvatarEdit, GlobalNavi, AdventureTop2), so taking them changes those screens; only
   `ActMapTreasureBoxAnim0` and `ActMapTreasureBoxExAnim0` are cited by no served or generated layout and not by the binary.
   `ActMapTreasureBoxExAnim0` now carries `Cursor_Anim_Proud` (JP_ARM of `import_jp_coco.py`); `ActMapTreasureBoxAnim0` is the last free one.
+  **Correction 02-11 (I-222)**: "free" was wrong for `MyPageAnime0`: it is the atlas of the served `MyPageAnime.ExportJson`
+  (home WARNING bar, `Home_Warning_*`), and overwriting it erased those frames. Since then JP_ARM never replaces a served
+  atlas: `atlas_merge.py` packs the JP frames into the served texture (free space first, power-of-two enlargement only
+  if nothing fits; served rects and premultiplied pixels unchanged) and appends them to the served plist. All three
+  slots (`MyPageAnime0`, `ActMapTreasureBoxExAnim0` 512x256 -> 512x512, `ActMapTreasureBoxAnim0`) are merged, so a
+  slot no longer needs to be free; `test_jp_arm_atlas.py` checks it.
 - Playing an armature movement that does not exist = crash.
 - Many buttons load `img/ui/<nome>_On.png` on tap: without it, crash (46 copied).
 - The template's ImageViews have 9-slice (border 50): for icons at natural size `s9=False`.

@@ -537,6 +537,8 @@ for n in ours:
 # plist e la texture vanno sul nome di un plist servito che il binario non cita mai; le due armature
 # hanno lo stesso fotogramma (Rank_Panel_User_Eff.png) e condividono il plist. La texture di
 # Ranking2 (Cursor_Anim_Ranking20.png) manca anche nel JP: si usa quella di Ranking.
+# Lo slot NON e' libero: MyPageAnime0 e' l'atlante di MyPageAnime.ExportJson (barra WARNING della home,
+# Home_Warning_*.png, I-222); i fotogrammi JP si uniscono all'atlante servito (atlas_merge.py, piu' avanti).
 # Cursor_Anim_Proud (Proud Mode, I-200): cursore rosso del nodo «Cursor» di StartDeckProudScene_ver260
 # (servita, come StartDeckEdit2/3Scene): un fotogramma, PMode_Rule_Panel_B.png. Va su
 # ActMapTreasureBoxExAnim0: plist servito che nessun layout servito o generato e il binario citano
@@ -1045,6 +1047,10 @@ if os.path.isdir(os.path.join(JP_ROOT, 'lwf', 'pet', 'part')):
 
 # ---- armature originali JP su un plist libero -------------------------------------------------
 # (JP_ARM e' definito prima delle radici: scritto qui sotto, dopo le radici)
+# Il plist dello slot e' l'atlante servito CON i fotogrammi JP aggiunti (atlas_merge.py, I-222): sovrascriverlo
+# toglieva i fotogrammi originali (MyPageAnime0 = Home_Warning_*: la barra rossa WARNING della home spariva).
+import atlas_merge  # noqa: E402
+_slot_src = {}
 for _arm, (_slot, _src) in sorted(JP_ARM.items()):
     _ej = os.path.join(_jp_pub, _arm + '.ExportJson')
     if 'cocostudio/publish/%s.ExportJson' % _arm in _served_all or not os.path.exists(_ej):
@@ -1053,10 +1059,31 @@ for _arm, (_slot, _src) in sorted(JP_ARM.items()):
     _data['config_file_path'] = [_slot + '.plist']
     _data['config_png_path'] = [_slot + '.png']
     writes[_arm + '.ExportJson'] = ('jp', _ej, _data)
-    _pl = open(os.path.join(_jp_pub, _src + '.plist'), encoding='utf-8').read()
-    writes[_slot + '.plist'] = ('jp', os.path.join(_jp_pub, _src + '.plist'),
-                                _pl.replace(_src + '.png', _slot + '.png').encode('utf-8'))
-    writes[_slot + '.png'] = ('jp', os.path.join(_jp_pub, _src + '.png'), None)
+    _slot_src.setdefault(_slot, [])
+    if _src not in _slot_src[_slot]:
+        _slot_src[_slot].append(_src)
+for _slot, _srcs in sorted(_slot_src.items()):
+    if Image is None:
+        if args.check:
+            continue
+        sys.exit('JP_ARM: unire %s all\'atlante servito richiede Pillow (lanciare senza -I)' % _slot)
+    _bp, _bt = served_path(_slot + '.plist'), served_path(_slot + '.png')
+    _pl = open(_bp, 'rb').read() if os.path.exists(_bp) else _served_bytes(PUB + _slot + '.plist')
+    _tx = open(_bt, 'rb').read() if os.path.exists(_bt) else _served_bytes(PUB + _slot + '.png')
+    if not _pl or not _tx:
+        sys.exit('JP_ARM: atlante servito %s assente (catalog\\files e resource_data)' % _slot)
+    _bom = b'\xef\xbb\xbf' if _pl.startswith(b'\xef\xbb\xbf') else b''
+    _pl = _pl.decode('utf-8-sig')
+    for _src in _srcs:
+        _pl, _tx, _rep = atlas_merge.merge(_pl, _tx, open(os.path.join(_jp_pub, _src + '.plist'), encoding='utf-8-sig',
+                                                         newline='').read(),
+                                           Image.open(os.path.join(_jp_pub, _src + '.png')))
+        print('JP_ARM: %s + %s -> tela %dx%d, aggiunti %s%s' % (
+            _slot, _src, _rep['canvas'][0], _rep['canvas'][1],
+            ', '.join('%s@%d,%d' % p[:3] for p in _rep['placed']) or '-',
+            ('; gia\' serviti: ' + ', '.join(_rep['skipped'])) if _rep['skipped'] else ''))
+    writes[_slot + '.plist'] = ('jp', _bp, _bom + _pl.encode('utf-8'))
+    writes[_slot + '.png'] = ('jp', _bt, _tx)
 
 
 # ---- effetti sonori originali citati dai LWF (I-152) -------------------------------------------
