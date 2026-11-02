@@ -19,7 +19,7 @@ const coin = coinRows({ enemyId: ENEMY, date: '2019-10-07', tier: 'Beginner', le
 const rewardId = (t) => [t.raidRewardId, t.raidRewardId, 0, 0, 0];
 
 function world(opts = {}) {
-  const w = { now: TUE, saves: 0, sent: null, sentCode: 0, logs: [], grants: [], presents: [], ap: 100, lux: 0, burst: null, medalCount: 0, medalCap: 3000 };
+  const w = { now: TUE, week: { shopFrom: '2019-10-07', shopTo: '2019-10-13' }, saves: 0, sent: null, sentCode: 0, logs: [], grants: [], presents: [], ap: 100, lux: 0, burst: null, medalCount: 0, medalCap: 3000 };
   w.player = opts.player || { name: 'Prova', titles: [] };
   const victory = opts.victoryRow || coin.victory;
   w.tables = {
@@ -30,10 +30,10 @@ function world(opts = {}) {
     ],
     raidReward: [victory, coin.mvp, coin.all],
   };
-  w.index = opts.index || { entries: [{ key: 'WW-1/Beginner', available: true, stageId: STAGE, evStageId: 8001, enemyId: ENEMY, modelId: 7, tier: 'Beginner',
-    upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07', level: 25 }], models: { '0007': { fight: true, start: true, escape: true, put_down: true } } };
+  w.index = opts.index || { entries: [{ key: 'WW-1/Beginner', censusId: 'WW-1', available: true, stageId: STAGE, evStageId: 8001, enemyId: ENEMY, modelId: 7, tier: 'Beginner',
+    upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07', end: '2019-10-13', level: 25 }], models: { '0007': { fight: true, start: true, escape: true, put_down: true } } };
   w.raid = routesRaid({
-    player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], raidIndex: () => w.index,
+    player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], raidIndex: () => w.index, storyWeek: () => w.week, smokeKey: () => w.smoke,
     realNow: () => w.now, serverTime: () => fmt(w.now), serverTimeAt: fmt,
     userPointData: (now) => ({ now, ap: w.ap, lux: w.lux }), userDetailData: () => ({ detail: 1 }),
     stageResumptionData: () => ({ resumptionStatus: 0, stageId: 0, raidId: 0, colosseumStageId: 0 }),
@@ -437,6 +437,52 @@ const tests = {
     assert.strictEqual(w.raid.stageAp(SPECIAL, TUE), null);
     assert.strictEqual(w.raid.stageAp(1010, TUE), null);
   },
+  smoke_forces_boss() {
+    // bench smoke (tmp/raid_p2/smoke_raids.ps1 writes save/raid_smoke.json): /raid/list shows the named boss, any week
+    const w = world();
+    w.index.entries.push({ ...w.index.entries[0], key: 'WW-9/Advanced', censusId: 'WW-9', start: '2021-01-04', end: '2021-01-10', tier: 'Advanced' });
+    w.smoke = 'WW-9/Advanced';
+    assert.strictEqual(w.call('notice').raidNotice.isSelfRaid, 1, 'the home shows Active request! at once');
+    const b = w.call('list');
+    assert.strictEqual(b.selfRaid.raidStatus, 4, 'appears with its start demo');
+    assert.strictEqual(w.player.raid.boss.key, 'WW-9/Advanced');
+    const id = w.player.raid.boss.raidId;
+    w.call('list');
+    assert.strictEqual(w.player.raid.boss.raidId, id, 'the same boss stays, damage and all');
+    w.smoke = 'WW-1/Beginner';
+    w.call('list');
+    assert.strictEqual(w.player.raid.boss.key, 'WW-1/Beginner', 'the next one replaces it');
+    w.smoke = 'nothing/Beginner';
+    w.call('list');
+    assert.strictEqual(w.player.raid.boss.key, 'WW-1/Beginner', 'an unknown key changes nothing');
+    w.smoke = null;
+    const plain = world();
+    plain.call('list');
+    assert.strictEqual(plain.player.raid.boss, null, 'no file, no boss');
+  },
+  calendar_week() {
+    // Task 8: /stage/event and the Raid Boards follow the Shop week of the story (storyCtx), the kept raid joins them
+    const w = world();
+    const base = w.index.entries[0];
+    w.index.entries = [{ ...base, sphereBoardIds: [3000001] },
+      { ...base, key: 'WW-2/Beginner', censusId: 'WW-2', evStageId: 8002, stageId: STAGE + 1, start: '2019-10-14', end: '2019-10-20', sphereBoardIds: [3000002] },
+      { ...base, key: 'WW-3/Beginner', censusId: 'WW-3', evStageId: 8003, stageId: STAGE + 2, start: '2019-10-21', end: '2019-10-27', available: false, why: 'graphics', sphereBoardIds: [3000003] }];
+    const listed = () => w.raid.events(TUE).map((e) => e.eventStageId);
+    assert.deepStrictEqual(listed(), [8001]);
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001]);
+    w.week = { shopFrom: '2019-10-17', shopTo: '2019-10-23' };
+    assert.deepStrictEqual(listed(), [8002], 'a Thursday-to-Wednesday week: the row holding shopFrom');
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000002]);
+    w.week = { shopFrom: '2019-10-21', shopTo: '2019-10-27' };
+    assert.deepStrictEqual(listed(), [], 'only an unavailable tier: no raid');
+    w.week = { shopFrom: '2016-04-07', shopTo: '2016-04-13' };
+    assert.deepStrictEqual(listed(), [], 'before the raids');
+    w.player.raid.kept = 'WW-1';
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001], 'the kept raid keeps its boards');
+    assert.deepStrictEqual(w.raid.boardIds(TUE).all.sort(), [3000001, 3000002, 3000003]);
+    // a quest of another week still counts once played (its screen was open across the Monday)
+    assert.strictEqual(w.raid.stageAp(STAGE + 1, TUE), 90);
+  },
   events_type_2() {
     const w = world();
     w.index.entries.push({ ...w.index.entries[0], key: 'WW-1/Advanced', stageId: STAGE + 1, tier: 'Advanced' },
@@ -468,7 +514,8 @@ function wiring() {
   delete process.env.KHUX_REAL_NOW;
   delete process.env.KHUX_SERVER_TIME;
   const FAKE = 989999; // far from any generated row
-  fs.writeFileSync(process.env.KHUX_RAID_INDEX, JSON.stringify({ entries: [{ key: 'K/Beginner', available: true, stageId: FAKE, evStageId: 8999, enemyId: 2999990, modelId: 7, tier: 'Beginner', upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07' }], reasons: {} }));
+  // dates: in every Shop week (raid-calendar.js); the week itself is checked below
+  fs.writeFileSync(process.env.KHUX_RAID_INDEX, JSON.stringify({ entries: [{ key: 'K/Beginner', censusId: 'K', available: true, stageId: FAKE, evStageId: 8999, enemyId: 2999990, modelId: 7, tier: 'Beginner', upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2015-01-01', end: '2099-12-31' }], reasons: {} }));
   fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ '0007': { fight: true, start: true, escape: true, put_down: true } }));
   fs.mkdirSync(process.env.KHUX_RAID_IMG);
   const realDateNow = Date.now;
@@ -490,6 +537,16 @@ function wiring() {
 
   const ev = call(t.respondStageEvent, { eventCategory: 2 }).events;
   assert.deepStrictEqual(ev.map((e) => [e.eventStageId, e.eventType]), [[8999, 2]]);
+  // the raids follow the Shop week of storyCtx(): a row that ends before shopFrom is gone, one that holds it is listed
+  {
+    const wk = quiet(() => t.storyCtx()), k = t.raidIndex().entries[0];
+    const dayBefore = new Date(Date.parse(wk.shopFrom) - 86400000).toISOString().slice(0, 10);
+    Object.assign(k, { start: '2015-01-01', end: dayBefore });
+    assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events.filter((e) => e.eventType === 2), [], `row ending ${dayBefore}`);
+    Object.assign(k, { start: wk.shopFrom, end: wk.shopFrom });
+    assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events.map((e) => e.eventStageId), [8999]);
+    Object.assign(k, { start: '2015-01-01', end: '2099-12-31' });
+  }
   assert.strictEqual(ev[0].bannerUrl, `${t.WEB_BASE}/web/raid/img/8999.png`);
   assert.strictEqual(ev[0].stages[0].useAp, 90);
 

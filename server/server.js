@@ -4168,6 +4168,13 @@ var raidRoutes = null; // var: respondStageStart can run before this line
 function raid() {
   return raidRoutes ??= routesRaid({
     player, savePlayer, masterRows, raidIndex, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks, inventorySnapshot, send, ret, clock,
+    // the Shop week of the story (raid-calendar.js): the same rotation as the Shop and Special tabs, no counter of its own
+    storyWeek: () => { const c = storyCtx(); return { shopFrom: c.shopFrom, shopTo: c.shopTo }; },
+    // bench smoke (tmp/raid_p2/smoke_raids.ps1): save/raid_smoke.json {"key": "<entry key>"} forces that boss; never in play
+    smokeKey: () => {
+      // written by Out-File: trim() also drops a leading BOM
+      try { return JSON.parse(fs.readFileSync(path.join(path.dirname(SAVE_FILE), 'raid_smoke.json'), 'utf8').trim()).key || null; } catch { return null; }
+    },
     apNow: () => apState().ap, changeAp,
     raidUser: () => ({ userId: 1, name: player.name, level: luxRankFor(player.lux), userAvatar: userAvatarData() }),
     supportUsers: (id, now) => { const medal = id && sharedMedalData(now); return medal ? [selfPlayerElement(now, medal)] : []; },
@@ -4905,6 +4912,7 @@ module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, // server/test-raid-routes.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, // server/test-raid-boards.js
+  storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)

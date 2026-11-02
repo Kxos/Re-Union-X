@@ -37,7 +37,7 @@ process.env.KHUX_RAID_MODELS = path.join(dir, 'raid_models.json');
 delete process.env.KHUX_REAL_NOW;
 delete process.env.KHUX_SERVER_TIME;
 const entryOf = (key, censusId, ids, extra = {}) => ({ key, censusId, available: true, stageId: 989990, evStageId: 8990, enemyId: 2999900, modelId: 7, tier: 'Beginner', upMinutes: 20, useAp: 10,
-  questAp: [0, 5, 90], start: '2019-10-07', sphereBoardIds: ids, ...extra });
+  questAp: [0, 5, 90], start: '2015-01-01', end: '2099-12-31', sphereBoardIds: ids, ...extra }); // dates: in every Shop week (raid-calendar.js)
 fs.writeFileSync(process.env.KHUX_RAID_INDEX, JSON.stringify({ entries: [entryOf('WA/Beginner', 'WA', [A]), entryOf('WA/Advanced', 'WA', [A], { tier: 'Advanced' }), entryOf('WB/Beginner', 'WB', [B])], reasons: {} }));
 fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ '0007': { fight: true, start: true, escape: true, put_down: true } }));
 
