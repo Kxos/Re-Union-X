@@ -198,7 +198,7 @@ node server\make-master-stub.js --force          # 106 minimal tables
 node server\import-master.js D:\Progetto_Restauro_KH_UX\apk501\extra_files `
   avatarParts initItem misc stage world stageDrama enemy enemyAttack keyblade skill buff `
   burst battleMisc badstatus tutorialMisc medalMisc material title theater raidEnemy raidEnemyAttack
-$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'; $env:KHUX_TOURS_V2='1'
+$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'   # required: the script stops without them (KHUX_TOURS_V2 stays unset)
 node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json
 ```
 
