@@ -5064,6 +5064,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407026,
+  "name": "Balloon Mike & Sulley",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407027,
   "name": "Balloon KH III Sora",
   "partsType": 7,
@@ -5186,6 +5194,14 @@
  {
   "petPartsId": 407046,
   "name": "Gold-Rimmed Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407047,
+  "name": "Balloon Axel",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,

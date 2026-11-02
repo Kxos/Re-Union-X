@@ -424,6 +424,10 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   `grantPart` for the rewards. Artwork and icons from the JP (`recon/tools/jp_pet_parts.py`, from
   import_jp_coco.py): 445 LWFs that the local reference copy kept only once are taken back from the twin
   series (same texture and size); 38 accessories without textures even in the JP stay out
+  (2 Nov 2026: a texture missing from every pet folder is taken from the avatar accessory with the same texture name and
+  size when exactly one exists, never by a «ビットマップ N» default name: Balloon Mike & Sulley 407026 = avatar 208106,
+  Balloon Axel 407047 = avatar 208137, rows added to `pet_parts.tsv`, 670 rows; the rule also completes 402092, 407024,
+  407036, 407039, 410016, 410020, whose files are imported but which have no row yet: to add after a visual check)
   (among them Starlight Bow/Glasses and almost all the Limited Balloons). Also **25 original
   motions** `lwf/pet/motion` (wait, walk, battle_normal...: they have the accessory movies; shadow
   97x24 = NPC_SHADOW) instead of ours; battle_all, pvp_start/total_*,
