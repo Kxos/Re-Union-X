@@ -56,12 +56,18 @@ function realIndex() {
   realMemo = { ...mr.buildRaid({ ...sources, master, models, config, ids }).index, census: sources.census };
   return realMemo;
 }
+// the real part of a test, or a visible SKIP line when the private sources are not readable (the fixture part still ran)
+function realOrSkip(what) {
+  const ix = realIndex();
+  if (!ix) console.log(`  SKIP ${what}: private sources not readable, fixture part only`);
+  return ix;
+}
 const addDays = (iso, n) => new Date(Date.parse(iso + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
 
 const tests = {
   follows_story() {
     assert.strictEqual(keys(cal.raidsForWeek(FIX, week('2019-10-14', '2019-10-20'))), 'W1014/Beginner');
-    const ix = realIndex();
+    const ix = realOrSkip('follows_story');
     if (!ix) return;
     const got = cal.raidsForWeek(ix, week('2019-10-07', '2019-10-13'));
     assert.deepStrictEqual(got.map((e) => [e.boss, e.tier]), [['Trickmaster', 'Beginner'], ['Blue Trident Tail', 'Advanced']]);
@@ -100,7 +106,7 @@ const tests = {
     // FIX has a radiant row beside a weekly one (R1007, W1007): special keeps both only when they hold shopFrom, so the
     // sweep runs without R1007
     sweep({ entries: FIX.entries.filter((e) => e.censusId !== 'R1007') }, '2019-09-15', '2019-11-15');
-    const ix = realIndex();
+    const ix = realOrSkip('shop_week_overlap');
     if (ix) console.log(`  (real calendar: ${sweep(ix, '2018-08-20', '2021-07-10')} Shop weeks agree with special.currentEntries)`);
   },
   radiant_beside_weekly() {
@@ -116,7 +122,7 @@ const tests = {
     assert.deepStrictEqual(cal.raidsForWeek(FIX, {}), [], 'no Shop week');
     assert.deepStrictEqual(cal.raidsForWeek({ entries: [] }, week('2019-10-07', '2019-10-13')), []);
     assert.deepStrictEqual(cal.raidsForWeek(undefined, week('2019-10-07', '2019-10-13')), []);
-    const ix = realIndex();
+    const ix = realOrSkip('no_raid_week');
     if (!ix) return;
     for (const d of ['2016-04-07', '2016-04-25', '2016-05-01']) assert.deepStrictEqual(cal.raidsForWeek(ix, week(d, d)), [], d);
     assert.ok(ix.entries.every((e) => e.start >= '2016-05-02'), 'no row before the first WW raid');
@@ -135,7 +141,7 @@ const tests = {
     assert.deepStrictEqual([0, 1, 2, 3, 4].map((k) => at(k).shopFrom), ['2019-09-26', '2019-10-03', '2019-10-10', '2019-10-17', '2019-09-26']);
     assert.deepStrictEqual([0, 1, 2, 3].map((k) => keys(cal.raidsForWeek(FIX, at(k)))),
       ['W0923/Beginner', 'W1001/Beginner', 'W1007/Beginner,W1007/Advanced,R1007/Beginner', 'W1014/Beginner']);
-    const ix = realIndex();
+    const ix = realOrSkip('monday_changes');
     if (!ix) return;
     const file = path.join(__dirname, 'game_data', 'gacha_catalog.json');
     if (!fs.existsSync(file)) return;

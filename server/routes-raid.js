@@ -75,11 +75,17 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
 
   // Bench smoke only (smokeKey: save/raid_smoke.json of server.js, absent in play): the named available entry's boss
   // appears at the next /user/notice or /raid/list, whatever the week, replacing a stored one of another key.
+  let smokeMissing = null; // last unknown key logged, so a typo is logged once
   function forceSmoke(r, nowMs) {
     const key = smokeKey();
     if (!key || r.boss?.key === key) return;
     const entry = entries().find((e) => e.key === key);
-    if (!entry) return log(`[raid] smoke: ${key} is not an available entry`);
+    if (!entry) {
+      if (smokeMissing !== key) log(`[raid] smoke: ${key} is not an available entry`);
+      smokeMissing = key;
+      return;
+    }
+    smokeMissing = null;
     if (spawn(r, entry, nowMs)) { r.points = 0; savePlayer(); log(`[raid] smoke: boss of ${key} forced`); }
   }
 
@@ -302,6 +308,34 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, boardIds };
 }
 
+// Bench smoke file (save/raid_smoke.json {"key": ...}, written by tmp/raid_p2/smoke_raids.ps1 before every model): only a
+// file younger than SMOKE_MAX_AGE_MS counts, so one left by a killed script cannot take over normal play. Read once per
+// change of mtime; a stale file is logged once. Returns (wallMs = Date.now()) -> key or null. Wall clock on purpose: the
+// file's mtime is real time, whatever the game clock says.
+const SMOKE_MAX_AGE_MS = 2 * 3600 * 1000;
+function smokeReader(file, log = console.log) {
+  const fs = require('fs');
+  let seen = null, key = null, staleLogged = null;
+  return (wallMs = Date.now()) => {
+    let st;
+    try { st = fs.statSync(file); } catch { seen = null; return null; }
+    if (seen !== st.mtimeMs) {
+      seen = st.mtimeMs;
+      // written by Out-File: trim() also drops a leading BOM
+      try { key = JSON.parse(fs.readFileSync(file, 'utf8').trim()).key || null; } catch { key = null; }
+    }
+    if (!key) return null;
+    if (wallMs - st.mtimeMs > SMOKE_MAX_AGE_MS) {
+      if (staleLogged !== st.mtimeMs) log(`[raid] smoke: ${file} is older than ${SMOKE_MAX_AGE_MS / 3600000} h, ignored (a script left it behind?)`);
+      staleLogged = st.mtimeMs;
+      return null;
+    }
+    return key;
+  };
+}
+
 module.exports = routesRaid;
+module.exports.smokeReader = smokeReader;
+module.exports.SMOKE_MAX_AGE_MS = SMOKE_MAX_AGE_MS;
 module.exports.isBonusTime = isBonusTime;
 module.exports.questApAt = questApAt;
