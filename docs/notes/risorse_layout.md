@@ -30,6 +30,10 @@ rebuilt. History: [../journal/fino-al-2026-10-11.md](../journal/fino-al-2026-10-
   `resource_data\<N>\packs.txt`: `-Quick`/`-DryRun` put back into the index those of the installed
   version (without `packs.txt`, versions <= 34: no rooms) and never rebuild `rooms_gen`
   or `enemy_gen`.
+  From 92 a static pack `raid_gen` (after `raisedraw_gen`) carries the raid boss models: `lwf/character/raid` and `lwf/raid/demo`
+  of the 29 bosses of [raid.md](raid.md#models), imported by `originals.tsv` into `stage_geniles`, moved by `build-resources.ps1`
+  into `raid_geniles` and packed with `--cache`. A `-Quick` run takes them out of the generated pack only if the installed
+  version lists `raid_gen`. `check_raid_models.py` runs on `raid_geniles` and writes `server/game_data/raid_models.json`.
   The client splits the data into `misc.mp4`, `misc.mp4.1`, `misc.mp4.2` ... at 2 GiB: 47 has
   4,286,993,546 bytes (3.99 GiB, **7.6 MiB under 4 GiB**); limits and measurements in [Parts and 4 GiB](#pezzi).
   Rooms: [mappe_storia.md#stanze-jp](mappe_storia.md#stanze-jp).

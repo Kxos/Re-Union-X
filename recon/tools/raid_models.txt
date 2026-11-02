@@ -1,0 +1,31 @@
+# Raid boss models the resource pack carries (I-221). One id per line; check_raid_models.py checks these.
+# 0001-0016, 1000-1010 complete in the 2016 package; 9102, 9103 without start demo. 5000 and 9101 stay out.
+0001
+0002
+0003
+0004
+0005
+0006
+0007
+0008
+0009
+0010
+0011
+0012
+0013
+0014
+0015
+0016
+1000
+1001
+1002
+1003
+1004
+1005
+1006
+1007
+1008
+1009
+1010
+9102
+9103

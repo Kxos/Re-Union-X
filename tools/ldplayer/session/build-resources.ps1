@@ -25,6 +25,7 @@
 #   import_jp_raisedraw.py); KHUX_GACHA_SIZES va ridotto a 1 (solo raidgacha_result_display_01 servita).
 # I pacchetti statici di una versione completa sono scritti in resource_data\<N>\packs.txt: -Quick e
 # -DryRun usano quelli della versione installata (senza packs.txt: niente stanze, versioni <= 34).
+# raid_gen (modelli dei boss raid, I-221): pacchetto statico fatto una volta; check_raid_models.py scrive server\game_data\raid_models.json.
 # -NoCompact: versione completa con OBB, addnl e medaglie non compattati (resource_compact.py, I-171: senza,
 #   i record che l'indice unito non cita restano nei dati, ~90 MB).
 # -TestStraddle <nome>: solo per la prova al banco dei pezzi oltre 4 GiB (I-171, risorse_layout.md#pezzi): versione
@@ -257,6 +258,20 @@ if ($LASTEXITCODE) { throw 'jp_sound_effects fallito' }
 # PNG veri e BTF non premoltiplicati -> BTF come le originali (alpha premoltiplicata)
 python recon\tools\btf_fix.py "$sg\files"
 if ($LASTEXITCODE) { throw 'btf_fix fallito' }
+# Raid boss models (I-221, Raids Part 2): lwf/character/raid and lwf/raid/demo (~210 MB) leave the generated pack for the
+# static pack raid_gen, built once with --cache (later versions do not rebuild it). A -Quick run takes them out of the
+# generated pack only if the installed version carries raid_gen; without it they stay where the installed version has them.
+$rmg = "$D\raid_gen"
+if (-not $Quick -or $instPacks -contains 'raid_gen') {
+  foreach ($rd in @('lwf\character\raid', 'lwf\raid\demo')) {
+    if (-not $Quick) {
+      robocopy "$sg\files\$rd" "$rmg\files\$rd" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+      if ($LASTEXITCODE -ge 8) { throw "copia di $rd in raid_gen non riuscita" }
+      $global:LASTEXITCODE = 0
+    }
+    Remove-Item "$sg\files\$rd" -Recurse -Force
+  }
+}
 python -I recon\tools\resource_pack.py "$sg\files" $key "$sg\gen.mp4" "$sg\gen.png"
 # pacchetti statici (medaglie, stanze, nemici) con --cache: rifatti solo se i loro file cambiano
 # pacchetto delle immagini delle medaglie (fetch_medal_images.py, ~150 MB): solo nelle
@@ -324,7 +339,24 @@ if ($Quick) {
   if ($LASTEXITCODE) { throw 'resource_pack raisedraw fallito' }
   $raisedrawPack = @("$xg\gen.png", "$xg\gen.mp4")
 }
-$staticPacks = $medalPack + $roomsPack + $enemyPack + $raisedrawPack
+# pacchetto dei modelli dei boss raid (raid_gen\files, spostati dal generato piu' sopra), statico con --cache. Controllo dei
+# modelli completi (check_raid_models.py): scrive server\game_data\raid_models.json (non versionato), 29 disponibili attesi
+$raidPack = @()
+if ($Quick) {
+  if ($instPacks -contains 'raid_gen') {
+    if (-not (Test-Path "$rmg\gen.png")) { throw "la versione $Version contiene raid_gen ma manca $rmg\gen.png" }
+    $raidPack = @("$rmg\gen.png", "$rmg\gen.mp4")
+  }
+} else {
+  python -I recon\tools\resource_pack.py --cache "$rmg\files" $key "$rmg\gen.mp4" "$rmg\gen.png"
+  if ($LASTEXITCODE) { throw 'resource_pack raid fallito' }
+  $raidPack = @("$rmg\gen.png", "$rmg\gen.mp4")
+}
+if ($raidPack) {
+  python -I recon\tools\check_raid_models.py "$rmg\files" server\game_data\raid_models.json
+  if ($LASTEXITCODE) { throw 'check_raid_models fallito' }
+}
+$staticPacks = $medalPack + $roomsPack + $enemyPack + $raisedrawPack + $raidPack
 # Pacchetti nell'ordine dei dati (etichetta, indice, dati separati da virgola): OBB 5.0.1 main + patch
 # (indice aliud.png), addnl 4.3.1, i pacchetti statici, il generato per ultimo
 $o = "$D\obb76"
@@ -426,7 +458,7 @@ if ($Quick) {
     "prova I-171: riempimento $padName di $padLen byte, $TestStraddle a cavallo di misc.mp4.1 / misc.mp4.2"
   }
   $genName = 'd{0:D4}' -f $nx
-  $names = @(); if ($medalPack) { $names += 'medal_gen' }; if ($roomsPack) { $names += 'rooms_gen' }; if ($enemyPack) { $names += 'enemy_gen' }; if ($raisedrawPack) { $names += 'raisedraw_gen' }
+  $names = @(); if ($medalPack) { $names += 'medal_gen' }; if ($roomsPack) { $names += 'rooms_gen' }; if ($enemyPack) { $names += 'enemy_gen' }; if ($raisedrawPack) { $names += 'raisedraw_gen' }; if ($raidPack) { $names += 'raid_gen' }
   Set-Content -Encoding ascii "$v\packs.txt" $names
   if ($compact) { Set-Content -Encoding ascii "$v\compact.txt" @($compact | ForEach-Object { Compact-Stamp $_ }) }
   # 168 MiB dal 20 ottobre (I-171): contenuto 138,8 MB (132,4 MiB) nella 47, restano ~35,6 MiB per i -Quick (piu'
