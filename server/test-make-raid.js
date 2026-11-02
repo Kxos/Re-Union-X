@@ -71,6 +71,32 @@ function asServed(master) {
   return master;
 }
 
+// Inputs of make-raid.js from the private sources and the local master_data (null when the sources are missing), with
+// every model complete and the shipped raid_config.json: the real build once raid_models.json covers every boss.
+let realMemo;
+function realInputs() {
+  if (realMemo !== undefined) return realMemo;
+  realMemo = null;
+  const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
+  let sources;
+  try { sources = mr.readSources(src, process.env.KHUX_RAID_2016 || mr.DEFAULT_2016); } catch (e) { console.log(`  (skipped: private sources not readable, ${e.code || e.message})`); return null; }
+  const master = fixture().master;
+  const dir = path.join(__dirname, 'master_data');
+  if (fs.existsSync(path.join(dir, 'stage.json'))) {
+    for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack', 'medal', 'material', 'petParts', 'avatarParts', 'title']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
+    asServed(master);
+    master.stage = master.stage.filter((r) => !(r.stageId >= 980000 && r.stageId <= 989999));
+    master.evStage = []; master.raidSetting = []; master.raidReward = [];
+    master.raidEnemy = master.raidEnemy.filter((r) => r.raidEnemyId < 2000000);
+  }
+  const all = { fight: true, start: true, escape: true, put_down: true };
+  const models = new Proxy({}, { get: () => all });
+  const config = { ...REAL_CONFIG, stats: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_stats.json'), 'utf8')) };
+  const ids = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_ids.json'), 'utf8'));
+  realMemo = { ...sources, master, models, config, ids };
+  return realMemo;
+}
+
 // Raid Boards fixture: the shape of raid_rewards/a_weekly/boards_weekly.json and the master item tables
 const cell = (n, cost, kind, reward, qty = 1) => ({ n, cost, kind, reward, qty });
 const BOARD_MASTER = {
@@ -790,24 +816,78 @@ const tests = {
     assert.strictEqual(new Set(all.sphereRows.map((r) => r.sphereBoardId)).size, all.sphereRows.length);
     for (const a of all.arrayRows) walkOrder(a);
   },
-  real_census_week() {
-    const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
-    let sources;
-    try { sources = mr.readSources(src, process.env.KHUX_RAID_2016 || mr.DEFAULT_2016); } catch (e) { console.log(`  (skipped: private sources not readable, ${e.code || e.message})`); return; }
-    const master = fixture().master;
-    const dir = path.join(__dirname, 'master_data');
-    if (fs.existsSync(path.join(dir, 'stage.json'))) {
-      for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack', 'medal', 'material', 'petParts', 'avatarParts', 'title']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
-      asServed(master);
-      master.stage = master.stage.filter((r) => !(r.stageId >= 980000 && r.stageId <= 989999));
-      master.evStage = []; master.raidSetting = []; master.raidReward = [];
-      master.raidEnemy = master.raidEnemy.filter((r) => r.raidEnemyId < 2000000);
+  all_rows_build() {
+    // Task 8: the shipped config builds every WW row with week data, no filter
+    assert.ok(!('onlyCensusIds' in REAL_CONFIG), 'raid_config.json has no onlyCensusIds');
+    const real = realInputs();
+    if (!real) return;
+    const out = mr.buildRaid(real);
+    const the130 = real.census.rows.filter((r) => String(r.id).startsWith('WW-') && (r.family === 'weekly' || r.family === 'radiant reward'));
+    assert.strictEqual(the130.length, 130);
+    const inIndex = new Set(out.index.entries.map((e) => e.censusId));
+    assert.deepStrictEqual(the130.filter((r) => !inIndex.has(r.id)).map((r) => r.id), ['WW-W-2020-11-01'], 'only the one-day event of 2020-11-01 has no week data');
+    const by = (rows, k) => new Map(rows.map((r) => [r[k], r]));
+    const stages = by(out.stageRows, 'stageId'), settings = by(out.settingRows, 'raidSettingId'), enemies = by(out.enemyRows, 'raidEnemyId'), evs = by(out.evStageRows, 'eventStageId');
+    const rewards = new Set(out.rewardRows.map((r) => r.raidRewardId));
+    const skills = new Set([...out.attackRows, ...real.master.raidEnemyAttack].map((r) => r.raidEnemyAttackId));
+    const boards = new Set(out.sphereRows.map((r) => r.sphereBoardId));
+    const on = out.index.entries.filter((e) => e.available);
+    for (const e of on) {
+      const st = stages.get(e.stageId), set = settings.get(e.settingId), body = enemies.get(e.enemyId), ev = evs.get(e.evStageId);
+      assert.ok(st && st.stageKind === 2 && st.raidBoss === e.settingId, `stage of ${e.key}`);
+      assert.ok(set && set.bossId === e.enemyId, `raidSetting of ${e.key}`);
+      assert.ok(body && body.validParts >= 1 && body.parts.slice(0, body.validParts).every((id) => enemies.has(id)), `raidEnemy rows of ${e.key}`);
+      assert.ok(ev && ev.stageId.includes(e.stageId), `evStage of ${e.key}`);
+      for (const k of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) assert.ok(body[k].slice(0, body.validGrowth).every((x) => rewards.has(x)), `${k} of ${e.key}`);
+      assert.ok(body.skillId.slice(0, body.validSkill).every((x) => skills.has(x)), `skills of ${e.key}`);
+      assert.ok(e.sphereBoardIds.every((id) => boards.has(id)), `boards of ${e.key}`);
     }
-    const all = { fight: true, start: true, escape: true, put_down: true };
-    const models = new Proxy({}, { get: () => all });
-    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
-    const config = { ...cfg, stats: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_stats.json'), 'utf8')) };
-    const seeded = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_ids.json'), 'utf8'));
+    // every_reward_row_exists on the whole table
+    for (const r of out.enemyRows.filter((x) => x.weakness === 1)) {
+      for (const k of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) assert.ok(r[k].slice(0, r.validGrowth).every((x) => rewards.has(x)), `${k} of ${r.raidEnemyId}`);
+    }
+    // nothing leaves a board cell off (seasonal Draw Tickets, Spirit parts, the reconstructed Sora & Moogle B included)
+    assert.deepStrictEqual(out.report.boards.unmatched, []);
+    const of130 = new Set(the130.map((r) => r.id));
+    const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));
+    const withBoards = [...avail130].filter((id) => on.some((e) => e.censusId === id && e.sphereBoardIds.length));
+    const size = ['stageRows', 'evStageRows', 'settingRows', 'enemyRows', 'rewardRows', 'attackRows', 'sphereRows', 'arrayRows', 'masuRows'].reduce((n, k) => n + JSON.stringify(out[k]).length, 0);
+    console.log(`  (every model complete: ${on.length} of ${out.index.entries.length} tier rows available, ${avail130.size} of the 130 rows with a raid, ${withBoards.length} with boards, `
+      + `+${(size / 1048576).toFixed(2)} MB of rows)`);
+    assert.ok(avail130.size >= 85, `${avail130.size} rows (85 on 2 Nov 2026; the rest wait for modelTemplates)`);
+    assert.ok(size < 40 * 1048576);
+  },
+  hp_table_whole() {
+    const real = realInputs();
+    if (!real) return;
+    const out = mr.buildRaid(real);
+    let table = 0, read = 0;
+    for (const e of out.index.entries.filter((x) => x.available)) {
+      assert.ok(e.hp > 0, `HP of ${e.key}`);
+      const body = out.enemyRows.find((r) => r.raidEnemyId === e.enemyId);
+      assert.ok(body.hp.slice(0, body.validGrowth).every((h) => h > 0), `HP knots of ${e.key}`);
+      const rule = mr.tierHp(real.values, e.tier, e.start);
+      assert.ok(rule && rule.hp > 0, `tier rule for ${e.key}`);
+      if (e.tier === 'single') {
+        // one tier before 2019-08-12: the cap is read or comes from the rule, the shares below it are ours, always labelled
+        assert.ok(e.reconstructed.includes('hp'), `label of ${e.key}`);
+        if (e.hp === rule.hp) table++; else read++;
+      } else if (e.reconstructed.includes('hp')) {
+        table++;
+        // a missing reading uses the tier rule
+        assert.strictEqual(e.hp, rule.hp, `tier rule for ${e.key}`);
+        assert.strictEqual(e.reconstructed.includes('hp_step'), rule.step, `hp_step of ${e.key}`);
+      } else read++;
+    }
+    console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp)`);
+    assert.ok(table > 0 && read > 0);
+  },
+  real_census_week() {
+    const real = realInputs();
+    if (!real) return;
+    const { master, models } = real;
+    const sources = real, seeded = real.ids;
+    const config = { ...real.config, onlyCensusIds: [W1] };
     const out = mr.buildRaid({ ...sources, master, models, config, ids: seeded });
     assert.deepStrictEqual(out.ids, seeded, 'raid_ids.json already covers every WW row');
     assert.deepStrictEqual(out.index.entries.map((e) => [e.tier, e.boss, e.modelId]), [['Beginner', 'Trickmaster', 7], ['Advanced', 'Blue Trident Tail', 1003]]);
@@ -819,8 +899,7 @@ const tests = {
     assert.deepStrictEqual(out.enemyRows.filter((r) => r.raidEnemyId > b.enemyId && r.raidEnemyId <= b.enemyId + 5).map((r) => r.weakness), [2, 3]);
     assert.ok(out.stageRows.every((s) => s.worldId === 3 && s.raidBoss));
     // all rows, as Task 8 will build them: nothing throws and the 2016 bosses come out
-    const wide = { ...config }; delete wide.onlyCensusIds;
-    const every = mr.buildRaid({ ...sources, master, models, config: wide, ids: seeded });
+    const every = mr.buildRaid(real);
     assert.deepStrictEqual(every.ids, seeded);
     assert.strictEqual(new Set(every.index.entries.map((e) => e.key)).size, every.index.entries.length);
     const count = (f) => every.index.entries.filter(f).length;

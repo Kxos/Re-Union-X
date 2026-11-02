@@ -3,9 +3,11 @@
 // in player.raid only (raidState), so old saves load.
 //   240 list, 122 start, 123 clear, 120 reward, 121 member, 241 notice; onStageClear (spawn), events (/stage/event
 //   category 2), stageAp (/stage/start of a raid quest), boardIds (Raid Boards handed out, for /user/sphere of server.js).
+// The raids listed are those of the player's Shop week (storyWeek, raid-calendar.js).
 'use strict';
 const fight = require('./raid-fight');
 const rewards = require('./raid-rewards');
+const calendar = require('./raid-calendar');
 
 const USER_ID = 1; // the only player: same id as userObject and supportUserId of server.js
 const SPAWN_POINTS = 8600, SPAWN_POINTS_BONUS = 6000; // misc 110; bonus time: 2 eggs of 3000 (inferred, plan decision 3)
@@ -48,7 +50,7 @@ const usableCount = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 
 const usableParts = (parts) => (Array.isArray(parts) ? parts.filter((p) => p && usableCount(p.hp)) : []);
 const damageOf = (parts) => parts.reduce((sum, p) => sum + (usableCount(p.damage) ? Number(p.damage) : 0), 0);
 
-function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
+function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
   inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, beginBattle, grantItem, addPresent, medalCount, medalCap,
   stageState, webBase, rng = Math.random, log = console.log }) {
   const state = () => rewards.raidState(player);
@@ -71,8 +73,19 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     savePlayer();
   }
 
+  // Bench smoke only (smokeKey: save/raid_smoke.json of server.js, absent in play): the named available entry's boss
+  // appears at the next /user/notice or /raid/list, whatever the week, replacing a stored one of another key.
+  function forceSmoke(r, nowMs) {
+    const key = smokeKey();
+    if (!key || r.boss?.key === key) return;
+    const entry = entries().find((e) => e.key === key);
+    if (!entry) return log(`[raid] smoke: ${key} is not an available entry`);
+    if (spawn(r, entry, nowMs)) { r.points = 0; savePlayer(); log(`[raid] smoke: boss of ${key} forced`); }
+  }
+
   function list(res) {
     const r = state(), nowMs = realNow();
+    forceSmoke(r, nowMs);
     dropOrphan(r);
     const selfRaid = fight.listView(r.boss, nowMs, serverTimeAt);
     const raids = alive(r.boss, nowMs) ? [{ raid: selfRaid.raid, discoverer: raidUser(), isRelief: 0, isEntry: 0 }] : [];
@@ -208,7 +221,9 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
   }
 
   function notice(res) {
-    send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: alive(state().boss, realNow()) ? 1 : 0, isOthersRaid: 0 } });
+    const r = state(), nowMs = realNow();
+    forceSmoke(r, nowMs);
+    send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: alive(r.boss, nowMs) ? 1 : 0, isOthersRaid: 0 } });
   }
 
   function spawn(r, entry, nowMs) {
@@ -236,8 +251,13 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     if (spawn(r, entry, nowMs)) r.points = 0;
   }
 
-  // The raids running now. Task 8 adds the calendar: until then every entry the generator emitted, with no date filter.
-  const currentEntries = () => entries(); // called with the real time, which the calendar of Task 8 will read
+  // The raids of the player's Shop week (raid-calendar.js): storyWeek() is {shopFrom, shopTo} of storyCtx() in server.js, the
+  // rotation of the Shop and Special tabs, so the raid follows the story and changes every real Monday inside a tranche.
+  // A quest of another week still counts when played (entryOfStage): its screen may have stayed open across the Monday.
+  const currentEntries = (realMs = realNow()) => {
+    const { shopFrom, shopTo } = storyWeek();
+    return calendar.raidsForWeek(raidIndex(), { shopFrom, shopTo, nowMs: realMs });
+  };
   // The kept raid of the Catalog (Task 9): player.raid.kept names an entry key or a census id; all its available tiers.
   function keptEntries() {
     const k = state().kept;

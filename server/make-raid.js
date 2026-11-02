@@ -7,7 +7,9 @@
 // - the 2016 rows (KHUX_RAID_2016): raidEnemy, raidEnemyAttack;
 // - server/game_data/raid_models.json (model completeness): available = fight && put_down. No file: every boss is
 //   unavailable, with a warning.
-// One entry per tier row of a census row. Ids come from server/raid_ids.json (versioned, append-only), because they live in
+// One entry per tier row of a census row; every WW row with week data is built (onlyCensusIds of raid_config.json is a filter
+// for tests and benches, absent in the shipped file). Which rows run in the player's week is raid-calendar.js's business: it
+// reads censusId, start and end of the entries. Ids come from server/raid_ids.json (versioned, append-only), because they live in
 // saves and in the client's master: rows {censusId: r}, entries {"<censusId>/<tier>[+gem]": n}. A new key takes the next
 // free number, a key that disappears stays and its number is never reused, a repeated number stops the run. Every WW row is
 // numbered whatever the filter says.
@@ -511,6 +513,9 @@ function patch(masterDir, opts = {}) {
   writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
   const on = out.index.entries.filter((e) => e.available).length;
+  const rows = [...new Set(out.index.entries.filter((e) => e.available).map((e) => e.censusId))];
+  console.log(`raid: ${rows.length} census rows with an available tier, calendar ${out.index.entries.map((e) => e.start).sort()[0] || '-'} to `
+    + `${out.index.entries.map((e) => e.end || e.start).sort().pop() || '-'}`);
   console.log(`raid: ${on} of ${out.index.entries.length} tier rows available; +${out.stageRows.length} stage, +${out.evStageRows.length} evStage, +${out.settingRows.length} raidSetting, `
     + `+${out.enemyRows.length} raidEnemy, +${out.rewardRows.length} raidReward, +${out.attackRows.length} raidEnemyAttack`);
   const bd = out.report.boards;

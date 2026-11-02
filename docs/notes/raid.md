@@ -115,6 +115,7 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 
 `server/routes-raid.js`, a factory wired in `server.js`; state only in `player.raid`. Choices the plan left open, ours unless a source is named:
 
+- **Which raids are listed:** those of the player's Shop week, see Calendar below.
 - **Spawn.** Only clears of a raid event's quest count (stage ids 980000-989999; Task 11 adds the story). Points add up while a boss is stored, and it blocks a new one; at the threshold the counter restarts from 0, whatever was above it. Bonus hours and weekends are read in Pacific time, daylight saving included.
 - **Boss level** starts at 1 and stops at 99. `entry.level` of `raids.json` is the quest's level (225 on Epic), not the boss's.
 - **Quest AP** is charged at `/stage/start` and listed in `stages[].useAp` for the moment; the master row holds the weekday value. Before 2019-07-15, by the week's `ap`: `0 / 5` is bonus / the rest, `5 / 90` weekend / weekday, so bonus time costs the weekday value there.
@@ -126,6 +127,19 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - **`/raid/member`**: `damage` is the sum of `parts[].damage` the client reported on that boss, kept in `player.raid.lastFight` after the boss is gone.
 - **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list`, since the client would crash on it.
 - **Banner.** `/web/raid/img/<evStageId>.png` from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404.
+
+## Calendar (Part 2, Task 8: tests only, bench pending)
+
+`server/raid-calendar.js` picks the raids of the player's week; `routes-raid.js` lists them in `/stage/event` (category 2) and hands out their Raid Boards. Rules, ours unless a source is named:
+
+- **The week is the Shop week of the story** (`storyCtx()` of `server.js`: `shopFrom` / `shopTo`). The story quest picks the tranche, and inside a tranche of several weeks the week moves on every real Monday, as the Shop and Special tabs do. There is no rotation counter of its own.
+- **Which census rows run:** every row whose dates hold `shopFrom` (several when they ran together, such as a Radiant Reward row beside a Weekly one). Otherwise the row with the largest overlap with the Shop week, tie to the later start, together with any row of the same dates. Shop weeks start on the tranche's day, often a Thursday, while rows mostly run Monday to Sunday: this is the rule `special.currentEntries` applies to the weekly VIP versions, and the test checks that the two agree on every day from 2018-08-20 to 2021-07-10.
+- **Only available tiers are listed.** A week whose rows have no available tier (model incomplete, no template row) has no raid, as do the weeks before the first row (2018-09-03 today; the WW event raids from 2016-05-02 come with Task 10). The other tiers of the chosen rows are returned apart (`weekRaids(...).unavailable`) for the Raid Catalog.
+- **Families:** `raids.json` holds the Weekly and Radiant Reward rows plus the 3 pre-series rows of September and October 2018, every WW row with week data. `make-raid.js` builds all of them; `onlyCensusIds` in `raid_config.json` is now only a filter for tests and benches. Weekend-only and Daily raids, which open only on the real weekend or day, come with Task 10; `nowMs` is reserved for them.
+- **Bench smoke:** `server/save/raid_smoke.json` `{"key": "<entry key>"}` makes `/user/notice` and `/raid/list` force that entry's boss, whatever the week, replacing a stored boss of another key. It exists only on the bench (a script writes it and removes it at the end); without the file nothing changes.
+- **A quest of another week still counts** when it is played, because its screen may stay open across the Monday. The kept raid of the Raid Catalog (Task 9) keeps its boards beside the current ones.
+- **Coverage, 2 November 2026** (`raid_models.json` with 29 models): 86 census rows with an available tier (85 of the 130 Weekly and Radiant rows, plus one pre-series row), 222 of 344 tier rows. The rest are `graphics` (101 tier rows, 16 bosses) or `template` (21 tier rows: Malicious Spider, Egg Master and Wicked Spider have a complete model but no 2016 row, waiting for `modelTemplates`). Along the story, 97 of the 150 Shop weeks from 2018-08-30 list a raid, and the other 53 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
+- **Size:** all rows add about 2.1 MB to the master (222 stage, 86 evStage, 222 raidSetting, 715 raidEnemy, 855 raidReward, 40 raidEnemyAttack, 226 Raid Boards).
 
 ## Bench 2 November 2026 (Part 2, save `raid2`, resources 93, rev 230)
 

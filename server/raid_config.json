@@ -1,5 +1,4 @@
 {
-  "onlyCensusIds": ["WW-W-2019-10-07"],
   "weeklyUpMinutes": 20,
   "useAp": 10,
   "tierQuestLv": {
@@ -38,7 +37,7 @@
     "coinOdds": "Coin amounts come from the wiki tables, often of the same tier in another week; the odds of the high amount and of gems have no source (rewards.reconstructed).",
     "rewards2016": "Lux, Munny and EXP of the boss rows are the 2016 values of the template row. Reported Lux is about 2 billion on a 2019 boss, so these are far too low; no formula is known.",
     "upMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
-    "onlyCensusIds": "Filter: only these census rows are built. Task 8 removes the key; without it every WW row with week data is built.",
+    "onlyCensusIds": "Optional filter, absent in the shipped file (Task 8): only these census rows are built. Without it every WW row with week data is built, and raid-calendar.js picks the rows of the Shop week.",
     "weeklyUpMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
     "useAp": "AP of a further attempt on the same boss: 10 in the 2016 rows, not stated for the Weekly era.",
     "tierQuestLv": "Quest level per tier from the wiki pages. The Gem Drop Beginner page prints 125, taken as a slip.",
