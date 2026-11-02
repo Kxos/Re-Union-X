@@ -126,6 +126,15 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list`, since the client would crash on it.
 - **Banner.** `/web/raid/img/<evStageId>.png` from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404.
 
+## Bench 2 November 2026 (Part 2, save `raid2`, resources 93, rev 230)
+
+- Weekday quest AP 90 charged at `/stage/start` (254 → 164, 165 → 75 read in the save).
+- Spawn from the quest clear (`raidPoint` 9000 ≥ 8600): Encounter, then RAID BOSS ALERT with the next level (LV 2, then LV 3).
+- **Raid AP: first attempt 0 (164 → 164), second 10 (76 → 66).** The card shows AP 0, then AP 10.
+- HP and broken parts kept after Give Up (49,548,210,919 of 70 billion, parts 2 and 3 at 0).
+- Victory twice in a row: SUCCESS «The Raid Boss is defeated!», RAID RESULTS 180/60/60 Raid Coins, OMEGA label; the level goes up after the win.
+- Give Up (`raidTimeStatus` 1): YOU LOSE with Damage, Munny, Lux and the level bar; the text line under the title stays empty.
+
 ## Open, for the bench
 
 `getPoint.raidPoint` with Eggcognito rows, a fight outlasting `timeLeft`, 0 in `subdueId` or `mvpId`, `isEntry`/`isRelief`/`reliefFlag`, the home button's widgets, what the Raid button opens, fever.
