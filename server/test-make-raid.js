@@ -64,6 +64,12 @@ function fixture() {
   };
 }
 const build = (mutate) => { const f = fixture(); if (mutate) mutate(f); return mr.buildRaid(f); };
+// The local master_data as make-game-tables.js serves it: server/tables copied over it (petParts), campaign medals added
+function asServed(master) {
+  master.petParts = JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'petParts.json'), 'utf8'));
+  require('./make-campaign-medals').addCampaignMedals(master.medal);
+  return master;
+}
 
 // Raid Boards fixture: the shape of raid_rewards/a_weekly/boards_weekly.json and the master item tables
 const cell = (n, cost, kind, reward, qty = 1) => ({ n, cost, kind, reward, qty });
@@ -720,19 +726,42 @@ const tests = {
     assert.ok(vc.some((c) => c.reward === '5★ Chip' && c.cost === 60) && !vc.some((c) => c.reward === '3★ Chip' && c.cost === 60), 'Vacation Resort: the 60-coin Chip is 5★');
   },
   unknown_reward_stops_declared_is_reported() {
-    const bad = (f) => { withBoards(f); f.boards.boards[1].cells.push(cell(2, 50, 'Medal', '6★ Nobody'), cell(3, 50, 'Cookie', 'Spooky Cookie')); };
-    assert.throws(() => build(bad), (e) => /6★ Nobody/.test(e.message) && /Spooky Cookie/.test(e.message), 'one list with every name');
-    const ok = build((f) => { bad(f); f.config.boards = { unmatched: { '6★ Nobody': 'not a medal', 'Spooky Cookie': 'seasonal currency' } }; });
-    assert.deepStrictEqual(ok.report.boards.unmatched.map((u) => [u.board, u.n, u.reward, u.weeks]), [['enhancement-A2', 2, '6★ Nobody', 1], ['enhancement-A2', 3, 'Spooky Cookie', 1]]);
+    const bad = (f) => { withBoards(f); f.boards.boards[1].cells.push(cell(2, 50, 'Medal', '6★ Nobody'), cell(3, 50, 'Coin', 'Mystery Coin')); };
+    assert.throws(() => build(bad), (e) => /6★ Nobody/.test(e.message) && /Mystery Coin/.test(e.message), 'one list with every name');
+    const ok = build((f) => { bad(f); f.config.boards = { unmatched: { '6★ Nobody': 'not a medal', 'Mystery Coin': 'no such item' } }; });
+    assert.deepStrictEqual(ok.report.boards.unmatched.map((u) => [u.board, u.n, u.reward, u.weeks]), [['enhancement-A2', 2, '6★ Nobody', 1], ['enhancement-A2', 3, 'Mystery Coin', 1]]);
     const id = entry(ok, 'Trickmaster').sphereBoardIds[1];
     assert.deepStrictEqual(ok.masuRows.find((r) => r.masuId === id).spherePoint.slice(0, 2), [100, 0], 'the cell is left off, not replaced');
     assert.ok(entry(ok, 'Trickmaster').reconstructed.includes('boardCells'));
     // a board left with no cell is not built; a copy row (groupId of another medal) does not make a name ambiguous
-    const empty = build((f) => { withBoards(f); f.boards.boards[1].cells = [cell(1, 50, 'Cookie', 'Spooky Cookie')]; f.config.boards = { unmatched: { 'Spooky Cookie': 'x' } }; });
+    const empty = build((f) => { withBoards(f); f.boards.boards[1].cells = [cell(1, 50, 'Coin', 'Mystery Coin')]; f.config.boards = { unmatched: { 'Mystery Coin': 'x' } }; });
     assert.strictEqual(entry(empty, 'Trickmaster').sphereBoardIds.length, 1);
     assert.deepStrictEqual(empty.report.boards.dropped, ['enhancement-A2']);
     assert.strictEqual(rb.matchReward(rb.itemIndex(BOARD_MASTER), 'Medal', '6★ Huey, Dewey & Louie').id, 301388);
     assert.throws(() => build((f) => { withBoards(f); f.boards.boards[0].completion_reward = { value: '6★ Nobody' }; }), /completion of enhancement-A1/);
+  },
+  seasonal_tickets_and_aliases() {
+    const idx = rb.itemIndex(BOARD_MASTER);
+    // Draw Ticket and the seasonal currencies: rewardSelect 41, rewardId = the gacha.js currency index
+    const g = require('./gacha');
+    for (const [name, kind, cur] of [['Draw Ticket', 'Ticket', 'draw'], ['Holiday Draw Ticket', 'Holidayticket', 'holiday'], ['Spooky Cookie', 'Cookie', 'spooky'], ['Moogle Points', 'Mogpoints', 'moogle']]) {
+      const m = rb.matchReward(idx, kind, name, 10);
+      assert.strictEqual(m.sel, 41, name);
+      assert.strictEqual(g.ticketCurrency(m.id), cur, name);
+      assert.strictEqual(m.value, 10, name);
+    }
+    // a declared alias gives the other item and labels the week
+    const out = build((f) => {
+      withBoards(f);
+      f.boards.boards[1].cells.push(cell(2, 50, 'Medal', '6★ Fantasia Mickey A'), cell(3, 50, 'Cookie', 'Spooky Cookie', 10));
+      f.master.medal = [...(f.master.medal || []), { medalId: 90085, rare: 5, name: 'Fantasia Mickey Ver. A', groupId: 0 }];
+      f.config.boards = { aliases: { '6★ Fantasia Mickey A': { item: '5★ Fantasia Mickey Ver. A', why: 'x' } } };
+    });
+    const id = entry(out, 'Trickmaster').sphereBoardIds[1];
+    const masu = out.masuRows.find((r) => r.masuId === id);
+    assert.deepStrictEqual([masu.rewardSelect.slice(0, 3), masu.rewardId.slice(0, 3), masu.rewardValue.slice(0, 3)], [[3, 3, 41], [90156, 90085, 2], [1, 1, 10]]);
+    assert.ok(entry(out, 'Trickmaster').reconstructed.includes('boardAlias'));
+    assert.deepStrictEqual(out.report.boards.unmatched, []);
   },
   master_size() {
     const out = build((f) => withBoards(f));
@@ -744,6 +773,7 @@ const tests = {
     if (!fs.existsSync(path.join(dir, 'medal.json'))) { console.log('  (real boards skipped: no master_data)'); return; }
     const master = {};
     for (const t of ['medal', 'material', 'petParts', 'avatarParts', 'title']) master[t] = JSON.parse(fs.readFileSync(path.join(dir, t + '.json'), 'utf8'));
+    asServed(master);
     const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
     const all = rb.buildBoards({ doc: sources.boards, correctionsMd: sources.rewards.correctionsMd, master, ids: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_ids.json'), 'utf8')), config: cfg.boards });
     const weeks = Object.keys(all.byCensus).length;
@@ -763,6 +793,7 @@ const tests = {
     const dir = path.join(__dirname, 'master_data');
     if (fs.existsSync(path.join(dir, 'stage.json'))) {
       for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack', 'medal', 'material', 'petParts', 'avatarParts', 'title']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
+      asServed(master);
       master.stage = master.stage.filter((r) => !(r.stageId >= 980000 && r.stageId <= 989999));
       master.evStage = []; master.raidSetting = []; master.raidReward = [];
       master.raidEnemy = master.raidEnemy.filter((r) => r.raidEnemyId < 2000000);

@@ -240,6 +240,11 @@ check(t.userPointData(t.serverTime()).limitedDrawTicket2 === 4, 'migrazione: lim
 check(saved().drawTickets && saved().drawTickets.draw === 4 && !('limitedDrawTicket2' in saved()), 'migrazione: salvataggio con drawTickets.draw 4');
 quiet(() => t.grantItem(41, 0, 3));
 check(p.drawTickets.draw === 7 && t.userPointData(t.serverTime()).limitedDrawTicket2 === 7, 'grantItem 41: drawTickets.draw +3');
+// seasonal currencies (Raid Boards): item id 1/2/3 = holiday/spooky/moogle, never the Draw Ticket
+const tk0 = { ...p.drawTickets };
+quiet(() => { t.grantItem(41, 1, 5); t.grantItem(41, 2, 10); t.grantItem(41, 3, 20); });
+check(p.drawTickets.draw === 7 && p.drawTickets.holiday === tk0.holiday + 5 && p.drawTickets.spooky === tk0.spooky + 10
+  && p.drawTickets.moogle === tk0.moogle + 20, 'grantItem 41: id 1/2/3 -> holiday/spooky/moogle');
 
 // box pieno
 p.freeStone = 3000; p.gacha.count = {};

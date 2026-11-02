@@ -80,6 +80,7 @@ const tk = g.ticketsOf(old);
 check(JSON.stringify(tk) === '{"draw":7,"holiday":0,"spooky":0,"moogle":0}' && !('limitedDrawTicket2' in old), 'migrazione di limitedDrawTicket2');
 old.limitedDrawTicket2 = 3;
 check(g.ticketsOf(old).draw === 7, 'migrazione una volta sola');
+check(['draw', 'holiday', 'spooky', 'moogle', 'draw', 'draw'].join() === [0, 1, 2, 3, 9, undefined].map(g.ticketCurrency).join(), 'ticketCurrency: item id of reward 41');
 const pw = { drawTickets: { draw: 1, holiday: 0, spooky: 4, moogle: 0 }, freeStone: 50 };
 check(g.balance(pw, tSpooky) === 4 && g.balance(pw, inside) === 50, 'balance');
 check(g.walletName(tSpooky) === 'drawTickets.spooky' && g.walletName(inside) === 'freeStone' && g.walletName(mk({ payType: 7 })) === 'limitedDrawTicket1', 'walletName');

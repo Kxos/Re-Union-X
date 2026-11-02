@@ -27,6 +27,9 @@ const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYL
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1' }; // payType 8: player.drawTickets[currency]
 const TICKET_CURRENCIES = ['draw', 'holiday', 'spooky', 'moogle'];
+// Item id of a type 41 reward (Draw Ticket) -> payType 8 currency: 0 Draw Ticket, 1 Holiday Draw Ticket, 2 Spooky Cookie,
+// 3 Moogle Point. Ours: the original had one currency renamed by the event (itemId 0); the server keeps them apart.
+const ticketCurrency = (itemId) => TICKET_CURRENCIES[Number(itemId) || 0] || 'draw';
 const VIP_FREE = 'vipFree'; // chiave del limite condiviso delle Free Deal (spec 9.5; nome storico dei salvataggi)
 // Free Deal giornaliera: gratuita (tutti i prezzi 0) con una estrazione al giorno, VIP o no, senza limite totale. Tutte
 // insieme danno UNA sola estrazione al giorno (decisione dell'utente 26-10, non originale: si sceglie su quale), fissate
@@ -855,6 +858,6 @@ function catalogPage(banners, ctx) {
 
 module.exports = {
   KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS,
-  SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
+  SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };

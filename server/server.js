@@ -2026,8 +2026,8 @@ function grantItem(type, id, num) {
   // 40 Platinum Ticket, 41 Draw Ticket (tipi 37-42: Bronze, Silver, Gold,
   // Platinum, Draw, Premium Ticket); si spendono nei banner dello Shop (rotte /gacha/*)
   else if (type === 40) player.limitedDrawTicket1 = (player.limitedDrawTicket1 || 0) + num;
-  // 41: Draw Ticket (le valute stagionali arrivano con le loro Limited, sotto-progetto 3)
-  else if (type === 41) gacha.ticketsOf(player).draw += num;
+  // 41: Draw Ticket; id 1/2/3 = Holiday Draw Ticket, Spooky Cookie, Moogle Point (gacha.ticketCurrency, ours)
+  else if (type === 41) { const t = gacha.ticketsOf(player), c = gacha.ticketCurrency(id); t[c] = (t[c] || 0) + num; }
   // 7 titolo (userTitles), 20 parte dell'avatar (accessorio, userAvatarParts)
   else if (type === 7 && id) { player.titles = [...new Set([...(player.titles || []), id])]; }
   else if (type === 20 && id) { player.avatarParts = [...new Set([...(player.avatarParts || []), id])]; }

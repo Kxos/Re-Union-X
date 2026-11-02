@@ -427,6 +427,8 @@ Limited Missions rotate among the original campaigns: one monthly Lux campaign a
 
 A few Spirit parts without original graphics are replaced by a similar part.
 
+The **Sora & Moogle B** Medal (JP 5th anniversary) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.
+
 The "Medal STR +N" and "Medal DEF +N" effects of Special Attacks and Supernovas are rebuilt from their descriptions, because the original values are lost.
 
 ### Shop and draws
@@ -439,7 +441,7 @@ Free draws cost 1 Jewel. All Free Deals share one draw a day, and VIP Free Deals
 
 Free deals that could be drawn only once (or once per day) keep that limit.
 
-Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time.
+Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time. When you earn one of them, the reward message calls it a Draw Ticket, but it goes to its own currency.
 
 Some 2016-17 banners only drew Epic Medals; the game data no longer says which Medals were Epic, so these banners draw from their full sets.
 
