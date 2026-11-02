@@ -667,8 +667,8 @@ const tests = {
     }), 'Gear Golem');
     assert.ok(!plain.reconstructed.includes('attribute'));
     // the shipped config: the three spiders and Egg Master have a template, each spider its colour's attribute
-    assert.deepStrictEqual(REAL_CONFIG.modelTemplates, { 'Scourge Spider': 5000, 'Wicked Spider': 5000, 'Malicious Spider': 5000, 'Egg Master': 7 });
-    assert.deepStrictEqual(REAL_CONFIG.bossAttributes, { 'Scourge Spider': 1, 'Wicked Spider': 2, 'Malicious Spider': 3 });
+    for (const [b, id] of Object.entries({ 'Scourge Spider': 5000, 'Wicked Spider': 5000, 'Malicious Spider': 5000, 'Egg Master': 7 })) assert.strictEqual(REAL_CONFIG.modelTemplates[b], id);
+    for (const [b, a] of Object.entries({ 'Scourge Spider': 1, 'Wicked Spider': 2, 'Malicious Spider': 3 })) assert.strictEqual(REAL_CONFIG.bossAttributes[b], a);
   },
   model_parts_cap() {
     // Raids Part 2 serving: modelParts keeps only the first N parts of the template row (spiders in the weekly era: body +
@@ -699,6 +699,23 @@ const tests = {
     // the shipped config: the three spiders keep the 4 parts of 5000 (Spinneret + 3 spiderlings, coordinator ruling 2 Nov:
     // their only LWFs with the Spinneret mark the spiderlings as weak points too, so 1 part would crash, see spiders_*)
     assert.deepStrictEqual(REAL_CONFIG.modelParts, { 'Scourge Spider': 4, 'Wicked Spider': 4, 'Malicious Spider': 4 });
+  },
+  reconstructed_bosses_have_templates() {
+    // render7/TEMPLATES15 (coordinator ruling 2 Nov): the 15 reconstructed bosses get a 2016 template row whose part
+    // weaknesses equal the model's weak points; with the real raid_models.json slots no entry is `template` or `parts`
+    const FIFTEEN = ['Assault Dragon', 'Adventurer', 'Jewel Princess', 'Gear Golem', 'Heartless Tsum', 'Loudmouth Parade', 'Greedy Grouch',
+      'Mysterious Sir', 'Merry-Go-Rowdy', 'Holiday Sleigh', 'Demon Tide', 'Cranky Cake', 'Mischief Bouquet', 'Red-Nosed Chariot', 'Closehanded Captain'];
+    for (const b of FIFTEEN) assert.ok(Number.isInteger(REAL_CONFIG.modelTemplates[b]), `template of ${b}`);
+    const real = realInputs();
+    if (!real) return;
+    const file = path.join(__dirname, 'game_data', 'raid_models.json');
+    if (!fs.existsSync(file)) { console.log('  (skipped: no raid_models.json)'); return; }
+    const out = mr.buildRaid({ ...real, models: JSON.parse(fs.readFileSync(file, 'utf8')) });
+    const mine = out.index.entries.filter((e) => FIFTEEN.includes(e.boss));
+    assert.ok(mine.length > 0);
+    assert.deepStrictEqual(mine.filter((e) => !e.available).map((e) => `${e.key} ${e.why} ${e.missingSlots || ''}`), []);
+    // no boss at all is left without a template or with an unpaired weak point
+    assert.deepStrictEqual(out.index.entries.filter((e) => e.why === 'template' || e.why === 'parts').map((e) => e.key), []);
   },
   spiders_cover_every_weak_point() {
     // weekly-era spider LWFs (parts2 revisions) have weak points parts1-5: with the shipped modelTemplates / modelParts the

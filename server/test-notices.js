@@ -150,6 +150,8 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(/15 raid bosses/.test(t) && /Jewel Princess/.test(t) && /Closehanded Captain/.test(t) && /twin or related/.test(t), 'Raid Bosses: grafiche ricostruite');
   check(/Enraged Arachnid/.test(t) && /Egg Master/.test(t) && /Trickmaster/.test(t) && /Spinneret/.test(t) && /900 of 24,000/.test(t), 'Raid Bosses: modelli e ragni');
   check(/Queen Bee, Queen Bee Ω/.test(t) && /Lion Headliner/.test(t) && /older version of their animations/.test(t), 'Raid Bosses: api e Lion Headliner');
+  check(/moves, part HP shares and rarity/.test(t) && /all their weak points/.test(t) && /Closehanded Captain\*\* keep/.test(t), 'Raid Bosses: modelli dei 15 e parti complete');
+  check(!n.NOTICES.some((x) => /Raid Bosses and Union Cross, which are not available yet/.test(x.body.join(' '))), 'VIP/Special: i raid sono tornati');
   check(/4 weak points/.test(t) && /spiderlings/.test(t) && /\*\*not original\*\* here/.test(t), 'Raid Bosses: ragni con 4 parti dichiarati');
 }
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
