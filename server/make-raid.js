@@ -7,20 +7,24 @@
 // - the 2016 rows (KHUX_RAID_2016): raidEnemy, raidEnemyAttack;
 // - server/game_data/raid_models.json (model completeness): available = fight && put_down. No file: every boss is
 //   unavailable, with a warning.
-// One entry per tier row of a census row. Ids, n = (evStageId - 8000) * 10 + position of the tier in the row:
-//   evStage 8001 + index of the row in the census (8000 stays free), stage 980000 + n, raidSetting 30000 + n,
+// One entry per tier row of a census row. Ids come from server/raid_ids.json (versioned, append-only), because they live in
+// saves and in the client's master: rows {censusId: r}, entries {"<censusId>/<tier>[+gem]": n}. A new key takes the next
+// free number, a key that disappears stays and its number is never reused, a repeated number stops the run. Every WW row is
+// numbered whatever the filter says.
+//   evStage 8000 + r (8000 stays free), stage 980000 + n, raidSetting 30000 + n,
 //   raidEnemy body 2000000 + 10n, parts + (weakness - 1), raidReward by rewardRowId (raid-rewards.js).
-// So ids do not depend on the filter or on availability, only on the order of the census rows.
 // Output (own rows dropped first, the previous run's list is raids.json `own`; anything else in our ranges stops the run):
 // - stage (stageKind 2, raidBoss = setting, copy of a story row of the map's world), evStage (one per census row with an
 //   available tier, eventCategory and eventType 2), raidEnemy, raidSetting, raidReward, raidEnemyAttack;
-// - game_data/raids.json: {entries: [...], own: {...}}, entries in the shape of the plan plus gemDrop, hp, worldId, level;
+// - game_data/raids.json: {entries: [...], reasons: {label: why}, own: {...}}, entries in the shape of the plan plus gemDrop,
+//   hp, worldId, level; reasons comes from reconstructedWhy of raid_config.json, one per label in use;
 // - game_data/raid_maps.json: stage list for recon/tools/gen_story_maps.py (config key "special", as special_maps.json).
 // Wired at the end of make-game-tables.js after make-special. KHUX_RAID=0 turns it off; without the private sources it
 // warns and writes nothing. After a run: maps (raid_maps.json), then raise the master revision.
 //
 //   node server/make-raid.js [master folder]
 //   node server/make-raid.js --stats       rewrites server/raid_stats.json from its inputs
+//   node server/make-raid.js --ids         numbers new keys in server/raid_ids.json, without touching the master
 'use strict';
 
 const fs = require('fs');
@@ -155,6 +159,45 @@ function checkRanges(master) {
   }
 }
 
+const tierOf = (w, date) => (w.tier === SINGLE && date >= REWARDS.tierFrom ? 'Beginner' : w.tier);
+const keyOf = (row, w) => `${row.id}/${tierOf(w, row.start)}${w.gem_drop ? '+gem' : ''}`;
+const tierRowsOf = (row, weeks) => weeks.filter((w) => w.start === row.start && row.bosses.includes(w.boss));
+const correctedFrom = (values, rewards) => correctedWeeks(values.weeks, parseCorrections((rewards || {}).correctionsMd).dates);
+
+function checkNumbers(map, what, max) {
+  const seen = new Map();
+  for (const [k, v] of Object.entries(map)) {
+    if (!Number.isInteger(v) || v < 1 || v > max) throw new Error(`raid: raid_ids.json: ${what} ${k} has number ${v}, outside 1-${max}`);
+    if (seen.has(v)) throw new Error(`raid: raid_ids.json: ${what} number ${v} repeats (${seen.get(v)}, ${k})`);
+    seen.set(v, k);
+  }
+}
+// Copy of ids with a number for every WW row and its tier rows, and for the rows the filter names. Stops on a key that two
+// tier rows would share, or a tier row that two census rows would claim.
+function allocateIds({ census, weeks, ids, only }) {
+  const out = { ...ids, rows: { ...(ids || {}).rows }, entries: { ...(ids || {}).entries } };
+  checkNumbers(out.rows, 'row', RANGES.evStage[2] - EV_BASE);
+  checkNumbers(out.entries, 'entry', RANGES.stage[2] - RANGES.stage[1]);
+  let nextRow = Math.max(0, ...Object.values(out.rows)) + 1, nextEntry = Math.max(0, ...Object.values(out.entries)) + 1;
+  const claimed = new Map();
+  for (const row of census.rows) {
+    if (!String(row.id).startsWith('WW-') && !(only && only.has(row.id))) continue;
+    if (!(row.id in out.rows)) out.rows[row.id] = nextRow++;
+    const keys = new Set();
+    for (const w of tierRowsOf(row, weeks)) {
+      const key = keyOf(row, w);
+      if (keys.has(key)) throw new Error(`raid: two tier rows give the key ${key} (${w.boss})`);
+      keys.add(key);
+      if (claimed.has(w)) throw new Error(`raid: the tier row ${w.start} ${w.tier} ${w.boss} is claimed by ${claimed.get(w)} and ${row.id}`);
+      claimed.set(w, row.id);
+      if (!(key in out.entries)) out.entries[key] = nextEntry++;
+    }
+  }
+  checkNumbers(out.rows, 'row', RANGES.evStage[2] - EV_BASE);
+  checkNumbers(out.entries, 'entry', RANGES.stage[2] - RANGES.stage[1]);
+  return out;
+}
+
 // The master rows of one boss at one tier, or {why} when the 2016 tables cannot give them.
 function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single }) {
   const parts = [];
@@ -187,7 +230,7 @@ function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knot
   return { body, partRows };
 }
 
-function buildRaid({ census, values, rewards, orig2016, master, models, config }) {
+function buildRaid({ census, values, rewards, orig2016, master, models, config, ids }) {
   checkRanges(master);
   const fixes = parseCorrections((rewards || {}).correctionsMd);
   const weeks = correctedWeeks(values.weeks, fixes.dates);
@@ -212,28 +255,27 @@ function buildRaid({ census, values, rewards, orig2016, master, models, config }
     return near.length ? near[near.length - 1].worldId : 0;
   };
   const only = config.onlyCensusIds ? new Set(config.onlyCensusIds) : null;
-  const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], maps: [], index: { entries: [] } };
+  const numbers = allocateIds({ census, weeks, ids, only });
+  const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], maps: [], index: { entries: [], reasons: {} }, ids: numbers, report: { why: {}, templateGap: [] } };
   const seenReward = new Set(), seenAttack = new Set();
 
-  census.rows.forEach((row, rowIndex) => {
+  census.rows.forEach((row) => {
     if (only ? !only.has(row.id) : !String(row.id).startsWith('WW-')) return;
-    const evStageId = EV_BASE + 1 + rowIndex;
-    if (evStageId > RANGES.evStage[2]) throw new Error('raid: more census rows than evStage ids');
-    const tierRows = weeks.filter((w) => w.start === row.start && row.bosses.includes(w.boss));
+    const evStageId = EV_BASE + numbers.rows[row.id];
+    const tierRows = tierRowsOf(row, weeks);
     const stageIds = [];
-    tierRows.forEach((w, position) => {
-      if (position >= 10) throw new Error(`raid: ${row.id} has more than 10 tier rows`);
+    tierRows.forEach((w) => {
       const date = row.start;
-      const tier = w.tier === SINGLE && date >= REWARDS.tierFrom ? 'Beginner' : w.tier;
-      const n = (evStageId - EV_BASE) * 10 + position;
+      const tier = tierOf(w, date);
+      const n = numbers.entries[keyOf(row, w)];
       const boss = (census.bosses || []).find((b) => b.ww === w.boss);
       const modelId = boss ? boss.raid_model_id : 0;
       const m = models && modelId ? models[modelId] : null;
       const questKey = w.tier === SINGLE ? 'Raid Time!' : `(${w.tier}) ${w.gem_drop ? 'Gem Drop: ' : ''}Raid Time!`;
       const quest = (values.quests || {})[questKey];
       const worldReal = mapWorld(w.map);
-      const reconstructed = ['atk', 'def', 'partHp', 'upMinutes', 'useAp', 'coinOdds'];
-      const entry = { key: `${row.id}/${tier}${w.gem_drop ? '+gem' : ''}`, censusId: row.id, family: row.family, start: row.start, end: row.end, tier, gemDrop: !!w.gem_drop,
+      const reconstructed = ['atk', 'def', 'partHp', 'upMinutes', 'useAp', 'coinOdds', 'rewards2016'];
+      const entry = { key: keyOf(row, w), censusId: row.id, family: row.family, start: row.start, end: row.end, tier, gemDrop: !!w.gem_drop,
         boss: w.boss, modelId, available: false, why: null, stageId: RANGES.stage[1] + n, evStageId, settingId: RANGES.raidSetting[1] + n, enemyId: RANGES.raidEnemy[1] + 10 * n,
         upMinutes: config.weeklyUpMinutes, useAp: config.useAp, questAp: String(w.ap).split('/').map(num), map: w.map, worldId: 0, level: (config.tierQuestLv || {})[tier] || num(w.quest_lv), hp: 0,
         boards: (values.week_boards || []).find((b) => b.start === row.start)?.boards || fixes.boards[row.id] || String(row.rewards || '').split(/\s*[;,|]\s*/).filter(Boolean),
@@ -313,6 +355,15 @@ function buildRaid({ census, values, rewards, orig2016, master, models, config }
     });
     if (stageIds.length) out.evStageRows.push(evStageRow(evStageId, stageIds));
   });
+  for (const e of out.index.entries) {
+    if (e.why) out.report.why[e.why] = (out.report.why[e.why] || 0) + 1;
+    if (e.why === 'template' && !out.report.templateGap.includes(e.boss)) out.report.templateGap.push(e.boss);
+    for (const label of e.reconstructed) {
+      const reason = (config.reconstructedWhy || {})[label];
+      if (!reason) throw new Error(`raid: no reason for the label ${label} in reconstructedWhy of raid_config.json`);
+      out.index.reasons[label] = reason;
+    }
+  }
   return out;
 }
 
@@ -362,7 +413,25 @@ function deduceStats({ raidEnemy2016, weeklyBosses, enemy, stage, poi, questLeve
 }
 
 const rowsOf = (file) => { const r = JSON.parse(fs.readFileSync(file, 'utf8')); return Array.isArray(r) ? r : Object.values(r)[0]; };
-const readJson = (p, dflt) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return dflt; } };
+// A missing file gives dflt where the caller allows it (dflt undefined: it stops the run); a corrupt one always stops it,
+// or a truncated table would be rewritten with our rows only.
+function readJson(p, dflt) {
+  let text;
+  try { text = fs.readFileSync(p, 'utf8'); } catch (e) {
+    if (e.code === 'ENOENT' && dflt !== undefined) return dflt;
+    throw new Error(`raid: ${p} not readable (${e.code || e.message})`);
+  }
+  try { return JSON.parse(text); } catch (e) { throw new Error(`raid: ${p} is corrupt: ${e.message}`); }
+}
+const IDS_FILE = path.join(__dirname, 'raid_ids.json');
+const IDS_NOTE = 'Append-only: raid ids live in saves and in the master. Numbers are written by make-raid.js; a key that disappears stays, its number is never reused. rows: evStage = 8000 + r. entries: stage = 980000 + n, raidSetting = 30000 + n, raidEnemy = 2000000 + 10n.';
+const readIds = (file) => readJson(file, { note: IDS_NOTE, rows: {}, entries: {} });
+function writeIds(file, ids) {
+  const text = JSON.stringify(ids, null, 1) + '\n';
+  let old = null;
+  try { old = fs.readFileSync(file, 'utf8'); } catch { /* first run */ }
+  if (old === null || old.replace(/\r\n/g, '\n') !== text) fs.writeFileSync(file, text);
+}
 
 // Throws when a source is not readable.
 function readSources(src, dir2016) {
@@ -397,25 +466,41 @@ function patch(masterDir, opts = {}) {
     if (!models) console.warn(`raid: ${file} not readable: raid_models.json missing, every boss is unavailable`);
   }
   const prev = readJson(path.join(gameData, 'raids.json'), {}).own || {};
+  // stage, world and the two tables with a row to blank must be there; the others are empty in the base master
+  const REQUIRED = new Set(['stage', 'raidEnemy', 'raidEnemyAttack']);
   const load = (table, key) => {
     const mine = new Set(prev[table] || []);
-    return readJson(path.join(masterDir, `${table}.json`), []).filter((r) => !mine.has(r[key]));
+    return readJson(path.join(masterDir, `${table}.json`), REQUIRED.has(table) ? undefined : []).filter((r) => !mine.has(r[key]));
   };
-  const keyOf = { ...Object.fromEntries(Object.entries(RANGES).map(([t, [k]]) => [t, k])), raidEnemyAttack: 'raidEnemyAttackId' };
-  const master = Object.fromEntries(Object.entries(keyOf).map(([t, k]) => [t, load(t, k)]));
-  master.world = readJson(path.join(masterDir, 'world.json'), []);
-  master.enemy = readJson(path.join(masterDir, 'enemy.json'), []);
-  const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig() });
+  const tableKey = { ...Object.fromEntries(Object.entries(RANGES).map(([t, [k]]) => [t, k])), raidEnemyAttack: 'raidEnemyAttackId' };
+  const master = Object.fromEntries(Object.entries(tableKey).map(([t, k]) => [t, load(t, k)]));
+  master.world = readJson(path.join(masterDir, 'world.json'));
+  if (!master.stage.some((r) => r.stageKind === 1)) throw new Error(`raid: ${path.join(masterDir, 'stage.json')} has no story rows`);
+  const idsFile = opts.idsFile || IDS_FILE;
+  const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig(), ids: readIds(idsFile) });
   const added = { stage: out.stageRows, evStage: out.evStageRows, raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
-  const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[keyOf[t]])]));
-  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, own }, null, 1));
+  const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[tableKey[t]])]));
+  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, own }, null, 1));
+  writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
   const on = out.index.entries.filter((e) => e.available).length;
   console.log(`raid: ${on} of ${out.index.entries.length} tier rows available; +${out.stageRows.length} stage, +${out.evStageRows.length} evStage, +${out.settingRows.length} raidSetting, `
     + `+${out.enemyRows.length} raidEnemy, +${out.rewardRows.length} raidReward, +${out.attackRows.length} raidEnemyAttack`);
+  const whys = Object.entries(out.report.why).sort().map(([k, v]) => `${k} ${v}`);
+  if (whys.length) console.log(`raid: not available: ${whys.join(', ')}`);
+  if (out.report.templateGap.length) console.warn(`raid: complete model but no template row, choose one in modelTemplates of raid_config.json: ${out.report.templateGap.join(', ')}`);
   return out;
+}
+
+// node server/make-raid.js --ids: numbers every WW row and tier row in raid_ids.json
+function writeIdsFile() {
+  const src = process.env.KHUX_RAID_SRC || DEFAULT_SRC, dir2016 = process.env.KHUX_RAID_2016 || DEFAULT_2016;
+  const { census, values, rewards } = readSources(src, dir2016);
+  const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null });
+  writeIds(IDS_FILE, ids);
+  console.log(`raid_ids.json: ${Object.keys(ids.rows).length} rows, ${Object.keys(ids.entries).length} entries`);
 }
 
 // node server/make-raid.js --stats: raid_stats.json from the served tables, the 2016 rows and the wiki levels
@@ -438,7 +523,8 @@ function writeStats() {
 
 if (require.main === module) {
   if (process.argv[2] === '--stats') writeStats();
+  else if (process.argv[2] === '--ids') writeIdsFile();
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { buildRaid, patch, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { buildRaid, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
