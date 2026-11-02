@@ -109,6 +109,29 @@ check(got == ['d/three.lwf'], 'three missing sizes: only donors with >= 3 (%r)' 
 check(dd.candidates(77, {'wait': {'miss': [], 'have': {}}}, idx) == [], 'nothing missing: no candidates')
 dd.resolve = _resolve
 
+
+# 6. donors of a raid model (Raids part 2, task 2): the search order is character/raid, character/enemy,
+# adventure/raid_notice_boss, drama, burst/effect, ability/hit_effect, raid/demo; inside a folder, path order
+check(dd.RAID_DONOR_ORDER == ['character/raid', 'character/enemy', 'adventure/raid_notice_boss', 'drama',
+                              'burst/effect', 'ability/hit_effect', 'raid/demo'], 'raid donor order: %r' % (dd.RAID_DONOR_ORDER,))
+ridx = {'x/lwf/raid/demo/start_0017/start.lwf': ('jp431', 'a', [('t', 1, 1)]),
+        'x/lwf/ability/hit_effect/9/h.lwf': ('jp431', 'b', [('t', 1, 1)]),
+        'x/lwf/burst/effect/3/e.lwf': ('jp431', 'c', [('t', 1, 1)]),
+        'x/lwf/drama/2001001/d.lwf': ('jp431', 'd', [('t', 1, 1)]),
+        'x/lwf/adventure/raid_notice_boss/1/n.lwf': ('jp431', 'e', [('t', 1, 1)]),
+        'x/lwf/character/enemy/1500/wait/wait.lwf': ('jp431', 'f', [('t', 1, 1)]),
+        'x/lwf/character/raid/0020/wait/wait.lwf': ('jp431', 'g', [('t', 1, 1)]),
+        'x/lwf/character/raid/0017/wait/wait.lwf': ('jp431', 'h', [('t', 1, 1)]),
+        'x/lwf/other/unrelated.lwf': ('jp431', 'i', [('t', 1, 1)])}
+got = dd.raid_donors('0017', ridx)
+check([g[1] for g in got] == ['x/lwf/character/raid/0017/wait/wait.lwf', 'x/lwf/character/raid/0020/wait/wait.lwf',
+                              'x/lwf/character/enemy/1500/wait/wait.lwf', 'x/lwf/adventure/raid_notice_boss/1/n.lwf',
+                              'x/lwf/drama/2001001/d.lwf', 'x/lwf/burst/effect/3/e.lwf',
+                              'x/lwf/ability/hit_effect/9/h.lwf', 'x/lwf/raid/demo/start_0017/start.lwf'],
+      'raid donors order: %r' % ([g[1] for g in got],))
+check([g[0] for g in got][:2] == ['character/raid'] * 2 and got[-1][0] == 'raid/demo', 'raid donors: group label')
+check(all('unrelated' not in g[1] for g in got), 'raid donors: unrelated folder excluded')
+
 # helpers
 check(dd.close((10, 10), (11, 9)) and not dd.close((10, 10), (12, 10)), 'close: +-1 px')
 check(dd.lcs_map([(1, 1), (2, 2), (3, 3)], [(2, 2), (9, 9), (3, 3)]) == {1: 0, 2: 2}, 'lcs_map')

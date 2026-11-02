@@ -277,6 +277,33 @@ def solve(anims, survs, famdims, donors, diff, mode='AB'):
     return res
 
 
+# --- donors of a raid model (Raids part 2, task 2) ----------------------------------------------------------------------
+# Where the missing images of a raid boss are searched, in this order (measured on the held-out raid models: every
+# unresolved image exists in these folders, mostly in the first two).
+RAID_DONOR_ORDER = ['character/raid', 'character/enemy', 'adventure/raid_notice_boss', 'drama', 'burst/effect',
+                    'ability/hit_effect', 'raid/demo']
+
+
+def raid_donors(model, idx):
+    """LWFs of idx ({path: (container, sha1, table)}) that may donate to raid model `model` ('0017'):
+    [(group, path, container, table)] grouped by RAID_DONOR_ORDER, path order inside a group (the model's own folder
+    first in character/raid); identical copies (same sha1) count once; folders outside the list are ignored."""
+    out, seen = [], set()
+    for g, group in enumerate(RAID_DONOR_ORDER):
+        frag = '/lwf/%s/' % group
+        rows = []
+        for p, (k, sh, t) in idx.items():
+            q = p.replace(chr(92), '/')
+            if frag in q:
+                rows.append((0 if ('/%s/' % model) in q or ('_%s/' % model) in q else 1, q, p, k, sh, t))
+        for _, q, p, k, sh, t in sorted(rows, key=lambda r: (r[0], r[1])):
+            if sh in seen:
+                continue
+            seen.add(sh)
+            out.append((group, p, k, t))
+    return out
+
+
 # --- local sources ----------------------------------------------------------------------------------------------------
 REV = re.compile(r'^(.*)\.(\d{8})(\.[^.]+)$')
 _dir = {}
