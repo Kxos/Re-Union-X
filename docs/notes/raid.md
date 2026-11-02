@@ -133,7 +133,7 @@ Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the 
 - **Raid AP: first attempt 0 (164 → 164), second 10 (76 → 66).** The card shows AP 0, then AP 10.
 - HP and broken parts kept after Give Up (49,548,210,919 of 70 billion, parts 2 and 3 at 0).
 - Victory twice in a row: SUCCESS «The Raid Boss is defeated!», RAID RESULTS 180/60/60 Raid Coins, OMEGA label; the level goes up after the win.
-- Give Up (`raidTimeStatus` 1): YOU LOSE with Damage, Munny, Lux and the level bar; the text line under the title stays empty.
+- Give Up (`raidTimeStatus` 1): YOU LOSE with Damage, Munny, Lux and the level bar; the text line under the title stays empty. Raid texts (`layouts/ui_texts`, ids 10320xxxx): 011 «The Raid Boss has escaped.», 010 «A party member defeated the Raid Boss!», 005 «No available Raid Boss.», 019 «A support request was sent to other players.», 016 empty. The original sent a support request on a lost raid, so 019 is the likely text of a loss; it is a multiplayer feature we do not have, and no status is proven to show it. The Defeated scene's layout JSON is not local, so the binding stays unread. Kept at 1: an empty line claims nothing false.
 
 ## Open, for the bench
 
