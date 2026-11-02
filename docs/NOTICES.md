@@ -427,9 +427,15 @@ Limited Missions rotate among the original campaigns: one monthly Lux campaign a
 
 A few Spirit parts without original graphics are replaced by a similar part.
 
-The **Sora & Moogle B** Medal (JP 5th anniversary) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.
-
 The "Medal STR +N" and "Medal DEF +N" effects of Special Attacks and Supernovas are rebuilt from their descriptions, because the original values are lost.
+
+### Raid Boards
+
+The **Sora & Moogle B** Medal (JP 5th anniversary, a Raid Board reward) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.
+
+The Raid Board cell listed as a **6★ Fantasia Mickey A** gives the **5★ Fantasia Mickey A**: no 6★ version of that Medal is known, and the board pairs it with Magic Brooms, which evolve the 5★.
+
+The **Starlight Ears** and **Dazzling Disco** Spirit parts are **left off** their Raid Boards: part of their artwork is lost, so those boards have one cell less than in the original game.
 
 ### Shop and draws
 
