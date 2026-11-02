@@ -28,6 +28,16 @@
     }
   },
   "reconstructedWhy": {
+    "atk": "No ATK of a raid is known after 2016. Story enemy ATK of the period, times the median boss/story ratio of the 23 weekly bosses with 2016 rows, times a tier share that has no source. Table and rule: raid_stats.json, docs/notes/raid.md.",
+    "def": "No DEF of a raid is known after 2016. 1000, or 1100 for rare 2: community calculators. Epic 50,000: a player report of no damage below about 50,000 STR, read as DEF without reading the damage formula; it may stop the deck that passed the Part 1 spike at about 1200 DEF. To change it, edit def in statsRule of raid_config.json and run node server/make-raid.js --stats, which copies it into raid_stats.json.",
+    "hp": "This boss, tier and week were not read on video: HP comes from the tier and period table. Before 2019-08-12 the shares below the cap at LV 30 are ours too (singleEra).",
+    "hp_step": "The week lies outside the dates this HP was seen in: change dates are known only between two video uploads, so the midpoint week decides, or the last value seen is carried on.",
+    "atk_curve": "Before 2019-08-12 stats grew with level. ATK below the cap follows singleEra.atkShare, which has no reading at all.",
+    "moves": "This boss has no 2016 row: it reuses the parts and moves of the row named in modelTemplates.",
+    "background": "The raid background of this map's world is incomplete (brokenBackgrounds): the fight draws the one of backgroundFallbackWorld.",
+    "coinOdds": "Coin amounts come from the wiki tables, often of the same tier in another week; the odds of the high amount and of gems have no source (rewards.reconstructed).",
+    "rewards2016": "Lux, Munny and EXP of the boss rows are the 2016 values of the template row. Reported Lux is about 2 billion on a 2019 boss, so these are far too low; no formula is known.",
+    "upMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
     "onlyCensusIds": "Filter: only these census rows are built. Task 8 removes the key; without it every WW row with week data is built.",
     "weeklyUpMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
     "useAp": "AP of a further attempt on the same boss: 10 in the 2016 rows, not stated for the Weekly era.",

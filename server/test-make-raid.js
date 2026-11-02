@@ -7,6 +7,7 @@ const mr = require('./make-raid');
 const rr = require('./raid-rewards');
 
 const W1 = 'WW-W-2019-10-07';
+const REAL_CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
 const tiers5 = ['Beginner', 'Intermediate', 'Advanced', 'Legendary', 'Epic'];
 const stats = {
   def: { base: 1000, omega: 1100, epic: 50000 },
@@ -58,7 +59,7 @@ function fixture() {
       world: [{ worldId: 1, raidBackground: 'bg_DB1' }, { worldId: 3, raidBackground: 'bg_WL1' }, { worldId: 7, raidBackground: 'bg_CD1' }] },
     models: { 7: { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true }, 21: { fight: true, start: true, escape: true, put_down: true } },
     config: { onlyCensusIds: [W1], stats, weeklyUpMinutes: 20, useAp: 10, brokenBackgrounds: ['bg_CD1', 'bg_ED1'], backgroundFallbackWorld: 1, tierQuestLv: { single: 25, Beginner: 25, Intermediate: 75, Advanced: 125, Legendary: 175, Epic: 225 },
-      singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {} },
+      singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {}, reconstructedWhy: REAL_CONFIG.reconstructedWhy },
   };
 }
 const build = (mutate) => { const f = fixture(); if (mutate) mutate(f); return mr.buildRaid(f); };
@@ -295,7 +296,7 @@ const tests = {
     fs.mkdirSync(master); fs.mkdirSync(game);
     const f = fixture();
     for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(master, n + '.json'), JSON.stringify(rows));
-    const opts = { gameDataDir: game, sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config };
+    const opts = { gameDataDir: game, idsFile: path.join(game, 'raid_ids.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config };
     const snap = () => Object.fromEntries([...fs.readdirSync(master).map((n) => [n, path.join(master, n)]), ...fs.readdirSync(game).map((n) => [n, path.join(game, n)])].map(([n, p]) => [n, fs.readFileSync(p, 'utf8')]));
     mr.patch(master, opts);
     const first = snap();
@@ -331,7 +332,7 @@ const tests = {
     const log = console.warn; const warned = [];
     console.warn = (s) => warned.push(s);
     try {
-      const out = mr.patch(dir, { gameDataDir: dir, modelsFile: path.join(dir, 'absent.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, config: f.config });
+      const out = mr.patch(dir, { gameDataDir: dir, idsFile: path.join(dir, 'raid_ids.json'), modelsFile: path.join(dir, 'absent.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, config: f.config });
       assert.strictEqual(out.stageRows.length, 0);
       assert.ok(warned.some((s) => /raid_models/.test(s)));
     } finally { console.warn = log; fs.rmSync(dir, { recursive: true, force: true }); }
@@ -394,6 +395,161 @@ const tests = {
     assert.strictEqual(s.reconstructed, true);
     assert.ok(!JSON.stringify(s).includes('NotWeekly'));
   },
+  ids_survive_inserted_row() {
+    const first = build();
+    const before = entry(first, 'Trickmaster'), other = entry(first, 'Blue Trident Tail');
+    const next = build((f) => {
+      f.ids = first.ids;
+      // a row inserted before ours, and the tier rows in another order
+      f.census.rows.unshift(censusRow('WW-NEW', '2019-08-19', '2019-08-25', ['Trickmaster'], 'Beginner'));
+      f.values.weeks.reverse();
+      f.values.weeks.unshift(week('2019-08-19', '2019-08-25', 'Beginner', 'Trickmaster', 'Curious Room'));
+      f.config.onlyCensusIds = [W1, 'WW-NEW'];
+    });
+    const ours = next.index.entries.filter((e) => e.censusId === W1);
+    for (const k of ['stageId', 'evStageId', 'settingId', 'enemyId']) {
+      assert.strictEqual(ours.find((e) => e.boss === 'Trickmaster')[k], before[k], k);
+      assert.strictEqual(ours.find((e) => e.boss === 'Blue Trident Tail')[k], other[k], k);
+    }
+    const added = next.index.entries.find((e) => e.censusId === 'WW-NEW');
+    assert.ok(added.stageId > Math.max(before.stageId, other.stageId), 'the new key takes the next free number');
+    assert.ok(added.evStageId > before.evStageId);
+  },
+  id_of_a_gone_key_is_never_reused() {
+    const first = build();
+    const gone = entry(first, 'Blue Trident Tail');
+    const next = build((f) => {
+      f.ids = first.ids;
+      f.values.weeks = f.values.weeks.filter((w) => w.boss !== 'Blue Trident Tail');
+      f.census.rows.push(censusRow('WW-NEW', '2019-08-19', '2019-08-25', ['Trickmaster'], 'Beginner'));
+      f.values.weeks.push(week('2019-08-19', '2019-08-25', 'Beginner', 'Trickmaster', 'Curious Room'));
+      f.config.onlyCensusIds = [W1, 'WW-NEW'];
+    });
+    assert.ok(gone.key in next.ids.entries, 'the key stays in the file');
+    assert.ok(next.index.entries.every((e) => e.stageId !== gone.stageId));
+  },
+  repeated_id_number_throws() {
+    const first = build();
+    const dupEntries = JSON.parse(JSON.stringify(first.ids));
+    const keys = Object.keys(dupEntries.entries);
+    dupEntries.entries[keys[1]] = dupEntries.entries[keys[0]];
+    assert.throws(() => build((f) => { f.ids = dupEntries; }), /repeat/);
+    const dupRows = JSON.parse(JSON.stringify(first.ids));
+    dupRows.rows.X = dupRows.rows[W1];
+    assert.throws(() => build((f) => { f.ids = dupRows; }), /repeat/);
+  },
+  ids_cover_every_ww_row_under_the_filter() {
+    const out = build((f) => {
+      f.census.rows.push(censusRow('WW-OTHER', '2020-01-06', '2020-01-12', ['Trickmaster'], 'Beginner'), censusRow('WW-NOWEEK', '2020-01-13', '2020-01-19', ['Trickmaster'], 'x'));
+      f.values.weeks.push(week('2020-01-06', '2020-01-12', 'Beginner', 'Trickmaster', 'Curious Room'));
+    });
+    assert.strictEqual(out.index.entries.length, 2, 'the filter still limits the rows built');
+    assert.ok('WW-OTHER/Beginner' in out.ids.entries);
+    assert.ok('WW-OTHER' in out.ids.rows && 'WW-NOWEEK' in out.ids.rows);
+  },
+  duplicate_key_throws() {
+    assert.throws(() => build((f) => { f.values.weeks.push(week('2019-10-07', '2019-10-13', 'Beginner', 'Blue Trident Tail', 'Curious Room')); }), /WW-W-2019-10-07\/Beginner/);
+    // one tier row claimed by two census rows
+    assert.throws(() => build((f) => {
+      f.census.rows.push(censusRow('WW-TWIN', '2019-10-07', '2019-10-13', ['Trickmaster'], 'Beginner'));
+      f.config.onlyCensusIds = [W1, 'WW-TWIN'];
+    }), /WW-TWIN/);
+  },
+  ids_file_written_and_kept() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const f = fixture();
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
+    const idsFile = path.join(dir, 'raid_ids.json');
+    const opts = { gameDataDir: dir, idsFile, sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config };
+    try {
+      const a = mr.patch(dir, opts);
+      const saved = JSON.parse(fs.readFileSync(idsFile, 'utf8'));
+      assert.strictEqual(saved.entries[`${W1}/Beginner`], a.index.entries[0].stageId - 980000);
+      assert.strictEqual(saved.rows[W1], a.index.entries[0].evStageId - 8000);
+      // a key removed from the census stays in the file
+      opts.sources = { ...opts.sources, values: { ...f.values, weeks: f.values.weeks.filter((w) => w.tier === 'Beginner') } };
+      mr.patch(dir, opts);
+      assert.ok(`${W1}/Advanced` in JSON.parse(fs.readFileSync(idsFile, 'utf8')).entries);
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  },
+  every_label_has_a_reason() {
+    const variants = [build(), build((f) => addWeek(f, 'X', '2018-11-05', '2018-11-11', 'single')), build((f) => addWeek(f, 'X', '2019-09-23', '2019-09-29', 'Advanced')),
+      build((f) => addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Trickmaster', 'Castle Courtyard')),
+      build((f) => { addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem'); f.config.modelTemplates = { 'Gear Golem': 7 }; })];
+    const seen = new Set();
+    for (const out of variants) {
+      for (const e of out.index.entries) {
+        assert.ok(e.reconstructed.includes('rewards2016'), e.key);
+        for (const l of e.reconstructed) { seen.add(l); assert.ok(typeof out.index.reasons[l] === 'string' && out.index.reasons[l].length > 20, `no reason for ${l}`); }
+      }
+    }
+    for (const l of ['atk', 'def', 'coinOdds', 'hp', 'hp_step', 'moves', 'background', 'rewards2016', 'atk_curve']) assert.ok(seen.has(l), l);
+    assert.ok(/spike/.test(REAL_CONFIG.reconstructedWhy.def) && /statsRule/.test(REAL_CONFIG.reconstructedWhy.def) && /--stats/.test(REAL_CONFIG.reconstructedWhy.def));
+    assert.throws(() => build((f) => { f.config.reconstructedWhy = {}; }), /reason/);
+    // written to raids.json
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const f = fixture();
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
+    try {
+      mr.patch(dir, { gameDataDir: dir, idsFile: path.join(dir, 'raid_ids.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config });
+      assert.ok(JSON.parse(fs.readFileSync(path.join(dir, 'raids.json'), 'utf8')).reasons.rewards2016);
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  },
+  template_gap_is_reported() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const f = fixture();
+    addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
+    f.config.onlyCensusIds = ['X', W1];
+    delete f.models[1003];
+    delete f.models[7];
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
+    const warn = console.warn, log = console.log; const warned = [], logged = [];
+    console.warn = (s) => warned.push(s); console.log = (s) => logged.push(s);
+    try {
+      mr.patch(dir, { gameDataDir: dir, idsFile: path.join(dir, 'raid_ids.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config });
+    } finally { console.warn = warn; console.log = log; fs.rmSync(dir, { recursive: true, force: true }); }
+    assert.ok(warned.some((s) => /Gear Golem/.test(s) && /template/.test(s)), warned.join('|'));
+    assert.ok(!warned.some((s) => /Blue Trident Tail/.test(s)), 'a boss without graphics is not a template gap');
+    assert.ok(logged.some((s) => /template 1/.test(s) && /graphics 2/.test(s)), logged.join('|'));
+  },
+  corrupt_or_missing_table_throws() {
+    const setup = () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+      const f = fixture();
+      for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
+      return { dir, opts: { gameDataDir: dir, idsFile: path.join(dir, 'raid_ids.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config } };
+    };
+    // corrupt JSON in any file we read: throws and leaves stage.json as it was
+    for (const name of ['stage.json', 'evStage.json', 'raidSetting.json', 'raidReward.json', 'raidEnemy.json', 'raidEnemyAttack.json', 'world.json', 'raids.json', 'raid_ids.json']) {
+      const { dir, opts } = setup();
+      try {
+        fs.writeFileSync(path.join(dir, name), '{"truncated": [');
+        const stageBefore = fs.readFileSync(path.join(dir, 'stage.json'), 'utf8');
+        assert.throws(() => mr.patch(dir, opts), new RegExp(name.replace('.', '\\.')), name);
+        assert.strictEqual(fs.readFileSync(path.join(dir, 'stage.json'), 'utf8'), stageBefore, name);
+      } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+    }
+    { // corrupt models file: not the same as no models file
+      const { dir, opts } = setup();
+      delete opts.models; opts.modelsFile = path.join(dir, 'raid_models.json');
+      fs.writeFileSync(opts.modelsFile, '{');
+      try { assert.throws(() => mr.patch(dir, opts), /raid_models\.json/); } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+    }
+    // a table that must exist: missing stops the run, and so does an empty stage table
+    for (const name of ['stage.json', 'world.json', 'raidEnemy.json', 'raidEnemyAttack.json']) {
+      const { dir, opts } = setup();
+      fs.rmSync(path.join(dir, name));
+      try { assert.throws(() => mr.patch(dir, opts), new RegExp(name.replace('.', '\\.')), name); } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+    }
+    { const { dir, opts } = setup(); fs.writeFileSync(path.join(dir, 'stage.json'), '[]'); try { assert.throws(() => mr.patch(dir, opts), /stage\.json/); } finally { fs.rmSync(dir, { recursive: true, force: true }); } }
+    // those that may legitimately be absent do not stop it
+    for (const name of ['evStage.json', 'raidSetting.json', 'raidReward.json', 'raids.json', 'raid_ids.json']) {
+      const { dir, opts } = setup();
+      fs.rmSync(path.join(dir, name), { force: true });
+      const log = console.log; console.log = () => {};
+      try { assert.strictEqual(mr.patch(dir, opts).stageRows.length, 2, name); } finally { console.log = log; fs.rmSync(dir, { recursive: true, force: true }); }
+    }
+  },
   real_census_week() {
     const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
     let sources;
@@ -410,7 +566,9 @@ const tests = {
     const models = new Proxy({}, { get: () => all });
     const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
     const config = { ...cfg, stats: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_stats.json'), 'utf8')) };
-    const out = mr.buildRaid({ ...sources, master, models, config });
+    const seeded = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_ids.json'), 'utf8'));
+    const out = mr.buildRaid({ ...sources, master, models, config, ids: seeded });
+    assert.deepStrictEqual(out.ids, seeded, 'raid_ids.json already covers every WW row');
     assert.deepStrictEqual(out.index.entries.map((e) => [e.tier, e.boss, e.modelId]), [['Beginner', 'Trickmaster', 7], ['Advanced', 'Blue Trident Tail', 1003]]);
     const [b, a] = out.index.entries;
     const row = (e) => out.enemyRows.find((r) => r.raidEnemyId === e.enemyId);
@@ -421,7 +579,9 @@ const tests = {
     assert.ok(out.stageRows.every((s) => s.worldId === 3 && s.raidBoss));
     // all rows, as Task 8 will build them: nothing throws and the 2016 bosses come out
     const wide = { ...config }; delete wide.onlyCensusIds;
-    const every = mr.buildRaid({ ...sources, master, models, config: wide });
+    const every = mr.buildRaid({ ...sources, master, models, config: wide, ids: seeded });
+    assert.deepStrictEqual(every.ids, seeded);
+    assert.strictEqual(new Set(every.index.entries.map((e) => e.key)).size, every.index.entries.length);
     const count = (f) => every.index.entries.filter(f).length;
     console.log(`  (all WW rows: ${every.index.entries.length} tier rows, ${count((e) => e.available)} buildable, ${count((e) => e.why === 'template')} without a template, ${count((e) => e.why === 'map')} without a map world)`);
     assert.ok(count((e) => e.available) > 100);
