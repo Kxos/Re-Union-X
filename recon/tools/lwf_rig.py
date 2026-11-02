@@ -6,7 +6,7 @@ Place fields (checked on every LWF of the dump, 23-10, both formats):
   place.depth  = depth | clipDepth << 16: clipDepth > 0 marks a Flash MASK layer (the clip depth is always greater
                  than the depth; values up to 1737, so it is not a blend mode). The mask piece itself is never drawn
                  (they are flat colour fills, e.g. enemy 1615's 187x198 solid red square); it clips the siblings at
-                 depths (depth, clipDepth]. draws() leaves masks out and lists them in Draw.masks of the clipped draws.
+                 depths (depth, clipDepth) (clipDepth is 1-based, depths 0-based). draws() leaves masks out and lists them in Draw.masks of the clipped draws.
   place.object = objectId | (0x8000 | blendMode) << 16 (0 normal, 1 add, 5 multiply, ...).
 """
 import struct, numpy as np
@@ -105,7 +105,9 @@ class LWF:
         active = []                                 # (clipDepth, draws of the mask)
         for d in sorted(dl):
             o, mid, cid, pa, clip = dl[d]
-            active = [a for a in active if d <= a[0]]
+            # LWF depths are 0-based but clipDepth keeps Flash's 1-based value: the clip depth itself is NOT clipped
+            # (raid 1012/0013 atk1: claw and lit face exactly at the clip depth, overlap 0% with their mask)
+            active = [a for a in active if d < a[0]]
             ot, oid = self.objects[o & 0xffff]
             bl = blend or ((o >> 16) & 0x7fff)      # modo di fusione nei 16 bit alti (1 = add)
             W = M @ self.mat(mid)
