@@ -2,7 +2,7 @@
 // listed field is mandatory, or the client answers «200 ERROR»). The factory takes everything from server.js; state lives
 // in player.raid only (raidState), so old saves load.
 //   240 list, 122 start, 123 clear, 120 reward, 121 member, 241 notice; onStageClear (spawn), events (/stage/event
-//   category 2), stageAp (/stage/start of a raid quest).
+//   category 2), stageAp (/stage/start of a raid quest), boardIds (Raid Boards handed out, for /user/sphere of server.js).
 'use strict';
 const fight = require('./raid-fight');
 const rewards = require('./raid-rewards');
@@ -236,11 +236,26 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     if (spawn(r, entry, nowMs)) r.points = 0;
   }
 
-  // /stage/event category 2: one event per census row, with its available tiers. Task 8 adds the calendar: until then every
-  // entry the generator emitted, with no date filter.
+  // The raids running now. Task 8 adds the calendar: until then every entry the generator emitted, with no date filter.
+  const currentEntries = () => entries(); // called with the real time, which the calendar of Task 8 will read
+  // The kept raid of the Catalog (Task 9): player.raid.kept names an entry key or a census id; all its available tiers.
+  function keptEntries() {
+    const k = state().kept;
+    const key = k && typeof k === 'object' ? k.key || k.censusId : k;
+    return key ? entries().filter((e) => e.key === key || e.censusId === key) : [];
+  }
+  // Raid Boards (sphere type 5) of the current raids and of the kept one (active), and of every raid of the index (all).
+  // Boards belong to the census row: every tier carries the same sphereBoardIds (make-raid.js).
+  function boardIds(realMs = realNow()) {
+    const ids = (list) => list.flatMap((e) => e.sphereBoardIds || []);
+    const active = [...new Set([...ids(currentEntries(realMs)), ...ids(keptEntries())])].sort((a, b) => a - b);
+    return { active, all: [...new Set(ids(raidIndex().entries || []))] };
+  }
+
+  // /stage/event category 2: one event per census row, with its available tiers (currentEntries).
   function events(realMs = realNow()) {
     const byEvent = new Map();
-    for (const e of entries()) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
+    for (const e of currentEntries(realMs)) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
     return [...byEvent].map(([eventStageId, list]) => ({
       stages: list.map((e) => {
         const st = stageState(e.stageId);
@@ -264,7 +279,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     return entry ? questApAt(entry, realMs) : null;
   }
 
-  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp };
+  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, boardIds };
 }
 
 module.exports = routesRaid;

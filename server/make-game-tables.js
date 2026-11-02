@@ -860,15 +860,16 @@ require('./make-proud').patch(OUT);
 // Special tab (Quests > Special): stage rows 970000-979999 (stageKind 2), evStage 7000+, drop rows 970000+ and
 // game_data/special.json from server/special_periods.json and the private catalogue (make-special.js)
 require('./make-special').patch(OUT);
-// Raids: stage rows 980000-989999, evStage 8001+, raidEnemy 2000000+, raidSetting 30000+, raidReward, game_data/raids.json and
-// raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off
-require('./make-raid').patch(OUT);
 // tabelle ricostruite da noi (server/tables: mission = missioni giornaliere/settimanali dalla
 // khuxwiki, vedi le note in testa a ciascun generatore): copiate cosi' come sono
 const TABLES = path.join(__dirname, 'tables');
 for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
   if (f.endsWith('.json')) fs.copyFileSync(path.join(TABLES, f), path.join(OUT, f));
 }
+// Raids: stage rows 980000-989999, evStage 8001+, raidEnemy 2000000+, raidSetting 30000+, raidReward, Raid Boards (sphere 3000000+), game_data/raids.json and
+// raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off.
+// After the copy of server/tables: the Raid Boards are appended to the sphere tables copied from there
+require('./make-raid').patch(OUT);
 console.log(`medal: ${medals.length} righe (+${roboAdded} da Roboloid, ${tiersFromRobo} tier da Roboloid); player: ${players.length} livelli (HP lv1 = ${hp})` +
   (enemies ? `; enemy: ${enemies.length} righe (${displaysJp} con grafica originale di enemy_gen, ${displaysDarkRoad} con grafica di Dark Road, ${displaysSubstituted} con grafica sostitutiva, ${showsRestored} con effetto di comparsa originale ripristinato, ${showsSubstituted} con effetto di comparsa sostitutivo; enemyAttack +${attacksAdded})` : '') + `; burst: ${bursts.length} righe (+${burstsAdded}, ${buffStats.rows} con buff/debuff, ${buffStats.fromOrig} da thethiny, ${buffStats.conflicts} conflitti)` +
   `; supernova: ${snBursts.length} attacchi, +${meowAdded} Dual Meow Wow, ${snEvolve.applied} Evolve con medaglie richieste (${snEvolve.missing} regole senza medaglie); +${fairyAdded} Blue Fairy, ${fairyEvolve} Evolve 6★->7★ con Blue Fairy (${orgEvolve} dell'Organizzazione XIII verso la 7★ «X A»); ${wikiEvolve.changes.length} Evolve with khuxwiki required medals (I-205); bgm: ${bgmRows} righe` +

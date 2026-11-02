@@ -18,7 +18,10 @@
 //   available tier, eventCategory and eventType 2), raidEnemy, raidSetting, raidReward, raidEnemyAttack;
 // - game_data/raids.json: {entries: [...], reasons: {label: why}, own: {...}}, entries in the shape of the plan plus gemDrop,
 //   hp, worldId, level; reasons comes from reconstructedWhy of raid_config.json, one per label in use;
-// - game_data/raid_maps.json: stage list for recon/tools/gen_story_maps.py (config key "special", as special_maps.json).
+// - game_data/raid_maps.json: stage list for recon/tools/gen_story_maps.py (config key "special", as special_maps.json);
+// - Raid Boards (raid-boards.js, from raid_rewards/a_weekly/boards_weekly.json): sphere / sphereArray / sphereMasu rows of type 5,
+//   one set per census row with a raid, ids 3000000 + n (raid_ids.json `boards`); entries carry sphereBoardIds, raids.json `boards`
+//   the report (cells left off for a reward with no item, corrected costs, size).
 // Wired at the end of make-game-tables.js after make-special. KHUX_RAID=0 turns it off; without the private sources it
 // warns and writes nothing. After a run: maps (raid_maps.json), then raise the master revision.
 //
@@ -31,10 +34,15 @@ const fs = require('fs');
 const path = require('path');
 const { coinRows, CONFIG: REWARDS } = require('./raid-rewards');
 const { objectiveCodes } = require('./make-story-oltre');
+const raidBoards = require('./raid-boards');
 
 const STAGE_KIND = 2;
 const RANGES = { stage: ['stageId', 980000, 989999], evStage: ['eventStageId', 8000, 8999], raidSetting: ['raidSettingId', 30000, 39999],
-  raidEnemy: ['raidEnemyId', 2000000, 2999999], raidReward: ['raidRewardId', 200000000, 299999999] };
+  raidEnemy: ['raidEnemyId', 2000000, 2999999], raidReward: ['raidRewardId', 200000000, 299999999],
+  sphere: ['sphereBoardId', raidBoards.BOARD_BASE, raidBoards.BOARD_MAX], sphereArray: ['arryId', raidBoards.BOARD_BASE, raidBoards.BOARD_MAX],
+  sphereMasu: ['masuId', raidBoards.BOARD_BASE, raidBoards.BOARD_MAX] };
+// master tables read for the board rewards (name -> item), never rewritten
+const ITEM_TABLES = ['medal', 'material', 'petParts', 'avatarParts', 'title'];
 const EV_BASE = 8000, EGG_ID = 100, EGG = 'Eggcognito', ENEMY_REWARD = 1;
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\sources';
@@ -230,7 +238,7 @@ function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knot
   return { body, partRows };
 }
 
-function buildRaid({ census, values, rewards, orig2016, master, models, config, ids }) {
+function buildRaid({ census, values, rewards, orig2016, boards, master, models, config, ids }) {
   checkRanges(master);
   const fixes = parseCorrections((rewards || {}).correctionsMd);
   const weeks = correctedWeeks(values.weeks, fixes.dates);
@@ -256,7 +264,9 @@ function buildRaid({ census, values, rewards, orig2016, master, models, config, 
   };
   const only = config.onlyCensusIds ? new Set(config.onlyCensusIds) : null;
   const numbers = allocateIds({ census, weeks, ids, only });
-  const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], maps: [], index: { entries: [], reasons: {} }, ids: numbers, report: { why: {}, templateGap: [] } };
+  const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], sphereRows: [], arrayRows: [], masuRows: [], maps: [],
+    index: { entries: [], reasons: {} }, ids: numbers, report: { why: {}, templateGap: [], boards: null } };
+  const withRaid = new Set();
   const seenReward = new Set(), seenAttack = new Set();
 
   census.rows.forEach((row) => {
@@ -354,8 +364,19 @@ function buildRaid({ census, values, rewards, orig2016, master, models, config, 
         enemies: [[egg(), egg()]], treasures: [], rooms: 1 });
       entry.available = true;
     });
-    if (stageIds.length) out.evStageRows.push(evStageRow(evStageId, stageIds));
+    if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds)); withRaid.add(row.id); }
   });
+  // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
+  if (boards) {
+    const b = raidBoards.buildBoards({ doc: boards, correctionsMd: (rewards || {}).correctionsMd, master, ids: numbers, config: config.boards || {}, censusIds: withRaid });
+    Object.assign(out, { sphereRows: b.sphereRows, arrayRows: b.arrayRows, masuRows: b.masuRows });
+    out.ids = { ...out.ids, boards: b.boardIds };
+    out.report.boards = { ...b.report, count: b.sphereRows.length };
+    for (const e of out.index.entries) {
+      e.sphereBoardIds = b.byCensus[e.censusId] || [];
+      if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []));
+    }
+  } else for (const e of out.index.entries) e.sphereBoardIds = [];
   for (const e of out.index.entries) {
     if (e.why) out.report.why[e.why] = (out.report.why[e.why] || 0) + 1;
     if (e.why === 'template' && !out.report.templateGap.includes(e.boss)) out.report.templateGap.push(e.boss);
@@ -425,7 +446,7 @@ function readJson(p, dflt) {
   try { return JSON.parse(text); } catch (e) { throw new Error(`raid: ${p} is corrupt: ${e.message}`); }
 }
 const IDS_FILE = path.join(__dirname, 'raid_ids.json');
-const IDS_NOTE = 'Append-only: raid ids live in saves and in the master. Numbers are written by make-raid.js; a key that disappears stays, its number is never reused. rows: evStage = 8000 + r. entries: stage = 980000 + n, raidSetting = 30000 + n, raidEnemy = 2000000 + 10n.';
+const IDS_NOTE = 'Append-only: raid ids live in saves and in the master. Numbers are written by make-raid.js; a key that disappears stays, its number is never reused. rows: evStage = 8000 + r. entries: stage = 980000 + n, raidSetting = 30000 + n, raidEnemy = 2000000 + 10n. boards: sphereBoardId = arryId = masuId = 3000000 + n.';
 const readIds = (file) => readJson(file, { note: IDS_NOTE, rows: {}, entries: {} });
 function writeIds(file, ids) {
   const text = JSON.stringify(ids, null, 1) + '\n';
@@ -440,6 +461,7 @@ function readSources(src, dir2016) {
   values.partHpMd = fs.readFileSync(path.join(src, 'raid_values', 'RAID_VALUES.md'), 'utf8');
   return { census: JSON.parse(fs.readFileSync(path.join(src, 'raid_census', 'raid_census.json'), 'utf8')), values,
     rewards: { correctionsMd: fs.readFileSync(path.join(src, 'raid_rewards', 'CORRECTIONS.md'), 'utf8') },
+    boards: JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'a_weekly', 'boards_weekly.json'), 'utf8')),
     orig2016: { raidEnemy: rowsOf(path.join(dir2016, 'raidEnemy.json')), raidEnemyAttack: rowsOf(path.join(dir2016, 'raidEnemyAttack.json')) } };
 }
 
@@ -476,19 +498,26 @@ function patch(masterDir, opts = {}) {
   const tableKey = { ...Object.fromEntries(Object.entries(RANGES).map(([t, [k]]) => [t, k])), raidEnemyAttack: 'raidEnemyAttackId' };
   const master = Object.fromEntries(Object.entries(tableKey).map(([t, k]) => [t, load(t, k)]));
   master.world = readJson(path.join(masterDir, 'world.json'));
+  for (const t of ITEM_TABLES) master[t] = readJson(path.join(masterDir, `${t}.json`), []);
   if (!master.stage.some((r) => r.stageKind === 1)) throw new Error(`raid: ${path.join(masterDir, 'stage.json')} has no story rows`);
   const idsFile = opts.idsFile || IDS_FILE;
   const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig(), ids: readIds(idsFile) });
-  const added = { stage: out.stageRows, evStage: out.evStageRows, raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows };
+  const added = { stage: out.stageRows, evStage: out.evStageRows, raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows,
+    sphere: out.sphereRows, sphereArray: out.arrayRows, sphereMasu: out.masuRows };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[tableKey[t]])]));
-  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, boards: out.report.boards, own }, null, 1));
   writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
   const on = out.index.entries.filter((e) => e.available).length;
   console.log(`raid: ${on} of ${out.index.entries.length} tier rows available; +${out.stageRows.length} stage, +${out.evStageRows.length} evStage, +${out.settingRows.length} raidSetting, `
     + `+${out.enemyRows.length} raidEnemy, +${out.rewardRows.length} raidReward, +${out.attackRows.length} raidEnemyAttack`);
+  const bd = out.report.boards;
+  if (bd) {
+    console.log(`raid: +${bd.count} Raid Boards (sphere, sphereArray, sphereMasu: ${(bd.bytes / 1048576).toFixed(2)} MB), ${bd.unmatched.length} cells left off for a reward with no item, `
+      + `${bd.corrected.length} corrected`);
+  }
   const whys = Object.entries(out.report.why).sort().map(([k, v]) => `${k} ${v}`);
   if (whys.length) console.log(`raid: not available: ${whys.join(', ')}`);
   if (out.report.templateGap.length) console.warn(`raid: complete model but no template row, choose one in modelTemplates of raid_config.json: ${out.report.templateGap.join(', ')}`);
@@ -498,10 +527,11 @@ function patch(masterDir, opts = {}) {
 // node server/make-raid.js --ids: numbers every WW row and tier row in raid_ids.json
 function writeIdsFile() {
   const src = process.env.KHUX_RAID_SRC || DEFAULT_SRC, dir2016 = process.env.KHUX_RAID_2016 || DEFAULT_2016;
-  const { census, values, rewards } = readSources(src, dir2016);
+  const { census, values, rewards, boards } = readSources(src, dir2016);
   const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null });
+  ids.boards = raidBoards.allocateBoardIds(boards, ids);
   writeIds(IDS_FILE, ids);
-  console.log(`raid_ids.json: ${Object.keys(ids.rows).length} rows, ${Object.keys(ids.entries).length} entries`);
+  console.log(`raid_ids.json: ${Object.keys(ids.rows).length} rows, ${Object.keys(ids.entries).length} entries, ${Object.keys(ids.boards).length} boards`);
 }
 
 // node server/make-raid.js --stats: raid_stats.json from the served tables, the 2016 rows and the wiki levels
