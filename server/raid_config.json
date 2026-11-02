@@ -1,4 +1,44 @@
 {
+  "onlyCensusIds": ["WW-W-2019-10-07"],
+  "weeklyUpMinutes": 20,
+  "useAp": 10,
+  "tierQuestLv": {
+    "single": 25,
+    "Beginner": 25,
+    "Intermediate": 75,
+    "Advanced": 125,
+    "Legendary": 175,
+    "Epic": 225
+  },
+  "brokenBackgrounds": ["bg_CD1", "bg_ED1", "RB_0003_00_00_eff_back2", "RB_0003_00_00_eff_back3"],
+  "backgroundFallbackWorld": 1,
+  "mapWorlds": {},
+  "modelTemplates": {},
+  "singleEra": {
+    "knots": [1, 10, 20, 30, 99],
+    "hpShare": [0.015, 0.08, 0.17, 1, 1],
+    "atkShare": [0.15, 0.25, 0.5, 1, 1]
+  },
+  "statsRule": {
+    "refEnemyId": 80001,
+    "def": {
+      "base": 1000,
+      "omega": 1100,
+      "epic": 50000
+    }
+  },
+  "reconstructedWhy": {
+    "onlyCensusIds": "Filter: only these census rows are built. Task 8 removes the key; without it every WW row with week data is built.",
+    "weeklyUpMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
+    "useAp": "AP of a further attempt on the same boss: 10 in the 2016 rows, not stated for the Weekly era.",
+    "tierQuestLv": "Quest level per tier from the wiki pages. The Gem Drop Beginner page prints 125, taken as a slip.",
+    "brokenBackgrounds": "Incomplete raid backgrounds (docs/notes/raid.md, Backgrounds). A stage whose world has one uses backgroundFallbackWorld; the entry lists background in reconstructed.",
+    "mapWorlds": "Map name -> world when the story rows do not tell it. Otherwise the last story row with the same map, or with the same text before the colon.",
+    "modelTemplates": "Boss name -> 2016 raidEnemy id whose parts and moves it reuses, for bosses with no 2016 row. Empty: those bosses stay unavailable with why = template until chosen.",
+    "singleEra": "One tier before 2019-08-12: stats grow up to a cap at LV 30 (one forum statement). Cap HP is read from footage; the shares below it are ours, fitted to the only readings: LV 2 above 2%, LV 4 above 3%, LV 24 about 50%. atkShare has no reading at all: it follows the shape of the 2016 rows. Knots are the coin level bands.",
+    "statsRule": "Inputs of raid_stats.json. refEnemyId: the plain Shadow row, the reference story enemy. def: community calculators treat raid DEF as constant at about 1000, 1100 for Omega; epic: a player report of a threshold near 50,000 STR, read as DEF. The damage formula was not read, so that reading is an assumption.",
+    "partHp": "Part HP: JP screenshots of 5 bosses as a share of the body where derived, the nearest date; otherwise the body-to-part ratio of the 2016 row at its first knot."
+  },
   "rewards": {
     "tierFrom": "2019-08-12",
     "coinType": 16,

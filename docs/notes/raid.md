@@ -89,6 +89,28 @@ Recovery measured 1 November on the real gaps of the 31 models the 2016 package 
 - **Backgrounds** (`world.raidBackground` and `partsId`): complete for `bg_AG1`, `bg_BC1`, `bg_DB1`, `bg_DW1`, `bg_OC1`, `bg_WL1`, `RB_..._eff_back`, `_front`. **Incomplete**: `bg_CD1` (1 texture of 2 missing), `bg_ED1` (17 of 18), `RB_0003_00_00_eff_back3` (15 of 20); `RB_0003_00_00_eff_back2` has no folder in the data. A raid in worlds CD or ED, or world rows 10000/10001, would draw a broken background: use a complete one in `world` until recovered.
 - **Pack.** `raid_gen` (static, `--cache`): see [risorse_layout.md](risorse_layout.md#pacchetti). Imported tree before packing: `character/raid` 112 MB, `raid/demo` 101 MB, `raid/bg` 27 MB (PNG, before BTF). The size against version 91 is measured with the build.
 
+## ATK and DEF (Part 2, Task 5: deduced, not original)
+
+No ATK or DEF of a raid is known after 2016. `server/raid_stats.json` holds our own deduction, rebuilt with `node server/make-raid.js --stats`; every entry of `raids.json` lists `atk` and `def` in `reconstructed`, and the Notices must declare them.
+
+- **Ratio:** 75, the median of body ATK / reference story enemy ATK (plain Shadow row, same level), over the 96 knots of the 23 weekly bosses that have a 2016 row.
+- **Story ATK of a period:** median ATK of the enemies on the maps of the story quests released on that date (Shop catalogue dates), at each quest's wiki level. Then the median of the last 5 tranches, because one tranche holds 10 enemies at about 4 times the others, kept at its running maximum so a later period is never weaker. A new period starts only 5% above the last. So a jump in story level reaches the table about 2 tranches late.
+- **Tier (builder's call, no source):** the tier's wiki quest level (25, 75, 125, 175, 225) on the reference curve against Advanced: Beginner 0.348, Intermediate 0.696, Advanced 1, Legendary 1.308, Epic 1.617. The sources say only that higher tiers are stronger.
+- **ATK = story ATK x 75 x tier share**, rounded to 100. Static in level from 2019-08-12.
+- **DEF:** 1000, 1100 when `rare` is 2 (community calculators; the 2016 rows vary 800 to 2300). **Epic 50,000**: players report no damage below a stack of about 50,000 STR, read here as DEF. The damage formula was not read, so this reading is an assumption to check on the bench. Parts: the table's DEF times part / body DEF of the 2016 row at its first knot.
+- **Before 2019-08-12** (one tier): the table gives the value at the cap; below LV 30 `singleEra.atkShare` in `raid_config.json` applies, which has no reading at all.
+
+| Period from | Story ATK | Beginner | Intermediate | Advanced | Legendary | Epic |
+|---|---|---|---|---|---|---|
+| 2019-06-13 | 14,033 | 366,700 | 732,900 | 1,052,500 | 1,377,000 | 1,701,600 |
+| 2019-12-19 | 15,457 | 403,900 | 807,300 | 1,159,300 | 1,516,800 | 1,874,200 |
+| 2020-01-30 | 20,472 | 535,000 | 1,069,200 | 1,535,400 | 2,008,900 | 2,482,300 |
+| 2021-03-25 | 40,244 | 1,051,700 | 2,101,900 | 3,018,300 | 3,949,000 | 4,879,800 |
+
+**Not supported by the inputs:** the tier shares and the Epic DEF rest on no measured value; all the periods rest on the 2016 ratio, 3 to 5 years older than the raids. Not yet fought on the bench. Without a measured value these numbers can change freely if a tier proves out of reach; HP cannot.
+
+Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the boss rows are the 2016 values, far below the Lux reported later (about 2 billion on a 2019 boss); part HP comes from the 2016 ratio, or from JP screenshots of 5 bosses where derived; below the cap of the one-tier era HP follows `singleEra.hpShare`, fitted to three readings.
+
 ## Open, for the bench
 
 `getPoint.raidPoint` with Eggcognito rows, a fight outlasting `timeLeft`, 0 in `subdueId` or `mvpId`, `isEntry`/`isRelief`/`reliefFlag`, the home button's widgets, what the Raid button opens, fever.

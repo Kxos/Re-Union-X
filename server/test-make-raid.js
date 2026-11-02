@@ -1,0 +1,439 @@
+// Raid data generator: node server/test-make-raid.js
+// Fixtures are built here; `real_census_week` reads the private sources when they exist and skips otherwise.
+'use strict';
+const assert = require('assert');
+const fs = require('fs'); const os = require('os'); const path = require('path');
+const mr = require('./make-raid');
+const rr = require('./raid-rewards');
+
+const W1 = 'WW-W-2019-10-07';
+const tiers5 = ['Beginner', 'Intermediate', 'Advanced', 'Legendary', 'Epic'];
+const stats = {
+  def: { base: 1000, omega: 1100, epic: 50000 },
+  periods: [{ from: '2016-04-07', atk: { single: 1000, Beginner: 100, Intermediate: 200, Advanced: 300, Legendary: 400, Epic: 500 } },
+    { from: '2019-09-19', atk: { single: 2000, Beginner: 1100, Intermediate: 1200, Advanced: 1300, Legendary: 1400, Epic: 1500 } }],
+};
+const blankEnemy = { raidEnemyId: 100001, name: 'Darkside', raidDisplayId: 1, attribute: 2, rare: 1, weakness: 1, validParts: 2, parts: [1, 2], validGrowth: 4,
+  baseLv: [1, 10, 30, 100], hp: [1, 2, 3, 4], attack: [1, 2, 3, 4], defense: [1, 2, 3, 4], rewardId: [1, 2, 3, 4], mvpRewardId: [1, 2, 3, 4], destroyAllRewardId: [1, 2, 3, 4],
+  validLocked: 3, lockedLv: [1, 2, 3], lockedRewardId: [1, 2, 3], lockedMvpRewardId: [1, 2, 3], lockedDestroyAllRewardId: [1, 2, 3], attackWidth: 7, bufAttackUpright: 7,
+  validSkill: 2, skillId: [101, 102], skillRequire: [2, 2], skillRequireArg: [0, 0], skillOdds: [1, 1], bgmRaid: 1, expAttack: [1, 1, 1, 1], luxAttack: [1, 1, 1, 1] };
+const body2016 = (id, name, rare, partIds) => ({ raidEnemyId: id, name, attribute: 3, rare, weakness: 1, validParts: partIds.length, parts: [...partIds, 7497076, 1234567, 0].slice(0, 5),
+  validGrowth: 4, baseLv: [1, 10, 30, 100, 0], hp: [12000, 36000, 180000, 900000, 0], attack: [12500, 15000, 25000, 80000, 0], defense: [1200, 1300, 1500, 2000, 0],
+  expAttack: [48, 48, 48, 48, 0], luxAttack: [270, 1080, 6480, 38880, 0], rewardId: [70101, 70102, 70103, 70103, 0], mvpRewardId: [70201, 70202, 70203, 70203, 0],
+  destroyAllRewardId: [70301, 70302, 70303, 70303, 0], drawHeight: 11200, validSkill: 2, skillId: [id * 100 + 1, id * 100 + 2, 70303, 70303], skillRequire: [2, 2, 70303, 70303],
+  skillRequireArg: [0, 0, 70303, 70303], skillOdds: [10000, 5000, 70303, 70303], bgmRaid: 501001050 });
+const part2016 = (id, weakness) => ({ raidEnemyId: id, name: 'str_rdb_dummy', attribute: 3, rare: 1, weakness, validParts: 0, parts: [1601336435, 1600283762, 1835890020, 121, 0],
+  validGrowth: 4, baseLv: [1, 10, 30, 100, 0], hp: [7200, 24300, 121500, 607500, 0], attack: [0, 0, 0, 0, 0], defense: [120, 450, 750, 1350, 0], expAttack: [16, 16, 16, 16, 0], luxAttack: [90, 360, 2160, 12960, 0],
+  rewardId: [0, 0, 0, 0, 0], mvpRewardId: [0, 0, 0, 0, 0], destroyAllRewardId: [0, 0, 0, 0, 0], validSkill: 0, skillId: [0, 0, 0, 0], skillRequire: [0, 0, 0, 0], skillRequireArg: [0, 0, 0, 0], skillOdds: [0, 0, 0, 0], bgmRaid: 1 });
+const attack2016 = (id) => ({ raidEnemyAttackId: id, name: 'Attack', hitCount: 1, power: 10000, target: 1 });
+const week = (start, end, tier, boss, map, extra = {}) => ({ start, end, tier, gem_drop: false, boss, map, ap: '0 / 5 / 90', quest_lv: String({ single: 25, Beginner: 25, Intermediate: 75, Advanced: 125, Legendary: 175, Epic: 225 }[tier]), ...extra });
+const quest = (lvl) => ({ tier: 'x', info: { lvl: String(lvl), target: 'Eggcognito', naobj1: 'Defeat all enemies within 1 turn', naobjbonus1: 'Raid Coin', naobjbonus1qty: '5',
+  naobj2: 'Complete without having to continue', naobjbonus2: 'Raid Coin', naobjbonus2qty: '5', naobj3: 'Complete within 00\'30"00', naobjbonus3: 'Raid Coin', naobjbonus3qty: '5' } });
+const censusRow = (id, start, end, bosses, tier, extra = {}) => ({ id, family: 'weekly', region: 'WW', start, end, bosses, tier, map: 'x', rewards: 'Enhancement Boards', ...extra });
+const era = (tier, hp, from, to) => ({ tier, hp, from, to });
+
+function fixture() {
+  return {
+    census: { rows: [censusRow('S-1', null, null, [], 'quests'), censusRow(W1, '2019-10-07', '2019-10-13', ['Trickmaster', 'Blue Trident Tail'], 'Beginner; Advanced')],
+      bosses: [{ ww: 'Trickmaster', raid_model_id: 7 }, { ww: 'Blue Trident Tail', raid_model_id: 1003 }, { ww: 'Gear Golem', raid_model_id: 21 }] },
+    values: {
+      weeks: [week('2019-10-07', '2019-10-13', 'Beginner', 'Trickmaster', 'Curious Room'), week('2019-10-07', '2019-10-13', 'Advanced', 'Blue Trident Tail', 'Morning Dew Grove: Clearing')],
+      week_tier_hp: [],
+      week_boards: [{ start: '2019-10-07', boards: ['Enhancement Boards'] }],
+      quests: Object.assign({ 'Raid Time!': quest(25) }, ...tiers5.flatMap((t, i) => [{ [`(${t}) Raid Time!`]: quest(25 + 50 * i) }, { [`(${t}) Gem Drop: Raid Time!`]: quest(125) }])),
+      hp_tier_era: { rows: [era('Beginner', 150000000, '2020-02-25', null), era('Intermediate', 150000000000, '2020-02-26', '2021-01-26'),
+        era('Advanced', 54000000000, '2019-09-21', '2019-09-24'), era('Advanced', 42000000000, '2019-08-12', '2019-08-23'), era('Advanced', 70000000000, '2019-09-28', '2019-11-30'),
+        era('Legendary', 700000000000, '2020-09-16', '2021-04-18'), era('Epic', 999999999999, '2020-12-14', '2021-04-25'),
+        era('single, cap at LV 30+', 1200000000, '2018-10-07', '2018-12-14')] },
+    },
+    rewards: { correctionsMd: '- 5 Gear Golem rows dated 2020-02-22 are 2021-02-22 (wiki typo).' },
+    orig2016: { raidEnemy: [body2016(7, 'Trickmaster', 1, [70002, 70003]), part2016(70002, 2), part2016(70003, 3), body2016(1003, 'Blue Trident Tail', 2, [10030002]), part2016(10030002, 2)],
+      raidEnemyAttack: [attack2016(701), attack2016(702), attack2016(100301), attack2016(100302)] },
+    master: { raidEnemy: [blankEnemy], raidSetting: [], raidReward: [], raidEnemyAttack: [{ raidEnemyAttackId: 101, name: 'A', hitCount: 1, heal: 0, bufAttackUpright: 0 }],
+      stage: [{ stageId: 13030, id: 378, stageKind: 1, worldId: 3, mapName: 'Curious Room', raidBoss: 6010, name: 'x', useAp: 21, validBeforeDrama: 1, beforeDramaId: [1], beforeDramaType: [0], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], bgmField: 9 },
+        { stageId: 33180, id: 833, stageKind: 1, worldId: 3, mapName: 'Morning Dew Grove: Clearing', raidBoss: 3010, name: 'y', useAp: 0 },
+        { stageId: 22000, id: 500, stageKind: 1, worldId: 7, mapName: 'Castle Courtyard', raidBoss: 0, name: 'z', useAp: 5 },
+        { stageId: 1010, id: 1, stageKind: 1, worldId: 1, mapName: 'Fountain Square', raidBoss: 0, name: 'p', useAp: 0 }],
+      evStage: [], enemy: [{ enemyId: 100, name: 'Eggcognito', raidPoint: [3000, 3000, 3000, 3000, 3000] }],
+      world: [{ worldId: 1, raidBackground: 'bg_DB1' }, { worldId: 3, raidBackground: 'bg_WL1' }, { worldId: 7, raidBackground: 'bg_CD1' }] },
+    models: { 7: { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true }, 21: { fight: true, start: true, escape: true, put_down: true } },
+    config: { onlyCensusIds: [W1], stats, weeklyUpMinutes: 20, useAp: 10, brokenBackgrounds: ['bg_CD1', 'bg_ED1'], backgroundFallbackWorld: 1, tierQuestLv: { single: 25, Beginner: 25, Intermediate: 75, Advanced: 125, Legendary: 175, Epic: 225 },
+      singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {} },
+  };
+}
+const build = (mutate) => { const f = fixture(); if (mutate) mutate(f); return mr.buildRaid(f); };
+const entry = (out, boss) => out.index.entries.find((e) => e.boss === boss);
+const enemyOf = (out, id) => out.enemyRows.find((r) => r.raidEnemyId === id);
+// one extra week in the fixture: census row plus its tier row
+const addWeek = (f, id, start, end, tier, boss = 'Trickmaster', map = 'Curious Room') => {
+  f.census.rows.push(censusRow(id, start, end, [boss], tier));
+  f.values.weeks.push(week(start, end, tier, boss, map));
+  f.config.onlyCensusIds = [id];
+};
+
+const tests = {
+  trickmaster_row() {
+    const out = build();
+    const e = entry(out, 'Trickmaster');
+    const r = enemyOf(out, e.enemyId);
+    assert.strictEqual(r.raidDisplayId, 7);
+    assert.strictEqual(r.weakness, 1);
+    assert.strictEqual(r.validGrowth, 4, 'static era keeps the 2016 knots with flat values');
+    assert.deepStrictEqual(r.baseLv.slice(0, 4), [1, 10, 30, 100]);
+    assert.deepStrictEqual(r.hp.slice(0, r.validGrowth), Array(4).fill(150000000));
+    assert.strictEqual(r.hp[4], 0);
+    assert.strictEqual(r.validParts, 2);
+    assert.deepStrictEqual(r.parts, [e.enemyId + 1, e.enemyId + 2, 0, 0, 0], 'parts clean beyond validParts');
+    assert.deepStrictEqual(r.skillId.slice(2), [0, 0], 'skills clean beyond validSkill');
+    for (const [w, id] of [[2, e.enemyId + 1], [3, e.enemyId + 2]]) {
+      const p = enemyOf(out, id);
+      assert.ok(p, `part ${id}`);
+      assert.strictEqual(p.weakness, w);
+      assert.deepStrictEqual(p.parts, [0, 0, 0, 0, 0]);
+      assert.strictEqual(p.hp[0], 90000000, 'body-to-part ratio of the 2016 row at its first knot');
+      assert.strictEqual(p.attack[0], 0);
+    }
+    // 4.3.1 fields the 2016 rows lack come from the blank row
+    assert.strictEqual(r.validLocked, 0);
+    assert.strictEqual(r.attackWidth, 0);
+    assert.strictEqual(r.bufAttackUpright, 0);
+    assert.strictEqual(e.enemyId, 2000000 + 10 * (e.stageId - 980000));
+    assert.strictEqual(e.settingId, 30000 + (e.stageId - 980000));
+    assert.ok(e.evStageId >= 8000 && e.evStageId <= 8999);
+  },
+  hp_bar_max() {
+    const hpOf = (start, end, tier) => {
+      const out = build((f) => addWeek(f, 'X', start, end, tier));
+      const e = out.index.entries[0];
+      return { hp: enemyOf(out, e.enemyId).hp, rec: e.reconstructed };
+    };
+    assert.strictEqual(hpOf('2019-10-14', '2019-10-20', 'Advanced').hp[0], 70000000000);
+    assert.strictEqual(hpOf('2020-10-05', '2020-10-11', 'Legendary').hp[3], 700000000000);
+    assert.strictEqual(hpOf('2021-01-04', '2021-01-10', 'Epic').hp[2], 999999999999);
+    assert.strictEqual(hpOf('2020-10-05', '2020-10-11', 'Intermediate').hp[0], 150000000000);
+    // between 2019-09-24 (54B) and 2019-09-28 (70B): midpoint 09-26, its Monday 09-23
+    const before = hpOf('2019-09-16', '2019-09-22', 'Advanced'), after = hpOf('2019-09-23', '2019-09-29', 'Advanced');
+    assert.strictEqual(before.hp[0], 54000000000);
+    assert.strictEqual(after.hp[0], 70000000000);
+    assert.ok(after.rec.includes('hp_step'), 'a week decided by the midpoint rule is labelled');
+    // 08-23 (42B) -> 09-21 (54B): midpoint 09-06, its Monday 09-02
+    assert.strictEqual(hpOf('2019-08-26', '2019-09-01', 'Advanced').hp[0], 42000000000);
+    assert.strictEqual(hpOf('2019-09-02', '2019-09-08', 'Advanced').hp[0], 54000000000);
+    assert.ok(hpOf('2019-09-02', '2019-09-08', 'Advanced').rec.includes('hp_step'));
+    assert.ok(!hpOf('2019-10-14', '2019-10-20', 'Advanced').rec.includes('hp_step'), 'inside the range seen on video');
+    assert.ok(hpOf('2019-10-14', '2019-10-20', 'Advanced').rec.includes('hp'));
+  },
+  hp_video_reading_wins_and_is_not_labelled() {
+    const out = build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced');
+      f.values.week_tier_hp.push({ start: '2019-10-14', tier: 'Advanced', boss: 'Trickmaster', gem_drop: false, hp: 71000000000, confidence: 'video frame' });
+    });
+    const e = out.index.entries[0];
+    assert.strictEqual(enemyOf(out, e.enemyId).hp[0], 71000000000);
+    assert.ok(!e.reconstructed.includes('hp'));
+  },
+  part_hp_derived_wins_over_ratio() {
+    const out = build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced');
+      f.values.partHpMd = '### Trickmaster\n| hp body: 42,000,000,000 (hard) | LV 1 | JP | 2019-08-12 | x | y |\n| hp part: 7,000,000,000 derived from +349991 | LV 1 | JP | 2019-08-12 | x | inferred |\n### Other\n';
+    });
+    const e = out.index.entries[0];
+    assert.strictEqual(enemyOf(out, e.enemyId + 1).hp[0], Math.round(70000000000 * 7 / 42));
+    assert.ok(e.reconstructed.includes('partHp'));
+  },
+  stage_links() {
+    const f = fixture();
+    const out = mr.buildRaid(f);
+    assert.strictEqual(out.index.entries.length, 2);
+    for (const e of out.index.entries) {
+      const stage = out.stageRows.find((r) => r.stageId === e.stageId);
+      assert.strictEqual(stage.stageKind, 2);
+      assert.strictEqual(stage.raidBoss, e.settingId);
+      assert.strictEqual(stage.stageBinId, e.stageId);
+      assert.strictEqual(stage.validBeforeDrama, 0);
+      assert.ok(stage.stageId >= 980000 && stage.stageId <= 989999);
+      const setting = out.settingRows.find((r) => r.raidSettingId === stage.raidBoss);
+      assert.strictEqual(setting.bossId, e.enemyId);
+      assert.strictEqual(setting.rareBossId, e.enemyId);
+      assert.deepStrictEqual(setting.unlockRareBossId, [0, 0, 0]);
+      assert.strictEqual(setting.bossUpTime, 20);
+      assert.strictEqual(setting.useAp, 10);
+      assert.ok(enemyOf(out, setting.bossId));
+      const world = f.master.world.find((w) => w.worldId === stage.worldId);
+      assert.ok(world && !f.config.brokenBackgrounds.includes(world.raidBackground));
+      const ev = out.evStageRows.find((r) => r.eventStageId === e.evStageId);
+      assert.ok(ev.stageId.includes(e.stageId));
+      assert.strictEqual(ev.validStageId, ev.stageId.length);
+      assert.strictEqual(ev.eventType, 2);
+    }
+    assert.strictEqual(out.evStageRows.length, 1, 'one evStage per census row');
+  },
+  broken_background_falls_back() {
+    const out = build((f) => addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Trickmaster', 'Castle Courtyard'));
+    const e = out.index.entries[0];
+    assert.ok(e.available);
+    assert.strictEqual(out.stageRows[0].worldId, 1, 'world 1 bg_DB1');
+    assert.ok(e.reconstructed.includes('background'));
+    assert.strictEqual(out.maps[0].world, 7, 'the map keeps the room of its own world');
+    assert.ok(!entry(build(), 'Trickmaster').reconstructed.includes('background'));
+  },
+  every_reward_row_exists() {
+    const out = build();
+    const ids = new Set(out.rewardRows.map((r) => r.raidRewardId));
+    const skills = new Set([...out.attackRows.map((r) => r.raidEnemyAttackId), 101]);
+    const bodies = out.enemyRows.filter((r) => r.weakness === 1);
+    assert.strictEqual(bodies.length, 2);
+    for (const r of bodies) {
+      for (const k of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) {
+        const list = r[k].slice(0, r.validGrowth);
+        assert.ok(list.length && list.every((x) => ids.has(x)), `${k} of ${r.raidEnemyId}`);
+      }
+      assert.ok(r.skillId.slice(0, r.validSkill).every((x) => skills.has(x)));
+    }
+    assert.ok(out.rewardRows.every((r) => r.type[0] === 16));
+    // ids by the rule of raid-rewards.js: Advanced is tier 3
+    const e = entry(out, 'Blue Trident Tail');
+    assert.strictEqual(enemyOf(out, e.enemyId).rewardId[0], rr.rewardRowId(e.enemyId, 1, 3));
+  },
+  gem_drop_own_row() {
+    const out = build((f) => {
+      f.census.rows.push(censusRow('X', '2020-03-16', '2020-03-22', ['Trickmaster'], 'Advanced (Gem Drop)'));
+      f.values.weeks.push(week('2020-03-16', '2020-03-22', 'Advanced', 'Trickmaster', 'Curious Room', { gem_drop: true }));
+      f.config.onlyCensusIds = ['X'];
+    });
+    const e = out.index.entries[0];
+    assert.strictEqual(e.gemDrop, true);
+    assert.strictEqual(e.key, 'X/Advanced+gem');
+    const row = out.rewardRows.find((r) => r.raidRewardId === enemyOf(out, e.enemyId).rewardId[0]);
+    assert.strictEqual(row.validReward, 4);
+    assert.strictEqual(out.stageRows[0].name, '(Advanced) Gem Drop: Raid Time!');
+  },
+  unavailable_not_emitted() {
+    const out = build((f) => { f.models[7] = { fight: false, start: true, escape: true, put_down: true }; });
+    const e = entry(out, 'Trickmaster');
+    assert.strictEqual(e.available, false);
+    assert.strictEqual(e.why, 'graphics');
+    assert.ok(!enemyOf(out, e.enemyId));
+    assert.ok(!out.stageRows.some((r) => r.stageId === e.stageId));
+    assert.ok(!out.settingRows.some((r) => r.raidSettingId === e.settingId));
+    assert.strictEqual(out.stageRows.length, 1, 'the other tier stays');
+    assert.deepStrictEqual(out.evStageRows[0].stageId, [entry(out, 'Blue Trident Tail').stageId]);
+    // put_down false is unavailable too; no models file: nothing at all
+    const noPutDown = build((f) => { f.models[7] = { fight: true, put_down: false }; });
+    assert.strictEqual(entry(noPutDown, 'Trickmaster').available, false);
+    const none = build((f) => { f.models = null; });
+    assert.ok(none.index.entries.every((x) => !x.available && x.why === 'graphics'));
+    assert.deepStrictEqual([none.stageRows.length, none.enemyRows.length, none.evStageRows.length, none.maps.length], [0, 0, 0, 0]);
+  },
+  no_template_is_unavailable() {
+    const out = build((f) => addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem'));
+    assert.strictEqual(out.index.entries[0].available, false);
+    assert.strictEqual(out.index.entries[0].why, 'template');
+  },
+  ids_stable_when_the_filter_goes() {
+    const narrow = entry(build(), 'Trickmaster');
+    const wide = entry(build((f) => { f.census.rows[0].id = 'WW-X'; delete f.config.onlyCensusIds; }), 'Trickmaster');
+    assert.strictEqual(narrow.stageId, wide.stageId);
+    assert.strictEqual(narrow.enemyId, wide.enemyId);
+  },
+  single_era_row() {
+    const out = build((f) => addWeek(f, 'X', '2018-11-05', '2018-11-11', 'single'));
+    const e = out.index.entries[0];
+    const r = enemyOf(out, e.enemyId);
+    assert.deepStrictEqual(r.baseLv, [1, 10, 20, 30, 99]);
+    assert.strictEqual(r.validGrowth, 5);
+    assert.strictEqual(r.hp[3], 1200000000);
+    assert.strictEqual(r.hp[4], 1200000000);
+    assert.ok(r.hp[0] < r.hp[1] && r.hp[1] < r.hp[2]);
+    assert.ok(e.reconstructed.includes('hp'));
+    assert.strictEqual(new Set(r.rewardId).size, 4, 'four level bands');
+    const ids = new Set(out.rewardRows.map((x) => x.raidRewardId));
+    assert.ok(r.rewardId.every((x) => ids.has(x)));
+    assert.strictEqual(enemyOf(out, e.enemyId + 1).validGrowth, 5);
+  },
+  single_after_the_tiers_is_beginner() {
+    const out = build((f) => addWeek(f, 'X', '2019-08-26', '2019-08-31', 'single'));
+    const e = out.index.entries[0];
+    assert.strictEqual(e.tier, 'Beginner');
+    assert.strictEqual(enemyOf(out, e.enemyId).hp[0], 150000000);
+  },
+  eggcognito_quest() {
+    const out = build();
+    const e = entry(out, 'Blue Trident Tail');
+    const m = out.maps.find((x) => x.stageId === e.stageId);
+    assert.strictEqual(m.target, 'Eggcognito');
+    assert.strictEqual(m.targetId, 100);
+    assert.strictEqual(m.targetReward, 1);
+    assert.strictEqual(m.enemies.flat().reduce((n, x) => n + x.n, 0), 2, 'one target plus two');
+    assert.ok(m.enemies.flat().every((x) => x.enemyId === 100 && x.reward === 1));
+    assert.strictEqual(m.level, 125);
+    assert.strictEqual(m.room, 'Morning Dew Grove: Clearing');
+    const s = out.stageRows.find((r) => r.stageId === e.stageId);
+    assert.strictEqual(s.validSubmission, 3);
+    assert.deepStrictEqual(s.submissionRewardType, [16, 16, 16]);
+    assert.deepStrictEqual(s.submissionItemNum, [5, 5, 5]);
+    assert.strictEqual(s.submissionRequire[2], 37);
+    assert.strictEqual(s.submissionNum[2], 30);
+    assert.strictEqual(s.useAp, 90);
+    assert.deepStrictEqual(e.questAp, [0, 5, 90]);
+    assert.deepStrictEqual(e.boards, ['Enhancement Boards']);
+    assert.strictEqual(e.upMinutes, 20);
+    assert.strictEqual(e.useAp, 10);
+    assert.strictEqual(e.map, 'Morning Dew Grove: Clearing');
+  },
+  quest_level_slip_on_gem_beginner() {
+    const out = build((f) => {
+      f.census.rows.push(censusRow('X', '2020-03-16', '2020-03-22', ['Trickmaster'], 'Beginner (Gem Drop)'));
+      f.values.weeks.push(week('2020-03-16', '2020-03-22', 'Beginner', 'Trickmaster', 'Curious Room', { gem_drop: true, quest_lv: '125' }));
+      f.config.onlyCensusIds = ['X'];
+    });
+    assert.strictEqual(out.maps[0].level, 25);
+  },
+  idempotent() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const master = path.join(dir, 'master'), game = path.join(dir, 'game');
+    fs.mkdirSync(master); fs.mkdirSync(game);
+    const f = fixture();
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(master, n + '.json'), JSON.stringify(rows));
+    const opts = { gameDataDir: game, sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config };
+    const snap = () => Object.fromEntries([...fs.readdirSync(master).map((n) => [n, path.join(master, n)]), ...fs.readdirSync(game).map((n) => [n, path.join(game, n)])].map(([n, p]) => [n, fs.readFileSync(p, 'utf8')]));
+    mr.patch(master, opts);
+    const first = snap();
+    assert.ok(JSON.parse(first['stage.json']).some((r) => r.stageId >= 980000));
+    assert.ok(first['raids.json'] && first['raid_maps.json']);
+    mr.patch(master, opts);
+    assert.deepStrictEqual(snap(), first);
+    // a row in the range that the previous run did not list is not ours
+    const stage = JSON.parse(first['stage.json']);
+    stage.push({ stageId: 989999, id: 989999 });
+    fs.writeFileSync(path.join(master, 'stage.json'), JSON.stringify(stage));
+    assert.throws(() => mr.patch(master, opts), /989999/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
+  patch_writes_nothing_without_sources() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const log = console.warn; const warned = [];
+    console.warn = (s) => warned.push(s);
+    const save = process.env.KHUX_RAID_SRC;
+    process.env.KHUX_RAID_SRC = path.join(dir, 'none');
+    try {
+      assert.strictEqual(mr.patch(dir, { gameDataDir: dir }), null);
+      assert.deepStrictEqual(fs.readdirSync(dir), []);
+      assert.ok(warned.length);
+    } finally { console.warn = log; if (save === undefined) delete process.env.KHUX_RAID_SRC; else process.env.KHUX_RAID_SRC = save; fs.rmSync(dir, { recursive: true, force: true }); }
+    process.env.KHUX_RAID = '0';
+    try { assert.strictEqual(mr.patch(dir), null); } finally { delete process.env.KHUX_RAID; }
+  },
+  no_models_warns_and_emits_no_rows() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const f = fixture();
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(dir, n + '.json'), JSON.stringify(rows));
+    const log = console.warn; const warned = [];
+    console.warn = (s) => warned.push(s);
+    try {
+      const out = mr.patch(dir, { gameDataDir: dir, modelsFile: path.join(dir, 'absent.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, config: f.config });
+      assert.strictEqual(out.stageRows.length, 0);
+      assert.ok(warned.some((s) => /raid_models/.test(s)));
+    } finally { console.warn = log; fs.rmSync(dir, { recursive: true, force: true }); }
+  },
+  id_collision_stops() {
+    for (const [table, row, re] of [['stage', { stageId: 980005 }, /stage.*980005/], ['evStage', { eventStageId: 8500 }, /evStage.*8500/], ['raidSetting', { raidSettingId: 30001 }, /raidSetting.*30001/], ['raidEnemy', { raidEnemyId: 2000015 }, /raidEnemy.*2000015/]]) {
+      assert.throws(() => build((f) => f.master[table].push(row)), re);
+    }
+  },
+  corrections_applied() {
+    const out = build((f) => {
+      f.census.rows.push(censusRow('WW-W-2021-02-22', '2021-02-22', '2021-02-28', ['Gear Golem'], 'Beginner; Epic (Gem Drop)'));
+      for (const t of ['Beginner', 'Epic']) f.values.weeks.push(week('2020-02-22', '2020-02-28', t, 'Gear Golem', 'Fountain Square', { gem_drop: true }));
+      f.config.onlyCensusIds = ['WW-W-2021-02-22'];
+    });
+    assert.strictEqual(out.index.entries.length, 2);
+    assert.ok(out.index.entries.every((e) => e.start === '2021-02-22' && e.end === '2021-02-28' && e.censusId === 'WW-W-2021-02-22'));
+    // sources stay untouched
+    const f = fixture();
+    f.values.weeks.push(week('2020-02-22', '2020-02-28', 'Beginner', 'Gear Golem', 'Fountain Square'));
+    const before = JSON.stringify(f.values.weeks);
+    mr.buildRaid(f);
+    assert.strictEqual(JSON.stringify(f.values.weeks), before);
+  },
+  reconstructed_labelled() {
+    const e = entry(build(), 'Trickmaster');
+    for (const k of ['atk', 'def', 'hp', 'partHp', 'upMinutes']) assert.ok(e.reconstructed.includes(k), k);
+    const out = build();
+    const r = enemyOf(out, e.enemyId), a = enemyOf(out, entry(out, 'Blue Trident Tail').enemyId);
+    assert.deepStrictEqual(r.attack.slice(0, 4), Array(4).fill(1100));
+    assert.deepStrictEqual(r.defense.slice(0, 4), Array(4).fill(1000));
+    assert.strictEqual(a.attack[0], 1300);
+    assert.strictEqual(a.defense[0], 1100, 'rare 2');
+    const part = enemyOf(out, e.enemyId + 1);
+    assert.strictEqual(part.defense[0], 100, 'part base DEF / body base DEF of the 2016 row, times the table');
+  },
+  epic_def() {
+    const out = build((f) => addWeek(f, 'X', '2021-01-04', '2021-01-10', 'Epic'));
+    assert.strictEqual(enemyOf(out, out.index.entries[0].enemyId).defense[0], 50000);
+  },
+  deduce_stats() {
+    const ref = { enemyId: 80001, name: 'Shadow', validGrowth: 2, baseLv: [1, 101], attack: [100, 1100] };
+    const s = mr.deduceStats({
+      raidEnemy2016: [{ raidEnemyId: 7, name: 'A', validGrowth: 2, baseLv: [1, 101, 0], attack: [1000, 22000, 0] }, { raidEnemyId: 8, name: 'B', validGrowth: 1, baseLv: [1], attack: [3000] }, { raidEnemyId: 9, name: 'NotWeekly', validGrowth: 1, baseLv: [1], attack: [90000] }],
+      weeklyBosses: ['A', 'B', 'Unknown'],
+      enemy: [ref, { enemyId: 500, name: 'Foe', validGrowth: 2, baseLv: [1, 101], attack: [100, 1100] }, { enemyId: 100, name: 'Eggcognito', validGrowth: 2, baseLv: [1, 101], attack: [9999, 9999] }],
+      stage: [{ stageId: 1, id: 1, stageKind: 1 }, { stageId: 2, id: 2, stageKind: 1 }, { stageId: 3, id: 3, stageKind: 1 }],
+      poi: { 1: { enemies: [{ enemyId: 500 }, { enemyId: 100 }] }, 2: { enemies: [{ enemyId: 500 }] }, 3: { enemies: [{ enemyId: 500 }] } },
+      questLevels: new Map([[1, 101], [2, 51], [3, 1]]),
+      story: [[1, 1, '2019-01-01'], [2, 2, '2019-02-01'], [3, 3, '2019-03-01']],
+      config: { refEnemyId: 80001, tierQuestLv: { single: 25, Beginner: 1, Intermediate: 51, Advanced: 101, Legendary: 101, Epic: 101 }, def: { base: 1000, omega: 1100, epic: 50000 } },
+    });
+    // ratios 10, 20, 30: median 20; story ATK 1100, then 600 kept at the running maximum (merged), and 100 too
+    assert.strictEqual(s.ratio.median, 20);
+    assert.strictEqual(s.ratio.bosses, 2);
+    assert.strictEqual(s.periods.length, 1);
+    assert.strictEqual(s.periods[0].atk.Advanced, 22000);
+    assert.strictEqual(s.periods[0].atk.single, 22000);
+    assert.strictEqual(s.periods[0].atk.Beginner, 2000, '22000 x 100/1100');
+    assert.strictEqual(s.reconstructed, true);
+    assert.ok(!JSON.stringify(s).includes('NotWeekly'));
+  },
+  real_census_week() {
+    const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
+    let sources;
+    try { sources = mr.readSources(src, process.env.KHUX_RAID_2016 || mr.DEFAULT_2016); } catch (e) { console.log(`  (skipped: private sources not readable, ${e.code || e.message})`); return; }
+    const master = fixture().master;
+    const dir = path.join(__dirname, 'master_data');
+    if (fs.existsSync(path.join(dir, 'stage.json'))) {
+      for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
+      master.stage = master.stage.filter((r) => !(r.stageId >= 980000 && r.stageId <= 989999));
+      master.evStage = []; master.raidSetting = []; master.raidReward = [];
+      master.raidEnemy = master.raidEnemy.filter((r) => r.raidEnemyId < 2000000);
+    }
+    const all = { fight: true, start: true, escape: true, put_down: true };
+    const models = new Proxy({}, { get: () => all });
+    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
+    const config = { ...cfg, stats: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_stats.json'), 'utf8')) };
+    const out = mr.buildRaid({ ...sources, master, models, config });
+    assert.deepStrictEqual(out.index.entries.map((e) => [e.tier, e.boss, e.modelId]), [['Beginner', 'Trickmaster', 7], ['Advanced', 'Blue Trident Tail', 1003]]);
+    const [b, a] = out.index.entries;
+    const row = (e) => out.enemyRows.find((r) => r.raidEnemyId === e.enemyId);
+    assert.strictEqual(row(b).raidDisplayId, 7);
+    assert.ok(row(b).hp.slice(0, row(b).validGrowth).every((h) => h === 150000000));
+    assert.strictEqual(row(a).hp[0], 70000000000);
+    assert.deepStrictEqual(out.enemyRows.filter((r) => r.raidEnemyId > b.enemyId && r.raidEnemyId <= b.enemyId + 5).map((r) => r.weakness), [2, 3]);
+    assert.ok(out.stageRows.every((s) => s.worldId === 3 && s.raidBoss));
+    // all rows, as Task 8 will build them: nothing throws and the 2016 bosses come out
+    const wide = { ...config }; delete wide.onlyCensusIds;
+    const every = mr.buildRaid({ ...sources, master, models, config: wide });
+    const count = (f) => every.index.entries.filter(f).length;
+    console.log(`  (all WW rows: ${every.index.entries.length} tier rows, ${count((e) => e.available)} buildable, ${count((e) => e.why === 'template')} without a template, ${count((e) => e.why === 'map')} without a map world)`);
+    assert.ok(count((e) => e.available) > 100);
+    const ids = new Set(every.rewardRows.map((r) => r.raidRewardId));
+    assert.ok(every.enemyRows.filter((r) => r.weakness === 1).every((r) => r.rewardId.slice(0, r.validGrowth).every((x) => ids.has(x))));
+    assert.strictEqual(new Set(every.stageRows.map((r) => r.stageId)).size, every.stageRows.length);
+  },
+};
+
+let failed = 0;
+for (const [name, fn] of Object.entries(tests)) {
+  try { fn(); console.log(`ok ${name}`); } catch (e) { failed++; console.log(`FAIL ${name}: ${e.message}`); }
+}
+console.log(failed ? `${failed} of ${Object.keys(tests).length} failed` : `all ${Object.keys(tests).length} passed`);
+process.exit(failed ? 1 : 0);
