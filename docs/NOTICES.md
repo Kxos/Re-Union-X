@@ -52,6 +52,10 @@ The three spiders (**Scourge Spider, Wicked Spider, Malicious Spider**) use the 
 
 Some bosses have no surviving data of their own: the three spiders use the moves of **Enraged Arachnid**, and **Egg Master** the moves of **Trickmaster** (same animations; **reconstructed**). The spiders keep their own attribute, read from their colour (red Power, green Speed, blue Magic).
 
+The 15 bosses above have no surviving data either: their **moves, part HP shares and rarity** come from a 2016 boss with the same number of weak points (for example Trident Tail, Behemoth, Savage Spider, Fortress Crab), so they are **reconstructed**. Each boss keeps its own attribute where the wiki gives it; its parts take the same attribute, not the separate attributes some wiki pages list for them.
+
+**Assault Dragon, Adventurer, Jewel Princess, Gear Golem** and **Closehanded Captain** keep **all their weak points** in every week (**not original**): in some later weekly raids they had fewer (for example Assault Dragon only its Head), but every surviving version of their animations has the full set, and the game cannot start the fight if a weak point has no HP bar.
+
 The spiders have **4 weak points**: the **Spinneret** and the three **spiderlings**, as from 2016 to July 2018. In the weekly raids from September 2018 only the Spinneret was a target (**not original** here): the only surviving spider animations that have the Spinneret also mark the spiderlings as weak points, and the game cannot start the fight if a weak point has no HP bar. The HP shares are the 2016 ones (Spinneret 900 of 24,000, each spiderling a quarter).
 
 Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP comes from recordings of the original game where one exists, otherwise from the tier tables.
@@ -80,7 +84,7 @@ Tapping **Unlock All** or a locked banner shows a **message** about the Weekly M
 
 **VIP** is earned by finishing all the **Weekly Missions** of a week, and it lasts for the rest of that week and the whole next week (**not original**: it was a paid weekly pass).
 
-**For now VIP cannot be earned**: the Weekly Missions include Raid Bosses and Union Cross, which are not available yet (see the VIP Draws notice). Until they come back, the VIP quests stay locked, and they are most of the Special Quests.
+**For now VIP cannot be earned**: the Weekly Missions include Union Cross, which is not available yet (see the VIP Draws notice; Raid Bosses are back). Until it comes back, the VIP quests stay locked, and they are most of the Special Quests.
 
 While VIP is active, every weekday quest is open on any day, with an **Available** plate, and the VIP quests are open too. A bar at the bottom of the tab shows "VIP: all Special Quests open" and the time left (the wording is ours: the original text is unknown).
 
@@ -150,7 +154,7 @@ The **VIP Draws** of the original Shop are back: 52 VIP versions of the deals fr
 
 In the original game VIP Draws needed a **paid weekly pass**. Here nothing is sold: you get the **VIP benefit** by completing **all the Weekly Missions** of a week. It then lasts for the rest of that week and the whole next week (**not original**).
 
-The Weekly Missions include Raid Bosses and Union Cross, which are not available yet: until they come back the VIP benefit cannot be earned, so VIP Draws and the VIP Special Quests stay locked.
+The Weekly Missions include Union Cross, which is not available yet (Raid Bosses are back: see the Raid Bosses notice). Until Union Cross comes back the VIP benefit cannot be earned, so VIP Draws and the VIP Special Quests stay locked.
 
 This rule is temporary and will be reviewed when the game balance is studied again.
 
