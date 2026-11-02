@@ -93,6 +93,24 @@ class Check(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(crm.check_model(d, '7777'), {'fight': False, 'start': False, 'escape': False, 'put_down': False})
 
+    def test_served_folder_counts(self):
+        # folder with only a .res; LWF and textures are in the base resources
+        with tempfile.TemporaryDirectory() as d:
+            put(d, 'lwf/raid/demo/put_down_0005/put_down_0005.res')
+            served = {'lwf/raid/demo/put_down_0005/put_down_0005.lwf', 'lwf/raid/demo/put_down_0005/put_down_0005_0.png'}
+            notes = []
+            self.assertTrue(crm.check_model(d, '0005', served, notes)['put_down'])
+            self.assertTrue(any('put_down_0005' in n and 'not parsed' in n for n in notes))
+            self.assertFalse(crm.check_model(d, '0005')['put_down'])
+
+    def test_served_partly_is_incomplete(self):
+        # LWF on disk names two textures: one on disk, one neither on disk nor served
+        with tempfile.TemporaryDirectory() as d:
+            folder(d, 'lwf/raid/demo/put_down_0006', 'put_down_0006', ['a.png', 'b.png'], ['a.png'])
+            self.assertFalse(crm.check_model(d, '0006', set())['put_down'])
+            self.assertTrue(crm.check_model(d, '0006', {'lwf/raid/demo/put_down_0006/b.png'})['put_down'])
+            self.assertFalse(crm.check_model(d, '0006', {'lwf/raid/demo/put_down_0006/zzz.png'})['put_down'])
+
     def test_available_and_main(self):
         with tempfile.TemporaryDirectory() as d:
             full_model(d, '0001')

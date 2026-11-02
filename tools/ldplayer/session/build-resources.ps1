@@ -353,7 +353,7 @@ if ($Quick) {
   $raidPack = @("$rmg\gen.png", "$rmg\gen.mp4")
 }
 if ($raidPack) {
-  python -I recon\tools\check_raid_models.py "$rmg\files" server\game_data\raid_models.json
+  python -I recon\tools\check_raid_models.py "$rmg\files" server\game_data\raid_models.json --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv"
   if ($LASTEXITCODE) { throw 'check_raid_models fallito' }
 }
 $staticPacks = $medalPack + $roomsPack + $enemyPack + $raisedrawPack + $raidPack
