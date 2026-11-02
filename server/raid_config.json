@@ -47,7 +47,25 @@
     "modelTemplates": "Boss name -> 2016 raidEnemy id whose parts and moves it reuses, for bosses with no 2016 row. Empty: those bosses stay unavailable with why = template until chosen.",
     "singleEra": "One tier before 2019-08-12: stats grow up to a cap at LV 30 (one forum statement). Cap HP is read from footage; the shares below it are ours, fitted to the only readings: LV 2 above 2%, LV 4 above 3%, LV 24 about 50%. atkShare has no reading at all: it follows the shape of the 2016 rows. Knots are the coin level bands.",
     "statsRule": "Inputs of raid_stats.json. refEnemyId: the plain Shadow row, the reference story enemy. def: community calculators treat raid DEF as constant at about 1000, 1100 for Omega; epic: a player report of a threshold near 50,000 STR, read as DEF. The damage formula was not read, so that reading is an assumption.",
-    "partHp": "Part HP: JP screenshots of 5 bosses as a share of the body where derived, the nearest date; otherwise the body-to-part ratio of the 2016 row at its first knot."
+    "partHp": "Part HP: JP screenshots of 5 bosses as a share of the body where derived, the nearest date; otherwise the body-to-part ratio of the 2016 row at its first knot.",
+    "boards": "Raid Boards (raid-boards.js): unmatched lists reward names with no item in the master tables; their cells are left off the board and reported, never replaced by another item.",
+    "boardPath": "The positions of the cells on the Raid Boards are ours: the wiki board images were not downloaded, so the cells follow one path from START in the wiki's order n. Whether cells had to be bought in order is not documented.",
+    "boardSet": "Which boards ran this week is inferred: the board names are sourced, the layout of that week is not (2021-03-01 to 2021-06-29 and the one-day event of 2020-11-01).",
+    "boardCost": "A board cost corrected from the wiki: Halloween Board 2019, cell 17 reads 700 on the wiki, but the page total and the cost ladder need 1,600 (inferred).",
+    "boardCells": "Some cells of this week's boards are missing: their reward (a seasonal currency or a Spirit part or medal absent from the game data) has no item here, so the cell is left off rather than replaced."
+  },
+  "boards": {
+    "unmatched": {
+      "Moogle Points": "Seasonal currency of a Moogle Points event: no item of the game data holds it.",
+      "Spooky Cookie": "Seasonal currency of the Halloween event: no item of the game data holds it.",
+      "Holiday Draw Ticket": "Seasonal draw ticket: no item of the game data holds it.",
+      "6★ Fantasia Mickey A": "The medal tables have Fantasia Mickey Ver. A only at 5★: a 6★ copy would be an invented medal.",
+      "6★ Sora & Moogle B": "No Sora & Moogle B medal in the medal tables.",
+      "Starlight Ears": "Spirit part absent from the petParts table (the avatar part of the same name exists, the Spirit one does not).",
+      "Dazzling Disco": "Spirit part absent from the petParts table.",
+      "Balloon Mike & Sulley": "Spirit part absent from the petParts table.",
+      "Balloon Axel": "Spirit part absent from the petParts table (the avatar part of the same name exists, the Spirit one does not)."
+    }
   },
   "rewards": {
     "tierFrom": "2019-08-12",

@@ -5,6 +5,7 @@ const assert = require('assert');
 const fs = require('fs'); const os = require('os'); const path = require('path');
 const mr = require('./make-raid');
 const rr = require('./raid-rewards');
+const rb = require('./raid-boards');
 
 const W1 = 'WW-W-2019-10-07';
 const REAL_CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
@@ -63,6 +64,80 @@ function fixture() {
   };
 }
 const build = (mutate) => { const f = fixture(); if (mutate) mutate(f); return mr.buildRaid(f); };
+
+// Raid Boards fixture: the shape of raid_rewards/a_weekly/boards_weekly.json and the master item tables
+const cell = (n, cost, kind, reward, qty = 1) => ({ n, cost, kind, reward, qty });
+const BOARD_MASTER = {
+  medal: [{ medalId: 90026, rare: 6, name: 'Huey', groupId: 0 }, { medalId: 90036, rare: 6, name: 'Louie', groupId: 0 }, { medalId: 300948, rare: 5, name: 'Magic Broom', groupId: 0 },
+    { medalId: 90146, rare: 6, name: 'Huey & Dewey & Louie', groupId: 0 }, { medalId: 90156, rare: 6, name: 'Magic Mirror', groupId: 0 }, { medalId: 90056, rare: 6, name: 'Chip', groupId: 0 },
+    { medalId: 301388, rare: 6, name: 'Huey, Dewey & Louie', groupId: 0 }, { medalId: 2301388, rare: 6, name: 'Huey, Dewey & Louie', groupId: 301388 }],
+  material: [{ materialId: 51, name: 'Sun Gem' }],
+  petParts: [{ petPartsId: 407034, name: 'Halloween Crow: Wings' }, { petPartsId: 402066, name: 'Jessie Hat' }],
+  avatarParts: [{ avatarPartsId: 201234, name: 'Starlight Bow', partsType: 7, gender: 1 }, { avatarPartsId: 201235, name: 'Starlight Bow', partsType: 7, gender: 2 }],
+  title: [{ titleId: 12215, title: 'Shining' }],
+};
+const BOARDS = {
+  boards: [
+    { id: 'enhancement-A1', name: 'Enhancement Board', cells: [cell(2, 200, 'Medal', '6★ Louie'), cell(1, 100, 'Medal', '6★ Huey'), cell(3, 300, 'Material', 'Sun Gem', 2)], completion_reward: { value: '5★ Magic Broom' }, title: null },
+    { id: 'enhancement-A2', name: 'Enhancement Board', cells: [cell(1, 100, 'Medal', '6★ Magic Mirror')], completion_reward: { value: '6★ Magic Mirror' }, title: null },
+    { id: 'radiant-01', name: 'Radiant Rewards Board', cells: [cell(1, 300, 'Jewel', 'Jewels', 100), cell(2, 700, 'Avatar', 'Starlight Bow (Male)'), cell(3, 700, 'Avatar', 'Starlight Bow (Female)'),
+      cell(4, 400, 'Pet', 'Jessie: Hat'), cell(5, 500, 'Ticket', 'Draw Ticket')], completion_reward: { value: null }, title: { value: 'Shining' } },
+    { id: 'halloween-board-2019', name: 'Halloween Board', cells: [...Array.from({ length: 16 }, (_, i) => cell(i + 1, 300, 'Medal', '6★ Huey & Dewey & Louie')), cell(17, 700, 'Pet', 'Halloween Crow: Wings')],
+      completion_reward: { value: '6★ Huey & Dewey & Louie' }, title: null },
+  ],
+  weeks: [
+    { census_id: W1, family: 'weekly', boards: [{ board: 'enhancement-A1', confidence: 'wiki' }, { board: 'enhancement-A2', confidence: 'wiki' }] },
+    { census_id: 'WW-W-2019-10-14', family: 'weekly', boards: [{ board: 'enhancement-A1', confidence: 'wiki' }, { board: 'enhancement-A2', confidence: 'wiki (inferred layout)' }] },
+    { census_id: 'WW-W-2019-10-28', family: 'weekly', boards: [{ board: 'halloween-board-2019', confidence: 'wiki' }] },
+    { census_id: 'WW-W-2018-09-03', family: 'radiant reward', boards: [{ board: 'radiant-01', confidence: 'wiki' }] },
+    { census_id: 'WW-E1-1', family: 'weekly (pre-series raid event)', boards: [{ board: 'enhancement-A1', confidence: 'wiki' }] },
+  ],
+};
+const HALLOWEEN_FIX = '## Boards\n- Halloween Board 2019, cell 17: wiki 700, total and cost ladder need 1,600 (inferred).\n';
+const withBoards = (f, more = []) => {
+  f.boards = JSON.parse(JSON.stringify(BOARDS));
+  Object.assign(f.master, JSON.parse(JSON.stringify(BOARD_MASTER)));
+  f.rewards.correctionsMd += '\n' + HALLOWEEN_FIX;
+  for (const [id, start, end] of more) {
+    f.census.rows.push(censusRow(id, start, end, ['Trickmaster'], 'Beginner'));
+    f.values.weeks.push(week(start, end, 'Beginner', 'Trickmaster', 'Curious Room'));
+  }
+  f.config.onlyCensusIds = [W1, ...more.map((m) => m[0])];
+};
+// node sequence from START along the path pieces of a sphereArray row
+function walkOrder(row) {
+  const g = [row.spCol0, row.spCol1, row.spCol2, row.spCol3, row.spCol4];
+  const OPEN = { 1001: 'UD', 1002: 'LR', 1003: 'UL', 1004: 'UR', 1005: 'DL', 1006: 'DR' };
+  const DV = { U: [-1, 0], D: [1, 0], L: [0, -1], R: [0, 1] }, OPP = { U: 'D', D: 'U', L: 'R', R: 'L' };
+  let at = null;
+  g.forEach((line, r) => line.forEach((v, c) => { if (v === 1000) at = [r, c]; }));
+  assert.ok(at, 'START');
+  assert.strictEqual((at[0] + at[1]) % 2, 0, 'START on an even cell');
+  const order = [], seen = new Set([at.join()]);
+  for (;;) {
+    const next = Object.entries(DV).map(([d, [dr, dc]]) => [d, at[0] + dr, at[1] + dc]).find(([d, r, c]) => {
+      const v = g[r]?.[c];
+      return v && !seen.has(`${r},${c}`) && OPEN[v] && OPEN[v].includes(OPP[d]);
+    });
+    if (!next) break;
+    let [d, r, c] = next;
+    for (;;) { // follow the pieces to the next node
+      seen.add(`${r},${c}`);
+      const v = g[r][c];
+      if (!OPEN[v]) break;
+      const out = OPEN[v].replace(OPP[d], '');
+      d = out; r += DV[out][0]; c += DV[out][1];
+    }
+    const v = g[r][c];
+    assert.ok(v >= 1 && v <= 22, `piece leads to node, not ${v}`);
+    assert.strictEqual((r + c) % 2, 0, `node ${v} on an even cell`);
+    order.push(v); at = [r, c];
+  }
+  // nothing else on the grid
+  const cells = g.flat().filter((v) => v);
+  assert.strictEqual(cells.length, 2 * order.length + 1, 'only the path is drawn');
+  return order;
+}
 const entry = (out, boss) => out.index.entries.find((e) => e.boss === boss);
 const enemyOf = (out, id) => out.enemyRows.find((r) => r.raidEnemyId === id);
 // one extra week in the fixture: census row plus its tier row
@@ -558,6 +633,128 @@ const tests = {
       try { assert.strictEqual(mr.patch(dir, opts).stageRows.length, 2, name); } finally { console.log = log; fs.rmSync(dir, { recursive: true, force: true }); }
     }
   },
+  one_board_set_per_raid() {
+    const out = build((f) => withBoards(f, [['WW-W-2019-10-14', '2019-10-14', '2019-10-20']]));
+    const mine = out.index.entries.filter((e) => e.censusId === W1);
+    assert.strictEqual(mine.length, 2, 'two tiers');
+    assert.strictEqual(mine[0].sphereBoardIds.length, 2);
+    assert.ok(mine.every((e) => JSON.stringify(e.sphereBoardIds) === JSON.stringify(mine[0].sphereBoardIds)), 'every tier points at the same boards');
+    const other = out.index.entries.find((e) => e.censusId === 'WW-W-2019-10-14');
+    assert.strictEqual(other.sphereBoardIds.length, 2, 'same layout');
+    assert.ok(other.sphereBoardIds.every((id) => !mine[0].sphereBoardIds.includes(id)), 'each raid keeps its own boards');
+    for (const id of [...mine[0].sphereBoardIds, ...other.sphereBoardIds]) {
+      assert.ok(id >= 3000000 && id <= 3999999);
+      const s = out.sphereRows.find((r) => r.sphereBoardId === id);
+      assert.deepStrictEqual([s.type, s.arryId, s.masuId, s.price, s.detailUrl, s.kindId], [5, id, id, 0, '', 0]);
+      assert.ok(out.arrayRows.some((r) => r.arryId === id) && out.masuRows.some((r) => r.masuId === id && r.sphereBoardId === id));
+    }
+    assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board (1)', 'Enhancement Board (2)']);
+    // ids: every Weekly / Radiant row is numbered whatever the filter; pre-series rows are not boards of this task
+    assert.deepStrictEqual(Object.keys(out.ids.boards).sort(), ['WW-W-2018-09-03/radiant-01', `${W1}/enhancement-A1`, `${W1}/enhancement-A2`, 'WW-W-2019-10-14/enhancement-A1',
+      'WW-W-2019-10-14/enhancement-A2', 'WW-W-2019-10-28/halloween-board-2019'].sort());
+    // only raids that exist get rows; the label of an inferred set
+    assert.strictEqual(out.sphereRows.length, 4);
+    assert.ok(other.reconstructed.includes('boardSet') && !mine[0].reconstructed.includes('boardSet'));
+    assert.ok(mine[0].reconstructed.includes('boardPath'));
+    // stable when a row is added before
+    const again = build((f) => {
+      withBoards(f, [['WW-W-2019-10-14', '2019-10-14', '2019-10-20']]);
+      f.ids = out.ids;
+      f.boards.weeks.unshift({ census_id: 'WW-W-2017-01-02', family: 'weekly', boards: [{ board: 'enhancement-A1' }] });
+    });
+    assert.deepStrictEqual(again.index.entries.find((e) => e.censusId === W1).sphereBoardIds, mine[0].sphereBoardIds);
+    // a raid with no available tier has no boards
+    const none = build((f) => { withBoards(f); f.models = null; });
+    assert.ok(none.index.entries.every((e) => e.sphereBoardIds.length === 0));
+    assert.strictEqual(none.sphereRows.length, 0);
+  },
+  cell_order() {
+    const out = build((f) => withBoards(f));
+    const id = entry(out, 'Trickmaster').sphereBoardIds[0];
+    const arr = out.arrayRows.find((r) => r.arryId === id), masu = out.masuRows.find((r) => r.masuId === id);
+    assert.deepStrictEqual(walkOrder(arr), [1, 2, 3], 'one path from START in the order n');
+    assert.deepStrictEqual(masu.spherePoint.slice(0, 4), [100, 200, 300, 0]);
+    assert.deepStrictEqual(masu.rewardSelect.slice(0, 3), [3, 3, 5]);
+    assert.deepStrictEqual(masu.rewardId.slice(0, 3), [90026, 90036, 51]);
+    assert.deepStrictEqual(masu.rewardValue.slice(0, 3), [1, 1, 2]);
+    for (const k of ['spherePoint', 'rewardSelect', 'medalCategory', 'rewardId', 'rewardExpand', 'rewardExpandId', 'rewardValue', 'burstUpperNumber']) assert.strictEqual(masu[k].length, 23, k);
+    assert.deepStrictEqual([masu.rewardSelect[22], masu.rewardId[22], masu.spherePoint[22]], [3, 300948, 0], 'completion at index 22');
+    for (const k of ['spCol0', 'spCol1', 'spCol2', 'spCol3', 'spCol4']) assert.strictEqual(arr[k].length, 9);
+    // every size the grid holds keeps the order
+    for (let n = 1; n <= rb.NODES; n++) assert.deepStrictEqual(walkOrder(rb.gridRow(1, n)), Array.from({ length: n }, (_, i) => i + 1), `${n} cells`);
+    assert.throws(() => rb.gridRow(1, 23), /23 cells/);
+    // radiant: jewels, both genders of an avatar part, a Spirit part by its master spelling, a draw ticket, a title at completion
+    const all = build((f) => { withBoards(f); f.boards.weeks[3].census_id = W1; });
+    const rad = all.masuRows.find((r) => all.sphereRows.find((s) => s.sphereBoardId === r.masuId).boardName === 'Radiant Rewards Board');
+    assert.deepStrictEqual(rad.rewardSelect.slice(0, 5), [2, 20, 20, 33, 41]);
+    assert.deepStrictEqual(rad.rewardId.slice(0, 5), [0, 201234, 201235, 402066, 0]);
+    assert.strictEqual(rad.rewardValue[0], 100);
+    assert.deepStrictEqual([rad.rewardSelect[22], rad.rewardId[22]], [7, 12215]);
+  },
+  halloween_cell_17() {
+    const out = build((f) => { withBoards(f); f.boards.weeks[2].census_id = W1; });
+    const sid = out.sphereRows.find((r) => r.boardName === 'Halloween Board').sphereBoardId;
+    const masu = out.masuRows.find((r) => r.masuId === sid);
+    assert.strictEqual(masu.spherePoint[16], 1600, 'CORRECTIONS.md: 700 on the wiki');
+    assert.strictEqual(masu.rewardSelect[16], 33);
+    assert.ok(entry(out, 'Trickmaster').reconstructed.includes('boardCost'));
+    assert.deepStrictEqual(out.report.boards.corrected, [{ board: 'halloween-board-2019', n: 17, what: 'cost 700 -> 1600 (CORRECTIONS.md, inferred)' }]);
+    // event boards: the original table rules over the wiki where the research names it the best source (Task 10 builds them)
+    const zoo = { id: 'zootopia-swb', name: 'Seasoned Wielder Bonus', best_cells: 'original_table.cells', cells: [cell(1, 120, 'medal', '6★ Moogle')],
+      original_table: { cells: [{ slot: 21, type: 'medal', reward: '5★ Dewey', cost: 120 }, { slot: 1, type: 'medal', reward: '6★ Moogle', cost: 300 }, { slot: 18, type: 'medal', reward: '5★ Moogle', cost: 120 }] } };
+    assert.deepStrictEqual(rb.cellsOf(zoo).map((c) => [c.n, c.reward, c.cost]), [[1, '6★ Moogle', 300], [2, '5★ Moogle', 120], [3, '5★ Dewey', 120]]);
+    const vac = { id: 'vacation-resort', name: 'Vacation Resort', best_cells: 'original_table.cells', cells: [cell(5, 60, 'medal', '3★ Chip')],
+      original_table: { cells: [{ slot: 2, type: 'medal', reward: '5★ Chip', cost: 60 }] } };
+    assert.deepStrictEqual(rb.cellsOf(vac).map((c) => [c.reward, c.cost]), [['5★ Chip', 60]]);
+    // on the real research files when they are readable
+    const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
+    let ev;
+    try { ev = JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'b_events', 'event_raid_rewards.json'), 'utf8')); } catch { console.log('  (real event boards skipped: not readable)'); return; }
+    const boards = ev.rows.flatMap((r) => (r.boards || []).map((b) => ({ ...b, row: r })));
+    const realZoo = boards.find((b) => /Seasoned Wielder/.test(b.board) && b.row.boards.some((x) => /Zootopia/i.test(x.board)));
+    assert.ok(realZoo, 'Zootopia Seasoned Wielder Bonus board');
+    const zc = rb.cellsOf({ ...realZoo, id: 'z', name: realZoo.board });
+    assert.ok(zc.some((c) => c.cost === 120) && zc.filter((c) => c.cost === 120).every((c) => /^5★/.test(c.reward)), 'Seasoned Wielder Bonus 5★ at 120');
+    const realVac = boards.find((b) => b.board === 'Vacation Resort');
+    const vc = rb.cellsOf({ ...realVac, id: 'v', name: realVac.board });
+    assert.ok(vc.some((c) => c.reward === '5★ Chip' && c.cost === 60) && !vc.some((c) => c.reward === '3★ Chip' && c.cost === 60), 'Vacation Resort: the 60-coin Chip is 5★');
+  },
+  unknown_reward_stops_declared_is_reported() {
+    const bad = (f) => { withBoards(f); f.boards.boards[1].cells.push(cell(2, 50, 'Medal', '6★ Nobody'), cell(3, 50, 'Cookie', 'Spooky Cookie')); };
+    assert.throws(() => build(bad), (e) => /6★ Nobody/.test(e.message) && /Spooky Cookie/.test(e.message), 'one list with every name');
+    const ok = build((f) => { bad(f); f.config.boards = { unmatched: { '6★ Nobody': 'not a medal', 'Spooky Cookie': 'seasonal currency' } }; });
+    assert.deepStrictEqual(ok.report.boards.unmatched.map((u) => [u.board, u.n, u.reward, u.weeks]), [['enhancement-A2', 2, '6★ Nobody', 1], ['enhancement-A2', 3, 'Spooky Cookie', 1]]);
+    const id = entry(ok, 'Trickmaster').sphereBoardIds[1];
+    assert.deepStrictEqual(ok.masuRows.find((r) => r.masuId === id).spherePoint.slice(0, 2), [100, 0], 'the cell is left off, not replaced');
+    assert.ok(entry(ok, 'Trickmaster').reconstructed.includes('boardCells'));
+    // a board left with no cell is not built; a copy row (groupId of another medal) does not make a name ambiguous
+    const empty = build((f) => { withBoards(f); f.boards.boards[1].cells = [cell(1, 50, 'Cookie', 'Spooky Cookie')]; f.config.boards = { unmatched: { 'Spooky Cookie': 'x' } }; });
+    assert.strictEqual(entry(empty, 'Trickmaster').sphereBoardIds.length, 1);
+    assert.deepStrictEqual(empty.report.boards.dropped, ['enhancement-A2']);
+    assert.strictEqual(rb.matchReward(rb.itemIndex(BOARD_MASTER), 'Medal', '6★ Huey, Dewey & Louie').id, 301388);
+    assert.throws(() => build((f) => { withBoards(f); f.boards.boards[0].completion_reward = { value: '6★ Nobody' }; }), /completion of enhancement-A1/);
+  },
+  master_size() {
+    const out = build((f) => withBoards(f));
+    assert.ok(out.report.boards.bytes > 0 && out.report.boards.bytes < 40 * 1048576);
+    const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
+    let sources;
+    try { sources = mr.readSources(src, process.env.KHUX_RAID_2016 || mr.DEFAULT_2016); } catch { console.log('  (real boards skipped: private sources not readable)'); return; }
+    const dir = path.join(__dirname, 'master_data');
+    if (!fs.existsSync(path.join(dir, 'medal.json'))) { console.log('  (real boards skipped: no master_data)'); return; }
+    const master = {};
+    for (const t of ['medal', 'material', 'petParts', 'avatarParts', 'title']) master[t] = JSON.parse(fs.readFileSync(path.join(dir, t + '.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
+    const all = rb.buildBoards({ doc: sources.boards, correctionsMd: sources.rewards.correctionsMd, master, ids: JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_ids.json'), 'utf8')), config: cfg.boards });
+    const weeks = Object.keys(all.byCensus).length;
+    console.log(`  (all ${weeks} Weekly and Radiant rows: ${all.sphereRows.length} boards, +${all.report.bytes} bytes = ${(all.report.bytes / 1048576).toFixed(2)} MB; `
+      + `${all.report.unmatched.length} cells left off, boards with no cell: ${all.report.dropped.join(', ') || 'none'})`);
+    assert.strictEqual(weeks, 130);
+    assert.ok(all.report.bytes < 40 * 1048576, `${all.report.bytes} bytes`);
+    assert.strictEqual(all.report.corrected.length, 1, 'Halloween Board 2019 cell 17');
+    assert.strictEqual(new Set(all.sphereRows.map((r) => r.sphereBoardId)).size, all.sphereRows.length);
+    for (const a of all.arrayRows) walkOrder(a);
+  },
   real_census_week() {
     const src = process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC;
     let sources;
@@ -565,7 +762,7 @@ const tests = {
     const master = fixture().master;
     const dir = path.join(__dirname, 'master_data');
     if (fs.existsSync(path.join(dir, 'stage.json'))) {
-      for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
+      for (const n of ['stage', 'world', 'enemy', 'raidEnemy', 'raidEnemyAttack', 'medal', 'material', 'petParts', 'avatarParts', 'title']) master[n] = JSON.parse(fs.readFileSync(path.join(dir, n + '.json'), 'utf8'));
       master.stage = master.stage.filter((r) => !(r.stageId >= 980000 && r.stageId <= 989999));
       master.evStage = []; master.raidSetting = []; master.raidReward = [];
       master.raidEnemy = master.raidEnemy.filter((r) => r.raidEnemyId < 2000000);

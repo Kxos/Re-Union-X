@@ -91,6 +91,45 @@ After a Level Up and at every login (if the server announces boards) the client 
 (home and Level Up 3 -> 4 in quest 11). Analysis in `stage_gen\lb_popup`. Original not found
 online (`reference\lb_popup`: style from «Purchased Avatar Board!») (ISSUES I-026).
 
+<a id="raid-boards"></a>
+## Raid Boards (type 5)
+
+Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026). Client path read on the 4.3.1 client
+(notes kept outside the repository); bench pending.
+
+- **How the client reaches them.** On a raid event (event list row with `eventType` 2) the event map shows
+  `AdventureTop2_Raid_Button.json` (rebuilt in `stage_gen`, not in the original WW package) with `Button_EV_Board`, text
+  102920006 «Raid Boards». The tap sends `POST /user/sphere/reset {}`, then
+  `POST /user/sphere/check/170119 {"checkTypes":[1,2],"boardTypes":[5]}`, and opens the board list in its raid mode at once
+  (it does not wait for the answer). Empty list: text 103420003 «No Raid Boards.».
+- **What the list shows.** A board is listed when its master `sphere.type` is 5 and its id is in the client's board list
+  (`userSphereDatas`). Nothing else filters it: no date (`startDatetime`, `endDatetime`, `evStage.boardEndTime` are not read
+  for type 5), no event id, no link from a board to its raid. So the server decides which raid boards exist by handing their
+  ids out; two weeks' boards can sit in the master side by side.
+- **Client list updates.** `GET /user/sphere` replaces the list; `update`, `check` (without 3), `mission/receive` merge by
+  `sphereBoardId`; a `check` whose `checkTypes` contain 3 reads only `closeEventSphereBoardIds` and removes those ids.
+- **Rows.** `sphere` (type 5, `kindId` 0 = no gender icon, `boardId` 1, `detailUrl` "" so the missing detail popup is never
+  opened, `price` 0), `sphereArray` and `sphereMasu` with all 23 entries: the board scene reads both rows unchecked, so a
+  missing one is a native crash. Index 22 of `sphereMasu` is the completion reward.
+- **Coins.** Type 5 boards cost `userPoint.raidSpherePoint` (Raid Coins, reward type 16, icon `SpherePointIcon_Raid`); the
+  client shows the balance of the last `/user/sphere/update` answer and subtracts nothing itself. Reward type 15 is Event Coins
+  (event boards, type 4, `stageSpherePoint`); until the event boards exist the server pays it into Raid Coins too.
+- **Data** (`server/raid-boards.js`, run by `make-raid.js`): the 130 Weekly and Radiant census rows, from the private board
+  research. One board set per census row (the week), shared by its tiers; every raid has its own ids, so two weeks with the
+  same layout keep separate progress: `sphereBoardId` = `arryId` = `masuId` = 3000000 + n, n in `server/raid_ids.json`
+  (`boards`, append-only). Rows only for raids with an available tier. Cells follow the wiki order on one path from START
+  (snake on the 5 x 9 grid; the original layouts were not collected, labelled `boardPath`). Rewards matched by name to the
+  master tables (medal by rarity and name, material, Spirit part, avatar part by gender, title, Jewels, Draw Ticket); a name
+  with no item stops the build unless `raid_config.json` `boards.unmatched` declares it, and then its cell is left off the
+  board (label `boardCells`); a board with no cell left is not built. CORRECTIONS.md cost fixes apply (label `boardCost`).
+  Each entry of `game_data/raids.json` carries `sphereBoardIds`; `raids.json` `boards` holds the report.
+- **Server.** Standard boards open with the Lux level only if type 1. Raid Boards handed out = those of the current raids and
+  of the kept raid (`routes-raid.js` `boardIds()`); their progress is `player.raidSphere[id]` and is never deleted, so a board
+  that comes back (Catalog) keeps its nodes. `GET /user/sphere` lists them (and records `player.raidSphereSent`); a check
+  without 3 adds the ones handed out since; a check with 3 closes every raid board not handed out now. Update: refused for
+  a board not handed out, for a node already open or not on the board, or without enough Raid Coins; completion pays index 22.
+  Images: no `img/sphere_incentive/<id>.png` exists for these ids, so the card has no costume picture (no crash).
+
 <a id="prove"></a>
 ## Tests on the save
 

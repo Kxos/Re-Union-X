@@ -2404,27 +2404,48 @@ function sphereNodes(board) {
   return [...nodes].sort((a, b) => a - b);
 }
 
+// Only type 1 boards open with the level: Raid Boards (type 5) are handed out by the raid they belong to.
 function sphereBoards() {
   player.sphere = player.sphere || {};
   const level = luxRankFor(player.lux);
   for (const b of masterRows('sphere')) {
-    if (b.price || b.openParam > level || player.sphere[b.sphereBoardId]) continue;
-    const id = Math.max(0, ...Object.values(player.sphere).map((s) => s.id)) + 1;
-    player.sphere[b.sphereBoardId] = { id, unlock: [], getDatetime: realNow() };
+    if (b.type !== 1 || b.price || b.openParam > level || player.sphere[b.sphereBoardId]) continue;
+    player.sphere[b.sphereBoardId] = { id: nextUserSphereId(), unlock: [], getDatetime: realNow() };
   }
   return player.sphere;
 }
+// userSphereBoardId: one sequence for the standard and the Raid Boards
+const nextUserSphereId = () => Math.max(0, ...[...Object.values(player.sphere || {}), ...Object.values(player.raidSphere || {})].map((s) => s.id)) + 1;
+
+// Raid Boards (type 5, master rows of make-raid.js / raid-boards.js; client path docs/notes/bacheche.md «Raid Boards»).
+// player.raidSphere[sphereBoardId] = {id, unlock[], getDatetime}, made when the board is first handed out and kept for good,
+// so its progress survives a week change and comes back with the raid (Catalog). Handed out: the boards of the current raids
+// and of the kept one (raid().boardIds()). player.raidSphereSent = the ids the client holds as far as the server knows:
+// GET /user/sphere replaces it, a check adds the new ones and removes the closed ones.
+function raidSphereBoards() {
+  const ids = raid().boardIds();
+  const served = new Set(masterRows('sphere').filter((b) => b.type === 5).map((b) => b.sphereBoardId));
+  const active = ids.active.filter((id) => served.has(id));
+  player.raidSphere = player.raidSphere || {};
+  for (const id of active) if (!player.raidSphere[id]) player.raidSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: realNow() };
+  return { active, all: new Set([...ids.all, ...Object.keys(player.raidSphere).map(Number)]) };
+}
+const sphereState = (sphereBoardId) => sphereBoards()[sphereBoardId] || (player.raidSphere || {})[sphereBoardId];
 
 function userSphereData(sphereBoardId) {
-  const s = sphereBoards()[sphereBoardId];
+  const s = sphereState(sphereBoardId);
   const board = masterRows('sphere').find((r) => r.sphereBoardId === Number(sphereBoardId));
   const done = board && sphereNodes(board).every((n) => s.unlock.includes(n));
   return { userSphereBoardId: s.id, sphereBoardId: Number(sphereBoardId), isBuy: 1, status: done ? 3 : 1,
     unlockMasuIds: s.unlock.slice(0, 23), getDatetime: outTime(s.getDatetime, serverTime()) };
 }
 
-function userSphereAll() {
-  return { userSphereDatas: Object.keys(sphereBoards()).map(userSphereData), notChargedSphereBoardIds: [] };
+// GET /user/sphere (and the lists of 190): the standard boards plus the Raid Boards handed out now. GET replaces the client's
+// list, so the closed Raid Boards drop out of it there and raidSphereSent is replaced (setSent true); 190 merges ('merge').
+function userSphereAll({ setSent = false } = {}) {
+  const raidIds = raidSphereBoards().active;
+  if (setSent) player.raidSphereSent = [...new Set([...(setSent === 'merge' ? player.raidSphereSent || [] : []), ...raidIds])];
+  return { userSphereDatas: [...Object.keys(sphereBoards()).map(Number), ...raidIds].map(userSphereData), notChargedSphereBoardIds: [] };
 }
 
 // POST /user/sphere/check (azioni 60/61): ogni voce di userSphereDatas e' per il client una
@@ -2433,53 +2454,78 @@ function userSphereAll() {
 // una volta per voce. Si mandano solo le bacheche non ancora annunciate (player.sphereNotified);
 // l'array vuoto svuota l'elenco, la chiave mancante lo lascerebbe com'e'. L'elenco completo
 // arriva da GET /user/sphere. Salvataggi di prima: le bacheche gia' possedute contano come annunciate.
-function respondSphereCheck(res) {
+// Raid Boards: the client reads closeEventSphereBoardIds only when checkTypes has 3, and then removes those ids from its list;
+// otherwise userSphere is merged. A check without 3 adds the Raid Boards handed out since the last GET (a new week, a kept
+// raid); one with 3 closes those no longer handed out. Their progress stays in player.raidSphere.
+function respondSphereCheck(res, req) {
   const owned = Object.keys(sphereBoards());
   if (!player.sphereNotified) player.sphereNotified = owned.map(Number);
   const fresh = owned.filter((id) => !player.sphereNotified.includes(Number(id)));
   player.sphereNotified.push(...fresh.map(Number));
+  const { active, all } = raidSphereBoards();
+  const sent = new Set(player.raidSphereSent || []);
+  const closing = (req?.checkTypes || []).map(Number).includes(3);
+  let close = [], add = [];
+  if (closing) {
+    close = [...all].filter((id) => !active.includes(id)).sort((a, b) => a - b);
+    player.raidSphereSent = [...sent].filter((id) => active.includes(id));
+  } else {
+    add = active.filter((id) => !sent.has(id));
+    player.raidSphereSent = [...sent, ...add];
+  }
   savePlayer();
-  const userSphere = { userSphereDatas: fresh.map(userSphereData), notChargedSphereBoardIds: [] };
-  send(res, 200, { ret: ret(), userSphere, closeEventSphereBoardIds: [] });
+  const userSphere = { userSphereDatas: [...fresh.map(userSphereData), ...add.map(userSphereData)], notChargedSphereBoardIds: [] };
+  send(res, 200, { ret: ret(), userSphere, closeEventSphereBoardIds: close });
 }
 
 // premio di un nodo (rewardSelect di sphereMasu): 12 HP, 21 AP, 22 costo del deck (bonus sommati
-// in userPointData/userDetailData), 3 medaglia, 19/20/23 parti dell'avatar
+// in userPointData/userDetailData), 3 medaglia, 19/20/23 parti dell'avatar; Raid Boards also 5 material, 7 title,
+// 33 Spirit part, 41 Draw Ticket (the item types of grantItem)
 function grantSphereReward(masu, i) {
   const sel = masu.rewardSelect[i], id = masu.rewardId[i], val = masu.rewardValue[i] || 1;
   const bonus = player.sphereBonus = player.sphereBonus || { hp: 0, ap: 0, cost: 0 };
   if (sel === 12) bonus.hp += val;
   else if (sel === 21) bonus.ap += val;
   else if (sel === 22) bonus.cost += val;
-  else if (sel === 3) grantItem(3, id, 1);
+  else if (sel === 3) grantItem(3, id, val);
   else if (sel === 19 || sel === 20 || sel === 23) player.avatarParts = [...new Set([...(player.avatarParts || []), id])];
   else if (sel === 2) grantItem(2, 0, val);
+  else if (sel === 5 || sel === 7 || sel === 33 || sel === 41) grantItem(sel, id, val);
   else console.log(`  [sphere] premio rewardSelect ${sel} (id ${id}) non gestito`);
 }
 
 // POST /user/sphere/update (azione 44): {sphereBoardId, releaseMasuId} o {releaseMasuId 0, allOpen 1}.
-// Si scalano gli Avatar Coin, si danno i premi e, a bacheca completa, il titolo 2000+N
+// Si scalano gli Avatar Coin, si danno i premi e, a bacheca completa, il titolo 2000+N.
+// Raid Boards (type 5): only while handed out, paid in Raid Coins (raidSpherePoint, the field the client shows for type 5);
+// the completion reward is the one at index 22 of sphereMasu. A node already open is refused and pays nothing.
 function respondSphereUpdate(res, req) {
   const now = serverTime();
   const snap = inventorySnapshot(now); // solo le voci toccate dai premi (vedi inventoryBlocks)
   const boardId = Number(req?.sphereBoardId);
   const board = masterRows('sphere').find((r) => r.sphereBoardId === boardId);
-  const s = sphereBoards()[boardId];
+  const isRaid = board?.type === 5;
+  const s = !board ? undefined : isRaid ? (raidSphereBoards().active.includes(boardId) ? player.raidSphere[boardId] : undefined)
+    : board.type === 1 ? sphereBoards()[boardId] : undefined;
+  const coin = isRaid ? 'raidSpherePoint' : 'spherePoint';
   if (board && s) {
     const masu = masterRows('sphereMasu').find((r) => r.masuId === board.masuId);
-    const todo = req?.allOpen ? sphereNodes(board).filter((n) => !s.unlock.includes(n))
-      : [Number(req?.releaseMasuId)].filter((n) => n >= 1 && n <= 23 && !s.unlock.includes(n));
+    const nodes = sphereNodes(board);
+    const todo = req?.allOpen ? nodes.filter((n) => !s.unlock.includes(n))
+      : [Number(req?.releaseMasuId)].filter((n) => nodes.includes(n) && !s.unlock.includes(n));
     const cost = todo.reduce((t, n) => t + (masu?.spherePoint[n - 1] || 0), 0);
-    if (masu && todo.length && cost <= (player.spherePoint || 0)) {
-      player.spherePoint -= cost;
+    if (masu && todo.length && cost <= (player[coin] || 0)) {
+      player[coin] -= cost;
       for (const n of todo) { s.unlock.push(n); grantSphereReward(masu, n - 1); }
-      if (sphereNodes(board).every((n) => s.unlock.includes(n))) {
-        const title = 2000 + (boardId - 2100000);
-        if (masterRows('title').some((t) => t.titleId === title)) player.titles = [...new Set([...(player.titles || []), title])];
+      if (nodes.every((n) => s.unlock.includes(n))) {
+        if (isRaid) grantSphereReward(masu, 22);
+        else {
+          const title = 2000 + (boardId - 2100000);
+          if (masterRows('title').some((t) => t.titleId === title)) player.titles = [...new Set([...(player.titles || []), title])];
+        }
       }
-      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} Avatar Coin)`);
+      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} ${isRaid ? 'Raid Coin' : 'Avatar Coin'})`);
     } else console.log(`[sphere] sblocco rifiutato: bacheca ${boardId}, nodi ${todo.join(',') || '-'}, costo ${cost}`);
-  }
+  } else if (board) console.log(`[sphere] sblocco rifiutato: bacheca ${boardId} non consegnata`);
   savePlayer();
   send(res, 200, {
     ret: ret(),
@@ -2776,7 +2822,7 @@ function respondMissionReceive(res, req) {
     ret: ret(),
     userData: { userPoint: userPointData(now), userDetail: userDetailData() },
     missions: missionsData(), beginnerLimitTime: beginnerLimitTime(),
-    userSphere: userSphereAll(),
+    userSphere: userSphereAll({ setSent: 'merge' }),
     ...inventoryBlocks(now, snap),
   });
 }
@@ -4514,9 +4560,9 @@ function handler(scheme) {
       }
       // Avatar Boards: GET /user/sphere (azione 10, sostituisce l'elenco), POST /user/sphere/check e
       // /check/170119 (azioni 60/61: userSphere in merge, closeEventSphereBoardIds se checkTypes ha 3)
-      if (kind === 'spherelist') { const userSphere = userSphereAll(); savePlayer(); return send(res, 200, { ret: ret(), userSphere }); }
+      if (kind === 'spherelist') { const userSphere = userSphereAll({ setSent: true }); savePlayer(); return send(res, 200, { ret: ret(), userSphere }); }
       if (kind === 'sphereupdate') return respondSphereUpdate(res, entry.bodyDecoded);
-      if (kind === 'spherecheck') return respondSphereCheck(res);
+      if (kind === 'spherecheck') return respondSphereCheck(res, entry.bodyDecoded);
       if (kind === 'missionreceive') return respondMissionReceive(res, entry.bodyDecoded);
       if (kind === 'userdetailupdate') return respondUserDetailUpdate(res, req.url.split('?')[0], entry.bodyDecoded);
       // GET /moogleshop/list: moogleshops[] = {moogleshopId, limitCount} (acquisti
@@ -4833,6 +4879,7 @@ module.exports = { SESSION, parseBody, start, route, multi };
 module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, // server/test-raid-routes.js
+  raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, // server/test-raid-boards.js
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
