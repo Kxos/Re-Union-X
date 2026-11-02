@@ -142,5 +142,15 @@ p = n.noticesPage(U(2026, 10, 16, 15));
 n.NOTICES.pop();
 check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.includes('&lt;script&gt;'), 'escape HTML');
 
+{
+  // Raids Part 2: reconstructed raid boss graphics, inferred templates and spider data, withheld bosses (IMPORTANT)
+  const rb = n.NOTICES.find((x) => x.title === 'Raid Bosses');
+  const t = rb ? rb.body.join(' ') : '';
+  check(rb && rb.tag === 'IMPORTANT', 'Raid Bosses: notizia IMPORTANT');
+  check(/15 raid bosses/.test(t) && /Jewel Princess/.test(t) && /Closehanded Captain/.test(t) && /twin or related/.test(t), 'Raid Bosses: grafiche ricostruite');
+  check(/Enraged Arachnid/.test(t) && /Egg Master/.test(t) && /Trickmaster/.test(t) && /Spinneret/.test(t) && /900 of 24,000/.test(t), 'Raid Bosses: modelli e ragni');
+  check(/Queen Bee, Queen Bee Ω/.test(t) && /Lion Headliner/.test(t) && /older version of their animations/.test(t), 'Raid Bosses: api e Lion Headliner');
+  check(/4 weak points/.test(t) && /spiderlings/.test(t) && /\*\*not original\*\* here/.test(t), 'Raid Bosses: ragni con 4 parti dichiarati');
+}
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 console.log('OK: notices');

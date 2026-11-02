@@ -340,7 +340,7 @@ if ($Quick) {
   $raisedrawPack = @("$xg\gen.png", "$xg\gen.mp4")
 }
 # pacchetto dei modelli dei boss raid (raid_gen\files, spostati dal generato piu' sopra), statico con --cache. Controllo dei
-# modelli completi (check_raid_models.py): scrive server\game_data\raid_models.json (non versionato), 29 disponibili attesi
+# modelli completi (check_raid_models.py): scrive server\game_data\raid_models.json (non versionato), 45 disponibili attesi
 $raidPack = @()
 if ($Quick) {
   if ($instPacks -contains 'raid_gen') {

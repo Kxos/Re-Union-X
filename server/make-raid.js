@@ -319,8 +319,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const near = (partHp[w.boss] || []).slice().sort((a, b) => Math.abs(dayMs(a.date) - dayMs(date)) - Math.abs(dayMs(b.date) - dayMs(date)))[0];
       const partShare = (p, i) => (near ? near.parts[i % near.parts.length] / near.body : p.hp[0] / template.hp[0]);
       const knots = single ? single.knots : null;
-      // modelParts: a boss whose era showed fewer weak points than its template row keeps only the first N parts (spiders from
-      // Sep 2018: body + Spinneret; the census has no spider row before that, which would need the 4 parts of 5000)
+      // modelParts: a boss keeps only the first N parts of its template row (raid_config.json; the weak-point check below
+      // still needs every slot of the model covered)
       const cap = (config.modelParts || {})[w.boss];
       const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap });
       if (rows.why) { entry.why = rows.why; return; }
