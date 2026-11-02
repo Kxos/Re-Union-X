@@ -223,6 +223,7 @@ node server\make-master-stub.js --force          # 106 minimal tables + misc
 node server\import-master.js D:\Progetto_Restauro_KH_UX\apk501\extra_files `
   avatarParts initItem misc stage world stageDrama enemy enemyAttack keyblade skill buff `
   burst battleMisc badstatus tutorialMisc medalMisc material title theater raidEnemy raidEnemyAttack
+$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'   # required (without them: 522 medals, stop in make-special)
 node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json
 node server\make-moogleshop.js
 node server\make-multi-tables.js                # Union Cross: multi, multiStage
