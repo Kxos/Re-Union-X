@@ -195,7 +195,10 @@ edge (x 1722) and check that Undo is gray. To do: `target` 3 for the random Supe
   (`burstUpperNumber`, up to `burst.maxEnhanceCount`: 6★/7★ 5), guilt unlock/reroll
   (`guiltFactor`, with `isGuilt` = Quest 34), Magic Mirror +1%, Chip/Dale STR/DEF (up to
   `addMaxAttack/addMaxDefense`), Cid cost (up to `cost - minCost`, 6★/7★ 20), Fantasia Mickey B
-  (300913, type 8) +1 dot; Magic Broom (300948) and Fantasia Mickey A -> B with 5 Brooms. Saved
+  (300913, type 8) +1 dot; Magic Broom (300948) and Fantasia Mickey A -> B with 5 Brooms; Sora & Moogle B (302016, type 4,
+  +100 STR and +100 DEF, reconstructed 2 Nov 2026 by `make-campaign-medals.js`: copy of Chip 6★ with the Roboloid ability
+  text, art = the Roboloid medal already in medal_gen; Raid Board «JP 5th Anniv. Entry Medal Board» and bonus of the SN++
+  Illus. KH III Falling Price Deals B0718-B0724 once the banner catalogue is regenerated). Saved
   in `medalState`, served in `userMedal`. Details and tests: [guilt.md](guilt.md#stato).
 - Guilt reroll confirmation: `PopupNormal_Guilt_ver130` was missing (crash on
   tapping Level Up with a copy on a medal with guilt), generated from `PopupNormal_Text_34_4Line_

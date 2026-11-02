@@ -35,9 +35,10 @@ const REWARDS = {
   Jewel: [2, 0],
   'Platinum Ticket': [40, 0],
   'Draw Ticket': [41, 0],
-  'Holiday Draw Ticket': [41, 0],
-  'Moogle Point': [41, 0],
-  'Spooky Cookie': [41, 0],
+  // seasonal currencies: item id = gacha.js TICKET_CURRENCIES index (ours; the original renamed one currency, id 0)
+  'Holiday Draw Ticket': [41, 1],
+  'Moogle Point': [41, 3],
+  'Spooky Cookie': [41, 2],
   Title: [7, 12601], // «"" Title» della khuxwiki = «With Gratitude» (khuxwiki Title Banner, nameplate 1349)
 };
 const LIMITED = 4;

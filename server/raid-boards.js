@@ -18,6 +18,11 @@ const NODES = 22, MASU = 23, COMPLETION = 22; // nodes 1..22; index 22 of sphere
 const FAMILIES = new Set(['weekly', 'radiant reward']); // the 130 rows; the 3 pre-series rows belong to the event raids
 const SEL = { jewel: 2, medal: 3, material: 5, title: 7, pet: 33, drawTicket: 41 }; // rewardSelect = item type of grantItem
 const PARTS_SEL = { 2: 23, 3: 19, 7: 20 }; // avatarParts.partsType -> rewardSelect (clothes, hairstyle, accessory)
+// Draw Ticket and the seasonal currencies (rewardSelect 41): rewardId = index in gacha.js TICKET_CURRENCIES (gacha.ticketCurrency).
+// The original had one currency renamed by the event, always rewardId 0; ours are separate wallets (docs/notes/shop.md).
+const TICKETS = { 'draw ticket': 0, 'holiday draw ticket': 1, 'spooky cookie': 2, 'moogle points': 3, 'moogle point': 3 };
+// Board names that the wiki writes differently from the item (raid_config.json boards.aliases:
+// {"<wiki name>": {"item": "<name matched instead>", "why": "..."}}); the week gets the label boardAlias.
 const START = '2015-01-01 00:00:00', END = '2099-12-31 23:59:59';
 const MASU_KEYS = ['spherePoint', 'rewardSelect', 'medalCategory', 'rewardId', 'rewardExpand', 'rewardExpandId', 'rewardValue', 'burstUpperNumber'];
 const PIECE = { UD: 1001, LR: 1002, UL: 1003, UR: 1004, DL: 1005, DR: 1006 };
@@ -76,7 +81,7 @@ const one = (list, what) => {
 function matchReward(idx, kind, name, qty) {
   const k = norm(kind), value = qty || 1;
   if (k === 'jewel') return { sel: SEL.jewel, id: 0, value };
-  if (k === 'ticket' && norm(name) === 'draw ticket') return { sel: SEL.drawTicket, id: 0, value };
+  if (TICKETS[norm(name)] !== undefined) return { sel: SEL.drawTicket, id: TICKETS[norm(name)], value };
   if (k === 'medal') {
     const m = /^(\d+)\s*★\s*(.+)$/.exec(String(name).trim());
     const r = m && one(idx.medal.get(`${m[1]}|${norm(m[2])}`), 'medal');
@@ -176,6 +181,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   const idx = itemIndex(master);
   const fixes = parseBoardCorrections(correctionsMd);
   const declared = config.unmatched || {};
+  const aliases = config.aliases || {};
   const layouts = new Map((doc.boards || []).map((b) => [b.id, b]));
   const out = { sphereRows: [], arrayRows: [], masuRows: [], byCensus: {}, labels: {}, boardIds, report: { unmatched: [], corrected: [], dropped: [], bytes: 0 } };
   const unknown = new Map(), unmatched = new Map(), built = new Map();
@@ -185,8 +191,9 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
     if (built.has(b.id)) return built.get(b.id);
     const cells = [], dropped = [];
     for (const c of cellsOf(b, fixes)) {
-      const m = matchReward(idx, c.kind, c.reward, num(c.qty) || 1);
-      if (!m.why) { cells.push({ ...c, item: m }); continue; }
+      const alias = aliases[c.reward] && aliases[c.reward].item;
+      const m = matchReward(idx, c.kind, alias || c.reward, num(c.qty) || 1);
+      if (!m.why) { cells.push({ ...c, item: m, ...(alias ? { alias } : {}) }); continue; }
       const why = declared[c.reward];
       if (why) dropped.push({ board: b.id, n: c.n, kind: c.kind, reward: c.reward, why });
       else unknown.set(`${c.kind}|${c.reward}`, `${c.kind} «${c.reward}» (${b.id} cell ${c.n}): ${m.why}`);
@@ -218,6 +225,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       if (/inferred/i.test(ref.confidence || '')) labels.add('boardSet');
       if (r.cells.some((c) => c.corrected)) labels.add('boardCost');
       if (r.dropped.length) labels.add('boardCells');
+      if (r.cells.some((c) => c.alias)) labels.add('boardAlias');
       for (const d of r.dropped) {
         const k = `${d.board}/${d.n}`;
         if (!unmatched.has(k)) unmatched.set(k, { ...d, weeks: 0 });

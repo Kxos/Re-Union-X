@@ -218,7 +218,10 @@ then relogin (or leave and re-enter the Shop: the client downloads the missing f
   first (9001, payType 6).
 - Prices (9.4): never 0 (free = 1 Jewel); FIRST_FREE and FALLING from the player's counter (`player.gacha.count`).
 - Currencies (9.6-9.7): jewels = payType 1; Platinum = payType 7 (`limitedDrawTicket1`); payType 8 = seasonal currencies in
-  `player.drawTickets` (draw, holiday, spooky, moogle); payType 4/5/6/9 only in the catalogue.
+  `player.drawTickets` (draw, holiday, spooky, moogle); payType 4/5/6/9 only in the catalogue. Earning them: reward type 41
+  with item id 0 Draw Ticket, 1 Holiday Draw Ticket, 2 Spooky Cookie, 3 Moogle Point (`gacha.ticketCurrency`, ours: the
+  original had one currency renamed by the event, id 0); used by the Raid Boards and `make-limited-missions.js` REWARDS
+  (2 Nov 2026). The client still calls them «Draw Ticket» in the reward popups.
 - Limits: `dayLimit` per banner, `totalLimit` overall (rejection «limite totale raggiunto», without charge), only one
   free Free Deal VIP per day across all of them (`player.gacha.used.vipFree`). The plate has `isDayLimited` 1 with any
   of the three and `userLimitedCount` = draws left (the lower of day and total).

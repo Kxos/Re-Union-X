@@ -47,7 +47,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   for (const s of ['Shop draw rates are reconstructed where the original game did not publish them (Medal rarities, guarantees and Skill rates are original): Draw Odds and each banner\'s Details say so.',
     'Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.',
     'Free draws cost 1 Jewel. All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).',
-    'Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time.',
+    'Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time. When you earn one of them, the reward message calls it a Draw Ticket, but it goes to its own currency.',
     'Some 2016-17 banners only drew Epic Medals; the game data no longer says which Medals were Epic, so these banners draw from their full sets.',
     'Blue Fairy Deal banners are in the Banner Catalog but cannot be drawn yet: Blue Fairies will come with a future update.',
     'Trait Medals are back: a deal that guaranteed a Trait Medal gives it (all 313 Trait Medals, matched to their Medals from the community wiki).',

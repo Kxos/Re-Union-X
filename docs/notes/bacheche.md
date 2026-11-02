@@ -123,6 +123,21 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
   with no item stops the build unless `raid_config.json` `boards.unmatched` declares it, and then its cell is left off the
   board (label `boardCells`); a board with no cell left is not built. CORRECTIONS.md cost fixes apply (label `boardCost`).
   Each entry of `game_data/raids.json` carries `sphereBoardIds`; `raids.json` `boards` holds the report.
+- **Missing rewards added (2 Nov 2026, user: «add them, do not skip»).** Of the 9 names of Task 7, 7 are now items; all 363
+  boards are built, 2 cells stay off:
+  - Spooky Cookie, Holiday Draw Ticket, Moogle Points: `rewardSelect` 41 (the Draw Ticket type: in the original the three were
+    the same currency renamed by the event) with `rewardId` 2, 1, 3 = index in `gacha.js` `TICKET_CURRENCIES` (ours: the
+    original used 0); `grantItem(41, id)` pays `player.drawTickets.spooky/holiday/moogle`, which the Spooky Cookies Deal
+    (B0731/B0732), Holiday Draw Tickets Deal (B0758/B0759) and Moogle Points Deal (B0800/B0801) spend. The client names
+    type 41 «Draw Ticket» in the popups (text 106180322): Notices, Differences.
+  - 6★ Sora & Moogle B: reconstructed medal row 302016 (`server/make-campaign-medals.js`, [medaglie](medaglie.md)).
+  - 6★ Fantasia Mickey A: `boards.aliases` gives the 5★ Fantasia Mickey Ver. A (90085), label `boardAlias`. No 6★ exists
+    (Roboloid's full list and the medal table have it only at 5★); the board pairs it with 5 Magic Brooms (the 5★ evolve
+    recipe) and the wiki infobox lists `mickeya=1` without a rarity. Not checked against the board image (not downloaded).
+  - Balloon Mike & Sulley (407026), Balloon Axel (407047): Spirit parts with their original artwork, recovered from the
+    identical files of the avatar accessories 208106/208137 ([home_profilo](home_profilo.md), `jp_pet_parts.py` avatar twin).
+  - Still off (`boards.unmatched`): Starlight Ears (402028, a 51x60 texture «ビットマップ 1» missing) and Dazzling Disco
+    (410014, a 1x1 texture «ビットマップ 2» missing). Both names are in the 2020 global file list, but no local copy has the bytes.
 - **Server.** Standard boards open with the Lux level only if type 1. Raid Boards handed out = those of the current raids and
   of the kept raid (`routes-raid.js` `boardIds()`); their progress is `player.raidSphere[id]` and is never deleted, so a board
   that comes back (Catalog) keeps its nodes. `GET /user/sphere` lists them (and records `player.raidSphereSent`); a check
@@ -142,3 +157,5 @@ To test the popups again: stop the server, `unlock` of 2100001 to [1..5], `spher
 - Board 3000110: path and costs drawn, one node bought (EXP Medal Huey, 870 → 770 Raid Coins), Unlock All (9,900) completes it: COMPLETE with an Evolve Medal, then the list shows COMPLETE 16/16.
 - Not original yet: the cards have no picture (no `sphere_incentive/<id>.png` for these ids) and the coin icon is the generic one (`img/incentive/SpherePointIcon_Raid.png` is not shipped).
 - Not seen yet: nodes paying Draw Tickets, Jewels, materials or Spirit parts (this week's boards pay medals only); to check when Task 8 serves other weeks.
+  Also the seasonal ones (rewardSelect 41 with rewardId 1-3: icon and «Draw Ticket» text expected, balance in the Shop's
+  seasonal banner) and the new items Sora & Moogle B, Balloon Mike & Sulley, Balloon Axel.
