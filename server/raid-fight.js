@@ -5,7 +5,7 @@ const RETURN_RATIO = 0.5; // a broken weak point comes back with this share of i
 const DOWN_MS = 180000; // ...after this long
 const STATUS = { NONE: 0, GAVE_UP: 1, ESCAPE: 2, ACTIVE: 3, START: 4 };
 const RAID_TIME_VICTORY = 3;
-const RAID_TIME_GIVE_UP = 1; // provisional: Task 6 Step 5 picks the final one on the bench
+const RAID_TIME_GIVE_UP = 1; // bench 2-11: YOU LOSE with an empty text line (docs/notes/raid.md)
 const RAID_TIME_ESCAPED = 2; // «The Raid Boss has escaped»: a fight lost past the timer
 
 const defaultFmt = (ms) => new Date(ms).toISOString().slice(0, 19).replace('T', ' ');
@@ -71,4 +71,4 @@ function clearFight(boss, parts, nowMs) {
   return { victory, allPoints, raidTimeStatus: victory ? RAID_TIME_VICTORY : nowMs >= boss.endsAt ? RAID_TIME_ESCAPED : RAID_TIME_GIVE_UP };
 }
 
-module.exports = { RETURN_RATIO, DOWN_MS, STATUS, newBoss, listView, afterList, startFight, clearFight };
+module.exports = { RETURN_RATIO, DOWN_MS, STATUS, RAID_TIME_ESCAPED, newBoss, listView, afterList, startFight, clearFight };

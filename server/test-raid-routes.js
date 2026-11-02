@@ -146,6 +146,20 @@ const tests = {
     assert.strictEqual(w.call('start', { raidId: 12345 }).startRaidData, undefined);
     assert.strictEqual(w.player.raid.boss.fights, 0);
   },
+  start_after_timer_plays_an_escape() {
+    // bench 2-11: the deck screen open over the timer; a refused start is «200 ERROR :122», and OK resends it forever
+    const w = world();
+    w.spawn(); w.call('list'); w.start(); w.clearParts([500, 100, 200]);
+    w.now = w.player.raid.boss.endsAt + 1;
+    const b = w.start();
+    assert.notStrictEqual(b.startRaidData, undefined, 'the fight starts');
+    assert.strictEqual(w.ap, 100, 'no AP for a boss that is gone');
+    const c = w.clearParts([0, 0, 0]);
+    assert.strictEqual(c.raidTimeStatus, 2, 'even a win reads as escaped');
+    assert.deepStrictEqual(w.player.raid.pending, [], 'no reward');
+    assert.strictEqual(w.call('list').selfRaid.raidStatus, 2, 'the list plays the flee');
+    assert.strictEqual(w.player.raid.boss, null);
+  },
   clear_has_all_fields() {
     const w = world();
     w.spawn(); w.start();

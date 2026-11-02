@@ -83,17 +83,22 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
   function start(res, body) {
     const r = state(), nowMs = realNow(), now = serverTime(), boss = r.boss;
     dropOrphan(r);
-    const open = r.boss && alive(boss, nowMs) && Number(body?.raidId) === boss.raidId;
+    const same = !!r.boss && Number(body?.raidId) === boss.raidId;
+    // The deck screen left open over the timer: refusing it is «200 ERROR :122», and OK resends it forever (bench 2-11).
+    // The fight is played for free and ends as an escape at /raid/clear.
+    const late = same && !alive(boss, nowMs);
+    const open = same && !late;
     const ap = open ? fight.listView(boss, nowMs, serverTimeAt).raid.useAp : 0;
-    if (!open || apNow() < ap) {
+    if (!(open || late) || apNow() < ap) {
       // Missing fields on purpose: the client stops here with an error, so it cannot play a fight the server does not
       // count. Only a stale screen gets here: the client checks the AP of the list before asking.
       log(`[raid] start refused: raidId ${body?.raidId}, boss ${boss?.raidId}, AP ${apNow()} of ${ap}`);
       return send(res, 200, { ret: ret(), userData: { userPoint: userPointData(now) } });
     }
     if (ap) changeAp(-ap);
-    fight.startFight(boss, nowMs);
-    boss.fighting = true; // /raid/clear has no raidId: this is how it knows a fight is running
+    if (late) log(`[raid] start after the timer (boss ${boss.raidId}): free fight, ends as an escape`);
+    else fight.startFight(boss, nowMs);
+    boss.fighting = late ? 'late' : true; // /raid/clear has no raidId: this is how it knows a fight is running
     beginBattle(body?.userKeybladeId);
     savePlayer();
     send(res, 200, {
@@ -136,7 +141,12 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, realNow, server
     const r = state(), nowMs = realNow(), now = serverTime(), boss = r.boss;
     const titlesBefore = new Set(player.titles || []);
     let raidTimeStatus = NO_RAID, getLux = 0;
-    if (boss?.fighting) {
+    if (boss?.fighting === 'late') {
+      boss.fighting = false;
+      raidTimeStatus = fight.RAID_TIME_ESCAPED;
+      getLux = battlePoints(body?.getPoint, body?.burst);
+      savePlayer();
+    } else if (boss?.fighting) {
       boss.fighting = false;
       const parts = usableParts(body?.parts);
       boss.damage = (boss.damage || 0) + damageOf(parts);
