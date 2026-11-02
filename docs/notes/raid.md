@@ -98,6 +98,37 @@ Recovery measured 1 November on the real gaps of the 31 models the 2016 package 
 - **Backgrounds** (`world.raidBackground` and `partsId`): complete for `bg_AG1`, `bg_BC1`, `bg_DB1`, `bg_DW1`, `bg_OC1`, `bg_WL1`, `RB_..._eff_back`, `_front`. **Incomplete**: `bg_CD1` (1 texture of 2 missing), `bg_ED1` (17 of 18), `RB_0003_00_00_eff_back3` (15 of 20); `RB_0003_00_00_eff_back2` has no folder in the data. A raid in worlds CD or ED, or world rows 10000/10001, would draw a broken background: use a complete one in `world` until recovered.
 - **Pack.** `raid_gen` (static, `--cache`): see [risorse_layout.md](risorse_layout.md#pacchetti). Imported tree before packing: `character/raid` 112 MB, `raid/demo` 101 MB, `raid/bg` 27 MB (PNG, before BTF). The size against version 91 is measured with the build.
 
+## Every boss served (Part 2, 2 November 2026: resources 95, master revision 235)
+
+User decision (2 Nov): every raid boss is served. `raid_models.txt` lists 45 models; `originals.tsv` section 49 grows by three blocks, all appended after 49c so their single destinations win. Categories as in the enemy pipeline ([battaglia.md](battaglia.md), I-194): **1** original file at its own path; **2** original copy (the same image in another LWF of the same boss, its twin or the same Flash source, placed by a measured rule, 98.7-99.5% right); **3** reconstructed, a real file chosen by a rule below the 99% bar (common art, anchored alignment, unique size); **3c** reconstructed candidate, the best existing image of the declared size for a hole (never an invented shape).
+
+- **49d, 15 reconstructed bosses** (render7, each approved by the user on rendered animations; `0020` with the icy orb, category 3 from the reference art): 120 folder lines (JP own files) and 9,022 single-file lines. Slots per category:
+
+| Boss | Slots | 1 | 2 | 3 | 3c |
+|---|---|---|---|---|---|
+| 0018 Assault Dragon | 959 | 149 | 658 | 106 | 46 |
+| 0019 Adventurer | 828 | 91 | 605 | 61 | 71 |
+| 0020 Jewel Princess | 746 | 79 | 631 | 18 | 18 |
+| 0021 Gear Golem | 582 | 232 | 178 | 118 | 54 |
+| 0022 Heartless Tsum | 727 | 182 | 426 | 55 | 64 |
+| 0023 Loudmouth Parade | 741 | 196 | 427 | 116 | 2 |
+| 0024 Greedy Grouch | 611 | 133 | 355 | 22 | 101 |
+| 0025 Mysterious Sir | 944 | 280 | 571 | 38 | 55 |
+| 0026 Merry-Go-Rowdy | 1447 | 312 | 1002 | 105 | 28 |
+| 0027 Holiday Sleigh | 664 | 150 | 381 | 94 | 39 |
+| 0028 Demon Tide | 637 | 248 | 270 | 54 | 65 |
+| 0030 Cranky Cake | 801 | 192 | 564 | 43 | 2 |
+| 0031 Mischief Bouquet | 549 | 165 | 315 | 55 | 14 |
+| 0032 Red-Nosed Chariot | 774 | 211 | 445 | 66 | 52 |
+| 1011 Closehanded Captain | 819 | 199 | 451 | 116 | 53 |
+
+- **49e, spiders 9101-9103** (1,107 lines, category 2): the JP LWF revisions that carry the Spinneret target `parts2` (9101 wait .00293431, atk1 plain, atk2 .00293425, knockback1 .00293427, knockback2 .00293429; 9102 and 9103 plain), as exact `=path` sources, and their textures (same folder by name and size, the served 2016 version or the twin rig 5000 by table alignment; for 9101 the image 9102/9103 share at that slot, its own image of that size, or the shared keyblade-hit run). The previously served revisions (the 2016 package) had only `parts1`, so no part could be targeted.
+- **49f, Queen Bee 0015, Queen Bee Ω 0016, Lion Headliner 1005** (947 lines, category 2): the JP revisions whose part markers match the 2016 rows (bees: plain name, `parts1`-`parts2`, the abdomen; Lion: wait .00001097, atk1 .00001313, atk2 .00001198, knockback1 .00001275, knockback2 .00001164, `parts1`-`parts3`, the arms), as `=path` sources, plus 932 texture copies (the same model's 2016 files by table alignment, its own unique image of that size, the common keyblade-hit run). The 2016 package carries the 5-marker version that crashed ([Weak points](#weak-points)); with these the part rows stay as they are (11.25%; 60% and 33.3%) and the weak-point check passes on its own.
+- **Spider parts (deviation, declared in the Raid Bosses notice).** In the weekly raids (Sep 2018 on) only the Spinneret had a bar (khuxwiki tabs, 2019-2020 footage). But every JP spider revision with `parts2` also marks the spiderlings `parts3`-`parts5` as weak points, and none has `parts1`-`parts2` only, so one part would crash at fight load. Coordinator ruling: `raid_config.json` `modelParts` 4 for the three spiders, the 2016 to July 2018 layout of 5000 (Spinneret 900/24,000 of body HP, spiderlings 25% each). `modelParts` caps a template's parts (first N); it stays in the config for a later era-faithful choice.
+- **Checks.** `check_raid_models.py --served` on `raid_gen`: 45 checked, 45 available (`fight`, `put_down`, `escape` true for all; `start` false only for 9102/9103, as before: no `raidStatus` 4 for them). Slots: 0015/0016 [1,2], 1005 [1,2,3], 9101-9103 [1..5], each covered by the part rows.
+- **Coverage** (master revision 235): 250 of 344 tier rows available, 96 census rows (was 230 / 87 at revision 234). The other 94 tier rows are `template`: the 15 reconstructed bosses have no 2016 `raidEnemy` row and no `modelTemplates` choice yet, so their weeks wait for one. Along the story 43 of the 150 Shop weeks from 2018-08-30 have no raid (was 46).
+- **Maps.** The 7 Scourge Spider tier rows are new raid stages (980032, 980052, 980270-980274): `gen_story_maps.py` on `stage_gen\raid_cfg.json` (250 stages; the 486 files of the others byte-identical), `validate_maps.py` 0 errors, copied into `stage_gen\files\stage`. Resources 94 was built before them and lacks those maps: 95 replaces it.
+
 ## ATK and DEF (Part 2, Task 5: deduced, not original)
 
 No ATK or DEF of a raid is known after 2016. `server/raid_stats.json` holds our own deduction, rebuilt with `node server/make-raid.js --stats`; every entry of `raids.json` lists `atk` and `def` in `reconstructed`, and the Notices must declare them.

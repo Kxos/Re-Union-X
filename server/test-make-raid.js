@@ -696,8 +696,33 @@ const tests = {
       f.config.modelParts = { 'Gear Golem': 4, 'Trickmaster': 1 };
     });
     assert.strictEqual(enemyOf(wide, entry(wide, 'Gear Golem').enemyId).validParts, 2);
-    // the shipped config: the three spiders keep only the Spinneret
-    assert.deepStrictEqual(REAL_CONFIG.modelParts, { 'Scourge Spider': 1, 'Wicked Spider': 1, 'Malicious Spider': 1 });
+    // the shipped config: the three spiders keep the 4 parts of 5000 (Spinneret + 3 spiderlings, coordinator ruling 2 Nov:
+    // their only LWFs with the Spinneret mark the spiderlings as weak points too, so 1 part would crash, see spiders_*)
+    assert.deepStrictEqual(REAL_CONFIG.modelParts, { 'Scourge Spider': 4, 'Wicked Spider': 4, 'Malicious Spider': 4 });
+  },
+  spiders_cover_every_weak_point() {
+    // weekly-era spider LWFs (parts2 revisions) have weak points parts1-5: with the shipped modelTemplates / modelParts the
+    // spiders get 4 parts of weakness 2-5 from 5000 and stay available under the weak-point rule
+    const spider = (cap) => build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Scourge Spider');
+      f.config.onlyCensusIds = ['X'];
+      f.census.bosses.push({ ww: 'Scourge Spider', raid_model_id: 9101 });
+      f.orig2016.raidEnemy.push(body2016(5000, 'Enraged Arachnid', 1, [50000002, 50000003, 50000004, 50000005]),
+        part2016(50000002, 2), part2016(50000003, 3), part2016(50000004, 4), part2016(50000005, 5));
+      f.orig2016.raidEnemyAttack.push(attack2016(500001), attack2016(500002));
+      f.models[9101] = { fight: true, start: true, escape: true, put_down: true, slots: [1, 2, 3, 4, 5] };
+      f.config.modelTemplates = { 'Scourge Spider': REAL_CONFIG.modelTemplates['Scourge Spider'] };
+      f.config.modelParts = { 'Scourge Spider': cap };
+    });
+    const out = spider(REAL_CONFIG.modelParts['Scourge Spider']);
+    const e = entry(out, 'Scourge Spider');
+    assert.ok(e.available, e.why);
+    const body = enemyOf(out, e.enemyId);
+    assert.strictEqual(body.validParts, 4);
+    assert.deepStrictEqual(body.parts.slice(0, 4).map((id) => enemyOf(out, id).weakness), [2, 3, 4, 5]);
+    // one part (the weekly-era layout) leaves slots 3-5 empty: withheld, it would crash at fight load
+    const one = entry(spider(1), 'Scourge Spider');
+    assert.deepStrictEqual([one.available, one.why, one.missingSlots], [false, 'parts', [3, 4, 5]]);
   },
   corrupt_or_missing_table_throws() {
     const setup = () => {

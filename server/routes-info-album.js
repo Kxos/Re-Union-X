@@ -108,6 +108,18 @@ function updateNotice(realMs) {
 // Solo informazioni utili per capire come funziona il gioco (decisione dell'utente del 16-10): niente
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
+  // boss raid ricostruiti (I-221, Raids Part 2: originals.tsv 49d/49e, raid_config.json modelTemplates/bossAttributes/modelParts,
+  // docs/notes/raid.md), decisione dell'utente del 2-11: tutti i boss serviti, i 15 ricostruiti approvati a vista
+  { date: '11/02', tag: 'IMPORTANT', title: 'Raid Bosses',
+    body: ['The weekly **Raid Bosses** follow your Story like the Shop: each week shows the raids of the matching week of the original game. Their graphics, moves and strength come from the original game files wherever they survive; the parts below are **reconstructed**.',
+      '## Graphics',
+      'The graphics of 15 raid bosses were incomplete in the surviving game files: **Assault Dragon, Adventurer, Jewel Princess, Gear Golem, Heartless Tsum, Loudmouth Parade, Greedy Grouch, Mysterious Sir, Merry-Go-Rowdy, Holiday Sleigh, Demon Tide, Cranky Cake, Mischief Bouquet, Red-Nosed Chariot** and **Closehanded Captain**. Their missing pieces are **reconstructed** from the game\'s own files: pieces of their twin or related bosses and enemies, and pieces of the same size chosen by rule. Every one of them was checked by eye against the original look.',
+      'The three spiders (**Scourge Spider, Wicked Spider, Malicious Spider**) use the version of their animations that has the **Spinneret** target, and some of their pictures are copied from the same spider or its twin.',
+      '**Queen Bee, Queen Bee Ω** and **Lion Headliner** use an older version of their animations from the game files, whose weak points match their surviving data (the abdomen; the two arms); some of their pictures are copied from the same boss\'s 2016 files.',
+      '## Moves and stats',
+      'Some bosses have no surviving data of their own: the three spiders use the moves of **Enraged Arachnid**, and **Egg Master** the moves of **Trickmaster** (same animations; **reconstructed**). The spiders keep their own attribute, read from their colour (red Power, green Speed, blue Magic).',
+      'The spiders have **4 weak points**: the **Spinneret** and the three **spiderlings**, as from 2016 to July 2018. In the weekly raids from September 2018 only the Spinneret was a target (**not original** here): the only surviving spider animations that have the Spinneret also mark the spiderlings as weak points, and the game cannot start the fight if a weak point has no HP bar. The HP shares are the 2016 ones (Spinneret 900 of 24,000, each spiderling a quarter).',
+      'Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP comes from recordings of the original game where one exists, otherwise from the tier tables.'] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
   { date: '10/27', tag: 'INFORMATION', title: 'Support Medal Cost',
     body: ['The support Medals (EXP Medals such as Huey, Dewey, Louie and Scrooge, Moogle Medals, Boost Medals such as Chip, Dale and Magic Mirror, Cid, and the Evolve Medals such as Merlin, Flora, Fantasia Mickey and the Blue Fairy) now show **cost 999**, like the Trait Medals.',

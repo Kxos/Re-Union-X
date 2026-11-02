@@ -14,7 +14,7 @@
   "mapWorlds": {},
   "modelTemplates": { "Scourge Spider": 5000, "Wicked Spider": 5000, "Malicious Spider": 5000, "Egg Master": 7 },
   "bossAttributes": { "Scourge Spider": 1, "Wicked Spider": 2, "Malicious Spider": 3 },
-  "modelParts": { "Scourge Spider": 1, "Wicked Spider": 1, "Malicious Spider": 1 },
+  "modelParts": { "Scourge Spider": 4, "Wicked Spider": 4, "Malicious Spider": 4 },
   "singleEra": {
     "knots": [1, 10, 20, 30, 99],
     "hpShare": [0.015, 0.08, 0.17, 1, 1],
@@ -47,7 +47,7 @@
     "brokenBackgrounds": "Incomplete raid backgrounds (docs/notes/raid.md, Backgrounds). A stage whose world has one uses backgroundFallbackWorld; the entry lists background in reconstructed.",
     "mapWorlds": "Map name -> world when the story rows do not tell it. Otherwise the last story row with the same map, or with the same text before the colon.",
     "modelTemplates": "Boss name -> 2016 raidEnemy id whose parts and moves it reuses, for bosses with no 2016 row; a boss not listed stays unavailable with why = template. Spiders 9101-9103 -> 5000 Enraged Arachnid: one rig for the three (identical frame, movie and place counts in all five fight animations), and 5000 is the 2016 recolour that already reused Savage Spider's moves. Egg Master 1008 -> 7 Trickmaster: identical frame counts in all five fight animations, 2 parts as in the JP raid_rule row. Inferred from the LWFs, medium-high confidence.",
-    "modelParts": "Boss name -> number of parts of its template row it keeps (the first ones). Spiders 9101-9103 -> 1: in the weekly-raid era (Sep 2018 on) only the Spinneret (part 2 of 5000, weakness 2, 900 / 24,000 of body HP in 2016) had a bar; the 3 spiderlings had bars only before (wiki tabs, footage; render7/SPIDERS.md). A pre-Sep-2018 spider row would need 4.",
+    "modelParts": "Boss name -> number of parts of its template row it keeps (the first ones). Spiders 9101-9103 -> 4 (coordinator ruling 2 Nov): the Spinneret (part 2 of 5000, weakness 2, 900 / 24,000 of body HP) and the 3 spiderlings (25% each), the 2016 to Jul 2018 layout. In the weekly raids (Sep 2018 on) only the Spinneret had a bar, but the only original spider LWFs with the Spinneret target (parts2) also mark the spiderlings as weak points (parts3-5), and a weak point without a part crashes the client (docs/notes/raid.md, Weak points). Declared in the Raid Bosses notice.",
     "bossAttributes": "Boss name -> attribute (1 Power, 2 Speed, 3 Magic) for a boss on a template row whose own attribute differs; body and parts take it. The spiders' attributes come from their colour as the census reads it (inferred).",
     "singleEra": "One tier before 2019-08-12: stats grow up to a cap at LV 30 (one forum statement). Cap HP is read from footage; the shares below it are ours, fitted to the only readings: LV 2 above 2%, LV 4 above 3%, LV 24 about 50%. atkShare has no reading at all: it follows the shape of the 2016 rows. Knots are the coin level bands.",
     "statsRule": "Inputs of raid_stats.json. refEnemyId: the plain Shadow row, the reference story enemy. def: community calculators treat raid DEF as constant at about 1000, 1100 for Omega; epic: a player report of a threshold near 50,000 STR, read as DEF. The damage formula was not read, so that reading is an assumption.",
