@@ -7,12 +7,11 @@ Controlli (dati veri: catalog\\files servito, names_v4.tsv, JP 4.3.1 locale):
 - StartDeckProudScene_ver260.json e' una radice attiva di jp_coco_layouts.txt;
 - ogni sotto-layout e texture della sua chiusura (scena servita, sotto-layout serviti e JP) e' servito o c'e' nel JP,
   le texture col 9-slice comprese (crash 0x2c, I-049); le armature non servite stanno in JP_ARM;
-- ogni slot di JP_ARM e' un plist servito, ogni armatura JP_ARM esiste nel JP, e nessuno slot e' citato da un
-  layout servito (le armature servite che lo usano non compaiono in nessun layout servito) ne' condiviso da armature
-  con fotogrammi diversi.
+- ogni slot di JP_ARM e' un plist servito, ogni armatura JP_ARM esiste nel JP e nessuno slot e' condiviso da
+  armature con fotogrammi diversi. Gli slot non devono piu' essere liberi: i fotogrammi JP si uniscono all'atlante
+  servito (atlas_merge.py, I-222), controllato da test_jp_arm_atlas.py.
 """
 import ast
-import glob
 import json
 import os
 import re
@@ -116,8 +115,6 @@ for need in ('StartDeckProud_Base_ver131.json', 'StartDeckProud_Button_Skip_ver1
     check(need in served or jp_has(need), 'assente nel JP: ' + need)
 
 # slot liberi delle armature
-served_layouts = {os.path.basename(f): open(f, encoding='utf-8-sig', errors='replace').read()
-                  for f in glob.glob(os.path.join(SERVED_PUB, '*.json'))}
 frames = {}
 for arm, (slot, jp_src) in JP_ARM.items():
     check(slot + '.plist' in served, '%s: slot %s.plist non servito' % (arm, slot))
@@ -127,12 +124,8 @@ for arm, (slot, jp_src) in JP_ARM.items():
         frames.setdefault(slot, set()).add(tuple(sorted(re.findall(r'<key>([^<]+\.png)</key>',
                                                               open(os.path.join(JP_PUB, jp_src + '.plist'),
                                                                    encoding='utf-8').read()))))
-    owners = [os.path.basename(f)[:-len('.ExportJson')] for f in glob.glob(os.path.join(SERVED_PUB, '*.ExportJson'))
-              if slot + '.plist' in open(f, encoding='utf-8-sig', errors='replace').read()]
-    if slot == 'MyPageAnime0':          # Ranking: slot scelto il 14-10 (banco), le scene MyPage lo citano gia'
-        continue
-    users = sorted(j for j, t in served_layouts.items() for o in owners if 'publish/%s.ExportJson' % o in t)
-    check(not users, '%s: slot %s citato da layout serviti %s' % (arm, slot, users[:3]))
+    # Slots need not be free any more: import_jp_coco.py merges the JP frames into the served atlas (atlas_merge.py,
+    # I-222: MyPageAnime0 is the atlas of the home WARNING bar). test_jp_arm_atlas.py checks the merged atlases.
 for slot, fs in frames.items():
     check(len(fs) == 1, 'slot %s condiviso da armature con fotogrammi diversi: %s' % (slot, sorted(fs)))
 
@@ -141,5 +134,5 @@ if errori:
     for e in errori:
         print(' -', e)
     sys.exit(1)
-print('OK: chiusura di %s (%d file, %d riferimenti a texture), %d armature JP_ARM su slot liberi'
+print('OK: chiusura di %s (%d file, %d riferimenti a texture), %d armature JP_ARM'
       % (ROOT, len(seen), n_tex, len(JP_ARM)))

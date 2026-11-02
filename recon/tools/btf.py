@@ -67,11 +67,26 @@ def _unpremultiply(im):
     return Image.fromarray(px.astype(np.uint8), 'RGBA')
 
 
-def encode(im):
+def decode_premultiplied(d):
+    """Like decode() but keeps the stored premultiplied colours (type 8 only): for atlas edits that
+    copy original pixels unchanged (no un-/re-premultiply rounding). Other types fall back to decode()."""
+    from PIL import Image
+    i = info(d)
+    if i is None or i['type'] != 8:
+        return _premultiply(decode(d))
+    w, h = i['size']
+    canvas = Image.new('RGBA', i['canvas'] if all(i['canvas']) else (max(w, 1), max(h, 1)))
+    raw = zlib.decompressobj().decompress(d[0x26:])
+    canvas.paste(Image.frombytes('RGBA', (w, h), raw[:w * h * 4]), i['offset'])
+    return canvas
+
+
+def encode(im, premultiplied=False):
     """Immagine PIL -> BTF tipo 8 (RGBA, tela = immagine). Intestazione come le originali:
     '\\x89BTF', 00 00 01 00, zeri, +0x10 tipo, +0x16 tela, +0x1a 0 0, +0x1e dimensioni,
-    +0x22 u32 lunghezza dei dati zlib, dati da +0x26."""
-    im = _premultiply(im.convert('RGBA'))
+    +0x22 u32 lunghezza dei dati zlib, dati da +0x26. premultiplied=True: colours already
+    premultiplied (decode_premultiplied), stored as they are."""
+    im = im.convert('RGBA') if premultiplied else _premultiply(im.convert('RGBA'))
     w, h = im.size
     z = zlib.compress(im.tobytes(), 9)
     head = b'\x89BTF' + bytes([0, 0, 1, 0]) + bytes(8) + bytes([8, 0, 0, 0, 0, 0])

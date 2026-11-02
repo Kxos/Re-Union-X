@@ -715,9 +715,14 @@ Bench 14-10 (I-106, I-113, I-114). Module `server/routes-party-ranking.js`.
   - Crash after `/ranking/lux/border` (bench 14-10): on the player's row the client creates the armature
     `Cursor_Anim_Ranking2` from `Cursor_Anim_Ranking2.ExportJson`: missing from the WW resources (like
     `Cursor_Anim_Ranking`). Import in
-    `import_jp_coco.py` (`JP_ARM`): JP ExportJson with plist and texture on the free name `MyPageAnime0`
+    `import_jp_coco.py` (`JP_ARM`): JP ExportJson pointed at the served plist name `MyPageAnime0`
     (new plists are not loaded, [risorse_layout](risorse_layout.md#regole)); the two armatures have the
     same frame `Rank_Panel_User_Eff.png` (`Cursor_Anim_Ranking20.png` is missing in JP too).
+    `MyPageAnime0` is NOT free: it is the atlas of the served `MyPageAnime.ExportJson` (home WARNING bar,
+    `Ticker_Warning_Logo1/2`, `Home_Warning_Anim1-8`, `Home_Warning_Base`, `LuxGauge_*`). Until 02-11 the JP
+    plist/texture overwrote it and the WARNING bar vanished (I-222); now `atlas_merge.py` adds
+    `Rank_Panel_User_Eff.png` into the free space of the served 2048x1024 atlas (at 597,754, every original rect
+    and pixel unchanged), checked by `test_jp_arm_atlas.py`.
     Same row: position number `img/colosseum/Colosseum_Rank_Num1..10.png` and the balloons
     `img/ranking/Rank_Balloon*` (`Ranking_IconPanel_ver131`), missing from the WW resources:
     from JP (`Rank_Balloon1_01` = copy of `1_02`, missing in JP too).
