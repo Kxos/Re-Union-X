@@ -39,7 +39,7 @@ function world(opts = {}) {
     stageResumptionData: () => ({ resumptionStatus: 0, stageId: 0, raidId: 0, colosseumStageId: 0 }),
     inventoryBlocks: () => ({ userSkills: [{ userSkillId: 1 }], userMedals: [{ userMedalId: 9 }], userMaterials: [], userKeyblades: [{ userKeybladeId: 1 }], userAvatarParts: [],
       userTitles: (w.player.titles || []).map((titleId, i) => ({ userTitleId: i + 1, titleId })) }),
-    inventorySnapshot: () => null, send: (res, code, body) => { w.sentCode = code; w.sent = body; }, ret: () => ({ ok: 1 }), clock: { weekEnd: (ms) => ms + 1000 },
+    inventorySnapshot: () => null, send: (res, code, body) => { w.sentCode = code; w.sent = body; }, ret: () => ({ ok: 1 }), clock: { weekEnd: (ms) => ms + 1000, monthIndex: (ms) => { const d = new Date(ms - 8 * 3600e3); return d.getUTCFullYear() * 12 + d.getUTCMonth(); } },
     apNow: () => w.ap, changeAp: (d) => { w.ap += d; }, raidUser: () => USER, supportUsers: (id) => (id ? [{ supportUserId: id }] : []),
     guiltLists: () => ({ guiltBurstFirstUserMedalIds: [], guiltBurstMaxUserMedalIds: [] }),
     battlePoints: (getPoint, burst) => { const lux = Number(getPoint?.lux) || 0; w.lux += lux; w.burst = burst; return lux; }, beginBattle: (k) => { w.keyblade = k; },
@@ -327,9 +327,45 @@ const tests = {
     assert.strictEqual(w.player.raid.pending.length, 1, 'one pending');
     assert.strictEqual(w.spawn().level, 2, 'next boss at the new level');
   },
+  level_reset_on_month_change() {
+    const w = world();
+    w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 2);
+    w.now = Date.parse('2026-11-01T09:00:00Z'); // 02:00 PDT of the 1st: next month
+    assert.strictEqual(w.spawn().level, 1, 'reset to LV 1');
+    assert.strictEqual(w.player.raid.levelsMonth, w.raid.monthOf(w.now));
+  },
+  level_kept_within_month() {
+    const w = world();
+    w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+    w.now = Date.parse('2026-10-31T10:00:00Z');
+    assert.strictEqual(w.spawn().level, 2, 'same month: kept');
+  },
+  level_live_boss_untouched() {
+    const w = world();
+    w.player.raid = { levels: { 'WW-1/Beginner': 4 }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': '2019-10-07' } };
+    w.now = Date.parse('2026-11-01T07:50:00Z'); w.player.raid.levelsMonth = w.raid.monthOf(w.now);
+    const boss = w.spawn();
+    assert.strictEqual(boss.level, 4);
+    w.now = Date.parse('2026-11-01T08:05:00Z');
+    const b = w.call('list');
+    assert.strictEqual(w.player.raid.boss, boss, 'live boss kept');
+    assert.strictEqual(boss.level, 4);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], undefined, 'levels cleared');
+    w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], undefined, 'old-month boss does not feed the new month');
+    assert.strictEqual(w.spawn().level, 1);
+  },
+  level_returning_week_restarts() {
+    const w = world();
+    w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 2);
+    w.index.entries[0].start = '2019-12-02'; w.index.entries[0].end = '2019-12-08'; // same key, a later week
+    assert.strictEqual(w.spawn().level, 1, 'comes back at LV 1');
+  },
   level_cap() {
     const w = world();
-    w.player.raid = { levels: { 'WW-1/Beginner': 99 } };
+    w.player.raid = { levels: { 'WW-1/Beginner': 99 }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': '2019-10-07' } };
     w.spawn(); w.start(); w.clearParts([0, 100, 200]);
     assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 99);
   },
