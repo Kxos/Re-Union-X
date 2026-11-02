@@ -10,7 +10,8 @@ const CFG = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'),
 const TYPE_RAID_COIN = CFG.coinType, TYPE_MATERIAL = 5, TYPE_MEDAL = 3;
 const TABLES = ['victory', 'mvp', 'all'];
 const TIER_ORDER = ['Beginner', 'Intermediate', 'Advanced', 'Legendary', 'Epic'];
-const ID_BASE = 9100000; // server-made row ids, above every id of the original rows
+// raidReward id = raidEnemyId * 100 + table * 10 + band (tables 1 Victory, 2 MVP/Host, 3 All Points)
+const rewardRowId = (enemyId, table, band) => enemyId * 100 + table * 10 + band;
 
 const dateKey = (d) => (typeof d === 'number' ? new Date(d).toISOString().slice(0, 10) : String(d).slice(0, 10));
 
@@ -41,24 +42,25 @@ function tableRow(id, items, shares) {
 }
 
 // The three coin tables of a boss: {victory, mvp, all}. Before cfg.tierFrom the level bands apply (tier 'single').
-function coinRows({ date, tier, level, gemDrop = false }) {
+// `enemyId`: the boss row the tables belong to (each boss has its own rows). Band = level band, or tier number (1-5).
+function coinRows({ enemyId, date, tier, level, gemDrop = false }) {
   let idx, spec, name;
   if (dateKey(date) >= CFG.tierFrom) {
     name = tier === 'Standard' ? 'Beginner' : tier;
     spec = CFG.tiers[name];
     if (!spec) throw new Error(`raid tier ${tier} has no coin table`);
-    idx = 4 + TIER_ORDER.indexOf(name);
+    idx = 1 + TIER_ORDER.indexOf(name);
   } else {
     const band = CFG.bandsBefore.findIndex((b) => level >= b.minLv && level <= b.maxLv);
     if (band < 0) throw new Error(`raid level ${level} outside the level bands`);
-    spec = CFG.bandsBefore[band]; idx = band; name = 'single'; gemDrop = false;
+    spec = CFG.bandsBefore[band]; idx = band + 1; name = 'single'; gemDrop = false;
   }
   const gemPct = gemDrop ? CFG.gemPctByTier[name] : 0;
   const gems = Object.values(CFG.gemMaterialIds).map((id) => ({ type: TYPE_MATERIAL, id, num: 1 }));
   const coin = (num) => ({ type: TYPE_RAID_COIN, id: 0, num });
   const out = {};
   TABLES.forEach((t, k) => {
-    const id = ID_BASE + (gemDrop ? 1000 : 0) + idx * 10 + k + 1;
+    const id = rewardRowId(enemyId, k + 1, idx);
     const amounts = t === 'victory' ? spec.victory : [spec[t]];
     if (gemDrop) { // the low coin amount or one gem; the gem odds are reconstructed
       const each = gemPct / gems.length;
@@ -145,4 +147,4 @@ function raidState(player) {
   return r;
 }
 
-module.exports = { coinRows, rollReward, slotItem, pendingEntry, entryItems, sanitizePending, deliverReward, deliverEntry, raidState, CONFIG: CFG };
+module.exports = { rewardRowId, coinRows, rollReward, slotItem, pendingEntry, entryItems, sanitizePending, deliverReward, deliverEntry, raidState, CONFIG: CFG };
