@@ -7,7 +7,7 @@ const rr = require('./raid-rewards');
 
 const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const D_OLD = '2019-08-11', D_NEW = '2019-08-12', D_GEM = '2020-03-16';
-const rowsOf = (o) => rr.coinRows({ date: D_NEW, tier: 'Epic', level: 50, ...o });
+const rowsOf = (o) => rr.coinRows({ enemyId: 7, date: D_NEW, tier: 'Epic', level: 50, ...o });
 const nums = (row) => row.num.slice(0, row.validReward);
 const tests = {
   victory_pays_one_slot() {
@@ -33,11 +33,11 @@ const tests = {
   coin_tables() {
     const a = rowsOf();
     assert.deepStrictEqual([nums(a.victory), nums(a.mvp), nums(a.all)], [[240, 360], [90], [90]]);
-    const b = rr.coinRows({ date: D_OLD, tier: 'single', level: 20 });
+    const b = rr.coinRows({ enemyId: 7, date: D_OLD, tier: 'single', level: 20 });
     assert.deepStrictEqual([nums(b.victory), nums(b.mvp), nums(b.all)], [[150, 220], [60], [60]]);
-    const c = rr.coinRows({ date: D_OLD, tier: 'single', level: 5 });
+    const c = rr.coinRows({ enemyId: 7, date: D_OLD, tier: 'single', level: 5 });
     assert.deepStrictEqual([nums(c.victory), nums(c.mvp)], [[40, 60], [10]]);
-    assert.deepStrictEqual(nums(rr.coinRows({ date: D_NEW, tier: 'Legendary', level: 99 }).victory), [210, 315]);
+    assert.deepStrictEqual(nums(rr.coinRows({ enemyId: 7, date: D_NEW, tier: 'Legendary', level: 99 }).victory), [210, 315]);
     assert.ok(a.victory.type.slice(0, 2).every((t) => t === rr.CONFIG.coinType));
   },
   all_points_only_when_earned() {
@@ -72,14 +72,20 @@ const tests = {
     assert.strictEqual(rr.deliverReward({ type: 3, id: 90033, num: 1 }, { medalCount: 3000, cap: 3000 }), 'present');
     assert.strictEqual(rr.deliverReward({ type: 3, id: 90033, num: 1 }, { medalCount: 2999, cap: 3000 }), 'grant');
     assert.strictEqual(rr.deliverReward({ type: rr.CONFIG.coinType, id: 0, num: 90 }, { medalCount: 3000, cap: 3000 }), 'grant');
-    const row = { validReward: 1, type: [3], id: [90033], num: [2], odds: [100000], oddsUpPerLv: 0 };
+    const row = { validReward: 1, type: [3], id: [90033], num: [1], odds: [100000], oddsUpPerLv: 0 };
     const rows = { victory: row, mvp: row, all: row };
     const e = { raidId: 1, level: 1, subdueId: 1, mvpId: 1, partAllId: 0, rewardIds: {} };
     const got = { grant: [], present: [] };
     const r = rr.deliverEntry(e, rows, { medalCount: 2999, cap: 3000, grant: (i) => got.grant.push(i), present: (i) => got.present.push(i) });
     assert.strictEqual(r.granted + r.presented, 2);
     assert.strictEqual(got.grant.length + got.present.length, 2);
-    assert.ok(got.present.length >= 1);
+    assert.deepStrictEqual([r.granted, r.presented, got.grant.length, got.present.length], [1, 1, 1, 1]);
+  },
+  row_ids() {
+    assert.strictEqual(rr.rewardRowId(13, 2, 3), 1323);
+    const a = rowsOf({ enemyId: 13 }), b = rowsOf({ enemyId: 14 });
+    assert.deepStrictEqual([a.victory.raidRewardId, a.mvp.raidRewardId, a.all.raidRewardId], [1315, 1325, 1335]);
+    assert.notStrictEqual(a.victory.raidRewardId, b.victory.raidRewardId);
   },
   old_save() {
     const p = {};
@@ -89,7 +95,7 @@ const tests = {
     assert.strictEqual(rr.raidState(p).points, 5);
     assert.deepStrictEqual(rr.raidState({ raid: { points: 2 } }), { boss: null, levels: {}, points: 2, pending: [], kept: null });
   },
-  reward_type_15() {
+  reward_type_15_and_16() {
     const SAVE = path.join(os.tmpdir(), `khux-test-raid-rewards-${process.pid}.json`);
     try { fs.unlinkSync(SAVE); } catch { /* new */ }
     process.env.KHUX_SAVE = SAVE; delete process.env.KHUX_REAL_NOW; delete process.env.KHUX_SERVER_TIME;
@@ -98,8 +104,9 @@ const tests = {
     const q = (fn) => { console.log = () => {}; try { return fn(); } finally { console.log = log; } };
     const before = q(() => t.userPointData(Date.now())).raidSpherePoint;
     q(() => t.grantObjectiveReward({ submissionRewardType: [15], submissionItemId: [0], submissionItemNum: [7] }, 1));
-    assert.strictEqual(t.player.raidSpherePoint, 7);
-    assert.strictEqual(q(() => t.userPointData(Date.now())).raidSpherePoint, before + 7);
+    q(() => t.grantObjectiveReward({ submissionRewardType: [16], submissionItemId: [0], submissionItemNum: [5] }, 1));
+    assert.strictEqual(t.player.raidSpherePoint, 12);
+    assert.strictEqual(q(() => t.userPointData(Date.now())).raidSpherePoint, before + 12);
     try { fs.unlinkSync(SAVE); } catch { /* gone */ }
   },
 };

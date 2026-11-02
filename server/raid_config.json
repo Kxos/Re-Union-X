@@ -1,7 +1,7 @@
 {
   "rewards": {
     "tierFrom": "2019-08-12",
-    "coinType": 15,
+    "coinType": 16,
     "oddsBase": 10000,
     "oddsUpFromLevel": 1,
     "highCoinPct": 10,
@@ -21,7 +21,7 @@
       "Epic": { "victory": [240, 360], "mvp": 90, "all": 90 }
     },
     "reconstructed": {
-      "coinType": "Reward type of the Raid Coin. The brief and grantItem use 15 (raidSpherePoint); the 2016 table export names 15 Event Coin and 16 Raid Coin, from item-image names. Not settled: check on the bench which icon the result screen shows.",
+      "coinType": "Reward type of the Raid Coin: the 2016 rows pay the Weekly-era bosses (13, 14, 1003, 1004, 1009) in type 16 and event bosses in type 15 Event Coin. grantItem pays both 15 and 16 into raidSpherePoint so no original row loses its reward. The icon is checked on the bench.",
       "oddsBase": "Odds read as base 10000, rolled from the last slot to the first, slot 1 taking the rest (the 2016 rows then give round shares: 1/3 each, 92/8, 70/30). Inferred from the numbers, not from code.",
       "oddsUpFromLevel": "oddsUpPerLv is added to the chance of every slot after the first for each level above this one. The field is undocumented (name only), so this is a guess; every coin row built here has oddsUpPerLv 0, so coins are unaffected.",
       "highCoinPct": "Chance of the higher Victory coin amount: a player counted about 5,200 coins over LV 1-29, which fits about 10% high rolls; no source gives the odds. Matches the 92/8 pattern of the 2016 two-slot rows.",
