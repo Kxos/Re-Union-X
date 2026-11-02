@@ -209,9 +209,10 @@ function allocateIds({ census, weeks, ids, only }) {
 }
 
 // The master rows of one boss at one tier, or {why} when the 2016 tables cannot give them.
-function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single }) {
+// cap: raid_config.json modelParts, the first N parts of the template that the boss keeps (undefined: all of them).
+function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap }) {
   const parts = [];
-  for (const id of template.parts.slice(0, template.validParts)) {
+  for (const id of template.parts.slice(0, cap === undefined ? template.validParts : Math.min(cap, template.validParts))) {
     const p = orig.get(id);
     if (!p) return { why: 'template' };
     if (!(p.weakness >= 2 && p.weakness <= 6)) throw new Error(`raid: part ${id} of ${e.boss} has weakness ${p.weakness}`);
@@ -318,7 +319,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const near = (partHp[w.boss] || []).slice().sort((a, b) => Math.abs(dayMs(a.date) - dayMs(date)) - Math.abs(dayMs(b.date) - dayMs(date)))[0];
       const partShare = (p, i) => (near ? near.parts[i % near.parts.length] / near.body : p.hp[0] / template.hp[0]);
       const knots = single ? single.knots : null;
-      const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single });
+      // modelParts: a boss whose era showed fewer weak points than its template row keeps only the first N parts (spiders from
+      // Sep 2018: body + Spinneret; the census has no spider row before that, which would need the 4 parts of 5000)
+      const cap = (config.modelParts || {})[w.boss];
+      const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap });
       if (rows.why) { entry.why = rows.why; return; }
       // every weak point of the model (raid_models.json `slots`, parts<N> of its wait LWF) needs a part of weakness N: at fight
       // load the client looks up a raidEnemy row for each one and crashes on an empty slot (docs/notes/raid.md «Weak points»)
