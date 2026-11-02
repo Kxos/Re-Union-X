@@ -627,6 +627,32 @@ const tests = {
     assert.ok(!warned.some((s) => /Blue Trident Tail/.test(s)), 'a boss without graphics is not a template gap');
     assert.ok(logged.some((s) => /template 1/.test(s) && /graphics 2/.test(s)), logged.join('|'));
   },
+  template_with_own_attribute() {
+    // Task 8 fix: a boss on a template row keeps the template's moves and parts, and takes its own attribute when set
+    const out = build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
+      f.config.onlyCensusIds = ['X'];
+      f.config.modelTemplates = { 'Gear Golem': 7 };
+      f.config.bossAttributes = { 'Gear Golem': 1 };
+    });
+    const e = entry(out, 'Gear Golem');
+    assert.ok(e.available, e.why);
+    const body = enemyOf(out, e.enemyId);
+    assert.strictEqual(body.raidDisplayId, 21, 'its own model');
+    assert.strictEqual(body.validParts, 2, 'the parts of the template');
+    assert.deepStrictEqual([body, ...body.parts.slice(0, 2).map((id) => enemyOf(out, id))].map((r) => r.attribute), [1, 1, 1]);
+    assert.ok(e.reconstructed.includes('moves') && e.reconstructed.includes('attribute'));
+    // without bossAttributes: the template's attribute, no label
+    const plain = entry(build((f) => {
+      addWeek(f, 'X', '2019-10-14', '2019-10-20', 'Advanced', 'Gear Golem');
+      f.config.onlyCensusIds = ['X'];
+      f.config.modelTemplates = { 'Gear Golem': 7 };
+    }), 'Gear Golem');
+    assert.ok(!plain.reconstructed.includes('attribute'));
+    // the shipped config: the three spiders and Egg Master have a template, each spider its colour's attribute
+    assert.deepStrictEqual(REAL_CONFIG.modelTemplates, { 'Scourge Spider': 5000, 'Wicked Spider': 5000, 'Malicious Spider': 5000, 'Egg Master': 7 });
+    assert.deepStrictEqual(REAL_CONFIG.bossAttributes, { 'Scourge Spider': 1, 'Wicked Spider': 2, 'Malicious Spider': 3 });
+  },
   corrupt_or_missing_table_throws() {
     const setup = () => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));

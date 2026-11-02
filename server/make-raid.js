@@ -320,6 +320,12 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const knots = single ? single.knots : null;
       const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single });
       if (rows.why) { entry.why = rows.why; return; }
+      // a boss on another boss's row (modelTemplates) keeps its own attribute where raid_config.json bossAttributes states it
+      const attribute = (config.bossAttributes || {})[w.boss];
+      if (attribute && !own) {
+        for (const r of [rows.body, ...rows.partRows]) r.attribute = attribute;
+        reconstructed.push('attribute');
+      }
 
       const skillIds = template.skillId.slice(0, template.validSkill);
       const missing = skillIds.filter((id) => !haveAttack.has(id) && !origAttack.has(id));
