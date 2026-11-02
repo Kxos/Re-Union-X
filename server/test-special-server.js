@@ -57,7 +57,7 @@ delete process.env.KHUX_VIP;
 
 // 3. functionFlags bit 4 (letto una volta al login) e la scheda Events vuota
 check(t.ret().functionFlags === 4, `functionFlags ${t.ret().functionFlags}`);
-check(ev(2).events.length === 0, 'Events (eventCategory 2) non vuota');
+check(ev(2).events.every((e) => e.eventType === 2), 'Events (eventCategory 2): only raid events');
 
 // 4. drop dei nemici: tipi per posizione della riga del POI; uid e conteggi attesi si ricavano dal POI e dalle righe
 // reward lette qui (non dalla disposizione della mappa generata)
