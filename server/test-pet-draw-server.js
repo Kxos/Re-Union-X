@@ -96,6 +96,12 @@ check(keepBtn(20775) && !keepBtn(20810), 'catalogue: Keep button on the past dea
 check(call(t.respondGachaPost, '/web/gacha/pinpet/20775')?.ok === true, 'pinpet answers ok');
 const cat2 = raw(t.respondGachaWeb, '/web/gacha/catalog');
 check(/data-k="pet" data-id="20775" data-pin="\/web\/gacha\/unpinpet" data-on="0">Remove from the Shop/.test(cat2.body), 'catalogue: kept deal shows Remove');
+// kept deal in the Shop: plate image with the «KEPT IN SHOP» badge like the medal banners (user 03-11); the deal of the week without
+const lk = call(t.respondGachaList).petGachaList;
+check(/\/web\/gacha\/petimg\/20775-kept\d+\.png$/.test(lk.find((x) => x.drawPetTypeId === 20775)?.bannerUrl || '') && /\/web\/gacha\/petimg\/20810\.png$/.test(lk.find((x) => x.drawPetTypeId === 20810)?.bannerUrl || ''), `kept plate url (${JSON.stringify(lk.map((x) => x.bannerUrl))})`);
+const kimg = raw(t.respondGachaWeb, lk.find((x) => x.drawPetTypeId === 20775).bannerUrl.replace(/^https?:\/\/[^/]+/, ''));
+check(kimg.code === 200, `kept plate image served (${kimg.code})`);
+check(raw(t.respondGachaWeb, '/web/gacha/petimg/20775-kept999.png').code === 404, 'old/unknown kept style: 404');
 // master drawPetType: a row for every deal, all fields (client parser FUN_00f15760)
 const rows = JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'drawPetType.json'), 'utf8'));
 check(rows.length === 6 && rows.every((x) => x.drawType === 11 && Object.keys(x).length === 24 && Object.values(x).every((v) => typeof v === 'string' || v >= 0)), 'tables/drawPetType.json: 6 rows, 24 fields, integers >= 0');

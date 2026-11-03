@@ -96,11 +96,13 @@ function drawPetTypeRow(b, sortId = PET_SORT_FIRST) {
 
 // petGachaList element (parser FUN_007959a8: every key mandatory): totalCount / restCount = the «N/M left» counter
 // (restCount 0 greys the button and the client sends nothing)
-function plate(b, webBase, sortId, owned, petRows, elsewhere) {
+// kept: the deal kept from the Catalog (outside its dates) gets the «KEPT IN SHOP» badge image, like the medal banners
+// (server.js keptImageFile, URL pet<id>-kept<KEPT_STYLE>.png)
+function plate(b, webBase, sortId, owned, petRows, elsewhere, kept = false, keptStyle = 0) {
   const ext = b.extend === 'unobtainable' ? petRows.map((r) => r.petPartsId).filter((id) => !elsewhere.has(id) && !b.poolIds.includes(id)) : [];
   const all = [...b.poolIds, ...ext];
   return { drawPetTypeId: b.drawPetTypeId, drawType: DRAW_TYPE_PET, sortId, payType: 1, price: b.price, lotName: '', lotCount: 1,
-    bannerUrl: `${webBase}${imgUrl(b.drawPetTypeId)}`, mypageBanner: 0, totalCount: all.length, restCount: all.filter((id) => !owned.has(id)).length };
+    bannerUrl: `${webBase}${kept ? imgUrl(b.drawPetTypeId).replace(/\.png$/, `-kept${keptStyle}.png`) : imgUrl(b.drawPetTypeId)}`, mypageBanner: 0, totalCount: all.length, restCount: all.filter((id) => !owned.has(id)).length };
 }
 
 // POST /gacha/petdraw response (apply at 0x7c8854): pet.userPetParts (drawn parts), effectNumbers (>= one per part; [0]
