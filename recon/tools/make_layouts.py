@@ -1183,9 +1183,11 @@ LAYOUTS = {
         P('Grid_R_Area', 0, 0, 10, 10)])),
     'SphereScene_Info.json': ('build', P('sphere_info_root', 0, 0, 960, 640, [
         P('Info_Area', 0, 0, 960, 640, [
-            I('Txt_SphereBoard_Plate', 113, 505, 220, 36, 'Plate13.png',
+            # title left-aligned as in the original board screenshots, on a plate wide enough for the longest Raid Board
+            # title with its week date («JP 5th Anniv. Entry Medal Board 10/14/19», ~440 px at 22 pt; was 220, centred)
+            I('Txt_SphereBoard_Plate', 234, 505, 460, 36, 'Plate13.png',
               opts=dict(scale9Enable=True, capInsetsX=60, capInsetsY=10, capInsetsWidth=1, capInsetsHeight=1)),
-            L('Txt_SphereBoard_Label', 113, 505, 210, 30, '', 22),
+            L('Txt_SphereBoard_Label', 14, 505, 440, 30, '', 22, opts=dict(anchorPointX=0, hAlignment=0)),
             I('Select_Board', 120, 408, 306, 306, 'Board_0001.png', s9=False, scale=0.5),
             I('Select_Base', 120, 408, 306, 306, 'Board_0001.png', s9=False, scale=0.5),
             I('Select_Kind', 120, 408, 306, 306, 'Kind_0001.png', s9=False, scale=0.5),

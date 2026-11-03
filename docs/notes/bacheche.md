@@ -152,15 +152,20 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
   `Select_Base` = `img/sphere_incentive/<sphereBoardId>.png` (the picture), `Select_Kind` = `img/sphere_kind/Kind_%04d` of
   `kindId` (0 = none); the title bar shows `sphere.boardName`. Nothing else names the art, so every id needs its own file.
   - Sources: the khuxwiki screenshots of every WW weekly board (`File:Raid Board - <name> KHUX.png`, 113 files, kept in
-    `D:\Progetto_Restauro_KH_UXeferenceaid_boards\wiki`, not in the repository) show the title, the lilac card
+    `D:\Progetto_Restauro_KH_UX
+eference
+aid_boards\wiki`, not in the repository) show the title, the lilac card
     (Board_0005) and a picture per board; the JP 4.3.1 data has the same pictures in `img/sphere_incentive/` (472 files
     2400xxx, `Board Raid/`, `Board Raid/Repeat/`). A pixel match (48 px, inner area) pairs 62 of the 66 boards of
-    `boards_weekly.json` with a JP file (checked by eye in `tmpaid_boards_arterify.png`); 4 have none
+    `boards_weekly.json` with a JP file (checked by eye in `tmp
+aid_boards_arterify.png`); 4 have none
     (enhancement-2019-03, radiant-12, -15, -18) and are cut from the screenshot by `recon/tools/raid_board_screens.py`
     (card box fitted on two boards that have the JP file: mean difference 3.8/255) into `raid_loc\img\sphere_incentive_ww`.
   - `raid_config.json` `boards.background` 5 and `boards.art` (board key -> `jp` path or `screenshot`); `raid-boards.js`
     writes `boardId` 5, the original `boardName` (two boards of a week can share it, as in the 2019 screenshots: the picture
-    tells them apart; the old « (1)/(2)» suffix is gone), labels `boardArt` (screenshot) / `boardNoArt`; `make-raid.js`
+    tells them apart; the old « (1)/(2)» suffix is gone) + the week's start date M/D/YY (ours, user 3 Nov 2026: a kept
+    raid's boards beside the current week's; «Enhancement Board 10/14/19»; longest served «JP 5th Anniv. Entry Medal Board
+    9/14/20»; the board-screen title is left-aligned on a 460 px plate so it fits, list title bar 540 px), labels `boardArt` (screenshot) / `boardNoArt`; `make-raid.js`
     writes `game_data/raid_board_art.tsv` (one line per board id, originals.tsv columns), imported by `build-resources.ps1`
     after `originals.tsv`. Notice: Raid Bosses, «Raid Boards».
   - Coin: the list loads `img/incentive/SpherePointIcon_<kind>.png` (Raid Coins `_Raid`) into its `SpherePointIcon`; the
