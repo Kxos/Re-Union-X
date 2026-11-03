@@ -1,7 +1,8 @@
 // Spirit Blind Box WebView pages (03-11): Details of a pet plate (master detailUrl), Draw Odds (login link petOdds) and the
 // Banner Catalog section with «Keep in the Shop» for past deals. Same style as the medal banner pages (gacha.page).
 'use strict';
-const { page, PIN_JS, esc } = require('./gacha');
+const gacha = require('./gacha');
+const { page, PIN_JS, esc } = gacha;
 const pd = require('./pet-draw');
 
 const EXT_TEXT = 'Not original: once you own every part listed above, this deal also gives the Spirit parts that have no other way to be obtained in this restoration (the original game gave them in events not restored yet).';
@@ -50,17 +51,28 @@ function oddsPage(list, ctx) {
   return page('Draw Odds', body || '<p>No Spirit Blind Box in the Shop.</p>');
 }
 
+// «Keep in the Shop» in the catalogue row, like the medal banners (user 03-11: the button was only in the Details page);
+// data-k="pet": gacha CATALOG_JS / khuxSet use /web/gacha/pinpet/<id> and /web/gacha/unpinpet, own kept slot
+function keepRowButton(b, state) {
+  const on = state !== 'pinned';
+  return `<div class="pkw"><button type="button" class="pk" data-k="pet" data-id="${b.drawPetTypeId}" data-pin="${on ? `/web/gacha/pinpet/${b.drawPetTypeId}` : '/web/gacha/unpinpet'}" data-on="${on ? 1 : 0}">${on ? '📌 Keep in the Shop' : 'Remove from the Shop'}</button><div class="pinmsg"></div></div>`;
+}
+
 // Banner Catalog section (appended to the medal catalogue page)
 function catalogSection(banners, ctx) {
+  const keepInRow = (b, state) => (state === 'pinned' || (state === 'later' && ctx.keepableOf(b)) ? keepRowButton(b, state) : '');
   const rows = banners.map((b) => {
     const href = `/web/gacha/petdetail/${b.drawPetTypeId}?from=catalog`;
     const st = ctx.listedIds.has(b.drawPetTypeId) ? ['now', 'In the Shop now'] : ctx.keptRowId === b.rowId ? ['pinned', 'Kept in the Shop']
       : ctx.keepableOf(b) ? ['later', 'Past deal: can be kept in the Shop'] : ['locked', 'Unlocks with the Story'];
-    return `<div class="b ${st[0]}"><a href="${href}"><img loading="lazy" src="${pd.imgUrlOf(b.drawPetTypeId)}" alt=""></a>`
-      + `<a class="nm" href="${href}">${esc(b.name)}</a><div class="n">${esc(b.start)} to ${esc(b.end)} · ${b.price} Jewels per part</div>`
-      + `<span class="s s-${st[0]}">${st[1]}</span></div>`;
+    // same markup and data attributes as the medal rows (gacha.catalogPage), so the catalogue filters apply to them too
+    // (BANNER TYPE «Spirit parts», game year tabs, SHOW); price in Jewels
+    return `<div class="b ${st[0]}" id="p${b.drawPetTypeId}" data-year="${gacha.gameYearOf(b.start)}" data-pay="jewel" data-vip="0" data-free="0" data-state="${st[0]}" data-kind="spirit">`
+      + `<a class="im" href="${href}"><img loading="lazy" width="640" height="140" src="${pd.imgUrlOf(b.drawPetTypeId)}" alt=""></a>`
+      + `<div class="info"><a class="nm" href="${href}">${esc(b.name)}</a><div class="n">${esc(gacha.niceRange(b))}</div>`
+      + `<div class="pay">${gacha.PAY_ICON.jewel}${b.price} Jewels per part</div><span class="s s-${st[0]}">${st[1]}</span>${keepInRow(b, st[0])}</div></div>`;
   });
-  return `<h2 id="spirit">Spirit Blind Box (${banners.length})</h2><p class="n">Spirit part deals: every draw gives a part you do not own.</p>${rows.join('')}`;
+  return `<div class="ksec"><h2 id="spirit">Spirit Blind Box (${banners.length})</h2><p class="n">Spirit part deals: every draw gives a part you do not own.</p><div class="cat">${rows.join('')}</div></div>`;
 }
 
 module.exports = { detailPage, oddsPage, catalogSection, EXT_TEXT };

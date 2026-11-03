@@ -628,8 +628,12 @@ try {
     'alt="">Seasonal tickets<', 'alt="">VIP<', '>Other<', '>SHOW<', '>All banners<', '▶ In the Shop now', 'Unlocked, not in the Shop now', '🔒 Still locked', 'Reset filters', 'Show 7 banners', 'Clear all']) {
     check(yp.includes(t), `catalogo: testo «${t}»`);
   }
+  check(!yp.includes('BANNER TYPE') && g.catalogPage(yb, { ...sctx, storyQuest: 525, spirit: true }).includes('<h4>BANNER TYPE</h4>'), 'catalogo: BANNER TYPE solo con ctx.spirit');
+  check(g.KIND_OPTS.map((o) => o[0]).join() === 'all,medal,spirit', 'catalogo: opzioni BANNER TYPE');
+  check(yp.includes("kind:attr(el,'data-kind')||'medal'") && yp.includes("if(s.kind!=='all'&&r.kind!==s.kind)return false;"), 'catalogo: filtro kind nel JS');
+  check(yp.includes('"/web/gacha/unpin"+p'), 'catalogo: khuxSet con le rotte pet per data-k="pet"');
   check(yp.includes('/web/gacha/search?q=') && yp.includes('encodeURIComponent(') && yp.includes('Searching…'), 'catalogo: ricerca con encodeURIComponent e «Searching…»');
-  const rows = [...yp.matchAll(/<div class="b [^"]*" id="c(\d+)" data-year="(\d)" data-pay="(\w+)" data-vip="([01])" data-free="[01]" data-state="(\w+)">/g)];
+  const rows = [...yp.matchAll(/<div class="b [^"]*" id="c(\d+)" data-year="(\d)" data-pay="(\w+)" data-vip="([01])" data-free="[01]" data-state="(\w+)" data-kind="medal">/g)];
   check(rows.length === yb.length, `catalogo: data-* su ogni banner (${rows.length})`);
   const row = (b) => rows.find((r) => Number(r[1]) === b.drawMedalTypeId) || [];
   check(row(yb[0])[2] === '0' && row(yb[1])[2] === '1' && row(yb[5])[2] === '5', 'catalogo: data-year');

@@ -609,7 +609,7 @@ function laterWhy(banner, w, ctx) {
 // di Details e Catalog: l'elemento porta data-pin (URL del POST) e data-on (1 = fissa, 0 = toglie); khuxPin manda il
 // POST, mostra nel riquadro `box` la conferma ben visibile (scorrendo fino a lei) e chiama onOk(fissato).
 const PIN_JS = 'var KHUX_PIN={1:["Pinned!","Leave and re-enter the Shop to see it.","pinmsg"],0:["Removed.","Leave and re-enter the Shop.","pinmsg off"]};'
-  + 'function khuxSet(el,id,pinned){el.setAttribute("data-pin",pinned?"/web/gacha/unpin":"/web/gacha/pin/"+id);el.setAttribute("data-on",pinned?"0":"1");el.textContent=pinned?"Remove from the Shop":"\uD83D\uDCCC Keep in the Shop";}'
+  + 'function khuxSet(el,id,pinned){var p=el.getAttribute("data-k")==="pet"?"pet":"";el.setAttribute("data-pin",pinned?"/web/gacha/unpin"+p:"/web/gacha/pin"+p+"/"+id);el.setAttribute("data-on",pinned?"0":"1");el.textContent=pinned?"Remove from the Shop":"\uD83D\uDCCC Keep in the Shop";}'
   + 'function khuxSay(box,cls,head,sub){box.className=cls;box.innerHTML="";var b=document.createElement("div"),s=document.createElement("small");b.textContent=head;s.textContent=sub;box.appendChild(b);box.appendChild(s);box.style.display="block";if(box.scrollIntoView)box.scrollIntoView(false);}'
   + 'function khuxPin(el,box,onOk){var on=el.getAttribute("data-on")==="1",m=KHUX_PIN[on?1:0],x=new XMLHttpRequest();x.open("POST",el.getAttribute("data-pin"));'
   + 'x.onload=function(){if(x.status===200){khuxSay(box,m[2],m[0],m[1]);if(onOk)onOk(on);}else khuxSay(box,"pinmsg err","Could not change the Shop","This banner cannot be kept.");};'
@@ -714,6 +714,9 @@ const PAY_ICON = Object.fromEntries(PAY_ICON_KEYS.map((k) => [k, `${payIcon(k)} 
 const PAY_OPTS = [['all', 'All'], ['jewel', `${payIcon('jewel')}Jewels`], ['platinum', `${payIcon('platinum')}Platinum Ticket`], ['draw', `${payIcon('draw')}Draw Ticket`], ['seasonal', `${payIcon('seasonal')}Seasonal tickets`], ['vip', `${payIcon('vip')}VIP`], ['free', 'Free Deals'], ['other', `${payIcon('other')}Other`]];
 // SHOW: «In the Shop now» comprende il fissato; «Unlocked, not in the Shop now» = later e size; i banner solo catalogo
 // (stato catalog) compaiono solo con «All banners»
+// BANNER TYPE (user request 03-11): medal banners or Spirit Blind Box deals (pet-draw-pages.catalogSection, rows
+// data-kind="spirit" in a .ksec section that hides when none of its rows is shown); only when ctx.spirit (KHUX_PET_DRAW)
+const KIND_OPTS = [['all', 'All'], ['medal', 'Medals'], ['spirit', 'Spirit parts']];
 const SHOW_OPTS = [['all', 'All banners'], ['now', '▶ In the Shop now'], ['unl', 'Unlocked, not in the Shop now'], ['lock', '🔒 Still locked']];
 // date della riga: «Apr 7 – Apr 13, 2016», «Dec 16, 2016 – Jan 6, 2017» (come le bozze)
 function niceRange(b) {
@@ -756,25 +759,26 @@ const CATALOG_CSS = 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-wi
 // diventerebbe uno spazio) con 300 ms di attesa dopo l'ultimo tasto e «Searching…» finche' non risponde; risultati in
 // cache per testo. Filtri ricordati in sessionStorage (facoltativo, spec 7.2) perche' BACK dai Details ritrovi la lista.
 const CATALOG_JS = `(function(){
-var Y=__YEARS__,LAB={pay:__PAY__,show:__SHOW__};
+var Y=__YEARS__,LAB={pay:__PAY__,show:__SHOW__,kind:__KIND__};
 var SHOW={now:{now:1,pinned:1},unl:{later:1,size:1},lock:{locked:1}};
 var HINT='Shows the banners where this Medal can be drawn.',KEY='khuxCatalog';
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
-var rows=[].map.call(document.querySelectorAll('.cat .b'),function(el){return {el:el,id:el.id.slice(1),y:attr(el,'data-year'),pay:attr(el,'data-pay'),vip:attr(el,'data-vip')==='1',free:attr(el,'data-free')==='1',st:attr(el,'data-state')};});
-var cur={y:'all',pay:'all',show:'all',q:'',ids:null},dr=null,cache={},timer=null,xhr=null,busy=false,err=false;
-function copy(s){return {y:s.y,pay:s.pay,show:s.show,q:s.q,ids:s.ids};}
+var rows=[].map.call(document.querySelectorAll('.cat .b'),function(el){return {el:el,id:el.id.slice(1),y:attr(el,'data-year'),pay:attr(el,'data-pay'),vip:attr(el,'data-vip')==='1',free:attr(el,'data-free')==='1',st:attr(el,'data-state'),kind:attr(el,'data-kind')||'medal'};});
+var cur={y:'all',kind:'all',pay:'all',show:'all',q:'',ids:null},dr=null,cache={},timer=null,xhr=null,busy=false,err=false;
+function copy(s){return {y:s.y,kind:s.kind,pay:s.pay,show:s.show,q:s.q,ids:s.ids};}
 function match(r,s,anyYear){
 if(!anyYear&&s.y!=='all'&&r.y!==s.y)return false;
+if(s.kind!=='all'&&r.kind!==s.kind)return false;
 if(s.pay==='vip'?!r.vip:s.pay==='free'?!r.free:(s.pay!=='all'&&r.pay!==s.pay))return false;
 if(s.show!=='all'&&!SHOW[s.show][r.st])return false;
 return !s.q||!s.ids||!!s.ids[r.id];}
 function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
-function nf(s){return (s.pay!=='all'?1:0)+(s.show!=='all'?1:0)+(s.q?1:0);}
+function nf(s){return (s.kind!=='all'?1:0)+(s.pay!=='all'?1:0)+(s.show!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function plural(n){return n+' banner'+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
-function save(){try{sessionStorage.setItem(KEY,JSON.stringify({y:cur.y,pay:cur.pay,show:cur.show,q:cur.q,ids:cur.ids?Object.keys(cur.ids):null}));}catch(e){}}
+function save(){try{sessionStorage.setItem(KEY,JSON.stringify({y:cur.y,kind:cur.kind,pay:cur.pay,show:cur.show,q:cur.q,ids:cur.ids?Object.keys(cur.ids):null}));}catch(e){}}
 function render(){
 var c={all:0},n=0,i,r,on;for(i=0;i<6;i++)c[i]=0;
 for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){c.all++;c[r.y]++;}
@@ -784,11 +788,13 @@ var k=nf(cur),y=cur.y,h='<span class="n1">'+plural(n)+'</span>';
 if(y!=='all')h+=' from <b>'+Y[y].phrase+'</b> ('+Y[y].dates+')';
 if(!k)h+=y==='all'?' · all years, no filters':' · no filters';
 else{h+=y==='all'?' match:':' match your filters:';
+if(cur.kind!=='all')h+=' '+tag('kind',LAB.kind[cur.kind]);
 if(cur.pay!=='all')h+=' '+tag('pay',LAB.pay[cur.pay]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
 if(cur.q)h+=' '+tag('q','🔍 &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
-$('sum').innerHTML=h;$('fdot').textContent=k?k:'';save();}
+$('sum').innerHTML=h;$('fdot').textContent=k?k:'';
+[].forEach.call(document.querySelectorAll('.ksec'),function(x){x.style.display=x.querySelector('.b:not(.hide)')?'':'none';});save();}
 function sync(){
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var g=attr(box,'data-g');[].forEach.call(box.children,function(o){o.className=o.className.replace(/ on/g,'')+(attr(o,'data-v')===dr[g]?' on':'');});});
 var b=$('fok'),wait=!!dr.q&&!dr.ids;b.disabled=wait;
@@ -807,24 +813,25 @@ $('fq').oninput=function(){var q=this.value.replace(/\\s+/g,' ').replace(/^ | $/
 if(!q)dr.ids=null;else if(cache[q])dr.ids=cache[q];else{dr.ids=null;busy=true;timer=setTimeout(function(){find(q);},300);}sync();};
 $('fq').onkeydown=function(e){if(e.keyCode===13)this.blur();};
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){box.onclick=function(e){var v=attr(e.target,'data-v');if(!v||!dr)return;dr[attr(box,'data-g')]=v;sync();};});
-$('freset').onclick=function(e){e.preventDefault();stop();dr.pay='all';dr.show='all';dr.q='';dr.ids=null;$('fq').value='';sync();};
+$('freset').onclick=function(e){e.preventDefault();stop();dr.kind='all';dr.pay='all';dr.show='all';dr.q='';dr.ids=null;$('fq').value='';sync();};
 $('fok').onclick=function(){if(!dr||this.disabled)return;var s=dr;s.y=cur.y;closeF();cur=s;render();};
 $('sum').onclick=function(e){var x=attr(e.target,'data-x');if(!x)return;e.preventDefault();
-if(x==='pay'||x==='all')cur.pay='all';if(x==='show'||x==='all')cur.show='all';if(x==='q'||x==='all'){cur.q='';cur.ids=null;}render();};
+if(x==='kind'||x==='all')cur.kind='all';if(x==='pay'||x==='all')cur.pay='all';if(x==='show'||x==='all')cur.show='all';if(x==='q'||x==='all'){cur.q='';cur.ids=null;}render();};
 document.querySelector('.tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-y'))t=t.parentNode;if(!t)return;cur.y=attr(t,'data-y');render();};
-var kept=null,last=null;
+var K={},last=null;
+function kd(b){return attr(b,'data-k')||'medal';}
 function rowOf(id){for(var i=0;i<rows.length;i++)if(rows[i].id===id)return rows[i];}
 function boxOf(b){return b.parentNode.querySelector('.pinmsg');}
 function setSt(r,key,text){r.st=key;r.el.className='b '+key;var s=r.el.querySelector('.s');s.className='s s-'+key;s.textContent=text;}
 function later(b){setSt(rowOf(attr(b,'data-id')),'later','Not in the Shop now \u2014 can be kept in the Shop');khuxSet(b,attr(b,'data-id'),false);}
-[].forEach.call(document.querySelectorAll('.cat .pk'),function(b){if(rowOf(attr(b,'data-id')).st==='pinned')kept=b;
+[].forEach.call(document.querySelectorAll('.cat .pk'),function(b){if(rowOf(attr(b,'data-id')).st==='pinned')K[kd(b)]=b;
 b.onclick=function(){return khuxPin(b,boxOf(b),function(on){
 if(last&&last!==b){last.style.display='';boxOf(last).style.display='none';}
-if(on){if(kept&&kept!==b){later(kept);kept.style.display='';boxOf(kept).style.display='none';}
-setSt(rowOf(attr(b,'data-id')),'pinned','\uD83D\uDCCC Kept in the Shop');khuxSet(b,attr(b,'data-id'),true);kept=b;}
-else{later(b);if(kept===b)kept=null;}
+var kp=K[kd(b)];if(on){if(kp&&kp!==b){later(kp);kp.style.display='';boxOf(kp).style.display='none';}
+setSt(rowOf(attr(b,'data-id')),'pinned','\uD83D\uDCCC Kept in the Shop');khuxSet(b,attr(b,'data-id'),true);K[kd(b)]=b;}
+else{later(b);if(kp===b)K[kd(b)]=null;}
 b.style.display='none';last=b;render();});};});
-try{var s=null;if(/^#c/.test(location.hash))s=JSON.parse(sessionStorage.getItem(KEY)||'null');else sessionStorage.removeItem(KEY);if(s&&/^(all|[0-5])$/.test(s.y)&&document.querySelector('.tab[data-y="'+s.y+'"]')){cur.y=s.y;cur.pay=LAB.pay[s.pay]?s.pay:'all';cur.show=LAB.show[s.show]?s.show:'all';
+try{var s=null;if(/^#c/.test(location.hash))s=JSON.parse(sessionStorage.getItem(KEY)||'null');else sessionStorage.removeItem(KEY);if(s&&/^(all|[0-5])$/.test(s.y)&&document.querySelector('.tab[data-y="'+s.y+'"]')){cur.y=s.y;cur.kind=LAB.kind[s.kind]?s.kind:'all';cur.pay=LAB.pay[s.pay]?s.pay:'all';cur.show=LAB.show[s.show]?s.show:'all';
 if(s.q&&s.ids){cur.q=s.q;cur.ids={};s.ids.forEach(function(i){cur.ids[i]=1;});cache[s.q]=cur.ids;}}}catch(e){}
 render();
 var t=location.hash&&document.getElementById(location.hash.slice(1));if(t&&t.className.indexOf(' hide')<0&&t.scrollIntoView)t.scrollIntoView();
@@ -836,7 +843,7 @@ function catalogPage(banners, ctx) {
     const st = stateOf(b, ctx), y = gameYearOf(b.start), pay = payGroupOf(b), href = `/web/gacha/detail/${b.drawMedalTypeId}?from=catalog`;
     perYear[y]++;
     const pk = pinnable(b, ctx) ? (() => { const on = st.key !== 'pinned'; return `<div class="pkw"><button type="button" class="pk" data-id="${b.drawMedalTypeId}" data-pin="${on ? `/web/gacha/pin/${b.drawMedalTypeId}` : '/web/gacha/unpin'}" data-on="${on ? 1 : 0}">${on ? '📌 Keep in the Shop' : 'Remove from the Shop'}</button><div class="pinmsg"></div></div>`; })() : '';
-    return `<div class="b ${st.key}" id="c${b.drawMedalTypeId}" data-year="${y}" data-pay="${pay}" data-vip="${isVip(b) ? 1 : 0}" data-free="${isFreeDaily(b) ? 1 : 0}" data-state="${st.key}">`
+    return `<div class="b ${st.key}" id="c${b.drawMedalTypeId}" data-year="${y}" data-pay="${pay}" data-vip="${isVip(b) ? 1 : 0}" data-free="${isFreeDaily(b) ? 1 : 0}" data-state="${st.key}" data-kind="medal">`
       + `<a class="im" href="${href}"><img loading="lazy" width="640" height="140" src="/web/gacha/img/${b.drawMedalTypeId}.png" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(b.name)}</a><div class="n">${esc(niceRange(b))}</div>`
       + `${priceLine(b) ? `<div class="pay">${PAY_ICON[pay]}${priceLine(b)}</div>` : ''}<span class="s s-${st.key}">${esc(st.text)}</span>${pk}</div></div>`;
@@ -845,7 +852,8 @@ function catalogPage(banners, ctx) {
   const opts = (list, cls = () => '') => list.map(([v, l], i) => `<button type="button" class="o${cls(v)}${i ? '' : ' on'}" data-v="${v}">${l}</button>`).join('');
   const n = sorted.length, nb = `${n} banner${n === 1 ? '' : 's'}`;
   const js = CATALOG_JS.replace('__YEARS__', JSON.stringify(GAME_YEARS.map(({ phrase, dates: d }) => ({ phrase, dates: d }))))
-    .replace('__PAY__', JSON.stringify(Object.fromEntries(PAY_OPTS.slice(1)))).replace('__SHOW__', JSON.stringify(Object.fromEntries(SHOW_OPTS.slice(1))));
+    .replace('__PAY__', JSON.stringify(Object.fromEntries(PAY_OPTS.slice(1)))).replace('__SHOW__', JSON.stringify(Object.fromEntries(SHOW_OPTS.slice(1))))
+    .replace('__KIND__', JSON.stringify(Object.fromEntries(KIND_OPTS.slice(1))));
   return page('Banner Catalog', `<style>${CATALOG_CSS}</style>`
     + `<p class="n">${n} original banners. Banners unlock as you progress through the Story; in the original game they followed the calendar.</p>`
     + '<div class="gy">GAME YEAR <span>— each year runs from one anniversary (April 7) to the next</span></div>'
@@ -856,6 +864,7 @@ function catalogPage(banners, ctx) {
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND A MEDAL</h4><div class="search">🔍<input type="search" id="fq" placeholder="Medal name" autocomplete="off"></div>'
     + '<div class="hint" id="fh">Shows the banners where this Medal can be drawn.</div>'
+    + (ctx.spirit ? `<h4>BANNER TYPE</h4><div class="opts" data-g="kind">${opts(KIND_OPTS)}</div>` : '')
     + `<h4>PAID WITH</h4><div class="opts" data-g="pay">${opts(PAY_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${nb}</button></div></div>`
@@ -863,6 +872,7 @@ function catalogPage(banners, ctx) {
 }
 
 module.exports = {
+  KIND_OPTS, niceRange, PAY_ICON,
   KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS, page, PIN_JS, esc,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,

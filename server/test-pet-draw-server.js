@@ -85,6 +85,17 @@ const odds = raw(t.respondGachaWeb, '/web/gacha/petodds/20810');
 check(odds.code === 200 && /same chance/.test(odds.body) || /every part/.test(odds.body), 'Draw Odds page');
 const cat = raw(t.respondGachaWeb, '/web/gacha/catalog');
 check(/Spirit Blind Box \(6\)/.test(cat.body) && /pinpet|petdetail\/20775/.test(cat.body), 'Banner Catalog section');
+// filters (user 03-11): BANNER TYPE group, Spirit rows with the medal rows' data attributes inside a .cat of a .ksec section
+check(cat.body.includes('<h4>BANNER TYPE</h4>') && cat.body.includes('>Spirit parts<'), 'catalogue: BANNER TYPE filter');
+const prow = [...cat.body.matchAll(/<div class="b (\w+)" id="p(\d+)" data-year="(\d)" data-pay="jewel" data-vip="0" data-free="0" data-state="(\w+)" data-kind="spirit">/g)];
+check(prow.length === 6 && prow.every((r) => r[1] === r[4]), `catalogue: 6 Spirit rows with data-* (${prow.length})`);
+check(/<div class="ksec"><h2 id="spirit">[\s\S]*?<div class="cat">/.test(cat.body), 'catalogue: Spirit rows in .ksec .cat');
+// Keep in the catalogue row (user 03-11): past deals at Q965 (Shop week of February 2021) get the button, the current one not
+const keepBtn = (id) => new RegExp(`class="pk" data-k="pet" data-id="${id}" data-pin="/web/gacha/pinpet/${id}" data-on="1"`).test(cat.body);
+check(keepBtn(20775) && !keepBtn(20810), 'catalogue: Keep button on the past deal B0775, none on the current B0810');
+check(call(t.respondGachaPost, '/web/gacha/pinpet/20775')?.ok === true, 'pinpet answers ok');
+const cat2 = raw(t.respondGachaWeb, '/web/gacha/catalog');
+check(/data-k="pet" data-id="20775" data-pin="\/web\/gacha\/unpinpet" data-on="0">Remove from the Shop/.test(cat2.body), 'catalogue: kept deal shows Remove');
 // master drawPetType: a row for every deal, all fields (client parser [fn])
 const rows = JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'drawPetType.json'), 'utf8'));
 check(rows.length === 6 && rows.every((x) => x.drawType === 11 && Object.keys(x).length === 24 && Object.values(x).every((v) => typeof v === 'string' || v >= 0)), 'tables/drawPetType.json: 6 rows, 24 fields, integers >= 0');
