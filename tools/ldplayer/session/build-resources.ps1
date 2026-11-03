@@ -187,9 +187,9 @@ foreach ($n in $imgJp) {
     Copy-Item $cand[-1].FullName "$sg\files\img\$n.png" -Force
 }
 # Serviti solo sotto cocostudio/publish (non valgono per img/...): stesso file anche in img/ (WW localizzate:
-# CrownIcon4, trophyIcon3/4, IncentiveIcon_42 Premium Ticket). Estratti una volta in catalog\img_alias
+# CrownIcon4, trophyIcon3/4; IncentiveIcon_42 now from JP in originals.tsv). Estratti una volta in catalog\img_alias
 $alias = @{ 'ui\AvtInfo_CrownIcon4' = 'cocostudio/publish/AvtInfo_CrownIcon4.png'; 'ui\AvtInfo_trophyIcon3' = 'cocostudio/publish/AvtInfo_trophyIcon3.png'
-  'ui\AvtInfo_trophyIcon4' = 'cocostudio/publish/AvtInfo_trophyIcon4.png'; 'incentive\IncentiveIcon_42' = 'cocostudio/publish/IncentiveIcon_42.png'
+  'ui\AvtInfo_trophyIcon4' = 'cocostudio/publish/AvtInfo_trophyIcon4.png'
   # arco dell'HP (I-032): nelle risorse WW solo sotto cocostudio/publish, stesse dimensioni di quelle in img/ui
   'ui\PlayerStatusIndicator\Avatar_Circle_01' = 'cocostudio/publish/Avatar_Circle_01.png'; 'ui\PlayerStatusIndicator\Avatar_Side_01' = 'cocostudio/publish/Avatar_Side_01.png'
   # biglietto dorato del pannello Skip (I-203): il client lo ricarica da img/ui quando si torna da «Force Skip» a
