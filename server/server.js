@@ -4363,9 +4363,19 @@ function raidBoardItems(sphereBoardId) {
   return [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? name(sel, masu.rewardId[i]) : '')).filter(Boolean))];
 }
 const raidBoardName = (sphereBoardId) => masterRows('sphere').find((r) => r.sphereBoardId === Number(sphereBoardId))?.boardName || '';
+// RAID BOARDS filter of the Raid Catalog (user 03-11): a Raid Board is complete when every node is unlocked in player.raidSphere,
+// the rule of the board screen (status 3 of userSphereData), whether it is handed out now or not (its progress is kept for good);
+// a board never handed out or not served by the master is not complete.
+function raidBoardDoneLookup() {
+  const boards = new Map(masterRows('sphere').filter((b) => b.type === 5).map((b) => [b.sphereBoardId, b]));
+  return (id) => {
+    const b = boards.get(Number(id)), s = (player.raidSphere || {})[Number(id)];
+    return !!(b && s && sphereNodes(b).every((n) => s.unlock.includes(n)));
+  };
+}
 const raidPageCtx = (fromCatalog = false) => ({ ...raid().catalogCtx(), periods: special.PERIODS, imgVersion: routesRaid.RAID_IMG_VERSION, fromCatalog,
   unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
-  boardItems: raidBoardItems, boardName: raidBoardName, stageDone: (id) => catalogStageDone(id) });
+  boardItems: raidBoardItems, boardName: raidBoardName, stageDone: (id) => catalogStageDone(id), boardDone: raidBoardDoneLookup() });
 // GET /web/raid/img/<evStageId>.png and <id>-kept.png (the kept raid's card): as /web/special/img, from game_data/raid_img. No
 // card of its own: 0.png, the plate of make_special_banners.py (a missing -kept copy: the card itself); none: 404.
 // GET /web/raid/catalog (Details of the Raid Catalog banner) and /web/raid/raid/<evStageId> (details page; ?from=catalog: BACK).
@@ -5114,7 +5124,7 @@ module.exports._test = {
   respondMedalSell, drawPointsUnlocked, // server/test-draw-points.js
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
-  raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, // server/test-raid-boards.js
+  raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, raidPageCtx, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   vipBenefits, // server/test-gacha-server.js (I-134)

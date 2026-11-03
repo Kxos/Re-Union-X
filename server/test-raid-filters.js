@@ -1,5 +1,5 @@
 // Filter matrix of the Raid Catalog (raid-pages.js, Task 9), run by the page script itself in headless Edge, as
-// test-special-filters.js: every period tab, TYPE, TIER and SHOW chip, some FIND queries and combinations, in the default year
+// test-special-filters.js: every period tab, TYPE, TIER, SHOW, PROGRESS and RAID BOARDS chip, some FIND queries and combinations, in the default year
 // and in All years. What is really DISPLAYED (computed style) must match the filters, every matching row of the selected year
 // must be displayed (and a year with matches must be selected when any row matches), the summary, tab counts, year chips and
 // «Show N results» must agree, month labels without rows hidden, the empty-state message exactly when nothing shows. Then a
@@ -25,7 +25,7 @@ function probe() {
       var prefix = function (q, name) { var ws = words(name); return words(q).every(function (w) { return ws.some(function (x) { return x.indexOf(w) === 0; }); }); };
       var shown = function (el) { while (el && el.nodeType === 1) { if (getComputedStyle(el).display === 'none') return false; el = el.parentNode; } return true; };
       var R = [].map.call(document.querySelectorAll('.row'), function (r) {
-        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), dn: A(r, 'data-done'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y') };
+        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), dn: A(r, 'data-done'), bd: A(r, 'data-boards'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y') };
       });
       var matches = function (r, f, anyPeriod) {
         if (!anyPeriod && f.p !== 'all' && r.p !== f.p) return false;
@@ -33,16 +33,18 @@ function probe() {
         if (f.tier !== 'all' && r.tr.indexOf(f.tier) < 0) return false;
         if (f.show !== 'all' && (SETS[f.show] || [f.show]).indexOf(r.st) < 0) return false;
         if (f.prog !== 'all' && (r.dn === '1') !== (f.prog === 'done')) return false;
+        if (f.bd !== 'all' && r.bd !== f.bd) return false;
         return !f.q || r.ns.some(function (n) { return prefix(f.q, n); });
       };
       var chip = function (g, v) { return document.querySelector('.opts[data-g="' + g + '"] [data-v="' + v + '"]'); };
-      var check = function (name, f, year) {
+      var check = function (name, f, year, act, after) {
         var d = document.querySelector('.yc[data-yr="' + A($('rows'), 'data-defy') + '"]'); if (d) d.click();
         $('fbtn').click(); $('freset').click();
-        chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click(); chip('prog', f.prog).click();
+        chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click(); chip('prog', f.prog).click(); chip('bd', f.bd).click();
         $('fq').value = f.q; $('fq').oninput(); $('fok').click();
         document.querySelector('.tab[data-p="' + f.p + '"]').click();
         if (year === 'all') document.querySelector('.yc[data-yr="all"]').click();
+        if (act) { var ae = act(); if (ae) { out.fail++; out.failed.push({ name: name + ' [' + year + ']', err: [ae] }); return; } f = after; }
         var err = [], sel = A(document.querySelector('.yc.on'), 'data-yr'), vis = 0, any = 0, inSel = 0;
         R.forEach(function (r) {
           var m = matches(r, f), inYear = sel === 'all' || r.y === sel, v = shown(r.el);
@@ -74,14 +76,16 @@ function probe() {
         if (vis && none) err.push('empty-state message with visible rows');
         if (none && f.prog !== 'all' && none.indexOf(f.prog === 'done' ? 'No completed raids' : 'No incomplete raids') !== 0) err.push('empty-state message without the progress: ' + none);
         if (f.prog !== 'all' && $('sum').textContent.indexOf(f.prog === 'done' ? 'Completed' : 'Incomplete') < 0) err.push('summary without the progress tag');
+        if (f.bd !== 'all' && $('sum').textContent.indexOf(f.bd === 'done' ? 'Raid Boards: Completed' : 'Raid Boards: Not completed') < 0) err.push('summary without the Raid Boards tag');
+        if (none && f.bd !== 'all' && none.indexOf(f.bd === 'done' ? 'with completed Raid Boards' : 'with Raid Boards to complete') < 0) err.push('empty-state message without the boards: ' + none);
         if (f.q) R.forEach(function (r) { var mt = r.el.querySelector('.mt'); if (shown(r.el) && !/^Matches: /.test(mt.textContent)) err.push('no Matches line on ' + A(r.el, 'data-name')); });
         if (err.length) { out.fail++; out.failed.push({ name: name + ' [' + year + ']', err: err.slice(0, 4) }); } else out.pass++;
       };
-      var base = { p: 'all', type: 'all', tier: 'all', show: 'all', prog: 'all', q: '' };
+      var base = { p: 'all', type: 'all', tier: 'all', show: 'all', prog: 'all', bd: 'all', q: '' };
       var w = function (o) { var f = {}, k; for (k in base) f[k] = base[k]; for (k in o) f[k] = o[k]; return f; };
       var cases = [['no filters', w({})]];
       [].forEach.call(document.querySelectorAll('.tab'), function (t) { if (A(t, 'data-p') !== 'all') cases.push(['tab ' + A(t, 'data-p'), w({ p: A(t, 'data-p') })]); });
-      ['type', 'tier', 'show', 'prog'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all') { var x = {}; x[g] = v; cases.push([g + ' ' + v, w(x)]); } }); });
+      ['type', 'tier', 'show', 'prog', 'bd'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all') { var x = {}; x[g] = v; cases.push([g + ' ' + v, w(x)]); } }); });
       ['trick', 'blue tri', 'sora', 'mythril', 'zzzz'].forEach(function (q) { cases.push(['find «' + q + '»', w({ q: q })]); });
       cases.push(['show can + tier advanced', w({ show: 'can', tier: 'advanced' })]);
       cases.push(['type radiant + tab 3', w({ type: 'radiant', p: '3' })]);
@@ -90,7 +94,13 @@ function probe() {
       cases.push(['prog todo + show can + tab 3', w({ prog: 'todo', show: 'can', p: '3' })]);
       cases.push(['prog done + find «trick»', w({ prog: 'done', q: 'trick' })]);
       cases.push(['prog done + show removed', w({ prog: 'done', show: 'removed' })]);
-      cases.forEach(function (c) { ['default', 'all'].forEach(function (y) { try { check(c[0], c[1], y); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
+      cases.push(['bd done + prog todo', w({ bd: 'done', prog: 'todo' })]);
+      cases.push(['bd todo + tier beginner + tab 3', w({ bd: 'todo', tier: 'beginner', p: '3' })]);
+      cases.push(['bd done + find «trick»', w({ bd: 'done', q: 'trick' })]);
+      cases.push(['bd done + show removed', w({ bd: 'done', show: 'removed' })]);
+      // a «×» on the Raid Boards tag clears that filter only
+      cases.push(['bd tag ×', w({ bd: 'todo', prog: 'done' }), function () { var x = document.querySelector('#sum [data-x="bd"]'); if (!x) return 'no × on the Raid Boards tag'; x.click(); return null; }, w({ prog: 'done' })]);
+      cases.forEach(function (c) { ['default', 'all'].forEach(function (y) { try { check(c[0], c[1], y, c[2], c[3]); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
       // keep / remove through the page script (the XHR answered 200): bars, status lines, buttons, «Replaces»
       var byId = function (id) { return document.getElementById('q' + id); };
       var can = R.filter(function (r) { return r.st === 'can'; }).map(function (r) { return A(r.el, 'data-eid'); });
@@ -136,7 +146,7 @@ const PERIODS = special.PERIODS;
 const tier = (censusId, evStageId, start, end, t, boss, extra = {}) => ({ key: `${censusId}/${t}`, censusId, family: 'weekly', start, end, tier: t, boss, available: true,
   stageId: 980000 + evStageId, evStageId, level: 25, hp: 1, boards: ['Enhancement Boards'], sphereBoardIds: [3000000 + evStageId], ...extra });
 const fx = { entries: [
-  tier('A', 8071, '2018-09-03', '2018-09-09', 'single', 'Merry-Go-Rowdy', { family: 'radiant reward' }),
+  tier('A', 8071, '2018-09-03', '2018-09-09', 'single', 'Merry-Go-Rowdy', { family: 'radiant reward', sphereBoardIds: [] }),
   tier('B', 8072, '2018-12-31', '2019-01-06', 'single', 'Trickmaster', { family: 'weekly (pre-series raid event)' }),
   tier('C', 8100, '2019-10-07', '2019-10-13', 'Beginner', 'Trickmaster'), tier('C', 8100, '2019-10-07', '2019-10-13', 'Advanced', 'Blue Trident Tail'),
   tier('D', 8101, '2019-10-14', '2019-10-20', 'Beginner', 'Trickmaster'), tier('D', 8101, '2019-10-14', '2019-10-20', 'Epic', 'Darkside'),
@@ -144,7 +154,7 @@ const fx = { entries: [
   tier('F', 8150, '2020-06-01', '2020-06-07', 'Legendary', 'Darkside'), tier('G', 8180, '2020-12-07', '2020-12-13', 'Epic', 'Red Trident Tail'),
 ] };
 const ctxFor = (index, week, kept) => ({ ...week, current: new Set(calendar.weekRows(index, week).map((r) => r.censusId)), kept, periods: PERIODS,
-  unlockQuestOf: () => 900, stageDone: (sid) => sid % 3 !== 1, boardItems: (id) => (id % 2 ? ['Sora & Moogle B'] : ['Mythril Shard']), imgVersion: 1 });
+  unlockQuestOf: () => 900, stageDone: (sid) => sid % 3 !== 1, boardDone: (id) => id % 4 !== 0, boardItems: (id) => (id % 2 ? ['Sora & Moogle B'] : ['Mythril Shard']), imgVersion: 1 });
 run(fx, ctxFor(fx, { shopFrom: '2019-10-17', shopTo: '2019-10-23' }, 'A'), 'fixture');
 let real = null; try { real = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'raids.json'), 'utf8')); } catch { /* no local index */ }
 if (real) {

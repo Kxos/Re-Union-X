@@ -109,6 +109,28 @@ const tests = {
     const none = pages.catalogPage(index(), ctx());
     assert(!/data-done="1"/.test(none) && !rowOf(none, 8071).includes(crown), 'no lookup: nothing completed');
   },
+  // RAID BOARDS filter (user 03-11, ours): a raid's boards are completed when every Raid Board of its playable tiers is complete
+  // in the save (ctx.boardDone, the rule of the board screen: every node unlocked); no board = neither completed nor not.
+  raid_boards_filter() {
+    const ix = index(); // boards: 8071 3008071 | 8100 3008100 + 3008200 (Advanced) + 3009100 (Epic, not restored) | 8101 none | 8180 3008180
+    ix.entries[2].sphereBoardIds = [3008100, 3008200];
+    ix.entries[3].sphereBoardIds = [3009100];
+    ix.entries[4].sphereBoardIds = [];
+    const page = (done) => pages.catalogPage(ix, ctx({ index: ix, boardDone: (id) => done.includes(id) }));
+    const bd = (html, id) => (/data-boards="(\w+)"/.exec(rowOf(html, id)) || [])[1];
+    const html = page([3008071, 3008100, 3008180]);
+    assert.strictEqual(bd(html, 8071), 'done');
+    assert.strictEqual(bd(html, 8100), 'todo', 'the Advanced board 3008200 is not complete');
+    assert.strictEqual(bd(page([3008100, 3008200]), 8100), 'done', 'the board of a tier not restored (Epic) does not count');
+    assert.strictEqual(bd(html, 8101), 'none', 'no board: neither');
+    assert.strictEqual(bd(html, 8150), 'none', 'not restored, no board');
+    assert.strictEqual(bd(html, 8180), 'done');
+    assert.strictEqual(bd(pages.catalogPage(ix, ctx({ index: ix })), 8071), 'todo', 'no lookup: nothing completed');
+    assert(/<h4>RAID BOARDS<\/h4><div class="opts" data-g="bd">/.test(html), 'RAID BOARDS group');
+    assert(/data-v="done"><img[^>]*unlocked\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*lock\.png[^>]*>Not completed</.test(html), 'chips with the padlock icons');
+    assert(html.includes('Raid Boards: '), 'summary tag label');
+    assert.strictEqual(count(rowOf(html, 8071), 'class="s s-'), 1, 'still one status line');
+  },
   one_status_line_at_most_one_button() {
     const html = pages.catalogPage(index(), ctx({ kept: 'WW-W-2018-09-03' }));
     for (const id of [8071, 8100, 8101, 8150, 8180]) {

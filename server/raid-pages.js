@@ -3,15 +3,16 @@
 // access: server.js passes the index (game_data/raids.json) and the context (routes-raid.js catalogCtx plus the pages' lookups).
 // Same style and rules as the Special Catalog (server/special-pages.js, whose CSS, icons and word-start search are reused):
 // period tabs and year chips, one minimal row per raid week (card, bosses, one date line, ONE status line, at most ONE Keep
-// button, «›»), a Filters sheet (FIND / TYPE / TIER / SHOW / PROGRESS) with a «Matches:» line, a details page per raid.
+// button, «›»), a Filters sheet (FIND / TYPE / TIER / SHOW / PROGRESS / RAID BOARDS) with a «Matches:» line, a details page per raid.
 // ctx: {shopFrom, shopTo, current (Set of census ids of the week), kept (census id), periods, unlockQuestOf(row) -> N | null,
 // boardItems(sphereBoardId) -> [item names], boardName(sphereBoardId) -> name, imgVersion, fromCatalog,
-// stageDone(stageId) -> true when that quest has all its objectives done (PROGRESS filter and crown; absent: nothing completed)}.
+// stageDone(stageId) -> true when that quest has all its objectives done (PROGRESS filter and crown; absent: nothing completed),
+// boardDone(sphereBoardId) -> true when every node of that Raid Board is unlocked (RAID BOARDS filter; absent: none completed)}.
 'use strict';
 const special = require('./special-pages');
 const calendar = require('./raid-calendar');
 
-const { CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls } = special;
+const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls } = special;
 
 const KEEP_LABEL = `${icon('pin')}Keep in Events`, REMOVE_LABEL = 'Remove from Events';
 const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)' };
@@ -31,6 +32,19 @@ const doneOf = (row, ctx) => {
   const play = row.entries.filter((e) => e.available);
   return !!ctx.stageDone && play.length > 0 && play.every((e) => ctx.stageDone(e.stageId));
 };
+
+// RAID BOARDS (user 03-11, ours): 'done' when every Raid Board of the playable tiers (the boards a raid hands out) is complete in
+// the save (ctx.boardDone, the rule of the board screen; a board is one per raid week, so a kept raid shares its week's progress),
+// 'todo' otherwise, 'none' for a raid without boards (neither completed nor not)
+const boardsOf = (row, ctx) => {
+  const ids = [...new Set(row.entries.filter((e) => e.available).flatMap((e) => e.sphereBoardIds || []))];
+  if (!ids.length) return 'none';
+  return ctx.boardDone && ids.every((id) => ctx.boardDone(id)) ? 'done' : 'todo';
+};
+const BOARD_OPTS = [['all', 'All'], ['done', 'Completed', 'unlocked'], ['todo', 'Not completed', 'lock']];
+const boardCls = (v) => (v === 'all' ? '' : ` bd-${v}`);
+// chips chosen: Completed blue (the open padlock), Not completed grey
+const CSS = SPECIAL_CSS + '.o.bd-done.on{background:#1a6fa8;border-color:#62a7ff}.o.bd-todo.on{background:#5a6470;border-color:#9aa4ae}';
 
 const pill = (c, k, text) => `<span class="s s-${c}">${k ? icon(k) : ''}${text}</span>`;
 // the pills the page script writes after a keep / remove: [row class, html]
@@ -80,17 +94,17 @@ const KEEP_JS = `var KX_KEEP=${JSON.stringify(KEEP_LABEL)},KX_REMOVE=${JSON.stri
 
 // ES5, no external script. Rows read once at start; a period tab, a year chip and the Filters sheet only toggle a class.
 const JS = `(function(){
-var PN=__PN__,LAB={type:__TYPE__,tier:__TIER__,show:__SHOW__,prog:__PROG__},SHOWSET=__SHOWSET__,PILL=__PILL__;
+var PN=__PN__,LAB={type:__TYPE__,tier:__TIER__,show:__SHOW__,prog:__PROG__,bd:__BD__},SHOWSET=__SHOWSET__,PILL=__PILL__;
 __MATCH__
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
 function q(el,s){return el.querySelector(s);}
 var rows=[].map.call(document.querySelectorAll('.row'),function(el){return {el:el,id:attr(el,'data-eid'),st:attr(el,'data-show'),p:attr(el,'data-periods'),y:attr(el,'data-y'),
-t:attr(el,'data-type'),dn:attr(el,'data-done')==='1',tr:' '+attr(el,'data-tier')+' ',ns:(attr(el,'data-search')||'').split(' | '),mt:q(el,'.mt')};});
+t:attr(el,'data-type'),dn:attr(el,'data-done')==='1',bd:attr(el,'data-boards'),tr:' '+attr(el,'data-tier')+' ',ns:(attr(el,'data-search')||'').split(' | '),mt:q(el,'.mt')};});
 var mls=[].map.call(document.querySelectorAll('.ml'),function(el){return el;});
 var ycs=[].map.call(document.querySelectorAll('.yc'),function(el){return {el:el,y:attr(el,'data-yr'),n:q(el,'.yn')};});
-var cur={p:'all',type:'all',tier:'all',show:'all',prog:'all',q:''},dr=null,yr=attr($('rows'),'data-defy')||'all';
-function copy(s){return {p:s.p,type:s.type,tier:s.tier,show:s.show,prog:s.prog,q:s.q};}
+var cur={p:'all',type:'all',tier:'all',show:'all',prog:'all',bd:'all',q:''},dr=null,yr=attr($('rows'),'data-defy')||'all';
+function copy(s){return {p:s.p,type:s.type,tier:s.tier,show:s.show,prog:s.prog,bd:s.bd,q:s.q};}
 function hits(r,qq,max){var o=[],i;for(i=0;i<r.ns.length&&o.length<max;i++)if(khuxMatch(qq,r.ns[i]))o.push(r.ns[i]);return o;}
 function match(r,s,anyPeriod){
 if(!anyPeriod&&s.p!=='all'&&r.p!==s.p)return false;
@@ -98,9 +112,10 @@ if(s.type!=='all'&&r.t!==s.type)return false;
 if(s.tier!=='all'&&r.tr.indexOf(' '+s.tier+' ')<0)return false;
 if(s.show!=='all'&&(SHOWSET[s.show]||[s.show]).indexOf(r.st)<0)return false;
 if(s.prog!=='all'&&r.dn!==(s.prog==='done'))return false;
+if(s.bd!=='all'&&r.bd!==s.bd)return false;
 return !s.q||hits(r,s.q,1).length>0;}
 function count(s){var n=0;for(var i=0;i<rows.length;i++)if(match(rows[i],s))n++;return n;}
-function nf(s){return (s.type!=='all'?1:0)+(s.tier!=='all'?1:0)+(s.show!=='all'?1:0)+(s.prog!=='all'?1:0)+(s.q?1:0);}
+function nf(s){return (s.type!=='all'?1:0)+(s.tier!=='all'?1:0)+(s.show!=='all'?1:0)+(s.prog!=='all'?1:0)+(s.bd!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function plural(n,w){return n+' '+w+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
@@ -123,11 +138,12 @@ if(cur.type!=='all')h+=' '+tag('type',LAB.type[cur.type]);
 if(cur.tier!=='all')h+=' '+tag('tier',LAB.tier[cur.tier]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
 if(cur.prog!=='all')h+=' '+tag('prog',LAB.prog[cur.prog]);
+if(cur.bd!=='all')h+=' '+tag('bd',LAB.bd[cur.bd]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;$('fdot').textContent=f?f:'';
 for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
-var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids';none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';}
+var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids'+(cur.bd==='done'?' with completed Raid Boards':cur.bd==='todo'?' with Raid Boards to complete':'');none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';}
 // after a keep / remove: the kept row gold, the previous one back to «can be kept», the «Replaces» lines
 function setRow(r,st){var pc=PILL[st];r.st=st;r.el.setAttribute('data-show',st);r.el.className='row '+pc[0]+(/ hide/.test(r.el.className)?' hide':'');var s=q(r.el,'.s');if(s){s.className='s s-'+pc[0];s.innerHTML=pc[1];}
 var b=q(r.el,'.pk');if(b)kxSet(b,r.id,st==='kept');}
@@ -142,10 +158,10 @@ $('fbtn').onclick=openF;$('fx').onclick=closeF;$('dim').onclick=closeF;
 $('fq').oninput=function(){dr.q=this.value.replace(/\\s+/g,' ').replace(/^ | $/g,'');sync();};
 $('fq').onkeydown=function(e){if(e.keyCode===13)this.blur();};
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){box.onclick=function(e){var t=e.target;while(t&&t!==box&&!attr(t,'data-v'))t=t.parentNode;var v=attr(t,'data-v');if(!v||!dr)return;dr[attr(box,'data-g')]=v;sync();};});
-$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.tier='all';dr.show='all';dr.prog='all';dr.q='';$('fq').value='';sync();};
+$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.tier='all';dr.show='all';dr.prog='all';dr.bd='all';dr.q='';$('fq').value='';sync();};
 $('fok').onclick=function(){if(!dr)return;var s=dr;s.p=cur.p;closeF();cur=s;render();};
 $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x'))t=t.parentNode;var x=attr(t,'data-x');if(!x)return;e.preventDefault();
-if(x==='type'||x==='all')cur.type='all';if(x==='tier'||x==='all')cur.tier='all';if(x==='show'||x==='all')cur.show='all';if(x==='prog'||x==='all')cur.prog='all';if(x==='q'||x==='all')cur.q='';render();};
+if(x==='type'||x==='all')cur.type='all';if(x==='tier'||x==='all')cur.tier='all';if(x==='show'||x==='all')cur.show='all';if(x==='prog'||x==='all')cur.prog='all';if(x==='bd'||x==='all')cur.bd='all';if(x==='q'||x==='all')cur.q='';render();};
 $('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 render();
@@ -178,9 +194,9 @@ function catalogPage(index, ctx = {}) {
     const st = statusOf(row, ctx), href = detailHref(row.evStageId), y = row.start.slice(0, 4), m = row.start.slice(0, 7);
     const label = m !== lastM ? `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>` : '';
     lastM = m;
-    const tiers = [...new Set(row.entries.map((e) => e.tier))], done = doneOf(row, ctx);
+    const tiers = [...new Set(row.entries.map((e) => e.tier))], done = doneOf(row, ctx), bd = boardsOf(row, ctx);
     return `${label}<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
-      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${esc(searchOf(row, ctx))}" data-done="${done ? 1 : 0}">`
+      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${esc(searchOf(row, ctx))}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(titleOf(row))}${done ? CROWN : ''}</a><div class="d">${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
@@ -194,7 +210,7 @@ function catalogPage(index, ctx = {}) {
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
-    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__TIER__', labels(TIER_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__PROG__', labels(PROG_OPTS)).replace('__SHOWSET__', JSON.stringify(SHOW_SETS))
+    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__TIER__', labels(TIER_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__PROG__', labels(PROG_OPTS)).replace('__BD__', JSON.stringify(Object.fromEntries(BOARD_OPTS.slice(1).map((o) => [o[0], `Raid Boards: ${optLabel(o)}`])))).replace('__SHOWSET__', JSON.stringify(SHOW_SETS))
     .replace('__PILL__', JSON.stringify({ kept: PILLS.kept, can: PILLS.can })).replace('__MATCH__', () => MATCH_JS);
   return PAGE_HEAD('Raid Catalog', CSS) + '<body>'
     + '<div class="hdr"><h1>Raid Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
@@ -212,6 +228,7 @@ function catalogPage(index, ctx = {}) {
     + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`
     + `<h4>PROGRESS</h4><div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`
+    + `<h4>RAID BOARDS</h4><div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(rows.length, 'result')}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${js}</script></body></html>`;
 }
