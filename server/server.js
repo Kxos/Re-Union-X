@@ -551,7 +551,8 @@ function servedMasterRows(name, realMs) {
         : leave.has(r.drawMedalTypeId) ? { displayTimeLeft: 1, endDate: clock.fakeString(clock.weekStartOf(leave.get(r.drawMedalTypeId)), off) } : {}) }));
   }
   // evStage (banner Special, make-special.js): come per drawMedalType bannerUrl/detailUrl sono percorsi
-  if (name === 'evStage') {
+  // drawPetType (Spirit Blind Box, pet-draw.js): same paths; the client opens detailUrl as given (a path = «file not found»)
+  if (name === 'evStage' || name === 'drawPetType') {
     const abs = (u) => (String(u || '').startsWith('/') ? WEB_BASE + u : u);
     return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl) }));
   }

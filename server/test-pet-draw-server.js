@@ -37,6 +37,9 @@ check(bb && KEYS.every((k) => k in bb) && Object.keys(bb).length === KEYS.length
 check(bb && bb.drawType === 11 && bb.payType === 1 && bb.price === 100 && bb.lotCount === 1 && /\/web\/gacha\/petimg\/20810\.png$/.test(bb.bannerUrl), 'B0810: drawType 11, 100 Jewels, 1 part');
 check(bb && bb.totalCount > 78 && bb.restCount === bb.totalCount, `B0810 counter: pool + extension, nothing owned (${bb && bb.restCount}/${bb && bb.totalCount})`);
 check(l.gachaList.every((g) => g.sortId !== bb.sortId) && bb.sortId > 1, 'pet sortId apart from the medal plates and the Catalog');
+// master drawPetType: Details opens detailUrl as given, so it must be absolute like drawMedalType (a path = «file not found», bench 03-11)
+const mrow = t.servedMasterRows('drawPetType', Date.now()).find((r) => r.drawPetTypeId === 20810);
+check(mrow && /^http:\/\/.+\/web\/gacha\/petdetail\/20810$/.test(mrow.detailUrl) && /^http:\/\/.+\/web\/gacha\/petimg\/20810\.png$/.test(mrow.bannerUrl), `drawPetType urls absolute (${mrow && mrow.detailUrl})`);
 // draw: refused without Jewels, then one part not owned, Jewels charged, response contract
 p.freeStone = 50;
 let r = call(t.respondPetDraw, { drawPetTypeId: 20810 });

@@ -113,6 +113,10 @@ img/incentive/Star7_Ticket_38.png	jp
 # Draw Points (payType 9, plate icon 42): the plain JP/WW file is a gold «仮»-era ticket; revision 00391970 is the
 #     rainbow crystal printed on the Draw Points Deal art (B0794) and on JP cocostudio/publish/IncentiveIcon_42
 img/incentive/draw_Ticket_42.png	jp	=img/incentive/draw_Ticket_42.00391970.png
+# Same currency in the medal cells (Sell list, DeckEdit_Deck_MedalInfo2_ver350) and as reward type 42: the WW file is the gold
+#     «Premium Ticket»; JP final = the crystal (bench 03-11: Shop showed the crystal, the medal list still the gold ticket)
+cocostudio/publish/IncentiveIcon_42.png	jp
+img/incentive/IncentiveIcon_42.png	jp	=cocostudio/publish/IncentiveIcon_42.png
 
 # 15. Armature delle Avatar Board (gen_sphere_armatures.py, linee sottili): originali con barre e sfera «START»
 cocostudio/publish/Z_SpRoute_*	jp
