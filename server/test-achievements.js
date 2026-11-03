@@ -70,9 +70,11 @@ const strengthNow = () => {
 const emptyOk = (a, when, exact) => {
   const [sn, sd] = exact || strengthNow();
   check(a.strengthNumerator === sn && a.strengthDenominator === sd, `${when}: Special ${a.strengthNumerator}/${a.strengthDenominator} (expected ${sn}/${sd})`);
-  for (const k of ['event', 'multi']) {
-    check(a[k + 'Numerator'] === 0 && a[k + 'Denominator'] === 1, `${when}: ${k} ${a[k + 'Numerator']}/${a[k + 'Denominator']} (atteso 0/1)`);
-  }
+  // Events (user 03-11): 3 per raid event quest listed now, none done; no raid this week 0/1
+  const ev = t.raidEventsNow().reduce((s, e) => s + e.stages.length, 0);
+  const [en, ed] = ev ? [0, 3 * ev] : [0, 1];
+  check(a.eventNumerator === en && a.eventDenominator === ed, `${when}: event ${a.eventNumerator}/${a.eventDenominator} (expected ${en}/${ed})`);
+  check(a.multiNumerator === 0 && a.multiDenominator === 1, `${when}: multi ${a.multiNumerator}/${a.multiDenominator} (atteso 0/1)`);
   check(a.colosseumRank === 0 && a.pvpRanking && a.pvpRanking.userPvpRanking && a.pvpRanking.userPvpRanking.rank === 0,
     `${when}: Coliseum senza classifica`);
 };
@@ -146,5 +148,16 @@ p.clearMissions = {};
 check(require('./server').route('/stage/achievements?m=1&i=1&v=x') === 'stageachievements', 'rotta /stage/achievements');
 try { fs.unlinkSync(SAVE); } catch { /* tolto */ }
 if (INDEX) try { fs.unlinkSync(INDEX); } catch { /* removed */ }
+// Events: objectives done on a listed raid quest count (user 03-11)
+{
+  const evs = t.raidEventsNow();
+  const sid = evs.length ? evs[0].stages[0].stageId : 0;
+  if (sid) {
+    p.clearMissions[sid] = [1, 2, 3];
+    const b = ach();
+    check(b.eventNumerator === 3, `event numerator after one raid quest with 3 objectives: ${b.eventNumerator}`);
+    delete p.clearMissions[sid];
+  } else console.log('(no raid event this week: Events numerator check skipped)');
+}
 if (errors.length) { log(`ERRORI (${errors.length}):\n  ` + errors.slice(0, 60).join('\n  ')); process.exit(1); }
-log(`OK: /stage/achievements (Story ${STORY_OBJ} + Proud ${PROUD_OBJ} obiettivi, Special ${INDEX ? 'periods 1 and 5: 0/18, 0/21' : 'from game_data'}, Events/Union Cross 0/1)`);
+log(`OK: /stage/achievements (Story ${STORY_OBJ} + Proud ${PROUD_OBJ} obiettivi, Special ${INDEX ? 'periods 1 and 5: 0/18, 0/21' : 'from game_data'}, Events from the raid quests, Union Cross 0/1)`);
