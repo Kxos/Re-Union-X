@@ -299,10 +299,10 @@ delete p.special.pinned;
   call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
   call(t.respondStageContinue, '/stage/continue', {});
   check(p.freeStone === 400, `quest vera Continue: jewel ${p.freeStone}`);
-  // una quest vera dopo l'allenamento salva ancora la gauge
+  // Give Up of a real quest: the client always sends burst 0; the keyblade keeps the gauge it had before the quest (user 03-11)
   call(t.respondStageStart, { stageId: 970120, eventId: 7012, userKeybladeId: 0 });
   call(t.respondStageContinue, '/stage/retire', { burst: 0 });
-  check(p.keybladeBurst === 0, `quest vera: Give Up gauge ${p.keybladeBurst}`);
+  check(p.keybladeBurst === 55000, `quest vera: Give Up gauge ${p.keybladeBurst} (expected the pre-quest 55000)`);
 }
 
 try { fs.unlinkSync(SAVE); } catch { /* gia' tolto */ }

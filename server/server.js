@@ -2132,13 +2132,9 @@ function respondStageContinue(res, path, body) {
     savePlayer();
   }
   if (String(path).toLowerCase() === '/stage/retire') { player.stageInProgress = false; savePlayer(); }
-  // Give Up: «the special attack gauge will reset», il corpo porta {burst: 0}
-  // (non l'allenamento: li' la gauge resta com'era)
-  if (String(path).toLowerCase() === '/stage/retire' && typeof body?.burst === 'number' && player.currentStageId !== TRAINING_STAGE_ID) {
-    setKeybladeBurst(body.burst);
-    console.log(`[gauge] /stage/retire burst = ${body.burst}: salvata nel keyblade`);
-    savePlayer();
-  }
+  // Give Up: the client always sends {burst: 0}. The popup's «the special attack gauge will reset» means back to the gauge
+  // the keyblade had before the quest (everything earned here is lost), not 0 (user 03-11): the body's burst is ignored.
+  if (String(path).toLowerCase() === '/stage/retire') console.log(`[gauge] /stage/retire burst = ${body?.burst}: ignored, the keyblade keeps its gauge`);
   send(res, 200, { ret: ret(), userKeyblades: userKeybladesData(), userData: { stageResumption: stageResumptionData() } });
 }
 
