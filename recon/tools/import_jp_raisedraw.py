@@ -80,6 +80,7 @@ GENERIC = re.compile(r'^ビットマップ \d+\.png$')
 RD = 'lwf/raisedraw/'
 GB = 'lwf/medal/guilt_bonus/'
 PD = 'lwf/petdraw/'
+DR = 'lwf/drawraise/'
 # percorsi completi dalla radice JP (= percorso pubblicato della cartella)
 WANTED = ([f'{RD}demo/raidgacha_result_display_{n:02d}' for n in range(1, 11)]
           + [f'{RD}Medal/Medal_D_Up{n}' for n in range(1, 13)]
@@ -96,7 +97,10 @@ WANTED = ([f'{RD}demo/raidgacha_result_display_{n:02d}' for n in range(1, 11)]
           # Spirit Blind Box result (pet draw, 03-11): the client loads these 8 for every /gacha/petdraw (missing = crash);
           # only in the JP data. Source (1), then (1b) by original name inside lwf/petdraw/
           + [f'{PD}demo/{n}' for n in ('raidgacha_result_display_pet', 'raidgacha_result_display_rarepet', 'Draw_NormalPet', 'Draw_RarePet')]
-          + [f'{PD}Pet/Pet_{k}{n:03d}' for k in ('Normal', 'Rare') for n in (1, 2)])
+          + [f'{PD}Pet/Pet_{k}{n:03d}' for k in ('Normal', 'Rare') for n in (1, 2)]
+          # «SPIRIT PART GET!» reveal of the pet draw result (03-11): the client loads it after the demo and adds it to
+          # Area_Point unchecked (missing = SIGSEGV, tmp/petdraw_crash/NOTES_crash.md); only in the JP data, 11 of 19 textures
+          + [DR + 'Draw_PetGet'])
 # Animazioni della guilt (cartelle sotto GB, 19-10): l'esportazione JP salva una texture condivisa solo nella
 # prima cartella che la usa (le cifre png_num_Y* di Yfix0-9 e _result stanno in GuiltBonus; i KeyBlade_ef* in
 # altre LWF). Fonte (1b) solo per queste cartelle: stesso NOME originale (mai «ビットマップ N», che le
@@ -118,6 +122,11 @@ PD_FROM = {PD + 'demo/raidgacha_result_display_pet': (PD + 'demo/raidgacha_resul
            PD + 'Pet/Pet_Normal002': (PD + 'demo/raidgacha_result_display_rarepet', 'ビットマップ 4.png'),
            PD + 'Pet/Pet_Rare002': (PD + 'demo/raidgacha_result_display_rarepet', 'ビットマップ 4.png')}
 PD_BLANK = {'ビットマップ 5.png': (64, 60), 'ビットマップ 6.png': (8, 8)}
+# Draw_PetGet (03-11): 5 textures dropped by the JP export = the WW served twin Draw_MedalGet (same original name,
+# declared size and registration, checked 03-11: 王冠, png_ef01-03, ビットマップ 1); 3 title letters with no file anywhere =
+# the same letter of the same title (sprit_3 I = sprit_5, sprit_4 R = sprit_9, sprit_10 T = sprit_6: same declared size).
+DR_TWIN = {DR + 'Draw_PetGet': DR + 'Draw_MedalGet'}
+DR_LETTER = {'sprit_3.png': 'sprit_5.png', 'sprit_4.png': 'sprit_9.png', 'sprit_10.png': 'sprit_6.png'}
 BLANK_DIR = os.path.join(tempfile.gettempdir(), 'khux_pd_blank')
 
 
@@ -137,6 +146,22 @@ def pd_source(rel, name, wh, sig):
             from PIL import Image as _I
             _I.new('RGBA', tuple(wh), (0, 0, 0, 0)).save(f)
         return ('jp', f), 'blank'
+    return None
+
+
+def dr_source(ww, rel, folder, name, wh, sig):
+    """((kind, path), class) for a Draw_PetGet texture missing from its JP folder (DR_TWIN, then DR_LETTER), else None."""
+    twin = DR_TWIN[rel]
+    tdir, tbase = os.path.join(ww, *twin.split('/')), twin.split('/')[-1]
+    tl = os.path.join(tdir, tbase + '.lwf')
+    for k, twh, tsig in lwf_textures(tl) if os.path.exists(tl) else []:
+        if orig_name(tbase, k) == name and tuple(twh) == tuple(wh) and tsig == sig and os.path.exists(os.path.join(tdir, k)):
+            return ('ww', os.path.join(tdir, k)), 'twin-ww'
+    base = rel.split('/')[-1]
+    if name in DR_LETTER:
+        for k, lwh, _s in lwf_textures(latest(folder, base, '.lwf')):
+            if orig_name(base, k) == DR_LETTER[name] and tuple(lwh) == tuple(wh) and os.path.exists(os.path.join(folder, k)):
+                return ('jp', os.path.join(folder, k)), 'same-letter'
     return None
 
 
@@ -370,7 +395,7 @@ def main(argv=None):
             continue
         files, missing = {}, []
         count = {'own-jp': 0, 'unique-anchor': 0, 'position-corroborated': 0, 'name-corroborated': 0,
-                 'position-only': len(pos_only), 'name-jp': 0, 'name-ww': 0, 'substitute': 0, 'sibling-jp': 0, 'blank': 0}
+                 'position-only': len(pos_only), 'name-jp': 0, 'name-ww': 0, 'substitute': 0, 'sibling-jp': 0, 'blank': 0, 'twin-ww': 0, 'same-letter': 0}
         bad = set(conflict) | set(pos_only)
         conflict = [orig_name(base, k) for k in conflict]
         for k, wh, _sig in tex:
@@ -388,6 +413,8 @@ def main(argv=None):
             elif rel.startswith((GB, PD)) and (hit := by_name(names, name, wh)):
                 cand, cls = hit
             elif rel in PD_FROM and (src := pd_source(rel, name, wh, _sig)):
+                cand, cls = src
+            elif rel in DR_TWIN and (src := dr_source(a.ww, rel, folder, name, wh, _sig)):
                 cand, cls = src
             else:
                 missing.append(name)

@@ -950,3 +950,7 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   Catalog section. B0810 `extend: unobtainable` (not original). Plates `game_data/gacha_img/pet<id>.png`
   (`make_banner_images.py` build_pets; B0810 uses the January 2021 art). Switch: `KHUX_PET=1` and `KHUX_PET_DRAW=1` (the draw
   crashes on a client without the resources that carry `lwf/petdraw`). Tests: `test-pet-draw.js`, `test-pet-draw-server.js`.
+  The reveal after the demo also needs `lwf/drawraise/Draw_PetGet` («SPIRIT PART GET!», JP data only; added 03-11 after a
+  bench crash: the client adds the LWF to `Area_Point` without a null check, so a missing file is a SIGSEGV). 11 textures
+  from JP, 5 dropped by the JP export from the served WW twin `Draw_MedalGet` (same name, size and registration), 3 title
+  letters with no file anywhere from the same letter of the title (I, R, T): `DR_TWIN` / `DR_LETTER` of import_jp_raisedraw.py.
