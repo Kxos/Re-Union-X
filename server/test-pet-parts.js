@@ -24,8 +24,12 @@ for (const [id, name] of Object.entries(ADDED)) check(byId.get(Number(id))?.name
 // reconstructed graphics: listed with their status; «recon» rows are left out unless approved (or forced for a preview)
 const st = pp.partStatus();
 check(st.get(402028) === 'recon-ok' && st.get(410014) === 'recon-ok' && byId.has(402028) && byId.has(410014), 'Starlight Ears / Dazzling Disco: reconstructed, approved 02-11, served');
+// the 18 parts without graphics (audit 03-11); 17 approved after the rendered review of 03-11 (tmp/spirit_parts/render/recon_review.html),
+// Olaf's Snow Cloud stays a candidate (its falling-snow particle is drawn, the snowfall looks sparser than the game icon)
 const AWAITING = [402021, 402022, 402027, 402029, 402041, 402060, 402073, 402122, 402126, 407006, 407012, 407025, 407030, 410003, 410007, 410012, 410013, 410021];
-check(AWAITING.every((id) => st.get(id) === 'recon'), `the 18 parts without graphics are listed as «recon» (${AWAITING.filter((id) => st.get(id) !== 'recon')})`);
+const APPROVED_0311 = AWAITING.filter((id) => id !== 410013);
+check(AWAITING.every((id) => st.get(id) === (APPROVED_0311.includes(id) ? 'recon-ok' : 'recon')), `the 18 parts without graphics: 17 «recon-ok», 410013 «recon» (${AWAITING.filter((id) => st.get(id) !== (APPROVED_0311.includes(id) ? 'recon-ok' : 'recon'))})`);
+check(byId.get(410012)?.name === "Elsa's Magic" && byId.get(407006)?.name === 'Kite' && byId.get(407012)?.name === 'Balloon Zazu' && !byId.has(410013), "Elsa's Magic, Kite, Balloon Zazu served; Olaf's Snow Cloud not yet");
 const approved = new Set([...st].filter(([, s]) => s === 'recon-ok').map(([id]) => id));
 check(AWAITING.every((id) => byId.has(id) === approved.has(id)), 'a «recon» part has a row only once approved');
 const all = pp.petPartsRows(undefined, { previewRecon: true });

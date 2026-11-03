@@ -477,6 +477,18 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     and size on screen, k times more texels); report key `hires`, `import_jp_coco.py` writes it. Only files larger than
     declared (the small 51x60 sparkle placeholders stay as they are). Also applies to 402119, 410010, 410014, 410019 (served)
     and to the recon candidates 402029, 407006, 410003, 410021. `recon/tools/test_jp_pet_parts.py`.
+  - **17 reconstructed parts approved (3 Nov 2026, rendered review delegated by the user):** 402021 Mickey Mask, 402022 Minnie
+    Mask, 402027 Starlight Bow, 402029 Pointy Pumpkin Hat, 402041 Popcorn Hat, 402060 KH III Sora Ornament A, 402073 Dante
+    Ornament, 402122 Hannya Mask, 402126 Black Heart-Shaped Hat, 407006 Kite, 407012 Balloon Zazu, 407025 Balloon Baymax & Mochi,
+    407030 Balloon Aliens, 410003 Falling Snow, 410007 Goldfish, 410012 Elsa's Magic, 410021 Confetti & Butterflies: status
+    `recon-ok`, textures in the private `pet_parts_recon/files` (record in its README), 706 rows. Each was rendered on the pink
+    Kitstar on the served path (hires LWF applied: 402029, 407006, 410003, 410021) and compared with the khuxwiki pictures and the
+    game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX	mp\spirit_partsenderecon_review.html` (scripts
+    `render\scriptsecon_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
+    poses instead of 8). 402126 has no JP folder: `collect()` now reads a part folder that exists only in `recon_root` whole
+    (LWF + textures, report key `recon_only`). Not approved: **410013 Olaf's Snow Cloud** (its 10x10 falling particle
+    «img_snow01» is drawn, lost in pet and avatar; the render shows a narrow, sparse snowfall against the dense, wide one of the
+    game icon and the khuxwiki pictures). Notice «Spirit Parts» (11/03) updated; Elsa's Magic VIP week pays the part.
 - **Visible pet** (11 October evening, to be tested on the bench): `make_pet_motions.py` writes every
   motion as a root with 9 empty movies named like the parts of 001 (only those: no
   load towards missing files) and one pose per frame (PLACE at the first, MOVEM afterwards; strings,

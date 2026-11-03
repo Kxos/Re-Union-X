@@ -501,15 +501,15 @@ petPartsId	name	status
 402018	Unicorn Style
 402019	Mickey Visor
 402020	Minnie Visor
-402021	Mickey Mask	recon
-402022	Minnie Mask	recon
+402021	Mickey Mask	recon-ok
+402022	Minnie Mask	recon-ok
 402023	Pirate Hat
 402024	Sailor Hat
 402025	Swim Snorkel
 402026	Swim Cap & Goggles
-402027	Starlight Bow	recon
+402027	Starlight Bow	recon-ok
 402028	Starlight Ears	recon-ok
-402029	Pointy Pumpkin Hat	recon
+402029	Pointy Pumpkin Hat	recon-ok
 402030	Halloween Pointy Hat
 402031	Pumpkinhead
 402032	Fantasia Mickey Hat
@@ -520,7 +520,7 @@ petPartsId	name	status
 402038	Turkey Leg
 402039	Illusionist: Hat
 402040	Pizza Hat
-402041	Popcorn Hat	recon
+402041	Popcorn Hat	recon-ok
 402042	Woody Hat
 402043	Macaroon Tower Hat
 402044	Patissier's Hat
@@ -539,7 +539,7 @@ petPartsId	name	status
 402057	Water Samurai: Helm
 402058	Monsters, Inc. Helmet
 402059	[unidentified black starry wig]
-402060	KH III Sora Ornament A	recon
+402060	KH III Sora Ornament A	recon-ok
 402061	KH III Sora Ornament B
 402062	White Hydrangea: Hat
 402063	Black Hydrangea: Hat
@@ -552,7 +552,7 @@ petPartsId	name	status
 402070	Moogle Head
 402071	Argyle Mickey Headband
 402072	Pepita Ornament
-402073	Dante Ornament	recon
+402073	Dante Ornament	recon-ok
 402074	Mickey Ornament
 402075	Minnie Ornament
 402076	Floral Headband
@@ -601,11 +601,11 @@ petPartsId	name	status
 402119	Snowy Mickey Ears
 402120	Axel Ornament A
 402121	Axel Ornament B
-402122	Hannya Mask	recon
+402122	Hannya Mask	recon-ok
 402123	Fortune Fedora
 402124	Celebration Ribbon
 402125	New Year's Mickey Ears
-402126	Black Heart-Shaped Hat	recon
+402126	Black Heart-Shaped Hat	recon-ok
 402127	Red Heart-Shaped Hat
 405001	Red Bowtie
 405002	Yellow Scarf
@@ -642,13 +642,13 @@ petPartsId	name	status
 407003	Red Backpack
 407004	Balloon Snowman
 407005	New Year Decoration
-407006	Kite	recon
+407006	Kite	recon-ok
 407007	Rose Flower Basket
 407008	Dragon Maleficent: Wings
 407009	Balloon Fairies
 407010	Chirithy Cape
 407011	Balloon Moogle & Chirithy
-407012	Balloon Zazu	recon
+407012	Balloon Zazu	recon-ok
 407013	Balloon Pumbaa
 407014	Paraglider
 407015	Starlight Angel Wings
@@ -661,12 +661,12 @@ petPartsId	name	status
 407022	Balloon Huey, Dewey & Louie
 407023	Balloon Scrooge
 407024	Valentine Balloons
-407025	Balloon Baymax & Mochi	recon
+407025	Balloon Baymax & Mochi	recon-ok
 407026	Balloon Mike & Sulley
 407027	Balloon KH III Sora
 407028	Balloon KH III Kairi
 407029	Buzz Lightyear Wings
-407030	Balloon Aliens	recon
+407030	Balloon Aliens	recon-ok
 407031	Balloon KH III Riku
 407032	Balloon Pegasus
 407033	Balloon Blimp Chirithy
@@ -688,16 +688,16 @@ petPartsId	name	status
 407049	Mickey & Minnie Glove Balloons
 410001	Heart
 410002	Autumn Leaves
-410003	Falling Snow	recon
+410003	Falling Snow	recon-ok
 410004	Rose Flower Petals
 410005	Fluffy Heart
 410006	Fireworks
-410007	Goldfish	recon
+410007	Goldfish	recon-ok
 410008	Word Bubble: Sea-Salt Ice Cream
 410009	Word Bubble: Watermelon
 410010	Word Bubble: Noodle Stir-Fry
 410011	Floating Trick or Treat
-410012	Elsa's Magic	recon
+410012	Elsa's Magic	recon-ok
 410013	Olaf's Snow Cloud	recon
 410014	Dazzling Disco	recon-ok
 410015	Swirling Hearts
@@ -706,7 +706,7 @@ petPartsId	name	status
 410018	Word Bubble: Ukulele
 410019	Word Bubble: Hot Dog
 410020	Pinwheels
-410021	Confetti & Butterflies	recon
+410021	Confetti & Butterflies	recon-ok
 411001	Mustache
 411002	Santa Beard
 411003	Pirate Mustache

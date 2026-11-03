@@ -15,7 +15,8 @@ Mike & Sulley 407026 = avatar 208106, Balloon Axel 407047 = avatar 208137). Repo
 Own file at another pixel size (2 Nov 2026): an accessory texture whose own file exists but is stored at another size than
 the LWF declares is used as it is (the original game shipped such files: avatar 108225 has 12x13 for a declared 5x5,
 410014 the same); report key `own_resized`. Reconstructed textures: `recon_root` (the private pet_parts_recon/files
-folder, with its README) gives a file for a texture missing from every source; report key `reconstructed`.
+folder, with its README) gives a file for a texture missing from every source; report key `reconstructed`. A part with
+no JP folder at all (402126 Black Heart-Shaped Hat) is read whole (LWF + textures) from `recon_root`; report key `recon_only`.
 
 Larger file than declared (3 Nov 2026, blur fix): when a served texture is stored larger than the LWF declares, the LWF is
 served as a patched copy (`hires_lwf`) that declares the real size and keeps the drawn size; report key `hires`
@@ -183,6 +184,18 @@ def collect(jp_root, served=(), recon_root=None):
     pngs_of = {}
     for (series, part), files in dirs.items():
         pngs_of[(series, part)] = tuple(sorted((n, _png_size(p)) for n, p in files.items() if n.endswith('.png')))
+    # a part with no JP folder at all (402126 Black Heart-Shaped Hat, 3 Nov 2026): LWF and textures from recon_root, added
+    # after the twin indices (a reconstructed file is never a twin for another part); report key `recon_only`
+    report_recon_only = []
+    rroot = os.path.join(recon_root, 'lwf', 'pet', 'part') if recon_root else None
+    for series in sorted(os.listdir(rroot)) if rroot and os.path.isdir(rroot) else []:
+        sd = os.path.join(rroot, series)
+        for part in sorted(os.listdir(sd)) if os.path.isdir(sd) else []:
+            pd = os.path.join(sd, part)
+            if (series, part) in dirs or not os.path.isfile(os.path.join(pd, part + '.lwf')):
+                continue
+            dirs[(series, part)] = {k: os.path.join(pd, f) for k, f in _latest(os.listdir(pd)).items()}
+            report_recon_only.append((series, part))
 
     def nearest(cands, series):
         return min(cands, key=lambda c: (abs(_num(c[0]) - _num(series)), c[0]))[1]
@@ -207,7 +220,8 @@ def collect(jp_root, served=(), recon_root=None):
         cands = av_png.get((name[len(part) + 1:], tuple(size)), [])
         return cands[0] if len(cands) == 1 else None
 
-    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'reconstructed': [], 'own_resized': [], 'skipped': [], 'hires': {}}
+    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'reconstructed': [], 'own_resized': [], 'skipped': [], 'hires': {},
+              'recon_only': report_recon_only}
     for (series, part), files in sorted(dirs.items()):
         base = 'lwf/pet/part/%s/%s/' % (series, part)
         if base + part + '.lwf' in served:
@@ -285,4 +299,6 @@ if __name__ == '__main__':
         print('  saltata', *s)
     for k in sorted(rep['hires']):
         print('  hires', k)
+    for s in rep['recon_only']:
+        print('  recon_only', *s)
     print('serie escluse:', ' '.join(rep['missing_series']))
