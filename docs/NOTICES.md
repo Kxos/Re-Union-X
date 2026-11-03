@@ -48,7 +48,9 @@ The **VIP! Jewels & Spirit Part** quests and the Spirit Part VIP campaigns now g
 
 The **Spirit Blind Box** deals are in the Shop again, following the Story like the other banners: Bunstar (500 Jewels) and Pigstar (300 Jewels) of November 2017, both back in February 2018 (500 Jewels), January 2021 (500 Jewels) and the last one, from February 25, 2021 to the end of service (**100 Jewels**). Every draw gives one Spirit part of the deal that you do not own yet.
 
-Past Spirit Blind Box deals can be kept in the Shop from the **Banner Catalog** («Keep in the Shop»), one at a time, separately from the kept Medal banner (**not original**).
+Past Spirit Blind Box deals can be kept in the Shop from the **Banner Catalog** («Keep in the Shop»), one at a time, separately from the kept Medal banner (**not original**). The kept deal shows the **KEPT IN SHOP** badge on its banner, like the kept Medal banner.
+
+In the Banner Catalog, the filter **Banner type** shows only the Medal banners or only the **Spirit parts** deals (**not original**).
 
 Once you own every part of the last Spirit Blind Box, it also gives the Spirit parts that have **no other way to be obtained** here, because their original events are not back yet (**not original**).
 
@@ -59,6 +61,10 @@ The **Gold Reinstar** VIP quests (December 2017): the notice says only that the 
 The banner picture of the February 2021 Spirit Blind Box is the one of January 2021 (same title): the original picture is lost.
 
 Two tiny sparkles of the Spirit Blind Box result animation are lost and are not drawn.
+
+The **SPIRIT PART GET!** title of the result survives only in the Japanese files, with some of its pictures missing: the crown and light effects are the ones of the identical **MEDAL GET!** title, and three of its letters (I, R, T) are copied from the same letters of the title.
+
+Some Spirit parts (for example Balloon Fairies and Flying Carpet) looked blurry: their original pictures are sharp but were drawn at a smaller size and then enlarged. They are now drawn at their full size; the pictures themselves are unchanged.
 
 A few parts with lost graphics (for example Elsa’s Magic, Kite, Balloon Zazu) are not available yet: they are being rebuilt and will come with a later update. Until then the Elsa’s Magic VIP week gives a 6★ Moogle.
 
@@ -79,6 +85,8 @@ Some 2021 rewards gave Draw Points in the Presents; when they come back, they wi
 The labels **Draw Points** on the Sell screen and the points held on the Draw Points Deal are written by this restoration (the original texts are lost). The original Shop data of this version called this currency "Premium Ticket": the draw button now says Draw Points.
 
 In the original game the points of the first campaign (January 2020) were removed when it ended; here every point stays (**not original**).
+
+The Draw Points icon (the rainbow crystal printed on the Draw Points Deal banner) comes from the final Japanese version: the worldwide files of this version only had a gold placeholder ticket.
 
 ### June 2021
 
@@ -130,6 +138,8 @@ The **Raid Catalog** is **not original**: it is an addition of this server, in t
 
 One **past raid** at a time can be **kept** in the Events tab, beside the raids of the week. Raids later than your Story stay locked (**Unlocks at Story Quest N**), and raids whose boss cannot be served yet are marked **Not restored yet** and cannot be kept.
 
+The catalogue **Filters** (**not original**) find raids by boss, board or reward name, by type, tier and state, and by **Progress**: **Completed** shows the raids whose objectives you have all completed.
+
 A kept raid follows the rules of its own week (AP, Bonus Time). Its boss has a **level of its own**, starting at **LV 1**: playing it never changes the level of the boss of the week, and the other way round. Its **Raid Boards** are the same as in its week, so a board reward is never given twice; **Raid Coins** are given at every win, as for the raid of the week.
 
 Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.
@@ -177,6 +187,8 @@ The Daily Challenge: Cid quests are the exception: once every objective of all o
 ### Special Catalog
 
 The first banner is the **Special Catalog**. **Details** opens the catalogue of every period. Tapping a quest in the catalogue opens the **details** of that quest (periods, objectives with their rewards, drops). This page is an addition of this server (**not original**): the original game had none.
+
+The catalogue **Filters** have a **Progress** group (**not original**): **Completed** shows the quests whose objectives you have all completed, **Incomplete** the others, so you can see which ones you have never finished.
 
 **Keep in Special**: you can keep **one quest** at a time. It appears under the catalogue with a KEPT banner, like the kept banner of the Shop (**not original**), and keeping another one replaces it.
 
