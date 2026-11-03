@@ -72,7 +72,7 @@ const tDraw = mk({ payType: 8, currency: 'draw', prices: [1], start: '2016-12-05
 const tSpooky = mk({ payType: 8, currency: 'spooky', prices: [1], start: '2016-12-03' });
 s = g.shopBanners([tSpooky, tDraw], opt);
 check(s.includes(tDraw) && !s.includes(tSpooky), 'payType 8: una sola valuta, la prima in ordine');
-check(g.drawable(inside, sizes) && !g.drawable(mk({ payType: 9 }), sizes) && !g.drawable(mk({ payType: 4 }), sizes), 'drawable');
+check(g.drawable(inside, sizes) && g.drawable(mk({ payType: 9, currency: 'points' }), sizes) && !g.drawable(mk({ payType: 4 }), sizes), 'drawable (payType 9 Draw Points since 03-11)');
 
 // valute
 const old = { limitedDrawTicket2: 7 };
@@ -84,6 +84,8 @@ check(['draw', 'holiday', 'spooky', 'moogle', 'draw', 'draw'].join() === [0, 1, 
 const pw = { drawTickets: { draw: 1, holiday: 0, spooky: 4, moogle: 0 }, freeStone: 50 };
 check(g.balance(pw, tSpooky) === 4 && g.balance(pw, inside) === 50, 'balance');
 check(g.walletName(tSpooky) === 'drawTickets.spooky' && g.walletName(inside) === 'freeStone' && g.walletName(mk({ payType: 7 })) === 'limitedDrawTicket1', 'walletName');
+// Draw Points (payType 9): player.drawPoints, served as userPoint.limitedDrawTicket3 (client 4.3.1: the payType 9 plate reads it)
+check(g.walletName(mk({ payType: 9 })) === 'drawPoints' && g.balance({ drawPoints: 250 }, mk({ payType: 9 })) === 250 && g.balance({}, mk({ payType: 9 })) === 0, 'Draw Points: wallet and balance');
 
 // lista dello Shop
 const pList = { freeStone: 0 };
@@ -116,7 +118,7 @@ check(JSON.stringify(bySort.map((x) => x.drawMedalTypeId)) === JSON.stringify(wa
 check(new Set(lo.gachaList.map((x) => x.sortId)).size === lo.gachaList.length, 'sortId distinti');
 const cat = l.gachaList[0];
 check(cat.payType === 6 && cat.price === 1 && cat.drawType === 1, 'Catalog innocuo');
-check(l.gachaList.every((x) => x.price >= 1 && x.payType !== 3 && x.payType !== 9), 'mai prezzo 0, payType 3 o 9');
+check(l.gachaList.every((x) => x.price >= 1 && x.payType !== 3), 'mai prezzo 0 o payType 3');
 l = g.gachaListData([inside], {}, { realMs: t0, webBase: 'http://h', ...opt });
 check(l.gachaList.length === 2, 'senza payType 8');
 const pNone = {};
@@ -161,7 +163,7 @@ check(g.checkDraw({ ...cheap, vipDraw: true }, pc, { count: 3 }, dopt) === 'VIP 
 check(g.checkDraw({ ...cheap, vipDraw: true }, pc, { count: 3 }, { ...dopt, vip: true }) === null, 'VIP Draw con il benefit');
 check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, dopt) === 'banner bloccato', 'banner bloccato');
 check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, { ...dopt, show: new Set([cheap.rowId]) }) === null, 'show sblocca');
-for (const pt of [4, 5, 6, 9]) check(g.checkDraw({ ...cheap, payType: pt }, pc, { count: 3 }, dopt) === `payType ${pt} non estraibile`, `payType ${pt}`);
+for (const pt of [4, 5, 6]) check(g.checkDraw({ ...cheap, payType: pt }, pc, { count: 3 }, dopt) === `payType ${pt} non estraibile`, `payType ${pt}`);
 check(g.checkDraw(mk({ prices: [3000] }), pc, { count: 10 }, dopt) !== null, 'jewel insufficienti');
 check(g.checkDraw(first, { freeStone: 1 }, { count: 10 }, dopt) === null, 'FIRST_FREE: basta 1 Jewel');
 check(g.checkDraw(cheap, pc, { count: 3 }, { ...dopt, freeSlots: 2 }) !== null, 'box senza posti per 3');
@@ -179,6 +181,10 @@ g.payDraw(fall, pp, t0, false);
 check(JSON.stringify(g.drawState(pp, fall)) === '{"draws":3,"sinceFeatured":1}', 'drawState');
 check(g.payDraw(tSpooky, pp, t0, false) === 1 && pp.drawTickets.spooky === 2 && pp.drawTickets.draw === 2, 'spooky: scala la valuta giusta');
 check(JSON.stringify(g.drawState({}, fall)) === '{"draws":0,"sinceFeatured":0}', 'drawState vuoto');
+const dpDeal = mk({ payType: 9, currency: 'points', prices: [100], lotCount: 1 });
+check(g.checkDraw(dpDeal, { drawPoints: 99 }, { count: 1 }, dopt) === 'drawPoints 99 < 100', 'Draw Points: 99 are not enough');
+const pdp = { drawPoints: 250, freeStone: 7 };
+check(g.checkDraw(dpDeal, pdp, { count: 1 }, dopt) === null && g.payDraw(dpDeal, pdp, t0, false) === 100 && pdp.drawPoints === 150 && pdp.freeStone === 7, 'Draw Points: 100 points a draw, Jewels untouched');
 const q = { limitedDrawTicket1: 3 };
 g.payDraw(mk({ payType: 7, prices: [1], lotCount: 5 }), q, t0, false);
 check(q.limitedDrawTicket1 === 2, 'biglietto Platinum scalato');

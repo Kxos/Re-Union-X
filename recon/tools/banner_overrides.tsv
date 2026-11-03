@@ -180,3 +180,6 @@ B0431	slot	0:names=prime - kristoff|prime - anna|prime - olaf|supernova - elsa;u
 B0590	pity	5;names=supernova - kh iii lea (axel)|sn - blitz form sora|sn - kh iii ventus|sn - ultimate form sora|supernova+ - key art #21	D8, notice 57597 ritrovato (tmp\sp2c\d8): [notice text kept locally]
 B0591	pity	10;names=supernova+ - key art #21	D8, notice 57597: [notice text kept locally]
 B0618	pity	3;mode=every	D8, notice 59825: [notice text kept locally]
+B0811	end_pt	2021-06-29	notice 74614 (7★ Deal 2021-02-25 08:00 UTC, available until the end of service); notices 75152, 78463: online service ends 2021-06-29 18:00 PDT (the TSV end 2021-05-30 was the first EOS date, moved on 14 May 2021)
+B0812	end_pt	2021-06-29	notice 74613 (SN++ Deal 2021-02-25 08:00 UTC, available until the end of service); notices 75152, 78463: online service ends 2021-06-29 18:00 PDT (the TSV end 2021-05-30 was the first EOS date, moved on 14 May 2021)
+B0794	skill	72415:all	notice 73873 (About medals with skills: Attack Boost I 1.68421%, Attack Boost All I / Poison / Paralysis / Sleep / Defense Boost I 1.26315%, No Skills 92%; same values as table 72415); B0772 (notice 72831) prints no skill table

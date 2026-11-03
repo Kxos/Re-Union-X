@@ -205,6 +205,9 @@ edge (x 1722) and check that Undo is gray. To do: `target` 3 for the random Supe
   rare medals: `Alert_Area` <- `PopupNormal_MedalMix_RareCaution_Panel.json` (generated).
 - `POST /user/medal/sell` (51) `{"userMedalIds":[..],"numbers":[..]}` -> `userData.userPoint`,
   `userSkills`, `userMedals`, `sellUserMedalIds`.
+- Draw Points (03-11): `Plate_A_Ticket` / `Txt_A_Ticket_Label` show the sum of `medal.sellTicket` of the selection (title
+  106240301 «Draw Points»); `sellTicket` = Tier on Attack Medals of Tier >= 2 (`make-sell-ticket.js`), credited to
+  `player.drawPoints` (`userPoint.limitedDrawTicket3`) from story quest 895 ([shop](shop.md#draw-points)).
 - Quantity popup `EquipSell_Medal_Step1_ver131`: «1/N» = `Txt_MaterialStock_Fix_2`,
   `Txt_data3` «/», `_Fix_3` maximum; red band «Includes ★★★ Medals or higher.» (Panel
   233,18,38, borders 255,2,0, `rare_star.png`) if the stack has more than 2 stars.

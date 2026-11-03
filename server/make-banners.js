@@ -5,7 +5,7 @@
 // Uscita (fuori da git): server/master_data/drawMedalType.json = piastra Catalog (9001) + una riga per
 // ogni banner del catalogo. Il master serve per Details (detailUrl) e la striscia scorrevole (comment);
 // la lista dello Shop la decide il server a ogni /gacha/list (gacha.js). Mai price 0; benefitId != 0 solo per le VIP Draw;
-// payType fuori da [1, 4, 5, 6, 7, 8] (3, 9) diventa 1: quei banner restano solo nel catalogo.
+// payType fuori da [1, 4, 5, 6, 7, 8, 9] (3) diventa 1; 9 = Draw Points Deal (estraibile dal 03-11).
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -76,7 +76,7 @@ function masterRows(catalog, xmlSafe = WARRANT_XML_SAFE, nameOf = null) {
       console.log(`  ${b.rowId} ${b.name}: striscia della pity di ${bytes} byte senza pity_label in banner_overrides.tsv: «${PITY_LABEL_FALLBACK}»`);
     }
     return gd.drawMedalTypeRow({
-      drawMedalTypeId: b.drawMedalTypeId, name: b.name, payType: [1, 4, 5, 6, 7, 8].includes(b.payType) ? b.payType : 1,
+      drawMedalTypeId: b.drawMedalTypeId, name: b.name, payType: [1, 4, 5, 6, 7, 8, 9].includes(b.payType) ? b.payType : 1,
       price: Math.max(1, (b.prices || [])[0] || 1), sortId: 10 + i,
       bannerUrl: `/web/gacha/img/${b.drawMedalTypeId}.png`, detailUrl: `/web/gacha/detail/${b.drawMedalTypeId}`, comment: warrant.comment || commentOf(b), warrant,
       benefitId: b.vipDraw ? VIP_BENEFIT_ID : 0,

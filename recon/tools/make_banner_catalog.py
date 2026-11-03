@@ -622,7 +622,12 @@ def epic_boost(notes):
     return bool(re.search(r'higher chances? of (being|the other \d+ being) Epic|chance to obtain Epic', notes))
 
 
-def skill_of(typ, start):
+def skill_of(typ, start, override=None):
+    """tabella delle abilita' del banner; override = campo «skill» di banner_overrides.tsv («tabella:slot», es.
+    «72415:all»: B0794 Draw Points Deal, tabella stampata nel notice 73873)"""
+    if override:
+        table, _, slots = override.partition(':')
+        return {'table': table.strip(), 'slots': slots.strip() or 'all'}
     if typ == 'SKILL':
         return {'table': '50106', 'slots': 'first'}
     if typ in ('SN', 'SEVEN') and start >= SKILL72415_FROM:
@@ -1088,7 +1093,7 @@ def build_catalog(inputs):
     for o in inputs['overrides']:
         if o.get('field') == 'pity_label':
             labels[o['row_id']]['pity_label'] = o['value']
-        elif o.get('field') in ('price', 'draw_size', 'rarity_mix', 'start_pt', 'end_pt', 'preset', 'slot', 'boosted', 'bonus', 'day_limit', 'total_limit', 'featured', 'pity', 'max_skill', 'not_reproduced'):
+        elif o.get('field') in ('price', 'draw_size', 'rarity_mix', 'start_pt', 'end_pt', 'preset', 'slot', 'boosted', 'bonus', 'day_limit', 'total_limit', 'featured', 'pity', 'max_skill', 'not_reproduced', 'skill'):
             ov[o['row_id']][o['field']] = o['value']
             ov_src[o['row_id']][o['field']] = o.get('source') or 'override'
 
@@ -1182,8 +1187,7 @@ def build_catalog(inputs):
             only = 'VIP_TWIN'
         elif pay in (4, 5, 6):
             only = 'PVP_TICKETS'
-        elif pay == 9:
-            only = 'DRAW_POINTS'
+        # payType 9 (Draw Points Deal) si estrae dal 03-11 (decisione dell'utente): i punti dalla vendita delle medaglie
         elif unusable(prices, lot, rarity_mix(r['rarity_mix'])):
             only = 'INCOMPLETE'
         else:
@@ -1195,7 +1199,7 @@ def build_catalog(inputs):
             'unlockQuest': unlock_quest(r['start_pt'], story), 'payType': pay, 'currency': cur,
             'prices': prices, 'lotCount': lot, 'rarityMix': rarity_mix(r['rarity_mix']), 'epicBoost': epic_boost(notes),
             'dayLimit': day, 'totalLimit': total, 'vipFree': vip_free,
-            'pool': pool, 'guarantee': g, 'enhance': enh, 'skill': skill_of(typ, r['start_pt']), 'bonus': found,
+            'pool': pool, 'guarantee': g, 'enhance': enh, 'skill': skill_of(typ, r['start_pt'], (ov.get(rid) or {}).get('skill')), 'bonus': found,
             'catalogOnly': only, 'completedFrom': completed, 'image': img, 'imageFrom': img_from,
             'notes': notes, 'guaranteesText': r['guarantees'], 'notesSource': nsrc,
         })

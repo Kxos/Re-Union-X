@@ -9,7 +9,7 @@
 // (unlockQuest) e attivi alla data del punto della storia (i PERMANENT con le loro date originali), piu'
 // quelli di `show` (rowId); al massimo SHOP_MAX, i piu' recenti prima. Prezzi dinamici (9.4: mai 0,
 // FIRST_FREE/FALLING dal contatore del giocatore); Free Deal VIP: una sola gratuita al giorno fra tutte
-// (9.5); payType 4/5/6/9 solo nel catalogo (9.6); payType 8 = valute stagionali separate in
+// (9.5); payType 4/5/6 solo nel catalogo (9.6); payType 9 = Draw Points (player.drawPoints, dal 03-11); payType 8 = valute stagionali separate in
 // player.drawTickets, mai due valute insieme nella lista (9.7).
 'use strict';
 const clock = require('./clock');
@@ -25,7 +25,10 @@ const KEPT_STYLE = 2;
 const CATALOG_PLATE_STYLE = 3;
 const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYLE}.png`;
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
-const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1' }; // payType 8: player.drawTickets[currency]
+// payType 8: player.drawTickets[currency]; payType 9 Draw Points (Draw Points Deal): player.drawPoints, served as
+// userPoint.limitedDrawTicket3 (client 4.3.1: the payType 9 plate reads limitedDrawTicket3 with icon 42; points from selling
+// Attack Medals of Tier >= 2, medal.sellTicket = Tier, server.js respondMedalSell)
+const WALLET = { 1: 'freeStone', 7: 'limitedDrawTicket1', 9: 'drawPoints' };
 const TICKET_CURRENCIES = ['draw', 'holiday', 'spooky', 'moogle'];
 // Item id of a type 41 reward (Draw Ticket) -> payType 8 currency: 0 Draw Ticket, 1 Holiday Draw Ticket, 2 Spooky Cookie,
 // 3 Moogle Point. Ours: the original had one currency renamed by the event (itemId 0); the server keeps them apart.
@@ -62,11 +65,14 @@ function priceFor(b, player) {
   const p = b.prices || [];
   return Math.max(1, p.length ? p[Math.min(drawCount(player, b), p.length - 1)] : 1);
 }
-const drawable = (b, sizes) => !b.catalogOnly && [1, 7, 8].includes(b.payType) && sizes.has(b.lotCount);
+const DRAWABLE_PAY = [1, 7, 8, 9];
+const drawable = (b, sizes) => !b.catalogOnly && DRAWABLE_PAY.includes(b.payType) && sizes.has(b.lotCount);
 // Prima quest della storia da cui un banner estraibile spende il biglietto di una missione Limited (sp3 5): rewardType 40
-// Platinum Ticket (payType 7), 41 Draw Ticket (payType 8, valuta draw). Infinity se nessun banner lo spende.
+// Platinum Ticket (payType 7), 41 Draw Ticket (payType 8, valuta draw), 42 Draw Points (payType 9: also the first quest from
+// which selling Medals gives Draw Points, server.js drawPointsUnlocked). Infinity se nessun banner lo spende.
 function ticketUnlockQuest(banners, rewardType, sizes) {
-  const spends = rewardType === 40 ? (b) => b.payType === 7 : rewardType === 41 ? (b) => b.payType === 8 && b.currency === 'draw' : () => false;
+  const spends = rewardType === 40 ? (b) => b.payType === 7 : rewardType === 41 ? (b) => b.payType === 8 && b.currency === 'draw'
+    : rewardType === 42 ? (b) => b.payType === 9 : () => false;
   return banners.filter((b) => drawable(b, sizes) && spends(b)).reduce((m, b) => Math.min(m, b.unlockQuest), Infinity);
 }
 // Banner fissabile nello Shop (sp3 6.1): vecchio (finito prima dell'inizio del periodo della tranche, ctx.periodStart),
@@ -312,7 +318,7 @@ function checkDraw(banner, player, body, { realMs, freeSlots, sizes, storyQuest,
   if (!banner) return `banner ${body?.drawMedalTypeId} sconosciuto`;
   if (banner.catalogOnly) return 'banner solo nel catalogo';
   if ((banner.vipDraw || banner.vipFree) && !vip) return 'VIP Draw senza il benefit VIP'; // il client mostra il lucchetto (I-134)
-  if (![1, 7, 8].includes(banner.payType)) return `payType ${banner.payType} non estraibile`;
+  if (!DRAWABLE_PAY.includes(banner.payType)) return `payType ${banner.payType} non estraibile`;
   if (banner.unlockQuest > storyQuest && !show?.has(banner.rowId)) return 'banner bloccato';
   if (!sizes.has(banner.lotCount)) return `animazione per ${banner.lotCount} medaglie assente`;
   if (Number(body?.count) !== banner.lotCount) console.log(`  [gacha] count ${body?.count} diverso da lotCount ${banner.lotCount}: vale lotCount`);
@@ -350,7 +356,7 @@ function drawResultFields(userMedalIds, firstIds) {
 }
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const PAY = { 1: 'Jewels', 4: 'Bronze Tickets', 5: 'Silver Tickets', 6: 'Gold Tickets', 7: 'Platinum Tickets', 8: 'Draw Tickets' };
+const PAY = { 1: 'Jewels', 4: 'Bronze Tickets', 5: 'Silver Tickets', 6: 'Gold Tickets', 7: 'Platinum Tickets', 8: 'Draw Tickets', 9: 'Draw Points' };
 const CURRENCY_NAME = { spooky: 'Spooky Cookies', moogle: 'Moogle Points', holiday: 'Holiday Draw Tickets', draw: 'Draw Tickets' };
 // payType sconosciuto: ripiega su Jewels (1) o Tickets, senza lanciare; payType 8: valuta del banner
 const unitOf = (b) => (b.payType === 8 ? CURRENCY_NAME[b.currency] || PAY[8] : PAY[b.payType] || (b.payType === 1 ? 'Jewels' : 'Tickets'));

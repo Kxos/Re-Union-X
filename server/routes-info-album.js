@@ -72,6 +72,7 @@ const DIFFERENCES_BODY = [
   'Seasonal banners follow fixed dates of the real calendar, and the Shop shows the most recent unlocked edition of each season, from the first time you log in inside its window. In the original game each edition ran on its own dates.',
   'The banner you keep in the Shop with **Keep in the Shop** did not exist in the original game.',
   'Limited Missions that give Platinum Tickets or Draw Tickets appear only after a banner that uses them is unlocked.',
+  'Draw Points from selling Medals start only when the Story reaches the first Draw Points Deal, and they never expire (see the Draw Points notice).',
   '## Purchases',
   'There are no purchases: Jewels and items come from quests, missions and presents.',
   'Spirit Training slots that were bought in the original game open in other ways (**not original**): slot 2 ("Purchase Weekly Jewels") opens while you have the **VIP benefit** of the Weekly Missions, until it ends; slot 4 ("Purchase Jewel Box E") opens when you complete **all the monthly Limited Missions** (the month\'s Lux campaign), for the rest of that month and the whole next month, although its label says "Valid until the end of the month". Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.',
@@ -140,6 +141,19 @@ const NOTICES = [
   { date: '10/27', tag: 'INFORMATION', title: 'Support Medal Cost',
     body: ['The support Medals (EXP Medals such as Huey, Dewey, Louie and Scrooge, Moogle Medals, Boost Medals such as Chip, Dale and Magic Mirror, Cid, and the Evolve Medals such as Merlin, Flora, Fantasia Mickey and the Blue Fairy) now show **cost 999**, like the Trait Medals.',
       'They are materials for other Medals: with this cost they do not fit on a Keyblade, so they cannot be used in battle by mistake (**not original**: the original data had cost 0).'] },
+  // Draw Points (user decision 03-11; make-sell-ticket.js, server.js respondMedalSell/drawPointsUnlocked, gacha.js payType 9):
+  // original rules from notices 62950/72831/73873; client 4.3.1: Sell screen sum of medal.sellTicket, payType 9 plate =
+  // userPoint.limitedDrawTicket3 with icon 42; texts 106240301/106240303/106180336-341 ours (make_layouts.py)
+  { date: '11/03', tag: 'IMPORTANT', title: 'Draw Points',
+    body: ['**Draw Points** are back. Sell (convert) the Attack Medals you do not use: each Attack Medal of **Tier 2 or higher** gives as many points as its Tier (Tier 2 gives 2 points, Tier 10 gives 10 points). Tier 1 Medals, support Medals and Trait Medals give none.',
+      'Spend them in the **Draw Points Deal**: **100 points = 1 draw** of one boosted SN+ or SN++ Medal. The Draw Points Deal follows the Story like the other banners (lineups of January, February, May, September and October 2020, January and February 2021); the February 2021 lineup also has the original Skill rates of its notice.',
+      'Points are earned only once your Story reaches the first Draw Points Deal (Story Quest 895, January 2020); before that, the Sell screen shows the points but none are given. They never expire.',
+      'Some 2021 rewards gave Draw Points in the Presents; when they come back, they will go to the same points.',
+      '## What is reconstructed',
+      'The labels **Draw Points** on the Sell screen and the points held on the Draw Points Deal are written by this restoration (the original texts are lost). The original Shop data of this version called this currency "Premium Ticket": the draw button now says Draw Points.',
+      'In the original game the points of the first campaign (January 2020) were removed when it ended; here every point stays (**not original**).',
+      '## June 2021',
+      'The **7★ Deal** and the **SN++ Deal** of February 2021 now run until the end of service (June 29, 2021), as in the original game, so they are in the Shop with the last part of the Story together with the Draw Points Deal.'] },
   // Free Deal giornaliere (gacha.isFreeDaily): una sola estrazione al giorno fra tutte, fissabili (decisione dell'utente 26-10)
   { date: '10/26', tag: 'IMPORTANT', title: 'Free Deals',
     body: ['**Free Deals** are the free banners with one draw a day, such as the anniversary and holiday draws and the VIP Free Deals. In this version a free draw costs 1 Jewel.',
