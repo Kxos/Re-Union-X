@@ -49,6 +49,10 @@ check(m.classify(R(name='Free Deal (VIP)', currency='Free, VIP only'), '') == 'F
 check(m.classify(R(name='Supernova - Sephiroth'), '') == 'SN', 'sn')
 check(m.classify(R(name='DAILY DEAL!'), '') == 'DAILY', 'daily')
 
+# --- abilita' (skill): tabella per tipo e data, override «tabella:slot» (B0794 Draw Points Deal, notice 73873)
+check(m.skill_of('T_POINTS', '2021-02-01') is None and m.skill_of('SN', '2021-02-01') == {'table': '72415', 'slots': 'all'}, 'skill_of per tipo')
+check(m.skill_of('T_POINTS', '2021-02-01', '72415:all') == {'table': '72415', 'slots': 'all'} and m.skill_of('T_POINTS', '2021-02-01', '50106') == {'table': '50106', 'slots': 'all'}, 'skill_of override')
+
 # --- prezzi e valute
 check(m.parse_price('1st: Free, 2nd+: 3000') == [0, 3000], 'first free')
 check(m.parse_price('1900, 3000, 2500, 2200') == [3000, 2500, 2200, 1900], 'scalini')
@@ -323,6 +327,12 @@ if os.path.exists(WIKI) and os.path.exists(TSV):
     # «KH III Falling Price Deal» VIP hanno ciascuna due gemelli normali, B0551 e B0553)
     vt = sum(1 for b in bs if b['catalogOnly'] == 'VIP_TWIN')
     check(vt == 39, f'gemelli VIP {vt}')
+    # Draw Points Deal (payType 9) drawable since 03-11; B0794 with the skill table of notice 73873, B0772 without
+    dpd = {b['rowId']: b for b in bs if b['payType'] == 9}
+    check(sorted(dpd) == ['B0631', 'B0639', 'B0669', 'B0707', 'B0729', 'B0772', 'B0794'] and all(b['catalogOnly'] is None for b in dpd.values()), f'Draw Points Deal {sorted(dpd)}')
+    check(dpd['B0794']['skill'] == {'table': '72415', 'slots': 'all'} and dpd['B0772']['skill'] is None, 'skill del Draw Points Deal')
+    # fine del servizio 2021-06-29 per i deal del 25-02-2021 (notice 74613/74614)
+    check(all(next(b for b in bs if b['rowId'] == r)['end'] == '2021-06-29' for r in ('B0811', 'B0812', 'B0794')), 'deal fino alla fine del servizio')
     check(all(b['end'] for b in bs), 'tutte le date di fine')
     inc = sum(1 for b in bs if b['catalogOnly'] == 'INCOMPLETE')  # 31 prima degli override dei notice (Task 4)
     check(inc == 24, f'righe INCOMPLETE {inc}')
@@ -510,7 +520,7 @@ if os.path.exists(WIKI) and os.path.exists(TSV):
     # fix 1, punto 6: date dal notice -> fine originale, fonte in datesSource
     check(all(B[r]['endSource'] == 'original' and B[r]['end'] == '2017-12-04' and 'notice 34475' in B[r]['datesSource']
               for r in ('B0199', 'B0200', 'B0201', 'B0202', 'B0203')), 'B0199-B0203 fine originale dal notice')
-    check(sum(1 for b in bs if b['datesSource']) == 8, 'datesSource solo per le date lette dai notice')  # + B0704-B0706 (2c)
+    check(sum(1 for b in bs if b['datesSource']) == 10, 'datesSource solo per le date lette dai notice')  # + B0704-B0706 (2c), B0811-B0812 (fine del servizio, 03-11)
     # fix 1, punto 8: senza stella scritta, pityStar = stella dello slot finale
     import banner_guarantees as _bgm  # `bg` qui sopra e' una garanzia
     PITY_OV = {o['row_id'] for o in m.default_inputs()['overrides'] if o.get('field') == 'pity'}  # stella dal notice

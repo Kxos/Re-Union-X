@@ -148,7 +148,7 @@ Tools (20-10):
 - Texts: the client reads `text/<categoria>/<id>.txt` (ui/drama/audio); a missing id =
   crash. 856 constant ids cited (`ui_text_ids.py`, `layouts\ui_text_ids.tsv`); 2,332 originals
   imported from the `misc` of the IPA 4.4.0 (`import_ui_texts.py`). Missing there too: 102850008,
-  106260102, 1062402xx (filters, now «%d»/«%d+»), 106240301 «Tickets», 101210001-003 (space in the
+  106260102, 1062402xx (filters, now «%d»/«%d+»), 106240301 «Draw Points» and 106240303 «%d» (Draw Points, 03-11), 101210001-003 (space in the
   English resources).
 - Widgets are looked up by name; for some Labels the client creates a CustomRichText from the Label
   (`Txt_X` -> `Txt_X_Cus`: do not put it in the layout), and some TextFields are replaced at runtime.

@@ -1772,7 +1772,9 @@ function userPointData(now) {
     // la valuta stagionale elencata nello Shop (player.drawTickets, server/gacha.js ticketsOf; spec 9.7).
     // premi 40 Platinum Ticket e 41 Draw Ticket (anche Holiday Draw Ticket, Moogle Point, Spooky
     // Cookie: stessa valuta rinominata dall'evento); reference/missions/limited_rewards_map.md
-    limitedDrawTicket1: player.limitedDrawTicket1 || 0, limitedDrawTicket2: gacha.ticketsOf(player)[player.gacha?.listedCurrency || 'draw'] || 0, limitedDrawTicket3: 0,
+    limitedDrawTicket1: player.limitedDrawTicket1 || 0, limitedDrawTicket2: gacha.ticketsOf(player)[player.gacha?.listedCurrency || 'draw'] || 0,
+    // Draw Points (payType 9, Draw Points Deal; 4.3.1 client: the payType 9 plate reads limitedDrawTicket3 with icon 42)
+    limitedDrawTicket3: player.drawPoints || 0,
   };
 }
 
@@ -2031,6 +2033,9 @@ function grantItem(type, id, num) {
   else if (type === 40) player.limitedDrawTicket1 = (player.limitedDrawTicket1 || 0) + num;
   // 41: Draw Ticket; id 1/2/3 = Holiday Draw Ticket, Spooky Cookie, Moogle Point (gacha.ticketCurrency, ours)
   else if (type === 41) { const t = gacha.ticketsOf(player), c = gacha.ticketCurrency(id); t[c] = (t[c] || 0) + num; }
+  // 42: Draw Points (4.4.0 texts «Premium Ticket»; the client draws icon 42 for payType 9 = limitedDrawTicket3), e.g. the
+  // 2021 Draw Points campaigns in the Present Box
+  else if (type === 42) player.drawPoints = (player.drawPoints || 0) + num;
   // 7 titolo (userTitles), 20 parte dell'avatar (accessorio, userAvatarParts)
   else if (type === 7 && id) { player.titles = [...new Set([...(player.titles || []), id])]; }
   else if (type === 20 && id) { player.avatarParts = [...new Set([...(player.avatarParts || []), id])]; }
@@ -2639,6 +2644,15 @@ function limitedGroupQuest(g) {
     limitedTicketMemo.byGroup.set(key, Math.max(0, ...[...types].map((t) => gacha.ticketUnlockQuest(cat.banners, t, GACHA_SIZES))));
   }
   return limitedTicketMemo.byGroup.get(key);
+}
+// Draw Points from selling (respondMedalSell): from the first quest where a Draw Points Deal (payType 9) is drawable in the
+// Shop (gacha.ticketUnlockQuest 42; 895 with the real catalogue, tranche of the 2020-01-08 Draw Points campaign); before,
+// the original game had no Draw Points (user decision 03-11: features follow the Story date)
+let drawPointsMemo = null;
+function drawPointsUnlocked() {
+  const cat = gachaCatalog();
+  if (drawPointsMemo?.cat !== cat) drawPointsMemo = { cat, quest: gacha.ticketUnlockQuest(cat.banners, 42, GACHA_SIZES) };
+  return (storyQuestForced ?? stageNumber(lastStoryStageId())) >= drawPointsMemo.quest;
 }
 let storyQuestForced = null; // solo per i test: un giocatore finto oltre le soglie dei biglietti senza giocare la storia
 function limitedUnlocked(g) {
@@ -3705,10 +3719,11 @@ function respondMedalSell(res, body) {
     const cell = cells.get(Number(id));
     return cell ? cell.copies.slice(0, Math.max(1, Number(n) || 1)) : [Number(id)];
   }));
-  let gain = 0;
+  let gain = 0, points = 0;
   player.medals = (player.medals || []).filter((m) => {
     if (!copies.has(m.userMedalId)) return true;
     gain += rows.get(m.medalId)?.sell || 0;
+    points += rows.get(m.medalId)?.sellTicket || 0;
     copies.delete(m.userMedalId);
     return false;
   });
@@ -3717,11 +3732,17 @@ function respondMedalSell(res, body) {
   for (const m of startingInventory().medals) {
     if (!copies.has(m.userMedalId)) continue;
     gain += rows.get(m.medalId)?.sell || 0;
+    points += rows.get(m.medalId)?.sellTicket || 0;
     setMedalState(m.userMedalId, { removed: true });
   }
   player.money = (player.money || 0) + gain;
+  // Draw Points (sellTicket = Tier of the Attack Medals of Tier >= 2, make-sell-ticket.js): only once the Story has reached
+  // the first Draw Points Deal (the Sell screen still shows the master's number before)
+  const dpOpen = drawPointsUnlocked();
+  if (points && dpOpen) player.drawPoints = (player.drawPoints || 0) + points;
   savePlayer();
-  console.log(`  [vendita] medaglie ${[...sold.keys()].join(',') || '(nessun id nel corpo)'}: +${gain} munny`);
+  console.log(`  [vendita] medaglie ${[...sold.keys()].join(',') || '(nessun id nel corpo)'}: +${gain} munny`
+    + `${points ? (dpOpen ? `, +${points} Draw Points` : `, ${points} Draw Points not given (Story before the Draw Points Deal)`) : ''}`);
   // risposta dell'azione 51: userData.userPoint, poi
   // userSkills, userMedals, infine sellUserMedalIds;
   // senza i tre in radice «200 ERROR :51»
@@ -4991,6 +5012,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  respondMedalSell, drawPointsUnlocked, // server/test-draw-points.js
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, // server/test-raid-boards.js

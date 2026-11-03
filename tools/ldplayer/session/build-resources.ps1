@@ -113,7 +113,10 @@ if ($LASTEXITCODE) { throw 'prefer_addnl fallito' }
 # scritti a mano: dove c'e' l'originale prevale, tranne i segnaposto «[id]» dell'IPA (es. i
 # filtri Supernova 106240205-215) quando make_layouts.py ha gia' scritto un testo
 python -I recon\tools\import_ui_texts.py "$D\resource_data\names_v4.tsv" "$D\ipa440\names440misc.tsv" "$D\ipa440\miscdata" "$D\layouts\ui_texts" "$D\layouts\served_texts\text\ui"
+# ids that make_layouts.py replaces on purpose (FORCED_TEXTS: Draw Points texts of payType 9) are not copied over
+$forcedTexts = @(); if (Test-Path "$sg\forced_ui_texts.txt") { $forcedTexts = @(Get-Content "$sg\forced_ui_texts.txt" | ForEach-Object { "$_.txt" }) }
 foreach ($t in Get-ChildItem "$D\layouts\ui_texts\text\ui" -File) {
+    if ($forcedTexts -contains $t.Name) { continue }
     $dst = Join-Path "$sg\files\text\ui" $t.Name
     if ((Test-Path $dst) -and ([IO.File]::ReadAllText($t.FullName) -match '^\[\d+\]$')) { continue }
     Copy-Item $t.FullName $dst -Force

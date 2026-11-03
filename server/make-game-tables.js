@@ -860,6 +860,9 @@ require('./make-trait-medals').patch(OUT);
 require('./make-campaign-medals').patch(OUT);
 // Cost 999 on the non-battle Medals (EXP, sell, Boost, Cost, Evolve, Fantasia Mickey B; I-211, support-medal-cost.js)
 require('./support-medal-cost').patch(OUT);
+// Draw Points from selling (user decision 03-11): sellTicket = Tier on the Attack Medals of Tier >= 2, boosted copies included
+// (make-sell-ticket.js); after every generator that adds medal rows
+require('./make-sell-ticket').patch(OUT);
 // Livelli Lux 302-999 ricostruiti e misc 100 = 999 (make-lux-levels.js, richiesta dell'utente 19-10)
 require('./make-lux-levels').patch(OUT);
 // Login bonus (I-176): Daily 100/100/200/200/300 e Total della 1.1.3 (make-login-bonus.js)

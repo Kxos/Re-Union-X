@@ -1705,8 +1705,12 @@ TEXTS = {
     106250103: 'Jewels',        # Txt_Stock_2 (Dark Road: ジュエル)
     # Medal List (barra di aiuto in alto; modalita' vendita)
     100620045: 'Tap a Medal to see its details.',
-    # Sell Medals: titolo di Txt_A_Ticket (accanto a 106130301 «Jewels»)
-    106240301: 'Tickets',
+    # Sell Medals: title of Txt_A_Ticket (next to 106130301 «Jewels»); its number is the sum of medal.sellTicket of the
+    # selection (client 4.3.1, [fn]) = the Draw Points the sale gives (Draw Points restored 03-11, ours)
+    106240301: 'Draw Points',
+    # Shop, payType 9 plate (Draw Points Deal): printf format of the points held next to icon 42 ([fn]; the other
+    # currencies use 106140399 «%d»); missing everywhere -> crash when the plate is built (ours)
+    106240303: '%d',
     # esito della vendita (Txt_Sell_Ok1; l'alternativa 100300009 e' «Complete!»)
     106240302: 'Sale complete!',
     # Menu Quests: sbloccato il Colosseo (Quest 130, stage 4100) scrive questo testo
@@ -1739,6 +1743,18 @@ TEXTS.update({
     106240220: 'PvP Timing',     # Txt_SubTitleSb02: superburstTiming 1-7 («Triggers before slot N»)
 })
 TEXTS.update({106240220 + n: str(n) for n in range(1, 8)})
+# Texts that replace an original of the IPA 4.4.0 (build-resources.ps1 does not copy the import over the ids listed in
+# stage_gen\forced_ui_texts.txt): the payType 9 button texts 106180336-341 say «Premium Ticket», the 4.4.0 name of
+# limitedDrawTicket3; in our Shop payType 9 is the Draw Points Deal (ours, declared in the Notices)
+FORCED_TEXTS = {
+    106180336: 'Use <important>${1:%d :#</important>Draw Point:#</important>Draw Points}\nto get <important>1 Medal</important>',
+    106180337: 'Use <important>${1:%d :#</important>Draw Point:#</important>Draw Points}\nto get <important>${2:%d :#</important>Medal:#</important>Medals}',
+    106180338: 'Use ${1:%d :#Draw Point:#Draw Points}\nto get 1 Medal',
+    106180339: 'Use ${1:%d :#Draw Point:#Draw Points}\nto get ${2:%d :#Medal:#Medals}',
+    106180340: 'Use <important>${1:%d :#</important>Draw Point:#</important>Draw Points}\nto get <important>${2:%d :#</important>Medal:#</important>Medals}',
+    106180341: 'Draw Points Held',
+}
+TEXTS.update(FORCED_TEXTS)
 
 
 def node(name, tag):
@@ -2952,4 +2968,6 @@ os.makedirs(os.path.join(OUT, 'text', 'ui'), exist_ok=True)
 for tid, s in TEXTS.items():
     with open(os.path.join(OUT, 'text', 'ui', '%d.txt' % tid), 'w', encoding='utf-8', newline='') as fh:
         fh.write(s)
+with open(os.path.join(OUT, '..', 'forced_ui_texts.txt'), 'w', encoding='utf-8', newline='') as fh:
+    fh.write(''.join('%d\n' % tid for tid in sorted(FORCED_TEXTS)))
 print('testi ui:', len(TEXTS))

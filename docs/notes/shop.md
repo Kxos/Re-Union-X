@@ -51,8 +51,8 @@ is no longer written). Tests: `node server/test-gacha-data.js`, `node server/tes
 ## Plate rules
 
 - **payType**: 1 jewel (free+pay, the only one used for jewels), 3 payStone only (always 0: never), 4-6 drawTicket1-3
-  (always 0), 7/8 limitedDrawTicket1/2 (Platinum/Draw Ticket, from `userPoint`), **9 = crash** when drawing (text
-  106240303 missing). payType 1 -> DrawButton1 with the price text; 4-9 with tickets < price -> grey
+  (always 0), 7/8 limitedDrawTicket1/2 (Platinum/Draw Ticket, from `userPoint`), **9 = Draw Points** (`limitedDrawTicket3`, icon 42, held count with text 106240303 «%d»: without that text the plate crashed; [Draw Points](#draw-points)).
+  payType 1 -> DrawButton1 with the price text; 4-9 with tickets < price -> grey
   button (`But07_Disable`, since resources 39).
 - **price** never 0 (draw without confirmation); **benefitId** 0, except the VIP Draws (100, [below](#vip-draws)).
 - The master's **comment** as a printf format with userWarrantDisplayOfTime (scrolling strip under the banner, with
@@ -180,7 +180,7 @@ Fields added during sub-project 2 (beyond the plan):
   been released (sub-set 6.2, B0064, B0083); the 7★ of the «X [+]» entries never before `firstRarity[7]`; field `medal_date` of
   `banner_overrides.tsv` (value = name, date = start of the row's banner): SN++ - Axel B and SN++ - Roxas on
   01/01/2021 (B0774, notice 72833).
-- `catalogOnly`: VIP_TWIN, INCOMPLETE, DRAW_POINTS, PVP_TICKETS from the generator; `NO_MEDALS` is set by the server
+- `catalogOnly`: VIP_TWIN, INCOMPLETE, PVP_TICKETS from the generator (DRAW_POINTS until 03-11: the Draw Points Deals are drawable); `NO_MEDALS` is set by the server
   (`sanitizeBanners` in `server.js`) on banners with a slot without medals (B0370/B0418 Blue Fairy Deal, I-142).
 
 As of 17-10: types SN 213, FEATURED 168, FALLING 129, SKILL 69, DAILY 64, SEVEN 48, FREE 36, STANDARD 23, T_TICKET 21,
@@ -218,7 +218,7 @@ then relogin (or leave and re-enter the Shop: the client downloads the missing f
   first (9001, payType 6).
 - Prices (9.4): never 0 (free = 1 Jewel); FIRST_FREE and FALLING from the player's counter (`player.gacha.count`).
 - Currencies (9.6-9.7): jewels = payType 1; Platinum = payType 7 (`limitedDrawTicket1`); payType 8 = seasonal currencies in
-  `player.drawTickets` (draw, holiday, spooky, moogle); payType 4/5/6/9 only in the catalogue. Earning them: reward type 41
+  `player.drawTickets` (draw, holiday, spooky, moogle); payType 4/5/6 only in the catalogue; payType 9 = Draw Points ([below](#draw-points)). Earning them: reward type 41
   with item id 0 Draw Ticket, 1 Holiday Draw Ticket, 2 Spooky Cookie, 3 Moogle Point (`gacha.ticketCurrency`, ours: the
   original had one currency renamed by the event, id 0); used by the Raid Boards and `make-limited-missions.js` REWARDS
   (2 Nov 2026). The client still calls them «Draw Ticket» in the reward popups.
@@ -907,3 +907,33 @@ about 2x featured odds, 5 instead of 3 Magic Mirrors, more Limited VIP Coins; no
   keepable (user's decision 26-10, not original: each had its own daily draw). Catalog filter «Free Deals», note on the
   details page, IMPORTANT notice «Free Deals».
 - Bench: `relogin.ps1 -Vip 1` (or `0`) forces the benefit on/off (`KHUX_VIP`).
+
+<a id="draw-points"></a>
+## Draw Points (03-11)
+
+User decision 03-11: Draw Points restored with the original rules (notices 62950, 72831, 73873; research
+`D:\Progetto_Restauro_KH_UX\tmp\shop_june2021\FINDINGS.md`).
+
+- **Client 4.3.1** (Ghidra, khux-ww431): userPoint parser [fn] stores `limitedDrawTicket1/2/3` at 0x80/0x84/0x88;
+  the Shop plate [fn] switches on payType: 4/5/6 -> drawTicket1-3 (Star7_Ticket 37-39), 7/8/9 ->
+  limitedDrawTicket1/2/3 with `img/incentive/draw_Ticket_40/41/42.png` ([fn]); the held count is
+  printf(text, n) with **106240303** for icon 42 and 106140399 «%d» for the others ([fn]). Button texts of payType 9:
+  106180336-341 («Premium Ticket» in the IPA 4.4.0). Sell screen [fn]: medal fields 0x520 `sellJewel`, 0x524
+  `sellTicket`; `Txt_A_Ticket_Label` = sum of sellTicket x copies of the selection (a gain, not the balance), title 106240301.
+  So reward type 42 (IncentiveIcon_42) = the payType 9 currency.
+- **Earning**: `server/make-sell-ticket.js` (end of make-game-tables, idempotent) sets `sellTicket` = Tier (guiltValue) on
+  Attack Medals (type 1) of Tier >= 2, boosted copies with the Tier of their normal row (2,558 rows); `respondMedalSell`
+  adds the sum to `player.drawPoints` only when `drawPointsUnlocked()` (story quest >= `gacha.ticketUnlockQuest(banners, 42)`
+  = 895, B0631 campaign 2020-01-08). Before that the Sell screen still shows the master number (static), nothing is credited.
+  Reward type 42 (`grantItem`) credits drawPoints. No expiry, no removal at the end of the January 2020 campaign (declared).
+- **Spending**: payType 9 drawable (`gacha.DRAWABLE_PAY`, wallet `drawPoints`), price 100, x1; master `drawMedalType` keeps
+  payType 9 (`make-banners.js`). Lineups by their dates: B0631 2020-01-08..02-05, B0639 ..05-21, B0669 ..09-02, B0707
+  ..10-11, B0729 ..12-31, B0772 2021-01-01..01-31, B0794 2021-02-01..06-29. B0794 has skill table 72415 (override
+  `skill 72415:all`, notice 73873); B0772's notice 72831 prints no skill table, so none.
+- **Texts** (`make_layouts.py`): 106240301 «Draw Points», 106240303 «%d»; `FORCED_TEXTS` 106180336-341 «Draw Point(s)»
+  replace the IPA 4.4.0 «Premium Ticket» (`build-resources.ps1` skips the ids of `stage_gen\forced_ui_texts.txt`).
+- **June 2021**: B0811 «7★ Deal» and B0812 «SN++ Deal» end 2021-06-29 (end of service 18:00 PDT; override `end_pt`, notices
+  74613/74614, 75152): at quest 979 (Shop week 2021-06-09..15) the Shop shows B0811, B0812, B0794.
+- **Not done**: Spirit Blind Box (B0810, notice 75076, 100 Jewels per Spirit part not owned): needs a pet draw in
+  `petGachaList` (empty today), the list of the parts not owned (pet-parts master), price per part and a result scene;
+  catalogue row missing (classified `X_BLINDBOX`, excluded).
