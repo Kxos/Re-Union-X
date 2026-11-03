@@ -17,7 +17,7 @@
 # fatto da server/make-test-save.js)
 # -EnemyAtk N: attacco dei nemici x N (KHUX_BENCH_ENEMY_ATK, solo banco: per finire a terra e provare Second
 # Chance); la revisione servita cambia, quindi il client riscarica il master sia accendendola sia spegnendola
-param([int]$Revision = 242, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0, [string]$Vip)
+param([int]$Revision = 242, [switch]$TutorialFinished, [switch]$KbFree, [switch]$Pet, [switch]$NoPet, [switch]$TestPresents, [switch]$AllParts, [switch]$PetDraw, [string]$RealNow, [string]$GachaShow, [int]$EnemyAtk = 0, [int]$SkillProb = -1, [string]$Save, [int]$StealUid = 0, [string]$Vip)
 $repo = Split-Path (Split-Path (Split-Path $PSScriptRoot))
 $logs = 'D:\Progetto_Restauro_KH_UX\logs'
 New-Item -ItemType Directory -Force $logs | Out-Null
@@ -43,6 +43,8 @@ if (-not $NoPet) { $env:KHUX_PET = '1' }
 if ($TestPresents) { $env:KHUX_TEST_PRESENTS = '1' }
 # -AllParts: tutte le parti dello Spirit della tabella petParts (KHUX_PET_ALL_PARTS=1, prove)
 if ($AllParts) { $env:KHUX_PET_ALL_PARTS = '1' }
+# -PetDraw: Spirit Blind Box (KHUX_PET_DRAW=1, server/pet-draw.js; needs resources 98+ for lwf/petdraw)
+if ($PetDraw) { $env:KHUX_PET_DRAW = '1' } else { Remove-Item Env:KHUX_PET_DRAW -ErrorAction SilentlyContinue }
 # dimensione dell'ultima versione delle risorse (cartella numerica piu' alta)
 $res = 'D:\Progetto_Restauro_KH_UX\resource_data'
 $last = Get-ChildItem $res -Directory | Where-Object Name -match '^\d+$' | Sort-Object { [int]$_.Name } | Select-Object -Last 1
