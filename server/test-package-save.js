@@ -12,6 +12,7 @@ const bytes = (f) => fs.readFileSync(f);
 const before = [bytes(MAX), bytes(PROUD)];
 
 const { merge } = require('./make-package-save');
+const { newId } = require('./medal-renumber');
 const max = JSON.parse(before[0]); const proud = JSON.parse(before[1]);
 const p = merge(JSON.parse(before[0]), JSON.parse(before[1]));
 fs.writeFileSync(OUT, JSON.stringify(p));
@@ -46,7 +47,7 @@ check(t.maxMedal() >= live.length + 100, `storage ${t.maxMedal()} for ${live.len
 const liveIds = new Set(live.map((m) => m.userMedalId));
 // kind of a medal as the server sees it: medalState may hold the evolved medalId, «removed» = sold
 const maxLiveKinds = new Set(max.medals.filter((m) => !max.medalState?.[m.userMedalId]?.removed)
-  .map((m) => max.medalState?.[m.userMedalId]?.medalId || m.medalId));
+  .map((m) => newId(max.medalState?.[m.userMedalId]?.medalId || m.medalId))); // the server migrates the cut-in renumbering (I-225)
 const kinds = new Set(live.map((m) => m.medalId));
 for (const k of maxLiveKinds) check(kinds.has(k), `medal kind ${k} lost`);
 const refs = [...p.deck, ...Object.values(p.keybladeDecks).flat(), ...Object.values(p.keybladeSubslots).flatMap((s) => Object.values(s)),

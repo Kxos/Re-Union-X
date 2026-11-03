@@ -841,6 +841,10 @@ require('./make-pet-tables').patch(OUT);
 require('./make-skill-table').patch(OUT);
 // Base buff: addBase* della tabella burst dalle descrizioni «Medal STR/DEF ±N» (make-base-buff.js, I-155)
 require('./make-base-buff').patch(OUT);
+// Renumbered medals (I-225, medal-renumber.js): the ids ending in 2/4 whose cut-in row id-1 is another medal take
+// medal_renumber.json's id from here on (the patches below see the new ids; the banner catalogue is mapped when read)
+const medalRenumber = require('./medal-renumber');
+console.log('medal-renumber (medal rows):', JSON.stringify(medalRenumber.patch(OUT)));
 // Boosted: righe a parte del master medal (groupId = normale) dalle voci enhance.boosted del catalogo
 // dei banner (make-boosted-medals.js); dopo supernova, blue-fairy, guilt-burst e pet, che non le vedono
 const gachaCatalog = path.join(__dirname, 'game_data', 'gacha_catalog.json');
@@ -885,6 +889,8 @@ for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
 require('./make-raid').patch(OUT);
 // Raid «AP 0» campaign: evCampaign rows type 7 power 0 over the raid quest stages written just above (make-ev-campaign.js)
 require('./make-ev-campaign').patch(OUT);
+// rewards written above by the generators that read Roboloid-numbered sources (special, raid, story): medal ids mapped (I-225)
+console.log('medal-renumber (rewards):', JSON.stringify(medalRenumber.patch(OUT)));
 console.log(`medal: ${medals.length} righe (+${roboAdded} da Roboloid, ${tiersFromRobo} tier da Roboloid); player: ${players.length} livelli (HP lv1 = ${hp})` +
   (enemies ? `; enemy: ${enemies.length} righe (${displaysJp} con grafica originale di enemy_gen, ${displaysDarkRoad} con grafica di Dark Road, ${displaysSubstituted} con grafica sostitutiva, ${showsRestored} con effetto di comparsa originale ripristinato, ${showsSubstituted} con effetto di comparsa sostitutivo; enemyAttack +${attacksAdded})` : '') + `; burst: ${bursts.length} righe (+${burstsAdded}, ${buffStats.rows} con buff/debuff, ${buffStats.fromOrig} da thethiny, ${buffStats.conflicts} conflitti)` +
   `; supernova: ${snBursts.length} attacchi, +${meowAdded} Dual Meow Wow, ${snEvolve.applied} Evolve con medaglie richieste (${snEvolve.missing} regole senza medaglie); +${fairyAdded} Blue Fairy, ${fairyEvolve} Evolve 6★->7★ con Blue Fairy (${orgEvolve} dell'Organizzazione XIII verso la 7★ «X A»); ${wikiEvolve.changes.length} Evolve with khuxwiki required medals (I-205); bgm: ${bgmRows} righe` +

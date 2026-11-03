@@ -44,7 +44,7 @@ try {
   fs.writeFileSync(SAVE, JSON.stringify(save()));
   const p = login();
   const by = (id) => p.medals.find((m) => m.userMedalId === id);
-  assert.strictEqual(p.medalMapVersion, 2, 'medalMapVersion 2');
+  assert.strictEqual(p.medalMapVersion, 3, 'medalMapVersion 3 (2 + the cut-in renumbering of I-225, test-medal-renumber.js)');
   assert.deepStrictEqual(p.guiltBurst.first, [300443, 31176, 32186, 1], 'record Nova first');
   assert.deepStrictEqual(p.guiltBurst.max, [31176], 'record Nova max: 300443 -> 31176, nessun +5 in piu');
   assert.strictEqual(by(201).medalId, 31176, '300443 -> 31176');
@@ -67,19 +67,19 @@ try {
   // secondo login: niente cambia
   const before = fs.readFileSync(SAVE, 'utf8');
   const p2 = login();
-  assert.deepStrictEqual(p2.medals, p.medals); assert.strictEqual(p2.medalMapVersion, 2);
+  assert.deepStrictEqual(p2.medals, p.medals); assert.strictEqual(p2.medalMapVersion, 3);
   assert.strictEqual(fs.readFileSync(SAVE, 'utf8'), before, 'secondo login: salvataggio identico');
   // nuovo giocatore: versione 1 senza migrazione
   fs.writeFileSync(SAVE, JSON.stringify({ created: false }));
   const code = `const log = console.log; console.log = () => {}; const { _test: t } = require(${JSON.stringify(path.join(__dirname, 'server'))}); log(t.player.medalMapVersion);`;
   const env = { ...process.env, KHUX_SAVE: SAVE, KHUX_REVISION: '127' };
   const n = { medalMapVersion: Number(execFileSync(process.execPath, ['-e', code], { env, encoding: 'utf8' }).trim().split('\n').pop()) };
-  assert.strictEqual(n.medalMapVersion, 2, 'nuovo giocatore: medalMapVersion 2');
+  assert.strictEqual(n.medalMapVersion, 3, 'nuovo giocatore: medalMapVersion 3');
   // salvataggio gia' a versione 1 (banco 18-10): solo il record Nova
   fs.writeFileSync(SAVE, JSON.stringify(save({ medalMapVersion: 1, guiltBurst: { first: [300443, 31176], max: [300443] } })));
   const p3 = login();
   assert.strictEqual(p3.medals.find((m) => m.userMedalId === 201).medalId, 300443, 'versione 1: medaglie non ritoccate');
   assert.deepStrictEqual(p3.guiltBurst.max, [31176], 'versione 1: record Nova max migrato');
-  assert.strictEqual(p3.medalMapVersion, 2);
+  assert.strictEqual(p3.medalMapVersion, 3);
   console.log('ok: migrazione Organizzazione XIII');
 } finally { try { fs.unlinkSync(SAVE); } catch { /* assente */ } }

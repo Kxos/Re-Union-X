@@ -45,7 +45,7 @@ function targets(medals, catalog) {
 function patch(masterDir, catalogFile) {
   const medalFile = path.join(masterDir, 'medal.json');
   const medals = JSON.parse(fs.readFileSync(medalFile, 'utf8'));
-  const catalog = JSON.parse(fs.readFileSync(catalogFile, 'utf8'));
+  const catalog = require('./medal-renumber').mapCatalog(JSON.parse(fs.readFileSync(catalogFile, 'utf8'))); // I-225 ids
   const t = targets(medals, catalog);
   let changed = 0;
   for (const r of medals) {

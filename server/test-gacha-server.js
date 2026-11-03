@@ -11,7 +11,7 @@ process.env.KHUX_SAVE = SAVE;
 // medal-guilt.guiltProbRows (Tier 10: massimo 32000); burst.json vero (7 MB) non si copia
 const SRC_MASTER = path.resolve(process.argv[2] || path.join(__dirname, 'master_data'));
 const MASTER = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-test-gacha-master-'));
-const AVA = 301880, AVA_BOOSTED = 2301880, T8 = 301096, T9 = 300514; // T8: SN - Tsum Pooh & Pals (Tier 8), T9: SN - Illustrated Cloud (Tier 9)
+const AVA = 301880, AVA_BOOSTED = 2301880, T8 = 301096, T9 = require('./medal-renumber').newId(300514); // T8: SN - Tsum Pooh & Pals (Tier 8), T9: SN - Illustrated Cloud (Tier 9)
 // boosted sintetica 2000/2000 di Ava senza guiltValue: il Tier viene dalla normale via groupId (decisione 13-bis)
 const AVA_BOOSTED_NOTIER = 3301880;
 {
