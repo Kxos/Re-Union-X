@@ -103,6 +103,13 @@ const pinnable = (entry, period) => {
   return { ok: true, why: '' };
 };
 
+// one stage done (the crown rule): objectives 1..min(3, n) in clearMissionIds; a stage without objectives once cleared
+// (playStatus). Also the Completed / Incomplete filter of the Special and Raid catalogues (server.js catalogStageDone).
+const stageDone = ({ clearMissionIds = [], playStatus = 0 } = {}, n = 3) => {
+  const k = Math.min(3, n);
+  return k > 0 ? [1, 2, 3].slice(0, k).every((m) => clearMissionIds.includes(m)) : !!playStatus;
+};
+
 const specialEvents = (index, ctx) => {
   const { period, weekday, vip, pinnedKey, dayEndStr, weekEndStr, imgBase } = ctx;
   const stageState = ctx.stageState || (() => ({ score: 0, playStatus: 0, clearMissionIds: [] }));
@@ -110,10 +117,7 @@ const specialEvents = (index, ctx) => {
   const objectiveCount = ctx.objectiveCount || (() => 3);
   // complete (crown to the right of the banner, user 31-10): 1 when every stage has all its objectives done; a stage
   // without objectives counts once cleared (playStatus)
-  const allDone = (stages) => (stages.length && stages.every((s) => {
-    const n = Math.min(3, objectiveCount(s.stageId));
-    return n > 0 ? [1, 2, 3].slice(0, n).every((m) => s.clearMissionIds.includes(m)) : !!s.playStatus;
-  }) ? 1 : 0);
+  const allDone = (stages) => (stages.length && stages.every((s) => stageDone(s, objectiveCount(s.stageId))) ? 1 : 0);
   const build = (src, evStageId, { isLock, endTime, kept }) => {
     const stages = src.stageIds.map((stageId, i) => {
       const st = stageState(stageId) || {};
@@ -161,5 +165,5 @@ const resetDue = (entry, done, lastResetWeek, week, group) => {
 
 module.exports = {
   get PERIODS() { return loadPeriods(); },
-  SPECIAL_IMG_VERSION, imgPath, periodOf, isDailyCid, unlockQuest, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, resetDue,
+  SPECIAL_IMG_VERSION, imgPath, periodOf, isDailyCid, unlockQuest, weekdayOf, isOpen, lockOf, currentEntries, pinnable, specialEvents, stageDone, resetDue,
 };

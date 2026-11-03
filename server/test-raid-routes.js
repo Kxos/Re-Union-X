@@ -957,6 +957,14 @@ function wiring() {
     assert.strictEqual(cat.code, 200);
     assert(/<title>Raid Catalog<\/title>/.test(cat.body.toString()) && cat.body.toString().includes('id="q8999"'), 'catalogue page');
     assert(/In Events this week/.test(cat.body.toString()), 'the fixture row is the current week');
+    // PROGRESS filter (user 03-11): the row is completed once its quest has its objectives done in the save (clearMissions)
+    const doneAttr = () => (/id="q8999"[^>]*data-done="([01])"/.exec(web('/web/raid/catalog').body.toString()) || [])[1];
+    const keepCm = p.clearMissions[FAKE];
+    p.clearMissions[FAKE] = [1, 2];
+    assert.strictEqual(doneAttr(), '0', 'one objective missing: incomplete');
+    p.clearMissions[FAKE] = [1, 2, 3];
+    assert.strictEqual(doneAttr(), '1', 'all objectives: completed');
+    if (keepCm === undefined) delete p.clearMissions[FAKE]; else p.clearMissions[FAKE] = keepCm;
     const det = web('/web/raid/raid/8999?from=catalog');
     assert.strictEqual(det.code, 200);
     assert(det.body.toString().includes('class="back" href="/web/raid/catalog#q8999"'));

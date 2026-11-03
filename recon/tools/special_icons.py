@@ -32,6 +32,9 @@ ORIGINAL = {
     'jewel': 'cocostudio/publish/IncentiveIcon_01.png',      # Jewel (also the Shop's Jewel icon)
     'avatar': 'img/incentive/IncentiveIcon_20.png',          # avatar part (reward type 20)
     'material': 'cocostudio/publish/IncentiveIcon_02.png',   # crystal of the material rewards
+    # PROGRESS chips and the crown of a completed row (user 03-11): the crowns of the event banners (AdventureTop2_EV_Banner)
+    'done': 'img/ui/Complete_icon2.png',                     # gold crown: every objective done
+    'todo': 'img/ui/Complete_icon1.png',                     # grey crown: not complete
 }
 # share of the height kept from the top (full-body pictures too thin at chip size)
 TOP_SHARE = {'mog': 0.58}

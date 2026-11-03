@@ -223,6 +223,20 @@ check(raw(t.respondSpecialWeb, '/web/special/icon/nope.png').code === 404 && raw
   if (keep === undefined) delete p.clearMissions[970000]; else p.clearMissions[970000] = keep;
 }
 
+// filtro PROGRESS del catalogo (utente 03-11): una quest di una sola voce e' completata con tutti gli obiettivi nel salvataggio
+{
+  const ix = t.specialIndex(), title = (n) => n.replace(/\s*\((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\)\s*$/, '').replace(/\s+\d+$/, '');
+  const one = ix.entries.find((x) => x.periods && !x.campaign && !x.removed && !x.replacedBy && !x.training && x.key !== 'catalog' && (x.stageIds || []).length
+    && ix.entries.filter((y) => title(y.name) === title(x.name)).length === 1);
+  const doneAttr = () => (new RegExp(`id="q${one.evStageId}"[^>]*data-done="([01])"`).exec(raw(t.respondSpecialWeb, '/web/special/catalog').body.toString('utf8')) || [])[1];
+  const keep = one.stageIds.map((id) => p.clearMissions[id]);
+  for (const id of one.stageIds) delete p.clearMissions[id];
+  check(doneAttr() === '0', `catalogo: ${one.name} mai giocata -> incompleta (${doneAttr()})`);
+  for (const id of one.stageIds) p.clearMissions[id] = [1, 2, 3];
+  check(doneAttr() === '1', `catalogo: ${one.name} con [1,2,3] -> completata (${doneAttr()})`);
+  one.stageIds.forEach((id, i) => { if (keep[i] === undefined) delete p.clearMissions[id]; else p.clearMissions[id] = keep[i]; });
+}
+
 // 11. fissare una quest: POST /web/special/pin/<evStageId> e /web/special/unpin
 const post = (url) => { const r = raw(t.respondSpecialPost, url); return { code: r.code, body: JSON.parse(r.body.toString('utf8')) }; };
 check(server.route('/web/special/pin/7060') === 'specialweb', 'rotta pin');

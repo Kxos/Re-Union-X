@@ -95,7 +95,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(!/\p{Extended_Pictographic}/u.test(sheet.replace(/<div class="search">[\s\S]*?<\/div>/, '')), 'no emoji in the chips');
   check(!html.includes('📌'), 'no pin emoji in the page');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
-  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material,unlocked', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
+  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material,unlocked,done,todo', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
   const cls = (id) => (/class="([^"]*)"/.exec(itemOf(html, id)) || [])[1];
   check(cls(7101) === 'row pinned' && cls(7102) === 'row can' && cls(7103) === 'row off' && cls(7104) === 'row off' && cls(7105) === 'row off' && cls(7108) === 'row cr locked', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
   check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-locked"'), 'status pills');
@@ -330,7 +330,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
     ["donald's", "Donald's Hat", true], ['', 'anything', true]];
   for (const [q, n, want] of cases) check(m(q, n) === want && page(q, n) === want, `khuxMatch(${q}, ${n}) = ${m(q, n)} (want ${want})`);
   check(h0().includes('function khuxMatch(') && /split\(' \| '\)/.test(h0()), 'page script matches per item name');
-  check(h0().includes('class="mt"') && h0().includes('Matches') && h0().includes('id="none"') && h0().includes('No quests match'), '«Matches:» line and «No quests match» message');
+  check(h0().includes('class="mt"') && h0().includes('Matches') && h0().includes('id="none"') && h0().includes("'No '+wq+' match your filters'"), '«Matches:» line and «No quests match» message');
 }
 function h0() { return html; }
 // round 14 (user 31-10): VIP campaigns in the same minimal rows; weeks with the same art merged; a year selector
@@ -524,6 +524,36 @@ var p=document.createElement('pre');p.id='probe';p.textContent=JSON.stringify(R)
       check(R.unl.q === '7803' && R.unl.c.split(',').sort().join() === '7812,7813,7814' && R.unl.ml === '2017-08,2017-09,2020-02', `«Unlocked, not in Special now»: ${JSON.stringify(R.unl)}`);
     }
   }
+}
+// PROGRESS filter (user 03-11): a row is Completed when every quest it lists that can still be played (removed entries and
+// past replaced ones aside) has all its stages done (ctx.stageDone, the crown rule); a gold crown after its name
+{
+  const ix = { catalog: { evStageId: 7000 }, entries: [
+    e('d1', 7201, { name: 'Done Quest', periods: [2], stageIds: [72010, 72011] }),
+    e('d2', 7202, { name: 'Half Quest', periods: [2], stageIds: [72020, 72021] }),
+    e('n1', 7203, { name: 'Never Quest', periods: [2] }),
+    e('fm', 7204, { name: 'Fam Quest (Monday)', periods: [2], days: ['Mon'], banner: 'f.png' }),
+    e('ft', 7205, { name: 'Fam Quest (Tuesday)', periods: [2], days: ['Tue'], banner: 'f.png' }),
+    e('ok', 7206, { name: 'Mixed Quest', periods: [3] }), e('okgone', 7207, { name: 'Mixed Quest', periods: [1], removed: 'no-use' }),
+    e('okold', 7208, { name: 'Mixed Quest', periods: [1], replacedBy: 'ok', vip: true }),
+    e('gone', 7209, { name: 'Gone Quest', periods: [1], removed: 'no-use' }),
+    e('cdone', 7210, { name: 'Done Campaign', periods: [2], vip: true, campaign: { start: '2017-08-07', end: '2017-08-13' }, banner: 'c.png' }),
+  ] };
+  const done = new Set([72010, 72011, 72020, 72040, 72060, 72100]);
+  const c = { period: 4, pinnedKey: '', periods: PERIODS, shopFrom: '2016-01-11', shopTo: '2016-01-17', weekday: 'Mon', stageDone: (sid) => done.has(sid) };
+  const h = pages.catalogPage(ix, c);
+  const at = (id, a) => { const r = itemOf(h, id), m = new RegExp(a + '="([^"]*)"').exec(r.slice(0, r.indexOf('>') + 1)); return m ? m[1] : null; };
+  const want = { 7201: '1', 7202: '0', 7203: '0', 7204: '0', 7206: '1', 7209: '0', 7210: '1' };
+  for (const [id, v] of Object.entries(want)) check(at(id, 'data-done') === v, `data-done ${id}: ${at(id, 'data-done')} (want ${v})`);
+  const crown = '/web/special/icon/done.png';
+  check(itemOf(h, 7201).includes(crown) && itemOf(h, 7206).includes(crown) && itemOf(h, 7210).includes(crown), 'crown on completed rows');
+  check(!itemOf(h, 7202).includes(crown) && !itemOf(h, 7203).includes(crown) && !itemOf(h, 7204).includes(crown), 'no crown on incomplete rows');
+  check((itemOf(h, 7201).match(/class="s s-/g) || []).length === 1, 'still one status line');
+  check(h.includes('data-g="prog"') && /data-v="done">(?:<img[^>]*done\.png[^>]*>)Completed</.test(h) && /data-v="todo">(?:<img[^>]*todo\.png[^>]*>)Incomplete</.test(h) && h.includes('PROGRESS'), 'PROGRESS chips with icons');
+  const h0 = pages.catalogPage(ix, { ...c, stageDone: undefined });
+  check(!itemOf(h0, 7201).includes(crown), 'no lookup: no crown');
+  check(!/data-done="1"/.test(h0), 'no lookup: nothing completed');
+  check(pages.SPECIAL_ICON_KEYS.includes('done') && pages.SPECIAL_ICON_KEYS.includes('todo'), 'icon keys done / todo served');
 }
 if (errors.length) { console.log('FAIL\n' + errors.join('\n')); process.exit(1); }
 console.log('test-special-pages: OK');

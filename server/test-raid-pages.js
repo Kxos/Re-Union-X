@@ -88,6 +88,27 @@ const tests = {
     assert(/Sora &amp; Moogle B/.test(rowOf(html, 8180)), 'board rewards are searchable');
     assert(pages.khuxMatch('sora moo', 'Sora & Moogle B') && !pages.khuxMatch('oogle', 'Sora & Moogle B'), 'word-start match');
   },
+  // PROGRESS filter (user 03-11): Completed = every playable tier of the week (available) has all its objectives done
+  // (ctx.stageDone, the crown rule); a tier not restored does not count; no playable tier = Incomplete. Gold crown after the name.
+  progress_completed_incomplete() {
+    const ix = index();
+    ix.entries.forEach((t, i) => { t.stageId = 990000 + i; }); // 8071 | 8100 Beginner, Advanced, Epic (not restored) | 8101 | 8150 (not restored) | 8180
+    const page = (done) => pages.catalogPage(ix, ctx({ index: ix, stageDone: (sid) => done.includes(sid) }));
+    const dn = (html, id) => (/data-done="([01])"/.exec(rowOf(html, id)) || [])[1];
+    const html = page([990000, 990001, 990004, 990005, 990006]);
+    assert.strictEqual(dn(html, 8071), '1', 'one tier, done');
+    assert.strictEqual(dn(html, 8100), '0', 'Advanced missing');
+    assert.strictEqual(dn(html, 8101), '1');
+    assert.strictEqual(dn(html, 8150), '0', 'no playable tier: incomplete');
+    assert.strictEqual(dn(html, 8180), '1');
+    assert.strictEqual(dn(page([990001, 990002]), 8100), '1', 'the tier not restored (Epic) does not count');
+    const crown = '/web/special/icon/done.png';
+    assert(rowOf(html, 8071).includes(crown) && !rowOf(html, 8100).includes(crown) && !rowOf(html, 8150).includes(crown), 'crown on completed rows only');
+    assert.strictEqual(count(rowOf(html, 8071), 'class="s s-'), 1, 'still one status line');
+    assert(/data-g="prog"/.test(html) && /PROGRESS/.test(html) && /data-v="done"><img[^>]*done\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*todo\.png[^>]*>Incomplete</.test(html), 'PROGRESS chips');
+    const none = pages.catalogPage(index(), ctx());
+    assert(!/data-done="1"/.test(none) && !rowOf(none, 8071).includes(crown), 'no lookup: nothing completed');
+  },
   one_status_line_at_most_one_button() {
     const html = pages.catalogPage(index(), ctx({ kept: 'WW-W-2018-09-03' }));
     for (const id of [8071, 8100, 8101, 8150, 8180]) {
