@@ -13,6 +13,9 @@ const { raidAp0Ids } = require('./make-ev-campaign');
 const USER_ID = 1; // the only player: same id as userObject and supportUserId of server.js
 const SPAWN_POINTS = 8600, SPAWN_POINTS_BONUS = 6000; // misc 110; bonus time: 2 eggs of 3000 (inferred, plan decision 3)
 const BONUS_HOURS = new Set([2, 8, 14, 20]); // PT, one hour each, on the real clock (plan decision 4)
+// Bonus-time level step (notices #44500 2018-09-17 .. #54910 2019-07-08: «The raid boss will gain an increased 2 levels upon
+// successful defeat!» in Raid Boss Bonus Time; absent from 2019-07-15, removed by #56463): weeks starting in [FROM, TO)
+const BONUS_LEVEL_FROM = '2018-09-17', BONUS_LEVEL_TO = '2019-07-15', BONUS_LEVEL_STEP = 2;
 const AP_RULE_FROM = '2019-07-15', AP_RULE = { bonus: 0, weekend: 5, weekday: 90 };
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999; // stage ids of the raid events (make-raid.js)
 const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entry.level is the quest's level, not the boss's
@@ -160,8 +163,10 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     return { victory: rewardRow(body.rewardId?.[knot]), mvp: rewardRow(body.mvpRewardId?.[knot]), all: rewardRow(body.destroyAllRewardId?.[knot]) };
   }
 
-  function bossDefeated(r, boss, allPoints) {
-    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[boss.key] = Math.min(MAX_LEVEL, boss.level + 1); (r.levelOcc ||= {})[boss.key] = boss.occ; } // a boss of an older month does not feed the new one
+  // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
+  const levelStep = (boss, ms) => (String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1);
+  function bossDefeated(r, boss, allPoints, nowMs = realNow()) {
+    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[boss.key] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs)); (r.levelOcc ||= {})[boss.key] = boss.occ; } // a boss of an older month does not feed the new one
     r.lastFight = { raidId: boss.raidId, damage: boss.damage || 0 };
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
@@ -190,7 +195,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       const out = fight.clearFight(boss, parts, nowMs);
       raidTimeStatus = out.raidTimeStatus;
       getLux = battlePoints(body?.getPoint, body?.burst, luxFactorAt(nowMs));
-      if (out.victory) bossDefeated(r, boss, out.allPoints);
+      if (out.victory) bossDefeated(r, boss, out.allPoints, nowMs);
       savePlayer();
     } else log(`[raid] clear with no fight running (boss ${boss?.raidId ?? 'none'}): nothing changes`);
     const inv = inventoryBlocks(now);

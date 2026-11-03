@@ -354,6 +354,21 @@ const tests = {
     assert.strictEqual(w.player.raid.pending.length, 1, 'one pending');
     assert.strictEqual(w.spawn().level, 2, 'next boss at the new level');
   },
+  bonus_level_step() {
+    // weeks 2018-09-17..2019-07-14: a win in bonus time raises the boss 2 levels (notices #44500..#54910); else 1
+    const run = (start, now) => {
+      const w = world();
+      Object.assign(w.index.entries[0], { start, end: start, questAp: [0, 5, 90] });
+      w.now = now;
+      w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+      return w.player.raid.levels['WW-1/Beginner'];
+    };
+    const BONUS = Date.parse('2026-10-27T15:00:00Z'), PLAIN = Date.parse('2026-10-27T10:00:00Z'); // 08:00 / 03:00 PDT
+    assert.strictEqual(run('2019-03-04', BONUS), 3, 'bonus time in the +2 era');
+    assert.strictEqual(run('2019-03-04', PLAIN), 2, 'outside bonus time');
+    assert.strictEqual(run('2019-07-15', BONUS), 2, 'from 2019-07-15: +1');
+    assert.strictEqual(run('2018-09-10', BONUS), 2, 'before 2018-09-17: +1');
+  },
   level_reset_on_month_change() {
     const w = world();
     w.spawn(); w.start(); w.clearParts([0, 100, 200]);
