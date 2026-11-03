@@ -1,8 +1,15 @@
 """Banners of the Special tab (640x140 PNG) and their -kept copies (spec 2026-10-30-special-tab-design.md 4, 10).
 
     python -I recon/tools/make_special_banners.py [--index F] [--rules F] [--src D] [--out D] [--enemies D]
-        [--mode palette|full]
+        [--mode palette|full] [--section all|special|raid] [--raid-index F] [--raid-img D]
         -> server/game_data/special_img/<evStageId>.png and <evStageId>-kept.png (git-ignored)
+        -> raid section: server/game_data/raid_img/8000.png (Raid Catalog banner) and <evStageId>-kept.png (git-ignored)
+
+Raid section (raids Part 2, Task 9; run after make_raid_banners.py, whose weekly event cards it reads): the Raid Catalog
+banner (raids.json catalog.evStageId, 8000) in the layout of the Special Catalog banner, «RAID CATALOG» over strips of five
+original weekly raid cards spread over the calendar and the same Training Grounds figures (a tap opens that quest); and for
+every raid week a -kept copy of its card with a gold «KEPT RAID» tab (the kept raid of the Raid Catalog in the Events tab).
+After a change of these files bump RAID_IMG_VERSION (server/routes-raid.js), then the master revision.
 
 Index: server/game_data/special.json (make-special.js). Each entry names the original khuxwiki banner file in `banner`
 (server/special_periods.json, entries and campaigns); the originals are downloaded by hand into reference\\special_banners\\
@@ -43,6 +50,9 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 ROOT = os.path.dirname(os.path.dirname(REPO))
 KEPT_TEXT = 'KEPT QUEST'
 CATALOG_TITLE, CATALOG_SUB = 'SPECIAL CATALOG', 'Tap: Training Grounds · Details: all quests'
+# Raid Catalog (raids Part 2, Task 9): banner evStage 8000 in game_data/raid_img, kept raid cards <evStageId>-kept.png
+RAID_CATALOG_EV, RAID_CATALOG_TITLE, RAID_CATALOG_SUB = 8000, 'RAID CATALOG', 'Tap: Training Grounds · Details: all raids'
+RAID_KEPT_TEXT, RAID_STRIPS = 'KEPT RAID', 5
 # originals cut into the oblique strips of the catalogue banner (reference\special_banners; missing ones are skipped)
 CATALOG_STRIPS = [
     'Special - EXP Medals Power banner KHUX.png',
@@ -128,12 +138,12 @@ def vip_tab_end(im):
     return x if sum(under) >= .7 * len(under) else 0
 
 
-def kept_tab(im):
-    """copy of the banner with the gold «KEPT QUEST» tab at the top left (RGBA, 640x140)"""
+def kept_tab(im, text=KEPT_TEXT):
+    """copy of the banner with the gold «KEPT QUEST» tab (or «KEPT RAID», text) at the top left (RGBA, 640x140)"""
     im = im.convert('RGBA')
     if im.size != (640, 140):
         im = im.resize((640, 140), Image.LANCZOS)
-    return _tab(im, KEPT_TEXT, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, max(TAB_SOLID, vip_tab_end(im) + 4))
+    return _tab(im, text, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, max(TAB_SOLID, vip_tab_end(im) + 4))
 
 
 def _tab(im, text, hi, lo, dk, solid, size=18):
@@ -259,13 +269,16 @@ def tap_arrow(size=40):
     return L.resize((size, size), Image.LANCZOS)
 
 
-def catalog_banner(src_dir, enemies=None):
-    """640x140 RGBA of the catalogue banner (evStage 7000)"""
+def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, strips=None):
+    """640x140 RGBA of the catalogue banner (evStage 7000; the Raid Catalog's 8000 with its own title, subtitle and strips:
+    raid_catalog_banner)"""
     im = Image.new('RGBA', (640, 140), (24, 30, 70, 255))
     bg = ImageDraw.Draw(im)
     for y in range(140):
         bg.line((0, y, 639, y), fill=(18, 30 + y // 3, 80 + y // 3, 255))
-    strips = [os.path.join(src_dir, f) for f in CATALOG_STRIPS if os.path.exists(os.path.join(src_dir, f))]
+    if strips is None:
+        strips = [os.path.join(src_dir, f) for f in CATALOG_STRIPS if os.path.exists(os.path.join(src_dir, f))]
+    strips = [p for p in strips if os.path.exists(p)]
     if strips:
         n, slant = len(strips), 34
         w = (640 + slant) / n
@@ -302,8 +315,8 @@ def catalog_banner(src_dir, enemies=None):
             if fig is not None:
                 fig = fig.resize((max(1, int(fig.width * h / fig.height)), h), Image.LANCZOS)
                 im.alpha_composite(fig, (x, yb - h))
-    gold_text(im, (20, 50), CATALOG_TITLE, make_shop_art.font(40))
-    ImageDraw.Draw(im).text((22, 104), CATALOG_SUB, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
+    gold_text(im, (20, 50), title, make_shop_art.font(40))
+    ImageDraw.Draw(im).text((22, 104), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=(20, 16, 40, 255))
     im.alpha_composite(sticker(w=108, h=42), (414, -4))
     rp = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
@@ -449,6 +462,46 @@ def build_all(index, src_dir, out_dir, mode, enemies=None, rules=None):
     return n
 
 
+# ---- Raid Catalog (raids Part 2, Task 9) ----
+def raid_cards(raid_img):
+    """the weekly event cards of make_raid_banners.py in raid_img (<evStageId>.png, by id), without the plain plate 0.png,
+    the catalogue banner and the -kept copies"""
+    if not os.path.isdir(raid_img):
+        return []
+    ids = sorted(int(f[:-4]) for f in os.listdir(raid_img) if f.endswith('.png') and f[:-4].isdigit() and int(f[:-4]) not in (0, RAID_CATALOG_EV))
+    return [os.path.join(raid_img, '%d.png' % i) for i in ids]
+
+
+def raid_catalog_banner(raid_img, enemies=None):
+    """640x140 RGBA of the Raid Catalog banner (evStage 8000): the Special Catalog banner's layout with «RAID CATALOG», strips
+    of RAID_STRIPS original weekly raid cards spread over the calendar, and the same Training Grounds figures (a tap opens
+    that quest, make-raid.js)"""
+    cards = raid_cards(raid_img)
+    n = min(RAID_STRIPS, len(cards))
+    pick = [cards[round(i * (len(cards) - 1) / max(1, n - 1))] for i in range(n)] if n > 1 else cards[:n]
+    return catalog_banner(None, enemies, RAID_CATALOG_TITLE, RAID_CATALOG_SUB, pick)
+
+
+def build_raid(index, raid_img, mode, enemies=None):
+    """writes raid_img/8000.png (index.catalog of raids.json) and <evStageId>-kept.png for every raid week of the index, the
+    card with a «KEPT RAID» tab (its own card, else the plain plate 0.png; none: skipped). Run after make_raid_banners.py.
+    Returns the counts catalog / kept / missing."""
+    os.makedirs(raid_img, exist_ok=True)
+    n = {'catalog': 0, 'kept': 0, 'missing': 0}
+    cat = index.get('catalog') or {}
+    if cat.get('evStageId'):
+        mbi.save_png(raid_catalog_banner(raid_img, enemies), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
+        n['catalog'] += 1
+    for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
+        src = next((p for p in (os.path.join(raid_img, '%d.png' % ev), os.path.join(raid_img, '0.png')) if os.path.exists(p)), None)
+        if not src:
+            n['missing'] += 1
+            continue
+        mbi.save_png(kept_tab(Image.open(src), RAID_KEPT_TEXT), os.path.join(raid_img, '%d-kept.png' % ev), mode)
+        n['kept'] += 1
+    return n
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -462,7 +515,21 @@ def main():
     ap.add_argument('--rules', default=os.path.join(REPO, 'server', 'special_periods.json'),
                     help='campaigns[key].reconstruct: banners rebuilt from local sources (originals lost)')
     ap.add_argument('--mode', choices=['palette', 'full'], default='palette')
+    ap.add_argument('--section', choices=['all', 'special', 'raid'], default='all',
+                    help='special: the Special tab banners; raid: the Raid Catalog banner and the kept raid cards')
+    ap.add_argument('--raid-index', default=os.path.join(REPO, 'server', 'game_data', 'raids.json'))
+    ap.add_argument('--raid-img', default=os.path.join(REPO, 'server', 'game_data', 'raid_img'),
+                    help='the weekly event cards of make_raid_banners.py (run it first); output goes here too')
     a = ap.parse_args()
+    if a.section in ('all', 'raid'):
+        if os.path.exists(a.raid_index):
+            with open(a.raid_index, encoding='utf-8') as f:
+                rr = build_raid(json.load(f), a.raid_img, a.mode, a.enemies)
+            print('raid banners: %d catalog, %d kept cards, %d weeks without a card -> %s' % (rr['catalog'], rr['kept'], rr['missing'], a.raid_img))
+        else:
+            warn('%s not found: no Raid Catalog banner' % a.raid_index)
+        if a.section == 'raid':
+            return
     with open(a.index, encoding='utf-8') as f:
         index = json.load(f)
     rules = None

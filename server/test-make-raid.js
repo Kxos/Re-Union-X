@@ -445,6 +445,40 @@ const tests = {
     });
     assert.strictEqual(out.maps[0].level, 25);
   },
+  catalog_banner_row() {
+    // Task 9: the Raid Catalog banner, evStage 8000 (kept free by the numbering), Details -> /web/raid/catalog, a tap opens
+    // the Training Grounds of the Special Catalog (970000): an evStage needs a quest
+    const f = fixture();
+    f.master.stage.push({ stageId: 970000, id: 970000, stageKind: 2, worldId: 1, mapName: 'Training', raidBoss: 0, name: 'Training Grounds', useAp: 0 });
+    const out = mr.buildRaid(f);
+    const row = out.catalogEvStage;
+    assert.ok(row, 'catalogue row');
+    assert.deepStrictEqual([row.eventStageId, row.validStageId, row.stageId, row.stageStartId, row.stageEndId], [8000, 1, [970000], 970000, 970000]);
+    assert.deepStrictEqual([row.eventCategory, row.eventType, row.detailUrl], [2, 0, '/web/raid/catalog']);
+    assert.strictEqual(row.bannerUrl, `/web/raid/img/v${require('./routes-raid').RAID_IMG_VERSION}/8000.png`);
+    for (const k of ['startTime', 'endTime', 'endDispTime', 'boardEndTime']) assert.ok(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(row[k]), k);
+    assert.deepStrictEqual(out.index.catalog, { evStageId: 8000, stageIds: [970000], useAp: [0] });
+    assert.ok(!out.evStageRows.some((r) => r.eventStageId === 8000), 'not one of the raid rows');
+    assert.ok(!Object.values(out.ids.rows).includes(0), 'no census row takes 8000');
+    // without the Training Grounds row (Special not built): no banner
+    const none = build();
+    assert.strictEqual(none.catalogEvStage, null);
+    assert.strictEqual(none.index.catalog, undefined);
+    // patch writes it in evStage and lists it as ours, so the next run drops it first
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
+    const master = path.join(dir, 'master'), game = path.join(dir, 'game');
+    fs.mkdirSync(master); fs.mkdirSync(game);
+    for (const [n, rows] of Object.entries(f.master)) fs.writeFileSync(path.join(master, n + '.json'), JSON.stringify(rows));
+    const opts = { gameDataDir: game, idsFile: path.join(game, 'raid_ids.json'), sources: { census: f.census, values: f.values, rewards: f.rewards, orig2016: f.orig2016 }, models: f.models, config: f.config };
+    mr.patch(master, opts);
+    mr.patch(master, opts);
+    const ev = JSON.parse(fs.readFileSync(path.join(master, 'evStage.json'), 'utf8'));
+    assert.strictEqual(ev.filter((r) => r.eventStageId === 8000).length, 1, 'once after two runs');
+    const index = JSON.parse(fs.readFileSync(path.join(game, 'raids.json'), 'utf8'));
+    assert.deepStrictEqual(index.catalog, { evStageId: 8000, stageIds: [970000], useAp: [0] });
+    assert.ok(index.own.evStage.includes(8000));
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
   idempotent() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mkraid-'));
     const master = path.join(dir, 'master'), game = path.join(dir, 'game');

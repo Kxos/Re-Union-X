@@ -648,4 +648,6 @@ function detailPage(index, evStageId, ctx = {}) {
     + `${details}${back}<script>${PIN_JS}</script></body></html>`;
 }
 
-module.exports = { SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch };
+// CSS, DETAIL_CSS, esc, niceDay, monthYear, icon: shared with the Raid Catalog pages (server/raid-pages.js), which follow this style
+module.exports = { SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch,
+  CSS, DETAIL_CSS, esc, niceDay, monthYear, icon };

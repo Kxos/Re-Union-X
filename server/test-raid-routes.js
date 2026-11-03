@@ -665,7 +665,9 @@ const tests = {
     w.week = { shopFrom: '2016-04-07', shopTo: '2016-04-13' };
     assert.deepStrictEqual(listed(), [], 'before the raids');
     w.player.raid.kept = 'WW-1';
-    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001], 'the kept raid keeps its boards');
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [], 'a kept raid later than the Story is not served');
+    w.week = { shopFrom: '2019-10-17', shopTo: '2019-10-23' };
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001, 3000002], 'the kept raid keeps its boards');
     assert.deepStrictEqual(w.raid.boardIds(TUE).all.sort(), [3000001, 3000002, 3000003]);
     // a quest of another week still counts once played (its screen was open across the Monday)
     assert.strictEqual(w.raid.stageAp(STAGE + 1, TUE), 90);
@@ -690,7 +692,129 @@ const tests = {
     w.stageStates[STAGE + 1] = done;
     assert.strictEqual(w.raid.events(TUE)[0].complete, 1, 'every quest with its 3 objectives: crown');
   },
+
+  // ---- Raid Catalog (Task 9): one kept raid at a time, its own boss level, shared boards, coins every time ----
+  catalog_keep_one() {
+    const w = catWorld();
+    const ids = () => w.raid.events(TUE).map((e) => e.eventStageId);
+    assert.deepStrictEqual(ids(), [8000, 8001], 'the catalogue banner, then the week');
+    const cat = w.raid.events(TUE)[0];
+    assert.deepStrictEqual(keys(cat), ['stages', 'eventStageId', 'showIcon', 'bannerUrl', 'eventType', 'status', 'endTime', 'newStageId', 'isLock', 'complete']);
+    assert.deepStrictEqual([cat.eventType, cat.isLock, cat.bannerUrl], [0, 0, 'http://x/web/raid/img/v1/8000.png']);
+    assert.deepStrictEqual(cat.stages.map((s) => [s.stageId, s.useAp]), [[970000, 0]], 'its quest: Training Grounds');
+    assert.deepStrictEqual(w.raid.keep(8002), { code: 200, body: { ok: true } });
+    assert.strictEqual(w.player.raid.kept, 'WW-0');
+    assert(w.saves > 0);
+    assert.deepStrictEqual(ids(), [8000, 8002, 8001], 'the kept raid beside the current one');
+    const kept = w.raid.events(TUE)[1];
+    assert.deepStrictEqual([kept.eventType, kept.bannerUrl], [2, 'http://x/web/raid/img/v1/8002-kept.png']);
+    assert.deepStrictEqual(kept.stages.map((s) => s.stageId), [STAGE + 5], 'only its available tiers');
+    assert.deepStrictEqual(w.raid.keep(8003).code, 200);
+    assert.deepStrictEqual(ids(), [8000, 8003, 8001], 'keeping another replaces it');
+    assert.deepStrictEqual(w.raid.unkeep(), { code: 200, body: { ok: true } });
+    assert.strictEqual(w.player.raid.kept, null);
+    assert.deepStrictEqual(ids(), [8000, 8001]);
+    // refused: the current week, a later one, one not restored, an unknown id; nothing changes
+    w.raid.keep(8002);
+    assert.deepStrictEqual(w.raid.keep(8001), { code: 409, body: { ok: false, why: 'now' } });
+    assert.deepStrictEqual(w.raid.keep(8004), { code: 409, body: { ok: false, why: 'later' } });
+    assert.deepStrictEqual(w.raid.keep(8005), { code: 409, body: { ok: false, why: 'removed' } });
+    assert.deepStrictEqual(w.raid.keep(8999), { code: 404, body: { ok: false, why: 'unknown raid' } });
+    assert.strictEqual(w.player.raid.kept, 'WW-0');
+    // the pages' context: the week, the current rows, the kept one
+    const c = w.raid.catalogCtx(TUE);
+    assert.deepStrictEqual([c.shopFrom, c.shopTo, [...c.current], c.kept], ['2019-10-07', '2019-10-13', ['WW-1'], 'WW-0']);
+    // no catalogue in the index: no banner
+    const bare = world();
+    assert.deepStrictEqual(bare.raid.events(TUE).map((e) => e.eventStageId), [8001]);
+  },
+  catalog_separate_levels() {
+    // user 02-11: a kept raid's boss has its own level from LV 1; the live week's boss level never moves with it
+    const w = catWorld();
+    w.raid.keep(8002);
+    const kept = w.spawnAt(STAGE + 5);
+    assert.strictEqual(kept.level, 1);
+    w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['cat:WW-0/Beginner'], 2, 'the catalogue counter');
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], undefined, 'the live week untouched');
+    assert.strictEqual(w.spawn().level, 1, 'the live boss starts at its own level');
+    w.start(); w.clearParts([0, 100, 200]);
+    w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 3);
+    assert.strictEqual(w.player.raid.levels['cat:WW-0/Beginner'], 2, 'the live boss never changes the catalogue level');
+    assert.strictEqual(w.spawnAt(STAGE + 5).level, 2, 'the kept boss resumes its own level');
+    w.start(); w.clearParts([0, 100, 200]);
+    // the very week played live, kept once it is past: LV 1, not the live week's 3
+    w.week = { shopFrom: '2019-10-14', shopTo: '2019-10-20' };
+    w.index.entries.push({ ...w.index.entries[0], key: 'WW-2/Beginner', censusId: 'WW-2', evStageId: 8006, stageId: STAGE + 6, start: '2019-10-14', end: '2019-10-20' });
+    w.tables.stage.push({ stageId: STAGE + 6, raidBoss: 30007 });
+    assert.strictEqual(w.raid.keep(8001).code, 200, 'last week can be kept now');
+    const again = w.spawnAt(STAGE);
+    assert.strictEqual(again.level, 1, 'its own counter');
+    w.start(); w.clearParts([0, 100, 200]);
+    assert.deepStrictEqual([w.player.raid.levels['WW-1/Beginner'], w.player.raid.levels['cat:WW-1/Beginner']], [3, 2]);
+    // the monthly reset clears both
+    w.now = Date.parse('2026-11-01T09:00:00Z');
+    assert.strictEqual(w.spawnAt(STAGE).level, 1);
+    assert.deepStrictEqual(w.player.raid.levels, {});
+  },
+  catalog_boards_shared() {
+    // boards belong to the census row: the kept raid hands out the very ids it had live, so a cell is bought once
+    const w = catWorld();
+    w.week = { shopFrom: '2019-09-30', shopTo: '2019-10-06' };
+    const live = w.raid.boardIds(TUE).active;
+    assert.deepStrictEqual(live, [3000005]);
+    w.week = { shopFrom: '2019-10-07', shopTo: '2019-10-13' };
+    w.raid.keep(8002);
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001, 3000005], 'the same ids beside the current ones');
+    w.raid.unkeep();
+    assert.deepStrictEqual(w.raid.boardIds(TUE).active, [3000001]);
+  },
+  catalog_coins_repeat() {
+    const w = catWorld();
+    w.raid.keep(8002);
+    for (let i = 0; i < 2; i++) {
+      w.spawnAt(STAGE + 5); w.start(); w.clearParts([0, 0, 0]);
+      assert.strictEqual(w.call('reward').raidRewards.length, 1, `kill ${i + 1} pays`);
+    }
+    assert.strictEqual(w.grants.length, 6, 'Victory, MVP and All Points coins, both times');
+  },
+  catalog_week_rules() {
+    // a kept raid follows its own week's rules (entry.start): AP of 2019-03 (5 / 90), +2 levels in bonus time, AP 0 campaign
+    const w = catWorld();
+    Object.assign(w.index.entries[1], { start: '2019-03-04', end: '2019-03-10', questAp: [0, 5, 90] });
+    w.raid.keep(8002);
+    const BONUS = Date.parse('2026-10-27T15:00:00Z');
+    assert.strictEqual(w.raid.stageAp(STAGE + 5, BONUS), 0, 'bonus 0 by its own rule');
+    assert.strictEqual(w.raid.stageAp(STAGE + 5, TUE), 90);
+    w.now = BONUS;
+    w.spawnAt(STAGE + 5); w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['cat:WW-0/Beginner'], 3, '+2 in bonus time for a 2019-03 week');
+    // only the kept raid has 0 AP in the bonus hours: the campaign is listed
+    Object.assign(w.index.entries[0], { questAp: [5, 90], start: '2019-03-11', end: '2019-03-17' });
+    w.week = { shopFrom: '2019-03-11', shopTo: '2019-03-17' };
+    assert.deepStrictEqual(w.raid.campaignIds(BONUS), [98000]);
+    w.raid.unkeep();
+    assert.deepStrictEqual(w.raid.campaignIds(BONUS), [], 'without it, none');
+  },
 };
+
+// The fixture world plus the Raid Catalog: WW-0 a past week (8002, stage +5, boards 3000005), WW-00 another past one (8003),
+// WW-L a later one (8004), WW-X not restored (8005); the catalogue banner 8000 with Training Grounds.
+function catWorld() {
+  const w = world();
+  const base = w.index.entries[0];
+  base.sphereBoardIds = [3000001];
+  w.index.catalog = { evStageId: 8000, stageIds: [970000], useAp: [0] };
+  w.index.entries.push({ ...base, key: 'WW-0/Beginner', censusId: 'WW-0', evStageId: 8002, stageId: STAGE + 5, start: '2019-09-30', end: '2019-10-06', sphereBoardIds: [3000005] },
+    { ...base, key: 'WW-0/Epic', censusId: 'WW-0', evStageId: 8002, stageId: STAGE + 7, tier: 'Epic', start: '2019-09-30', end: '2019-10-06', available: false, why: 'graphics', sphereBoardIds: [3000005] },
+    { ...base, key: 'WW-00/Beginner', censusId: 'WW-00', evStageId: 8003, stageId: STAGE + 8, start: '2019-09-23', end: '2019-09-29', sphereBoardIds: [] },
+    { ...base, key: 'WW-L/Beginner', censusId: 'WW-L', evStageId: 8004, stageId: STAGE + 9, start: '2019-10-21', end: '2019-10-27', sphereBoardIds: [] },
+    { ...base, key: 'WW-X/Beginner', censusId: 'WW-X', evStageId: 8005, stageId: STAGE + 10, start: '2019-09-16', end: '2019-09-22', available: false, why: 'graphics', sphereBoardIds: [] });
+  w.tables.stage.push({ stageId: STAGE + 5, raidBoss: 30006 }, { stageId: STAGE + 8, raidBoss: 30009 });
+  w.spawnAt = (stageId) => { w.raid.onStageClear(stageId, { raidPoint: 9000 }); assert(w.player.raid.boss, `boss spawned from ${stageId}`); return w.player.raid.boss; };
+  return w;
+}
 
 let failed = 0;
 for (const [name, fn] of Object.entries(tests)) {
@@ -783,6 +907,25 @@ function wiring() {
   assert.strictEqual(web('/web/raid/img/8999.png').body.toString(), 'own', 'own file first');
   assert.strictEqual(web('/web/raid/img/v1/8999.png').body.toString(), 'own', 'versioned URL');
   assert.strictEqual(web('/web/raid/img/x.png').code, 404);
+  // Raid Catalog (Task 9): the kept card falls back to the week's own card; the pages; the keep routes
+  assert.strictEqual(web('/web/raid/img/v1/8999-kept.png').body.toString(), 'own', 'no -kept file: the card itself');
+  fs.writeFileSync(path.join(process.env.KHUX_RAID_IMG, '8999-kept.png'), 'kept');
+  assert.strictEqual(web('/web/raid/img/v1/8999-kept.png').body.toString(), 'kept');
+  assert.strictEqual(t.route('/web/raid/catalog'), 'raidweb');
+  {
+    const cat = web('/web/raid/catalog?session=1');
+    assert.strictEqual(cat.code, 200);
+    assert(/<title>Raid Catalog<\/title>/.test(cat.body.toString()) && cat.body.toString().includes('id="q8999"'), 'catalogue page');
+    assert(/In Events this week/.test(cat.body.toString()), 'the fixture row is the current week');
+    const det = web('/web/raid/raid/8999?from=catalog');
+    assert.strictEqual(det.code, 200);
+    assert(det.body.toString().includes('class="back" href="/web/raid/catalog#q8999"'));
+    assert.strictEqual(web('/web/raid/raid/1').code, 404);
+    const post = (url) => { const o = { code: 0, body: null }; quiet(() => t.respondRaidPost({ writeHead(c) { o.code = c; }, end(x) { o.body = JSON.parse(x.toString('utf8')); } }, url)); return o; };
+    assert.deepStrictEqual(post('/web/raid/keep/8999'), { code: 409, body: { ok: false, why: 'now' } });
+    assert.deepStrictEqual(post('/web/raid/unkeep'), { code: 200, body: { ok: true } });
+    assert.strictEqual(post('/web/raid/nothing').code, 404);
+  }
 
   const list = call(t.raid().list);
   assert.strictEqual(list.selfRaid.raidStatus, 0);
