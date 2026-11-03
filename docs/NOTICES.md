@@ -64,6 +64,14 @@ The spiders have **4 weak points**: the **Spinneret** and the three **spiderling
 
 Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP comes from recordings of the original game where one exists, otherwise from the tier tables.
 
+### Raid Boards
+
+Each **Raid Board** has its original name and card picture, so the boards of a week can be told apart by their picture, as in the original game (two boards of a week can share a name, such as **Enhancement Board**). Raid Coins have their original coin.
+
+The card pictures of 4 Raid Boards are **cut from screenshots** of the original game, because the picture files were not found: the **Enhancement Board** of March 11-17, 2019 and the **Radiant Rewards Boards** of July 8-14, 2019, October 14-20, 2019 and January 6-12, 2020.
+
+The positions of the cells on the Raid Boards are **not original**: they follow one path from START in the order of the original list of rewards.
+
 ### Raid Catalog
 
 The **Raid Catalog** is **not original**: it is an addition of this server, in the style of the Special Catalog. Its banner in the Events tab opens the **Training Grounds** when tapped, and its **Details** button lists every raid week of the game with its bosses, tiers and Raid Boards.

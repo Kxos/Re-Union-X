@@ -9,6 +9,13 @@ const rb = require('./raid-boards');
 
 const W1 = 'WW-W-2019-10-07';
 const REAL_CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'raid_config.json'), 'utf8'));
+// board keys of the private board research (null when it is not readable)
+const BOARDS_KEYS = () => {
+  try {
+    const doc = JSON.parse(fs.readFileSync(path.join(process.env.KHUX_RAID_SRC || mr.DEFAULT_SRC, 'raid_rewards', 'a_weekly', 'boards_weekly.json'), 'utf8'));
+    return doc.boards.map((b) => b.id);
+  } catch { return null; }
+};
 const tiers5 = ['Beginner', 'Intermediate', 'Advanced', 'Legendary', 'Epic'];
 const stats = {
   def: { base: 1000, omega: 1100, epic: 50000 },
@@ -851,7 +858,7 @@ const tests = {
       assert.deepStrictEqual([s.type, s.arryId, s.masuId, s.price, s.detailUrl, s.kindId], [5, id, id, 0, '', 0]);
       assert.ok(out.arrayRows.some((r) => r.arryId === id) && out.masuRows.some((r) => r.masuId === id && r.sphereBoardId === id));
     }
-    assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board (1)', 'Enhancement Board (2)']);
+    assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board', 'Enhancement Board'], 'the original title, twice');
     // ids: every Weekly / Radiant row is numbered whatever the filter; pre-series rows are not boards of this task
     assert.deepStrictEqual(Object.keys(out.ids.boards).sort(), ['WW-W-2018-09-03/radiant-01', `${W1}/enhancement-A1`, `${W1}/enhancement-A2`, 'WW-W-2019-10-14/enhancement-A1',
       'WW-W-2019-10-14/enhancement-A2', 'WW-W-2019-10-28/halloween-board-2019'].sort());
@@ -870,6 +877,32 @@ const tests = {
     const none = build((f) => { withBoards(f); f.models = null; });
     assert.ok(none.index.entries.every((e) => e.sphereBoardIds.length === 0));
     assert.strictEqual(none.sphereRows.length, 0);
+  },
+  board_art() {
+    // card: boardId = the configured background (Board_0005), the picture of each board key under every id that uses it
+    const art = { 'enhancement-A1': { jp: 'img/sphere_incentive/Board Raid/Repeat/2400393.png' }, 'enhancement-A2': { screenshot: 'Raid_Board_-_Enhancement_Board_(2)_KHUX.png' } };
+    const out = build((f) => { withBoards(f, [['WW-W-2019-10-14', '2019-10-14', '2019-10-20']]); f.config.boards = { background: 5, art }; });
+    assert.ok(out.sphereRows.every((r) => r.boardId === 5));
+    const mine = entry(out, 'Trickmaster').sphereBoardIds;
+    assert.deepStrictEqual(out.boardArt.filter((a) => mine.includes(a.sphereBoardId)).map((a) => [a.board, a.jp || a.screenshot]),
+      [['enhancement-A1', art['enhancement-A1'].jp], ['enhancement-A2', art['enhancement-A2'].screenshot]]);
+    assert.strictEqual(out.boardArt.length, out.sphereRows.length, 'every board of every week');
+    assert.ok(entry(out, 'Trickmaster').reconstructed.includes('boardArt') && !entry(out, 'Trickmaster').reconstructed.includes('boardNoArt'));
+    const lines = rb.artLines(out.boardArt).split('\n').filter((l) => l && !l.startsWith('#'));
+    assert.strictEqual(lines.length, out.sphereRows.length);
+    assert.ok(lines.includes(`img/sphere_incentive/${mine[0]}.png\tjp\timg/sphere_incentive/Board Raid/Repeat/2400393.png`));
+    assert.ok(lines.includes(`img/sphere_incentive/${mine[1]}.png\tloc\t=img/sphere_incentive_ww/enhancement-A2.png`));
+    // a board with no picture keeps the default background and is labelled; a malformed entry stops the build
+    const bare = build((f) => withBoards(f));
+    assert.ok(bare.sphereRows.every((r) => r.boardId === 1) && bare.boardArt.length === 0);
+    assert.ok(entry(bare, 'Trickmaster').reconstructed.includes('boardNoArt'));
+    assert.throws(() => build((f) => { withBoards(f); f.config.boards = { art: { 'enhancement-A1': {} } }; }), /boards\.art\.enhancement-A1/);
+    // the shipped config: every board of the research has a picture, and the JP files exist where the data is
+    const real = REAL_CONFIG.boards.art, keys = BOARDS_KEYS();
+    if (keys) assert.deepStrictEqual(keys.filter((k) => !real[k]), [], 'boards without a card picture');
+    const jp = process.env.KHUX_JP_DATA || path.join('D:', 'Progetto_Restauro_KH_UX', 'thethiny_data', ' KHUx data shared', 'khux_dev_data', 'data', 'khux_dev_jp_final_4.3.1', 'data', 'jp_final_4.3.1');
+    if (fs.existsSync(jp)) assert.deepStrictEqual(Object.values(real).filter((a) => a.jp && !fs.existsSync(path.join(jp, a.jp))), [], 'JP files');
+    else console.log('  (JP files not checked: no JP data)');
   },
   cell_order() {
     const out = build((f) => withBoards(f));

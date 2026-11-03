@@ -652,8 +652,8 @@ LAYOUTS = {
                                                 [('text', 'Txt_Wording', ''), ('opts', 'Txt_Wording', dict(y=75, height=100)),
                                                  L('Xml_Txt_Wording', 480, 395, 600, 100, '', 22, visible=False),
                                                  I('LB_Coin', 480, 300, 360, 28, 'Plate03.png', opts=PLATE3, children=[
-                                                     I('Coin_Icon', 15, 0, 90, 90, 'IncentiveIcon_14.png', s9=False,
-                                                       scale=0.3)]),
+                                                     # JP PopupNormal_SphereCoinCheck_ver310: 37x38 at scale 1
+                                                     I('Coin_Icon', 15, 0, 37, 38, 'SpherePointIcon_normal.png', s9=False)]),
                                                  L('Txt_BondsPossessed', 400, 300, 160, 28, 'Held', 22),
                                                  L('Txt_BondsPossessed_Label', 570, 300, 200, 28, '0', 22)]),
     # popup del nodo sbloccato (lo carica lo centra e cerca
@@ -1113,8 +1113,9 @@ LAYOUTS = {
         # scende sotto ~300 px di altezza (banco ab11)
         # come in ab_ref_list_complete_01: Win09 blu con il bordo chiaro, x 3-181, y 42-122
         I('Coin', 92, 82, 178, 80, 'Win09.png', opts=WIN9, children=[
-              # icona della valuta: (banco ab10)
-              I('SpherePointIcon', -66, 16, 90, 90, 'IncentiveIcon_14.png', s9=False, scale=0.3),
+              # icona della valuta (banco ab10): the client loads img/incentive/SpherePointIcon_<kind>.png into it by the
+              # board type (Raid Boards: _Raid); 37x38 at scale 0.9 as in the JP SphereBoard_Info_ver310
+              I('SpherePointIcon', -66, 16, 37, 38, 'SpherePointIcon_normal.png', s9=False, scale=0.9),
               L('Txt_Coin_Name_Label', 19, 16, 130, 24, 'Avatar Coins', 18),
               I('Coin_Base', 0, -17, 162, 30, 'Plate02.png', opts=PLATE3),
               L('Txt_Coin_Label', 66, -17, 120, 28, '0', 24, opts=dict(anchorPointX=1, hAlignment=2))]),
@@ -1194,7 +1195,10 @@ LAYOUTS = {
             # arancione alto quanto la barra (x 836-949). «Unlock All» non c'e' negli originali (2017):
             # pulsante blu dentro la barra, a sinistra di Unlock (sopra copriva i nodi della riga 5)
             I('Coin', 92, 45, 180, 83, 'Win09.png', opts=WIN9, children=[
-                  *[I(n, -66, 16, 90, 90, 'IncentiveIcon_14.png', s9=False, scale=0.3, visible=(n == 'SpherePointIcon'))
+                  # one coin per board kind, the client shows the right one (JP Sphere_Info_ver310: own texture each,
+                  # 37x38 at scale 0.9; the textures come from originals.tsv)
+                  *[I(n, -66, 16, 37, 38, (n if n != 'SpherePointIcon' else 'SpherePointIcon_normal') + '.png', s9=False,
+                      scale=0.9, visible=(n == 'SpherePointIcon'))
                     for n in ('SpherePointIcon', 'SpherePointIcon_OC', 'SpherePointIcon_EV', 'SpherePointIcon_Raid',
                               'SpherePointIcon_SP')],
                   L('Txt_Coin_Name_Label', 19, 16, 130, 24, 'Avatar Coins', 18),

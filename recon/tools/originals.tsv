@@ -15232,3 +15232,18 @@ lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e3839720
 
 # Raid AP 0 (docs/notes/raid.md «AP 0 campaign»): blue AP plate shown at AP 0 with the Cursor_Anim_AP glow; absent from WW
 img/ui/World_Stage_AP2.png	b16,jp
+
+# Avatar Board coin icons (Raid Boards, 3 Nov 2026; docs/notes/bacheche.md «Raid Boards»): the board list loads
+#     img/incentive/SpherePointIcon_<kind>.png by the board type (Raid Coins: _Raid), the board screen shows one of the
+#     SpherePointIcon_* widgets of its Info layout (make_layouts.py, as in the JP Sphere_Info_ver310). JP 4.3.1 files.
+img/incentive/SpherePointIcon_*.png	jp
+img/incentive/SpherePointIcon_normal.png	jp	cocostudio/publish/SpherePointIcon_normal.png
+cocostudio/publish/SpherePointIcon_normal.png	jp
+img/incentive/SpherePointIcon_OC.png	jp	cocostudio/publish/SpherePointIcon_OC.png
+cocostudio/publish/SpherePointIcon_OC.png	jp
+img/incentive/SpherePointIcon_EV.png	jp	cocostudio/publish/SpherePointIcon_EV.png
+cocostudio/publish/SpherePointIcon_EV.png	jp
+img/incentive/SpherePointIcon_Raid.png	jp	cocostudio/publish/SpherePointIcon_Raid.png
+cocostudio/publish/SpherePointIcon_Raid.png	jp
+img/incentive/SpherePointIcon_SP.png	jp	cocostudio/publish/SpherePointIcon_SP.png
+cocostudio/publish/SpherePointIcon_SP.png	jp

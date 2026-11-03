@@ -147,7 +147,27 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
   that comes back (Catalog) keeps its nodes. `GET /user/sphere` lists them (and records `player.raidSphereSent`); a check
   without 3 adds the ones handed out since; a check with 3 closes every raid board not handed out now. Update: refused for
   a board not handed out, for a node already open or not on the board, or without enough Raid Coins; completion pays index 22.
-  Images: no `img/sphere_incentive/<id>.png` exists for these ids, so the card has no costume picture (no crash).
+- **Card, name and coin (3 Nov 2026).** How the client draws a board card (list `SphereBoard_Select_Icon_ver130` and the
+  `Info` of the board screen): `Select_Board` = `img/sphere_board/Board_%04d.png` of `sphere.boardId` (background),
+  `Select_Base` = `img/sphere_incentive/<sphereBoardId>.png` (the picture), `Select_Kind` = `img/sphere_kind/Kind_%04d` of
+  `kindId` (0 = none); the title bar shows `sphere.boardName`. Nothing else names the art, so every id needs its own file.
+  - Sources: the khuxwiki screenshots of every WW weekly board (`File:Raid Board - <name> KHUX.png`, 113 files, kept in
+    `D:\Progetto_Restauro_KH_UXeferenceaid_boards\wiki`, not in the repository) show the title, the lilac card
+    (Board_0005) and a picture per board; the JP 4.3.1 data has the same pictures in `img/sphere_incentive/` (472 files
+    2400xxx, `Board Raid/`, `Board Raid/Repeat/`). A pixel match (48 px, inner area) pairs 62 of the 66 boards of
+    `boards_weekly.json` with a JP file (checked by eye in `tmpaid_boards_arterify.png`); 4 have none
+    (enhancement-2019-03, radiant-12, -15, -18) and are cut from the screenshot by `recon/tools/raid_board_screens.py`
+    (card box fitted on two boards that have the JP file: mean difference 3.8/255) into `raid_loc\img\sphere_incentive_ww`.
+  - `raid_config.json` `boards.background` 5 and `boards.art` (board key -> `jp` path or `screenshot`); `raid-boards.js`
+    writes `boardId` 5, the original `boardName` (two boards of a week can share it, as in the 2019 screenshots: the picture
+    tells them apart; the old « (1)/(2)» suffix is gone), labels `boardArt` (screenshot) / `boardNoArt`; `make-raid.js`
+    writes `game_data/raid_board_art.tsv` (one line per board id, originals.tsv columns), imported by `build-resources.ps1`
+    after `originals.tsv`. Notice: Raid Bosses, «Raid Boards».
+  - Coin: the list loads `img/incentive/SpherePointIcon_<kind>.png` (Raid Coins `_Raid`) into its `SpherePointIcon`; the
+    board screen shows its own `SpherePointIcon_Raid` widget (JP `Sphere_Info_ver310`). Both from the JP files
+    (`originals.tsv`, section «Avatar Board coin icons»), widgets 37x38 at scale 0.9 as in JP (`make_layouts.py`); the
+    Avatar Coins icon `_normal` is the same coin as the IncentiveIcon_14 used before.
+  - Still ours: the cell positions (the screenshots show the original layouts, e.g. START bottom left; not restored yet).
 
 <a id="prove"></a>
 ## Tests on the save
@@ -159,7 +179,7 @@ To test the popups again: stop the server, `unlock` of 2100001 to [1..5], `spher
 
 - Quests → Events → Raid Time! → Raid Boards opens the list of the week's two boards (3000110, 3000111) with Raid Coins and «To Complete».
 - Board 3000110: path and costs drawn, one node bought (EXP Medal Huey, 870 → 770 Raid Coins), Unlock All (9,900) completes it: COMPLETE with an Evolve Medal, then the list shows COMPLETE 16/16.
-- Not original yet: the cards have no picture (no `sphere_incentive/<id>.png` for these ids) and the coin icon is the generic one (`img/incentive/SpherePointIcon_Raid.png` is not shipped).
+- Not original yet: the cards have no picture (no `sphere_incentive/<id>.png` for these ids) and the coin icon is the generic one (`img/incentive/SpherePointIcon_Raid.png` is not shipped). Fixed 3 Nov 2026 (card pictures, names, coin: «Card, name and coin» above), bench pending.
 - Not seen yet: nodes paying Draw Tickets, Jewels, materials or Spirit parts (this week's boards pay medals only); to check when Task 8 serves other weeks.
   Also the seasonal ones (rewardSelect 41 with rewardId 1-3: icon and «Draw Ticket» text expected, balance in the Shop's
   seasonal banner) and the new items Sora & Moogle B, Balloon Mike & Sulley, Balloon Axel.
