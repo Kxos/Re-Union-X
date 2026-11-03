@@ -140,6 +140,27 @@ def build_all(banners, img_dir, out_dir, mode):
     return n
 
 
+# Spirit Blind Box plates (03-11, server/pet_draws.json): pet<drawPetTypeId>.png from the notice art. The two return deals
+# of notice 36849 use the art of the first deals (34278 Bunstar, 34474 Pigstar); B0810 (notice 75076, art not downloaded)
+# uses the «Spirit Blind Box!» art of January 2021 (72834), same title: ours, declared in the Notices.
+PET_ART = {'B0197': 'N34278.png', 'N36849-1': 'N34278.png', 'B0206': 'N34474.png', 'N36849-2': 'N34474.png',
+           'B0775': 'N72834.png', 'B0810': 'N72834.png'}
+
+
+def build_pets(img_dir, out_dir, mode, draws=os.path.join(REPO, 'server', 'pet_draws.json')):
+    with open(draws, encoding='utf-8') as f:
+        deals = json.load(f)['banners']
+    os.makedirs(out_dir, exist_ok=True)
+    n = 0
+    for d in deals:
+        fn = PET_ART.get(d['rowId'])
+        p = os.path.join(img_dir, fn) if fn else None
+        im = fit(Image.open(p)) if p and os.path.exists(p) else plate(d['name'])
+        save_png(im, os.path.join(out_dir, f"pet{d['drawPetTypeId']}.png"), mode)
+        n += 1
+    return n
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -154,6 +175,7 @@ def main():
     with open(a.catalog, encoding='utf-8') as f:
         banners = json.load(f)['banners']
     r = build_all(banners, a.img_dir, a.out, a.mode)
+    print(f'Spirit Blind Box plates: {build_pets(a.img_dir, a.out, a.mode)}')
     print(f"banner {len(banners)}: copiate {r['copiate']}, ridimensionate {r['ridimensionate']}, "
           f"da fratello {r['fratello']}, generate {r['generate']}; {r['mb']} MB in {a.out}")
 

@@ -458,6 +458,17 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   97x24 = NPC_SHADOW) instead of ours; battle_all, pvp_start/total_*,
   recovery_skill, rolling3 stay generated (effect textures missing). `petPartsOffset` stays empty (rest
   positions). `GET /pet/coordinate/members` (pets of the party members) is not handled.
+- **All Spirit parts (3 Nov 2026, user decision).** Audit: `D:\Progetto_Restauro_KH_UX	mp\spirit_partsudit\AUDIT.md` (708
+  original ids, 672 rows, 219 obtainable before). Changes:
+  - **VIP Spirit Part quests** (22 Special quests): `make-special.js` resolves «Spirit: <name> xN» to reward type 33 from
+    `server/tables/petParts.json`; the weekly set «VIP! Jewels & Spirit Part Quest» has `spirit: true` (every reward that is not
+    Jewels or a medal is a Spirit part, before the aliases). Before, they paid the avatar accessory of the same name (type 20,
+    ♂ + ♀) or the Moogle 6★ filler (Lion Dancer, Chocolate Hamstar, Word Bubble: I Love Sora, Cool Sunglasses). Now the
+    original rewards (1400 Jewels, the part, 1 6★ Moogle). Elsa's Magic (410012, graphics lost) keeps the filler until its
+    reconstruction is approved. Gold Reinstar (notice 34678): two reconstructed quests with the 5 parts (declared).
+  - **Rows for the 17 parts with complete original graphics** (689 rows); `pet_parts.tsv` third column `recon` (reconstructed
+    textures awaiting approval: no row) / `recon-ok` (approved: 402028, 410014). `KHUX_PET_RECON=all` adds the `recon` rows
+    for a local preview. `server/test-pet-parts.js`.
 - **Visible pet** (11 October evening, to be tested on the bench): `make_pet_motions.py` writes every
   motion as a root with 9 empty movies named like the parts of 001 (only those: no
   load towards missing files) and one pose per frame (PLACE at the first, MOVEM afterwards; strings,

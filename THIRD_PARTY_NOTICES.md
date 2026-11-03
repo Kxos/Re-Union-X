@@ -43,11 +43,11 @@ Text of the KH Wiki is available under the
 Data in this repository derived from KH Wiki pages (Medal, Special Traits, Spirit parts, story music
 notes, enemy pages) is shared under the same licence, with attribution to the KH Wiki contributors:
 
-- `server/pet_parts.tsv`, `server/tables/petParts.json` (Spirit part names, together with the KHUX Wiki);
+- `server/pet_parts.tsv`, `server/tables/petParts.json`, `server/pet_draws.json` (Spirit part names, together with the KHUX Wiki);
 - `server/make-pet-tables.js` (Special Trait list: names and unlock rates; Spirit Trick values);
 
-These three files carry an `SPDX-License-Identifier: CC-BY-SA-4.0` note with the attribution (at the top of
-`pet_parts.tsv` and `make-pet-tables.js`; in `server/tables/petParts.json.license` for the JSON file, which
+These files carry an `SPDX-License-Identifier: CC-BY-SA-4.0` note with the attribution (at the top of
+`pet_parts.tsv` and `make-pet-tables.js`; in `server/tables/petParts.json.license` and `server/pet_draws.json.license` for the JSON files, which
 cannot hold comments). Also using KH Wiki facts (short references, no copied text):
 
 - `server/make-story-oltre.js` (music of quests 526-979, read at build time from a local dump);

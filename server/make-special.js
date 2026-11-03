@@ -493,7 +493,8 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
 }
 
 function build(rules, catalogue, masterRows) {
-  const L = lookups(masterRows);
+  // petParts not given (older callers): server/tables/petParts.json
+  const L = lookups(masterRows.petParts ? masterRows : { ...masterRows, petParts: petPartsTable(path.join(__dirname, 'master_data')) });
   const report = { stopgaps: [], titleFallbacks: [], weeklyLeftOut: [], weeklyAliased: [], weeklySkills: [] };
   // reference rows: last story row 1-525 of each world, then the last story row of all
   const story = (masterRows.stage || []).filter((r) => r.stageKind === 1 && r.stageId < 100000 && r.id <= 525).sort((a, b) => a.id - b.id);

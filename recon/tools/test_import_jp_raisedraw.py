@@ -92,7 +92,11 @@ check(g(B + '12.png') not in out, 'nome generico non vale come prova')
 NUOVE = (['lwf/medal/guilt_bonus/GuiltBonus_BurstLvup', 'lwf/medal/guilt_bonus/GuiltBonus_BurstLvup_num',
           'lwf/raisedraw/demo/Draw_StatusBonus']
          + [f'lwf/medal/guilt_bonus/GuiltBonus_Wfix{n}' for n in range(10)])
+# Spirit Blind Box result (03-11): the 8 lwf/petdraw folders the client loads for /gacha/petdraw
+PET = ([f'lwf/petdraw/demo/{n}' for n in ('raidgacha_result_display_pet', 'raidgacha_result_display_rarepet', 'Draw_NormalPet', 'Draw_RarePet')]
+       + [f'lwf/petdraw/Pet/Pet_{k}{n:03d}' for k in ('Normal', 'Rare') for n in (1, 2)])
 WANTED0, STATIC0, REFS0, JP0 = list(m.WANTED), list(m.STATIC), dict(m.REFS), m.JP
+check(all(rel in WANTED0 for rel in PET), 'WANTED contiene le 8 cartelle lwf/petdraw')
 check(len(NUOVE) == 13, 'le cartelle nuove sono 13')
 for rel in NUOVE:
     check(rel in WANTED0, f'WANTED contiene {rel}')
@@ -214,8 +218,12 @@ if os.path.isdir(m.JP):
                 '--report', rp, '--check'])
         with open(rp, encoding='utf-8') as f:
             r = json.load(f)
-        for rel in NUOVE + STATIC0:
+        for rel in NUOVE + STATIC0 + PET:
             check(r.get(rel, {}).get('status') == 'ok', f'JP vero: {rel} -> {r.get(rel)}')
+        # Spirit Blind Box (03-11): blank only for the two lost demo sprites, sibling textures where the export kept them once
+        blank = {rel: r[rel]['count']['blank'] for rel in PET if r.get(rel, {}).get('count', {}).get('blank')}
+        check(blank == {'lwf/petdraw/demo/raidgacha_result_display_pet': 2, 'lwf/petdraw/demo/raidgacha_result_display_rarepet': 2}, f'petdraw: blank textures {blank}')
+        check(r['lwf/petdraw/demo/raidgacha_result_display_pet']['count']['sibling-jp'] == 6 and r['lwf/petdraw/Pet/Pet_Normal002']['count']['sibling-jp'] == 1, 'petdraw: sibling textures')
         check(set(r) == set(WANTED0) | set(STATIC0), 'rapporto: una voce per cartella')
 else:
     print('(radice JP assente: prova --check saltata)')

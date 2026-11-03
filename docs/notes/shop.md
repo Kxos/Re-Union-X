@@ -934,6 +934,19 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   replace the IPA 4.4.0 «Premium Ticket» (`build-resources.ps1` skips the ids of `stage_gen\forced_ui_texts.txt`).
 - **June 2021**: B0811 «7★ Deal» and B0812 «SN++ Deal» end 2021-06-29 (end of service 18:00 PDT; override `end_pt`, notices
   74613/74614, 75152): at quest 979 (Shop week 2021-06-09..15) the Shop shows B0811, B0812, B0794.
-- **Not done**: Spirit Blind Box (B0810, notice 75076, 100 Jewels per Spirit part not owned): needs a pet draw in
-  `petGachaList` (empty today), the list of the parts not owned (pet-parts master), price per part and a result scene;
-  catalogue row missing (classified `X_BLINDBOX`, excluded).
+- **Spirit Blind Box (03-11)**: pet draws, `server/pet-draw.js` + `server/pet_draws.json` (6 original deals with their notice
+  pools: B0197, B0206, the two returns of notice 36849, B0775, B0810) + `server/pet-draw-pages.js`. Client 4.3.1 (private RE
+  notes `tmp/spirit_parts/petdraw/NOTES_petdraw.md`): `petGachaList` elements {drawPetTypeId, drawType 11 (pet marker), sortId,
+  payType, price, lotName, lotCount, bannerUrl, mypageBanner, totalCount, restCount}, every key mandatory (one bad element =
+  «200 ERROR :75»); same plate builder as the medal banners, merged by sortId (pet plates 2.., Catalog 1, medals 10..);
+  totalCount/restCount = «N/M left», restCount 0 greys the button. Master `drawPetType` row mandatory for each plate (24
+  fields, `server/tables/drawPetType.json`, written by `node server/pet-draw.js`). `POST /gacha/petdraw` body
+  {drawPetTypeId} only; response `pet.userPetParts`, `effectNumbers` ([0]: 1 rare, other non-zero normal, 0 = crash),
+  `petGachaBonus` (addType 1, all list keys), `userData.userPoint` + `userDetail` (full). Confirm dialog
+  `PopupNormal_R_DrawCheck_ver260` (client checks free+paid Jewels, no box check); result `DrowResult2Scene_ver230` shows the
+  Spirit wearing the part (petParts row mandatory) after `lwf/petdraw/*` (8 folders, only in the JP data: imported by
+  `import_jp_raisedraw.py`, 2 lost 64x60 / 8x8 sprites of the demo drawn blank). Odds: login link `petOdds`
+  (`/web/gacha/petodds/`, id appended: to verify). Keep: one past deal, `player.gacha.pinnedPet`, `/web/gacha/pinpet/<id>`,
+  Catalog section. B0810 `extend: unobtainable` (not original). Plates `game_data/gacha_img/pet<id>.png`
+  (`make_banner_images.py` build_pets; B0810 uses the January 2021 art). Switch: `KHUX_PET=1` and `KHUX_PET_DRAW=1` (the draw
+  crashes on a client without the resources that carry `lwf/petdraw`). Tests: `test-pet-draw.js`, `test-pet-draw-server.js`.

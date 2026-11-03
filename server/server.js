@@ -42,6 +42,8 @@ const medalSkill = require('./medal-skill');
 const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
 const gachaSeasons = require('./gacha-seasons');
+const petDraw = require('./pet-draw');
+const petDrawPages = require('./pet-draw-pages');
 const medalBoost = require('./medal-boost');
 const specialPages = require('./special-pages'); // pagine web Special (catalogo)
 const special = require('./special'); // scheda Special di Quests: periodi, lucchetti, fissaggio
@@ -160,6 +162,7 @@ function route(url) {
   if (p === '/web/passive') return 'passivepage';
   if (p === '/gacha/list') return 'gachalist';
   if (p === '/gacha/draw') return 'gachadraw';
+  if (p === '/gacha/petdraw') return 'gachapetdraw';
   if (p.startsWith('/web/gacha/')) return 'gachaweb'; // catalogo, dettagli, odds, immagini dei banner
   if (p.startsWith('/web/special/')) return 'specialweb'; // immagini dei banner Special
   if (p.startsWith('/web/raid/')) return 'raidweb'; // raid banners
@@ -399,6 +402,8 @@ function respondLogin(res) {
   // Draw Odds dello Shop (pulsante su ogni piastra, link odds): il client
   // accoda il drawMedalTypeId della piastra all'url (banco 16-10: GET /web/gacha/odds9001), da qui la «/»
   body.odds = `${WEB_BASE}/web/gacha/odds/`;
+  // Spirit Blind Box plates open the login link petOdds (client 4.3.1 FUN_00791070), id appended like odds (to verify)
+  body.petOdds = `${WEB_BASE}/web/gacha/petodds/`;
   send(res, 200, body);
 }
 
@@ -1517,6 +1522,7 @@ function respondGachaList(res) {
     ...ctx, exFor, catalog: gachaCatalog(), validCommentOf: (b) => comments.get(b.drawMedalTypeId), safeMedalId, nameOf });
   if (migrate || player.gacha.listedCurrency !== listed) savePlayer();
   gachaLastListed = new Set(data.gachaList.map((x) => x.drawMedalTypeId));
+  data.petGachaList = petPlates(ctx);
   send(res, 200, { ret: ret(), ...data });
 }
 
@@ -1633,6 +1639,57 @@ function respondGachaDraw(res, body) {
   send(res, 200, { ret: ret(), userData: { userPoint: userPointData(now) }, ...inventoryBlocks(now, snap), ...gacha.drawResultFields(userMedalIds, first) });
 }
 
+// Spirit Blind Box (pet draws, pet-draw.js, server/pet_draws.json; 03-11). On only with the Spirit (KHUX_PET) and
+// KHUX_PET_DRAW=1: a draw loads lwf/petdraw/* (import_jp_raisedraw.py), which a client without the resources of 03-11
+// lacks (crash). Deals of the Shop week of the Story plus the kept past one (player.gacha.pinnedPet, Banner Catalog).
+const PET_DRAW = PET_ENABLED && process.env.KHUX_PET_DRAW === '1';
+let petDrawMemo = null;
+function petDraws() {
+  const rows = masterRows('petParts');
+  if (petDrawMemo?.rows === rows) return petDrawMemo;
+  const story = gachaCatalog().story || [];
+  const banners = petDraw.loadDraws(rows).map((b) => ({ ...b, unlockQuest: petDraw.unlockQuest(story, b.start) }));
+  petDrawMemo = { rows, banners, elsewhere: petDraw.elsewhereIds(masterRows, banners) };
+  return petDrawMemo;
+}
+const ownedPartIds = () => new Set(pet().ownedParts().map((x) => x.petPartsId));
+function petListed(ctx = storyCtx()) {
+  if (!PET_DRAW) return [];
+  return petDraw.listed(petDraws().banners, { shopFrom: ctx.shopFrom, shopTo: ctx.shopTo, storyQuest: ctx.storyQuest, periodStart: ctx.periodStart, keptRowId: player.gacha?.pinnedPet });
+}
+function petPageCtx(fromCatalog) {
+  const d = petDraws(), story = storyCtx();
+  return { banners: d.banners, rows: d.rows, elsewhere: d.elsewhere, owned: PET_DRAW ? ownedPartIds() : new Set(), fromCatalog,
+    // in the Shop by its dates (the kept one is shown as «Kept»)
+    listedIds: new Set(petListed(story).filter((b) => b.start <= story.shopTo && b.end >= story.shopFrom).map((b) => b.drawPetTypeId)),
+    keptRowId: player.gacha?.pinnedPet, keepableOf: (b) => petDraw.keepable(b, { periodStart: story.periodStart, storyQuest: story.storyQuest }) };
+}
+function petPlates(ctx) {
+  const d = petDraws(), owned = PET_DRAW ? ownedPartIds() : new Set();
+  return petListed(ctx).map((b, i) => petDraw.plate(b, WEB_BASE, petDraw.PET_SORT_FIRST + i, owned, d.rows, d.elsewhere));
+}
+// POST /gacha/petdraw (action 176), body {drawPetTypeId} only: one part not owned, price in Jewels (free first, as the
+// medal draws: the client checks free + paid). Refusal = {ret} only («200 ERROR :176», the client goes back to the Shop).
+function respondPetDraw(res, body) {
+  const now = serverTime(), realMs = realNow();
+  const b = petListed().find((x) => x.drawPetTypeId === Number(body?.drawPetTypeId));
+  const refuse = (why) => { console.log(`  [petdraw] refused: ${why} (body ${JSON.stringify(body)})`); return send(res, 200, { ret: ret() }); };
+  if (!PET_DRAW) return refuse('pet draws off (KHUX_PET_DRAW=1 and KHUX_PET=1)');
+  if (!b) return refuse(`deal ${body?.drawPetTypeId} not in the Shop`);
+  if ((player.freeStone || 0) < b.price) return refuse(`Jewels ${player.freeStone || 0} < ${b.price}`);
+  const d = petDraws();
+  const got = petDraw.drawPart(b, ownedPartIds(), d.rows, d.elsewhere);
+  if (!got) return refuse(`${b.rowId}: sold out`);
+  if (!pet().grantPart(got.petPartsId)) return refuse(`part ${got.petPartsId} not granted`);
+  player.freeStone -= b.price;
+  savePlayer();
+  const row = d.rows.find((r) => r.petPartsId === got.petPartsId);
+  console.log(`  [petdraw] ${b.rowId}: -${b.price} Jewels, part ${got.petPartsId} ${row.name}${got.extended ? ' (extension)' : ''}, ${got.left} left`);
+  const own = pet().ownedParts().find((x) => x.petPartsId === got.petPartsId);
+  send(res, 200, { ret: ret(), ...petDraw.drawResponse(got.petPartsId, row.partsType, own?.getDatetime || outTime(realMs),
+    { userPoint: userPointData(now), userDetail: userDetailData() }) });
+}
+
 // Pagine WebView dello Shop (Details della piastra Catalog e di ogni banner, Draw Odds) e immagini
 // 640x140 dei banner (bannerUrl, scaricate dal client via http). Nomi delle medaglie dal master
 // (gli id evolve, es. 301495, non sono in catalog.medals); skill solo se presenti in skill.json.
@@ -1649,6 +1706,22 @@ function respondGachaWeb(res, url) {
     const b = fs.readFileSync(file);
     res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
     return res.end(b);
+  }
+  // Spirit Blind Box (03-11): plate image (game_data/gacha_img/pet<id>.png), Details, Draw Odds
+  const pimg = /^\/web\/gacha\/petimg\/(\d+)\.png$/i.exec(p);
+  if (pimg) {
+    const file = path.join(GACHA_IMG, `pet${Number(pimg[1])}.png`);
+    if (!fs.existsSync(file)) return html('not found', 404);
+    const b = fs.readFileSync(file);
+    res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
+    return res.end(b);
+  }
+  const pdet = /^\/web\/gacha\/petdetail\/(\d+)$/i.exec(p), podds = /^\/web\/gacha\/petodds\/?(\d*)$/i.exec(p);
+  if (pdet || podds) {
+    const pctx = petPageCtx(/[?&]from=catalog/.test(url));
+    const one = pctx.banners.find((x) => x.drawPetTypeId === Number((pdet || podds)[1]));
+    if (pdet) return one ? html(petDrawPages.detailPage(one, pctx)) : html('not found', 404);
+    return html(petDrawPages.oddsPage(one ? [one] : petListed(), pctx));
   }
   const icon = /^\/web\/gacha\/icon\/([a-z]+)\.png$/.exec(p);
   if (icon) {
@@ -1667,7 +1740,12 @@ function respondGachaWeb(res, url) {
   }
   const banners = gachaCatalog().banners, story = storyCtx(), shop = gachaShopList(story);
   const ctx = { ...story, sizes: GACHA_SIZES, show: GACHA_SHOW, shown: new Set(shop.map((b) => b.drawMedalTypeId)) };
-  if (/^\/web\/gacha\/catalog$/i.test(p)) return html(gacha.catalogPage(banners, ctx));
+  if (/^\/web\/gacha\/catalog$/i.test(p)) {
+    const cat = gacha.catalogPage(banners, ctx);
+    if (!PET_DRAW) return html(cat);
+    const pctx = petPageCtx(true);
+    return html(cat.replace('<div class="dim" id="dim">', `${petDrawPages.catalogSection(pctx.banners, pctx)}<div class="dim" id="dim">`));
+  }
   const medalNames = new Map(masterRows('medal').map((m) => [m.medalId, m.name]));
   // /web/gacha/odds/<drawMedalTypeId> (id accodato dal client): le probabilita' di quel banner;
   // senza id o con la piastra Catalog (9001) quelle dei banner della lista
@@ -1692,6 +1770,21 @@ function respondGachaPost(res, url) {
   const json = (code, o) => { const b = Buffer.from(JSON.stringify(o), 'utf8'); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': b.length }); res.end(b); };
   if (/^\/web\/gacha\/unpin$/i.test(p)) {
     if (player.gacha) delete player.gacha.pinned;
+    savePlayer();
+    return json(200, { ok: true });
+  }
+  // Spirit Blind Box: one kept past deal, apart from the medal banner (player.gacha.pinnedPet)
+  if (/^\/web\/gacha\/unpinpet$/i.test(p)) {
+    if (player.gacha) delete player.gacha.pinnedPet;
+    savePlayer();
+    return json(200, { ok: true });
+  }
+  const pp = /^\/web\/gacha\/pinpet\/(\d+)$/i.exec(p);
+  if (pp) {
+    const b = PET_DRAW && petDraws().banners.find((x) => x.drawPetTypeId === Number(pp[1]));
+    const story = storyCtx();
+    if (!b || !petDraw.keepable(b, { periodStart: story.periodStart, storyQuest: story.storyQuest })) return json(409, { ok: false, why: 'this deal cannot be kept in the Shop' });
+    (player.gacha ||= {}).pinnedPet = b.rowId;
     savePlayer();
     return json(200, { ok: true });
   }
@@ -4652,6 +4745,7 @@ function handler(scheme) {
       // Shop > Draw (azioni 75/76) e pagine/immagini dei banner
       if (kind === 'gachalist') return respondGachaList(res);
       if (kind === 'gachadraw') return respondGachaDraw(res, entry.bodyDecoded);
+      if (kind === 'gachapetdraw') return respondPetDraw(res, entry.bodyDecoded);
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
       if (kind === 'raidweb') return req.method === 'POST' ? respondRaidPost(res, req.url) : respondRaidWeb(res, req.url);
@@ -5057,5 +5151,5 @@ module.exports._test = {
   respondStageEvent, respondStageContinue, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, respondSpecialPost, ret, WEB_BASE,
   weekIndex: clock.weekIndex,
   // server/test-gacha-server.js
-  sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
+  sessionRealMs, handler, sanitizeBanners, gachaCatalog, gachaShopList, respondGachaList, respondGachaDraw, respondPetDraw, respondGachaWeb, respondGachaPost, reloadGachaBanners, grantItem, maxMedal, inventoryBlocks,
 };
