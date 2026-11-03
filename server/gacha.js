@@ -863,7 +863,7 @@ function catalogPage(banners, ctx) {
 }
 
 module.exports = {
-  KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS,
+  KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS, page, PIN_JS, esc,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };

@@ -144,6 +144,19 @@ const NOTICES = [
   // Draw Points (user decision 03-11; make-sell-ticket.js, server.js respondMedalSell/drawPointsUnlocked, gacha.js payType 9):
   // original rules from notices 62950/72831/73873; client 4.3.1: Sell screen sum of medal.sellTicket, payType 9 plate =
   // userPoint.limitedDrawTicket3 with icon 42; texts 106240301/106240303/106180336-341 ours (make_layouts.py)
+  // Spirit parts restored (03-11): VIP Spirit Part quests, new parts, Spirit Blind Box (pet-draw.js)
+  { date: '11/03', tag: 'IMPORTANT', title: 'Spirit Parts',
+    body: ['The **VIP! Jewels & Spirit Part** quests and the Spirit Part VIP campaigns now give the **Spirit part** shown on their banner (with 1400 Jewels and a 6★ Moogle, as in the original game). Before, they gave the avatar accessory of the same name, and four weeks (Lion Dancer, Chocolate Hamstar, Word Bubble: I Love Sora, Cool Sunglasses) gave only a Moogle.',
+      '**17 more Spirit parts** with their original graphics are back, among them Starlight Glasses, Balloon Moogle & Chirithy, Balloon Aqua, Balloon Terra, Flying Carpet, Lantern and Pinwheels.',
+      '## Spirit Blind Box',
+      'The **Spirit Blind Box** deals are in the Shop again, following the Story like the other banners: Bunstar (500 Jewels) and Pigstar (300 Jewels) of November 2017, both back in February 2018 (500 Jewels), January 2021 (500 Jewels) and the last one, from February 25, 2021 to the end of service (**100 Jewels**). Every draw gives one Spirit part of the deal that you do not own yet.',
+      'Past Spirit Blind Box deals can be kept in the Shop from the **Banner Catalog** («Keep in the Shop»), one at a time, separately from the kept Medal banner (**not original**).',
+      'Once you own every part of the last Spirit Blind Box, it also gives the Spirit parts that have **no other way to be obtained** here, because their original events are not back yet (**not original**).',
+      '## What is reconstructed',
+      'The **Gold Reinstar** VIP quests (December 2017): the notice says only that the special quests gave the five Gold Reinstar parts; here two quests give them (the 6★ Moogle of the second quest is ours).',
+      'The banner picture of the February 2021 Spirit Blind Box is the one of January 2021 (same title): the original picture is lost.',
+      'Two tiny sparkles of the Spirit Blind Box result animation are lost and are not drawn.',
+      'A few parts with lost graphics (for example Elsa’s Magic, Kite, Balloon Zazu) are not available yet: they are being rebuilt and will come with a later update. Until then the Elsa’s Magic VIP week gives a 6★ Moogle.'] },
   { date: '11/03', tag: 'IMPORTANT', title: 'Draw Points',
     body: ['**Draw Points** are back. Sell (convert) the Attack Medals you do not use: each Attack Medal of **Tier 2 or higher** gives as many points as its Tier (Tier 2 gives 2 points, Tier 10 gives 10 points). Tier 1 Medals, support Medals and Trait Medals give none.',
       'Spend them in the **Draw Points Deal**: **100 points = 1 draw** of one boosted SN+ or SN++ Medal. The Draw Points Deal follows the Story like the other banners (lineups of January, February, May, September and October 2020, January and February 2021); the February 2021 lineup also has the original Skill rates of its notice.',

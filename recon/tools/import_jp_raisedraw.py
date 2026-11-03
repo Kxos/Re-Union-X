@@ -56,6 +56,7 @@ logo NOVA: Burst_Logo / Burst_Logo_B 422x142): il PNG deve avere le dimensioni d
 altrimenti la cartella non e' ok; un percorso sconosciuto e' un errore.
 """
 import argparse
+import tempfile
 import difflib
 import hashlib
 import io
@@ -78,6 +79,7 @@ GENERIC = re.compile(r'^ビットマップ \d+\.png$')
 
 RD = 'lwf/raisedraw/'
 GB = 'lwf/medal/guilt_bonus/'
+PD = 'lwf/petdraw/'
 # percorsi completi dalla radice JP (= percorso pubblicato della cartella)
 WANTED = ([f'{RD}demo/raidgacha_result_display_{n:02d}' for n in range(1, 11)]
           + [f'{RD}Medal/Medal_D_Up{n}' for n in range(1, 13)]
@@ -90,7 +92,11 @@ WANTED = ([f'{RD}demo/raidgacha_result_display_{n:02d}' for n in range(1, 11)]
           # animazioni della guilt nel Level Up (sblocco/rilancio, risultato, massimo; cifre gialle e
           # rosse), al posto delle nostre di make_guilt_bonus_lwf.py (19-10): solo fonte (1)
           + [GB + n for n in ('GuiltBonus', 'GuiltBonus_result', 'GuiltBonus_max')]
-          + [f'{GB}GuiltBonus_{c}fix{n}' for c in 'YR' for n in range(10)])
+          + [f'{GB}GuiltBonus_{c}fix{n}' for c in 'YR' for n in range(10)]
+          # Spirit Blind Box result (pet draw, 03-11): the client loads these 8 for every /gacha/petdraw (missing = crash);
+          # only in the JP data. Source (1), then (1b) by original name inside lwf/petdraw/
+          + [f'{PD}demo/{n}' for n in ('raidgacha_result_display_pet', 'raidgacha_result_display_rarepet', 'Draw_NormalPet', 'Draw_RarePet')]
+          + [f'{PD}Pet/Pet_{k}{n:03d}' for k in ('Normal', 'Rare') for n in (1, 2)])
 # Animazioni della guilt (cartelle sotto GB, 19-10): l'esportazione JP salva una texture condivisa solo nella
 # prima cartella che la usa (le cifre png_num_Y* di Yfix0-9 e _result stanno in GuiltBonus; i KeyBlade_ef* in
 # altre LWF). Fonte (1b) solo per queste cartelle: stesso NOME originale (mai «ビットマップ N», che le
@@ -101,6 +107,39 @@ NAME_WW = ['lwf/battleresult/Result_LuxLevelUp']
 # png_logo_guilt_bonus.png di GuiltBonus, stesso logo «GUILT BONUS» e stesse dimensioni. Unico sostituto,
 # contato come «substitute» nel rapporto.
 SUBST = {'png_logo_guilt_bonus2.png': 'png_logo_guilt_bonus.png'}
+# Spirit Blind Box (03-11): the JP export kept a «ビットマップ N» texture once, in the sibling folder that shares it.
+# PD_FROM[folder] = the sibling JP folder whose texture of the SAME name, declared size and registration (signature) is
+# used (checked 03-11: the two demo exports have identical tables; «ビットマップ 1» 213x213 of Pet_Normal002 / Pet_Rare002 =
+# «ビットマップ 4» of the rare demo, the only texture of the dump with that signature). PD_BLANK = textures lost from
+# every source and with no unique twin (64x60 and 8x8 effect sprites of the demo, 140 different files share the 64x60
+# signature): a fully transparent texture at the declared size (report class «blank», declared in the Notices).
+PD_FROM = {PD + 'demo/raidgacha_result_display_pet': (PD + 'demo/raidgacha_result_display_rarepet', None),
+           PD + 'demo/raidgacha_result_display_rarepet': (PD + 'demo/raidgacha_result_display_pet', None),
+           PD + 'Pet/Pet_Normal002': (PD + 'demo/raidgacha_result_display_rarepet', 'ビットマップ 4.png'),
+           PD + 'Pet/Pet_Rare002': (PD + 'demo/raidgacha_result_display_rarepet', 'ビットマップ 4.png')}
+PD_BLANK = {'ビットマップ 5.png': (64, 60), 'ビットマップ 6.png': (8, 8)}
+BLANK_DIR = os.path.join(tempfile.gettempdir(), 'khux_pd_blank')
+
+
+def pd_source(rel, name, wh, sig):
+    """((kind, path), class) for a petdraw texture missing from its own folder (PD_FROM, then PD_BLANK), else None."""
+    sib, other = PD_FROM[rel]
+    sdir = os.path.join(JP, *sib.split('/'))
+    sbase = sib.split('/')[-1]
+    want = other or name
+    for k, swh, ssig in lwf_textures(latest(sdir, sbase, '.lwf')):
+        if orig_name(sbase, k) == want and tuple(swh) == tuple(wh) and (other or ssig == sig) and os.path.exists(os.path.join(sdir, k)):
+            return ('jp', os.path.join(sdir, k)), 'sibling-jp'
+    if PD_BLANK.get(name) == tuple(wh):
+        os.makedirs(BLANK_DIR, exist_ok=True)
+        f = os.path.join(BLANK_DIR, '%dx%d.png' % tuple(wh))
+        if not os.path.exists(f):
+            from PIL import Image as _I
+            _I.new('RGBA', tuple(wh), (0, 0, 0, 0)).save(f)
+        return ('jp', f), 'blank'
+    return None
+
+
 # immagini singole (targhette rosse delle boosted), copiate come le texture: PNG vero -> BTF
 STATIC = ['img/ui/Minfo_Def12_SB.png', 'img/ui/Deck_Panel_SB.png']
 # cartella WW servita della stessa animazione (riferimento per le texture tolte dall'estrazione JP)
@@ -331,7 +370,7 @@ def main(argv=None):
             continue
         files, missing = {}, []
         count = {'own-jp': 0, 'unique-anchor': 0, 'position-corroborated': 0, 'name-corroborated': 0,
-                 'position-only': len(pos_only), 'name-jp': 0, 'name-ww': 0, 'substitute': 0}
+                 'position-only': len(pos_only), 'name-jp': 0, 'name-ww': 0, 'substitute': 0, 'sibling-jp': 0, 'blank': 0}
         bad = set(conflict) | set(pos_only)
         conflict = [orig_name(base, k) for k in conflict]
         for k, wh, _sig in tex:
@@ -346,8 +385,10 @@ def main(argv=None):
                 cand, cls = ('jp', own), 'own-jp'
             elif k in mapped:
                 cand, cls = ('ww', os.path.join(ref['dir'], mapped[k][0])), mapped[k][1]
-            elif rel.startswith(GB) and (hit := by_name(names, name, wh)):
+            elif rel.startswith((GB, PD)) and (hit := by_name(names, name, wh)):
                 cand, cls = hit
+            elif rel in PD_FROM and (src := pd_source(rel, name, wh, _sig)):
+                cand, cls = src
             else:
                 missing.append(name)
                 continue
