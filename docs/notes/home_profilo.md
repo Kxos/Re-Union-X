@@ -264,7 +264,7 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   client), progress computed from the state (`MISSION_DERIVED`: 30 story, 31 STR of the favourite keyblade, 32 level
   of the keyblade series, 33 Lux, 34 Special Attack Bonus maxed, 39 Nova = Guilt Burst level, 40 Spirit
   rank = Gear rank) or counter (35 Draw Medal: one per successful `/gacha/draw` draw, not retroactive).
-  They stay at 0 because the feature is missing: 3 Raid Boss, 36-38 special quests and Proud Quest, 41 Proud Mode, 42 events,
+  They stay at 0 because the feature is missing (3 Raid Boss counts since 03-11, [raid](raid.md#missions)): 36-38 special quests and Proud Quest, 41 Proud Mode, 42 events,
   43 Colosseum, 44 Union Cross (16-10, `test-beginner.js`; 30 uses the most advanced story quest, not lastClearStageId which the
   Tours push further; bench 16-10 evening: Nova, Spirit and Draw advance and are collected correctly, verified
   by the user). Reward «Skip Ticket+» = **type 28** (client 4.3.1 reward

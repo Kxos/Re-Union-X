@@ -155,7 +155,7 @@ No ATK or DEF of a raid is known after 2016. `server/raid_stats.json` holds our 
 
 **Not supported by the inputs:** the tier shares and the Epic DEF rest on no measured value; all the periods rest on the 2016 ratio, 3 to 5 years older than the raids. Not yet fought on the bench. Without a measured value these numbers can change freely if a tier proves out of reach; HP cannot.
 
-Other values of `make-raid.js` that are not original: Lux, Munny and EXP of the boss rows are the 2016 values, far below the Lux reported later (about 2 billion on a 2019 boss); part HP comes from the 2016 ratio, or from JP screenshots of 5 bosses where derived; below the cap of the one-tier era HP follows `singleEra.hpShare`, fitted to three readings.
+Other values of `make-raid.js` that are not original: Munny and EXP of the boss rows are the 2016 values; Lux follows the rule of [Lux](#lux); part HP comes from the 2016 ratio, or from JP screenshots of 5 bosses where derived; below the cap of the one-tier era HP follows `singleEra.hpShare`, fitted to three readings.
 
 ## Server routes (Part 2, Task 6: tests only, bench pending)
 
@@ -189,6 +189,31 @@ aid_banners`), written by `make_raid_banners.py`: 127 of 132 evStageIds; the 5 w
 - **Coverage, 2 November 2026** (`raid_models.json` with 29 models, templates below): 93 census rows with an available tier, 243 of 344 tier rows. The other 101 tier rows (16 bosses) are `graphics`. After the weak-point check (master revision 234): 87 census rows, 230 tier rows; 13 more are `parts` (Queen Bee, Queen Bee Ω, Lion Headliner). Along the story, 104 of the 150 Shop weeks from 2018-08-30 list a raid; the other 46 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
 - **Templates** (`modelTemplates`, inferred from the LWFs, medium-high confidence): Scourge, Wicked and Malicious Spider (9101-9103) use row `5000` Enraged Arachnid. The three share one rig, and `5000` is the 2016 recolour that already reused Savage Spider's moves. Egg Master (1008) uses `0007` Trickmaster: identical frame counts in all five fight animations, 2 parts. The spiders keep the attribute of their colour (`bossAttributes`: red Power, green Speed, blue Magic, as the census reads it), labelled `attribute`; Egg Master keeps Trickmaster's.
 - **Size:** all rows add about 2.4 MB to the master (243 stage, 93 evStage, 243 raidSetting, 810 raidEnemy, 945 raidReward, 42 raidEnemyAttack, 245 Raid Boards).
+
+<a id="lux"></a>
+## Lux (3 November 2026, tests only, bench pending)
+
+User report (bench 3 November, every tier): far too little Lux. `/raid/clear` reported 450-935 Lux per kill, Epic included.
+
+**What the client reports.** `getPoint.lux` is the sum of `luxAttack` (int64 in 4.3.1) of the body and of every part it breaks, at the boss's level (linear between `baseLv` knots), times the deck's Lux skills. Bench log 2-3 November: Trickmaster LV 1, 270 + 90 + 90 = **450** exact; LV 2, 360 + 120 + 120 = **600** exact; a row with `luxAttack` 1,000,000 gave 1,018,000; other fights 571-935, the same base times the Lux skills of the deck. `luxSuppress` did not show in a solo kill. Read from the logged requests, not from the code.
+
+**Original rule (evidence):**
+- Official guide «Collecting Large Amounts of LUX» (notice 60146, 2019-11-18): Lux from raid bosses is not affected by hits or by the damage of the last blow; it «changes based on the Raid Boss' remaining HP and skills that boost your LUX gain»; bonus time increases it «massively». So a kill's Lux is fixed by the boss and the deck, as the client computes it.
+- Bonus time doubles it: «Lux rewards for defeating raid bosses doubles!» (notices 18670, 19294, 2016; 25835, 2017), «Lux received from Raid Bosses greatly increases!» (44001, 2018), «0 AP cost and double the LUX» (66106, 66114, 66617, 2020). The 2016 master has 123 rows `evCampaign` type 10 «Lux x 2» power 20000 in the bonus windows.
+- 2.5.0 (notice 36760, 2018-02-01): «Increased max Lux obtainable from raid bosses»; `luxAttack` is int64 in 4.3.1.
+- Totals per kill, Lux++ on every medal, no bonus, no party boost: Advanced (400B HP) about 8 billion, Legendary (700B) «a little over 12 billion» (reddit jjsvtj, 2020); Epic (999,999,999,999) about 40 billion in bonus time and Legendary about 24 billion (reddit kcpa3r, Dec 2020, so 20B / 12B without); video aWbBHHG7HrU (Epic Trickmaster LV 99, June 2021, orange panel): **19,829,755,202** and 19,831,832,532 outside bonus time, **45,616,383,000** in «Raid hour» (bonus plus party boosts), Damage 1.85-1.90 trillion in all three, so damage does not change it.
+- These fit **2% of body HP** per kill with a full Lux++ deck (Advanced 8B exact, Epic 20B, Legendary 14B against about 12B).
+
+**Implemented.** `make-raid.js` `applyLux` (config `lux` of `raid_config.json`): at every knot the sum of `luxAttack` over body and parts = body HP x `perHpFullDeck` 0.02 / `fullDeckMultiplier` 5, where 5 is our Lux++ (`luxUp` 50000, itself an estimate, [medaglie](medaglie.md)); the sum is shared as the template row's `luxAttack` (all on the body when the template has none) and `luxSuppress` keeps its ratio. Base per kill: Beginner 600,000, Intermediate 600M, Advanced 1.6B, Legendary 2.8B, Epic 4B; one-tier era 54,000 at LV 1 to 3.6B at the 1.2B cap. Story raid rows (Darkside, Behemoth: not built by `make-raid.js`) keep the 2016 values. Label `lux` in `reconstructed`. **Bonus time**: `/raid/clear` multiplies the reported Lux by 2 in the bonus hours (`luxFactorAt`, the same hours as the AP rule), in the player's Lux, the Lux missions and `getLux`. No Lux campaign is served, so the client does not double it too. Declared in the Raid Bosses notice.
+
+**Confidence:** the client side (sum of `luxAttack`) high, read from 9 logged fights; the 2% share medium (3 forum totals and one video, all with Lux++ decks); the split between rows and Lux++ x5 low, but only the product matters for a full Lux++ deck; Beginner and Intermediate have no reading. **Open for the bench:** whether the orange panel shows `getLux` or its own count in bonus time; with its own count it shows half; then serve a type 10 campaign instead, after checking that the client applies it in a raid.
+
+**Master:** `raidEnemy` regenerated in place (1067 rows changed, only `luxAttack`/`luxSuppress`; backup `D:\Progetto_Restauro_KH_UX	mpaid_lux_backup`): **needs a master revision bump** before the client sees it.
+
+<a id="missions"></a>
+## Missions (3 November 2026, tests only)
+
+Mission rows that count raids, by original text: Beginner 1023 «Defeat Raid Boss x 3», 1024 «x 10» (conditionId 3); Daily 2007 «Defeat a total of 1 Raid Bosses» (3); Weekly 3001-3003 and 3011-3013 «Defeat a party total of 10 / 50 / 150 Raid Bosses» (6). `MISSION_COUNTER` already mapped 3 and 6 to the counter `raid`, but nothing fed it. Now `routes-raid.js` calls `onDefeat` once per boss defeated (victory at `/raid/clear`, never on a repeat clear) and `server.js` adds 1 to `raid`. Solo, the party total is the player's own. No master row asks for raid participation or damage. The raid event quests themselves already count as quests at `/stage/clear`. The VIP benefit still needs the Union Cross weeklies.
 
 ## AP 0 campaign (3 November 2026, benched on rev 237 / resources 97)
 

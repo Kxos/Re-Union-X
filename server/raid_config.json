@@ -24,6 +24,7 @@
     "hpShare": [0.015, 0.08, 0.17, 1, 1],
     "atkShare": [0.15, 0.25, 0.5, 1, 1]
   },
+  "lux": { "perHpFullDeck": 0.02, "fullDeckMultiplier": 5 },
   "statsRule": {
     "refEnemyId": 80001,
     "def": {
@@ -42,7 +43,8 @@
     "attribute": "The attribute of this boss is read from its colour (census: red Power, green Speed, blue Magic), not from a row: its template row has another attribute.",
     "background": "The raid background of this map's world is incomplete (brokenBackgrounds): the fight draws the one of backgroundFallbackWorld.",
     "coinOdds": "Coin amounts come from the wiki tables, often of the same tier in another week; the odds of the high amount and of gems have no source (rewards.reconstructed).",
-    "rewards2016": "Lux, Munny and EXP of the boss rows are the 2016 values of the template row. Reported Lux is about 2 billion on a 2019 boss, so these are far too low; no formula is known.",
+    "rewards2016": "Lux, Munny and EXP of the boss rows are the 2016 values of the template row (used only without the lux rule).",
+    "lux": "Lux of a defeat: the client sums luxAttack of the body and the broken parts at the boss's level, times the deck's Lux skills (bench). Original rule (official guide notice, Nov 2019): Lux follows the HP taken and the Lux skills, not hits or damage. Totals per kill reported with Lux++ on every medal, no bonus: Advanced about 8 billion, Legendary about 12 billion (forum), Epic about 19.8 billion (video frame, June 2021): 2% of body HP, divided by the x5 of our Lux++ skill (luxUp 50000, itself an estimate), spread as the template's luxAttack. Bonus time doubles it on the server. Munny and EXP stay the 2016 values.",
     "upMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
     "onlyCensusIds": "Optional filter, absent in the shipped file (Task 8): only these census rows are built. Without it every WW row with week data is built, and raid-calendar.js picks the rows of the Shop week.",
     "weeklyUpMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
@@ -54,6 +56,7 @@
     "modelParts": "Boss name -> number of parts of its template row it keeps (the first ones). Spiders 9101-9103 -> 4 (coordinator ruling 2 Nov): the Spinneret (part 2 of 5000, weakness 2, 900 / 24,000 of body HP) and the 3 spiderlings (25% each), the 2016 to Jul 2018 layout. In the weekly raids (Sep 2018 on) only the Spinneret had a bar, but the only original spider LWFs with the Spinneret target (parts2) also mark the spiderlings as weak points (parts3-5), and a weak point without a part crashes the client (docs/notes/raid.md, Weak points). Declared in the Raid Bosses notice.",
     "bossAttributes": "Boss name -> attribute (1 Power, 2 Speed, 3 Magic) for a boss on a template row whose own attribute differs; body and parts take it. The spiders' attributes come from their colour as the census reads it (inferred). The 15 reconstructed bosses: body attribute from the khuxwiki infobox where the template differs; their parts take it too, not the wiki's per-part attributes.",
     "singleEra": "One tier before 2019-08-12: stats grow up to a cap at LV 30 (one forum statement). Cap HP is read from footage; the shares below it are ours, fitted to the only readings: LV 2 above 2%, LV 4 above 3%, LV 24 about 50%. atkShare has no reading at all: it follows the shape of the 2016 rows. Knots are the coin level bands.",
+    "lux_config": "lux: perHpFullDeck = Lux of a kill with Lux++ on every medal, as a share of body HP (fit: Advanced 400B -> 8B, Legendary 700B -> 12B, Epic 1T -> 19.8B); fullDeckMultiplier = the Lux multiplier of that deck in our skill table (Lux++ luxUp 50000). Row Lux at a level = body HP x perHpFullDeck / fullDeckMultiplier.",
     "statsRule": "Inputs of raid_stats.json. refEnemyId: the plain Shadow row, the reference story enemy. def: community calculators treat raid DEF as constant at about 1000, 1100 for Omega; epic: a player report of a threshold near 50,000 STR, read as DEF. The damage formula was not read, so that reading is an assumption.",
     "partHp": "Part HP: JP screenshots of 5 bosses as a share of the body where derived, the nearest date; otherwise the body-to-part ratio of the 2016 row at its first knot.",
     "boards": "Raid Boards (raid-boards.js): unmatched lists reward names with no item in the master tables; their cells are left off the board and reported, never replaced by another item. aliases maps a wiki name to the item it means, with the reason; the week gets the label boardAlias. reconstructedTexture lists the rewards drawn with a reconstructed texture (label boardTexture).",

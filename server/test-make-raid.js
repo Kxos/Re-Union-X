@@ -209,6 +209,29 @@ const tests = {
     assert.strictEqual(e.settingId, 30000 + (e.stageId - 980000));
     assert.ok(e.evStageId >= 8000 && e.evStageId <= 8999);
   },
+  lux_follows_body_hp() {
+    // docs/notes/raid.md «Lux»: sum of luxAttack over body and parts = body HP x 2% / 5, shared as the template's luxAttack
+    assert.deepStrictEqual(REAL_CONFIG.lux, { perHpFullDeck: 0.02, fullDeckMultiplier: 5 });
+    const out = build((f) => { f.config.lux = REAL_CONFIG.lux; });
+    const e = entry(out, 'Trickmaster');
+    const body = enemyOf(out, e.enemyId), parts = [enemyOf(out, e.enemyId + 1), enemyOf(out, e.enemyId + 2)];
+    for (let k = 0; k < body.validGrowth; k++) {
+      assert.strictEqual(body.luxAttack[k] + parts[0].luxAttack[k] + parts[1].luxAttack[k], 600000, `knot ${k}: 150M HP x 0.004`);
+      assert.strictEqual(body.luxAttack[k], 360000, '270 : 90 : 90 of the 2016 rows');
+    }
+    assert.ok(e.reconstructed.includes('lux') && !e.reconstructed.includes('rewards2016'));
+    assert.ok(out.index.reasons.lux.length > 20);
+    const epic = { body: { validGrowth: 2, hp: [999999999999, 999999999999], luxAttack: [270, 1080], luxSuppress: [68, 272] },
+      partRows: [{ luxAttack: [90, 360], luxSuppress: [23, 92] }, { luxAttack: [0, 0], luxSuppress: [0, 0] }] };
+    mr.applyLux(epic, REAL_CONFIG.lux);
+    assert.strictEqual(epic.body.luxAttack[0] + epic.partRows[0].luxAttack[0], 4000000000, 'Epic: 4B base, 20B with Lux++ on every medal');
+    assert.strictEqual(epic.body.luxAttack[0], 3000000000);
+    assert.strictEqual(epic.body.luxSuppress[0], Math.round(3000000000 * 68 / 270), 'luxSuppress keeps its ratio');
+    assert.strictEqual(epic.partRows[1].luxAttack[0], 0);
+    const none = { body: { validGrowth: 1, hp: [1000000], luxAttack: [0], luxSuppress: [0] }, partRows: [{ luxAttack: [0], luxSuppress: [0] }] };
+    mr.applyLux(none, REAL_CONFIG.lux);
+    assert.deepStrictEqual([none.body.luxAttack[0], none.partRows[0].luxAttack[0]], [4000, 0], 'a template with no Lux: all on the body');
+  },
   hp_bar_max() {
     const hpOf = (start, end, tier) => {
       const out = build((f) => addWeek(f, 'X', start, end, tier));

@@ -44,7 +44,8 @@ function world(opts = {}) {
     inventorySnapshot: () => null, send: (res, code, body) => { w.sentCode = code; w.sent = body; }, ret: () => ({ ok: 1 }), clock: { weekEnd: (ms) => ms + 1000, monthIndex: (ms) => { const d = new Date(ms - 8 * 3600e3); return d.getUTCFullYear() * 12 + d.getUTCMonth(); } },
     apNow: () => w.ap, changeAp: (d) => { w.ap += d; }, raidUser: () => USER, supportUsers: (id) => (id ? [{ supportUserId: id }] : []),
     guiltLists: () => ({ guiltBurstFirstUserMedalIds: [], guiltBurstMaxUserMedalIds: [] }),
-    battlePoints: (getPoint, burst) => { const lux = Number(getPoint?.lux) || 0; w.lux += lux; w.burst = burst; return lux; }, beginBattle: (k) => { w.keyblade = k; },
+    battlePoints: (getPoint, burst, factor = 1) => { const lux = (Number(getPoint?.lux) || 0) * factor; w.lux += lux; w.burst = burst; w.luxFactor = factor; return lux; }, beginBattle: (k) => { w.keyblade = k; },
+    onDefeat: (boss) => { w.defeats = (w.defeats || 0) + 1; w.defeated = boss.raidId; },
     grantItem: (it) => { if (w.grantHook) w.grantHook(); w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
     medalCount: () => w.medalCount, medalCap: () => w.medalCap,
     stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: () => 0.99, log: (m) => w.logs.push(m),
@@ -185,6 +186,30 @@ const tests = {
     assert(Array.isArray(b.userKeyblades) && b.userKeyblades.length);
     assert(Array.isArray(b.userSkills));
     assert.strictEqual(w.player.raid.boss.parts[0].hp, 500);
+  },
+  clear_lux_doubles_in_bonus_time() {
+    const w = world();
+    w.spawn(); w.start();
+    assert.strictEqual(w.clearParts([500, 100, 200]).getLux, 50, 'outside the bonus hours: as reported');
+    assert.strictEqual(w.luxFactor, 1);
+    w.now = Date.parse('2026-10-27T09:30:00Z'); // 02:30 PDT, a bonus hour
+    assert(isBonusTime(w.now));
+    w.start();
+    assert.strictEqual(w.clearParts([400, 100, 200]).getLux, 100, 'bonus time: Lux x 2');
+    assert.strictEqual(w.luxFactor, 2);
+    assert.strictEqual(w.lux, 150);
+  },
+  defeat_counts_once_for_missions() {
+    const w = world();
+    const boss = w.spawn(); w.start();
+    w.clearParts([500, 100, 200]);
+    assert.strictEqual(w.defeats, undefined, 'a fight the boss survives is no defeat');
+    w.start();
+    assert.strictEqual(w.clearParts([0, 100, 200]).raidTimeStatus, 3);
+    assert.strictEqual(w.defeats, 1);
+    assert.strictEqual(w.defeated, boss.raidId);
+    w.call('clear', { parts: boss.parts.map((x) => ({ raidEnemyId: x.raidEnemyId, partsId: x.partsId, hp: 0, damage: 1 })), getPoint: { lux: 5 } });
+    assert.strictEqual(w.defeats, 1, 'a repeated clear counts nothing');
   },
   clear_malformed_hp_is_not_victory() {
     for (const hp of [undefined, null, 'x', '', NaN, -1, {}]) {
@@ -769,6 +794,14 @@ function wiring() {
   const cleared = call(t.raid().clear, { parts: [{ raidEnemyId: bossRow.raidEnemyId, partsId: 1, hp: 0, damage: 1000 }], getPoint: { exp: 0, money: 5, lux: 7 }, burst: 1000 });
   assert.strictEqual(cleared.raidTimeStatus, 3);
   assert.strictEqual(cleared.getLux, 7);
+  // the defeat feeds the 'raid' mission counter: Daily 2007, Beginner 1023/1024 and the active Weekly party series
+  {
+    const rows = t.masterRows('mission').filter((r) => t.MISSION_COUNTER[r.conditionId] === 'raid');
+    assert(rows.some((r) => r.id === 2007) && rows.some((r) => r.id === 1023), 'raid mission rows in the master');
+    const counted = rows.filter((r) => (p.missions?.[r.id]?.count || 0) === 1).map((r) => r.id);
+    assert(counted.includes(2007) && counted.includes(1023) && counted.includes(1024), `counted: ${counted}`);
+    assert(counted.some((id) => id >= 3001 && id <= 3013), `a Weekly series counts: ${counted}`);
+  }
   assert.strictEqual(p.money, money + 5);
   assert.strictEqual(p.lux, luxBefore + 7);
   assert.strictEqual(cleared.userData.stageResumption.resumptionStatus, 0);

@@ -2653,7 +2653,7 @@ function limitedUnlocked(g) {
 // 41 Proud Mode: Proud superate fino alla 3 (I-200).
 // 35 (Draw Medal) e' un contatore ('draw'). 36-38 e 42-44 (quest speciali, eventi, Colosseo, Union Cross) non
 // hanno ancora la funzione nel server (nessuno stage di quel tipo, tabelle evStage/colosseum vuote, Union Cross senza
-// Photon) e restano a 0, come il 3 (Raid Boss: nessun contatore 'raid' chiamato).
+// Photon) e restano a 0. 3 e 6 (Raid Boss) sono il contatore 'raid', +1 a ogni boss sconfitto (routes-raid.js onDefeat).
 const MISSION_DERIVED = {
   // la storia piu' avanzata dagli stage superati (1-979), non lastClearStageId: i Tour (id 91xx) lo portano oltre la storia
   30: (r) => (stageNumber(lastStoryStageId()) >= (r.targetId?.[0] || 0) ? 1 : 0),
@@ -4153,10 +4153,11 @@ function raidIndex() {
   }
   return raidMemo;
 }
-// A raid reports Lux, Munny and EXP as a stage does; the fight's keyblade keeps the gauge
-function raidBattlePoints(getPoint, burst) {
+// A raid reports Lux, Munny and EXP as a stage does; the fight's keyblade keeps the gauge. luxFactor: 2 in bonus time
+// (routes-raid.js luxFactorAt), the Lux the player gets and the getLux of the answer.
+function raidBattlePoints(getPoint, burst, luxFactor = 1) {
   player.money = (player.money || 0) + (Number(getPoint?.money) || 0);
-  const lux = Number(getPoint?.lux) || 0;
+  const lux = Math.round((Number(getPoint?.lux) || 0) * luxFactor);
   addBattleLux(lux);
   missionCount('lux', lux);
   weeklyLux(lux);
@@ -4186,6 +4187,8 @@ function raid() {
     supportUsers: (id, now) => { const medal = id && sharedMedalData(now); return medal ? [selfPlayerElement(now, medal)] : []; },
     guiltLists: () => guiltBurst().lists(),
     battlePoints: raidBattlePoints,
+    // Daily 2007, Weekly 3001-3003/3011-3013, Beginner 1023/1024 (conditionId 3 and 6 -> counter 'raid'): one per boss defeated
+    onDefeat: () => missionCount('raid', 1),
     beginBattle: (userKeybladeId) => { player.currentUserKeybladeId = Number(userKeybladeId) || USER_KEYBLADE_ID; },
     grantItem: grantRaidItem,
     addPresent: (item) => addPresent(item.type, item.id, item.num, 'Raid Boss reward', item.skillId),
