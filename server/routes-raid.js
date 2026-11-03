@@ -296,11 +296,13 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   function events(realMs = realNow()) {
     const byEvent = new Map();
     for (const e of currentEntries(realMs)) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
-    return [...byEvent].map(([eventStageId, list]) => ({
-      stages: list.map((e) => {
+    return [...byEvent].map(([eventStageId, list]) => {
+      const stages = list.map((e) => {
         const st = stageState(e.stageId);
         return { stageId: e.stageId, useAp: questApAt(e, realMs), score: st.score, playStatus: st.playStatus, clearMissionIds: st.clearMissionIds };
-      }),
+      });
+      return {
+      stages,
       eventStageId,
       showIcon: 1,
       bannerUrl: `${webBase}/web/raid/img/v${RAID_IMG_VERSION}/${eventStageId}.png`,
@@ -309,8 +311,10 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       endTime: serverTimeAt(clock.weekEnd(realMs)),
       newStageId: 0,
       isLock: 0,
-      complete: 0,
-    }));
+      // crown to the right of the banner (user 03-11): every quest of the event with its 3 objectives done, as the Special tab
+      complete: stages.length && stages.every((s) => [1, 2, 3].every((m) => (s.clearMissionIds || []).includes(m))) ? 1 : 0,
+      };
+    });
   }
 
   // Raid «AP 0» campaign (make-ev-campaign.js, docs/notes/raid.md «AP 0 campaign»): the ids of its evCampaign rows while a raid
