@@ -3960,6 +3960,22 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402021,
+  "name": "Mickey Mask",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402022,
+  "name": "Minnie Mask",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402023,
   "name": "Pirate Hat",
   "partsType": 2,
@@ -3992,8 +4008,24 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402027,
+  "name": "Starlight Bow",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402028,
   "name": "Starlight Ears",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402029,
+  "name": "Pointy Pumpkin Hat",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4074,6 +4106,14 @@
  {
   "petPartsId": 402040,
   "name": "Pizza Hat",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402041,
+  "name": "Popcorn Hat",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4224,6 +4264,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402060,
+  "name": "KH III Sora Ornament A",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402061,
   "name": "KH III Sora Ornament B",
   "partsType": 2,
@@ -4314,6 +4362,14 @@
  {
   "petPartsId": 402072,
   "name": "Pepita Ornament",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402073,
+  "name": "Dante Ornament",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4704,6 +4760,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402122,
+  "name": "Hannya Mask",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402123,
   "name": "Fortune Fedora",
   "partsType": 2,
@@ -4722,6 +4786,14 @@
  {
   "petPartsId": 402125,
   "name": "New Year's Mickey Ears",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402126,
+  "name": "Black Heart-Shaped Hat",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5016,6 +5088,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407006,
+  "name": "Kite",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407007,
   "name": "Rose Flower Basket",
   "partsType": 7,
@@ -5050,6 +5130,14 @@
  {
   "petPartsId": 407011,
   "name": "Balloon Moogle & Chirithy",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407012,
+  "name": "Balloon Zazu",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5152,6 +5240,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407025,
+  "name": "Balloon Baymax & Mochi",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407026,
   "name": "Balloon Mike & Sulley",
   "partsType": 7,
@@ -5178,6 +5274,14 @@
  {
   "petPartsId": 407029,
   "name": "Buzz Lightyear Wings",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407030,
+  "name": "Balloon Aliens",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5352,6 +5456,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 410003,
+  "name": "Falling Snow",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 410004,
   "name": "Rose Flower Petals",
   "partsType": 10,
@@ -5370,6 +5482,14 @@
  {
   "petPartsId": 410006,
   "name": "Fireworks",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410007,
+  "name": "Goldfish",
   "partsType": 10,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5402,6 +5522,14 @@
  {
   "petPartsId": 410011,
   "name": "Floating Trick or Treat",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410012,
+  "name": "Elsa's Magic",
   "partsType": 10,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5458,6 +5586,14 @@
  {
   "petPartsId": 410020,
   "name": "Pinwheels",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410021,
+  "name": "Confetti & Butterflies",
   "partsType": 10,
   "combinationType": 0,
   "combinationFlag": 0,

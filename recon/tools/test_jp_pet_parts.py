@@ -56,3 +56,31 @@ if os.path.isfile(src):
     assert jpp.hires_lwf(open(src, 'rb').read(), {t[0]: (t[2] // 2, t[3] // 2) for t in L.textures}) is None
 check('407043', 'bag_back', [0, 1, 2, 3])
 check('407009', 'bag_back', [2])
+
+
+# a part with no JP folder (402126 Black Heart-Shaped Hat) is read whole from recon_root (3 Nov 2026): LWF + texture served,
+# reported as `recon_only`; without recon_root it does not exist
+red = os.path.join(dd.JP431, 'lwf', 'pet', 'part', '402127', 'ac_hat1')
+if os.path.isdir(red) and not os.path.isdir(os.path.join(dd.JP431, 'lwf', 'pet', 'part', '402126')):
+    import shutil
+    import tempfile
+    rr = tempfile.mkdtemp(prefix='jpp_recon_')
+    try:
+        dst = os.path.join(rr, 'lwf', 'pet', 'part', '402126', 'ac_hat1')
+        os.makedirs(dst)
+        for f in os.listdir(red):
+            shutil.copy(os.path.join(red, f), dst)
+        files, rep = jpp.collect(dd.JP431, recon_root=rr)
+        base = 'lwf/pet/part/402126/ac_hat1/'
+        mine = sorted(k for k in files if k.startswith(base))
+        assert mine and base + 'ac_hat1.lwf' in mine and all(files[k].startswith(rr) for k in mine), mine
+        assert ('402126', 'ac_hat1') in rep['recon_only'] and '402126' not in rep['missing_series'], rep['recon_only']
+        files0, rep0 = jpp.collect(dd.JP431)
+        assert not any(k.startswith(base) for k in files0) and rep0['recon_only'] == []
+        # the other parts are unchanged by the recon-only folder
+        assert {k: v for k, v in files.items() if not k.startswith(base)} == files0
+        print('OK: recon-only part 402126 served from recon_root (%d files)' % len(mine))
+    finally:
+        shutil.rmtree(rr, ignore_errors=True)
+else:
+    print('skip recon-only check: no JP dump')
