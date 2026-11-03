@@ -71,14 +71,16 @@ function catalogRows(index) {
 
 // State of a catalogue row for the player: ctx {shopFrom, shopTo, current (census ids of the week: Set or array), kept}.
 // removed: no available tier («Not restored yet», whatever the date); now: a raid of the Shop week; kept: the kept one;
-// can: a week before the Shop week, which can be kept; later: not reached by the Story yet (also every row before the
-// Story has a Shop week). A kept row counts as kept only while it is a past week (a save kept from a later Story stays inert).
-function rowState(row, { shopFrom, current, kept } = {}) {
+// can: a week before the Shop week, which can be kept; other: dates inside the Shop week but not listed now (a row that lost
+// the week to another, the Weekend-only and Daily rows of Task 10 off their day): reached by the Story, so never «later»;
+// later: starts after the Shop week (also every row before the Story has a Shop week). A kept row counts as kept only while
+// it is a past week (a save kept from a later Story stays inert).
+function rowState(row, { shopFrom, shopTo, current, kept } = {}) {
   if (!row.available) return 'removed';
   const cur = current instanceof Set ? current : new Set(current || []);
   if (cur.has(row.censusId)) return 'now';
-  if (!(shopFrom && row.end < shopFrom)) return 'later';
-  return kept && kept === row.censusId ? 'kept' : 'can';
+  if (shopFrom && row.end < shopFrom) return kept && kept === row.censusId ? 'kept' : 'can';
+  return shopFrom && row.start <= (shopTo && shopTo >= shopFrom ? shopTo : shopFrom) ? 'other' : 'later';
 }
 
 module.exports = { raidsForWeek, weekRaids, weekRows, catalogRows, rowState };

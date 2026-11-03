@@ -147,12 +147,25 @@ const tests = {
     const tail = o.slice(o.indexOf('Other weeks'));
     assert(tail.indexOf('/web/raid/raid/8120') < tail.indexOf('/web/raid/raid/8101'), 'newest first');
   },
+  off_today_row() {
+    // review b597b99: a row of the Shop week that is not listed now (Task 10 weekend / daily rows): neither later nor keepable
+    const ix = index();
+    ix.entries.push(tier('WW-D-2019-10-19', 8110, '2019-10-19', '2019-10-20', 'Beginner', 'Darkside'));
+    const html = pages.catalogPage(ix, ctx({ index: ix }));
+    const r = rowOf(html, 8110);
+    assert(/data-show="other"/.test(r) && /This week, not open now/.test(r), 'its own status');
+    assert(!/Unlocks at Story Quest/.test(r) && !/class="pk"/.test(r));
+  },
   html_escape() {
     const html = pages.catalogPage(index(), ctx());
     const r = rowOf(html, 8180);
     assert(r.includes("Tom &amp; Jerry's Ω &lt;Boss&gt;"), 'name intact, escaped');
     assert(!r.includes('<Boss>'), 'no raw tag');
     assert(r.includes('Moogle &amp; Co. Board'));
+    const ix = index();
+    ix.entries.push(tier('WW-Q', 8190, '2021-01-04', '2021-01-10', 'Odd"Tier<x>', 'Q'));
+    const q = rowOf(pages.catalogPage(ix, ctx({ index: ix })), 8190);
+    assert(q.includes('data-tier="odd&quot;tier&lt;x&gt;"') && q.includes('Odd&quot;Tier&lt;x&gt;'), 'tier values escaped');
     const d = pages.detailPage(index(), 8180, ctx());
     assert(d.includes("<h1>Tom &amp; Jerry's Ω &lt;Boss&gt;</h1>"));
     assert(d.includes("<title>Tom &amp; Jerry's Ω &lt;Boss&gt;</title>"));
