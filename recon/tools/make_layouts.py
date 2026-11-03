@@ -1880,6 +1880,9 @@ for _p in [['pet', 'demo', 'training_SE']]:
 import make_pet_training_fx  # noqa: E402
 make_pet_training_fx.write_all(OUT, SRC)
 TEXTURES |= set(make_pet_training_fx.TEXTURE_NAMES)
+# coin icons of the Avatar / Raid Boards: JP 4.3.1 files written into cocostudio/publish by import_originals.py
+# (originals.tsv, «Avatar Board coin icons»), which runs after this script and stops the build if one is missing
+TEXTURES |= {'SpherePointIcon_%s.png' % k for k in ('normal', 'OC', 'EV', 'Raid', 'SP')}
 # Movimenti del pet (lwf/pet/motion/*): LWF nostri che animano le 9 parti servite di
 # lwf/pet/part/001 (attaccate dal client ai movie omonimi), con l'evento «end» dove la
 # battaglia aspetta la fine del movimento (I-005: con i vuoti la battaglia col pet si bloccava
