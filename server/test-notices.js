@@ -17,7 +17,8 @@ check(pos('Shop') < pos('Missions'), 'newest first: Shop (10/20) before Missions
 check(n.NOTICES.some((x) => x.title === 'Missions' && /joins the rotation only once your Story reaches the date/.test(x.body.join(' '))), 'Missions: campagne con medaglia legate alla storia');
 check(n.NOTICES.some((x) => x.title === 'Missions' && /are given once/.test(x.body.join(' ')) && /did not finish in time come back/.test(x.body.join(' '))), 'Missions: premi unici una volta sola');
 check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /draw rates are reconstructed/.test(x.body.join(' '))), 'probabilita nelle differenze');
-check(!p.includes('restored'), 'niente elenchi di modifiche');
+// the Raid Catalog label «Not restored yet» (raids Part 2 Task 9) is quoted in the Raid Bosses notice: the only allowed hit
+check(p.includes('Not restored yet') && !p.replace(/Not restored yet/g, '').includes('restored'), 'niente elenchi di modifiche');
 check(p.includes('Differences from the original game') && p.includes('Limited Missions rotate'), 'notizia differenze');
 check(p.includes('<a class="row" href="#n0"') && p.includes('id="d0"'), 'struttura elenco');
 

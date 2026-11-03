@@ -73,8 +73,21 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   const state = () => {
     const r = rewards.raidState(player), month = monthOf(realNow());
     if (r.levelsMonth !== month) { r.levels = {}; r.levelOcc = {}; r.levelsMonth = month; savePlayer(); }
+    normalizeKept(r);
     return r;
   };
+  // kept of older saves: {key, censusId} or an entry key -> the census id; unknown -> cleared (only with an index, so a missing
+  // raids.json never loses it)
+  function normalizeKept(r) {
+    const k = r.kept, all = raidIndex().entries || [];
+    if (k === null || k === undefined || !all.length || (typeof k === 'string' && all.some((e) => e.censusId === k))) return;
+    const census = (id) => (id && all.some((e) => e.censusId === id) ? id : null);
+    const byKey = (key) => (all.find((e) => e.key === key) || {}).censusId || null;
+    const id = typeof k === 'string' ? byKey(k) : (k && typeof k === 'object' ? census(k.censusId) || byKey(k.key) : null);
+    log(`[raid] Raid Catalog: kept ${JSON.stringify(k)} -> ${id}`);
+    r.kept = id;
+    savePlayer();
+  }
   const entries = () => (raidIndex().entries || []).filter((e) => e.available);
   const entryOfStage = (stageId) => {
     const id = Number(stageId);
@@ -285,7 +298,9 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const r = state(), nowMs = realNow();
     r.points += points;
     if (r.boss || r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
-    if (spawn(r, entry, nowMs, { catalog: isKeptOnly(entry, nowMs) })) r.points = 0;
+    // a quest that is not a raid of the week (the kept raid, or one kept until a moment ago): the catalogue counter, so it never
+    // reads or moves the level the live week of that entry left (review b597b99)
+    if (spawn(r, entry, nowMs, { catalog: !currentEntries(nowMs).includes(entry) })) r.points = 0;
   }
 
   // The raids of the player's Shop week (raid-calendar.js): storyWeek() is {shopFrom, shopTo} of storyCtx() in server.js, the
@@ -306,8 +321,6 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const c = catalogCtx(realMs), row = c.kept && catalogRow(c.kept);
     return row && calendar.rowState(row, c) === 'kept' ? row.entries.filter((e) => e.available) : [];
   }
-  // a quest of the kept raid that is not a raid of the week: its boss is a Raid Catalog boss
-  const isKeptOnly = (entry, realMs) => keptEntries(realMs).includes(entry);
   // POST /web/raid/keep/<evStageId> and /web/raid/unkeep (catalogue buttons): {code, body {ok, why?}}. Only a past week with an
   // available tier can be kept (else why: now, later, removed); keeping one replaces the previous.
   function keep(evStageId) {

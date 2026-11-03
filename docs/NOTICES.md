@@ -68,7 +68,7 @@ Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP come
 
 The **Raid Catalog** is **not original**: it is an addition of this server, in the style of the Special Catalog. Its banner in the Events tab opens the **Training Grounds** when tapped, and its **Details** button lists every raid week of the game with its bosses, tiers and Raid Boards.
 
-One **past raid** at a time can be **kept** in the Events tab, beside the raids of the week. Raids later than your Story stay locked (**Unlocks at Story Quest N**), and raids whose boss cannot be served yet are listed but cannot be kept.
+One **past raid** at a time can be **kept** in the Events tab, beside the raids of the week. Raids later than your Story stay locked (**Unlocks at Story Quest N**), and raids whose boss cannot be served yet are marked **Not restored yet** and cannot be kept.
 
 A kept raid follows the rules of its own week (AP, Bonus Time). Its boss has a **level of its own**, starting at **LV 1**: playing it never changes the level of the boss of the week, and the other way round. Its **Raid Boards** are the same as in its week, so a board reward is never given twice; **Raid Coins** are given at every win, as for the raid of the week.
 

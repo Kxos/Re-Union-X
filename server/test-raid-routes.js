@@ -359,6 +359,7 @@ const tests = {
     const run = (start, now) => {
       const w = world();
       Object.assign(w.index.entries[0], { start, end: start, questAp: [0, 5, 90] });
+      w.week = { shopFrom: start, shopTo: start }; // a raid of the week: a quest of another week feeds the catalogue counter
       w.now = now;
       w.spawn(); w.start(); w.clearParts([0, 100, 200]);
       return w.player.raid.levels['WW-1/Beginner'];
@@ -567,10 +568,13 @@ const tests = {
     assert.strictEqual(reader(now), null, 'stale: ignored');
     assert.strictEqual(reader(now), null);
     assert.strictEqual(logs.filter((m) => /ignored/.test(m)).length, 1, 'logged once');
+    // explicit mtimes: two writes inside one mtime tick would read as no change (flaky run seen in review b597b99)
     fs.writeFileSync(file, '{"key": "WW-2/Beginner"}');
-    assert.strictEqual(reader(Date.now()), 'WW-2/Beginner', 'rewritten: fresh again');
+    fs.utimesSync(file, now / 1000 - 10, now / 1000 - 10);
+    assert.strictEqual(reader(now), 'WW-2/Beginner', 'rewritten: fresh again');
     fs.writeFileSync(file, 'not json');
-    assert.strictEqual(reader(Date.now()), null, 'corrupt: nothing');
+    fs.utimesSync(file, now / 1000 - 5, now / 1000 - 5);
+    assert.strictEqual(reader(now), null, 'corrupt: nothing');
     fs.rmSync(dir, { recursive: true, force: true });
     // an unknown key is logged once, not at every call
     const w = world();
@@ -757,6 +761,42 @@ const tests = {
     w.now = Date.parse('2026-11-01T09:00:00Z');
     assert.strictEqual(w.spawnAt(STAGE).level, 1);
     assert.deepStrictEqual(w.player.raid.levels, {});
+  },
+  catalog_key_without_kept() {
+    // review b597b99: the kept raid removed or changed before the clear that spawns its boss: a past week's quest still feeds
+    // the catalogue counter, never the plain entry key that the live week of that entry used
+    const w = catWorld();
+    w.player.raid = { levels: { 'WW-0/Beginner': 7 }, levelOcc: { 'WW-0/Beginner': '2019-09-30' }, levelsMonth: w.raid.monthOf(w.now) };
+    w.raid.keep(8002); w.raid.unkeep();
+    const boss = w.spawnAt(STAGE + 5);
+    assert.strictEqual(boss.levelKey, 'cat:WW-0/Beginner');
+    assert.strictEqual(boss.level, 1, 'not the live level 7');
+    w.start(); w.clearParts([0, 100, 200]);
+    assert.deepStrictEqual([w.player.raid.levels['WW-0/Beginner'], w.player.raid.levels['cat:WW-0/Beginner']], [7, 2]);
+    w.raid.keep(8003);
+    assert.strictEqual(w.spawnAt(STAGE + 5).levelKey, 'cat:WW-0/Beginner', 'another raid kept: still the catalogue key');
+    // a quest of the week keeps the plain key
+    w.player.raid.boss = null;
+    assert.strictEqual(w.spawn().levelKey, undefined);
+  },
+  catalog_old_kept_shapes() {
+    // review b597b99: older saves may hold kept as {key, censusId} or an entry key: converted to the census id, else cleared
+    const cases = [[{ key: 'WW-0/Beginner', censusId: 'WW-0' }, 'WW-0'], [{ key: 'WW-0/Beginner' }, 'WW-0'], ['WW-0/Beginner', 'WW-0'], [{ key: 'gone' }, null], [{}, null], ['WW-0', 'WW-0']];
+    for (const [old, want] of cases) {
+      const w = catWorld();
+      w.player.raid = { kept: old };
+      w.raid.events(TUE);
+      assert.strictEqual(w.player.raid.kept, want, JSON.stringify(old));
+    }
+  },
+  catalog_off_today_is_not_later() {
+    // review b597b99: a row of the Shop week that is not listed now (Task 10 weekend / daily rows) is no «later» row
+    const w = catWorld();
+    w.index.entries.push({ ...w.index.entries[0], key: 'WW-D/Beginner', censusId: 'WW-D', evStageId: 8007, stageId: STAGE + 11, start: '2019-10-12', end: '2019-10-12', sphereBoardIds: [] });
+    const c = w.raid.catalogCtx(TUE);
+    c.current.delete('WW-D'); // as a Weekend-only row on a Tuesday
+    const row = require('./raid-calendar').catalogRows(w.index).find((r) => r.censusId === 'WW-D');
+    assert.strictEqual(require('./raid-calendar').rowState(row, c), 'other');
   },
   catalog_boards_shared() {
     // boards belong to the census row: the kept raid hands out the very ids it had live, so a cell is bought once

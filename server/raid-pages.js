@@ -41,6 +41,10 @@ function statusOf(row, ctx) {
     return { show: st, cls: 'off', pill: pill('off', 'removed', 'Not restored yet'), button: null,
       why: 'Its raid boss cannot be served yet: its graphics or data are incomplete in the surviving game files. It comes back when they are recovered.' };
   }
+  if (st === 'other') {
+    return { show: st, cls: 'other', pill: pill('other', '', 'This week, not open now'), button: null,
+      why: 'Your Story has reached its dates, but it is not in the Events tab now. It cannot be kept while its week is current.' };
+  }
   if (st === 'now') return { show: st, cls: 'now', pill: pill('now', 'now', 'In Events this week'), button: null, why: 'It is in the Events tab this week, as in the original game.' };
   if (st === 'kept') {
     return { show: st, cls: 'pinned', pill: pill(PILLS.kept[0], '', PILLS.kept[1]), button: 0,
@@ -167,7 +171,7 @@ function catalogPage(index, ctx = {}) {
     lastM = m;
     const tiers = [...new Set(row.entries.map((e) => e.tier))];
     return `${label}<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
-      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${tiers.map((t) => t.toLowerCase()).join(' ')}" data-search="${esc(searchOf(row, ctx))}">`
+      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${esc(searchOf(row, ctx))}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(titleOf(row))}</a><div class="d">${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
