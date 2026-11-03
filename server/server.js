@@ -1835,7 +1835,7 @@ function respondStageStart(res, req) {
     userEnemyDropItems: req?.isSteal ? applySteal(req?.stageId ?? START_STAGE_ID, stageEnemyDrops(req?.stageId ?? START_STAGE_ID))
       : (player.steal = null, stageEnemyDrops(req?.stageId ?? START_STAGE_ID)),
     userTreasures: stageTreasures(req?.stageId ?? START_STAGE_ID),
-    campaigns: [],
+    campaigns: raid().campaignIds(), // raid AP 0 campaign in the bonus hours (routes-raid.js)
     luxMagnifications: { campaign: 0, party: 0 },
     // l'amico scelto (supportUserId 1 = il giocatore stesso, /stage/support/list) con la medaglia condivisa:
     // con la lista vuota il client non ha la medaglia dell'amico da mettere nel deck della battaglia
@@ -4173,6 +4173,9 @@ function raid() {
     // bench smoke (tmp/raid_p2/smoke_raids.ps1): save/raid_smoke.json {"key": "<entry key>"} forces that boss while the
     // file is younger than 2 h (routes-raid.js smokeReader); never in play
     smokeKey: routesRaid.smokeReader(path.join(path.dirname(SAVE_FILE), 'raid_smoke.json')),
+    // bench switch: save/raid_ap0.json {"force": true} lists the raid AP 0 campaign at any hour while the file is younger
+    // than 2 h (display only, the AP charge stays questApAt's); never in play
+    ap0Force: routesRaid.smokeReader(path.join(path.dirname(SAVE_FILE), 'raid_ap0.json'), console.log, 'force'),
     apNow: () => apState().ap, changeAp,
     raidUser: () => ({ userId: 1, name: player.name, level: luxRankFor(player.lux), userAvatar: userAvatarData() }),
     supportUsers: (id, now) => { const medal = id && sharedMedalData(now); return medal ? [selfPlayerElement(now, medal)] : []; },
@@ -4615,8 +4618,8 @@ function handler(scheme) {
   if (kind === 'usernotice') return raid().notice(res);
   if (kind === 'useroption') return respondUserOption(res, entry.bodyDecoded);
   if (kind === 'colosseum') return respondColosseum(res);
-      // GET /campaign (azione 143): campaigns, array di int (id delle campagne attive)
-      if (kind === 'campaign') return send(res, 200, { ret: ret(), campaigns: [] });
+      // GET /campaign (azione 143): campaigns, array di int (id delle campagne attive): the raid AP 0 campaign in the bonus hours
+      if (kind === 'campaign') return send(res, 200, { ret: ret(), campaigns: raid().campaignIds() });
       if (kind === 'shopcampaign') return respondShopCampaign(res, req.headers);
       // POST /ranking/reward/check (azione 142): il client
       // vuole tre array in radice (lastRankingResults, rankingRewardIds, openRankingIds),

@@ -883,6 +883,8 @@ for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
 // raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off.
 // After the copy of server/tables: the Raid Boards are appended to the sphere tables copied from there
 require('./make-raid').patch(OUT);
+// Raid «AP 0» campaign: evCampaign rows type 7 power 0 over the raid quest stages written just above (make-ev-campaign.js)
+require('./make-ev-campaign').patch(OUT);
 console.log(`medal: ${medals.length} righe (+${roboAdded} da Roboloid, ${tiersFromRobo} tier da Roboloid); player: ${players.length} livelli (HP lv1 = ${hp})` +
   (enemies ? `; enemy: ${enemies.length} righe (${displaysJp} con grafica originale di enemy_gen, ${displaysDarkRoad} con grafica di Dark Road, ${displaysSubstituted} con grafica sostitutiva, ${showsRestored} con effetto di comparsa originale ripristinato, ${showsSubstituted} con effetto di comparsa sostitutivo; enemyAttack +${attacksAdded})` : '') + `; burst: ${bursts.length} righe (+${burstsAdded}, ${buffStats.rows} con buff/debuff, ${buffStats.fromOrig} da thethiny, ${buffStats.conflicts} conflitti)` +
   `; supernova: ${snBursts.length} attacchi, +${meowAdded} Dual Meow Wow, ${snEvolve.applied} Evolve con medaglie richieste (${snEvolve.missing} regole senza medaglie); +${fairyAdded} Blue Fairy, ${fairyEvolve} Evolve 6★->7★ con Blue Fairy (${orgEvolve} dell'Organizzazione XIII verso la 7★ «X A»); ${wikiEvolve.changes.length} Evolve with khuxwiki required medals (I-205); bgm: ${bgmRows} righe` +

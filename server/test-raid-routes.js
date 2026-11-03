@@ -7,6 +7,7 @@ const fs = require('fs'); const os = require('os'); const path = require('path')
 const routesRaid = require('./routes-raid');
 const { isBonusTime, questApAt } = routesRaid;
 const { coinRows } = require('./raid-rewards');
+const evCampaign = require('./make-ev-campaign');
 
 const TUE = Date.parse('2026-10-27T10:00:00Z');
 const STAGE = 980001, ENEMY = 2000010, SPECIAL = 970001;
@@ -29,11 +30,12 @@ function world(opts = {}) {
       enemyRow(ENEMY + 1, 2, 100), enemyRow(ENEMY + 2, 3, 200),
     ],
     raidReward: [victory, coin.mvp, coin.all],
+    evCampaign: [{ campaignId: 101, type: 7, power: 5000 }, ...evCampaign.raidAp0Rows([{ stageId: STAGE }])],
   };
   w.index = opts.index || { entries: [{ key: 'WW-1/Beginner', censusId: 'WW-1', available: true, stageId: STAGE, evStageId: 8001, enemyId: ENEMY, modelId: 7, tier: 'Beginner',
     upMinutes: 20, useAp: 10, questAp: [0, 5, 90], start: '2019-10-07', end: '2019-10-13', level: 25 }], models: { '0007': { fight: true, start: true, escape: true, put_down: true } } };
   w.raid = routesRaid({
-    player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], raidIndex: () => w.index, storyWeek: () => w.week, smokeKey: () => w.smoke,
+    player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], raidIndex: () => w.index, storyWeek: () => w.week, smokeKey: () => w.smoke, ap0Force: () => w.ap0,
     realNow: () => w.now, serverTime: () => fmt(w.now), serverTimeAt: fmt,
     userPointData: (now) => ({ now, ap: w.ap, lux: w.lux }), userDetailData: () => ({ detail: 1 }),
     stageResumptionData: () => ({ resumptionStatus: 0, stageId: 0, raidId: 0, colosseumStageId: 0 }),
@@ -536,6 +538,75 @@ const tests = {
     w.call('list'); w.call('notice'); w.call('list');
     assert.strictEqual(w.logs.filter((m) => /not an available entry/.test(m)).length, 1);
   },
+  ap0_rows() {
+    // make-ev-campaign.js: type 7 power 0, stageType 2, 5 raid quest stages per row, the 18 fields in client order
+    const rows = evCampaign.raidAp0Rows([{ stageId: 1010 }, ...[6, 1, 2, 3, 4, 5, 7, 1].map((n) => ({ stageId: 980000 + n })), { stageId: SPECIAL }]);
+    assert.deepStrictEqual(rows.map((r) => [r.campaignId, r.validStageId, r.stageId]), [[98000, 5, [980001, 980002, 980003, 980004, 980005]], [98001, 2, [980006, 980007, 0, 0, 0]]]);
+    assert.deepStrictEqual(keys(rows[0]), ['campaignId', 'type', 'power', 'displayText', 'stageType', 'validStageId', 'stageId', 'startTime', 'endTime',
+      'weekMonday', 'weekTuesday', 'weekWednesday', 'weekThursday', 'weekFriday', 'weekSaturday', 'weekSunday', 'groupPattern', 'validMinute']);
+    assert.deepStrictEqual([rows[0].type, rows[0].power, rows[0].stageType, rows[0].displayText], [7, 0, 2, 'Raid Event quests cost 0 AP during Bonus Time!']);
+    assert.deepStrictEqual(evCampaign.raidAp0Ids([{ campaignId: 101, type: 7, power: 0 }, ...rows, { ...rows[0], campaignId: 98500, power: 5000 }]), [98000, 98001], 'own range, type 7 power 0 only');
+    assert.deepStrictEqual(evCampaign.raidAp0Rows([]), []);
+    // patch: own rows replaced, the others kept
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-evcampaign-'));
+    fs.writeFileSync(path.join(dir, 'stage.json'), JSON.stringify([{ stageId: 980001 }]));
+    fs.writeFileSync(path.join(dir, 'evCampaign.json'), JSON.stringify([{ campaignId: 101 }, { campaignId: 98003 }]));
+    const log = console.log; console.log = () => {};
+    try { evCampaign.patch(dir); evCampaign.patch(dir); } finally { console.log = log; }
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(path.join(dir, 'evCampaign.json'), 'utf8')).map((r) => r.campaignId), [101, 98000], 'idempotent');
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
+  ap0_campaign_bonus_hours() {
+    // original rule: 0 AP in the bonus hours, weekdays and weekends alike; the ids go out only then
+    const w = world();
+    const BONUS = Date.parse('2026-10-27T15:00:00Z'), SAT = Date.parse('2026-10-31T10:00:00Z'), SAT_BONUS = Date.parse('2026-10-31T15:00:00Z');
+    assert.deepStrictEqual([TUE, BONUS, SAT, SAT_BONUS].map((t) => w.raid.campaignIds(t)), [[], [98000], [], [98000]]);
+    assert.strictEqual(w.raid.stageAp(STAGE, BONUS), 0, 'the charge stays questApAt');
+    // a week whose rule has no bonus value (5 / 90): no campaign in the bonus hours
+    const old = world();
+    Object.assign(old.index.entries[0], { start: '2019-03-04', end: '2019-03-10', questAp: [5, 90] });
+    old.week = { shopFrom: '2019-03-04', shopTo: '2019-03-10' };
+    assert.strictEqual(old.raid.stageAp(STAGE, BONUS), 90);
+    assert.deepStrictEqual(old.raid.campaignIds(BONUS), []);
+    // no raid in the week: none
+    const none = world();
+    none.week = { shopFrom: '2015-01-05', shopTo: '2015-01-11' };
+    assert.deepStrictEqual(none.raid.campaignIds(BONUS), []);
+    // a master without the rows: none
+    const bare = world();
+    bare.tables.evCampaign = [];
+    assert.deepStrictEqual(bare.raid.campaignIds(BONUS), []);
+  },
+  ap0_campaign_start_and_force() {
+    const w = world();
+    w.spawn(); w.call('list');
+    assert.deepStrictEqual(w.start().campaigns, [], '/raid/start outside the bonus hours');
+    w.clearParts([500, 100, 0]);
+    w.now = Date.parse('2026-10-27T15:00:00Z');
+    w.player.raid.boss.endsAt = w.now + 3600e3;
+    const b = w.call('start', { raidId: w.player.raid.boss.raidId, supportUserId: 0, userKeybladeId: 3 });
+    assert.deepStrictEqual(b.campaigns, [98000], '/raid/start in the bonus hours');
+    // bench switch: the ids at any hour, the charge unchanged
+    const f = world();
+    f.ap0 = true;
+    assert.deepStrictEqual(f.raid.campaignIds(TUE), [98000]);
+    assert.strictEqual(f.raid.stageAp(STAGE, TUE), 90);
+    // the switch file: save/raid_ap0.json {"force": true}, fresh only (smokeReader with field «force»)
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-raid-ap0-'));
+    const file = path.join(dir, 'raid_ap0.json');
+    const reader = routesRaid.smokeReader(file, () => {}, 'force');
+    assert.strictEqual(reader(Date.now()), null, 'no file');
+    fs.writeFileSync(file, '{"force": true}');
+    assert.strictEqual(reader(Date.now()), true);
+    fs.writeFileSync(file, '{"key": "WW-1/Beginner"}');
+    fs.utimesSync(file, Date.now() / 1000 + 5, Date.now() / 1000 + 5);
+    assert.strictEqual(reader(Date.now()), null, 'another field');
+    fs.writeFileSync(file, '{"force": true}');
+    const old = (Date.now() - routesRaid.SMOKE_MAX_AGE_MS - 60000) / 1000;
+    fs.utimesSync(file, old, old);
+    assert.strictEqual(reader(Date.now()), null, 'stale');
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
   calendar_week() {
     // Task 8: /stage/event and the Raid Boards follow the Shop week of the story (storyCtx), the kept raid joins them
     const w = world();
@@ -632,6 +703,21 @@ function wiring() {
   assert.strictEqual(t.userPointData(t.serverTime()).ap, before - 90, '/stage/start charges the AP of the moment, not the master row');
   call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0, raidPoint: 3000 } });
   assert.strictEqual(p.raid.points, 3000, '/stage/clear adds the points');
+  // raid AP 0 campaign: none outside the bonus hours; the bench file save/raid_ap0.json lists the master's rows
+  {
+    assert.deepStrictEqual(call(t.respondStageStart, { stageId: 1010, userKeybladeId: 0 }).campaigns, [], 'outside the bonus hours');
+    call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0 } });
+    const readFile = fs.readFileSync;
+    fs.readFileSync = (f, ...a) => (String(f).endsWith('evCampaign.json') ? JSON.stringify(evCampaign.raidAp0Rows([{ stageId: FAKE }])) : readFile(f, ...a));
+    fs.writeFileSync(path.join(dir, 'raid_ap0.json'), '{"force": true}');
+    try {
+      const ids = t.raid().campaignIds();
+      assert(ids.length >= 1 && ids.every((id) => id >= evCampaign.RAID_AP0_BASE && id <= evCampaign.RAID_AP0_MAX), `forced: ${ids}`);
+      assert.deepStrictEqual(call(t.respondStageStart, { stageId: 1010, userKeybladeId: 0 }).campaigns, ids, '/stage/start lists them');
+      call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0 } });
+    } finally { fs.readFileSync = readFile; fs.rmSync(path.join(dir, 'raid_ap0.json')); }
+    assert.deepStrictEqual(t.raid().campaignIds(), [], 'file gone');
+  }
   call(t.respondStageStart, { stageId: 1010, userKeybladeId: 0 });
   call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0, raidPoint: 3000 } });
   assert.strictEqual(p.raid.points, 3000, 'a story quest adds nothing for now');
