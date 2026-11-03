@@ -15229,3 +15229,6 @@ lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720312e
 lwf/raid/demo/put_down_9103/put_down_9103.lwf	loc	=lwf/raid/demo/put_down_9103/put_down_9103.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
 lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
 lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+
+# Raid AP 0 (docs/notes/raid.md «AP 0 campaign»): blue AP plate shown at AP 0 with the Cursor_Anim_AP glow; absent from WW
+img/ui/World_Stage_AP2.png	b16,jp

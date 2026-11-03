@@ -37,6 +37,7 @@ const path = require('path');
 const { coinRows, CONFIG: REWARDS } = require('./raid-rewards');
 const { objectiveCodes } = require('./make-story-oltre');
 const raidBoards = require('./raid-boards');
+const { RAID_IMG_VERSION } = require('./routes-raid'); // same versioned card URL as /stage/event
 
 const STAGE_KIND = 2;
 const RANGES = { stage: ['stageId', 980000, 989999], evStage: ['eventStageId', 8000, 8999], raidSetting: ['raidSettingId', 30000, 39999],
@@ -154,7 +155,7 @@ function questSubs(info, coinType, where) {
 function evStageRow(evStageId, stageIds) {
   const row = { eventStageId: evStageId, parentEventStageId: 0, validStageId: stageIds.length, stageId: [...stageIds], validStageWidthId: 0,
     stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag: 0, eventCategory: 2, eventType: 2, scoreMedalListId: 0, scoreStartReward: 0,
-    scoreEndReward: 0, rankingId: 0, bannerUrl: `/web/raid/img/${evStageId}.png`, mypageBanner: 0, detailUrl: '', startTime: START, endTime: END, endDispTime: END, boardEndTime: END };
+    scoreEndReward: 0, rankingId: 0, bannerUrl: `/web/raid/img/v${RAID_IMG_VERSION}/${evStageId}.png`, mypageBanner: 0, detailUrl: '', startTime: START, endTime: END, endDispTime: END, boardEndTime: END };
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const d of days) row[`week${d}`] = 1;
   row.benefitId = 0;
