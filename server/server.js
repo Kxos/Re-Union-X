@@ -34,6 +34,7 @@ const loginBonus = require('./login-bonus');
 const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
 const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
+const raidPages = require('./raid-pages'); // Raid Catalog web pages (Task 9)
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
 const chatRoutes = require('./routes-chat'); // chat del party (I-210)
@@ -4098,7 +4099,7 @@ function specialAchievement(realMs = realNow()) {
 }
 // Events (eventNumerator/Denominator, user 03-11): objectives of the raid event quests listed now (raid().events), as Special
 function eventAchievement(realMs = realNow()) {
-  const ids = new Set(raid().events(realMs).flatMap((e) => e.stages.map((s) => s.stageId)));
+  const ids = new Set(raid().events(realMs).filter((e) => e.eventType === 2).flatMap((e) => e.stages.map((s) => s.stageId))); // not the Raid Catalog banner
   if (!ids.size) return ACHIEVEMENT_EMPTY;
   const done = player.clearMissions || {};
   let numerator = 0;
@@ -4218,15 +4219,58 @@ function raid() {
     webBase: WEB_BASE,
   });
 }
-// GET /web/raid/img/<evStageId>.png: as /web/special/img, from game_data/raid_img. No banner of its own: 0.png, the plate of
-// make_special_banners.py; neither: 404.
+// Raid Catalog pages (raid-pages.js, Task 9): the context of routes-raid.js plus the lookups of the pages. Board rewards by name
+// from the master (sphereMasu of the board: rewardSelect = item type, raid-boards.js SEL / PARTS_SEL); unlockQuestOf as the
+// Special catalogue (special.unlockQuest on the story rows of the Shop catalogue, from the row's start).
+const RAID_TICKET_NAMES = ['Draw Ticket', 'Holiday Draw Ticket', 'Spooky Cookie', 'Moogle Points']; // gacha.js TICKET_CURRENCIES order
+function raidBoardItems(sphereBoardId) {
+  const masu = masterRows('sphereMasu').find((r) => r.sphereBoardId === Number(sphereBoardId));
+  if (!masu) return [];
+  const byId = (table, key, id) => masterRows(table).find((r) => r[key] === id);
+  const name = (sel, id) => {
+    if (sel === 3) return byId('medal', 'medalId', id)?.name;
+    if (sel === 5) return byId('material', 'materialId', id)?.name;
+    if (sel === 7) return byId('title', 'titleId', id)?.title;
+    if (sel === 19 || sel === 20 || sel === 23) return byId('avatarParts', 'avatarPartsId', id)?.name;
+    if (sel === 33) return byId('petParts', 'petPartsId', id)?.name;
+    if (sel === 2) return 'Jewels';
+    if (sel === 41) return RAID_TICKET_NAMES[id] || RAID_TICKET_NAMES[0];
+    return '';
+  };
+  return [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? name(sel, masu.rewardId[i]) : '')).filter(Boolean))];
+}
+const raidBoardName = (sphereBoardId) => masterRows('sphere').find((r) => r.sphereBoardId === Number(sphereBoardId))?.boardName || '';
+const raidPageCtx = (fromCatalog = false) => ({ ...raid().catalogCtx(), periods: special.PERIODS, imgVersion: routesRaid.RAID_IMG_VERSION, fromCatalog,
+  unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
+  boardItems: raidBoardItems, boardName: raidBoardName });
+// GET /web/raid/img/<evStageId>.png and <id>-kept.png (the kept raid's card): as /web/special/img, from game_data/raid_img. No
+// card of its own: 0.png, the plate of make_special_banners.py (a missing -kept copy: the card itself); none: 404.
+// GET /web/raid/catalog (Details of the Raid Catalog banner) and /web/raid/raid/<evStageId> (details page; ?from=catalog: BACK).
 function respondRaidWeb(res, url) {
-  const m = /^\/web\/raid\/img\/(?:v\d+\/)?(\d+)\.png$/i.exec(url.split('?')[0]);
-  const file = m && [`${Number(m[1])}.png`, '0.png'].map((n) => path.join(RAID_IMG, n)).find((x) => fs.existsSync(x));
-  if (!file) { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); }
+  const p = url.split('?')[0];
+  const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
+  const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
+  if (/^\/web\/raid\/catalog$/i.test(p)) return page(raidPages.catalogPage(raidIndex(), raidPageCtx()));
+  const det = /^\/web\/raid\/raid\/(\d+)$/i.exec(p);
+  if (det) {
+    const html = raidPages.detailPage(raidIndex(), Number(det[1]), raidPageCtx(new URLSearchParams(url.split('?')[1] || '').get('from') === 'catalog'));
+    return html ? page(html) : notFound();
+  }
+  const m = /^\/web\/raid\/img\/(?:v\d+\/)?(\d+)(-kept)?\.png$/i.exec(p);
+  const names = m ? [...(m[2] ? [`${Number(m[1])}-kept.png`] : []), `${Number(m[1])}.png`, '0.png'] : [];
+  const file = names.map((n) => path.join(RAID_IMG, n)).find((x) => fs.existsSync(x));
+  if (!file) return notFound();
   const b = fs.readFileSync(file);
   res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
   return res.end(b);
+}
+// POST /web/raid/keep/<evStageId> and /web/raid/unkeep (buttons of the Raid Catalog): routes-raid.js keep / unkeep, JSON {ok, why?}
+function respondRaidPost(res, url) {
+  const p = url.split('?')[0];
+  const json = (code, o) => { const b = Buffer.from(JSON.stringify(o), 'utf8'); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': b.length }); res.end(b); };
+  const m = /^\/web\/raid\/keep\/(\d+)$/i.exec(p);
+  const out = m ? raid().keep(Number(m[1])) : /^\/web\/raid\/unkeep$/i.test(p) ? raid().unkeep() : { code: 404, body: { ok: false, why: 'unknown route' } };
+  return json(out.code, out.body);
 }
 
 // GET /user/notice (azione 241): raidNotice {isSelfRaid, isOthersRaid} uint,
@@ -4585,7 +4629,7 @@ function handler(scheme) {
       if (kind === 'gachadraw') return respondGachaDraw(res, entry.bodyDecoded);
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
-      if (kind === 'raidweb') return respondRaidWeb(res, req.url);
+      if (kind === 'raidweb') return req.method === 'POST' ? respondRaidPost(res, req.url) : respondRaidWeb(res, req.url);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
@@ -4944,7 +4988,7 @@ module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
-  raid, respondRaidWeb, // server/test-raid-routes.js
+  raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)

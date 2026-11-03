@@ -13,7 +13,7 @@
 // saves and in the client's master: rows {censusId: r}, entries {"<censusId>/<tier>[+gem]": n}. A new key takes the next
 // free number, a key that disappears stays and its number is never reused, a repeated number stops the run. Every WW row is
 // numbered whatever the filter says.
-//   evStage 8000 + r (8000 stays free), stage 980000 + n, raidSetting 30000 + n,
+//   evStage 8000 + r (8000 is the Raid Catalog banner, CATALOG_EV), stage 980000 + n, raidSetting 30000 + n,
 //   raidEnemy body 2000000 + 10n, parts + (weakness - 1), raidReward by rewardRowId (raid-rewards.js).
 // Output (own rows dropped first, the previous run's list is raids.json `own`; anything else in our ranges stops the run):
 // - stage (stageKind 2, raidBoss = setting, copy of a story row of the map's world), evStage (one per census row with an
@@ -47,6 +47,10 @@ const RANGES = { stage: ['stageId', 980000, 989999], evStage: ['eventStageId', 8
 // master tables read for the board rewards (name -> item), never rewritten
 const ITEM_TABLES = ['medal', 'material', 'petParts', 'avatarParts', 'title'];
 const EV_BASE = 8000, EGG_ID = 100, EGG = 'Eggcognito', ENEMY_REWARD = 1;
+// Raid Catalog banner (Task 9): evStage 8000 (EV_BASE, never a census row), Details -> /web/raid/catalog. An evStage needs a quest
+// and a tap always opens the banner's quest list, so it holds the Training Grounds of the Special Catalog (make-special.js
+// TRAINING_STAGE): our own quest (no Lux, no drops), never raid content. Emitted only when that stage row is in the master.
+const CATALOG_EV = EV_BASE, CATALOG_STAGE = 970000, CATALOG_URL = '/web/raid/catalog';
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\sources';
 const DEFAULT_2016 = 'D:\\Progetto_Restauro_KH_UX\\external\\thethiny_2026-10-13\\KHUx-Server\\data';
@@ -152,10 +156,10 @@ function questSubs(info, coinType, where) {
     submissionItemId: each(() => 0), submissionSkillType: each(() => 0), submissionSkillId: each(() => 0), submissionSkillLv: each(() => 0), submissionItemNum: each((c) => c.qty) };
 }
 
-function evStageRow(evStageId, stageIds) {
+function evStageRow(evStageId, stageIds, { eventType = 2, detailUrl = '' } = {}) {
   const row = { eventStageId: evStageId, parentEventStageId: 0, validStageId: stageIds.length, stageId: [...stageIds], validStageWidthId: 0,
-    stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag: 0, eventCategory: 2, eventType: 2, scoreMedalListId: 0, scoreStartReward: 0,
-    scoreEndReward: 0, rankingId: 0, bannerUrl: `/web/raid/img/v${RAID_IMG_VERSION}/${evStageId}.png`, mypageBanner: 0, detailUrl: '', startTime: START, endTime: END, endDispTime: END, boardEndTime: END };
+    stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag: 0, eventCategory: 2, eventType, scoreMedalListId: 0, scoreStartReward: 0,
+    scoreEndReward: 0, rankingId: 0, bannerUrl: `/web/raid/img/v${RAID_IMG_VERSION}/${evStageId}.png`, mypageBanner: 0, detailUrl, startTime: START, endTime: END, endDispTime: END, boardEndTime: END };
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const d of days) row[`week${d}`] = 1;
   row.benefitId = 0;
@@ -428,6 +432,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       out.index.reasons[label] = reason;
     }
   }
+  // Raid Catalog banner (CATALOG_EV): kept apart from the raid rows; patch() writes it in evStage
+  const training = (master.stage || []).find((r) => r.stageId === CATALOG_STAGE);
+  out.catalogEvStage = training ? evStageRow(CATALOG_EV, [CATALOG_STAGE], { eventType: 0, detailUrl: CATALOG_URL }) : null;
+  if (training) out.index.catalog = { evStageId: CATALOG_EV, stageIds: [CATALOG_STAGE], useAp: [Number(training.useAp) || 0] };
   return out;
 }
 
@@ -544,12 +552,13 @@ function patch(masterDir, opts = {}) {
   if (!master.stage.some((r) => r.stageKind === 1)) throw new Error(`raid: ${path.join(masterDir, 'stage.json')} has no story rows`);
   const idsFile = opts.idsFile || IDS_FILE;
   const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig(), ids: readIds(idsFile) });
-  const added = { stage: out.stageRows, evStage: out.evStageRows, raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows,
+  const added = { stage: out.stageRows, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStageRows], raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows,
     sphere: out.sphereRows, sphereArray: out.arrayRows, sphereMasu: out.masuRows };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[tableKey[t]])]));
-  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, boards: out.report.boards, own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), boards: out.report.boards, own }, null, 1));
+  if (!out.index.catalog) console.warn(`raid: no Raid Catalog banner: the Training Grounds stage ${CATALOG_STAGE} is not in the master (make-special first)`);
   writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
   const on = out.index.entries.filter((e) => e.available).length;

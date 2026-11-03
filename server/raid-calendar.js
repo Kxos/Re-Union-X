@@ -53,4 +53,32 @@ function weekRaids(index, ctx = {}) {
 
 const raidsForWeek = (index, ctx = {}) => weekRaids(index, ctx).entries;
 
-module.exports = { raidsForWeek, weekRaids, weekRows };
+// Raid Catalog (Task 9): one row per census row (a raid week), by date: {censusId, evStageId, start, end, family, entries (its
+// tiers, index order), bosses (names, first appearance order), available (at least one tier available)}
+function catalogRows(index) {
+  const rows = new Map();
+  for (const e of (index && index.entries) || []) {
+    if (!e.censusId || !e.start) continue;
+    if (!rows.has(e.censusId)) rows.set(e.censusId, { censusId: e.censusId, evStageId: e.evStageId || 0, start: e.start, end: e.end || e.start, family: e.family || '', entries: [], bosses: [] });
+    const r = rows.get(e.censusId);
+    r.entries.push(e);
+    if (e.boss && !r.bosses.includes(e.boss)) r.bosses.push(e.boss);
+  }
+  const list = [...rows.values()];
+  for (const r of list) r.available = r.entries.some((e) => e.available);
+  return list.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
+}
+
+// State of a catalogue row for the player: ctx {shopFrom, shopTo, current (census ids of the week: Set or array), kept}.
+// removed: no available tier («Not restored yet», whatever the date); now: a raid of the Shop week; kept: the kept one;
+// can: a week before the Shop week, which can be kept; later: not reached by the Story yet (also every row before the
+// Story has a Shop week). A kept row counts as kept only while it is a past week (a save kept from a later Story stays inert).
+function rowState(row, { shopFrom, current, kept } = {}) {
+  if (!row.available) return 'removed';
+  const cur = current instanceof Set ? current : new Set(current || []);
+  if (cur.has(row.censusId)) return 'now';
+  if (!(shopFrom && row.end < shopFrom)) return 'later';
+  return kept && kept === row.censusId ? 'kept' : 'can';
+}
+
+module.exports = { raidsForWeek, weekRaids, weekRows, catalogRows, rowState };

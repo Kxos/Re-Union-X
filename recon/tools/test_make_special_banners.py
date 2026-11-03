@@ -207,6 +207,33 @@ try:
             check(got.size == (640, 140) and mean(ImageChops.difference(got, orig.resize((640, 140)))) < 2, 'notice image %s kept as banner' % n)
     else:
         print('(reference banners %s missing: real-rules check skipped)' % REF)
+    # raids Part 2, Task 9: the Raid Catalog banner (8000) from the weekly event cards, and a «KEPT RAID» copy of every card
+    rimg = os.path.join(tmp, 'raid_img')
+    os.makedirs(rimg)
+    for i, ev in enumerate((8070, 8071, 8072, 8073, 8074, 8075, 8076)):
+        Image.new('RGB', (640, 140), ((40 * i) % 255, 60, 200 - 20 * i)).save(os.path.join(rimg, '%d.png' % ev))
+    Image.new('RGB', (640, 140), (90, 90, 90)).save(os.path.join(rimg, '0.png'))
+    check([os.path.basename(p) for p in m.raid_cards(rimg)] == ['8070.png', '8071.png', '8072.png', '8073.png', '8074.png', '8075.png', '8076.png'],
+          'raid cards: the weekly cards only')
+    rix = {'catalog': {'evStageId': 8000, 'stageIds': [970000]}, 'entries': [
+        {'evStageId': 8070, 'censusId': 'A'}, {'evStageId': 8070, 'censusId': 'A'}, {'evStageId': 8071, 'censusId': 'B'}, {'evStageId': 8099, 'censusId': 'C'}]}
+    rn = m.build_raid(rix, rimg, 'full')
+    check(rn == {'catalog': 1, 'kept': 3, 'missing': 0}, 'raid counts %s' % rn)
+    rcat = Image.open(os.path.join(rimg, '8000.png')).convert('RGB')
+    check(rcat.size == (640, 140), 'Raid Catalog banner 640x140')
+    check(sum(gold(p) for p in pixels(rcat.crop((10, 12, 450, 82)))) > 1500, 'RAID CATALOG title in gold lettering')
+    check(mean(ImageChops.difference(rcat, cat)) > 8, 'not the Special Catalog banner')
+    check(mean(ImageChops.difference(rcat, m.catalog_banner(None, None, m.RAID_CATALOG_TITLE, m.RAID_CATALOG_SUB, []).convert('RGB'))) > 8,
+          'background made of the weekly cards')
+    check(8000 not in [int(os.path.basename(p)[:-4]) for p in m.raid_cards(rimg)], 'the catalogue banner is no strip of itself')
+    k70 = Image.open(os.path.join(rimg, '8070-kept.png')).convert('RGB')
+    check(sum(gold(p) for p in pixels(k70.crop((0, 6, 140, 34)))) > 600, 'KEPT RAID tab top left')
+    check(diffbox(k70, Image.open(os.path.join(rimg, '8070.png')).convert('RGB'))[3] <= 40, 'only the tab changes')
+    k99 = Image.open(os.path.join(rimg, '8099-kept.png')).convert('RGB')
+    check(k99.getpixel((400, 100)) == (90, 90, 90), 'a week without its card: the plain plate with the tab')
+    check(m.kept_tab(Image.new('RGB', (640, 140)), m.RAID_KEPT_TEXT).size == (640, 140) and m.RAID_KEPT_TEXT == 'KEPT RAID', 'raid tab text')
+    empty = os.path.join(tmp, 'raid_none')
+    check(m.build_raid({'entries': [{'evStageId': 8070}]}, empty, 'full') == {'catalog': 0, 'kept': 0, 'missing': 1}, 'no card, no index catalog')
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

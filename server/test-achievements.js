@@ -71,7 +71,7 @@ const emptyOk = (a, when, exact) => {
   const [sn, sd] = exact || strengthNow();
   check(a.strengthNumerator === sn && a.strengthDenominator === sd, `${when}: Special ${a.strengthNumerator}/${a.strengthDenominator} (expected ${sn}/${sd})`);
   // Events (user 03-11): 3 per raid event quest listed now, none done; no raid this week 0/1
-  const ev = t.raidEventsNow().reduce((s, e) => s + e.stages.length, 0);
+  const ev = t.raidEventsNow().filter((e) => e.eventType === 2).reduce((s, e) => s + e.stages.length, 0); // not the Raid Catalog banner
   const [en, ed] = ev ? [0, 3 * ev] : [0, 1];
   check(a.eventNumerator === en && a.eventDenominator === ed, `${when}: event ${a.eventNumerator}/${a.eventDenominator} (expected ${en}/${ed})`);
   check(a.multiNumerator === 0 && a.multiDenominator === 1, `${when}: multi ${a.multiNumerator}/${a.multiDenominator} (atteso 0/1)`);
@@ -150,7 +150,7 @@ try { fs.unlinkSync(SAVE); } catch { /* tolto */ }
 if (INDEX) try { fs.unlinkSync(INDEX); } catch { /* removed */ }
 // Events: objectives done on a listed raid quest count (user 03-11)
 {
-  const evs = t.raidEventsNow();
+  const evs = t.raidEventsNow().filter((e) => e.eventType === 2);
   const sid = evs.length ? evs[0].stages[0].stageId : 0;
   if (sid) {
     p.clearMissions[sid] = [1, 2, 3];

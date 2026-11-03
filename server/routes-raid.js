@@ -19,6 +19,7 @@ const BONUS_LEVEL_FROM = '2018-09-17', BONUS_LEVEL_TO = '2019-07-15', BONUS_LEVE
 const AP_RULE_FROM = '2019-07-15', AP_RULE = { bonus: 0, weekend: 5, weekday: 90 };
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999; // stage ids of the raid events (make-raid.js)
 const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entry.level is the quest's level, not the boss's
+const CATALOG_LEVEL_PREFIX = 'cat:'; // levels of the kept raids' bosses (Raid Catalog): a key space of their own in player.raid.levels
 // Version segment of the raid event card URL (/web/raid/img/v<N>/<evStageId>.png): the client caches banner images by URL, so
 // bump RAID_IMG_VERSION whenever recon/tools/make_raid_banners.py output changes (as SPECIAL_IMG_VERSION in special.js).
 const RAID_IMG_VERSION = 1; // 1: weekly event cards from the archived original banners (render8, 3 Nov)
@@ -166,7 +167,8 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
   const levelStep = (boss, ms) => (String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1);
   function bossDefeated(r, boss, allPoints, nowMs = realNow()) {
-    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[boss.key] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs)); (r.levelOcc ||= {})[boss.key] = boss.occ; } // a boss of an older month does not feed the new one
+    const lk = boss.levelKey || boss.key; // a kept raid's boss feeds its own counter (cat:<key>), never the live week's
+    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[lk] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs)); (r.levelOcc ||= {})[lk] = boss.occ; } // a boss of an older month does not feed the new one
     r.lastFight = { raidId: boss.raidId, damage: boss.damage || 0 };
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
@@ -256,17 +258,21 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     send(res, 200, { ret: ret(), raidNotice: { isSelfRaid: alive(r.boss, nowMs) ? 1 : 0, isOthersRaid: 0 } });
   }
 
-  function spawn(r, entry, nowMs) {
+  // catalog: the boss of the kept raid (Raid Catalog), with its own level counter cat:<key> (user 02-11): it starts at LV 1 and
+  // neither changes nor reads the level of the live week's boss, even for the very week once played live
+  function spawn(r, entry, nowMs, { catalog = false } = {}) {
     const body = enemyRow(entry.enemyId);
     const partRows = body && [body, ...body.parts.slice(0, body.validParts).map(enemyRow)];
     if (!partRows || partRows.some((x) => !x)) { log(`[raid] ${entry.key}: raidEnemy rows missing, no spawn`); return false; }
-    const level = (r.levelOcc || {})[entry.key] === entry.start ? r.levels[entry.key] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week) of the entry
+    const lk = catalog ? `${CATALOG_LEVEL_PREFIX}${entry.key}` : entry.key;
+    const level = (r.levelOcc || {})[lk] === entry.start ? r.levels[lk] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week) of the entry
     const model = (raidIndex().models || {})[String(entry.modelId).padStart(4, '0')] || {}; // keys are folder names, as in make-raid.js
     r.boss = fight.newBoss({ key: entry.key, tier: entry.tier, stageId: entry.stageId, enemy: body, level, upMinutes: entry.upMinutes, useAp: entry.useAp, nowMs,
       partRows: partRows.map((x) => ({ raidEnemyId: x.raidEnemyId, weakness: x.weakness, hp: atLevel(x, 'hp', level), attribute: x.attribute, rare: x.rare })),
       hasStartDemo: !!model.start, hasEscapeDemo: !!model.escape });
     r.boss.month = monthOf(nowMs); r.boss.occ = entry.start;
-    log(`[raid] boss ${entry.boss || entry.key} appears, LV ${level}`);
+    if (catalog) r.boss.levelKey = lk;
+    log(`[raid] boss ${entry.boss || entry.key} appears, LV ${level}${catalog ? ' (Raid Catalog)' : ''}`);
     return true;
   }
 
@@ -279,7 +285,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const r = state(), nowMs = realNow();
     r.points += points;
     if (r.boss || r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
-    if (spawn(r, entry, nowMs)) r.points = 0;
+    if (spawn(r, entry, nowMs, { catalog: isKeptOnly(entry, nowMs) })) r.points = 0;
   }
 
   // The raids of the player's Shop week (raid-calendar.js): storyWeek() is {shopFrom, shopTo} of storyCtx() in server.js, the
@@ -289,43 +295,74 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const { shopFrom, shopTo } = storyWeek();
     return calendar.raidsForWeek(raidIndex(), { shopFrom, shopTo, nowMs: realMs });
   };
-  // The kept raid of the Catalog (Task 9): player.raid.kept names an entry key or a census id; all its available tiers.
-  function keptEntries() {
-    const k = state().kept;
-    const key = k && typeof k === 'object' ? k.key || k.censusId : k;
-    return key ? entries().filter((e) => e.key === key || e.censusId === key) : [];
+  // Raid Catalog (Task 9). player.raid.kept = the census id of the kept raid (one at a time, as the Special pin); it is served
+  // only while it is a past week of the Story (calendar.rowState 'kept'): its available tiers, beside the current ones.
+  const catalogRow = (censusId) => calendar.catalogRows({ entries: (raidIndex().entries || []).filter((e) => e.censusId === censusId) })[0];
+  function catalogCtx(realMs = realNow()) {
+    const { shopFrom, shopTo } = storyWeek();
+    return { shopFrom, shopTo, current: new Set(currentEntries(realMs).map((e) => e.censusId)), kept: state().kept || null };
+  }
+  function keptEntries(realMs = realNow()) {
+    const c = catalogCtx(realMs), row = c.kept && catalogRow(c.kept);
+    return row && calendar.rowState(row, c) === 'kept' ? row.entries.filter((e) => e.available) : [];
+  }
+  // a quest of the kept raid that is not a raid of the week: its boss is a Raid Catalog boss
+  const isKeptOnly = (entry, realMs) => keptEntries(realMs).includes(entry);
+  // POST /web/raid/keep/<evStageId> and /web/raid/unkeep (catalogue buttons): {code, body {ok, why?}}. Only a past week with an
+  // available tier can be kept (else why: now, later, removed); keeping one replaces the previous.
+  function keep(evStageId) {
+    const id = Number(evStageId), entry = (raidIndex().entries || []).find((e) => e.evStageId === id);
+    if (!entry) return { code: 404, body: { ok: false, why: 'unknown raid' } };
+    const st = calendar.rowState(catalogRow(entry.censusId), { ...catalogCtx(), kept: null });
+    if (st !== 'can') return { code: 409, body: { ok: false, why: st } };
+    state().kept = entry.censusId;
+    savePlayer();
+    log(`[raid] Raid Catalog: ${entry.censusId} kept`);
+    return { code: 200, body: { ok: true } };
+  }
+  function unkeep() {
+    state().kept = null;
+    savePlayer();
+    return { code: 200, body: { ok: true } };
   }
   // Raid Boards (sphere type 5) of the current raids and of the kept one (active), and of every raid of the index (all).
   // Boards belong to the census row: every tier carries the same sphereBoardIds (make-raid.js).
   function boardIds(realMs = realNow()) {
     const ids = (list) => list.flatMap((e) => e.sphereBoardIds || []);
-    const active = [...new Set([...ids(currentEntries(realMs)), ...ids(keptEntries())])].sort((a, b) => a - b);
+    const active = [...new Set([...ids(currentEntries(realMs)), ...ids(keptEntries(realMs))])].sort((a, b) => a - b);
     return { active, all: [...new Set(ids(raidIndex().entries || []))] };
   }
 
-  // /stage/event category 2: one event per census row, with its available tiers (currentEntries).
+  // /stage/event category 2, in the order of the Special tab: the Raid Catalog banner (index.catalog of make-raid.js: eventType 0,
+  // Details -> /web/raid/catalog, a tap opens its Training Grounds quest), the kept raid (its card with the KEPT tab), then one
+  // event per census row of the week with its available tiers (currentEntries).
   function events(realMs = realNow()) {
-    const byEvent = new Map();
-    for (const e of currentEntries(realMs)) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
-    return [...byEvent].map(([eventStageId, list]) => {
-      const stages = list.map((e) => {
-        const st = stageState(e.stageId);
-        return { stageId: e.stageId, useAp: questApAt(e, realMs), score: st.score, playStatus: st.playStatus, clearMissionIds: st.clearMissionIds };
-      });
-      return {
+    const stageOf = (stageId, useAp) => {
+      const st = stageState(stageId);
+      return { stageId, useAp, score: st.score, playStatus: st.playStatus, clearMissionIds: st.clearMissionIds };
+    };
+    const event = (eventStageId, stages, { eventType = 2, kept = false } = {}) => ({
       stages,
       eventStageId,
       showIcon: 1,
-      bannerUrl: `${webBase}/web/raid/img/v${RAID_IMG_VERSION}/${eventStageId}.png`,
-      eventType: 2,
+      bannerUrl: `${webBase}/web/raid/img/v${RAID_IMG_VERSION}/${eventStageId}${kept ? '-kept' : ''}.png`,
+      eventType,
       status: 1,
       endTime: serverTimeAt(clock.weekEnd(realMs)),
       newStageId: 0,
       isLock: 0,
       // crown to the right of the banner (user 03-11): every quest of the event with its 3 objectives done, as the Special tab
       complete: stages.length && stages.every((s) => [1, 2, 3].every((m) => (s.clearMissionIds || []).includes(m))) ? 1 : 0,
-      };
     });
+    const raidEvents = (list, opts) => {
+      const byEvent = new Map();
+      for (const e of list) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
+      return [...byEvent].map(([id, tiers]) => event(id, tiers.map((e) => stageOf(e.stageId, questApAt(e, realMs))), opts));
+    };
+    const cat = raidIndex().catalog;
+    const banner = cat && cat.evStageId && (cat.stageIds || []).length
+      ? [event(cat.evStageId, cat.stageIds.map((id, i) => stageOf(id, (cat.useAp || [])[i] || 0)), { eventType: 0 })] : [];
+    return [...banner, ...raidEvents(keptEntries(realMs), { kept: true }), ...raidEvents(currentEntries(realMs))];
   }
 
   // Raid «AP 0» campaign (make-ev-campaign.js, docs/notes/raid.md «AP 0 campaign»): the ids of its evCampaign rows while a raid
@@ -333,7 +370,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // questApAt's. ap0Force (bench file save/raid_ap0.json of server.js) lists them at any hour, the charge unchanged.
   // For `campaigns` of GET /campaign, /stage/start and /raid/start.
   function campaignIds(realMs = realNow()) {
-    const on = !!ap0Force() || (isBonusTime(realMs) && currentEntries(realMs).some((e) => questApAt(e, realMs) === 0));
+    const on = !!ap0Force() || (isBonusTime(realMs) && [...currentEntries(realMs), ...keptEntries(realMs)].some((e) => questApAt(e, realMs) === 0));
     return on ? raidAp0Ids(masterRows('evCampaign')) : [];
   }
 
@@ -343,7 +380,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     return entry ? questApAt(entry, realMs) : null;
   }
 
-  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, campaignIds, boardIds, monthOf };
+  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, campaignIds, boardIds, monthOf, keep, unkeep, catalogCtx };
 }
 
 // Bench smoke file (save/raid_smoke.json {"key": ...}, written by tmp/raid_p2/smoke_raids.ps1 before every model): only a
