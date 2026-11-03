@@ -50,6 +50,8 @@ The three spiders (**Scourge Spider, Wicked Spider, Malicious Spider**) use the 
 
 **Queen Bee, Queen Bee Ω** and **Lion Headliner** use an older version of their animations from the game files, whose weak points match their surviving data (the abdomen; the two arms); some of their pictures are copied from the same boss's 2016 files.
 
+The **list banners** of 17 raid bosses (the picture in the raid list) are **reconstructed**: the worldwide originals were not found, so they are cut from the original Japanese **boss cards**. The boss cards of **Assault Dragon, Adventurer, Jewel Princess, Gear Golem** and **Closehanded Captain** are the original cards of their twin bosses. The **Raid Time!** card of each week is the original weekly raid banner of that week, from archived copies of the original notices; for the 5 weeks from 3 September to 1 October 2018 none survives and a plain card is shown.
+
 ### Moves and stats
 
 Some bosses have no surviving data of their own: the three spiders use the moves of **Enraged Arachnid**, and **Egg Master** the moves of **Trickmaster** (same animations; **reconstructed**). The spiders keep their own attribute, read from their colour (red Power, green Speed, blue Magic).

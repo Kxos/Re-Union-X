@@ -8,6 +8,7 @@
 const fight = require('./raid-fight');
 const rewards = require('./raid-rewards');
 const calendar = require('./raid-calendar');
+const { raidAp0Ids } = require('./make-ev-campaign');
 
 const USER_ID = 1; // the only player: same id as userObject and supportUserId of server.js
 const SPAWN_POINTS = 8600, SPAWN_POINTS_BONUS = 6000; // misc 110; bonus time: 2 eggs of 3000 (inferred, plan decision 3)
@@ -15,6 +16,9 @@ const BONUS_HOURS = new Set([2, 8, 14, 20]); // PT, one hour each, on the real c
 const AP_RULE_FROM = '2019-07-15', AP_RULE = { bonus: 0, weekend: 5, weekday: 90 };
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999; // stage ids of the raid events (make-raid.js)
 const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entry.level is the quest's level, not the boss's
+// Version segment of the raid event card URL (/web/raid/img/v<N>/<evStageId>.png): the client caches banner images by URL, so
+// bump RAID_IMG_VERSION whenever recon/tools/make_raid_banners.py output changes (as SPECIAL_IMG_VERSION in special.js).
+const RAID_IMG_VERSION = 1; // 1: weekly event cards from the archived original banners (render8, 3 Nov)
 const NO_RAID = 5; // raidTimeStatus «No available Raid Boss»: a clear with no fight running (texts read, not run on the bench)
 
 const PT = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', hour: 'numeric', weekday: 'short' });
@@ -50,7 +54,7 @@ const usableCount = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 
 const usableParts = (parts) => (Array.isArray(parts) ? parts.filter((p) => p && usableCount(p.hp)) : []);
 const damageOf = (parts) => parts.reduce((sum, p) => sum + (usableCount(p.damage) ? Number(p.damage) : 0), 0);
 
-function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
+function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, ap0Force = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
   inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, beginBattle, grantItem, addPresent, medalCount, medalCap,
   stageState, webBase, rng = Math.random, log = console.log }) {
   // Boss levels reset to LV 1 at the start of every month (original rule, notice 17888), and a boss that comes back in a later week starts at LV 1 again (notice 74823): the real-clock month of the server
@@ -137,7 +141,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       vitalsLog: [],
       partsLog: [],
       discovererUserId: USER_ID,
-      campaigns: [],
+      campaigns: campaignIds(nowMs),
       supportUsers: supportUsers(Number(body?.supportUserId) || 0, now),
     });
   }
@@ -299,7 +303,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       }),
       eventStageId,
       showIcon: 1,
-      bannerUrl: `${webBase}/web/raid/img/${eventStageId}.png`,
+      bannerUrl: `${webBase}/web/raid/img/v${RAID_IMG_VERSION}/${eventStageId}.png`,
       eventType: 2,
       status: 1,
       endTime: serverTimeAt(clock.weekEnd(realMs)),
@@ -309,21 +313,31 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     }));
   }
 
+  // Raid «AP 0» campaign (make-ev-campaign.js, docs/notes/raid.md «AP 0 campaign»): the ids of its evCampaign rows while a raid
+  // quest of the week costs 0 AP (bonus hours, questApAt), else none. The client then shows those quests at 0 AP; the charge stays
+  // questApAt's. ap0Force (bench file save/raid_ap0.json of server.js) lists them at any hour, the charge unchanged.
+  // For `campaigns` of GET /campaign, /stage/start and /raid/start.
+  function campaignIds(realMs = realNow()) {
+    const on = !!ap0Force() || (isBonusTime(realMs) && currentEntries(realMs).some((e) => questApAt(e, realMs) === 0));
+    return on ? raidAp0Ids(masterRows('evCampaign')) : [];
+  }
+
   // AP of a raid quest now, or null for any other stage (the master row applies)
   function stageAp(stageId, realMs = realNow()) {
     const entry = entryOfStage(stageId);
     return entry ? questApAt(entry, realMs) : null;
   }
 
-  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, boardIds, monthOf };
+  return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, campaignIds, boardIds, monthOf };
 }
 
 // Bench smoke file (save/raid_smoke.json {"key": ...}, written by tmp/raid_p2/smoke_raids.ps1 before every model): only a
 // file younger than SMOKE_MAX_AGE_MS counts, so one left by a killed script cannot take over normal play. Read once per
 // change of mtime; a stale file is logged once. Returns (wallMs = Date.now()) -> key or null. Wall clock on purpose: the
-// file's mtime is real time, whatever the game clock says.
+// file's mtime is real time, whatever the game clock says. `field` names the value read (the AP 0 bench switch,
+// save/raid_ap0.json {"force": true}, reads "force").
 const SMOKE_MAX_AGE_MS = 2 * 3600 * 1000;
-function smokeReader(file, log = console.log) {
+function smokeReader(file, log = console.log, field = 'key') {
   const fs = require('fs');
   let seen = null, key = null, staleLogged = null;
   return (wallMs = Date.now()) => {
@@ -332,7 +346,7 @@ function smokeReader(file, log = console.log) {
     if (seen !== st.mtimeMs) {
       seen = st.mtimeMs;
       // written by Out-File: trim() also drops a leading BOM
-      try { key = JSON.parse(fs.readFileSync(file, 'utf8').trim()).key || null; } catch { key = null; }
+      try { key = JSON.parse(fs.readFileSync(file, 'utf8').trim())[field] || null; } catch { key = null; }
     }
     if (!key) return null;
     if (wallMs - st.mtimeMs > SMOKE_MAX_AGE_MS) {

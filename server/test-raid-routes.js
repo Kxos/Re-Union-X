@@ -568,7 +568,7 @@ const tests = {
     assert.deepStrictEqual(keys(ev[0]), ['stages', 'eventStageId', 'showIcon', 'bannerUrl', 'eventType', 'status', 'endTime', 'newStageId', 'isLock', 'complete']);
     assert.strictEqual(ev[0].eventType, 2);
     assert.strictEqual(ev[0].eventStageId, 8001);
-    assert.strictEqual(ev[0].bannerUrl, 'http://x/web/raid/img/8001.png');
+    assert.strictEqual(ev[0].bannerUrl, 'http://x/web/raid/img/v1/8001.png');
     assert.strictEqual(ev[0].endTime, fmt(TUE + 1000));
     assert.deepStrictEqual(ev[0].stages.map((s) => [s.stageId, s.useAp]), [[STAGE, 90], [STAGE + 1, 90]], 'only available tiers, AP of the moment');
     assert.deepStrictEqual(keys(ev[0].stages[0]), ['stageId', 'useAp', 'score', 'playStatus', 'clearMissionIds']);
@@ -623,7 +623,7 @@ function wiring() {
     assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events.map((e) => e.eventStageId), [8999]);
     Object.assign(k, { start: '2015-01-01', end: '2099-12-31' });
   }
-  assert.strictEqual(ev[0].bannerUrl, `${t.WEB_BASE}/web/raid/img/8999.png`);
+  assert.strictEqual(ev[0].bannerUrl, `${t.WEB_BASE}/web/raid/img/v1/8999.png`);
   assert.strictEqual(ev[0].stages[0].useAp, 90);
 
   p.ap = 200; p.apTime = TUE;
@@ -649,6 +649,7 @@ function wiring() {
   assert.strictEqual(web('/web/raid/img/8999.png').body.toString(), 'default', 'default art');
   fs.writeFileSync(path.join(process.env.KHUX_RAID_IMG, '8999.png'), 'own');
   assert.strictEqual(web('/web/raid/img/8999.png').body.toString(), 'own', 'own file first');
+  assert.strictEqual(web('/web/raid/img/v1/8999.png').body.toString(), 'own', 'versioned URL');
   assert.strictEqual(web('/web/raid/img/x.png').code, 404);
 
   const list = call(t.raid().list);
