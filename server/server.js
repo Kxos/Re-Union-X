@@ -1389,8 +1389,9 @@ let raidMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
 // File del banner con il bollino (generato se manca o se l'originale e' piu' recente); se non riesce, quello normale
-function keptImageFile(id) {
-  const src = path.join(GACHA_IMG, `${id}.png`), dst = path.join(GACHA_IMG_KEPT, `${id}-kept${gacha.KEPT_STYLE}.png`);
+// name: file name without .png in GACHA_IMG (medal banner id, or pet<id> for the Spirit Blind Box plates)
+function keptImageFile(id, name = String(id)) {
+  const src = path.join(GACHA_IMG, `${name}.png`), dst = path.join(GACHA_IMG_KEPT, `${name}-kept${gacha.KEPT_STYLE}.png`);
   if (!fs.existsSync(src)) return src;
   try {
     if (fs.existsSync(dst) && fs.statSync(dst).mtimeMs >= fs.statSync(src).mtimeMs) return dst;
@@ -1667,7 +1668,9 @@ function petPageCtx(fromCatalog) {
 }
 function petPlates(ctx) {
   const d = petDraws(), owned = PET_DRAW ? ownedPartIds() : new Set();
-  return petListed(ctx).map((b, i) => petDraw.plate(b, WEB_BASE, petDraw.PET_SORT_FIRST + i, owned, d.rows, d.elsewhere));
+  // kept = the Catalog's kept deal shown outside its dates (inside them it is a normal plate of the week)
+  const keptOf = (b) => b.rowId === player.gacha?.pinnedPet && !(b.start <= ctx.shopTo && b.end >= ctx.shopFrom);
+  return petListed(ctx).map((b, i) => petDraw.plate(b, WEB_BASE, petDraw.PET_SORT_FIRST + i, owned, d.rows, d.elsewhere, keptOf(b), gacha.KEPT_STYLE));
 }
 // POST /gacha/petdraw (action 176), body {drawPetTypeId} only: one part not owned, price in Jewels (free first, as the
 // medal draws: the client checks free + paid). Refusal = {ret} only («200 ERROR :176», the client goes back to the Shop).
@@ -1709,9 +1712,10 @@ function respondGachaWeb(res, url) {
     return res.end(b);
   }
   // Spirit Blind Box (03-11): plate image (game_data/gacha_img/pet<id>.png), Details, Draw Odds
-  const pimg = /^\/web\/gacha\/petimg\/(\d+)\.png$/i.exec(p);
+  const pimg = /^\/web\/gacha\/petimg\/(\d+)(?:-kept(\d+))?\.png$/i.exec(p);
   if (pimg) {
-    const file = path.join(GACHA_IMG, `pet${Number(pimg[1])}.png`);
+    if (pimg[2] && Number(pimg[2]) !== gacha.KEPT_STYLE) return html('not found', 404); // old or unknown badge style
+    const file = pimg[2] ? keptImageFile(Number(pimg[1]), `pet${Number(pimg[1])}`) : path.join(GACHA_IMG, `pet${Number(pimg[1])}.png`);
     if (!fs.existsSync(file)) return html('not found', 404);
     const b = fs.readFileSync(file);
     res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
