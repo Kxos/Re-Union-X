@@ -46,7 +46,8 @@ const vipDrawOf = (b) => (b.catalogOnly === 'VIP_TWIN' ? { ...b, catalogOnly: nu
   : b.vipFree || VIP_FLAG(b) ? { ...b, vipDraw: true } : b);
 function loadCatalog(file) {
   try {
-    const c = JSON.parse(fs.readFileSync(file, 'utf8'));
+    // medal ids of the catalogue are Roboloid-numbered: renumbered medals take their master id (I-225, medal-renumber.js)
+    const c = require('./medal-renumber').mapCatalog(JSON.parse(fs.readFileSync(file, 'utf8')));
     return c && Array.isArray(c.banners) ? { ...EMPTY(), ...c, banners: c.banners.map(vipDrawOf) } : EMPTY();
   } catch {
     return EMPTY();

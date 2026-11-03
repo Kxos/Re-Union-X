@@ -35,6 +35,23 @@ function isCutinAlias(row, byId) {
     && row.cutinId === next.cutinId);
 }
 
+// The client finds the medal's own cut-in when the row it reads (cutinRowId) carries the same cutinId and darklight
+// (I-225): an id ending in 2/4 whose row id-1 is another medal shows that medal's cut-in, frame and sound.
+function cutinRowOk(row, byId) {
+  const id = cutinRowId(row.medalId);
+  if (id === row.medalId) return true;
+  const r = byId.get(id);
+  return Boolean(r && r.cutinId === row.cutinId && r.darklight === row.darklight);
+}
+
+// our rows (Roboloid 300000+ and their 1-8xxxxxx copies; not the SE originals, whose 2★/4★ use the 1★/3★ cut-in
+// on purpose, nor the Trait Medals 9xxxxxx) with a special whose cut-in row is missing or another medal
+const ourMedalId = (id) => id < 9000000 && id % 1000000 >= 300000;
+function cutinConflicts(medals) {
+  const byId = new Map(medals.map((r) => [r.medalId, r]));
+  return medals.filter((r) => r.validBurst && r.type !== 9 && ourMedalId(r.medalId) && !cutinRowOk(r, byId));
+}
+
 function patch(masterDir) {
   const file = path.join(masterDir, 'medal.json');
   const medals = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -48,4 +65,4 @@ function patch(masterDir) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { cutinRowId, aliasRows, isCutinAlias, patch };
+module.exports = { cutinRowId, aliasRows, isCutinAlias, cutinRowOk, cutinConflicts, ourMedalId, patch };

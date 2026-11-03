@@ -93,6 +93,31 @@ Raid, Thundaga, Heaven's Sword) (ISSUES I-033).
   medals share the Medal_L, 590 Cutin without the white glow, Medal_S slightly softer
   (ISSUES I-039).
 
+<a id="cutin-renumber"></a>
+## Cut-in row and renumbered medals (I-225, 03-11)
+
+- During a special the client reads the medal row `cutinRowId(id)`: ids ending in 2 or 4 read row id-1 (the SE
+  convention: a 2★/4★ uses its 1★/3★ cut-in), for the cut-in picture, the frame (darklight) and the sound
+  (`Burst_Medal_Change`, `KakuseiAttack_Again_A/B`; analysis in `D:\Progetto_Restauro_KH_UX	mpriend_cutin\`).
+  Missing row id-1: alias row (`make-cutin-alias.js`, I-187). Row id-1 holding another medal: no data fix is possible.
+- `server/medal-renumber.js`: the 284 normal rows of ours (Roboloid 300000+, not the SE originals, not the Trait Medals)
+  ending in 2/4 whose row id-1 has another cutinId or darklight take **medalId = old + 10001** (30xxxx -> 31xxxx,
+  last digit 3 or 5); copies digit x 10^6 + the new id (2302084 -> 2312085). imageId, thumbId, cutinId, artId,
+  displayId, burstId stay the old ones (no new resources). The list is frozen in `server/medal_renumber.json`
+  (`node server/medal-renumber.js --make` wrote it once from the master before the change; saves migrate with it).
+- Where: `make-game-tables.js` renumbers medal.json before the boosted rows (the later patches see the new ids) and maps
+  the medal rewards of the reward tables at the end (`REWARD_PAIRS`, reward type 3); the sources keep the Roboloid ids:
+  the banner catalogue is mapped when read (`mapCatalog` in `gacha-data.loadCatalog`, `make-boosted-medals.js`,
+  `make-nova-rows.js`), `trait_medals.json` in `make-trait-medals.js`. `shuffleSkillGroupId` (lowest medalId of the
+  family) is recomputed by `make-trait-groups.js` (equality only). Standalone in place: `node server/medal-renumber.js`.
+- Saves: `server.js migrateCutinRenumber()` (`medalMapVersion` 3): `medals[]`, `medalState[]`, medal presents, Nova
+  record (`guiltBurst.first/max`, new id only if not already there); everything per userMedalId stays.
+- Switch (`syncWithMaster`): at startup the server turns the mapping and the migration on only if the served medal.json
+  has no old id; with an older master everything stays as before (warning in the log). Install the regenerated master
+  only together with a server restart (a running server re-reads master_data by mtime but keeps the save in memory).
+- Guard: `make-cutin-alias.cutinConflicts(medals)` must be empty on the served master (`server/test-medal-renumber.js`);
+  a new conflict means extending `medal_renumber.json` and adding a migration version.
+
 <a id="medal-list"></a>
 ## Medal List and detail
 

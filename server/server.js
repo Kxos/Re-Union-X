@@ -3241,6 +3241,27 @@ function migrateMedalMap() {
   savePlayer();
 }
 
+// Renumbered medals (medalMapVersion 3, I-225, medal-renumber.js): the ids ending in 2/4 whose cut-in row id-1 was
+// another medal take medal_renumber.json's id (old + 10001; copies digit x 10^6 + normal). Same fields as version 1
+// (medals[], medalState[], medal presents) plus the Nova record (as version 2: the new id replaces the old one only
+// if it is not there yet). userMedalId, deck, locks, skills, traits and guilt are per userMedalId and stay.
+function migrateCutinRenumber() {
+  if (player.medalMapVersion >= 3) return;
+  const { newId } = require('./medal-renumber');
+  let n = 0;
+  const fix = (o, k) => { const to = o && newId(o[k]); if (o && to !== o[k]) { o[k] = to; n++; } };
+  for (const m of player.medals || []) fix(m, 'medalId');
+  for (const st of Object.values(player.medalState || {})) fix(st, 'medalId');
+  for (const p of player.presents || []) if (p.resourceType === 3) fix(p, 'resourceId');
+  for (const list of [player.guiltBurst?.first, player.guiltBurst?.max]) {
+    if (!Array.isArray(list)) continue;
+    list.forEach((id, i) => { const to = newId(id); if (to !== id && !list.includes(to)) { list[i] = to; n++; } });
+  }
+  player.medalMapVersion = 3;
+  if (n) console.log(`[save] renumbered medals (cut-in, I-225): ${n} ids moved (medalMapVersion 3)`);
+  savePlayer();
+}
+
 // elemento di userSkills
 function userSkillElement(m, s, now) {
   return { userSkillId: s.userSkillId, skillId: s.skillId, level: s.level, exp: s.exp || 0,
@@ -4905,7 +4926,11 @@ function grantMissingKeyblades() {
 // skill (I-146): qui e non accanto a migrateClock() perche' usa le tabelle (medalSkillTables, userMedalList)
 // definite piu' avanti nel file
 // id Organizzazione XIII (medalMapVersion 2), prima delle skill: migrateSkills cerca le medaglie nel master
-if (player.created) migrateMedalMap(); else player.medalMapVersion = 2;
+// a master generated before the cut-in renumbering (I-225) still has the old ids: then neither the save migration nor
+// the catalogue mapping runs (medal-renumber.js disabled), so save, catalogue and master keep agreeing
+const cutinRenumbered = require('./medal-renumber').syncWithMaster(MASTER_DIR);
+if (!cutinRenumbered) console.warn('[master] medal.json without the cut-in renumbering (I-225): regenerate it (make-game-tables.js) or run node server/medal-renumber.js; save migration off');
+if (player.created) { migrateMedalMap(); if (cutinRenumbered) migrateCutinRenumber(); } else player.medalMapVersion = cutinRenumbered ? 3 : 2;
 if (player.created) migrateSkills(); else player.skillVersion = 1; // nuovo giocatore: gia' sulla tabella completa
 
 if (player.created) {

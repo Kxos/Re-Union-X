@@ -116,22 +116,26 @@ if (fs.existsSync(file)) {
   const empty = ew.stillEmpty(m);
   assert.ok(empty.every((r) => /Kyroo \[SAB LV [789]\]$/.test(r.name)), 'only Kyroo rows without required medals: '
     + empty.filter((r) => !/Kyroo/.test(r.name)).map((r) => r.medalId).join(','));
-  const mb = new Map(m.map((r) => [r.medalId, r]));
+  // ids of the cut-in renumbering (I-225): rows and expected values through newId
+  const { newId } = require('./medal-renumber');
+  const N = (x) => (Array.isArray(x) ? x.map(N) : newId(x));
+  const byNew = new Map(m.map((r) => [r.medalId, r]));
+  const mb = { get: (id) => byNew.get(newId(id)) };
   assert.deepEqual([mb.get(301941).validEvolveNeed, mb.get(301941).evolveNeedId], [1, [FMB, 0, 0, 0, 0]], 'served: Terra');
   assert.deepEqual(mb.get(2301941).evolveNeedId, mb.get(301941).evolveNeedId, 'served: boosted Terra');
   // added evolutions (23-10): Sora & Riku & Meow Wow, Sora & Donald & Goofy C, the Puppy steps, Blue Fairy LV n -> n+1
   const ev = (id) => [mb.get(id).validEvolve, mb.get(id).evolveId, mb.get(id).validEvolveNeed, mb.get(id).evolveNeedId];
-  assert.deepEqual(ev(23086), [1, 300826, 2, [22086, 21086, 0, 0, 0]], 'served: Meow Wow');
-  assert.deepEqual(ev(22086), [1, 300826, 2, [21086, 23086, 0, 0, 0]], 'served: KH 3D Sora');
-  assert.deepEqual(ev(21086), [1, 300826, 2, [22086, 23086, 0, 0, 0]], 'served: KH 3D Riku');
-  assert.deepEqual(ev(301159), [1, 301162, 2, [301157, 301161, 0, 0, 0]], 'served: Halloween Sora C');
-  assert.deepEqual(ev(301247), [1, 301346, 5, [301248, 301249, 301250, 301251, 301252]], 'served: Puppy #1');
-  assert.deepEqual(ev(301345), [1, 301362, 2, [301343, 301344, 0, 0, 0]], 'served: Puppy #99');
-  assert.deepEqual(ev(301277), [1, 301351, 5, [301278, 301279, 301280, 301281, 301282]], 'served: Puppy #31 (wiki «#30 - 36»)');
-  assert.deepEqual(ev(301358), [1, 301365, 4, [301359, 301360, 301361, 301362, 0]], 'served: Puppy #73 - 78');
-  assert.deepEqual(ev(301363), [1, 301368, 4, [301364, 301365, 301366, 301367, 0]], 'served: Puppy #1 - 36');
-  assert.deepEqual(ev(301366), [1, 301368, 4, [301363, 301364, 301365, 301367, 0]], 'served: Pongo');
-  for (let lv = 1; lv <= 7; lv++) assert.deepEqual(ev(301494 + lv), [1, 301495 + lv, 5, Array(5).fill(301494 + lv)], 'served: Blue Fairy LV ' + lv);
+  assert.deepEqual(ev(23086), N([1, 300826, 2, [22086, 21086, 0, 0, 0]]), 'served: Meow Wow');
+  assert.deepEqual(ev(22086), N([1, 300826, 2, [21086, 23086, 0, 0, 0]]), 'served: KH 3D Sora');
+  assert.deepEqual(ev(21086), N([1, 300826, 2, [22086, 23086, 0, 0, 0]]), 'served: KH 3D Riku');
+  assert.deepEqual(ev(301159), N([1, 301162, 2, [301157, 301161, 0, 0, 0]]), 'served: Halloween Sora C');
+  assert.deepEqual(ev(301247), N([1, 301346, 5, [301248, 301249, 301250, 301251, 301252]]), 'served: Puppy #1');
+  assert.deepEqual(ev(301345), N([1, 301362, 2, [301343, 301344, 0, 0, 0]]), 'served: Puppy #99');
+  assert.deepEqual(ev(301277), N([1, 301351, 5, [301278, 301279, 301280, 301281, 301282]]), 'served: Puppy #31 (wiki «#30 - 36»)');
+  assert.deepEqual(ev(301358), N([1, 301365, 4, [301359, 301360, 301361, 301362, 0]]), 'served: Puppy #73 - 78');
+  assert.deepEqual(ev(301363), N([1, 301368, 4, [301364, 301365, 301366, 301367, 0]]), 'served: Puppy #1 - 36');
+  assert.deepEqual(ev(301366), N([1, 301368, 4, [301363, 301364, 301365, 301367, 0]]), 'served: Pongo');
+  for (let lv = 1; lv <= 7; lv++) assert.deepEqual(ev(301494 + lv), N([1, 301495 + lv, 5, Array(5).fill(301494 + lv)]), 'served: Blue Fairy LV ' + lv);
   assert.equal(mb.get(301502).validEvolve, 0, 'served: Blue Fairy LV 8 is the last tier');
   const puppies = m.filter((r) => r.medalId < 1000000 && /^Puppy #/.test(r.name));
   assert.equal(puppies.length, 99 + 17 + 3);

@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { newId: newMedalId } = require('./medal-renumber');
 
 const ID_BASE = 9000000;
 const LESSER_ATTACK = 9000000; // burstId
@@ -78,7 +79,7 @@ function patch(masterDir, list = JSON.parse(fs.readFileSync(path.join(__dirname,
   const rows = [];
   const links = new Map(); // shuffleSkillGroupId -> [medalId Trait Medal]
   for (const e of list) {
-    const med = byId.get(e.affected);
+    const med = byId.get(newMedalId(e.affected)); // trait_medals.json keeps the Roboloid ids (I-225)
     if (!med || !med.shuffleSkillGroupId) continue;
     rows.push(traitMedalRow(e, med));
     const l = links.get(med.shuffleSkillGroupId) || links.set(med.shuffleSkillGroupId, []).get(med.shuffleSkillGroupId);

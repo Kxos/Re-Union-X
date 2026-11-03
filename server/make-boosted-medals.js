@@ -25,7 +25,7 @@ const familyOf = (on) => (on.tierMin !== undefined ? 'tier' : on.names ? 'names'
 function patch(masterDir, catalogFile) {
   const medalFile = path.join(masterDir, 'medal.json');
   const medals = JSON.parse(fs.readFileSync(medalFile, 'utf8'));
-  const catalog = JSON.parse(fs.readFileSync(catalogFile, 'utf8'));
+  const catalog = require('./medal-renumber').mapCatalog(JSON.parse(fs.readFileSync(catalogFile, 'utf8'))); // I-225 ids
   // rare originali SE (id 1xxxxx, medal-boost.origBoostedBase): groupId = la normale, come nel client 1.1.3
   const allById = new Map(medals.map((r) => [r.medalId, r]));
   let regrouped = 0;

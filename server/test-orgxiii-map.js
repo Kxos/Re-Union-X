@@ -7,6 +7,7 @@
 //   node server/test-orgxiii-map.js
 'use strict';
 const { isCutinAlias } = require('./make-cutin-alias');
+const { newId } = require('./medal-renumber');
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -30,7 +31,7 @@ const TABLE = [
   [33206, 133206, 492, 300493, 301595, 301596], // Demyx
   [33216, 133216, 495, 300496, 301616, 301617], // Luxord
   [33236, 0, 644, 300645, 301782, 301783], // Roxas
-];
+].map((row) => row.map((id, i) => (i === 2 ? id : newId(id)))); // master ids after the cut-in renumbering (I-225)
 const FAIRY_LV3 = 301497; // Blue Fairy [SA Bonus LV 3] (blue-fairy.js)
 
 const fails = [];
