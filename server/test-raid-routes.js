@@ -544,7 +544,7 @@ const tests = {
     assert.deepStrictEqual(rows.map((r) => [r.campaignId, r.validStageId, r.stageId]), [[98000, 5, [980001, 980002, 980003, 980004, 980005]], [98001, 2, [980006, 980007, 0, 0, 0]]]);
     assert.deepStrictEqual(keys(rows[0]), ['campaignId', 'type', 'power', 'displayText', 'stageType', 'validStageId', 'stageId', 'startTime', 'endTime',
       'weekMonday', 'weekTuesday', 'weekWednesday', 'weekThursday', 'weekFriday', 'weekSaturday', 'weekSunday', 'groupPattern', 'validMinute']);
-    assert.deepStrictEqual([rows[0].type, rows[0].power, rows[0].stageType, rows[0].displayText], [7, 0, 2, 'Raid Event quests cost 0 AP during Bonus Time!']);
+    assert.deepStrictEqual([rows[0].type, rows[0].power, rows[0].stageType, rows[0].displayText], [7, 0, 2, 'Bonus Time: Raids cost 0 AP!']);
     assert.deepStrictEqual(evCampaign.raidAp0Ids([{ campaignId: 101, type: 7, power: 0 }, ...rows, { ...rows[0], campaignId: 98500, power: 5000 }]), [98000, 98001], 'own range, type 7 power 0 only');
     assert.deepStrictEqual(evCampaign.raidAp0Rows([]), []);
     // patch: own rows replaced, the others kept

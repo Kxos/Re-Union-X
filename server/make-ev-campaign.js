@@ -19,7 +19,7 @@ const path = require('path');
 const RAID_AP0_BASE = 98000, RAID_AP0_MAX = 98999;
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999;
 const PER_ROW = 5;
-const DISPLAY_TEXT = 'Raid Event quests cost 0 AP during Bonus Time!';
+const DISPLAY_TEXT = 'Bonus Time: Raids cost 0 AP!';
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const AP_CAMPAIGN = 7, STAGE_LIST = 2;
 
