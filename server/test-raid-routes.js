@@ -47,7 +47,7 @@ function world(opts = {}) {
     battlePoints: (getPoint, burst) => { const lux = Number(getPoint?.lux) || 0; w.lux += lux; w.burst = burst; return lux; }, beginBattle: (k) => { w.keyblade = k; },
     grantItem: (it) => { if (w.grantHook) w.grantHook(); w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
     medalCount: () => w.medalCount, medalCap: () => w.medalCap,
-    stageState: () => ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: () => 0.99, log: (m) => w.logs.push(m),
+    stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: () => 0.99, log: (m) => w.logs.push(m),
   });
   w.call = (fn, ...a) => { w.sent = null; w.raid[fn]({}, ...a); return w.sent; };
   w.spawn = () => { w.raid.onStageClear(STAGE, { raidPoint: 9000 }); assert(w.player.raid.boss, 'boss spawned'); return w.player.raid.boss; };
@@ -643,6 +643,12 @@ const tests = {
     assert.strictEqual(ev[0].endTime, fmt(TUE + 1000));
     assert.deepStrictEqual(ev[0].stages.map((s) => [s.stageId, s.useAp]), [[STAGE, 90], [STAGE + 1, 90]], 'only available tiers, AP of the moment');
     assert.deepStrictEqual(keys(ev[0].stages[0]), ['stageId', 'useAp', 'score', 'playStatus', 'clearMissionIds']);
+    assert.strictEqual(ev[0].complete, 0, 'no objectives: no crown');
+    const done = { score: 1, playStatus: 1, clearMissionIds: [1, 2, 3] };
+    w.stageStates = { [STAGE]: done, [STAGE + 1]: { ...done, clearMissionIds: [1, 3] } };
+    assert.strictEqual(w.raid.events(TUE)[0].complete, 0, 'one quest still missing an objective');
+    w.stageStates[STAGE + 1] = done;
+    assert.strictEqual(w.raid.events(TUE)[0].complete, 1, 'every quest with its 3 objectives: crown');
   },
 };
 
