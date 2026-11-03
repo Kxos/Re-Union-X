@@ -165,6 +165,24 @@ const tests = {
       assert.ok(!byId(list(), 3999903));
     } finally { idx.entries.splice(0, idx.entries.length, ...saved); p.raid.kept = null; }
   },
+  catalog_board_done() {
+    // RAID BOARDS filter of the Raid Catalog (user 03-11): a board is complete when every node is unlocked in player.raidSphere,
+    // the rule of the board screen (status 3), whether the board is handed out now or not
+    const done = t.raidPageCtx().boardDone;
+    assert.strictEqual(done(A), true, 'A completed in board_reward_once');
+    const keep = p.raidSphere[A].unlock;
+    try {
+      p.raidSphere[A].unlock = [1, 3];
+      assert.strictEqual(done(A), false, 'one node missing');
+      const real = t.raid().boardIds;
+      t.raid().boardIds = () => ({ active: [], all: [A, B] });
+      try { p.raidSphere[A].unlock = [1, 2, 3]; assert.strictEqual(t.raidPageCtx().boardDone(A), true, 'closed now, progress kept'); } finally { t.raid().boardIds = real; }
+    } finally { p.raidSphere[A].unlock = keep; }
+    assert.strictEqual(done(3999903), false, 'not in the master: never complete');
+    assert.strictEqual(done(3999999), false);
+    const html = require('./raid-pages').catalogPage(t.raidIndex(), t.raidPageCtx());
+    assert(/data-boards="done"/.test(html), 'the page gets it');
+  },
 };
 
 let failed = 0;
