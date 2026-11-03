@@ -4075,6 +4075,15 @@ function specialAchievement(realMs = realNow()) {
   for (const id of ids) numerator += new Set((done[id] || []).filter((m) => m >= 1 && m <= 3)).size;
   return { numerator, denominator: 3 * ids.size };
 }
+// Events (eventNumerator/Denominator, user 03-11): objectives of the raid event quests listed now (raid().events), as Special
+function eventAchievement(realMs = realNow()) {
+  const ids = new Set(raid().events(realMs).flatMap((e) => e.stages.map((s) => s.stageId)));
+  if (!ids.size) return ACHIEVEMENT_EMPTY;
+  const done = player.clearMissions || {};
+  let numerator = 0;
+  for (const id of ids) numerator += new Set((done[id] || []).filter((m) => m >= 1 && m <= 3)).size;
+  return { numerator, denominator: 3 * ids.size };
+}
 // GET /web/special/img/<eventStageId>.png e <id>-kept.png (banner della quest fissata): immagini 640x140 di
 // game_data/special_img, 404 se mancano. /web/special/quest/<id> (e il vecchio /detail/<id>): pagina della quest (dal catalogo con
 // ?from=catalog: barra BACK); /web/special/icon/<chiave>.png: icone di chip e pill (SPECIAL_ICON_KEYS)
@@ -4394,8 +4403,8 @@ function respondProudList(res) {
 // - main = Story: obiettivi compiuti delle missioni Standard (1-979) e Proud (note di versione 2.2.0: «completion
 //   percentage for Standard Mode and Proud Mode challenges»); denominatore = tutti gli obiettivi di quelle missioni.
 // - strength (Special): obiettivi delle quest Special aperte adesso (specialAchievement).
-// - event (Events), multi (Union Cross): modalita' non ancora presenti nel server: 0/1 = «Progress: 0%» senza COMPLETE
-//   (nessuna sfida compiuta), finche' non ci saranno.
+// - event (Events): obiettivi delle quest degli eventi raid della settimana (eventAchievement, utente 03-11).
+// - multi (Union Cross): modalita' non ancora presente nel server: 0/1 = «Progress: 0%» senza COMPLETE.
 // - colosseumRank 0 e pvpRanking con rank 0: il client scrive «---» (nessuna classifica).
 const ACHIEVEMENT_EMPTY = { numerator: 0, denominator: 1 };
 function storyAchievement() {
@@ -4412,14 +4421,14 @@ function storyAchievement() {
   return { numerator, denominator };
 }
 function respondStageAchievements(res) {
-  const main = storyAchievement(), strength = specialAchievement();
+  const main = storyAchievement(), strength = specialAchievement(), event = eventAchievement();
   const cap = (v) => Math.min(0x7fff, v); // il client li legge come short
   send(res, 200, {
     ret: ret(),
     stageAchievement: {
       mainNumerator: cap(main.numerator), mainDenominator: cap(main.denominator),
       strengthNumerator: cap(strength.numerator), strengthDenominator: cap(strength.denominator),
-      eventNumerator: ACHIEVEMENT_EMPTY.numerator, eventDenominator: ACHIEVEMENT_EMPTY.denominator,
+      eventNumerator: cap(event.numerator), eventDenominator: cap(event.denominator),
       multiNumerator: ACHIEVEMENT_EMPTY.numerator, multiDenominator: ACHIEVEMENT_EMPTY.denominator,
       colosseumRank: 0,
       pvpRanking: { rankingStatus: 0, userPvpRanking: { rank: 0, class: 0, point: 0 } },
@@ -4945,7 +4954,7 @@ module.exports._test = {
   // server/test-proud.js (Proud Mode, I-200)
   respondProudList, proudUnlocked, lastProudNumber, poiStageId, stageTreasures, stageEnemyDrops,
   // server/test-achievements.js (I-037)
-  respondStageAchievements,
+  respondStageAchievements, raidEventsNow: (ms) => raid().events(ms),
   // server/test-special-server.js (scheda Special)
   respondStageEvent, respondStageContinue, specialCtx, isSpecialStage, specialEvents: specialEventsNow, specialIndex, respondSpecialWeb, respondSpecialPost, ret, WEB_BASE,
   weekIndex: clock.weekIndex,
