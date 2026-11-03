@@ -13,8 +13,10 @@ const niceDay = (d) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ''); retur
 // Icons of the chips, pills and Keep button (user 31-10: no emoji): /web/special/icon/<key>.png from
 // server/game_data/special_icons (recon/tools/special_icons.py: original client icons where they exist, the others drawn
 // in the game's style). Only these keys are served. A missing file leaves an empty square of fixed size.
-const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material', 'unlocked'];
+const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material', 'unlocked', 'done', 'todo'];
 const icon = (k) => `<img class="ic" src="/web/special/icon/${k}.png" alt="">`;
+// the crown of a completed row (PROGRESS filter, user 03-11): the client's gold crown of a completed event banner, after the name
+const CROWN = '<img class="ic cw" src="/web/special/icon/done.png" alt="Completed" title="Completed">';
 const KEEP_LABEL = `${icon('pin')}Keep in Special`, REMOVE_LABEL = 'Remove from Special';
 
 // same pattern as the Shop catalogue (server/gacha.js): the element carries data-pin (POST URL) and data-on
@@ -37,7 +39,7 @@ const PILL_CSS = '.s{display:inline-block;border-radius:12px;padding:0 10px;font
   + 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-width:none;vertical-align:middle;margin:-.15em .3em 0 0;border:0;border-radius:0}'
   + '.pk{margin-top:6px;border:2px solid #ffe08a;border-radius:10px;color:#fff;font:bold 14px sans-serif;padding:3px 14px;background:linear-gradient(#e0a020,#a8700a);cursor:pointer;text-decoration:none;display:inline-block}'
   + '.pk[data-on="0"]{border-color:#ffb0b0;background:linear-gradient(#ff5a5a,#d81e2e 55%,#9c1020)}'
-  + '.vip{color:#ffcd4a;font-weight:bold}.rp{color:#ffcd4a;font-size:13px}';
+  + '.vip{color:#ffcd4a;font-weight:bold}.rp{color:#ffcd4a;font-size:13px}img.ic.cw{margin:-.2em 0 0 .35em}';
 
 const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-serif;letter-spacing:.4px;padding:6px 14px 40px}'
   + 'h1{font-size:22px;margin:8px 0 4px}h2{color:#00d4ed;font-size:18px;margin:18px 0 2px}h2:before{content:"\\25A0  "}'
@@ -102,6 +104,8 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   // SHOW chips: when chosen, the colour of the row pill of that status
   + '.o.st-unl.on{background:#1a6fa8;border-color:#62a7ff}.o.st-now.on{background:#2e9e3e;border-color:#7be08a}.o.st-kept.on{background:#b8860b;border-color:#ffe08a}.o.st-can.on{background:#1a6fa8;border-color:#62a7ff}'
   + '.o.st-replaced.on,.o.st-removed.on,.o.st-later.on{background:#5a6470;border-color:#9aa4ae}'
+  // PROGRESS chips: Completed gold (the crown), Incomplete grey
+  + '.o.pr-done.on{background:#b8860b;border-color:#ffe08a}.o.pr-todo.on{background:#5a6470;border-color:#9aa4ae}'
   + '.foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.ok{padding:6px 20px}.reset{color:#b9cfdc;font-size:14px}';
 
 // TYPE chips, derived from the index entry (an entry can have several types, e.g. the VIP Skill EXP is "vip skill"):
@@ -123,6 +127,10 @@ const SHOW_SETS = { now: ['now', 'kept'], unl: ['can', 'replaced', 'other'] };
 // REWARDS chips (round 7): reward types of the drops and objective rewards of an entry
 const REWARD_OPTS = [['all', 'All'], ['medal', 'Medals', 'medal'], ['avatar', 'Avatar parts', 'avatar'], ['jewel', 'Jewels', 'jewel'], ['material', 'Materials', 'material']];
 const REWARD_OF_TYPE = { 3: 'medal', 20: 'avatar', 2: 'jewel', 5: 'material' };
+// PROGRESS chips (user 03-11): Completed = every quest of the row with all its objectives done (the crown rule), Incomplete =
+// at least one objective missing or never played. Shared with the Raid Catalog.
+const PROG_OPTS = [['all', 'All'], ['done', 'Completed', 'done'], ['todo', 'Incomplete', 'todo']];
+const progCls = (v) => (v === 'all' ? '' : ` pr-${v}`);
 const optLabel = ([, l, k]) => (k ? icon(k) : '') + esc(l);
 function typesOf(en) {
   const t = [];
@@ -298,7 +306,7 @@ const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 // its Keep button) opens its details page. khuxRow (PIN_JS, after a pin / unpin) moves the statuses: the new kept entry
 // gold, the old one back to «can be kept»; the row shows its best entry again (khuxRank, the same rank as the server).
 const JS = `(function(){
-var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__},PILL=__PILL__,SHOWSET=__SHOWSET__;
+var PN=__PN__,LAB={type:__TYPE__,show:__SHOW__,reward:__REWARD__,prog:__PROG__},PILL=__PILL__,SHOWSET=__SHOWSET__;
 __RANK__
 __MATCH__
 function $(id){return document.getElementById(id);}
@@ -306,22 +314,23 @@ function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
 function q(el,s){return el.querySelector(s);}
 var items=[].map.call(document.querySelectorAll('.row'),function(el){var mp=[];try{mp=JSON.parse(attr(el,'data-mpill')||'[]');}catch(e){}
 return {el:el,camp:/\\bcr\\b/.test(el.className),ids:(attr(el,'data-eid')||'').split(' '),ss:(attr(el,'data-show')||'').split(' '),mc:(attr(el,'data-mcls')||'').split(' '),mp:mp,
-ps:' '+attr(el,'data-periods')+' ',t:' '+attr(el,'data-type')+' ',rw:' '+(attr(el,'data-reward')||'')+' ',ns:(attr(el,'data-search')||'').split(' | '),nv:+attr(el,'data-nv')||1,mt:q(el,'.mt')};});
+ps:' '+attr(el,'data-periods')+' ',t:' '+attr(el,'data-type')+' ',rw:' '+(attr(el,'data-reward')||'')+' ',dn:attr(el,'data-done')==='1',ns:(attr(el,'data-search')||'').split(' | '),nv:+attr(el,'data-nv')||1,mt:q(el,'.mt')};});
 var mls=[].map.call(document.querySelectorAll('.ml'),function(el){return {el:el,m:attr(el,'data-m')};});
 var ycs=[].map.call(document.querySelectorAll('.yc'),function(el){return {el:el,y:attr(el,'data-yr'),n:q(el,'.yn')};});
 for(var i0=0;i0<items.length;i0++){items[i0].y=attr(items[i0].el,'data-y');items[i0].mc0=items[i0].mc.slice();items[i0].mp0=items[i0].mp.slice();}
-var cur={p:'all',type:'all',show:'all',reward:'all',q:''},dr=null,yr=attr($('camps'),'data-defy')||'all';
-function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,q:s.q};}
+var cur={p:'all',type:'all',show:'all',reward:'all',prog:'all',q:''},dr=null,yr=attr($('camps'),'data-defy')||'all';
+function copy(s){return {p:s.p,type:s.type,show:s.show,reward:s.reward,prog:s.prog,q:s.q};}
 function match(r,s,anyPeriod){
 if(!anyPeriod&&s.p!=='all'&&r.ps.indexOf(' '+s.p+' ')<0)return false;
 if(s.type!=='all'&&r.t.indexOf(' '+s.type+' ')<0)return false;
 if(s.show!=='all'){var want=SHOWSET[s.show]||[s.show],ok=false;for(var w=0;w<want.length;w++)if((' '+r.ss.join(' ')+' ').indexOf(' '+want[w]+' ')>=0)ok=true;if(!ok)return false;}
 if(s.reward!=='all'&&r.rw.indexOf(' '+s.reward+' ')<0)return false;
+if(s.prog!=='all'&&r.dn!==(s.prog==='done'))return false;
 return !s.q||hits(r,s.q,1).length>0;}
 // item names of the row matching the query (one name at a time, khuxMatch), at most max
 function hits(r,q,max){var o=[],i;for(i=0;i<r.ns.length&&o.length<max;i++)if(khuxMatch(q,r.ns[i]))o.push(r.ns[i]);return o;}
 function count(s){var n=0;for(var i=0;i<items.length;i++)if(match(items[i],s))n++;return n;}
-function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.reward!=='all'?1:0)+(s.q?1:0);}
+function nf(s){return (s.type!=='all'?1:0)+(s.show!=='all'?1:0)+(s.reward!=='all'?1:0)+(s.prog!=='all'?1:0)+(s.q?1:0);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function plural(n,w){return n+' '+w+(n===1?'':'s');}
 function tag(g,l){return '<span class="tag">'+l+'<a href="#" data-x="'+g+'" aria-label="Remove">×</a></span>';}
@@ -347,12 +356,13 @@ else{h+=' match your filters:';
 if(cur.type!=='all')h+=' '+tag('type',LAB.type[cur.type]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
 if(cur.reward!=='all')h+=' '+tag('reward',LAB.reward[cur.reward]);
+if(cur.prog!=='all')h+=' '+tag('prog',LAB.prog[cur.prog]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;$('fdot').textContent=f?f:'';
 // why a row matched (only while searching), and a message when nothing does
 for(i=0;i<items.length;i++){r=items[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
-var none=$('none'),any=n+k;none.textContent=any?'':(cur.q?'No quests match "'+cur.q+'"':'No quests match your filters');none.style.display=any?'none':'';}
+var none=$('none'),any=n+k;var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'quests';none.textContent=any?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=any?'none':'';}
 // status changes (pin / unpin): the member's status, then the row shows its best member (bar and status line)
 function paint(r){var b=-1,o=0,j,k;for(j=0;j<r.ids.length;j++){k=khuxRank(r.ss[j],r.mc[j]);if(b<0||k<b){b=k;o=j;}}
 r.el.className='row'+(r.camp?' cr':'')+' '+r.mc[o]+(/ hide/.test(r.el.className)?' hide':'');var s=q(r.el,'.s');if(s){s.className='s s-'+r.mc[o];s.innerHTML=r.mp[o];}}
@@ -374,10 +384,10 @@ $('fbtn').onclick=openF;$('fx').onclick=closeF;$('dim').onclick=closeF;
 $('fq').oninput=function(){dr.q=this.value.replace(/\\s+/g,' ').replace(/^ | $/g,'');sync();};
 $('fq').onkeydown=function(e){if(e.keyCode===13)this.blur();};
 [].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){box.onclick=function(e){var t=e.target;while(t&&t!==box&&!attr(t,'data-v'))t=t.parentNode;var v=attr(t,'data-v');if(!v||!dr)return;dr[attr(box,'data-g')]=v;sync();};});
-$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.show='all';dr.reward='all';dr.q='';$('fq').value='';sync();};
+$('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.show='all';dr.reward='all';dr.prog='all';dr.q='';$('fq').value='';sync();};
 $('fok').onclick=function(){if(!dr)return;var s=dr;s.p=cur.p;closeF();cur=s;render();};
 $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x'))t=t.parentNode;var x=attr(t,'data-x');if(!x)return;e.preventDefault();
-if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='reward'||x==='all')cur.reward='all';if(x==='q'||x==='all')cur.q='';render();};
+if(x==='type'||x==='all')cur.type='all';if(x==='show'||x==='all')cur.show='all';if(x==='reward'||x==='all')cur.reward='all';if(x==='prog'||x==='all')cur.prog='all';if(x==='q'||x==='all')cur.q='';render();};
 $('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 render();
@@ -508,6 +518,12 @@ function catalogPage(index, ctx = {}) {
   };
   const uniq = (arr) => [...new Set(arr.join(' ').split(' ').filter(Boolean))].join(' ');
   const inner = (st) => st.pill.replace(/^<span[^>]*>|<\/span>$/g, '');
+  // PROGRESS: the quests of the row that can still be played (not the removed ones, not the past replaced ones), each
+  // with every stage done (ctx.stageDone, server.js: the crown rule on the player's clearMissions); none = incomplete
+  const doneOf = (list) => {
+    const play = list.filter((en) => !en.removed && statusFor(en).show !== 'replaced');
+    return !!ctx.stageDone && play.length > 0 && play.every((en) => (en.stageIds || []).length > 0 && en.stageIds.every((sid) => ctx.stageDone(sid)));
+  };
   // one minimal row: banner, title, ONE status line (best entry), at most ONE button, «›»; the whole row opens the
   // quest's details page. Anchors q<id> for every entry (BACK from a details page lands on the row).
   const row = (f) => {
@@ -516,11 +532,11 @@ function catalogPage(index, ctx = {}) {
     const img = `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${special.imgPath(head.evStageId)}" alt=""></a>`;
     // campaigns: the weeks as a short line (no Keep button in the list: keeping is on the details page)
     const dates = f.campaign ? `<div class="d">${all.length > 1 ? `${all.length} weeks · ` : ''}${niceDay(all[0].campaign.start)} – ${niceDay(all[all.length - 1].campaign.end)}</div>` : '';
-    const y = f.campaign ? all[0].campaign.start.slice(0, 4) : '';
+    const y = f.campaign ? all[0].campaign.start.slice(0, 4) : '', done = doneOf(all);
     return `<div class="row${f.campaign ? ' cr' : ''} ${best.cls}" id="q${f.key}"${y ? ` data-y="${y}"` : ''} data-href="${href}" data-name="${esc(f.title)}" data-eid="${all.map((en) => en.evStageId).join(' ')}"`
       + ` data-show="${all.map((en) => statusFor(en).show).join(' ')}" data-mcls="${all.map((en) => statusFor(en).cls).join(' ')}" data-mpill="${esc(JSON.stringify(all.map((en) => inner(statusFor(en)))))}"`
-      + ` data-periods="${uniq(all.map((en) => en.periods.join(' ')))}" data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${f.versions.length}">`
-      + `${img}<div class="info"><a class="nm" href="${href}">${esc(f.title)}</a>${anchors}${dates}${best.pill}`
+      + ` data-periods="${uniq(all.map((en) => en.periods.join(' ')))}" data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${f.versions.length}" data-done="${done ? 1 : 0}">`
+      + `${img}<div class="info"><a class="nm" href="${href}">${esc(f.title)}${done ? CROWN : ''}</a>${anchors}${dates}${best.pill}`
       + `${f.campaign ? '' : keepFor(all, ' onclick="return khuxClick(this)"')}<div class="mt"></div></div><a class="go" href="${href}" aria-label="Details">›</a></div>
 `;
   };
@@ -545,7 +561,7 @@ function catalogPage(index, ctx = {}) {
   const pillJs = (k) => ({ cls: PILLS[k][0], html: pillInner(PILLS[k]) });
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
-    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__SHOWSET__', JSON.stringify(SHOW_SETS)).replace('__REWARD__', labels(REWARD_OPTS))
+    .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__SHOWSET__', JSON.stringify(SHOW_SETS)).replace('__REWARD__', labels(REWARD_OPTS)).replace('__PROG__', labels(PROG_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
     .replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -564,6 +580,7 @@ function catalogPage(index, ctx = {}) {
     + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS)}</div>`
     + `<h4>REWARDS</h4><div class="opts" data-g="reward">${opts(REWARD_OPTS)}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
+    + `<h4>PROGRESS</h4><div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(fams.length, 'result')}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${PIN_JS}</script><script>${js}</script></body></html>`;
 }
@@ -650,4 +667,4 @@ function detailPage(index, evStageId, ctx = {}) {
 
 // CSS, DETAIL_CSS, esc, niceDay, monthYear, icon: shared with the Raid Catalog pages (server/raid-pages.js), which follow this style
 module.exports = { SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch,
-  CSS, DETAIL_CSS, esc, niceDay, monthYear, icon };
+  CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, PROG_OPTS, progCls };

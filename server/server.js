@@ -4111,12 +4111,16 @@ function eventAchievement(realMs = realNow()) {
 // ?from=catalog: barra BACK); /web/special/icon/<chiave>.png: icone di chip e pill (SPECIAL_ICON_KEYS)
 // quest della storia che apre una voce «later» del catalogo (special.unlockQuest sulle righe story del catalogo dello Shop)
 const specialUnlockQuest = (en) => special.unlockQuest(gachaCatalog().story, en, special.PERIODS);
+// PROGRESS filter of the Special and Raid catalogues (user 03-11): a quest is done with the crown rule (special.stageDone:
+// objectives 1..min(3, validSubmission) in clearMissions, none = cleared). The pages get only this yes / no per stage.
+const catalogStageDone = (id) => special.stageDone({ clearMissionIds: stageClearMissions(id), playStatus: id in (player.stageScores || {}) ? STAGE_CLEARED : 0 },
+  stageRowOf(id)?.validSubmission ?? 3);
 function respondSpecialWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); res.end(b); };
   const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   if (p === '/web/special/catalog') {
-    return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest })); // names: search box (drop and objective rewards)
+    return page(specialPages.catalogPage(specialIndex(), { ...specialCtx(), names: specialPages.buildNames(masterRows), unlockQuestOf: specialUnlockQuest, stageDone: catalogStageDone })); // names: search box (drop and objective rewards)
   }
   const det = /^\/web\/special\/(?:quest|detail)\/(\d+)$/i.exec(p); // round 13: /quest/<id>; /detail/<id> (vecchi link) e' la stessa pagina
   if (det) {
@@ -4242,7 +4246,7 @@ function raidBoardItems(sphereBoardId) {
 const raidBoardName = (sphereBoardId) => masterRows('sphere').find((r) => r.sphereBoardId === Number(sphereBoardId))?.boardName || '';
 const raidPageCtx = (fromCatalog = false) => ({ ...raid().catalogCtx(), periods: special.PERIODS, imgVersion: routesRaid.RAID_IMG_VERSION, fromCatalog,
   unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
-  boardItems: raidBoardItems, boardName: raidBoardName });
+  boardItems: raidBoardItems, boardName: raidBoardName, stageDone: (id) => catalogStageDone(id) });
 // GET /web/raid/img/<evStageId>.png and <id>-kept.png (the kept raid's card): as /web/special/img, from game_data/raid_img. No
 // card of its own: 0.png, the plate of make_special_banners.py (a missing -kept copy: the card itself); none: 404.
 // GET /web/raid/catalog (Details of the Raid Catalog banner) and /web/raid/raid/<evStageId> (details page; ?from=catalog: BACK).

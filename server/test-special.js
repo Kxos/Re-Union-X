@@ -199,6 +199,14 @@ check(!sp.resetDue(e('x', 9, {}), full, 10, 11, g1), 'resetDue no group false');
   const two = sp.specialEvents(index, cx({ objectiveCount: (id) => (id === 71031 ? 2 : 3) }));
   check(two.find((x) => x.eventStageId === 7103).complete === 1, 'stage with 2 objectives, both done: complete 1');
   check(sp.specialEvents(index, ctx({})).every((x) => x.complete === 0), 'no objectives done: all 0');
+  // the crown rule of one stage (also the catalogues' Completed filter, user 03-11): objectives 1..min(3, n); none = cleared
+  const sd = sp.stageDone;
+  check(typeof sd === 'function', 'special.stageDone exported');
+  if (typeof sd === 'function') {
+    check(sd({ clearMissionIds: [3, 1, 2], playStatus: 2 }, 3) && !sd({ clearMissionIds: [1, 2], playStatus: 2 }, 3), 'stageDone: 3 objectives');
+    check(sd({ clearMissionIds: [1, 2], playStatus: 2 }, 2) && sd({ clearMissionIds: [1, 2, 3] }, 5) && !sd({ clearMissionIds: [1, 2] }, 5), 'stageDone: min(3, n)');
+    check(sd({ clearMissionIds: [], playStatus: 2 }, 0) && !sd({ clearMissionIds: [], playStatus: 0 }, 0), 'stageDone: no objectives = cleared');
+  }
 }
 
 // round 17: recurring VIP set with week versions (weekOf = the set's entry, campaign = the week): in a week with a

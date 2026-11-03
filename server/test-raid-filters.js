@@ -25,20 +25,21 @@ function probe() {
       var prefix = function (q, name) { var ws = words(name); return words(q).every(function (w) { return ws.some(function (x) { return x.indexOf(w) === 0; }); }); };
       var shown = function (el) { while (el && el.nodeType === 1) { if (getComputedStyle(el).display === 'none') return false; el = el.parentNode; } return true; };
       var R = [].map.call(document.querySelectorAll('.row'), function (r) {
-        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y') };
+        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), dn: A(r, 'data-done'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y') };
       });
       var matches = function (r, f, anyPeriod) {
         if (!anyPeriod && f.p !== 'all' && r.p !== f.p) return false;
         if (f.type !== 'all' && r.t !== f.type) return false;
         if (f.tier !== 'all' && r.tr.indexOf(f.tier) < 0) return false;
         if (f.show !== 'all' && (SETS[f.show] || [f.show]).indexOf(r.st) < 0) return false;
+        if (f.prog !== 'all' && (r.dn === '1') !== (f.prog === 'done')) return false;
         return !f.q || r.ns.some(function (n) { return prefix(f.q, n); });
       };
       var chip = function (g, v) { return document.querySelector('.opts[data-g="' + g + '"] [data-v="' + v + '"]'); };
       var check = function (name, f, year) {
         var d = document.querySelector('.yc[data-yr="' + A($('rows'), 'data-defy') + '"]'); if (d) d.click();
         $('fbtn').click(); $('freset').click();
-        chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click();
+        chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click(); chip('prog', f.prog).click();
         $('fq').value = f.q; $('fq').oninput(); $('fok').click();
         document.querySelector('.tab[data-p="' + f.p + '"]').click();
         if (year === 'all') document.querySelector('.yc[data-yr="all"]').click();
@@ -71,18 +72,24 @@ function probe() {
         var none = shown($('none')) && $('none').textContent;
         if (!vis && !none) err.push('no empty-state message');
         if (vis && none) err.push('empty-state message with visible rows');
+        if (none && f.prog !== 'all' && none.indexOf(f.prog === 'done' ? 'No completed raids' : 'No incomplete raids') !== 0) err.push('empty-state message without the progress: ' + none);
+        if (f.prog !== 'all' && $('sum').textContent.indexOf(f.prog === 'done' ? 'Completed' : 'Incomplete') < 0) err.push('summary without the progress tag');
         if (f.q) R.forEach(function (r) { var mt = r.el.querySelector('.mt'); if (shown(r.el) && !/^Matches: /.test(mt.textContent)) err.push('no Matches line on ' + A(r.el, 'data-name')); });
         if (err.length) { out.fail++; out.failed.push({ name: name + ' [' + year + ']', err: err.slice(0, 4) }); } else out.pass++;
       };
-      var base = { p: 'all', type: 'all', tier: 'all', show: 'all', q: '' };
+      var base = { p: 'all', type: 'all', tier: 'all', show: 'all', prog: 'all', q: '' };
       var w = function (o) { var f = {}, k; for (k in base) f[k] = base[k]; for (k in o) f[k] = o[k]; return f; };
       var cases = [['no filters', w({})]];
       [].forEach.call(document.querySelectorAll('.tab'), function (t) { if (A(t, 'data-p') !== 'all') cases.push(['tab ' + A(t, 'data-p'), w({ p: A(t, 'data-p') })]); });
-      ['type', 'tier', 'show'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all') { var x = {}; x[g] = v; cases.push([g + ' ' + v, w(x)]); } }); });
+      ['type', 'tier', 'show', 'prog'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all') { var x = {}; x[g] = v; cases.push([g + ' ' + v, w(x)]); } }); });
       ['trick', 'blue tri', 'sora', 'mythril', 'zzzz'].forEach(function (q) { cases.push(['find «' + q + '»', w({ q: q })]); });
       cases.push(['show can + tier advanced', w({ show: 'can', tier: 'advanced' })]);
       cases.push(['type radiant + tab 3', w({ type: 'radiant', p: '3' })]);
       cases.push(['find «trick» + show now', w({ q: 'trick', show: 'now' })]);
+      cases.push(['prog done + tier beginner', w({ prog: 'done', tier: 'beginner' })]);
+      cases.push(['prog todo + show can + tab 3', w({ prog: 'todo', show: 'can', p: '3' })]);
+      cases.push(['prog done + find «trick»', w({ prog: 'done', q: 'trick' })]);
+      cases.push(['prog done + show removed', w({ prog: 'done', show: 'removed' })]);
       cases.forEach(function (c) { ['default', 'all'].forEach(function (y) { try { check(c[0], c[1], y); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
       // keep / remove through the page script (the XHR answered 200): bars, status lines, buttons, «Replaces»
       var byId = function (id) { return document.getElementById('q' + id); };
@@ -137,7 +144,7 @@ const fx = { entries: [
   tier('F', 8150, '2020-06-01', '2020-06-07', 'Legendary', 'Darkside'), tier('G', 8180, '2020-12-07', '2020-12-13', 'Epic', 'Red Trident Tail'),
 ] };
 const ctxFor = (index, week, kept) => ({ ...week, current: new Set(calendar.weekRows(index, week).map((r) => r.censusId)), kept, periods: PERIODS,
-  unlockQuestOf: () => 900, boardItems: (id) => (id % 2 ? ['Sora & Moogle B'] : ['Mythril Shard']), imgVersion: 1 });
+  unlockQuestOf: () => 900, stageDone: (sid) => sid % 3 !== 1, boardItems: (id) => (id % 2 ? ['Sora & Moogle B'] : ['Mythril Shard']), imgVersion: 1 });
 run(fx, ctxFor(fx, { shopFrom: '2019-10-17', shopTo: '2019-10-23' }, 'A'), 'fixture');
 let real = null; try { real = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'raids.json'), 'utf8')); } catch { /* no local index */ }
 if (real) {
