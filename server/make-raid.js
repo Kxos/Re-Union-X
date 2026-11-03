@@ -242,6 +242,26 @@ function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knot
   return { body, partRows };
 }
 
+// Lux of a defeat (docs/notes/raid.md «Lux»): the client reports the sum of luxAttack at the boss's level over the body and
+// every part it breaks (bench 3 Nov: 450 = 270 + 90 + 90 at LV 1, 600 at LV 2), times the deck's Lux skills. Original rule
+// (notice 60146, 2019-11-18): Lux follows the HP taken and the Lux skills, not hits or damage; reported per kill with Lux++
+// on every medal and no bonus: Advanced 400B HP about 8B, Legendary 700B about 12B, Epic 1T about 20B (video frame
+// 2021-06), so 2% of body HP. Base sum = body HP x perHpFullDeck / fullDeckMultiplier (our Lux++ luxUp 50000 = x5), shared
+// over the rows as the template's luxAttack; luxSuppress keeps its template ratio. Munny and EXP stay the 2016 values.
+function applyLux(rows, lux) {
+  const all = [rows.body, ...rows.partRows], perHp = lux.perHpFullDeck / lux.fullDeckMultiplier;
+  for (let k = 0; k < rows.body.validGrowth; k++) {
+    const target = Math.round(rows.body.hp[k] * perHp);
+    const sum = all.reduce((t, r) => t + (r.luxAttack[k] || 0), 0);
+    for (const r of all) {
+      const share = sum > 0 ? (r.luxAttack[k] || 0) / sum : r === rows.body ? 1 : 0;
+      const ratio = r.luxAttack[k] > 0 ? (r.luxSuppress[k] || 0) / r.luxAttack[k] : 0;
+      r.luxAttack[k] = Math.round(target * share);
+      r.luxSuppress[k] = Math.round(r.luxAttack[k] * ratio);
+    }
+  }
+}
+
 function buildRaid({ census, values, rewards, orig2016, boards, master, models, config, ids }) {
   checkRanges(master);
   const fixes = parseCorrections((rewards || {}).correctionsMd);
@@ -289,7 +309,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const questKey = w.tier === SINGLE ? 'Raid Time!' : `(${w.tier}) ${w.gem_drop ? 'Gem Drop: ' : ''}Raid Time!`;
       const quest = (values.quests || {})[questKey];
       const worldReal = mapWorld(w.map);
-      const reconstructed = ['atk', 'def', 'partHp', 'upMinutes', 'useAp', 'coinOdds', 'rewards2016'];
+      const reconstructed = ['atk', 'def', 'partHp', 'upMinutes', 'useAp', 'coinOdds', config.lux ? 'lux' : 'rewards2016'];
       const entry = { key: keyOf(row, w), censusId: row.id, family: row.family, start: row.start, end: row.end, tier, gemDrop: !!w.gem_drop,
         boss: w.boss, modelId, available: false, why: null, stageId: RANGES.stage[1] + n, evStageId, settingId: RANGES.raidSetting[1] + n, enemyId: RANGES.raidEnemy[1] + 10 * n,
         upMinutes: config.weeklyUpMinutes, useAp: config.useAp, questAp: String(w.ap).split('/').map(num), map: w.map, worldId: 0, level: (config.tierQuestLv || {})[tier] || num(w.quest_lv), hp: 0,
@@ -325,6 +345,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
       const cap = (config.modelParts || {})[w.boss];
       const rows = bossRows({ e: entry, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap });
       if (rows.why) { entry.why = rows.why; return; }
+      if (config.lux) applyLux(rows, config.lux);
       // every weak point of the model (raid_models.json `slots`, parts<N> of its wait LWF) needs a part of weakness N: at fight
       // load the client looks up a raidEnemy row for each one and crashes on an empty slot (docs/notes/raid.md «Weak points»)
       const slots = m && Array.isArray(m.slots) ? m.slots : null;
@@ -582,4 +603,4 @@ if (require.main === module) {
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { buildRaid, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { buildRaid, applyLux, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };

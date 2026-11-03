@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-222**).
+a new issue takes the number after the last one used (last: **I-224**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,8 @@ Last revision: 1 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-223 | TO VERIFY | **Raid Lux far too low** (user bench 03-11: about 600 Lux per Epic kill). The raidEnemy rows kept the 2016 `luxAttack`; the client reports the sum of `luxAttack` of the broken rows at the boss's level times the deck's Lux skills. Fix: `make-raid.js` `applyLux` sets that sum to body HP x 2% / 5 (Epic 4B base, 20B with Lux++ on every medal; originals: guide notice Nov 2019, forum totals, a June 2021 video frame), and `/raid/clear` doubles the Lux in bonus time. Master rows regenerated (raidEnemy only): needs a revision bump and a bench fight (what the orange panel shows in bonus time) | [raid](notes/raid.md#lux) | 03-11 |
+| I-224 | TO VERIFY | **Raid victories did not count for missions** (user bench 03-11): Daily 2007, Weekly 3001-3003/3011-3013, Beginner 1023/1024 (conditionId 3 and 6, counter `raid`) were never fed. Now +1 per boss defeated at `/raid/clear` (`routes-raid.js` `onDefeat`) (the VIP benefit still waits for the Union Cross weeklies) | [raid](notes/raid.md#missions) | 03-11 |
 | I-222 | Home | **«Active Requests!» home layout missing** (user bench 02-11): with a raid request active the original home showed a red frame with a warning that wraps the Quests button and reaches the Active Requests! button (video I2emqSXYAPc at 0:51). To study: frame of the video, `MyPage_RaidAlerts_Button_ver320` and `/user/notice` `raidNotice` flags. **Cause found 02-11**: the bar is the served armature `Warning_Anm` (`MyPageAnime.ExportJson`, movement `Home_Warning`), whose atlas `MyPageAnime0.plist/.png` was overwritten by `import_jp_coco.py` JP_ARM with the JP `Cursor_Anim_Ranking0` atlas (only `Rank_Panel_User_Eff.png`), erasing `Home_Warning_*`/`Ticker_Warning_Logo*`; fixed with `atlas_merge.py` (served atlas + JP frame, `test_jp_arm_atlas.py`), **seen on the bench 02-11** after `-Quick` (resources 93): the bar wraps Quests up to «Active request!» as in the video, and the `WARNING` ticker of the quest screens' top bar, empty before, shows too; **user confirmed 02-11: CLOSED** (effba88) | [raid](notes/raid.md) | 02-11 |
 | I-221 | IN PROGRESS | **Raids**: all original raids, solo, with a Raid Catalog ([design](superpowers/specs/2026-11-01-raids-design.md)). Part 1 spike done; Part 2 ([plan](superpowers/plans/2026-11-02-raids-part2.md)) Tasks 1-6 code done, one week played end to end on the bench 02-11 | [raid](notes/raid.md) | 01-11 |
 | I-013 | OPEN | Balance: Bandit + Red Nocturne (1240 part 2, quest from 27) wiped out 3040 HP at LV3 (11-10, placeholder data). Since then player HP, enemy attacks and enemy buffs are original (I-032, I-181, I-207 step 1): re-test with a low-rank save; close as OBSOLETE if it is the original difficulty | [battaglia](notes/battaglia.md#sconfitta) | 11-10 |

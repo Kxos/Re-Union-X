@@ -64,6 +64,8 @@ The spiders have **4 weak points**: the **Spinneret** and the three **spiderling
 
 Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP comes from recordings of the original game where one exists, otherwise from the tier tables.
 
+Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.
+
 ## Special Quests
 
 **IMPORTANT** · 10/31

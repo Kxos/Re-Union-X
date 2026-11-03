@@ -27,6 +27,11 @@ function ptNow(ms) {
   return { hour: Number(parts.hour), weekend: parts.weekday === 'Sat' || parts.weekday === 'Sun' };
 }
 const isBonusTime = (ms) => BONUS_HOURS.has(ptNow(ms).hour);
+// Lux of a raid fight in bonus time (original rule: «Lux received from raid bosses doubles!», notices 2016-2018; «0 AP
+// cost and double the LUX», 2020). The server doubles what the client reports: no Lux campaign (evCampaign type 10) is
+// served, so the client does not double it itself (docs/notes/raid.md «Lux»).
+const BONUS_LUX = 2;
+const luxFactorAt = (ms) => (isBonusTime(ms) ? BONUS_LUX : 1);
 
 // AP of a raid quest at this moment. From 2019-07-15 the rule; earlier the week's own «ap»: 3 values bonus / weekend /
 // weekday, «0 / 5» bonus / the rest, «5 / 90» weekend / weekday (no bonus value: those weeks read as weekday in bonus time).
@@ -55,7 +60,7 @@ const usableParts = (parts) => (Array.isArray(parts) ? parts.filter((p) => p && 
 const damageOf = (parts) => parts.reduce((sum, p) => sum + (usableCount(p.damage) ? Number(p.damage) : 0), 0);
 
 function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, ap0Force = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
-  inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, beginBattle, grantItem, addPresent, medalCount, medalCap,
+  inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, onDefeat = () => {}, beginBattle, grantItem, addPresent, medalCount, medalCap,
   stageState, webBase, rng = Math.random, log = console.log }) {
   // Boss levels reset to LV 1 at the start of every month (original rule, notice 17888), and a boss that comes back in a later week starts at LV 1 again (notice 74823): the real-clock month of the server
   // (clock.monthIndex, 1st 00:00 PST = 08:00 UTC, as Spirit Training). A boss alive keeps its level; levelsMonth is the month
@@ -160,6 +165,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     r.lastFight = { raidId: boss.raidId, damage: boss.damage || 0 };
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
+    onDefeat(boss); // Daily, Weekly and Beginner «Defeat Raid Boss» missions (server.js missionCount 'raid')
     const rows = rewardRowsOf(boss);
     if (!rows?.victory || !rows.mvp) return log(`[raid] boss ${boss.raidId} defeated, no reward: its raidReward rows are not served`);
     const entry = rewards.pendingEntry({ raid: boss, rows, victory: true, allPoints, rng });
@@ -175,7 +181,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     if (boss?.fighting === 'late') {
       boss.fighting = false;
       raidTimeStatus = fight.RAID_TIME_ESCAPED;
-      getLux = battlePoints(body?.getPoint, body?.burst);
+      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorAt(nowMs));
       savePlayer();
     } else if (boss?.fighting) {
       boss.fighting = false;
@@ -183,7 +189,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       boss.damage = (boss.damage || 0) + damageOf(parts);
       const out = fight.clearFight(boss, parts, nowMs);
       raidTimeStatus = out.raidTimeStatus;
-      getLux = battlePoints(body?.getPoint, body?.burst);
+      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorAt(nowMs));
       if (out.victory) bossDefeated(r, boss, out.allPoints);
       savePlayer();
     } else log(`[raid] clear with no fight running (boss ${boss?.raidId ?? 'none'}): nothing changes`);
