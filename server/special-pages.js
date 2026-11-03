@@ -147,7 +147,7 @@ function typesOf(en) {
 // result has drop(rewardId) -> names of a drop table, objective(stageId) -> names of the stage's objective rewards and
 // stage(stageId) -> { objectives: [{ text, reward }] } (objective texts as the client writes them, reward «Name xN»).
 const ITEM_NAMES = { 2: 'Jewels', 4: 'Munny', 11: 'Lux', 14: 'Avatar Coin', 26: 'Skip Ticket', 28: 'Skip Ticket+', 41: 'Draw Ticket' };
-const TABLES = { 3: ['medal', 'medalId'], 5: ['material', 'materialId'], 20: ['avatarParts', 'avatarPartsId'] };
+const TABLES = { 3: ['medal', 'medalId'], 5: ['material', 'materialId'], 20: ['avatarParts', 'avatarPartsId'], 33: ['petParts', 'petPartsId'] };
 // objective ids (submissionIdType): 1 enemy, 5 Keyblade, 6 skill
 const ID_TABLES = { 1: ['enemy', 'enemyId'], 5: ['keyblade', 'keybladeId'], 6: ['skill', 'skillId'] };
 function buildNames(rows) {

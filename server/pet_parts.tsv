@@ -3,7 +3,9 @@
 # attribution: the KH Wiki and KHUX Wiki contributors. Not covered by the MIT licence (THIRD_PARTY_NOTICES.md).
 # Parti dello Spirit: id della grafica JP 4.3.1, nome inglese (khuxwiki; metodo e confidenza in
 # reference/pet/spirit_parts_names.md fuori dal repo). Generata da make-pet-parts.js -> tables/petParts.json
-petPartsId	name
+# Third column (03-11): status of a part with reconstructed textures (lost from every source; record in the private pet_parts_recon):
+# «recon» = candidate awaiting the user's approval (no row, not served), «recon-ok» = approved, served. Empty = original graphics.
+petPartsId	name	status
 303001	Pink Kitstar Ears
 303002	Blue Kitstar Ears
 303003	Rainbow Kitstar Ears
@@ -468,6 +470,8 @@ petPartsId	name
 401007	Sleep Mask
 401008	Starry Sunglasses
 401009	Pirate Eye Patch
+401010	Starlight Glasses
+401011	Starlight Sunglasses
 401012	Illusionist: Mask
 401013	Clover Glasses
 401014	Fungus's Glasses
@@ -497,11 +501,15 @@ petPartsId	name
 402018	Unicorn Style
 402019	Mickey Visor
 402020	Minnie Visor
+402021	Mickey Mask	recon
+402022	Minnie Mask	recon
 402023	Pirate Hat
 402024	Sailor Hat
 402025	Swim Snorkel
 402026	Swim Cap & Goggles
-402028	Starlight Ears
+402027	Starlight Bow	recon
+402028	Starlight Ears	recon-ok
+402029	Pointy Pumpkin Hat	recon
 402030	Halloween Pointy Hat
 402031	Pumpkinhead
 402032	Fantasia Mickey Hat
@@ -512,6 +520,7 @@ petPartsId	name
 402038	Turkey Leg
 402039	Illusionist: Hat
 402040	Pizza Hat
+402041	Popcorn Hat	recon
 402042	Woody Hat
 402043	Macaroon Tower Hat
 402044	Patissier's Hat
@@ -530,6 +539,7 @@ petPartsId	name
 402057	Water Samurai: Helm
 402058	Monsters, Inc. Helmet
 402059	[unidentified black starry wig]
+402060	KH III Sora Ornament A	recon
 402061	KH III Sora Ornament B
 402062	White Hydrangea: Hat
 402063	Black Hydrangea: Hat
@@ -542,6 +552,7 @@ petPartsId	name
 402070	Moogle Head
 402071	Argyle Mickey Headband
 402072	Pepita Ornament
+402073	Dante Ornament	recon
 402074	Mickey Ornament
 402075	Minnie Ornament
 402076	Floral Headband
@@ -560,6 +571,7 @@ petPartsId	name
 402089	Aqua Ornament B
 402090	Donald's Hat
 402091	Goofy's Hat
+402092	Alarm Clock
 402093	Rice Ball Helmet
 402094	Cool Sunglasses
 402095	XIII Replica Hood
@@ -585,11 +597,15 @@ petPartsId	name
 402115	Red Knit Hat
 402116	Lux-Pattern Knit Cap
 402117	Starlight Headpiece
+402118	Chirithy Snowman
+402119	Snowy Mickey Ears
 402120	Axel Ornament A
 402121	Axel Ornament B
+402122	Hannya Mask	recon
 402123	Fortune Fedora
 402124	Celebration Ribbon
 402125	New Year's Mickey Ears
+402126	Black Heart-Shaped Hat	recon
 402127	Red Heart-Shaped Hat
 405001	Red Bowtie
 405002	Yellow Scarf
@@ -624,12 +640,18 @@ petPartsId	name
 407001	Angel Wings
 407002	Colorful Balloon
 407003	Red Backpack
+407004	Balloon Snowman
 407005	New Year Decoration
+407006	Kite	recon
 407007	Rose Flower Basket
 407008	Dragon Maleficent: Wings
+407009	Balloon Fairies
 407010	Chirithy Cape
+407011	Balloon Moogle & Chirithy
+407012	Balloon Zazu	recon
 407013	Balloon Pumbaa
 407014	Paraglider
+407015	Starlight Angel Wings
 407016	Balloon Figaro
 407017	Balloon Lucifer
 407018	Balloon Magic Broom
@@ -638,20 +660,26 @@ petPartsId	name
 407021	Illusionist: Wings
 407022	Balloon Huey, Dewey & Louie
 407023	Balloon Scrooge
+407024	Valentine Balloons
+407025	Balloon Baymax & Mochi	recon
 407026	Balloon Mike & Sulley
 407027	Balloon KH III Sora
 407028	Balloon KH III Kairi
 407029	Buzz Lightyear Wings
+407030	Balloon Aliens	recon
 407031	Balloon KH III Riku
 407032	Balloon Pegasus
 407033	Balloon Blimp Chirithy
 407034	Halloween Crow: Wings
 407035	Balloon Sugar Skull
+407036	Balloon Terra
 407037	Balloon Bianca & Bernard
 407038	Balloon Gingerbread House
+407039	Balloon Aqua
 407040	Balloon Roxas
 407041	Flotsam & Jetsam
 407042	Balloon Naminé
+407043	Flying Carpet
 407044	Balloon Genie
 407045	Fabergé Egg Wings
 407046	Gold-Rimmed Wings
@@ -660,16 +688,25 @@ petPartsId	name
 407049	Mickey & Minnie Glove Balloons
 410001	Heart
 410002	Autumn Leaves
+410003	Falling Snow	recon
 410004	Rose Flower Petals
 410005	Fluffy Heart
 410006	Fireworks
+410007	Goldfish	recon
 410008	Word Bubble: Sea-Salt Ice Cream
 410009	Word Bubble: Watermelon
+410010	Word Bubble: Noodle Stir-Fry
 410011	Floating Trick or Treat
-410014	Dazzling Disco
+410012	Elsa's Magic	recon
+410013	Olaf's Snow Cloud	recon
+410014	Dazzling Disco	recon-ok
 410015	Swirling Hearts
+410016	Lantern
 410017	Word Bubble: I Love Sora
 410018	Word Bubble: Ukulele
+410019	Word Bubble: Hot Dog
+410020	Pinwheels
+410021	Confetti & Butterflies	recon
 411001	Mustache
 411002	Santa Beard
 411003	Pirate Mustache
