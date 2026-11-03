@@ -1014,12 +1014,14 @@ if os.path.isdir(os.path.join(JP_ROOT, 'lwf', 'pet', 'part')):
     # their record (pet_parts_recon/README.md): used only where no original file exists
     _pp, _pp_rep = jp_pet_parts.collect(JP_ROOT, _served_all,
                                         recon_root=os.path.join(private_tools.root(), 'pet_parts_recon', 'files'))
+    # an LWF whose textures are stored larger than declared is served as the patched copy (jp_pet_parts.hires_lwf:
+    # real size declared, same drawn size), otherwise the client draws them at the declared resolution (blurry, 3 Nov 2026)
     for _name, _src in sorted(_pp.items()):
-        writes.setdefault(_name, ('jp', _src, None))
+        writes.setdefault(_name, ('jp', _src, _pp_rep['hires'].get(_name)))
     print('parti dello Spirit JP: %d file (%d LWF e %d texture dalle gemelle, %d dagli accessori avatar, %d ricostruite, '
-          '%d at another size), %d parti saltate'
+          '%d at another size, %d LWF re-declared at the real size), %d parti saltate'
           % (len(_pp), len(_pp_rep['lwf_twin']), len(_pp_rep['png_twin']), len(_pp_rep['avatar_twin']),
-             len(_pp_rep['reconstructed']), len(_pp_rep['own_resized']), len(_pp_rep['skipped'])))
+             len(_pp_rep['reconstructed']), len(_pp_rep['own_resized']), len(_pp_rep['hires']), len(_pp_rep['skipped'])))
     # Movimenti originali (lwf/pet/motion/<nome>): i nostri di make_pet_motions.py hanno solo i
     # movie delle 9 parti base, quindi gli accessori (ac_mask, ac_hat1-4, bag_*, ac_necklace1-3,
     # ac_special, ac_mouth) non si vedevano. Si prendono gli originali a cui manca al massimo
