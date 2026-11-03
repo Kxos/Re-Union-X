@@ -5,6 +5,7 @@
 const assert = require('assert');
 const fs = require('fs'); const os = require('os'); const path = require('path');
 const routesRaid = require('./routes-raid');
+const { RAID_IMG_VERSION } = routesRaid;
 const { isBonusTime, questApAt } = routesRaid;
 const { coinRows } = require('./raid-rewards');
 const evCampaign = require('./make-ev-campaign');
@@ -685,7 +686,7 @@ const tests = {
     assert.deepStrictEqual(keys(ev[0]), ['stages', 'eventStageId', 'showIcon', 'bannerUrl', 'eventType', 'status', 'endTime', 'newStageId', 'isLock', 'complete']);
     assert.strictEqual(ev[0].eventType, 2);
     assert.strictEqual(ev[0].eventStageId, 8001);
-    assert.strictEqual(ev[0].bannerUrl, 'http://x/web/raid/img/v1/8001.png');
+    assert.strictEqual(ev[0].bannerUrl, `http://x/web/raid/img/v${RAID_IMG_VERSION}/8001.png`);
     assert.strictEqual(ev[0].endTime, fmt(TUE + 1000));
     assert.deepStrictEqual(ev[0].stages.map((s) => [s.stageId, s.useAp]), [[STAGE, 90], [STAGE + 1, 90]], 'only available tiers, AP of the moment');
     assert.deepStrictEqual(keys(ev[0].stages[0]), ['stageId', 'useAp', 'score', 'playStatus', 'clearMissionIds']);
@@ -704,14 +705,14 @@ const tests = {
     assert.deepStrictEqual(ids(), [8000, 8001], 'the catalogue banner, then the week');
     const cat = w.raid.events(TUE)[0];
     assert.deepStrictEqual(keys(cat), ['stages', 'eventStageId', 'showIcon', 'bannerUrl', 'eventType', 'status', 'endTime', 'newStageId', 'isLock', 'complete']);
-    assert.deepStrictEqual([cat.eventType, cat.isLock, cat.bannerUrl], [0, 0, 'http://x/web/raid/img/v1/8000.png']);
+    assert.deepStrictEqual([cat.eventType, cat.isLock, cat.bannerUrl], [0, 0, `http://x/web/raid/img/v${RAID_IMG_VERSION}/8000.png`]);
     assert.deepStrictEqual(cat.stages.map((s) => [s.stageId, s.useAp]), [[970000, 0]], 'its quest: Training Grounds');
     assert.deepStrictEqual(w.raid.keep(8002), { code: 200, body: { ok: true } });
     assert.strictEqual(w.player.raid.kept, 'WW-0');
     assert(w.saves > 0);
     assert.deepStrictEqual(ids(), [8000, 8002, 8001], 'the kept raid beside the current one');
     const kept = w.raid.events(TUE)[1];
-    assert.deepStrictEqual([kept.eventType, kept.bannerUrl], [2, 'http://x/web/raid/img/v1/8002-kept.png']);
+    assert.deepStrictEqual([kept.eventType, kept.bannerUrl], [2, `http://x/web/raid/img/v${RAID_IMG_VERSION}/8002-kept.png`]);
     assert.deepStrictEqual(kept.stages.map((s) => s.stageId), [STAGE + 5], 'only its available tiers');
     assert.deepStrictEqual(w.raid.keep(8003).code, 200);
     assert.deepStrictEqual(ids(), [8000, 8003, 8001], 'keeping another replaces it');
@@ -904,7 +905,7 @@ function wiring() {
     assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events.map((e) => e.eventStageId), [8999]);
     Object.assign(k, { start: '2015-01-01', end: '2099-12-31' });
   }
-  assert.strictEqual(ev[0].bannerUrl, `${t.WEB_BASE}/web/raid/img/v1/8999.png`);
+  assert.strictEqual(ev[0].bannerUrl, `${t.WEB_BASE}/web/raid/img/v${RAID_IMG_VERSION}/8999.png`);
   assert.strictEqual(ev[0].stages[0].useAp, 90);
 
   p.ap = 200; p.apTime = TUE;
