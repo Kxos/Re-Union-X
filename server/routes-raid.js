@@ -363,3 +363,4 @@ module.exports.smokeReader = smokeReader;
 module.exports.SMOKE_MAX_AGE_MS = SMOKE_MAX_AGE_MS;
 module.exports.isBonusTime = isBonusTime;
 module.exports.questApAt = questApAt;
+module.exports.RAID_IMG_VERSION = RAID_IMG_VERSION;
