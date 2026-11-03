@@ -469,6 +469,14 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   - **Rows for the 17 parts with complete original graphics** (689 rows); `pet_parts.tsv` third column `recon` (reconstructed
     textures awaiting approval: no row) / `recon-ok` (approved: 402028, 410014). `KHUX_PET_RECON=all` adds the `recon` rows
     for a local preview. `server/test-pet-parts.js`.
+  - **Blur fix (3 Nov 2026, user on the device: 407009 green fairy, 407043 Flying Carpet, 402029 Pointy Pumpkin Hat blurry).**
+    Cause: their textures are stored LARGER than the LWF texture table declares (fairy 106x148 for 42x59, carpet frames 2x,
+    hat ~1.8x; the dump keeps newer, larger bitmaps next to an LWF with the old sizes) and the client draws them at the
+    declared resolution, then the animation scales them up. Fix: `jp_pet_parts.hires_lwf` serves a patched LWF copy that
+    declares the real size, scales the fragments by k and appends a 1/k matrix to each bitmap that draws them (same place
+    and size on screen, k times more texels); report key `hires`, `import_jp_coco.py` writes it. Only files larger than
+    declared (the small 51x60 sparkle placeholders stay as they are). Also applies to 402119, 410010, 410014, 410019 (served)
+    and to the recon candidates 402029, 407006, 410003, 410021. `recon/tools/test_jp_pet_parts.py`.
 - **Visible pet** (11 October evening, to be tested on the bench): `make_pet_motions.py` writes every
   motion as a root with 9 empty movies named like the parts of 001 (only those: no
   load towards missing files) and one pose per frame (PLACE at the first, MOVEM afterwards; strings,

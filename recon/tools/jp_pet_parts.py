@@ -17,6 +17,10 @@ the LWF declares is used as it is (the original game shipped such files: avatar 
 410014 the same); report key `own_resized`. Reconstructed textures: `recon_root` (the private pet_parts_recon/files
 folder, with its README) gives a file for a texture missing from every source; report key `reconstructed`.
 
+Larger file than declared (3 Nov 2026, blur fix): when a served texture is stored larger than the LWF declares, the LWF is
+served as a patched copy (`hires_lwf`) that declares the real size and keeps the drawn size; report key `hires`
+({served LWF name: bytes}, written by import_jp_coco.py instead of the dump's LWF).
+
     python -I recon/tools/jp_pet_parts.py <JP_ROOT> [RECON_ROOT] (resoconto, non scrive nulla)
 """
 import os
@@ -68,6 +72,92 @@ def _num(series):
     return int(series)
 
 
+FLAG = 0x80000000
+
+
+def hires_lwf(data, real):
+    """LWF bytes with every texture of `real` ({texture name: (w, h)} of the file actually served) that is stored LARGER
+    than declared re-declared at its real pixel size, at the same place and size on screen (3 Nov 2026, blur fix).
+
+    The client draws such a texture at its declared resolution: 407009 Balloon Fairies (green fairy 106x148 declared 42x59,
+    scaled x2.5 by the animation), 407043 Flying Carpet (4 frames 2x the declared size) and 402029 Pointy Pumpkin Hat (all
+    ~1.8x) came out blurry on the device, while the parts whose files match the table are sharp. The dump holds the newer,
+    larger bitmaps next to an LWF that still declares the old sizes. The copy changes only: the texture table (w, h), the
+    fragments of those textures (x, y, u, v, w, h times kx = real w / declared w, ky likewise) and the matrix of each bitmap
+    that draws them (followed by a scale 1/kx, 1/ky, new entries appended to the matrix table): every drawn point lands
+    where it did, the quad just carries k times more texels. Returns None when nothing changes."""
+    sys.path.insert(0, HERE)
+    from make_pet_motions import SECTIONS
+    b = bytearray(data)
+    sec = [list(struct.unpack_from('<2i', b, 32 + 8 * i)) for i in range(len(SECTIONS))]
+    S = {n: i for i, n in enumerate(SECTIONS)}
+    HEADER = 0x20 + 8 * len(SECTIONS) + 4
+    sb = sec[S['stringBytes']][0]
+    so, sn = sec[S['stringData']]
+    strs = [b[sb + a:sb + a + n].decode() for a, n in (struct.unpack_from('<2i', b, so + 8 * k) for k in range(sn))]
+    to, tn = sec[S['texture']]
+    k_of = {}
+    for t in range(tn):
+        s, fmt, w, h, sc = struct.unpack_from('<4if', b, to + 20 * t)
+        rw, rh = real.get(strs[s], (w, h))
+        if rw > w and rh > h:
+            k_of[t] = (rw / w, rh / h)
+            struct.pack_into('<4if', b, to + 20 * t, s, fmt, rw, rh, sc)
+    if not k_of:
+        return None
+    fo, fn = sec[S['textureFragment']]
+    frag_k = {}
+    for f in range(fn):
+        sid, tex, rot, x, y, u, v, w, h = struct.unpack_from('<9i', b, fo + 36 * f)
+        if tex in k_of:
+            kx, ky = k_of[tex]
+            if rot:      # rotated fragments: never in the pet parts, not handled
+                raise ValueError('rotated fragment %d' % f)
+            frag_k[f] = (kx, ky)
+            struct.pack_into('<9i', b, fo + 36 * f, sid, tex, rot, round(x * kx), round(y * ky), round(u * kx),
+                             round(v * ky), round(w * kx), round(h * ky))
+    tro = sec[S['translate']][0]
+    mo, mn = sec[S['matrix']]
+    new, index = [], {}
+
+    def scaled(mid, kx, ky):
+        if mid & FLAG:
+            sx, sy, k0, k1, tx, ty = struct.unpack_from('<6f', b, mo + 24 * (mid & 0x7fffffff))
+        else:
+            (tx, ty), sx, sy, k0, k1 = struct.unpack_from('<2f', b, tro + 8 * mid), 1.0, 1.0, 0.0, 0.0
+        m = (sx / kx, sy / ky, k0 / ky, k1 / kx, tx, ty)
+        if m not in index:
+            index[m] = mn + len(new)
+            new.append(m)
+        return FLAG | index[m]
+
+    for name, fmt in (('bitmap', '<2i'), ('bitmapEx', '<3i4f')):
+        o, n = sec[S[name]]
+        size = struct.calcsize(fmt)
+        for i in range(n):
+            rec = list(struct.unpack_from(fmt, b, o + size * i))
+            if rec[1] in frag_k:
+                rec[0] = scaled(rec[0] & 0xffffffff, *frag_k[rec[1]])
+                rec[0] = rec[0] - (1 << 32) if rec[0] & FLAG else rec[0]
+                struct.pack_into(fmt, b, o + size * i, *rec)
+    # append the new matrices at the end of the matrix table: the sections are stored in table order, back to back
+    offs = [s[0] for s in sec]
+    assert offs == sorted(offs) and offs[0] == HEADER, 'sections not in table order'
+    end = mo + 24 * mn
+    nxt = sec[S['matrix'] + 1][0]
+    assert end == nxt, 'matrix table not followed by the next section'
+    blob = b''.join(struct.pack('<6f', *m) for m in new)
+    for i in range(S['matrix'] + 1, len(SECTIONS)):
+        sec[i][0] += len(blob)
+    sec[S['matrix']][1] = mn + len(new)
+    for i, (o, n) in enumerate(sec):
+        struct.pack_into('<2i', b, 32 + 8 * i, o, n)
+    total = struct.unpack_from('<i', b, HEADER - 4)[0]
+    assert total == len(b), 'LWF length field'
+    struct.pack_into('<i', b, HEADER - 4, total + len(blob))
+    return bytes(b[:end]) + blob + bytes(b[end:])
+
+
 def collect(jp_root, served=(), recon_root=None):
     """{nome servito: percorso JP} per tutte le parti e le icone non gia' servite, piu' il resoconto."""
     root = os.path.join(jp_root, 'lwf', 'pet', 'part')
@@ -117,7 +207,7 @@ def collect(jp_root, served=(), recon_root=None):
         cands = av_png.get((name[len(part) + 1:], tuple(size)), [])
         return cands[0] if len(cands) == 1 else None
 
-    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'reconstructed': [], 'own_resized': [], 'skipped': []}
+    out, report = {}, {'lwf_twin': [], 'png_twin': [], 'avatar_twin': [], 'reconstructed': [], 'own_resized': [], 'skipped': [], 'hires': {}}
     for (series, part), files in sorted(dirs.items()):
         base = 'lwf/pet/part/%s/%s/' % (series, part)
         if base + part + '.lwf' in served:
@@ -161,11 +251,15 @@ def collect(jp_root, served=(), recon_root=None):
             out[base + part + '.lwf'] = lwf
             for name, path in pick.items():
                 out[base + name] = path
+            hi = hires_lwf(open(lwf, 'rb').read(), {n: _png_size(p) for n, p in pick.items()})
+            if hi:
+                report['hires'][base + part + '.lwf'] = hi
             continue
         report['skipped'].append((series, part, 'texture senza gemella'))
     # una parte incompleta esclude tutta la serie (l'accessorio si disegnerebbe a meta')
     bad = {s for s, _, _ in report['skipped']}
     out = {k: v for k, v in out.items() if k.split('/')[3] not in bad}
+    report['hires'] = {k: v for k, v in report['hires'].items() if k.split('/')[3] not in bad}
     report['missing_series'] = sorted(bad)
     icons = os.path.join(jp_root, 'img', 'petParts')
     if os.path.isdir(icons):
@@ -189,4 +283,6 @@ if __name__ == '__main__':
             print('  %s' % k, s[0], s[1], s[2].encode('ascii', 'backslashreplace').decode())
     for s in rep['skipped']:
         print('  saltata', *s)
+    for k in sorted(rep['hires']):
+        print('  hires', k)
     print('serie escluse:', ' '.join(rep['missing_series']))
