@@ -3084,6 +3084,30 @@ lwf/battleresult/Raid_Defeated/	b16
 # 48c. Banner dei boss nella lista raid (I-221)
 img/adventure/boss_L/	jp
 img/adventure/boss_L/	b16
+#     Served bosses without an original list banner (render8, user-approved 3 Nov): the twin model's JP card for 18-21 and 1011,
+#     and 17 RECONSTRUCTED RaidBoss_<id> banners scaled and cropped from the JP card (recon/tools/raid_list_banners.py, --loc).
+img/adventure/boss_L/RaidBoss_15.png	loc	=img/adventure/boss_L/RaidBoss_15.png	# RECONSTRUCTED from raid_boss_15 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_16.png	loc	=img/adventure/boss_L/RaidBoss_16.png	# RECONSTRUCTED from raid_boss_16 (scaled, cropped)
+img/adventure/boss_L/raid_boss_18.png	jp	img/adventure/boss_L/raid_boss_2007.png	# card of the twin model 2007 (identical textures)
+img/adventure/boss_L/RaidBoss_18.png	loc	=img/adventure/boss_L/RaidBoss_18.png	# RECONSTRUCTED from raid_boss_2007 (scaled, cropped)
+img/adventure/boss_L/raid_boss_19.png	jp	img/adventure/boss_L/raid_boss_2001.png	# card of the twin model 2001 (identical textures)
+img/adventure/boss_L/RaidBoss_19.png	loc	=img/adventure/boss_L/RaidBoss_19.png	# RECONSTRUCTED from raid_boss_2001 (scaled, cropped)
+img/adventure/boss_L/raid_boss_20.png	jp	img/adventure/boss_L/raid_boss_2000.png	# card of the twin model 2000 (identical textures)
+img/adventure/boss_L/RaidBoss_20.png	loc	=img/adventure/boss_L/RaidBoss_20.png	# RECONSTRUCTED from raid_boss_2000 (scaled, cropped)
+img/adventure/boss_L/raid_boss_21.png	jp	img/adventure/boss_L/raid_boss_2008.png	# card of the twin model 2008 (identical textures)
+img/adventure/boss_L/RaidBoss_21.png	loc	=img/adventure/boss_L/RaidBoss_21.png	# RECONSTRUCTED from raid_boss_2008 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_22.png	loc	=img/adventure/boss_L/RaidBoss_22.png	# RECONSTRUCTED from raid_boss_22 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_23.png	loc	=img/adventure/boss_L/RaidBoss_23.png	# RECONSTRUCTED from raid_boss_23 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_24.png	loc	=img/adventure/boss_L/RaidBoss_24.png	# RECONSTRUCTED from raid_boss_24 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_25.png	loc	=img/adventure/boss_L/RaidBoss_25.png	# RECONSTRUCTED from raid_boss_25 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_26.png	loc	=img/adventure/boss_L/RaidBoss_26.png	# RECONSTRUCTED from raid_boss_26 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_27.png	loc	=img/adventure/boss_L/RaidBoss_27.png	# RECONSTRUCTED from raid_boss_27 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_28.png	loc	=img/adventure/boss_L/RaidBoss_28.png	# RECONSTRUCTED from raid_boss_28 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_30.png	loc	=img/adventure/boss_L/RaidBoss_30.png	# RECONSTRUCTED from raid_boss_30 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_31.png	loc	=img/adventure/boss_L/RaidBoss_31.png	# RECONSTRUCTED from raid_boss_31 (scaled, cropped)
+img/adventure/boss_L/RaidBoss_32.png	loc	=img/adventure/boss_L/RaidBoss_32.png	# RECONSTRUCTED from raid_boss_32 (scaled, cropped)
+img/adventure/boss_L/raid_boss_1011.png	jp	img/adventure/boss_L/raid_boss_2012.png	# card of the twin model 2012 (identical textures)
+img/adventure/boss_L/RaidBoss_1011.png	loc	=img/adventure/boss_L/RaidBoss_1011.png	# RECONSTRUCTED from raid_boss_2012 (scaled, cropped)
 # 48d. Immagine inglese «Raid Boss Defeated!» al posto di quella JP del layout (I-221)
 cocostudio/publish/Result_Clear_Raid.png	b16
 
@@ -15046,3 +15070,162 @@ lwf/character/raid/1005/knockback2/knockback2_e38393e38383e38388e3839ee38383e383
 lwf/character/raid/1005/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972032362e706e67.png	b16	lwf/character/raid/1005/knockback2/knockback2_31.png	# 2016-same-model, 2016 table alignment
 lwf/character/raid/1005/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972032352e706e67.png	b16	lwf/character/raid/1005/knockback2/knockback2_32.png	# 2016-same-model, 2016 table alignment
 lwf/character/raid/1005/atk1/atk1_e38393e38383e38388e3839ee38383e383972037342e706e67.png	b16	lwf/character/raid/1005/atk1/atk1_2.png	# same model, same table position (slot 0 of both tables, next sizes 216x209, 8x12, 9x6)
+# 49g. English demo subtitles (render8, user-approved 3 Nov): the 52 JP demo LWFs of 0018-0028, 0030-0032, 1011, 9101-9103 rewritten
+#      with the declared size of the 2 subtitle textures (recon/tools/raid_demo_english.py, --loc), and the original 2016 English
+#      subtitle images under the JP names. Last in section 49, so they win over the copies above.
+lwf/raid/demo/start_0018/start_0018.lwf	loc	=lwf/raid/demo/start_0018/start_0018.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0018/start_0018_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0018/start_0018_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0018/escape_0018.lwf	loc	=lwf/raid/demo/escape_0018/escape_0018.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0018/escape_0018_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0018/escape_0018_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0018/put_down_0018.lwf	loc	=lwf/raid/demo/put_down_0018/put_down_0018.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0018/put_down_0018_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0018/put_down_0018_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0019/start_0019.lwf	loc	=lwf/raid/demo/start_0019/start_0019.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0019/start_0019_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0019/start_0019_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0019/escape_0019.lwf	loc	=lwf/raid/demo/escape_0019/escape_0019.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0019/escape_0019_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0019/escape_0019_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0019/put_down_0019.lwf	loc	=lwf/raid/demo/put_down_0019/put_down_0019.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0019/put_down_0019_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0019/put_down_0019_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0020/start_0020.lwf	loc	=lwf/raid/demo/start_0020/start_0020.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0020/start_0020_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0020/start_0020_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0020/escape_0020.lwf	loc	=lwf/raid/demo/escape_0020/escape_0020.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0020/escape_0020_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0020/escape_0020_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0020/put_down_0020.lwf	loc	=lwf/raid/demo/put_down_0020/put_down_0020.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0020/put_down_0020_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0020/put_down_0020_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0021/start_0021.lwf	loc	=lwf/raid/demo/start_0021/start_0021.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0021/start_0021_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0021/start_0021_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0021/escape_0021.lwf	loc	=lwf/raid/demo/escape_0021/escape_0021.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0021/escape_0021_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0021/escape_0021_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0021/put_down_0021.lwf	loc	=lwf/raid/demo/put_down_0021/put_down_0021.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0021/put_down_0021_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0021/put_down_0021_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0022/start_0022.lwf	loc	=lwf/raid/demo/start_0022/start_0022.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0022/start_0022_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0022/start_0022_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0022/escape_0022.lwf	loc	=lwf/raid/demo/escape_0022/escape_0022.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0022/escape_0022_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0022/escape_0022_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0022/put_down_0022.lwf	loc	=lwf/raid/demo/put_down_0022/put_down_0022.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0022/put_down_0022_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0022/put_down_0022_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0023/start_0023.lwf	loc	=lwf/raid/demo/start_0023/start_0023.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0023/start_0023_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0023/start_0023_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0023/escape_0023.lwf	loc	=lwf/raid/demo/escape_0023/escape_0023.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0023/escape_0023_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0023/escape_0023_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0023/put_down_0023.lwf	loc	=lwf/raid/demo/put_down_0023/put_down_0023.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0023/put_down_0023_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0023/put_down_0023_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0024/start_0024.lwf	loc	=lwf/raid/demo/start_0024/start_0024.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0024/start_0024_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0024/start_0024_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0024/escape_0024.lwf	loc	=lwf/raid/demo/escape_0024/escape_0024.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0024/escape_0024_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0024/escape_0024_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0024/put_down_0024.lwf	loc	=lwf/raid/demo/put_down_0024/put_down_0024.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0024/put_down_0024_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0024/put_down_0024_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0025/start_0025.lwf	loc	=lwf/raid/demo/start_0025/start_0025.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0025/start_0025_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0025/start_0025_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0025/escape_0025.lwf	loc	=lwf/raid/demo/escape_0025/escape_0025.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0025/escape_0025_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0025/escape_0025_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0025/put_down_0025.lwf	loc	=lwf/raid/demo/put_down_0025/put_down_0025.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0025/put_down_0025_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0025/put_down_0025_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0026/start_0026.lwf	loc	=lwf/raid/demo/start_0026/start_0026.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0026/start_0026_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0026/start_0026_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0026/escape_0026.lwf	loc	=lwf/raid/demo/escape_0026/escape_0026.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0026/escape_0026_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0026/escape_0026_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0026/put_down_0026.lwf	loc	=lwf/raid/demo/put_down_0026/put_down_0026.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0026/put_down_0026_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0026/put_down_0026_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0027/start_0027.lwf	loc	=lwf/raid/demo/start_0027/start_0027.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0027/start_0027_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0027/start_0027_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0027/escape_0027.lwf	loc	=lwf/raid/demo/escape_0027/escape_0027.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0027/escape_0027_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0027/escape_0027_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0027/put_down_0027.lwf	loc	=lwf/raid/demo/put_down_0027/put_down_0027.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0027/put_down_0027_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0027/put_down_0027_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0028/start_0028.lwf	loc	=lwf/raid/demo/start_0028/start_0028.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0028/start_0028_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0028/start_0028_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0028/escape_0028.lwf	loc	=lwf/raid/demo/escape_0028/escape_0028.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0028/escape_0028_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0028/escape_0028_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0028/put_down_0028.lwf	loc	=lwf/raid/demo/put_down_0028/put_down_0028.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0028/put_down_0028_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0028/put_down_0028_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0030/start_0030.lwf	loc	=lwf/raid/demo/start_0030/start_0030.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0030/start_0030_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0030/start_0030_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0030/escape_0030.lwf	loc	=lwf/raid/demo/escape_0030/escape_0030.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0030/escape_0030_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0030/escape_0030_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0030/put_down_0030.lwf	loc	=lwf/raid/demo/put_down_0030/put_down_0030.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0030/put_down_0030_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0030/put_down_0030_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0031/start_0031.lwf	loc	=lwf/raid/demo/start_0031/start_0031.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0031/start_0031_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0031/start_0031_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0031/escape_0031.lwf	loc	=lwf/raid/demo/escape_0031/escape_0031.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0031/escape_0031_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0031/escape_0031_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0031/put_down_0031.lwf	loc	=lwf/raid/demo/put_down_0031/put_down_0031.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0031/put_down_0031_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0031/put_down_0031_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0032/start_0032.lwf	loc	=lwf/raid/demo/start_0032/start_0032.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_0032/start_0032_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_0032/start_0032_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0032/escape_0032.lwf	loc	=lwf/raid/demo/escape_0032/escape_0032.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_0032/escape_0032_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_0032/escape_0032_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0032/put_down_0032.lwf	loc	=lwf/raid/demo/put_down_0032/put_down_0032.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_0032/put_down_0032_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_0032/put_down_0032_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_1011/start_1011.lwf	loc	=lwf/raid/demo/start_1011/start_1011.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_1011/start_1011_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_1011/start_1011_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_1011/escape_1011.lwf	loc	=lwf/raid/demo/escape_1011/escape_1011.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_1011/escape_1011_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_1011/escape_1011_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_1011/put_down_1011.lwf	loc	=lwf/raid/demo/put_down_1011/put_down_1011.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_1011/put_down_1011_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_1011/put_down_1011_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_9101/start_9101.lwf	loc	=lwf/raid/demo/start_9101/start_9101.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_9101/start_9101_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_9101/start_9101_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9101/escape_9101.lwf	loc	=lwf/raid/demo/escape_9101/escape_9101.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_9101/escape_9101_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9101/escape_9101_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9101/put_down_9101.lwf	loc	=lwf/raid/demo/put_down_9101/put_down_9101.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_9101/put_down_9101_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9101/put_down_9101_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9102/escape_9102.lwf	loc	=lwf/raid/demo/escape_9102/escape_9102.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9102/escape_9102_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9102/put_down_9102.lwf	loc	=lwf/raid/demo/put_down_9102/put_down_9102.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9102/put_down_9102_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9103/escape_9103.lwf	loc	=lwf/raid/demo/escape_9103/escape_9103.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_9103/escape_9103_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9103/put_down_9103.lwf	loc	=lwf/raid/demo/put_down_9103/put_down_9103.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_9103/put_down_9103_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
