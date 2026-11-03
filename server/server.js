@@ -1742,7 +1742,7 @@ function respondGachaWeb(res, url) {
   const banners = gachaCatalog().banners, story = storyCtx(), shop = gachaShopList(story);
   const ctx = { ...story, sizes: GACHA_SIZES, show: GACHA_SHOW, shown: new Set(shop.map((b) => b.drawMedalTypeId)) };
   if (/^\/web\/gacha\/catalog$/i.test(p)) {
-    const cat = gacha.catalogPage(banners, ctx);
+    const cat = gacha.catalogPage(banners, { ...ctx, spirit: PET_DRAW });
     if (!PET_DRAW) return html(cat);
     const pctx = petPageCtx(true);
     return html(cat.replace('<div class="dim" id="dim">', `${petDrawPages.catalogSection(pctx.banners, pctx)}<div class="dim" id="dim">`));
