@@ -127,13 +127,15 @@ function lookups(m) {
     if (!x) return 0;
     return ((m.avatarParts || []).find((r) => r.name === x[1] && r.gender === (x[2] === '♂' ? 1 : 2)) || {}).avatarPartsId || 0;
   };
+  // Spirit parts (03-11): «Spirit: Name» -> petPartsId of the master petParts row with that name (0 = no row)
+  const petPartId = (name) => ((m.petParts || []).find((r) => r.name === String(name).trim()) || {}).petPartsId || 0;
   // map form of an enemy (as enemy_id of gen_story_maps.py): target 1xxxx, others 8xxxx, otherwise the smallest id
   const mapEnemyId = (name, target) => {
     const ids = (m.enemy || []).filter((e) => lower(e.name) === lower(name)).map((e) => e.enemyId).sort((a, b) => a - b);
     return ids.find((i) => (target ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
   };
   return {
-    enemyId, medalId, materialId, avatarPartId, mapEnemyId, avatarParts: m.avatarParts || [],
+    enemyId, medalId, materialId, avatarPartId, petPartId, mapEnemyId, avatarParts: m.avatarParts || [],
     titleId: (name) => ((m.title || []).find((r) => r.title === name) || {}).titleId || 0,
     keybladeId: (name) => ((m.keyblade || []).find((k) => k.name === name && !k.lv) || {}).keybladeId || 0,
     skillId: (name) => ((m.skill || []).find((s) => s.name === name) || {}).skillId || 0,
@@ -156,6 +158,9 @@ function rewardOf(o, L) {
   const q = num(o.qty) || 1;
   if (o.reward === 'Munny') return [4, 0, q];
   if (/^Draw Tickets?$/i.test(o.reward)) return [41, 0, q]; // as make-limited-missions.js
+  // «Spirit: Name» = Spirit part, reward type 33 (itemId = petPartsId, as the Limited missions); unknown name -> null
+  const sp = /^Spirit:\s*(.+)$/.exec(o.reward);
+  if (sp) { const id = L.petPartId ? L.petPartId(sp[1]) : 0; return id ? [33, id, 1] : null; }
   const part = L.avatarPartId(o.reward);
   if (part) return [20, part, 1];
   if (!['Mythril Shard', 'Avatar Coin', 'Jewel', 'Title', 'Trophy'].includes(o.reward)) {
@@ -441,6 +446,14 @@ function weeklyEntries(rules, catalogue, L, report = { weeklyLeftOut: [], weekly
           let label = weeklyLabel(r, row.banner);
           if (!label) return null;
           let [, name, qty] = /^(.*) x(\d+)$/.exec(label);
+          // Spirit part set (spec.spirit, 03-11): every reward that is not Jewels or a medal is a Spirit part of the master
+          // petParts (type 33), before the aliases (which map some names to avatar parts); without a petParts row (a part
+          // whose reconstructed graphics are not approved yet) the slot gets the filler, reported as left out
+          if (spec.spirit && name !== 'Jewel' && !/★$/.test(name)) {
+            if (L.petPartId(name)) return `Spirit: ${name} x1`;
+            report.weeklyLeftOut.push([key, i + 1, name]);
+            return `${WEEKLY_FILLER} x1`;
+          }
           if (Object.prototype.hasOwnProperty.call(aliases, name)) {
             if (aliases[name] === null) { report.weeklyLeftOut.push([key, i + 1, name]); return `${WEEKLY_FILLER} x1`; }
             report.weeklyAliased.push([key, i + 1, name, aliases[name]]);
@@ -634,6 +647,9 @@ function mapsOf(index, stageRows, rewardRows, masterRows, L) {
 }
 
 const readJson = (p, dflt) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return dflt; } };
+// Spirit parts: server/tables/petParts.json (make-pet-parts.js, copied into the master after this generator runs), else
+// the master folder's copy
+const petPartsTable = (masterDir) => readJson(path.join(__dirname, 'tables', 'petParts.json'), null) || readJson(path.join(masterDir, 'petParts.json'), []);
 
 // appends the rows to the master tables (own rows of a previous run dropped first) and writes game_data/special.json
 // Returns null (nothing written) with KHUX_SPECIAL=0 or without the private catalogue.
@@ -666,7 +682,7 @@ function patch(masterDir, opts = {}) {
   if (foreignEnemy.length) throw new Error(`special: enemy row ${foreignEnemy[0].enemyId} («${foreignEnemy[0].name}») is not a training enemy`);
   const enemy = allEnemy.filter((r) => !isOwnEnemy(r));
   const out = build(rules, catalogue, { stage, reward, enemy, medal: t('medal'), material: t('material'), skill: t('skill'),
-    title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts'), enemyAttack: t('enemyAttack') });
+    title: t('title'), keyblade: t('keyblade'), avatarParts: t('avatarParts'), enemyAttack: t('enemyAttack'), petParts: petPartsTable(masterDir) });
   fs.writeFileSync(path.join(masterDir, 'stage.json'), JSON.stringify([...stage, ...out.stageRows]));
   fs.writeFileSync(path.join(masterDir, 'evStage.json'), JSON.stringify([...evStage, ...out.evStageRows]));
   fs.writeFileSync(path.join(masterDir, 'reward.json'), JSON.stringify([...reward, ...out.rewardRows]));

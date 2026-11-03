@@ -58,6 +58,10 @@ const built = pages.buildNames((n) => ({ reward: [{ rewardId: 5, type: [3, 5, 2]
   stage: [{ stageId: 3, validSubmission: 2, submissionName: ['Defeat %s x %d', 'Defeat the ${1:%s} within ${2:%d :#turn:#turns}', ''], submissionIdType: [1, 1, 0],
     submissionId: [77, 77, 0], submissionNum: [2, 1, 0], submissionRewardType: [5, 14, 0], submissionItemId: [8, 0, 0], submissionItemNum: [4, 5, 0] }] }[n] || []));
 check(built.drop(5).join() === 'Huey,Mythril,Jewels' && built.objective(3).join() === 'Mythril,Avatar Coin' && built.drop(99).length === 0, 'buildNames');
+// 03-11: Spirit part rewards (type 33) by their petParts name
+const builtP = pages.buildNames((n) => ({ petParts: [{ petPartsId: 402091, name: "Goofy's Hat" }],
+  stage: [{ stageId: 4, submissionRewardType: [2, 33, 3], submissionItemId: [0, 402091, 9] }], medal: [{ medalId: 9, name: 'Moogle' }] }[n] || []));
+check(builtP.objective(4).join() === "Jewels,Goofy's Hat,Moogle", `buildNames: Spirit part (${builtP.objective(4)})`);
 const none = pages.catalogPage(index, { period: 4, pinnedKey: '', vip: false, periods: PERIODS });
 check(!none.includes('Replaces:'), 'no Replaces without a pin');
 // final review: the status of a current-period entry comes from special.currentEntries (the quests of this Shop week)

@@ -415,6 +415,32 @@ check(index.catalog.dummyEnemyId === ms.DUMMY_ENEMY_ID && (index.catalog.rewardI
   const errOf = (r, cat) => { try { ms.build(r, cat, masterW); return ''; } catch (err) { return err.message; } };
   check(/week-version id 7650 outside 7700-7999/.test(errOf({ ...rules, weekly: { ...weekly, versions: { ...weekly.versions, 'beta@2020-06-15': { evStageId: 7650 } } } }, catW)),
     'a frozen week-version id below 7700 rejected with a clear message');
+  // 03-11 (Spirit parts restored): «Spirit: <name> xN» = reward type 33 (petPartsId) from master petParts; a set with
+  // spirit: true pays its parts as Spirit parts (not the avatar accessory of the same name), the original 3rd reward
+  // (Moogle 6★) stays; a part without a petParts row (graphics not approved yet) falls back to the filler, reported
+  const masterP = { ...masterW, petParts: [{ petPartsId: 402091, name: 'Fur Hat' }, { petPartsId: 304021, name: 'Fur Head' }, { petPartsId: 308021, name: 'Fur Body' }],
+    avatarParts: [{ avatarPartsId: 208001, name: 'Fur Hat', gender: 1 }, { avatarPartsId: 208002, name: 'Fur Hat', gender: 2 }] };
+  const catP = { ...catW, vip_recurring_weekly: { 'VIP! Spirit': [
+    { banner: 'Get Fur Hat spirit part!', dates: '06/01/20 - 06/07/20', rewards: ['1400 Jewels', 'Fur Hat', '1 6★ Moogle'] },
+    { banner: 'Get Fur spirit parts!', dates: '06/08/20 - 06/14/20', rewards: ['1400 Jewels', 'Fur Head', 'Fur Body'] },
+    { banner: 'Get Lost spirit part!', dates: '06/15/20 - 06/21/20', rewards: ['1400 Jewels', 'Not Approved Yet', '1 6★ Moogle'] },
+  ] } };
+  const op = ms.build({ ...rules, weekly: { sets: { 'VIP! Spirit': { entry: 'beta', spirit: true } } } }, catP, masterP);
+  const pv = op.index.entries.filter((x) => x.weekOf);
+  const prow = (k) => op.stageRows.find((r) => r.stageId === (pv.find((x) => x.key === k) || { stageIds: [] }).stageIds[0]) || {};
+  check(prow('beta@2020-06-01').submissionRewardType?.join() === '2,33,3' && prow('beta@2020-06-01').submissionItemId?.join() === '0,402091,90016',
+    `spirit set: Jewels, the Spirit part (type 33), Moogle 6★ (${prow('beta@2020-06-01').submissionRewardType} / ${prow('beta@2020-06-01').submissionItemId})`);
+  check(prow('beta@2020-06-08').submissionRewardType?.join() === '2,33,33' && prow('beta@2020-06-08').submissionItemId?.join() === '0,304021,308021', 'spirit set: two parts in one week');
+  check(prow('beta@2020-06-15').submissionRewardType?.join() === '2,3,3' && op.report.weeklyLeftOut.some(([k, i, n]) => k === 'beta@2020-06-15' && i === 2 && n === 'Not Approved Yet'),
+    'spirit set: a part without a petParts row -> Moogle 6★, reported');
+  check(!op.stageRows.some((r) => (r.submissionRewardType || []).includes(20)), 'spirit set: no avatar part (type 20)');
+  // explicit label in an entry's rewards; an unknown Spirit part is rejected like any unknown reward
+  const opE = ms.build({ ...rules, entries: rules.entries.map((x) => (x.key === 'beta' ? { ...x, rewards: ['Jewel x1400', 'Spirit: Fur Hat x1', 'Moogle 6★ x1'] } : x)) }, catalogue, masterP);
+  const be = opE.stageRows.find((r) => r.stageId === opE.index.entries.find((x) => x.key === 'beta').stageIds[0]);
+  check(be.submissionRewardType.join() === '2,33,3' && be.submissionItemId.join() === '0,402091,90016', `«Spirit: Fur Hat x1» -> [33, 402091] (${be.submissionRewardType} / ${be.submissionItemId})`);
+  let badP = false;
+  try { ms.build({ ...rules, entries: rules.entries.map((x) => (x.key === 'beta' ? { ...x, rewards: ['Jewel x1400', 'Spirit: Nope x1', 'Moogle 6★ x1'] } : x)) }, catalogue, masterP); } catch { badP = true; }
+  check(badP, 'unknown «Spirit: …» reward rejected');
 }
 {
   const catC = { ...catalogue, quests: [...catalogue.quests, { quest: 'VIP! Medal Quest', series: 'VIP! Medal Quest', world: 'Wonderland', room: "White Rabbit's House", ap: 'zero', level: '15', target: 'King Pretender', objectives: [
@@ -497,7 +523,8 @@ const SRC = process.env.KHUX_SPECIAL_SRC || 'D:\\Progetto_Restauro_KH_UX\\privat
 if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   const t = (n) => JSON.parse(fs.readFileSync(path.join(MASTER, n + '.json'), 'utf8'));
   const all = ms.build(real, JSON.parse(fs.readFileSync(SRC, 'utf8')), { stage: t('stage'), enemy: t('enemy'), medal: t('medal'),
-    material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack') });
+    material: t('material'), reward: t('reward'), skill: t('skill'), title: t('title'), avatarParts: t('avatarParts'), keyblade: t('keyblade'), enemyAttack: t('enemyAttack'),
+    petParts: JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'petParts.json'), 'utf8')) });
   const live = real.entries.filter((e) => !e.removed && !e.weeklyOnly);
   const weeklyV = all.index.entries.filter((e) => e.weekOf);
   check(all.evStageRows.length === 1 + live.length + 120 + 198, `real build: ${all.evStageRows.length} evStage rows (1 + ${live.length} + 120 campaigns + 198 week versions)`);
@@ -548,6 +575,23 @@ if (fs.existsSync(path.join(MASTER, 'stage.json')) && fs.existsSync(SRC)) {
   check(JSON.stringify(perSet) === JSON.stringify({ 'vip-medal': 46, 'vip-gems': 18, 'vip-draw-ticket': 8, 'vip-dual-meow-wow': 5, 'vip-spirit-part': 14, 'vip-jewels-avatar': 81, 'vip-subslot': 2, 'vip-skill': 24 }),
     `real build: week versions per set ${JSON.stringify(perSet)}`);
   check(weeklyV.every((e) => real.weekly.versions[e.key]?.evStageId === e.evStageId && e.evStageId >= 7700 && e.evStageId <= 7999), 'real build: week version ids frozen in special_periods.json (7700-7999)');
+  // 03-11 fix: the VIP Spirit Part quests pay the Spirit part (type 33), never the avatar accessory (20); each week its
+  // original part(s) (Elsa's Magic: graphics awaiting approval -> Moogle 6★ until its row exists)
+  const pRows = JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'petParts.json'), 'utf8'));
+  const pName = new Map(pRows.map((r) => [r.petPartsId, r.name]));
+  const spiritQ = all.index.entries.filter((e) => /spirit/i.test(JSON.stringify(e)));
+  const objs = (e) => e.stageIds.map((id) => all.stageRows.find((r) => r.stageId === id)).map((r) => r.submissionRewardType.map((t, i) => (t === 33 ? `S:${pName.get(r.submissionItemId[i])}` : `${t}:${r.submissionItemId[i]}`)));
+  check(spiritQ.length === 22 && !spiritQ.some((e) => objs(e).flat().some((x) => x.startsWith('20:'))), `real build: 22 Spirit Part quests, no avatar part (${spiritQ.length})`);
+  const wkParts = Object.fromEntries(weeklyV.filter((e) => e.weekOf === 'vip-spirit-part').map((e) => [e.key.split('@')[1], objs(e)[0].join('|')]));
+  const WANT = { '2020-03-09': '2:0|S:Double Cookie Headband|3:90016', '2020-03-23': '2:0|S:Lion Dancer|3:90016', '2020-03-30': '2:0|S:Chocolate Hamstar Head|S:Chocolate Hamstar Body',
+    '2020-04-13': '2:0|S:Balloon Olaf & Sven|3:90016', '2020-05-25': "2:0|S:Goofy's Hat|3:90016", '2020-06-22': '2:0|S:Word Bubble: I Love Sora|3:90016',
+    '2020-06-29': '2:0|S:Balloon Aqua|3:90016', '2020-08-03': '2:0|S:Cool Sunglasses|3:90016', '2020-08-17': '2:0|S:XIII Replica Hood|3:90016' };
+  for (const [w, v] of Object.entries(WANT)) check(wkParts[w] === v, `real build: VIP Spirit Part week ${w}: ${wkParts[w]} (want ${v})`);
+  check(wkParts['2020-04-06'] === (pRows.some((r) => r.name === "Elsa's Magic") ? "2:0|S:Elsa's Magic|3:90016" : '2:0|3:90016|3:90016'), `real build: Elsa's Magic week (${wkParts['2020-04-06']})`);
+  const camp = (k) => objs(all.index.entries.find((e) => e.key === k)).map((x) => x.join('|'));
+  check(camp('C48231')[2] === 'S:Festive Fur|S:Turkey Leg|S:Festive Sled', `real build: C48231 Festive Spirit Parts (${camp('C48231')[2]})`);
+  check(camp('C34678').slice(1).join(' / ') === 'S:Gold Reinstar Ears|S:Gold Reinstar Head|S:Gold Reinstar Body / S:Gold Reinstar Legs|S:Gold Reinstar Tail|3:90016', `real build: C34678 Gold Reinstar (${camp('C34678')})`);
+  check(camp('C41613')[0] === '2:0|S:Balloon Moogle & Chirithy|3:90016' && camp('C38260')[0] === '2:0|S:Rose Flower Petals|3:90016', 'real build: campaign Spirit parts (Balloon Moogle & Chirithy, Rose Flower Petals)');
   check(Object.keys(real.weekly.versions).filter((k) => !k.startsWith('_')).length === 201, 'real build: 201 frozen week-version ids (3 dropped, reserved)');
   // fix round 1 (ruling): the two clipped Medal Quest rows of 2019-03-04 are the campaigns' (C49538 / C49546, C50518): dropped, ids reserved
   const dropped = Object.entries(real.weekly.versions).filter(([k, v]) => !k.startsWith('_') && v.dropped).map(([k, v]) => `${k}:${v.evStageId}`);

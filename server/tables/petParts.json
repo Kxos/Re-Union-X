@@ -3712,6 +3712,22 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 401010,
+  "name": "Starlight Glasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 401011,
+  "name": "Starlight Sunglasses",
+  "partsType": 1,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 401012,
   "name": "Illusionist: Mask",
   "partsType": 1,
@@ -4448,6 +4464,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 402092,
+  "name": "Alarm Clock",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 402093,
   "name": "Rice Ball Helmet",
   "partsType": 2,
@@ -4642,6 +4666,22 @@
  {
   "petPartsId": 402117,
   "name": "Starlight Headpiece",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402118,
+  "name": "Chirithy Snowman",
+  "partsType": 2,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 402119,
+  "name": "Snowy Mickey Ears",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4960,6 +5000,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407004,
+  "name": "Balloon Snowman",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407005,
   "name": "New Year Decoration",
   "partsType": 7,
@@ -4984,8 +5032,24 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407009,
+  "name": "Balloon Fairies",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407010,
   "name": "Chirithy Cape",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407011,
+  "name": "Balloon Moogle & Chirithy",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5002,6 +5066,14 @@
  {
   "petPartsId": 407014,
   "name": "Paraglider",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407015,
+  "name": "Starlight Angel Wings",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5066,6 +5138,14 @@
  {
   "petPartsId": 407023,
   "name": "Balloon Scrooge",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407024,
+  "name": "Valentine Balloons",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5144,6 +5224,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 407036,
+  "name": "Balloon Terra",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 407037,
   "name": "Balloon Bianca & Bernard",
   "partsType": 7,
@@ -5154,6 +5242,14 @@
  {
   "petPartsId": 407038,
   "name": "Balloon Gingerbread House",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407039,
+  "name": "Balloon Aqua",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5178,6 +5274,14 @@
  {
   "petPartsId": 407042,
   "name": "Balloon Naminé",
+  "partsType": 7,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 407043,
+  "name": "Flying Carpet",
   "partsType": 7,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5288,6 +5392,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 410010,
+  "name": "Word Bubble: Noodle Stir-Fry",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 410011,
   "name": "Floating Trick or Treat",
   "partsType": 10,
@@ -5312,6 +5424,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 410016,
+  "name": "Lantern",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 410017,
   "name": "Word Bubble: I Love Sora",
   "partsType": 10,
@@ -5322,6 +5442,22 @@
  {
   "petPartsId": 410018,
   "name": "Word Bubble: Ukulele",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410019,
+  "name": "Word Bubble: Hot Dog",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
+  "petPartsId": 410020,
+  "name": "Pinwheels",
   "partsType": 10,
   "combinationType": 0,
   "combinationFlag": 0,
