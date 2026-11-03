@@ -170,6 +170,12 @@ function allocateBoardIds(doc, ids) {
   }
   return boards;
 }
+// 2019-10-14 -> 10/14/19 (the date added to a Raid Board title)
+function usDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+  if (!m) throw new Error(`raid boards: no start date for the week ${iso}`);
+  return `${Number(m[2])}/${Number(m[3])}/${m[1].slice(2)}`;
+}
 const weeksOf = (doc) => ((doc || {}).weeks || []).filter((w) => FAMILIES.has(w.family));
 
 // Rows of the boards of the census rows in `censusIds` (null: all). Returns {sphereRows, arrayRows, masuRows, byCensus,
@@ -227,6 +233,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   for (const w of weeksOf(doc)) {
     if (censusIds && !censusIds.has(w.census_id)) continue;
     const list = [], labels = new Set();
+    const weekDate = usDate(w.start || String(w.census_id).replace(/^WW-[A-Z0-9]+-/, ''));
     for (const ref of w.boards || []) {
       const r = built.get(ref.board);
       if (/inferred/i.test(ref.confidence || '')) labels.add('boardSet');
@@ -244,9 +251,11 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       for (const c of r.cells) {
         if (c.corrected && !out.report.corrected.some((x) => x.board === r.board.id && x.n === c.n)) out.report.corrected.push({ board: r.board.id, n: c.n, what: c.corrected });
       }
-      // the original title: two boards of one week may share it («Enhancement Board» twice in the 2019 screenshots); the card
-      // picture tells them apart (config.art)
-      const boardName = String(r.board.name).slice(0, 128);
+      // the original title (two boards of one week may share it, «Enhancement Board» twice in the 2019 screenshots: the card
+      // picture tells them apart, config.art) + the week's start date, ours (user 3 Nov 2026: a kept raid's boards beside the
+      // current week's). M/D/YY fits the title widgets: the longest, «JP 5th Anniv. Entry Medal Board 10/14/19», measures
+      // about 520 px at 26 pt (list title bar 540) and 440 px at 22 pt (board screen title, 448 px since make_layouts 3 Nov).
+      const boardName = `${String(r.board.name)} ${weekDate}`.slice(0, 128);
       const art = artOf(r.board.id);
       if (!art) labels.add('boardNoArt');
       else if (art.screenshot) labels.add('boardArt');
@@ -287,4 +296,4 @@ function artLines(art) {
   return [...head, ...art.map(line)].join('\n') + '\n';
 }
 
-module.exports = { artLines, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };
+module.exports = { artLines, usDate, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };

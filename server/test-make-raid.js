@@ -858,7 +858,9 @@ const tests = {
       assert.deepStrictEqual([s.type, s.arryId, s.masuId, s.price, s.detailUrl, s.kindId], [5, id, id, 0, '', 0]);
       assert.ok(out.arrayRows.some((r) => r.arryId === id) && out.masuRows.some((r) => r.masuId === id && r.sphereBoardId === id));
     }
-    assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board', 'Enhancement Board'], 'the original title, twice');
+    assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board 10/7/19', 'Enhancement Board 10/7/19'], 'the original title, twice, with the week');
+    assert.deepStrictEqual(out.sphereRows.filter((r) => other.sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board 10/14/19', 'Enhancement Board 10/14/19']);
+    assert.deepStrictEqual([rb.usDate('2019-03-11'), rb.usDate('2020-12-28')], ['3/11/19', '12/28/20']);
     // ids: every Weekly / Radiant row is numbered whatever the filter; pre-series rows are not boards of this task
     assert.deepStrictEqual(Object.keys(out.ids.boards).sort(), ['WW-W-2018-09-03/radiant-01', `${W1}/enhancement-A1`, `${W1}/enhancement-A2`, 'WW-W-2019-10-14/enhancement-A1',
       'WW-W-2019-10-14/enhancement-A2', 'WW-W-2019-10-28/halloween-board-2019'].sort());
@@ -921,7 +923,7 @@ const tests = {
     assert.throws(() => rb.gridRow(1, 23), /23 cells/);
     // radiant: jewels, both genders of an avatar part, a Spirit part by its master spelling, a draw ticket, a title at completion
     const all = build((f) => { withBoards(f); f.boards.weeks[3].census_id = W1; });
-    const rad = all.masuRows.find((r) => all.sphereRows.find((s) => s.sphereBoardId === r.masuId).boardName === 'Radiant Rewards Board');
+    const rad = all.masuRows.find((r) => all.sphereRows.find((s) => s.sphereBoardId === r.masuId).boardName.startsWith('Radiant Rewards Board '));
     assert.deepStrictEqual(rad.rewardSelect.slice(0, 5), [2, 20, 20, 33, 41]);
     assert.deepStrictEqual(rad.rewardId.slice(0, 5), [0, 201234, 201235, 402066, 0]);
     assert.strictEqual(rad.rewardValue[0], 100);
@@ -929,7 +931,7 @@ const tests = {
   },
   halloween_cell_17() {
     const out = build((f) => { withBoards(f); f.boards.weeks[2].census_id = W1; });
-    const sid = out.sphereRows.find((r) => r.boardName === 'Halloween Board').sphereBoardId;
+    const sid = out.sphereRows.find((r) => r.boardName.startsWith('Halloween Board ')).sphereBoardId;
     const masu = out.masuRows.find((r) => r.masuId === sid);
     assert.strictEqual(masu.spherePoint[16], 1600, 'CORRECTIONS.md: 700 on the wiki');
     assert.strictEqual(masu.rewardSelect[16], 33);
