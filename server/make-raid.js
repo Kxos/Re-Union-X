@@ -415,7 +415,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, master, models, 
   // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
   if (boards) {
     const b = raidBoards.buildBoards({ doc: boards, correctionsMd: (rewards || {}).correctionsMd, master, ids: numbers, config: config.boards || {}, censusIds: withRaid });
-    Object.assign(out, { sphereRows: b.sphereRows, arrayRows: b.arrayRows, masuRows: b.masuRows });
+    Object.assign(out, { sphereRows: b.sphereRows, arrayRows: b.arrayRows, masuRows: b.masuRows, boardArt: b.art });
     out.ids = { ...out.ids, boards: b.boardIds };
     out.report.boards = { ...b.report, count: b.sphereRows.length };
     for (const e of out.index.entries) {
@@ -561,6 +561,8 @@ function patch(masterDir, opts = {}) {
   if (!out.index.catalog) console.warn(`raid: no Raid Catalog banner: the Training Grounds stage ${CATALOG_STAGE} is not in the master (make-special first)`);
   writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
+  // card pictures of the Raid Boards: read by build-resources.ps1 (import_originals.py), docs/notes/bacheche.md «Raid Boards»
+  fs.writeFileSync(path.join(gameData, 'raid_board_art.tsv'), raidBoards.artLines(out.boardArt || []));
   const on = out.index.entries.filter((e) => e.available).length;
   const rows = [...new Set(out.index.entries.filter((e) => e.available).map((e) => e.censusId))];
   console.log(`raid: ${rows.length} census rows with an available tier, calendar ${out.index.entries.map((e) => e.start).sort()[0] || '-'} to `

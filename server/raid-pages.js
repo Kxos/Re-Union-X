@@ -222,7 +222,8 @@ function catalogPage(index, ctx = {}) {
 const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', upMinutes: 'time limit', useAp: 'AP of a further attempt', coinOdds: 'Raid Coin odds',
   lux: 'Lux', moves: 'moves', hp: 'boss HP (from the tier tables)', hp_step: 'the week of an HP change', atk_curve: 'ATK below the level cap',
   attribute: 'attribute (from the boss colour)', background: 'fight background', boardAlias: 'a Raid Board reward name', boardPath: 'the order of the Raid Board cells',
-  boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week' };
+  boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week',
+  boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)' };
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 function detailPage(index, evStageId, ctx = {}) {
   const rows = calendar.catalogRows(index), row = rows.find((r) => r.evStageId === Number(evStageId));

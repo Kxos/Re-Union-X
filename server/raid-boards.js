@@ -184,7 +184,16 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   const aliases = config.aliases || {};
   const texture = new Set(config.reconstructedTexture || []); // rewards drawn with a reconstructed texture: label boardTexture
   const layouts = new Map((doc.boards || []).map((b) => [b.id, b]));
-  const out = { sphereRows: [], arrayRows: [], masuRows: [], byCensus: {}, labels: {}, boardIds, report: { unmatched: [], corrected: [], dropped: [], bytes: 0 } };
+  // card: sphere.boardId = img/sphere_board/Board_%04d (background), img/sphere_incentive/<sphereBoardId>.png on top (config.art)
+  const background = config.background || 1;
+  const artOf = (key) => {
+    const a = (config.art || {})[key];
+    if (!a) return null;
+    if (a.jp) return { jp: a.jp };
+    if (a.screenshot) return { screenshot: a.screenshot };
+    throw new Error(`raid boards: boards.art.${key} needs jp or screenshot`);
+  };
+  const out = { sphereRows: [], arrayRows: [], masuRows: [], art: [], byCensus: {}, labels: {}, boardIds, report: { unmatched: [], corrected: [], dropped: [], bytes: 0 } };
   const unknown = new Map(), unmatched = new Map(), built = new Map();
 
   // one resolved layout per board id: cells with their items, dropped cells, completion
@@ -217,9 +226,6 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
 
   for (const w of weeksOf(doc)) {
     if (censusIds && !censusIds.has(w.census_id)) continue;
-    const names = new Map();
-    for (const ref of w.boards || []) { const n = layouts.get(ref.board).name; names.set(n, (names.get(n) || 0) + 1); }
-    const seenName = new Map();
     const list = [], labels = new Set();
     for (const ref of w.boards || []) {
       const r = built.get(ref.board);
@@ -238,10 +244,14 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       for (const c of r.cells) {
         if (c.corrected && !out.report.corrected.some((x) => x.board === r.board.id && x.n === c.n)) out.report.corrected.push({ board: r.board.id, n: c.n, what: c.corrected });
       }
-      const k = (seenName.get(r.board.name) || 0) + 1;
-      seenName.set(r.board.name, k);
-      const boardName = (names.get(r.board.name) > 1 ? `${r.board.name} (${k})` : r.board.name).slice(0, 128);
-      out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: 1, arryId: id, masuId: id, type: TYPE, openId: 0, openParam: 0, price: 0, detailUrl: '',
+      // the original title: two boards of one week may share it («Enhancement Board» twice in the 2019 screenshots); the card
+      // picture tells them apart (config.art)
+      const boardName = String(r.board.name).slice(0, 128);
+      const art = artOf(r.board.id);
+      if (!art) labels.add('boardNoArt');
+      else if (art.screenshot) labels.add('boardArt');
+      if (art) out.art.push({ sphereBoardId: id, board: r.board.id, ...art });
+      out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: background, arryId: id, masuId: id, type: TYPE, openId: 0, openParam: 0, price: 0, detailUrl: '',
         startDatetime: START, endDatetime: END });
       out.arrayRows.push(gridRow(id, r.cells.length));
       const masu = { masuId: id, sphereBoardId: id };
@@ -267,4 +277,14 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   return out;
 }
 
-module.exports = { buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };
+// Lines of the list read by recon/tools/import_originals.py (destination, source, path): the card picture of every Raid Board
+// under its own id. jp: the JP 4.3.1 file of the same art; screenshot: the card cut from a screenshot of the original game by
+// recon/tools/raid_board_screens.py into the --loc folder (img/sphere_incentive_ww/<board key>.png).
+function artLines(art) {
+  const head = ['# Raid Board card pictures, written by server/make-raid.js from raid_config.json boards.art (docs/notes/bacheche.md «Raid Boards»).',
+    '# Columns as in originals.tsv. jp = the JP 4.3.1 picture of the same board art; loc = cut from a screenshot of the original game.'];
+  const line = (a) => [`img/sphere_incentive/${a.sphereBoardId}.png`, a.jp ? 'jp' : 'loc', a.jp || `=img/sphere_incentive_ww/${a.board}.png`].join('\t');
+  return [...head, ...art.map(line)].join('\n') + '\n';
+}
+
+module.exports = { artLines, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };

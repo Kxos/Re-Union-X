@@ -251,6 +251,13 @@ python -I recon\tools\import_originals.py recon\tools\originals.tsv "$refWork\bu
   "$jpData" "$sg\files" `
   --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv" --i440 $i440 --jp501 "$D\tmp\jp501\x" --loc "$D\raid_loc" --report "$sg\originals.json"
 if ($LASTEXITCODE) { throw 'import_originals fallito' }
+# Raid Board card pictures, one per board id (list written by server/make-raid.js; the cards cut from screenshots are made
+# in --loc by recon/tools/raid_board_screens.py, docs/notes/bacheche.md «Raid Boards»)
+if (Test-Path server\game_data\raid_board_art.tsv) {
+  python -I recon\tools\import_originals.py server\game_data\raid_board_art.tsv "$refWork\bundle2016\files" `
+    "$jpData" "$sg\files" --loc "$D\raid_loc" --report "$sg\originals_raid_boards.json"
+  if ($LASTEXITCODE) { throw 'import_originals (Raid Board cards) fallito' }
+}
 # suoni se_<nome> dei LWF originali appena importati (KeyBlade_Evolution/StepUp, training_SE dei pet): la
 # ricerca di import_jp_coco e' girata prima, sui LWF generati senza eventi (banco 19-10: evoluzione muta)
 python -I recon\tools\jp_sound_effects.py --out "$sg\files" --apply @seOpt
