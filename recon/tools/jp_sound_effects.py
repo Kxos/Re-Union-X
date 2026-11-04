@@ -245,8 +245,18 @@ def walk_names(root):
     return out
 
 
+def _lwf_sound_names(path):
+    with open(path, 'rb') as fh:
+        return sound_names(lwf_events(fh.read()))
+
+
+def _sub(tree, prefix):
+    """walk_names(<root>/<prefix>) taken from scan_tree(<root>): {name below prefix: path}."""
+    return {n[len(prefix):]: v[0] for n, v in tree.items() if n.startswith(prefix)}
+
+
 def collect(out, served_names, writes=None, owned=(), jp_root=JP_ROOT, served=None, static_roots=None,
-            cache_path=None, save_cache=True):
+            cache_path=None, save_cache=True, cache=None):
     """Piano per il pacchetto generato <out> (stage_gen\\files).
 
     served_names  nomi serviti (names_v4 + addnl)
@@ -255,16 +265,24 @@ def collect(out, served_names, writes=None, owned=(), jp_root=JP_ROOT, served=No
                   come «gia' nel pacchetto», altrimenti la pulizia li toglierebbe
     static_roots  cartelle files\ dei pacchetti statici davvero nell'indice (predefinite: tutte e quattro;
                   import_jp_coco toglie quelle escluse con --no-static)
+    cache         optional stamp_cache.StampCache: the sound names of an LWF file whose size and date did not change
+                  are not read again (the ~1.5k LWFs of the static packs, 4 Nov 2026)
     """
+    sys.path.insert(0, HERE)
+    from stamp_cache import scan_tree
     writes = writes or {}
     if static_roots is None:
         static_roots = static_dirs()
+    # each tree listed once (with the file stats, free on Windows); the audio and text/audio sub-folders come from the same
+    # listing: nothing is written to these trees while the plan is made
+    trees = {root: scan_tree(root) for root in [r for r in static_roots if os.path.isdir(r)] + [out]}
     # LWF effettivi: serviti < pacchetti statici < generato su disco < scritture di questa corsa
-    lwf_src = {}
+    lwf_src, lwf_st = {}, {}
     for root in [r for r in static_roots if os.path.isdir(r)] + [out]:
-        for n, p in walk_names(root).items():
+        for n, (p, st) in trees[root].items():
             if n.endswith('.lwf'):
                 lwf_src[n] = p
+                lwf_st[p] = st
     for n, w in writes.items():
         if n.endswith('.lwf') and w[0] == 'jp':
             lwf_src[n] = w[2] if isinstance(w[2], bytes) else w[1]
@@ -272,19 +290,23 @@ def collect(out, served_names, writes=None, owned=(), jp_root=JP_ROOT, served=No
     if served is not None:
         sounds.update({n: s for n, s in served_lwf_sounds(served, cache_path, save_cache).items() if n not in lwf_src})
     for n, p in sorted(lwf_src.items()):
-        data = p if isinstance(p, bytes) else open(p, 'rb').read()
-        s = sound_names(lwf_events(data))
+        if isinstance(p, bytes):
+            s = sound_names(lwf_events(p))
+        elif cache is not None:
+            s = cache.get('lwf_sounds', p, _lwf_sound_names, lwf_st.get(p))
+        else:
+            s = _lwf_sound_names(p)
         if s:
             sounds[n] = s
     # nomi gia' disponibili: serviti, pacchetti statici, file del generato non scritti dall'import
     have = set(served_names) | {n for n, w in writes.items() if w[0] != 'delete'}
     for root in [r for r in static_roots if os.path.isdir(r)]:
-        have.update('audio/' + k for k in walk_names(os.path.join(root, 'audio')))
-        have.update('text/audio/' + k for k in walk_names(os.path.join(root, 'text', 'audio')))
-    gen_audio = walk_names(os.path.join(out, 'audio'))
+        have.update('audio/' + k for k in _sub(trees[root], 'audio/'))
+        have.update('text/audio/' + k for k in _sub(trees[root], 'text/audio/'))
+    gen_audio = _sub(trees[out], 'audio/')
     have.update('audio/' + k for k in gen_audio if 'audio/' + k not in owned)
     gen_text = {}
-    for k, p in walk_names(os.path.join(out, 'text', 'audio')).items():
+    for k, p in _sub(trees[out], 'text/audio/').items():
         if 'text/audio/' + k not in owned:
             have.add('text/audio/' + k)
             gen_text[k] = read_text(open(p, 'rb').read())

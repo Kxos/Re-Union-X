@@ -1,6 +1,6 @@
 """Prova offline di jp_sound_effects.py (eventi LWF, id come il client, piano e collect su alberi sintetici).
 
-    python -I recon/tools/test_jp_sound_effects.py        -> «OK: ...» oppure «ERRORI (n)», uscita 1
+    python -I recon/tools/test_jp_sound_effects.py        -> Â«OK: ...Â» oppure Â«ERRORI (n)Â», uscita 1
 """
 import json
 import os
@@ -116,6 +116,18 @@ with tempfile.TemporaryDirectory() as t:
     check(p['bytes'] == 4 + 12 + 12 + 9 + 9, 'collect: byte %d' % p['bytes'])
     check(p['lwf_with_sounds'] == 3 and p['sound_names'] == 5, 'collect: conteggi')
     check(m.collect(out, {'text/audio/ui2_se_000039'}, **kw) == p, 'collect: deterministico')
+    # with a stamp cache (4 Nov 2026): same plan on the first run (misses) and the second (hits); a changed LWF is read again
+    import stamp_cache  # noqa: E402
+    sc = stamp_cache.StampCache(os.path.join(t, 'sc.json'), 'v1')
+    check(m.collect(out, {'text/audio/ui2_se_000039'}, cache=sc, **kw) == p and sc.misses == 3 and sc.hits == 0, 'collect: cache, first run')
+    sc.save()
+    sc = stamp_cache.StampCache(os.path.join(t, 'sc.json'), 'v1')
+    check(m.collect(out, {'text/audio/ui2_se_000039'}, cache=sc, **kw) == p and sc.hits == 3, 'collect: cache, second run')
+    scrivi(os.path.join(st, 'lwf', 'medal', 'nova', 'nova.lwf'), lwf_eventi(['se_ui2_se_000074', 'se_static_se', 'se_owned_se']))
+    pc = m.collect(out, {'text/audio/ui2_se_000039'}, cache=sc, **kw)
+    check(pc == m.collect(out, {'text/audio/ui2_se_000039'}, **kw) and pc['sound_names'] == 5 and
+          'lwf/medal/nova/nova.lwf' in pc['refs'][509000900], 'collect: cache, changed LWF read again')
+    scrivi(os.path.join(st, 'lwf', 'medal', 'nova', 'nova.lwf'), lwf_eventi(['se_ui2_se_000074', 'se_static_se']))
     # una scrittura gia' decisa (es. BGM Medal) conta come presente; un LWF generato vince sul servito
     p2 = m.collect(out, set(), writes=dict(writes, **{'audio/509000740.akb': ('jp', 'x', None)}),
                    owned=set(), jp_root=jp, served=None, static_roots=[st])

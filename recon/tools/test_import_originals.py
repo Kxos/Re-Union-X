@@ -82,6 +82,45 @@ try:
         raise AssertionError('riga senza originale accettata')
     except SystemExit:
         pass
+    # 4 Nov 2026 speed-ups. Every row is resolved before writing: a vanished original leaves the output untouched
+    shutil.rmtree(out)
+    try:
+        io.run(io.parse(['img/ui/h.png\tjp', 'img/none.png\tb16,jp']), b16, jp, out)
+        raise AssertionError('riga senza originale accettata')
+    except SystemExit:
+        pass
+    assert not os.path.exists(os.path.join(out, 'img/ui/h.png')), 'nothing written before every row is resolved'
+    # a destination named by two rows gets the later one (as with the serial copies)
+    io.run(io.parse(['img/ui/h.png\tjp', 'img/ui/h.png\tjp\timg/ui/g.png']), b16, jp, out)
+    assert rd('img/ui/h.png') == 'new', 'later row wins'
+    # identical destinations are not rewritten (same bytes, mtime kept); a different one of the same size is
+    st = {}
+    rows = io.parse(['img/stage/ico_*.png\tb16', 'lwf/mog/\tjp'])
+    io.run(rows, b16, jp, out, stats=st)
+    assert st == {'copied': 4, 'unchanged': 0}, st
+    ico1 = os.path.join(out, 'img/stage/ico_1.png')
+    os.utime(ico1, ns=(10 ** 18, 10 ** 18))
+    open(os.path.join(out, 'img/stage/ico_2.png'), 'w').write('XX')          # same size, other bytes
+    io.run(rows, b16, jp, out, stats=st)
+    assert st == {'copied': 1, 'unchanged': 3}, st
+    assert os.stat(ico1).st_mtime_ns == 10 ** 18 and rd('img/stage/ico_2.png') == 'b2', 'skip identical, rewrite different'
+    open(os.path.join(out, 'lwf/mog/mog.lwf'), 'w').write('LONGER')          # other size
+    io.run(rows, b16, jp, out, stats=st)
+    assert st == {'copied': 1, 'unchanged': 3} and rd('lwf/mog/mog.lwf') == 'L', st
+    # threads or not: same tree
+    for k in range(40):
+        put(b16, 'img/many/m_%02d.png' % k, 'm' * k)
+    for w in (1, 8):
+        o2 = os.path.join(t, 'o%d' % w)
+        plan = {'img/many/m_%02d.png' % k: os.path.join(b16, 'img/many/m_%02d.png' % k) for k in range(40)}
+        assert io.copy_plan(plan, o2, workers=w) == (40, 0) and io.copy_plan(plan, o2, workers=w) == (0, 40)
+    assert sorted(os.listdir(os.path.join(t, 'o1', 'img/many'))) == sorted(os.listdir(os.path.join(t, 'o8', 'img/many')))
+    assert all(open(os.path.join(t, 'o1', 'img/many', f)).read() == open(os.path.join(t, 'o8', 'img/many', f)).read()
+               for f in os.listdir(os.path.join(t, 'o1', 'img/many')))
+    # a plain leaf is a lookup, not a pattern: a name with regex-like characters but no wildcard
+    put(b16, 'img/x/a+b(1).png', 'plus')
+    io.run(io.parse(['img/x/a+b(1).png\tb16']), b16, jp, out)
+    assert rd('img/x/a+b(1).png') == 'plus'
 finally:
     shutil.rmtree(t)
 print('OK: import_originals')
