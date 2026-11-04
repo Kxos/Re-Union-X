@@ -992,10 +992,12 @@ Object.assign(tests, {
     assert.strictEqual(v.player.raid.boss.key, 'story/Behemoth');
   },
   replays_count() {
+    // the route reads only the cleared stage id and its master row (no first-clear check): the same quest cleared again counts again
     const w = storyWorld();
-    w.player.stageScores = { [Q[4]]: 1 }; // quest 4 already cleared: a replay counts the same
-    w.storyClear(4, 5000); w.storyClear(4, 5000);
-    assert(w.player.raid.boss, 'two replays reach the threshold');
+    w.storyClear(4, 5000);
+    assert.strictEqual(w.player.raid.points, 5000);
+    w.storyClear(4, 5000);
+    assert(w.player.raid.boss, 'the same quest cleared a second time reaches the threshold');
     for (const [id, what] of [[1000004, 'Proud'], [SPECIAL, 'Special'], [9999, 'unknown stage']]) {
       const v = storyWorld();
       v.raid.onStageClear(id, { raidPoint: 9000 });
@@ -1074,6 +1076,40 @@ Object.assign(tests, {
     // the next Behemoth starts at LV 2
     w.storyClear(4, 9000);
     assert.strictEqual(w.player.raid.boss.level, 2);
+  },
+  smoke_story_key() {
+    // review I-1: the bench key story/<boss> forces the boss itself, story/<boss>+rare its Ω
+    const w = storyWorld({ rng: () => 0.99 });
+    w.smoke = 'story/Behemoth';
+    w.call('notice');
+    assert.deepStrictEqual([w.player.raid.boss.key, w.player.raid.boss.parts[0].raidEnemyId, w.player.raid.boss.stageId], ['story/Behemoth', STORY_B, STAGE_B], 'not the Ω');
+    const o = storyWorld({ rng: () => 0.99 });
+    o.smoke = 'story/Behemoth+rare';
+    o.call('notice');
+    assert.deepStrictEqual([o.player.raid.boss.parts[0].raidEnemyId, o.player.raid.boss.parts[0].rare], [STORY_BR, 2]);
+  },
+  weekly_and_story_block_each_other() {
+    // plan decision 7 across families: a live weekly boss blocks a story spawn, and a live story boss a weekly one
+    const w = storyWorld();
+    const weekly = w.spawn();
+    w.storyClear(4, 9000);
+    assert.strictEqual(w.player.raid.boss, weekly, 'the weekly boss stays, no story boss');
+    assert.strictEqual(w.player.raid.points, 9000, 'the counter is kept');
+    const v = storyWorld();
+    v.storyClear(4, 9000);
+    const story = v.player.raid.boss;
+    v.raid.onStageClear(STAGE, { raidPoint: 9000 });
+    assert.strictEqual(v.player.raid.boss, story, 'the story boss stays, no weekly boss');
+    assert.strictEqual(v.player.raid.points, 9000);
+  },
+  story_bonus_level_step() {
+    // a story boss has no week (occ null): +1 per defeat even in a bonus hour (the +2 rule is of the 2018-09..2019-08 raid weeks)
+    const w = storyWorld();
+    w.now = Date.parse('2026-10-27T15:00:00Z'); // 08:00 PDT, bonus
+    w.storyClear(4, 9000);
+    w.call('list'); w.start();
+    w.clearParts([0, 0]);
+    assert.strictEqual(w.player.raid.levels['story/Behemoth'], 2);
   },
   story_boss_orphan_dropped() {
     const w = storyWorld();

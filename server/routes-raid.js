@@ -117,9 +117,12 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   let smokeMissing = null; // last unknown key logged, so a typo is logged once
   function forceSmoke(r, nowMs) {
     const key = smokeKey();
-    if (!key || r.boss?.key === key) return;
-    // a story boss key (story/<boss>) too, on its first fight stage
-    const entry = entries().find((e) => e.key === key) || ((raidIndex().story || {}).bosses || []).find((b) => b.key === key && b.available);
+    if (!key || r.boss?.key === key || r.boss?.key === key.replace(/\+rare$/, '')) return;
+    // a story boss key too, on its first fight stage: story/<boss> the boss itself, story/<boss>+rare its Ω (review I-1: the
+    // story rare has no `every` of its own, the chance is per quest, so it is set here)
+    const sk = /^(story\/.+?)(\+rare)?$/.exec(key);
+    const sb = sk && ((raidIndex().story || {}).bosses || []).find((b) => b.key === sk[1] && b.available && (!sk[2] || b.rare));
+    const entry = entries().find((e) => e.key === key) || (sb ? storyEntry(sb, sb.stageId, sk[2] ? 1 : null) : null);
     if (!entry) {
       if (smokeMissing !== key) log(`[raid] smoke: ${key} is not an available entry`);
       smokeMissing = key;
@@ -184,7 +187,8 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   }
 
   // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
-  const levelStep = (boss, ms) => (String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1);
+  // a story boss has no week (occ null): always +1 (review M-5)
+  const levelStep = (boss, ms) => (boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1);
   function bossDefeated(r, boss, allPoints, nowMs = realNow()) {
     const lk = boss.levelKey || boss.key; // a kept raid's boss feeds its own counter (cat:<key>), never the live week's
     if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[lk] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs)); (r.levelOcc ||= {})[lk] = boss.occ; } // a boss of an older month does not feed the new one

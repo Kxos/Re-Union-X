@@ -966,6 +966,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     for (const [q, x] of p.quests) {
       const b = byName.get(x.boss), labels = [...x.labels];
       const rare = b && b.rare && x.setting && x.setting.rareBossId !== x.setting.bossId && [2, 3].includes(x.setting.rareUpType) ? x.setting.rareUpTypeArg : null;
+      if (rare && x.setting.rareUpType === 2) labels.push('rareType2'); // the quest's own Ω chance is a type-2 reading (review M-4)
       quests[q] = { boss: x.boss, census: x.census, stageId: b && b.available ? b.stages[x.stage] : 0, every: rare, reconstructed: labels,
         ...(x.nearest ? { nearest: x.nearest } : {}) };
       labels.forEach((l) => reasons.add(l));
