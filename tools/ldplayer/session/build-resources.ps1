@@ -464,7 +464,14 @@ if ($Quick) {
     foreach ($f in $src) { New-Item -ItemType HardLink -Path ("$v\data\d{0:D4}" -f $nx) -Target $f.FullName | Out-Null; $nx++ }
   }
   # pacchetti statici come pezzi seguenti (copie: le versioni dopo li ricostruiscono)
-  for ($i = 2; $i -lt $plist.Count - 1; $i++) { Copy-Item $plist[$i][2] ("$v\data\d{0:D4}" -f $nx); $nx++ }
+  # Hard link instead of a copy (04-11: ~2.3 GB copied on the HDD at every full version): resource_pack.py and resource_compact.py
+  # write a pack to a temporary file and rename it, so a finished pack never changes in place and an older version keeps its
+  # own bytes. A link that fails (another volume) falls back to the copy.
+  for ($i = 2; $i -lt $plist.Count - 1; $i++) {
+    $piece = "$v\data\d{0:D4}" -f $nx
+    try { New-Item -ItemType HardLink -Path $piece -Target $plist[$i][2] -ErrorAction Stop | Out-Null } catch { Copy-Item $plist[$i][2] $piece }
+    $nx++
+  }
   # -TestStraddle: pezzo di zeri prima del generato, lungo quanto basta perche' il record scelto stia a cavallo
   # di misc.mp4.1 / misc.mp4.2 (resource_parts.py --straddle); il nome del pezzo resta in testpad.txt per -Quick
   if ($TestStraddle) {

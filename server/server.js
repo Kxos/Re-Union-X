@@ -2107,11 +2107,16 @@ function grantItem(type, id, num) {
   if (!type || !num) return;
   if (type === 3 && id) {
     player.medals = player.medals || [];
+    // A new medal is never dated before one the player already has: the bench's fake clock (-RealNow differs in every session)
+    // dated medals of an earlier session later than these, and the Medal List sorted by newest put the old ones on top.
+    // With the real clock (monotonic) this is just realNow().
+    let got = realNow();
+    for (const m of player.medals) if (typeof m.getDatetime === 'number' && m.getDatetime > got) got = m.getDatetime;
     for (let k = 0; k < num; k++) {
       // mai riusare un id (vendite e Level Up tolgono medaglie; medalState resta per id)
       const used = [100, ...player.medals.map((m) => m.userMedalId), ...Object.keys(player.medalState || {}).map(Number)];
       const userMedalId = Math.max(...used) + 1;
-      player.medals.push({ userMedalId, medalId: id, level: 1, getDatetime: realNow() });
+      player.medals.push({ userMedalId, medalId: id, level: 1, getDatetime: got });
     }
     if (!masterRows('medal').some((m) => m.medalId === id)) console.log(`  [inventario] medaglia ${id} assente dalla tabella medal`);
   } else if (type === 2) player.freeStone = (player.freeStone || 0) + num;
