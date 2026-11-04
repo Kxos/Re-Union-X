@@ -1034,6 +1034,12 @@ const tests = {
     const FIFTEEN = ['Assault Dragon', 'Adventurer', 'Jewel Princess', 'Gear Golem', 'Heartless Tsum', 'Loudmouth Parade', 'Greedy Grouch',
       'Mysterious Sir', 'Merry-Go-Rowdy', 'Holiday Sleigh', 'Demon Tide', 'Cranky Cake', 'Mischief Bouquet', 'Red-Nosed Chariot', 'Closehanded Captain'];
     for (const b of FIFTEEN) assert.ok(Number.isInteger(REAL_CONFIG.modelTemplates[b]), `template of ${b}`);
+    // render9 (user decision 4 Nov), same rule: Savage Spider, Fortress Crab, Behemoth; body attribute from the wiki
+    const R9 = { 'Jewel Sorceress': [11, 3], 'Circus Crab': [13, 1], 'Crabby Cake': [3, 3] };
+    for (const [b, [tpl, attr]] of Object.entries(R9)) {
+      assert.strictEqual(REAL_CONFIG.modelTemplates[b], tpl, `template of ${b}`);
+      assert.strictEqual(REAL_CONFIG.bossAttributes[b], attr, `attribute of ${b}`);
+    }
     const real = realInputs();
     if (!real) return;
     const file = path.join(__dirname, 'game_data', 'raid_models.json');
