@@ -38,7 +38,16 @@ def make_record(job):
     rec = record(name.encode(), plain, key)
     # il record si rilegge come quelli originali
     assert bgad.decode(rec, bgad.parse(rec), key) == plain, name
-    return rec
+    return rec, hashlib.sha1(plain).hexdigest(), len(plain)
+
+
+def content_stamp(key, items):
+    """Stamp of the CONTENT of a folder: sha1 over the key and, per file in name order, name|size|sha1(bytes). Unlike the mtime stamp it
+    survives a re-copy of identical files (import_originals / robocopy give every file a new date), so a static pack is not rebuilt for it."""
+    h = hashlib.sha1(b'content1|' + key)
+    for name, size, digest in items:
+        h.update(('%s|%d|%s\n' % (name, size, digest)).encode())
+    return h.hexdigest()
 
 
 def main():
@@ -55,28 +64,46 @@ def main():
         h.update(('%s|%d|%d\n' % (name, st.st_size, st.st_mtime_ns)).encode())
     stamp = h.hexdigest()
     src = out_index + '.src'
-    if (cache and os.path.exists(out_data) and os.path.exists(out_index) and os.path.exists(src)
-            and open(src).read() == stamp):
-        print("%d file invariati: %s gia' fatto" % (len(files), out_data))
-        return
+    # <uscita.png>.src: riga 1 = impronta con le date (veloce), riga 2 = impronta del contenuto (file piu' vecchi: assente)
+    if cache and os.path.exists(out_data) and os.path.exists(out_index) and os.path.exists(src):
+        old = open(src).read().split('\n')
+        if old[0] == stamp:
+            print("%d file invariati: %s gia' fatto" % (len(files), out_data))
+            return
+        if len(old) > 1 and old[1]:
+            # date cambiate (file ricopiati) ma forse non il contenuto: si rileggono i file (molto meno che ricostruire il pacchetto)
+            items = []
+            for name in files:
+                data = open(os.path.join(root, name), 'rb').read()
+                items.append((name, len(data), hashlib.sha1(data).hexdigest()))
+            if content_stamp(key, items) == old[1]:
+                with open(src, 'w') as fh:
+                    fh.write(stamp + '\n' + old[1])
+                print("%d file con le date cambiate ma lo stesso contenuto: %s gia' fatto" % (len(files), out_data))
+                return
     if os.path.exists(src):
         os.remove(src)
 
-    offsets, pos = [], 0
+    offsets, pos, items = [], 0, []
     jobs = [(root, name, key) for name in files]
-    with open(out_data, 'wb') as out:                   # scritto man mano: niente GB in memoria
+    # scritto in un file temporaneo e poi rinominato: un pacchetto finito non cambia mai sul posto (le versioni di risorse lo
+    # collegano con un hard link invece di copiarlo) e un build interrotto non lascia un pacchetto a meta' al posto di quello buono
+    tmp_data, tmp_index = out_data + '.tmp', out_index + '.tmp'
+    with open(tmp_data, 'wb') as out:                   # scritto man mano: niente GB in memoria
         if WORKERS > 1 and len(jobs) > 64:
             with Pool(WORKERS) as pool:
-                for rec in pool.imap(make_record, jobs, chunksize=16):
+                for (rec, digest, size), name in zip(pool.imap(make_record, jobs, chunksize=16), files):
                     offsets.append(pos)
                     out.write(rec)
                     pos += len(rec)
+                    items.append((name, size, digest))
         else:
             for job in jobs:
-                rec = make_record(job)
+                rec, digest, size = make_record(job)
                 offsets.append(pos)
                 out.write(rec)
                 pos += len(rec)
+                items.append((job[1], size, digest))
 
     pool_names, name_offs = bytearray(), []
     for name in files:
@@ -87,10 +114,12 @@ def main():
            + struct.pack('<%dQ' % n, *offsets) + struct.pack('<%dI' % n, *range(n))
            + struct.pack('<%dI' % n, *name_offs) + bytes(pool_names) + b'\0' * 8)
     hdr = bgad.HDR.pack(b'BGAD', 2, 0, bgad.HDR.size, 1, 0, 0, len(bgi), len(bgi))
-    with open(out_index, 'wb') as fh:
+    with open(tmp_index, 'wb') as fh:
         fh.write(hdr + obfuscate_name(b'/', len(bgi)) + bgi)
+    os.replace(tmp_data, out_data)
+    os.replace(tmp_index, out_index)
     with open(src, 'w') as fh:
-        fh.write(stamp)
+        fh.write(stamp + '\n' + content_stamp(key, items))
     print('%d file, %d byte -> %s, %s' % (n, pos, out_data, out_index))
 
 

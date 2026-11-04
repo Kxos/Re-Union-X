@@ -180,10 +180,14 @@ def main(argv):
         src = png + '.src'
         if os.path.exists(src):
             os.remove(src)
-        new_offs, new_names = compact(offs, keep[i], data, mp4)
-        with open(png, 'wb') as fh:
+        # temporary files and rename: a finished pack never changes in place (resource versions link it with a hard link
+        # instead of copying it) and an interrupted run leaves the previous good pack alone
+        new_offs, new_names = compact(offs, keep[i], data, mp4 + '.tmp')
+        with open(png + '.tmp', 'wb') as fh:
             fh.write(index_bytes(new_offs, new_names))
-        before, after = data.size, os.path.getsize(mp4)
+        before, after = data.size, os.path.getsize(mp4 + '.tmp')
+        os.replace(mp4 + '.tmp', mp4)
+        os.replace(png + '.tmp', png)
         data.close()
         with open(src, 'w') as fh:
             fh.write(stamp(packs, i))

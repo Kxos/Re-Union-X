@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import btf  # noqa: E402
 
 ID_BASE = 9000000
+DEPS_MTIME = max(os.path.getmtime(os.path.abspath(__file__)), os.path.getmtime(btf.__file__))   # outputs older than the code are redone
 GAIN, OFFSET = 1.0, 0  # luminanza: media e deviazione vicine alle 3 originali (#1 148.6/67.3 vs 158.4/71.4, #8 198.9/53.1 vs 193.5/56.7, #20 61.5/66.4 vs 57.2/66.3)
 
 
@@ -46,7 +47,7 @@ def main(argv):
         mine = gray(btf.decode(open(os.path.join(src, 'img', 'medal', 'Medal_L_%d.png' % e['affected']), 'rb').read()))
         print('originale', stats(ref), 'nostra', stats(mine))
         return
-    done = cut = 0
+    done = cut = skipped = 0
     for e in entries:
         tid = ID_BASE + e['n']
         for kind, folder, name in (('L', 'medal', 'Medal_L_%d.png'), ('S', 'medal', 'Medal_S_%d.png'), ('C', 'Cutin', 'Cutin_%d.png')):
@@ -57,10 +58,16 @@ def main(argv):
                 continue
             q = os.path.join(out, 'img', folder, name % tid)
             os.makedirs(os.path.dirname(q), exist_ok=True)
+            # an output newer than its source, this script and btf.py is still right: not rewritten (it took 76 s at every full
+            # build, and a rewrite gives the file a new date, which then wakes up the pack cache for nothing)
+            if os.path.exists(q) and os.path.getmtime(q) >= max(os.path.getmtime(p), DEPS_MTIME):
+                cut += kind == 'C'
+                skipped += 1
+                continue
             open(q, 'wb').write(btf.encode(gray(btf.decode(open(p, 'rb').read()))))
             cut += kind == 'C'
         done += 1
-    print('trait medal: %d immagini L/S, %d cut-in' % (done, cut))
+    print('trait medal: %d immagini L/S, %d cut-in (%d file gia aggiornati, non riscritti)' % (done, cut, skipped))
 
 
 if __name__ == '__main__':
