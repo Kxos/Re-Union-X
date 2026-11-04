@@ -561,7 +561,7 @@
  },
  {
   "petPartsId": 303081,
-  "name": "[unidentified goat/sheep-like species, gray] Ears",
+  "name": "Mystery Gray Goat Ears",
   "partsType": 3,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -569,7 +569,7 @@
  },
  {
   "petPartsId": 303082,
-  "name": "[unidentified goat/sheep-like species, black-faced] Ears",
+  "name": "Mystery Black Sheep Ears",
   "partsType": 3,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -577,7 +577,7 @@
  },
  {
   "petPartsId": 303083,
-  "name": "[unidentified dog-like species, white with wings] Ears",
+  "name": "Mystery Winged White Dog Ears",
   "partsType": 3,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -1297,7 +1297,7 @@
  },
  {
   "petPartsId": 304081,
-  "name": "[unidentified goat/sheep-like species, gray] Head",
+  "name": "Mystery Gray Goat Head",
   "partsType": 4,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -1305,7 +1305,7 @@
  },
  {
   "petPartsId": 304082,
-  "name": "[unidentified goat/sheep-like species, black-faced] Head",
+  "name": "Mystery Black Sheep Head",
   "partsType": 4,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -1313,7 +1313,7 @@
  },
  {
   "petPartsId": 304083,
-  "name": "[unidentified dog-like species, white with wings] Head",
+  "name": "Mystery Winged White Dog Head",
   "partsType": 4,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2049,7 +2049,7 @@
  },
  {
   "petPartsId": 306081,
-  "name": "[unidentified goat/sheep-like species, gray] Legs",
+  "name": "Mystery Gray Goat Legs",
   "partsType": 6,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2057,7 +2057,7 @@
  },
  {
   "petPartsId": 306082,
-  "name": "[unidentified goat/sheep-like species, black-faced] Legs",
+  "name": "Mystery Black Sheep Legs",
   "partsType": 6,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2065,7 +2065,7 @@
  },
  {
   "petPartsId": 306083,
-  "name": "[unidentified dog-like species, white with wings] Legs",
+  "name": "Mystery Winged White Dog Legs",
   "partsType": 6,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2809,7 +2809,7 @@
  },
  {
   "petPartsId": 308081,
-  "name": "[unidentified goat/sheep-like species, gray] Body",
+  "name": "Mystery Gray Goat Body",
   "partsType": 8,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2817,7 +2817,7 @@
  },
  {
   "petPartsId": 308082,
-  "name": "[unidentified goat/sheep-like species, black-faced] Body",
+  "name": "Mystery Black Sheep Body",
   "partsType": 8,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -2825,7 +2825,7 @@
  },
  {
   "petPartsId": 308083,
-  "name": "[unidentified dog-like species, white with wings] Body",
+  "name": "Mystery Winged White Dog Body",
   "partsType": 8,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -3521,7 +3521,7 @@
  },
  {
   "petPartsId": 309081,
-  "name": "[unidentified goat/sheep-like species, gray] Tail",
+  "name": "Mystery Gray Goat Tail",
   "partsType": 9,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -3529,7 +3529,7 @@
  },
  {
   "petPartsId": 309082,
-  "name": "[unidentified goat/sheep-like species, black-faced] Tail",
+  "name": "Mystery Black Sheep Tail",
   "partsType": 9,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -3537,7 +3537,7 @@
  },
  {
   "petPartsId": 309083,
-  "name": "[unidentified dog-like species, white with wings] Tail",
+  "name": "Mystery Winged White Dog Tail",
   "partsType": 9,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4177,7 +4177,7 @@
  },
  {
   "petPartsId": 402049,
-  "name": "[unidentified pink fluffy wig]",
+  "name": "Mystery Pink Wig",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4185,7 +4185,7 @@
  },
  {
   "petPartsId": 402050,
-  "name": "[unidentified white starry hair]",
+  "name": "Mystery White Starry Hair",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4257,7 +4257,7 @@
  },
  {
   "petPartsId": 402059,
-  "name": "[unidentified black starry wig]",
+  "name": "Mystery Black Starry Wig",
   "partsType": 2,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -4825,7 +4825,7 @@
  },
  {
   "petPartsId": 405003,
-  "name": "[unidentified orange striped scarf]",
+  "name": "Mystery Orange Striped Scarf",
   "partsType": 5,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5017,7 +5017,7 @@
  },
  {
   "petPartsId": 405027,
-  "name": "[unidentified gold chain with blue pendant]",
+  "name": "Mystery Gold Pendant Chain",
   "partsType": 5,
   "combinationType": 0,
   "combinationFlag": 0,
@@ -5025,7 +5025,7 @@
  },
  {
   "petPartsId": 405028,
-  "name": "[unidentified Egyptian collar]",
+  "name": "Mystery Egyptian Collar",
   "partsType": 5,
   "combinationType": 0,
   "combinationFlag": 0,
