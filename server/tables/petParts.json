@@ -5536,6 +5536,14 @@
   "offsetNumber": 0
  },
  {
+  "petPartsId": 410013,
+  "name": "Olaf's Snow Cloud",
+  "partsType": 10,
+  "combinationType": 0,
+  "combinationFlag": 0,
+  "offsetNumber": 0
+ },
+ {
   "petPartsId": 410014,
   "name": "Dazzling Disco",
   "partsType": 10,
