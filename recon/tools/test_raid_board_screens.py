@@ -79,9 +79,29 @@ with tempfile.TemporaryDirectory() as tmp:
     px = im.convert('RGB').getpixel((115, 115))
     check(px[0] > 150 and px[1] < 80, 'red square inside the cut card: %s' % (px,))
 
+    # --cards: a ready card (rebuilt from the original picture) replaces the cut of the same file name; others are still cut
+    cards = os.path.join(tmp, 'cards'); os.makedirs(cards)
+    Image.new('RGBA', (306, 306), (10, 200, 10, 255)).save(os.path.join(cards, 'WW-E1-1_ev1-b-m.png'))
+    Image.new('RGBA', (306, 306), (10, 10, 200, 255)).save(os.path.join(cards, 'not-in-config.png'))
+    loc2 = os.path.join(tmp, 'loc2')
+    rbs.main([cfg, shots, board, loc2, patch, '--cards', cards])
+    out2 = os.path.join(loc2, 'img', 'sphere_incentive_ww')
+    names2 = sorted(os.listdir(out2))
+    check(names2 == ['WW-E1-1_ev1-b-m.png', 'radiant-12.png'], '--cards: files written %s (only configured keys)' % names2)
+    px = Image.open(os.path.join(out2, 'WW-E1-1_ev1-b-m.png')).convert('RGB').getpixel((115, 115))
+    check(px == (10, 200, 10), '--cards: ready card copied, got %s' % (px,))
+    px = Image.open(os.path.join(out2, 'radiant-12.png')).convert('RGB').getpixel((115, 115))
+    check(px[0] > 150 and px[1] < 80, '--cards: card without a ready file still cut: %s' % (px,))
+    try:
+        Image.new('RGBA', (300, 300)).save(os.path.join(cards, 'radiant-12.png'))
+        rbs.main([cfg, shots, board, os.path.join(tmp, 'loc3'), patch, '--cards', cards])
+        check(False, '--cards: a ready card that is not 306 x 306 must raise')
+    except SystemExit:
+        pass
+
 if errors:
     print('ERRORS (%d)' % len(errors))
     for e in errors:
         print(' -', e)
     sys.exit(1)
-print('OK: raid_board_screens (fixed box, colour box on 4 sizes, event key file names, run with patch)')
+print('OK: raid_board_screens (fixed box, colour box on 4 sizes, event key file names, run with patch, --cards)')
