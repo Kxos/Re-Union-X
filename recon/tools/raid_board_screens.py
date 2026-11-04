@@ -1,6 +1,6 @@
 """Raid Board card pictures cut from screenshots of the original game (docs/notes/bacheche.md «Raid Boards»).
 
-    python -I recon/tools/raid_board_screens.py <raid_config.json> <screenshot folder> <Board_0005.png> <loc folder> [<art patch.json>]
+    python -I recon/tools/raid_board_screens.py <raid_config.json> <screenshot folder> <Board_0005.png> <loc folder> [<art patch.json>] [--cards <folder>]
 
 For every board of raid_config.json boards.art with `screenshot` (no JP 4.3.1 file has its picture), plus the boards of an
 optional patch in the same shape ({<board key>: {screenshot: <file>}}, e.g. the event boards proposed by a review), the
@@ -15,6 +15,10 @@ event boards: 1024 x 409, 1280 x 544, 1919 x 819, ...) are searched for the card
 (pink raid card or blue-lilac event card) in the top-left part of the screen, squared (checked on 11 event boards whose JP
 picture exists: mean difference 1.8-3.2 of 255 on 1024-1779 px screenshots, 7-14 on 1919 x 819 ones, box within 1 px). The corners outside the rounded card take the alpha of the card background
 Board_0005, so the dark screen behind the card is not copied.
+
+--cards <folder>: ready cards with the same file names (306 x 306), e.g. a card rebuilt by placing the original transparent
+picture (khuxwiki «Preview - <board>», the JP-format file) on the original card background where the screenshot shows it;
+such a file is copied instead of the cut (sharper than a 144-192 px screenshot card). Boards without a ready card are cut.
 """
 import json
 import os
@@ -67,6 +71,14 @@ def cut(shot, mask):
 
 
 def main(argv):
+    argv = list(argv)
+    cards = None
+    if '--cards' in argv:
+        i = argv.index('--cards')
+        if i + 1 >= len(argv):
+            raise SystemExit(__doc__)
+        cards = argv[i + 1]
+        del argv[i:i + 2]
     if len(argv) not in (4, 5):
         raise SystemExit(__doc__)
     config, shots, board, loc = argv[:4]
@@ -76,13 +88,22 @@ def main(argv):
     mask = Image.open(board).convert('RGBA').resize((SIZE, SIZE)).getchannel('A')
     out = os.path.join(loc, 'img', 'sphere_incentive_ww')
     os.makedirs(out, exist_ok=True)
-    n = 0
+    n = ready = 0
     for key, a in sorted(art.items()):
         if 'screenshot' not in a:
             continue
-        cut(os.path.join(shots, a['screenshot']), mask).save(os.path.join(out, file_name(key) + '.png'))
+        dest = os.path.join(out, file_name(key) + '.png')
+        src = os.path.join(cards, file_name(key) + '.png') if cards else None
+        if src and os.path.exists(src):
+            card = Image.open(src).convert('RGBA')
+            if card.size != (SIZE, SIZE):
+                raise SystemExit('ready card %s is %dx%d, expected %dx%d' % (src, card.size[0], card.size[1], SIZE, SIZE))
+            card.save(dest)
+            ready += 1
+        else:
+            cut(os.path.join(shots, a['screenshot']), mask).save(dest)
         n += 1
-    print('raid_board_screens: %d cards -> %s' % (n, out))
+    print('raid_board_screens: %d cards (%d ready) -> %s' % (n, ready, out))
 
 
 if __name__ == '__main__':
