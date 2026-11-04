@@ -64,7 +64,54 @@ function realOrSkip(what) {
 }
 const addDays = (iso, n) => new Date(Date.parse(iso + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
 
+// Pacific moments: 2016-11-12 is a Saturday, 11-16 a Wednesday; 20:00 UTC = 12:00 PST
+const PT_NOON = (iso) => Date.parse(`${iso}T20:00:00Z`);
+// WW-E22111-1 (Closehanded Captain, weekend-only): the census weekend and the two other periods of its notice
+const WEEKEND = entry('WW-E22111-1', 'weekend-only', '2016-11-05', '2016-11-07', 'single', { event: true, open: 'weekend',
+  periods: [['2016-11-05', '2016-11-06'], ['2016-11-12', '2016-11-13'], ['2016-11-26', '2016-11-27']] });
+const MONTHLY = entry('WW-E22563-1', 'monthly', '2016-11-21', '2016-11-28', 'single', { event: true, periods: [['2016-11-21', '2016-11-28']] });
+// a daily showdown: one boss per day (Mon 12-26 .. Sun 01-01)
+const SHOWDOWN = ['2016-12-26', '2016-12-27', '2016-12-28'].map((day) => entry('WW-E23794-1', 'daily showdown', '2016-12-26', '2017-01-02', 'single',
+  { key: `WW-E23794-1/single@${day}`, event: true, open: 'day', day, periods: [['2016-12-26', '2017-01-01']] }));
+const DAILY = entry('WW-E29805-1', 'daily', '2017-07-03', '2017-07-10', 'single', { event: true, open: 'daily', periods: [['2017-07-03', '2017-07-09']] });
+const EV = { entries: [WEEKEND, MONTHLY, ...SHOWDOWN, DAILY] };
+
 const tests = {
+  weekend_only_real_days() {
+    // shown on a real Saturday or Sunday of a Shop week holding one of its periods, never on another day
+    const w = week('2016-11-10', '2016-11-16');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2016-11-12') })), 'WW-E22111-1/single', 'Saturday');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2026-11-08') })), 'WW-E22111-1/single', 'any real Sunday');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2016-11-16') })), '', 'Wednesday');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: Date.parse('2016-11-14T07:30:00Z') })), 'WW-E22111-1/single', 'Sunday 23:30 PST is still the weekend');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, w)), '', 'no clock: no weekend raid');
+    assert.strictEqual(keys(cal.weekRaids(EV, { ...w, nowMs: PT_NOON('2016-11-16') }).closed), 'WW-E22111-1/single', 'closed today, apart from unavailable');
+    // its other periods: the last weekend beside the monthly raid of the same week
+    const late = week('2016-11-24', '2016-11-30');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...late, nowMs: PT_NOON('2016-11-26') })), 'WW-E22111-1/single,WW-E22563-1/single');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...late, nowMs: PT_NOON('2016-11-30') })), 'WW-E22563-1/single');
+    // a week between its periods: nothing
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...week('2016-11-17', '2016-11-20'), nowMs: PT_NOON('2016-11-19') })), '');
+    assert.strictEqual(cal.openNow(WEEKEND, PT_NOON('2016-11-12')), true);
+    const ix = realOrSkip('weekend_only_real_days');
+    if (!ix) return;
+    const real = ix.entries.filter((e) => e.censusId === 'WW-E22111-1');
+    assert.ok(real.length && real.every((e) => e.open === 'weekend'));
+    assert.deepStrictEqual(real[0].periods, [['2016-11-05', '2016-11-06'], ['2016-11-12', '2016-11-13'], ['2016-11-26', '2016-11-27']]);
+    const listed = (now) => cal.weekRaids(ix, { ...w, nowMs: now });
+    const sat = listed(PT_NOON('2016-11-12')), wed = listed(PT_NOON('2016-11-16'));
+    assert.ok([...sat.entries, ...sat.unavailable].some((e) => e.censusId === 'WW-E22111-1'), 'Saturday');
+    assert.ok(![...wed.entries, ...wed.unavailable].some((e) => e.censusId === 'WW-E22111-1'), 'Wednesday');
+  },
+  daily_real_day() {
+    // a daily showdown lists the boss of the real weekday only; a daily raid runs every day of its week
+    const w = week('2016-12-26', '2017-01-01');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2016-12-27') })), 'WW-E23794-1/single@2016-12-27', 'Tuesday');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2026-11-04') })), 'WW-E23794-1/single@2016-12-28', 'any real Wednesday');
+    assert.strictEqual(keys(cal.raidsForWeek(EV, { ...w, nowMs: PT_NOON('2026-11-06') })), '', 'Friday: its boss is not in the fixture');
+    const d = week('2017-07-06', '2017-07-12');
+    for (const day of ['2026-11-02', '2026-11-04', '2026-11-08']) assert.strictEqual(keys(cal.raidsForWeek(EV, { ...d, nowMs: PT_NOON(day) })), 'WW-E29805-1/single', day);
+  },
   follows_story() {
     assert.strictEqual(keys(cal.raidsForWeek(FIX, week('2019-10-14', '2019-10-20'))), 'W1014/Beginner');
     const ix = realOrSkip('follows_story');
@@ -107,7 +154,8 @@ const tests = {
     // sweep runs without R1007
     sweep({ entries: FIX.entries.filter((e) => e.censusId !== 'R1007') }, '2019-09-15', '2019-11-15');
     const ix = realOrSkip('shop_week_overlap');
-    if (ix) console.log(`  (real calendar: ${sweep(ix, '2018-08-20', '2021-07-10')} Shop weeks agree with special.currentEntries)`);
+    // the event raids of 2016-2018 (Task 10) run beside this rule, by their periods: weekend_only_real_days, daily_real_day
+    if (ix) console.log(`  (real calendar: ${sweep({ entries: ix.entries.filter((e) => !e.event) }, '2018-08-20', '2021-07-10')} Shop weeks agree with special.currentEntries)`);
   },
   radiant_beside_weekly() {
     assert.strictEqual(keys(cal.raidsForWeek(FIX, week('2019-10-07', '2019-10-13'))), 'W1007/Beginner,W1007/Advanced,R1007/Beginner');

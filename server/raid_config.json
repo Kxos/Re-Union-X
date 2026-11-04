@@ -1,6 +1,8 @@
 {
   "weeklyUpMinutes": 20,
   "useAp": 10,
+  "eventUpMinutes": { "normal": 10, "rare": 20 },
+  "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
   "tierQuestLv": {
     "single": 25,
     "Beginner": 25,
@@ -11,7 +13,7 @@
   },
   "brokenBackgrounds": ["bg_CD1", "bg_ED1", "RB_0003_00_00_eff_back2", "RB_0003_00_00_eff_back3"],
   "backgroundFallbackWorld": 1,
-  "mapWorlds": {},
+  "mapWorlds": { "Fireplace": 6 },
   "modelTemplates": { "Scourge Spider": 5000, "Wicked Spider": 5000, "Malicious Spider": 5000, "Egg Master": 7,
     "Assault Dragon": 9, "Adventurer": 9, "Jewel Princess": 11, "Gear Golem": 1001, "Heartless Tsum": 9,
     "Loudmouth Parade": 3, "Greedy Grouch": 9, "Mysterious Sir": 1, "Merry-Go-Rowdy": 15, "Holiday Sleigh": 3,
@@ -45,13 +47,23 @@
     "coinOdds": "Coin amounts come from the wiki tables, often of the same tier in another week; the odds of the high amount and of gems have no source (rewards.reconstructed).",
     "rewards2016": "Lux, Munny and EXP of the boss rows are the 2016 values of the template row (used only without the lux rule).",
     "lux": "Lux of a defeat: the client sums luxAttack of the body and the broken parts at the boss's level, times the deck's Lux skills (bench). Original rule (official guide notice, Nov 2019): Lux follows the HP taken and the Lux skills, not hits or damage. Totals per kill reported with Lux++ on every medal, no bonus: Advanced about 8 billion, Legendary about 12 billion (forum), Epic about 19.8 billion (video frame, June 2021): 2% of body HP, divided by the x5 of our Lux++ skill (luxUp 50000, itself an estimate), spread as the template's luxAttack. Bonus time doubles it on the server. Munny and EXP stay the 2016 values.",
-    "upMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
+    "upMinutes": "Weekly raids: about 20 minutes, timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere. Event raids of 2016-2018 with no 2016 setting of their boss: 10 minutes, 20 for a rare 2 body (eventUpMinutes).",
     "onlyCensusIds": "Optional filter, absent in the shipped file (Task 8): only these census rows are built. Without it every WW row with week data is built, and raid-calendar.js picks the rows of the Shop week.",
+    "eventUpMinutes": "Timer of an event raid of 2016-2018 with no 2016 raidSetting of its boss: 10 minutes, 20 for a rare 2 body, as the 2016 story settings (Darkside 10 / Darkside Ω 20 ...).",
+    "weekendUpMinutes": "Weekend-only raids: 3 hours, 1 hour from the May 2018 weekend (reddit 8h8217, 2018-05-05: «counter 3 h to 1 h»). Applies to every weekend row without a 2016 setting dated on its own start.",
+    "weekendTimer": "Timer of a weekend-only raid from the weekend rule (3 hours, 1 hour from May 2018: one community post), not from a row of that weekend.",
+    "setting2016": "Timer and AP of a further attempt come from the boss's 2016 raidSetting of an earlier event (the only rows known), not from a row of this raid.",
+    "eventCoins": "The coin rewards of this event are not known: the one-tier level band table (LV 1-9, 10-19, 20-29, 30-99; wiki, 2018-09 on) of Raid Coins is used. Level drops named by the notices (Chips, Dales, event medals at LV 10, 90, 99 ...) are not served.",
+    "hpFloor": "HP is never lowered: where the boss's own 2016 row is stronger than the one-tier rule at a level, that level keeps the 2016 HP.",
+    "rareOdds": "The rare boss of this quest (raidSetting rareBossId of the 2016 table) appears with a chance of 1 in rareUpTypeArg per spawn (rareUpType 3). The meaning of the two fields is inferred from their values (Fortress Crab 1: always the Ω the notice names; Queen Bee 5), not read.",
+    "questObjectives": "One objective of this event quest has no code here or pays an item we do not have (Avatar Coin, a keyblade or skill objective): the quest uses the standard Raid Time! objectives (Raid Coin x 5).",
+    "boardStandard": "No board of this raid is known: it gets the board of the nearest raid of the same type (spec, Answer 5), without the medals exclusive to that other event.",
+    "boardGender": "Both the male and the female board of this event are open: the original showed the one of the avatar's gender.",
     "weeklyUpMinutes": "About 20 minutes: timers seen in footage (19:39, 19:00, 17:00); 20:00 itself is not stated anywhere.",
     "useAp": "AP of a further attempt on the same boss: 10 in the 2016 rows, not stated for the Weekly era.",
     "tierQuestLv": "Quest level per tier from the wiki pages. The Gem Drop Beginner page prints 125, taken as a slip.",
     "brokenBackgrounds": "Incomplete raid backgrounds (docs/notes/raid.md, Backgrounds). A stage whose world has one uses backgroundFallbackWorld; the entry lists background in reconstructed.",
-    "mapWorlds": "Map name -> world when the story rows do not tell it. Otherwise the last story row with the same map, or with the same text before the colon.",
+    "mapWorlds": "Map name -> world when the story rows do not tell it. Otherwise the last story row with the same map, or with the same text before the colon. Fireplace: Beast's Castle (world 6), the world of the wiki quest pages that use the room (Lure a Submarine Carp, June 2017; Lure a Heartless Tsum).",
     "modelTemplates": "Boss name -> 2016 raidEnemy id whose parts and moves it reuses, for bosses with no 2016 row; a boss not listed stays unavailable with why = template. Spiders 9101-9103 -> 5000 Enraged Arachnid: one rig for the three (identical frame, movie and place counts in all five fight animations), and 5000 is the 2016 recolour that already reused Savage Spider's moves. Egg Master 1008 -> 7 Trickmaster: identical frame counts in all five fight animations, 2 parts as in the JP raid_rule row. Inferred from the LWFs, medium-high confidence. The 15 reconstructed bosses (0018-0028, 0030-0032, 1011; render7/TEMPLATES15.md, coordinator ruling 2 Nov): a 2016 row whose part weaknesses equal the model's weak points, ties broken by equal frame counts, rare 1 preferred; no rig is shared, so moves, part HP shares and rarity are inferred (medium to medium-low confidence). Assault Dragon, Adventurer, Jewel Princess, Gear Golem and Closehanded Captain keep their full Default part set although later weekly weeks showed fewer parts on the wiki: every original LWF carries the full weak-point set, and an unpaired weak point crashes the client.",
     "modelParts": "Boss name -> number of parts of its template row it keeps (the first ones). Spiders 9101-9103 -> 4 (coordinator ruling 2 Nov): the Spinneret (part 2 of 5000, weakness 2, 900 / 24,000 of body HP) and the 3 spiderlings (25% each), the 2016 to Jul 2018 layout. In the weekly raids (Sep 2018 on) only the Spinneret had a bar, but the only original spider LWFs with the Spinneret target (parts2) also mark the spiderlings as weak points (parts3-5), and a weak point without a part crashes the client (docs/notes/raid.md, Weak points). Declared in the Raid Bosses notice.",
     "bossAttributes": "Boss name -> attribute (1 Power, 2 Speed, 3 Magic) for a boss on a template row whose own attribute differs; body and parts take it. The spiders' attributes come from their colour as the census reads it (inferred). The 15 reconstructed bosses: body attribute from the khuxwiki infobox where the template differs; their parts take it too, not the wiki's per-part attributes.",
@@ -139,7 +151,11 @@
       "gems-sun": {"jp": "img/sphere_incentive/2400440.png"},
       "gems-moon": {"jp": "img/sphere_incentive/2400441.png"}
     },
-    "unmatched": {},
+    "unmatched": {
+      "6★ Trickmaster (Boosted)": "Boosted Trickmaster (+1,000 base Strength, notice 33888): no Boosted row is identified in the medal table; the cell is left off rather than paying the plain medal.",
+      "6★ Destroyer Behemoth (Boosted)": "Boosted Destroyer Behemoth: no Boosted row is identified in the medal table; the cell is left off rather than paying the plain medal.",
+      "Booster [HD Vanitas (EX+)] +5%": "Event Boosters are not built yet (they come with the events, I-166): the cell is left off."
+    },
     "reconstructedTexture": ["Starlight Ears", "Dazzling Disco"],
     "aliases": {
       "6★ Fantasia Mickey A": {"item": "5★ Fantasia Mickey Ver. A", "why": "Fantasia Mickey A exists only at 5★ (Roboloid's full medal list, the medal table); the board pairs it with Magic Brooms, the 5★ evolve recipe, and the wiki infobox lists it as mickeya=1 without a rarity: the 6★ is read as a slip of the wiki layout."}

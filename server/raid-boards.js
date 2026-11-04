@@ -15,7 +15,7 @@
 
 const BOARD_BASE = 3000000, BOARD_MAX = 3999999, TYPE = 5;
 const NODES = 22, MASU = 23, COMPLETION = 22; // nodes 1..22; index 22 of sphereMasu = completion reward (crash with 0)
-const FAMILIES = new Set(['weekly', 'radiant reward']); // the 130 rows; the 3 pre-series rows belong to the event raids
+const FAMILIES = new Set(['weekly', 'radiant reward']); // the 130 rows; make-raid.js adds the pre-series and event families (Task 10, families option)
 const SEL = { jewel: 2, medal: 3, material: 5, title: 7, pet: 33, drawTicket: 41 }; // rewardSelect = item type of grantItem
 const PARTS_SEL = { 2: 23, 3: 19, 7: 20 }; // avatarParts.partsType -> rewardSelect (clothes, hairstyle, accessory)
 // Draw Ticket and the seasonal currencies (rewardSelect 41): rewardId = index in gacha.js TICKET_CURRENCIES (gacha.ticketCurrency).
@@ -119,9 +119,10 @@ function matchCompletion(idx, board) {
   const v = board.completion_reward && (board.completion_reward.value ?? board.completion_reward);
   if (!v) return { name: null, why: 'no completion reward' };
   const name = Array.isArray(v) ? v[1] : String(v);
-  if (/★/.test(name)) return { name, ...matchReward(idx, 'medal', name) };
-  const mat = matchReward(idx, 'material', name);
-  return { name, ...(mat.why ? matchReward(idx, 'medal', name) : mat) };
+  const qty = board.completion_qty || 1;
+  if (/★/.test(name)) return { name, ...matchReward(idx, 'medal', name, qty) };
+  const mat = matchReward(idx, 'material', name, qty);
+  return { name, ...(mat.why ? matchReward(idx, 'medal', name, qty) : mat) };
 }
 
 // CORRECTIONS.md, section «Boards»: «<Board name>, cell <n>: wiki <a>, ... need <b>» -> cost fixes
@@ -153,7 +154,7 @@ function cellsOf(board, fixes = []) {
 }
 
 // ids: copy of ids.boards with a number for every board of every Weekly / Radiant row (whatever the filter)
-function allocateBoardIds(doc, ids) {
+function allocateBoardIds(doc, ids, families = FAMILIES) {
   const boards = { ...((ids || {}).boards || {}) };
   const seen = new Map();
   for (const [k, v] of Object.entries(boards)) {
@@ -162,7 +163,7 @@ function allocateBoardIds(doc, ids) {
     seen.set(v, k);
   }
   let next = Math.max(0, ...Object.values(boards)) + 1;
-  for (const w of weeksOf(doc)) {
+  for (const w of weeksOf(doc, families)) {
     for (const b of w.boards || []) {
       const key = `${w.census_id}/${b.board}`;
       if (!(key in boards)) boards[key] = next++;
@@ -176,14 +177,14 @@ function usDate(iso) {
   if (!m) throw new Error(`raid boards: no start date for the week ${iso}`);
   return `${Number(m[2])}/${Number(m[3])}/${m[1].slice(2)}`;
 }
-const weeksOf = (doc) => ((doc || {}).weeks || []).filter((w) => FAMILIES.has(w.family));
+const weeksOf = (doc, families = FAMILIES) => ((doc || {}).weeks || []).filter((w) => families.has(w.family));
 
 // Rows of the boards of the census rows in `censusIds` (null: all). Returns {sphereRows, arrayRows, masuRows, byCensus,
 // labels (census id -> reconstructed labels: boardPath, boardSet, boardCost, boardCells), boardIds,
 // report: {unmatched: [{board, n, kind, reward, why, weeks}], corrected: [...], dropped: [board ids with no cell left], bytes}}. Throws on a name that matches
 // no item and is not declared in config.unmatched (with the whole list), and on a completion reward that matches nothing.
-function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null }) {
-  const boardIds = allocateBoardIds(doc, ids);
+function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null, families = FAMILIES }) {
+  const boardIds = allocateBoardIds(doc, ids, families);
   const idx = itemIndex(master);
   const fixes = parseBoardCorrections(correctionsMd);
   const declared = config.unmatched || {};
@@ -221,7 +222,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
     return r;
   };
 
-  for (const w of weeksOf(doc)) {
+  for (const w of weeksOf(doc, families)) {
     for (const ref of w.boards || []) {
       const b = layouts.get(ref.board);
       if (!b) { unknown.set(`board|${ref.board}`, `${w.census_id}: board ${ref.board} is not in the board list`); continue; }
@@ -230,7 +231,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   }
   if (unknown.size) throw new Error(`raid boards: reward names with no item (match them, or declare them in boards.unmatched of raid_config.json):\n  ${[...unknown.values()].join('\n  ')}`);
 
-  for (const w of weeksOf(doc)) {
+  for (const w of weeksOf(doc, families)) {
     if (censusIds && !censusIds.has(w.census_id)) continue;
     const list = [], labels = new Set();
     const weekDate = usDate(w.start || String(w.census_id).replace(/^WW-[A-Z0-9]+-/, ''));
@@ -296,4 +297,4 @@ function artLines(art) {
   return [...head, ...art.map(line)].join('\n') + '\n';
 }
 
-module.exports = { artLines, usDate, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };
+module.exports = { norm, artLines, usDate, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };
