@@ -196,10 +196,10 @@ const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angele
 const ptDate = (ms) => PT_DATE.format(new Date(ms)); // YYYY-MM-DD of the Pacific day
 // Pacific days a census row runs: weekend-only rows list their other weekends in the census note («Other periods in notice:
 // ["2016-11-12T08:00Z..2016-11-14T07:59Z", ...]», UTC, ending on the Monday 07:59/06:59 = Sunday 23:59 PT); the census end is that
-// Monday, so the last Pacific day is the day before. Other event rows: their census dates as they stand.
+// Monday, so the last Pacific day is the day before; the same for the one-off and monthly rows (their end is that Monday too,
+// review M-1).
 function eventPeriods(row) {
   const lastDay = (end) => isoDay(dayMs(end) - DAY);
-  if (row.family === 'one-off event' || row.family === 'monthly') return [[row.start, row.end]];
   const out = [[row.start, row.end > row.start ? lastDay(row.end) : row.start]];
   const m = /Other periods in notice: (\[[^\]]*\])/.exec(String(row.note || ''));
   for (const p of m ? JSON.parse(m[1]) : []) {
@@ -343,6 +343,53 @@ function setting2016Of(settings, orig, w, rareBody) {
   return rareBody ? { setting: pick, up: pick.rareBossUpTime, ap: pick.rareUseAp, dated: dateOf(pick) === w.start }
     : { setting: pick, up: pick.bossUpTime, ap: pick.useAp, dated: dateOf(pick) === w.start };
 }
+// HP of a one-tier or 2018 three-tier raid before the cap era (raid_config.json eventHp, user decision of review I-1): the boss's
+// 2016 row `ref` as the shape, scaled log-linearly by date from x1 on cfg.from to cfg.single.hp at cfg.single.level on
+// cfg.single.date (never below x1), x cfg.weekend.factor for weekend raids before cfg.weekend.until; Advanced at least
+// cfg.advanced.lv1 at LV 1 with the same shape, Intermediate the geometric mean of Beginner and Advanced. flatFrom: a level above
+// which the shape stops growing (the weekly one-tier rows of 2018-09). Returns lv -> HP.
+function eventHpCurve({ ref, date, tier, weekend, cfg, flatFrom = null }) {
+  const shape = (lv) => atLevel(ref, 'hp', flatFrom ? Math.min(lv, flatFrom) : lv);
+  const base = shape(cfg.single.level) || 1;
+  const t = Math.min(1, Math.max(0, (dayMs(date) - dayMs(cfg.from)) / (dayMs(cfg.single.date) - dayMs(cfg.from))));
+  const factor = Math.pow(Math.max(1, cfg.single.hp / base), t) * (weekend && date < cfg.weekend.until ? cfg.weekend.factor : 1);
+  const beginner = (lv) => factor * shape(lv);
+  const advanced = (lv) => Math.max(cfg.advanced.lv1 * shape(lv) / (shape(1) || 1), beginner(lv));
+  if (tier === 'Advanced') return advanced;
+  if (tier === 'Intermediate') return (lv) => Math.sqrt(beginner(lv) * advanced(lv));
+  return beginner;
+}
+
+// Level drops of an event (event_raid_rewards.json level_rewards, from the notices): [{levels, items: [{type, id, num, name}]}]
+// for the itemised ones, and `partial` when some are not served (not itemised, a chance drop, Boosted, coins with no amount).
+// «10», «31, 71», «10, then every 10 levels» (to 90); «one 6★ Chip, one 6★ Dale», «6★ Chip + 6★ Dale set», «Setzer, guaranteed».
+function levelDropsOf(evRow, medals) {
+  const out = { drops: [], partial: false };
+  for (const l of (evRow && evRow.level_rewards) || []) {
+    const lvText = String(l.level).replace(/"/g, '').trim(), text = String(l.reward || '');
+    let levels = null;
+    const every = /^(\d+), then every (\d+) levels$/.exec(lvText);
+    if (every) { levels = []; for (let v = num(every[1]); v <= 90; v += num(every[2])) levels.push(v); } else if (/^\d+(\s*,\s*\d+)*$/.test(lvText)) levels = lvText.split(/\s*,\s*/).map(num);
+    if (!levels || /not itemised|chance|Boosted|amount not stated|rarity not stated|Raid Coins|Event Coins/i.test(text)) { out.partial = true; continue; }
+    const items = [];
+    for (const part of text.replace(/,?\s*guaranteed$/i, '').replace(/\s+set$/i, '').split(/\s*(?:,|\+)\s*/).filter(Boolean)) {
+      const m = /^(?:one\s+)?(?:(\d)★\s*)?(.+?)$/i.exec(part.trim());
+      const name = raidBoards.norm(m[2]);
+      // a medal named without its rarity: the rarity the same event writes for it (its exclusive items, its board cells)
+      const named = [...Object.keys(evRow.exclusive_items || {}), ...(evRow.boards || []).flatMap((b) => (b.cells || []).map((c) => c.reward))]
+        .map((s) => /^(\d)★ (.+)$/.exec(String(s))).filter((x) => x && raidBoards.norm(x[2]) === name).map((x) => x[1]);
+      const rare = m[1] || (new Set(named).size === 1 ? named[0] : null);
+      const keys = [...medals.keys()].filter((k) => k.endsWith(`|${name}`) && (!rare || k.startsWith(`${rare}|`)));
+      const hit = keys.length === 1 ? medals.get(keys[0]) : null;
+      if (!hit || hit.length !== 1) { items.length = 0; break; }
+      items.push({ type: 3, id: hit[0].medalId, num: 1, name: part.trim() });
+    }
+    if (!items.length || items.length > 4) { out.partial = true; continue; }
+    out.drops.push({ levels, items });
+  }
+  return out;
+}
+
 // Timer and AP of an event raid: its own dated 2016 setting; weekend-only rows the weekend rule (3 h, 1 h from 2018-05-05:
 // reddit 8h8217); the boss's 2016 setting; else 10 minutes, 20 for a rare 2 body (2016 story rows), and the AP of config.useAp.
 function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
@@ -401,7 +448,8 @@ function allocateIds({ census, weeks, ids, only }) {
 // cap: raid_config.json modelParts, the first N parts of the template that the boss keeps (undefined: all of them).
 // exact: the boss's own 2016 rows as they stand (an event raid of the 2016 tables): knots, HP, ATK, DEF and growth.
 // floor(lv): a source HP the body never goes below (HP is never lowered, plan Global Constraints); hpFloored is then set.
-function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap, exact = false, floor = null }) {
+// hpCurve(lv): the body HP at a level when a rule other than hpBody x singleEra share gives it (eventHpCurve); parts keep their share.
+function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap, exact = false, floor = null, hpCurve = null }) {
   const parts = [];
   for (const id of template.parts.slice(0, cap === undefined ? template.validParts : Math.min(cap, template.validParts))) {
     const p = orig.get(id);
@@ -428,8 +476,9 @@ function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knot
     return { body, partRows: parts.map((p) => make(p, e.enemyId + p.weakness - 1, own(p)('hp'), own(p)('attack'), own(p)('defense'))) };
   }
   let floored = false;
+  const ruleAt = (lv) => (hpCurve ? hpCurve(lv) : hpBody * (share ? share[idx(lv)] : 1));
   const bodyHp = (lv) => {
-    const rule = Math.round(hpBody * (share ? share[idx(lv)] : 1)), min = floor ? Math.round(floor(lv)) : 0;
+    const rule = Math.round(ruleAt(lv)), min = floor ? Math.round(floor(lv)) : 0;
     if (min > rule) floored = true;
     return Math.max(rule, min);
   };
@@ -439,7 +488,7 @@ function bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knot
   body.weakness = 1;
   body.validParts = parts.length;
   body.parts = pad(parts.map((p) => e.enemyId + p.weakness - 1), PARTS);
-  const partRows = parts.map((p, i) => make(p, e.enemyId + p.weakness - 1, (lv) => Math.round(hpBody * partShare(p, i) * (share ? share[idx(lv)] : 1)), () => 0,
+  const partRows = parts.map((p, i) => make(p, e.enemyId + p.weakness - 1, (lv) => Math.round(ruleAt(lv) * partShare(p, i)), () => 0,
     () => Math.round(stat.def * (p.defense[0] / baseDef))));
   return { body, partRows, hpFloored: floored };
 }
@@ -514,13 +563,24 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       return rows.why ? rows : { rows, labels, hp: rows.body.hp[0], hpSource: '2016', template, own, original };
     }
     const reading = w.event ? null : readings.find((x) => x.start === w.start && x.tier === w.tier && x.boss === w.boss && !!x.gem_drop === !!w.gem_drop && x.hp && x.confidence === 'video frame');
-    // the event raids before 2019-08-12 follow the one-tier cap of their date, whatever their tier (Task 10)
-    const table = tierHp(values, w.event ? SINGLE : tier, date);
-    if (!reading && !table) return { why: 'hp' };
-    const hpBody = reading ? reading.hp : table.hp;
-    if (!reading || single) labels.push('hp');
-    // an event raid before the first cap reading carries that cap back: the step rule's «last value carried on»
-    if (!reading && (table.step || (w.event && date < table.first))) labels.push('hp_step');
+    // before the cap era (eventHp.capFrom, 2018-10-07) a raid with no reading follows the scale of its boss's 2016 row (review I-1,
+    // user decision): every event raid, and the one-tier weeks of 2018-09 (flat above LV 30)
+    const ecfg = config.eventHp;
+    const scaled = !reading && !!ecfg && (w.event || (tier === SINGLE && date < ecfg.capFrom));
+    let hpBody, hpCurve = null;
+    if (scaled) {
+      // a one-tier week is read at its last day, so the week of the 2018-09-11 reading (2018-09-10..16) reaches it, never below
+      hpCurve = eventHpCurve({ ref: own || template, date: w.event ? date : row.end || date, tier, weekend: row.family === 'weekend-only', cfg: ecfg, flatFrom: w.event ? null : ecfg.single.level });
+      hpBody = Math.round(hpCurve(1));
+      labels.push('eventHp');
+      if (w.event && tier !== SINGLE) labels.push('hpTier');
+    } else {
+      const table = tierHp(values, tier, date);
+      if (!reading && !table) return { why: 'hp' };
+      hpBody = reading ? reading.hp : table.hp;
+      if (!reading || single) labels.push('hp');
+      if (!reading && table.step) labels.push('hp_step');
+    }
     if (single) labels.push('atk_curve');
     const stat = statsAt(config.stats, tier, date, template.rare);
     if (stat.atk === undefined) throw new Error(`raid: raid_stats.json has no ATK for ${tier}`);
@@ -529,11 +589,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     const knots = single ? single.knots : null;
     // HP is never lowered: an event raid never goes below its boss's own 2016 row at the same level
     const floor = w.event && own ? (lv) => atLevel(own, 'hp', lv) : null;
-    const rows = bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap, floor });
+    const rows = bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap, floor, hpCurve });
     if (rows.why) return rows;
     if (rows.hpFloored) labels.push('hpFloor');
     if (config.lux) applyLux(rows, config.lux);
-    return { rows, labels, hp: hpBody, hpSource: reading ? 'video' : 'rule', template, own, original };
+    return { rows, labels, hp: scaled ? rows.body.hp[0] : hpBody, hpSource: reading ? 'video' : scaled ? 'scale' : 'rule', template, own, original };
   };
   // every weak point of the model (raid_models.json `slots`, parts<N> of its wait LWF) needs a part of weakness N: at fight
   // load the client looks up a raidEnemy row for each one and crashes on an empty slot (docs/notes/raid.md «Weak points»)
@@ -666,6 +726,22 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       }
       for (const l of made.labels) if (!reconstructed.includes(l)) reconstructed.push(l);
       emit(made, rewardRowsOf(made, entry.enemyId, tier, date, !!w.gem_drop));
+      // level drops of the notice (review I-3): one raidReward row per level, every slot paid (routes-raid.js), ids past the coin
+      // tables of the body (enemyId x 100 + 40 + i)
+      if (w.event) {
+        const ld = levelDropsOf(evRow, medalIndex);
+        const drops = ld.drops.flatMap((d) => d.levels.map((level) => ({ level, items: d.items }))).sort((a, b) => a.level - b.level);
+        if (drops.length > 59) throw new Error(`raid: ${entry.key}: ${drops.length} level drops`);
+        entry.levelDrops = drops.map((d, i) => {
+          const z = () => [0, 0, 0, 0], row = { raidRewardId: entry.enemyId * 100 + 40 + i, oddsUpPerLv: 0, pointUpPerLv: 0, validReward: d.items.length, type: z(), id: z(),
+            assignSkillType: [1, 1, 1, 1], assignSkillId: z(), assignSkillLv: [1, 1, 1, 1], burstUpperNumber: z(), num: z(), odds: z() };
+          d.items.forEach((it, k) => { row.type[k] = it.type; row.id[k] = it.id; row.num[k] = it.num; row.odds[k] = 100000; });
+          if (!seenReward.has(row.raidRewardId)) { seenReward.add(row.raidRewardId); out.rewardRows.push(row); }
+          return { level: d.level, rewardId: row.raidRewardId, items: d.items.map((it) => it.name) };
+        });
+        if (drops.length) reconstructed.push('levelDrops');
+        if (ld.partial) reconstructed.push('levelDropsPartial');
+      }
       out.settingRows.push({ raidSettingId: entry.settingId, bossId: entry.enemyId, bossUpTime: entry.upMinutes, useAp: entry.useAp, rareBossId: entry.enemyId, rareBossUpTime: entry.upMinutes,
         rareUseAp: entry.useAp, rareUpType: 3, rareUpTypeArg: 1, rareUpTriggerBossId: entry.enemyId, validUnlockRare: 0, unlockRareBossId: [0, 0, 0], unlockRareNum: [0, 0, 0], ...settingExtra });
 

@@ -15,11 +15,14 @@ const calendar = require('./raid-calendar');
 const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls } = special;
 
 const KEEP_LABEL = `${icon('pin')}Keep in Events`, REMOVE_LABEL = 'Remove from Events';
-const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)' };
+const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)',
+  // the event raids of 2016-2018 (Task 10)
+  'one-off event': 'Raid Event', 'weekend-only': 'Weekend Raid', monthly: 'Monthly Raid', daily: 'Daily Raid', 'daily showdown': 'Daily Raid Showdown' };
+const EVENT_FAMILIES = new Set(['one-off event', 'weekend-only', 'monthly', 'daily', 'daily showdown']);
 const TIER_LABEL = { single: 'One tier' };
 const tierLabel = (t) => TIER_LABEL[t] || t;
 // TYPE of a row (family of its census row): [value, label, icon key]
-const typeOf = (row) => (row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) ? 'event' : 'weekly');
+const typeOf = (row) => (row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
 const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp']];
 const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced'], ['legendary', 'Legendary'], ['epic', 'Epic'], ['single', 'One tier']];
 const SHOW_OPTS = [['all', 'All raids'], ['now', 'In Events now', 'now'], ['can', 'Can be kept now', 'pin'], ['kept', 'Kept', 'pin'], ['later', 'Later in the Story', 'later'],

@@ -2,6 +2,13 @@
   "weeklyUpMinutes": 20,
   "useAp": 10,
   "eventUpMinutes": { "normal": 10, "rare": 20 },
+  "eventHp": {
+    "from": "2016-10-31",
+    "single": { "date": "2018-09-11", "level": 30, "hp": 1000000000 },
+    "advanced": { "lv1": 500000000, "date": "2018-07-23" },
+    "weekend": { "until": "2018-05-05", "factor": 2 },
+    "capFrom": "2018-10-07"
+  },
   "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
   "tierQuestLv": {
     "single": 25,
@@ -54,6 +61,11 @@
     "weekendTimer": "Timer of a weekend-only raid from the weekend rule (3 hours, 1 hour from May 2018: one community post), not from a row of that weekend.",
     "setting2016": "Timer and AP of a further attempt come from the boss's 2016 raidSetting of an earlier event (the only rows known), not from a row of this raid.",
     "eventCoins": "The coin rewards of this event are not known: the one-tier level band table (LV 1-9, 10-19, 20-29, 30-99; wiki, 2018-09 on) of Raid Coins is used. Level drops named by the notices (Chips, Dales, event medals at LV 10, 90, 99 ...) are not served.",
+    "eventHp_config": "eventHp (user decision 4 Nov 2026, review I-1 option b): one-tier raids before capFrom with no video reading and no original row. Shape: the boss's own 2016 raidEnemy row (its template's when it has none), read at the knots. Scale: x1 on `from` (the last event of the 2016 tables), rising log-linearly by date to single.hp at single.level on single.date (RAID_VALUES.md: 1,000,000,000 at the LV 30 cap, Closehanded Captain, 2018-09-11), never below x1. The weekly one-tier rows of 2018-09 are flat above LV 30 («caps out at level 30»). Weekend raids before weekend.until: x factor («half of previous» on that weekend, reddit 8h8217). Three tiers of 2018: Beginner the line; Advanced LV 1 = advanced.lv1 (2018-07-23: «500,000,000 at LV 1», a week-long raid of three tiers, read as the hardest), with the boss's shape; Intermediate their geometric mean. The 1.2-16.5 billion cap of hp_tier_era applies from capFrom (2018-10-07) to 2019-08-11 only.",
+    "eventHp": "HP of an event raid of 2016-11 to 2018-08 (and of the one-tier weeks of 2018-09) with no original row: the boss's 2016 row scaled by date up to the 2018 readings (eventHp in raid_config.json). The readings are of unnamed bosses and tiers; the curve between them is ours.",
+    "hpTier": "The three tiers of 2018 have no HP reading of their own: Advanced takes the 2018-07-23 reading of 500 million at LV 1 (read as the hardest tier), Beginner the one-tier line, Intermediate the geometric mean of the two.",
+    "levelDrops": "Level drops named by the event's notice (Chip and Dale at LV 10, Setzer at 31 and 71, Young Kairi from LV 30, Halloween Sora at 90 ...): paid to the Present Box when the boss is defeated at that level. The rarity of a medal named without one is the only one the medal table has.",
+    "levelDropsPartial": "Some level rewards of this event's notice are not served: not itemised («bonus Medals»), a chance drop with no odds, a Boosted medal with no row, coins with no amount, or Event Coins every 5 levels with no amount.",
     "hpFloor": "HP is never lowered: where the boss's own 2016 row is stronger than the one-tier rule at a level, that level keeps the 2016 HP.",
     "rareOdds": "The rare boss of this quest (raidSetting rareBossId of the 2016 table) appears with a chance of 1 in rareUpTypeArg per spawn (rareUpType 3). The meaning of the two fields is inferred from their values (Fortress Crab 1: always the Ω the notice names; Queen Bee 5), not read.",
     "questObjectives": "One objective of this event quest has no code here or pays an item we do not have (Avatar Coin, a keyblade or skill objective): the quest uses the standard Raid Time! objectives (Raid Coin x 5).",

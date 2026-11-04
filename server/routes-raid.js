@@ -191,6 +191,16 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
     onDefeat(boss); // Daily, Weekly and Beginner «Defeat Raid Boss» missions (server.js missionCount 'raid')
+    // level drops of the event's notice (make-raid.js entry.levelDrops, review I-3): every slot of the drop row of this level, to the
+    // Present Box (the RAID RESULTS popup shows only the three coin tables)
+    const entryOf = (raidIndex().entries || []).find((e) => e.key === boss.key);
+    for (const d of (entryOf && entryOf.levelDrops) || []) {
+      if (d.level !== boss.level) continue;
+      const row = rewardRow(d.rewardId);
+      if (!row) { log(`[raid] level drop ${d.rewardId} of ${boss.key} not served`); continue; }
+      for (let i = 0; i < row.validReward; i++) addPresent({ type: row.type[i], id: row.id[i], num: row.num[i], skillId: 0, skillLv: 1, from: 'levelDrop' });
+      log(`[raid] ${boss.key}: level ${boss.level} drop ${row.raidRewardId} to the Present Box`);
+    }
     const rows = rewardRowsOf(boss);
     if (!rows?.victory || !rows.mvp) return log(`[raid] boss ${boss.raidId} defeated, no reward: its raidReward rows are not served`);
     const entry = rewards.pendingEntry({ raid: boss, rows, victory: true, allPoints, rng });
@@ -311,7 +321,12 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     if (r.boss || r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
     // a quest that is not a raid of the week (the kept raid, or one kept until a moment ago): the catalogue counter, so it never
     // reads or moves the level the live week of that entry left (review b597b99)
-    if (spawn(r, entry, nowMs, { catalog: !currentEntries(nowMs).includes(entry) })) r.points = 0;
+    // A raid of the week closed by the clock a moment ago (a weekend quest cleared after Sunday 23:59 PT, a showdown boss after
+    // midnight) still counts as live (review M-2): `closed` of weekRaids, not only the open list
+    const { shopFrom, shopTo } = storyWeek();
+    const week = calendar.weekRaids(raidIndex(), { shopFrom, shopTo, nowMs });
+    const live = [...week.entries, ...week.closed.filter((e) => e.available)].includes(entry);
+    if (spawn(r, entry, nowMs, { catalog: !live })) r.points = 0;
   }
 
   // The raids of the player's Shop week (raid-calendar.js): storyWeek() is {shopFrom, shopTo} of storyCtx() in server.js, the
@@ -395,7 +410,10 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // questApAt's. ap0Force (bench file save/raid_ap0.json of server.js) lists them at any hour, the charge unchanged.
   // For `campaigns` of GET /campaign, /stage/start and /raid/start.
   function campaignIds(realMs = realNow()) {
-    const on = !!ap0Force() || (isBonusTime(realMs) && [...currentEntries(realMs), ...keptEntries(realMs)].some((e) => questApAt(e, realMs) === 0));
+    // review I-2: the campaign rows cover every raid stage, so it goes out only when every listed raid quest costs 0 now (an event
+    // quest of 1 or 5 AP beside one of 0 would show 0 and be charged its AP)
+    const listed = [...currentEntries(realMs), ...keptEntries(realMs)];
+    const on = !!ap0Force() || (isBonusTime(realMs) && listed.length > 0 && listed.every((e) => questApAt(e, realMs) === 0));
     return on ? raidAp0Ids(masterRows('evCampaign')) : [];
   }
 

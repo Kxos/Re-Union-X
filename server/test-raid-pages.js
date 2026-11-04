@@ -62,6 +62,17 @@ const tests = {
     assert.strictEqual(calendar.rowState(rows[0], { ...c, kept: 'WW-W-2018-09-03' }), 'kept');
     assert.strictEqual(calendar.rowState(rows[0], { ...c, shopFrom: '', shopTo: '' }), 'later', 'no story week yet: every raid is later');
   },
+  event_families_typed() {
+    // Task 10 review M-5: the event raids of 2016-2018 are Raid Events, with a readable family name, not Weekly
+    const ix = index();
+    ix.entries.push(tier('WW-E22111-1', 8013, '2016-11-05', '2016-11-07', 'single', 'Closehanded Captain', { family: 'weekend-only' }),
+      tier('WW-E22563-1', 8014, '2016-11-21', '2016-11-28', 'single', 'Wicked Spider', { family: 'monthly' }));
+    const html = pages.catalogPage(ix, ctx({ index: ix }));
+    for (const id of [8013, 8014]) assert(rowOf(html, id).includes('data-type="event"'), `row ${id} is a Raid Event`);
+    assert(rowOf(html, 8100).includes('data-type="weekly"'));
+    assert(pages.detailPage(ix, 8013, ctx({ index: ix })).includes('<td>Weekend Raid</td>'));
+    assert(pages.detailPage(ix, 8014, ctx({ index: ix })).includes('<td>Monthly Raid</td>'));
+  },
   lists_every_row() {
     const html = pages.catalogPage(index(), ctx());
     for (const id of [8071, 8100, 8101, 8150, 8180]) assert.strictEqual(count(html, `id="q${id}"`), 1, `row ${id} once`);
