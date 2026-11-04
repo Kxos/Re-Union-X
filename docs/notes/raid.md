@@ -303,3 +303,17 @@ Master rev 236, resources 96, save `raid2` (maxpower party), 2 November. Every m
 Part bars (counted about 1 s after the first HUD frame; the first frame never shows them) match the expected count (weak points minus the body) wherever the screen was not covered: Queen Bee and Queen Bee Ω 1, Lion Headliner 2, Wicked and Malicious Spider 4, every reconstructed boss as its template (Assault Dragon, Adventurer, Gear Golem, Heartless Tsum, Greedy Grouch, Mysterious Sir 2; Jewel Princess 4; Closehanded Captain 3; the seven on the Behemoth or Queen Bee template 1). On some 2016 bosses a Special cut-in hid part of the screen, so fewer bars were seen there (none more than expected). One extra: Darkside (`0001`) shows one bar on its hand although `raid_models.json` lists no slots for it; it loads, so harmless.
 
 Seen on the way: the RAID BOSS ALERT card of Assault Dragon shows the layout's default Darkside picture (no list banner for `0018`). The per-model table and screenshots stay in the private bench folder (`tmp/raid_p2`, `SMOKE2.md`).
+## evStage rows and the client's master (4 Nov 2026, Task 10)
+
+- **A master table that breaks the schema is not served at all.** The server checks every table against `recon/out/master_types_ww431.json` and drops the whole
+  table when one row is out of schema (the log prints `[master] <table>: N errori ... non la servo` and `!!! MASTER: N tabelle scartate dallo schema`). The client then
+  keeps its old copy of that table, with no error on the device. Task 10 had a 7-stage evStage row (the daily Showdown of Dec 2016, `stageId` is `int[5]`): the whole
+  `evStage` table was dropped, the client never received the new event ids, and the Events list crashed (SIGSEGV, null + 0x10) on the first event id it could not
+  find (client function that builds the Events cell: it looks the evStage row up by id and reads the Details URL from it). It looked like a data bug in the entry for
+  an hour of bisecting (ids, banner, stage row, reward types, number of tiers were all innocent). **After every `make-game-tables.js` read the `[master]` lines of the
+  server log and expect `106 tabelle valide` and no `evStage` line.**
+- `make-raid.js` `evStageRow` keeps at most 5 stage ids (`EVSTAGE_MAX_STAGES`) and the full range in `stageStartId` / `stageEndId`; `/stage/event` lists the stages itself.
+  Test `evstage_row_fits_schema`.
+- Bench of Task 10 (rev 257): story Q260 shows Queen Bee (AP 15, objectives Moogle 5★ / Chip 3★ / Dale 3★, Raid Boards); story Q560 with `-RealNow` on a Saturday shows the
+  weekend event «Legendary Raid Level: Don't Go Alone! (March)» (AP 1) and on a Wednesday only the monthly «Lure a Queen Bee» (AP 0). The 62 event raids have no card of their
+  own yet (generic «Raid Time!» plate).

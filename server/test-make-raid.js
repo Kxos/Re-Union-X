@@ -1307,7 +1307,8 @@ const tests = {
       assert.ok(st && st.stageKind === 2 && st.raidBoss === e.settingId, `stage of ${e.key}`);
       assert.ok(set && set.bossId === e.enemyId, `raidSetting of ${e.key}`);
       assert.ok(body && body.validParts >= 1 && body.parts.slice(0, body.validParts).every((id) => enemies.has(id)), `raidEnemy rows of ${e.key}`);
-      assert.ok(ev && ev.stageId.includes(e.stageId), `evStage of ${e.key}`);
+      // a row holds at most 5 ids (schema int[5]); a longer event (the 7-day Showdown) is covered by stageStartId..stageEndId
+      assert.ok(ev && ev.stageId.length <= 5 && (ev.stageId.includes(e.stageId) || (e.stageId >= ev.stageStartId && e.stageId <= ev.stageEndId)), `evStage of ${e.key}`);
       for (const k of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) assert.ok(body[k].slice(0, body.validGrowth).every((x) => rewards.has(x)), `${k} of ${e.key}`);
       assert.ok(body.skillId.slice(0, body.validSkill).every((x) => skills.has(x)), `skills of ${e.key}`);
       assert.ok(e.sphereBoardIds.every((id) => boards.has(id)), `boards of ${e.key}`);
@@ -1365,6 +1366,23 @@ const tests = {
     }
     console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp; event raids: ${events2016} on their 2016 row, ${eventsRule} on the scale; ${scaled} one-tier weeks of 2018-09 on the scale)`);
     assert.ok(table > 0 && read > 0);
+  },
+  evstage_row_fits_schema() {
+    // review of Task 10 (04-11): a 7-stage evStage row (the Dec 2016 Showdown) broke the schema int[5], the server dropped the whole
+    // table and the client crashed on the first new event id. A row keeps at most 5 stage ids and the full range.
+    const ids = [980359, 980360, 980361, 980362, 980363, 980364, 980365];
+    const row = mr.evStageRow(8013, ids);
+    assert.deepStrictEqual(row.stageId, ids.slice(0, 5));
+    assert.strictEqual(row.validStageId, 5);
+    assert.strictEqual(row.stageStartId, 980359); assert.strictEqual(row.stageEndId, 980365);
+    const small = mr.evStageRow(8001, [980345]);
+    assert.deepStrictEqual([small.stageId, small.validStageId, small.stageStartId, small.stageEndId], [[980345], 1, 980345, 980345]);
+    // the schema file, when present, says the same
+    const schemaFile = path.join(__dirname, '..', 'recon', 'out', 'master_types_ww431.json');
+    if (fs.existsSync(schemaFile)) {
+      const schema = JSON.parse(fs.readFileSync(schemaFile, 'utf8')), t = JSON.stringify(schema.evStage || schema.tables?.evStage || {});
+      assert.ok(!t || /"stageId"[^}]*int\[5\]|int\[5\]/.test(t) || t === '{}', 'evStage.stageId is int[5] in the schema');
+    }
   },
   real_census_week() {
     const real = realInputs();

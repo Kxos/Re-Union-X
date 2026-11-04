@@ -159,9 +159,14 @@ function questSubs(info, coinType, where) {
     submissionItemId: each(() => 0), submissionSkillType: each(() => 0), submissionSkillId: each(() => 0), submissionSkillLv: each(() => 0), submissionItemNum: each((c) => c.qty) };
 }
 
-function evStageRow(evStageId, stageIds, { eventType = 2, detailUrl = '' } = {}) {
+// The master schema gives stageId int[5]: ONE row with more than 5 elements makes the server drop the whole evStage table (the
+// client then never gets a new row and a missing evStage id crashes the Events list; 04-11: the 7-day Showdown of Dec 2016).
+// A longer list keeps its first 5 ids and the full range in stageStartId / stageEndId; /stage/event lists the stages itself.
+const EVSTAGE_MAX_STAGES = 5;
+function evStageRow(evStageId, stageIdsAll, { eventType = 2, detailUrl = '' } = {}) {
+  const stageIds = stageIdsAll.slice(0, EVSTAGE_MAX_STAGES);
   const row = { eventStageId: evStageId, parentEventStageId: 0, validStageId: stageIds.length, stageId: [...stageIds], validStageWidthId: 0,
-    stageStartId: stageIds[0], stageEndId: stageIds[stageIds.length - 1], resetFlag: 0, eventCategory: 2, eventType, scoreMedalListId: 0, scoreStartReward: 0,
+    stageStartId: stageIdsAll[0], stageEndId: stageIdsAll[stageIdsAll.length - 1], resetFlag: 0, eventCategory: 2, eventType, scoreMedalListId: 0, scoreStartReward: 0,
     scoreEndReward: 0, rankingId: 0, bannerUrl: `/web/raid/img/v${RAID_IMG_VERSION}/${evStageId}.png`, mypageBanner: 0, detailUrl, startTime: START, endTime: END, endDispTime: END, boardEndTime: END };
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const d of days) row[`week${d}`] = 1;
@@ -977,4 +982,4 @@ if (require.main === module) {
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
