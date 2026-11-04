@@ -49,7 +49,7 @@ function world(opts = {}) {
     onDefeat: (boss) => { w.defeats = (w.defeats || 0) + 1; w.defeated = boss.raidId; },
     grantItem: (it) => { if (w.grantHook) w.grantHook(); w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
     medalCount: () => w.medalCount, medalCap: () => w.medalCap,
-    stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: () => 0.99, log: (m) => w.logs.push(m),
+    stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: opts.rng || (() => 0.99), log: (m) => w.logs.push(m),
   });
   w.call = (fn, ...a) => { w.sent = null; w.raid[fn]({}, ...a); return w.sent; };
   w.spawn = () => { w.raid.onStageClear(STAGE, { raidPoint: 9000 }); assert(w.player.raid.boss, 'boss spawned'); return w.player.raid.boss; };
@@ -356,7 +356,8 @@ const tests = {
     assert.strictEqual(w.spawn().level, 2, 'next boss at the new level');
   },
   bonus_level_step() {
-    // weeks 2018-09-17..2019-07-14: a win in bonus time raises the boss 2 levels (notices #44500..#54910); else 1
+    // weeks 2018-09-17..2019-08-11: a win in bonus time raises the boss 2 levels (notices #44500..#55884, «every day during
+    // the event»; removed by #56463 of 2019-08-12); else 1
     const run = (start, now) => {
       const w = world();
       Object.assign(w.index.entries[0], { start, end: start, questAp: [0, 5, 90] });
@@ -368,8 +369,43 @@ const tests = {
     const BONUS = Date.parse('2026-10-27T15:00:00Z'), PLAIN = Date.parse('2026-10-27T10:00:00Z'); // 08:00 / 03:00 PDT
     assert.strictEqual(run('2019-03-04', BONUS), 3, 'bonus time in the +2 era');
     assert.strictEqual(run('2019-03-04', PLAIN), 2, 'outside bonus time');
-    assert.strictEqual(run('2019-07-15', BONUS), 2, 'from 2019-07-15: +1');
+    assert.strictEqual(run('2019-07-15', BONUS), 3, 'notice #55360 (2019-07-15) still has it');
+    assert.strictEqual(run('2019-08-05', BONUS), 3, 'last week before the static stats');
+    assert.strictEqual(run('2019-08-12', BONUS), 2, 'from 2019-08-12: +1');
     assert.strictEqual(run('2018-09-10', BONUS), 2, 'before 2018-09-17: +1');
+    assert.strictEqual(run('2017-03-20', BONUS), 2, 'event raids of 2016-2018: +1');
+  },
+  rare_boss_spawn() {
+    // an entry with a rare boss (raidSetting rareBossId): rareUpType 3 reads as one chance in rareUpTypeArg per spawn; the
+    // rare body, its timer and its AP; the stage is the same, so the client fights rareBossId through parts[0].rare 2
+    const RARE = ENEMY + 100;
+    const run = (rngValue) => {
+      const w = world({ rng: () => rngValue });
+      w.tables.raidEnemy.push(enemyRow(RARE, 1, 5000, { rare: 2, validParts: 1, parts: [RARE + 1, 0, 0, 0, 0], rewardId: rewardId(coin.victory), mvpRewardId: rewardId(coin.mvp), destroyAllRewardId: rewardId(coin.all) }),
+        enemyRow(RARE + 1, 2, 300));
+      Object.assign(w.index.entries[0], { upMinutes: 10, useAp: 10, rare: { boss: 'Queen Bee Ω', modelId: 16, enemyId: RARE, upMinutes: 20, useAp: 1, every: 5 } });
+      w.index.models['0016'] = w.index.models['0007'];
+      return w;
+    };
+    const b = run(0.99).spawn();
+    assert.deepStrictEqual([b.parts[0].raidEnemyId, b.parts[0].rare, b.endsAt - TUE, b.useAp], [ENEMY, 1, 10 * 60000, 10], 'chance 1 in 5 missed');
+    const rare = run(0.1);
+    const r = rare.spawn();
+    assert.deepStrictEqual([r.parts[0].raidEnemyId, r.parts[0].rare, r.parts.length, r.endsAt - TUE, r.useAp, r.stageId], [RARE, 2, 2, 20 * 60000, 1, STAGE]);
+    rare.start();
+    rare.clearParts([1, 300]);
+    assert.strictEqual(rare.player.raid.boss.useAp, 1);
+    assert.strictEqual(rare.call('list').selfRaid.raid.useAp, 1, 'the rare AP after the first attempt');
+  },
+  daily_level_resets_daily() {
+    // daily raids (notice 29805: «The raid boss's level will reset every day (PT)»): one occurrence per Pacific day
+    const w = world();
+    Object.assign(w.index.entries[0], { open: 'daily', start: '2019-10-07' });
+    w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.spawn().level, 2, 'same day');
+    w.start(); w.clearParts([0, 100, 200]);
+    w.now += 24 * 3600e3;
+    assert.strictEqual(w.spawn().level, 1, 'next Pacific day');
   },
   level_reset_on_month_change() {
     const w = world();

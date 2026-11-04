@@ -10,19 +10,34 @@
 //   overlaps two Monday-based rows), together with any row of the same dates;
 // - no row overlaps: no raid this week (as in the original, the list stays empty).
 // Only available tiers are listed; the unavailable ones of the chosen rows are returned apart (Catalog, Notices).
-// nowMs is reserved for the Weekend-only and Daily families (open only on the real weekend or day, Task 10): the families in
-// raids.json today ignore it.
+// Event raids of 2016-2018 (Task 10, entries with event: true): every row with a period (Pacific days, `periods`) overlapping
+// the Shop week runs beside the weekly rule, and an entry is listed only when it is open on the real clock nowMs (Pacific time,
+// spec Answer 4): weekend-only on a real Saturday or Sunday, a daily showdown's boss on the real weekday of its day, daily raids
+// every day. Without nowMs no weekend or day entry is listed.
 'use strict';
+
+const PT = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short' });
+const ptWeekday = (ms) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(PT.format(new Date(ms)));
+const weekdayOf = (iso) => new Date(Date.parse(`${iso}T12:00:00Z`)).getUTCDay();
+// Is the entry open on the real clock? Weekend-only: Saturday or Sunday PT; daily showdown: the weekday of its day; else always.
+function openNow(e, nowMs) {
+  if (!e || !e.open || e.open === 'daily') return true;
+  if (!Number.isFinite(nowMs)) return false;
+  const wd = ptWeekday(nowMs);
+  if (e.open === 'weekend') return wd === 0 || wd === 6;
+  if (e.open === 'day') return wd === weekdayOf(e.day);
+  return false;
+}
 
 const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000) + 1;
 const overlap = (r, from, to) => days(r.start > from ? r.start : from, r.end < to ? r.end : to);
 
-// census rows of the index: {censusId, start, end, evStageId}, one per row
+// census rows of the index: {censusId, start, end, evStageId, event, periods}, one per row
 function rowsOf(index) {
   const rows = new Map();
   for (const e of (index && index.entries) || []) {
     if (!e.censusId || !e.start || rows.has(e.censusId)) continue;
-    rows.set(e.censusId, { censusId: e.censusId, start: e.start, end: e.end || e.start, evStageId: e.evStageId || 0 });
+    rows.set(e.censusId, { censusId: e.censusId, start: e.start, end: e.end || e.start, evStageId: e.evStageId || 0, event: !!e.event, periods: e.periods || [[e.start, e.end || e.start]] });
   }
   return [...rows.values()];
 }
@@ -31,7 +46,11 @@ function rowsOf(index) {
 function weekRows(index, { shopFrom, shopTo }) {
   if (!shopFrom) return [];
   const to = shopTo && shopTo >= shopFrom ? shopTo : shopFrom;
-  const rows = rowsOf(index);
+  const all = rowsOf(index);
+  const events = all.filter((r) => r.event && r.periods.some(([a, b]) => a <= to && b >= shopFrom));
+  return [...weeklyRows(all.filter((r) => !r.event), shopFrom, to), ...events];
+}
+function weeklyRows(rows, shopFrom, to) {
   const hold = rows.filter((r) => r.start <= shopFrom && r.end >= shopFrom);
   if (hold.length) return hold;
   const near = rows.filter((r) => r.start <= to && r.end >= shopFrom);
@@ -44,11 +63,13 @@ function weekRows(index, { shopFrom, shopTo }) {
   return near.filter((r) => r.start === best.start && r.end === best.end && overlap(r, shopFrom, to) === size);
 }
 
-// {entries: available tiers of the week's rows, unavailable: the other tiers of those rows}, in index order
+// {entries: available tiers of the week's rows open now, unavailable: the other tiers of those rows open now, closed: the tiers
+// not open on the real clock}, in index order
 function weekRaids(index, ctx = {}) {
   const ids = new Set(weekRows(index, ctx).map((r) => r.censusId));
-  const list = ((index && index.entries) || []).filter((e) => ids.has(e.censusId));
-  return { entries: list.filter((e) => e.available), unavailable: list.filter((e) => !e.available) };
+  const all = ((index && index.entries) || []).filter((e) => ids.has(e.censusId));
+  const list = all.filter((e) => openNow(e, ctx.nowMs));
+  return { entries: list.filter((e) => e.available), unavailable: list.filter((e) => !e.available), closed: all.filter((e) => !openNow(e, ctx.nowMs)) };
 }
 
 const raidsForWeek = (index, ctx = {}) => weekRaids(index, ctx).entries;
@@ -83,4 +104,4 @@ function rowState(row, { shopFrom, shopTo, current, kept } = {}) {
   return shopFrom && row.start <= (shopTo && shopTo >= shopFrom ? shopTo : shopFrom) ? 'other' : 'later';
 }
 
-module.exports = { raidsForWeek, weekRaids, weekRows, catalogRows, rowState };
+module.exports = { raidsForWeek, weekRaids, weekRows, catalogRows, rowState, openNow };

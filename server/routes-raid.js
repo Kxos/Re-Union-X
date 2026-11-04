@@ -13,9 +13,9 @@ const { raidAp0Ids } = require('./make-ev-campaign');
 const USER_ID = 1; // the only player: same id as userObject and supportUserId of server.js
 const SPAWN_POINTS = 8600, SPAWN_POINTS_BONUS = 6000; // misc 110; bonus time: 2 eggs of 3000 (inferred, plan decision 3)
 const BONUS_HOURS = new Set([2, 8, 14, 20]); // PT, one hour each, on the real clock (plan decision 4)
-// Bonus-time level step (notices #44500 2018-09-17 .. #54910 2019-07-08: «The raid boss will gain an increased 2 levels upon
-// successful defeat!» in Raid Boss Bonus Time; absent from 2019-07-15, removed by #56463): weeks starting in [FROM, TO)
-const BONUS_LEVEL_FROM = '2018-09-17', BONUS_LEVEL_TO = '2019-07-15', BONUS_LEVEL_STEP = 2;
+// Bonus-time level step (notices #44500 2018-09-17 .. #55884 2019-08-01: «The raid boss will gain an increased 2 levels upon
+// successful defeat!» in Raid Boss Bonus Time, every day of the event; removed by #56463 of 2019-08-12): weeks starting in [FROM, TO)
+const BONUS_LEVEL_FROM = '2018-09-17', BONUS_LEVEL_TO = '2019-08-12', BONUS_LEVEL_STEP = 2;
 const AP_RULE_FROM = '2019-07-15', AP_RULE = { bonus: 0, weekend: 5, weekday: 90 };
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999; // stage ids of the raid events (make-raid.js)
 const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entry.level is the quest's level, not the boss's
@@ -27,6 +27,10 @@ const RAID_IMG_VERSION = 2; // 1: weekly event cards from the archived original 
 const NO_RAID = 5; // raidTimeStatus «No available Raid Boss»: a clear with no fight running (texts read, not run on the bench)
 
 const PT = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', hour: 'numeric', weekday: 'short' });
+const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
+// The occurrence a boss level belongs to: the entry's week; for a daily raid its Pacific day (notice 29805, 2017-07-03: «The raid
+// boss's level will reset every day (PT)»)
+const occOf = (entry, ms) => (entry.open === 'daily' ? `${entry.start}@${PT_DATE.format(new Date(ms))}` : entry.start);
 function ptNow(ms) {
   const parts = Object.fromEntries(PT.formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
   return { hour: Number(parts.hour), weekend: parts.weekday === 'Sat' || parts.weekday === 'Sun' };
@@ -274,17 +278,23 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
 
   // catalog: the boss of the kept raid (Raid Catalog), with its own level counter cat:<key> (user 02-11): it starts at LV 1 and
   // neither changes nor reads the level of the live week's boss, even for the very week once played live
+  // entry.rare (make-raid.js, Task 10): the rare boss of the same quest replaces the boss with a chance of 1 in rare.every
+  // (raidSetting rareUpType 3 / rareUpTypeArg, read as such: inferred); the client fights it through parts[0].rare 2
   function spawn(r, entry, nowMs, { catalog = false } = {}) {
-    const body = enemyRow(entry.enemyId);
+    const rare = entry.rare && entry.rare.enemyId && enemyRow(entry.rare.enemyId) && rng() < 1 / Math.max(1, entry.rare.every || 1) ? entry.rare : null;
+    const body = enemyRow(rare ? rare.enemyId : entry.enemyId);
     const partRows = body && [body, ...body.parts.slice(0, body.validParts).map(enemyRow)];
     if (!partRows || partRows.some((x) => !x)) { log(`[raid] ${entry.key}: raidEnemy rows missing, no spawn`); return false; }
     const lk = catalog ? `${CATALOG_LEVEL_PREFIX}${entry.key}` : entry.key;
-    const level = (r.levelOcc || {})[lk] === entry.start ? r.levels[lk] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week) of the entry
-    const model = (raidIndex().models || {})[String(entry.modelId).padStart(4, '0')] || {}; // keys are folder names, as in make-raid.js
-    r.boss = fight.newBoss({ key: entry.key, tier: entry.tier, stageId: entry.stageId, enemy: body, level, upMinutes: entry.upMinutes, useAp: entry.useAp, nowMs,
+    const occ = occOf(entry, nowMs);
+    const level = (r.levelOcc || {})[lk] === occ ? r.levels[lk] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week, or day of a daily raid) of the entry
+    const fighter = rare || entry; // the rare boss: its own model, timer and AP
+    const model = (raidIndex().models || {})[String(fighter.modelId).padStart(4, '0')] || {}; // keys are folder names, as in make-raid.js
+    r.boss = fight.newBoss({ key: entry.key, tier: entry.tier, stageId: entry.stageId, enemy: body, level, upMinutes: fighter.upMinutes, useAp: fighter.useAp, nowMs,
       partRows: partRows.map((x) => ({ raidEnemyId: x.raidEnemyId, weakness: x.weakness, hp: atLevel(x, 'hp', level), attribute: x.attribute, rare: x.rare })),
       hasStartDemo: !!model.start, hasEscapeDemo: !!model.escape });
-    r.boss.month = monthOf(nowMs); r.boss.occ = entry.start;
+    r.boss.month = monthOf(nowMs); r.boss.occ = occ;
+    if (rare) r.boss.rare = rare.boss;
     if (catalog) r.boss.levelKey = lk;
     log(`[raid] boss ${entry.boss || entry.key} appears, LV ${level}${catalog ? ' (Raid Catalog)' : ''}`);
     return true;
@@ -320,7 +330,8 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   }
   function keptEntries(realMs = realNow()) {
     const c = catalogCtx(realMs), row = c.kept && catalogRow(c.kept);
-    return row && calendar.rowState(row, c) === 'kept' ? row.entries.filter((e) => e.available) : [];
+    // a weekend or daily raid kept from the Catalog opens on its real days too (spec Answer 4)
+    return row && calendar.rowState(row, c) === 'kept' ? row.entries.filter((e) => e.available && calendar.openNow(e, realMs)) : [];
   }
   // POST /web/raid/keep/<evStageId> and /web/raid/unkeep (catalogue buttons): {code, body {ok, why?}}. Only a past week with an
   // available tier can be kept (else why: now, later, removed); keeping one replaces the previous.

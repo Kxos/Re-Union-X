@@ -186,7 +186,189 @@ const addWeek = (f, id, start, end, tier, boss = 'Trickmaster', map = 'Curious R
   f.config.onlyCensusIds = [id];
 };
 
+// Older WW event raids (Task 10): a census row of an event family, its quest in the event reward research
+// (raid_rewards/b_events/event_raid_rewards.json shape) and, when it has one, its 2016 raidSetting row.
+const objective = (objective, reward, qty) => ({ objective, reward, qty: String(qty) });
+const eventQuest = (raid, lvl, ap = '10', objectives = [objective('Use 3 or more special attacks', 'Event Coin', 10),
+  objective('Complete without having to continue', 'Jewel', 10), objective('Defeat all enemies within 1 turn', 'Raid Coin', 5)]) => ({ page: `${raid} (Quest)`, ap, lvl: String(lvl), raid, objectives });
+const reward2016 = (id, num) => ({ raidRewardId: id, oddsUpPerLv: 50, pointUpPerLv: 1000, validReward: 3, type: [15, 15, 15, -1892354936], id: [0, 0, 0, -1892354936], assignSkillType: [1, 1, 1, 1],
+  assignSkillId: [0, 0, 0, 0], assignSkillLv: [1, 1, 1, 1], num: [num, num + 2, num + 5, -1892354936], odds: [100000, 5000, 3333, -1892354936] });
+const setting2016 = (raidSettingId, bossId, rareBossId, bossUpTime, useAp, rareBossUpTime, rareUseAp, rareUpTypeArg = 1) => ({ raidSettingId, bossId, bossUpTime, useAp, rareBossId, rareBossUpTime, rareUseAp,
+  rareUpType: 3, rareUpTypeArg, rareUpTriggerBossId: bossId, validUnlockRare: 0, unlockRareBossId: [0, 0, 0], unlockRareNum: [0, 0, 0] });
+function eventFixture(rows, quests = {}) {
+  return (f) => {
+    f.census.rows.push(...rows);
+    f.census.bosses.push({ ww: 'Queen Bee', raid_model_id: 15 }, { ww: 'Queen Bee Ω', raid_model_id: 16 }, { ww: 'Gummi Hound', raid_model_id: 1010 }, { ww: 'Jewel Princess', raid_model_id: 20 });
+    f.eventRewards = { rows: rows.map((r) => ({ row_id: r.id, region: 'WW', family: r.family, boards: [], quests: quests[r.id] || [eventQuest(r.bosses[0], 25)] })) };
+    f.orig2016.raidEnemy.push(body2016(15, 'Queen Bee', 1, [150002]), part2016(150002, 2), body2016(16, 'Queen Bee Ω', 2, [160002]), part2016(160002, 2),
+      body2016(1010, 'Gummi Hound', 2, [10100002]), part2016(10100002, 2));
+    for (const id of [15, 16, 1010]) f.orig2016.raidEnemyAttack.push(attack2016(id * 100 + 1), attack2016(id * 100 + 2));
+    f.orig2016.raidSetting = [setting2016(15000, 15, 16, 10, 10, 20, 10, 5), setting2016(160903000, 1010, 1010, 10, 1, 180, 1)];
+    f.orig2016.raidReward = [7, 15, 16, 1010].flatMap((id) => [1, 2, 3].flatMap((t) => [1, 2, 3].map((k) => reward2016(id * 10000 + t * 100 + k, 10 * t + k))));
+    for (const b of f.orig2016.raidEnemy.filter((x) => x.weakness === 1)) {
+      b.rewardId = [1, 2, 3, 3, 0].map((k) => (k ? b.raidEnemyId * 10000 + 100 + k : 0));
+      b.mvpRewardId = [1, 2, 3, 3, 0].map((k) => (k ? b.raidEnemyId * 10000 + 200 + k : 0));
+      b.destroyAllRewardId = [1, 2, 3, 3, 0].map((k) => (k ? b.raidEnemyId * 10000 + 300 + k : 0));
+    }
+    Object.assign(f.models, { '0015': f.models['0007'], '0016': f.models['0007'], 1010: f.models['0007'], '0020': f.models['0007'] });
+    f.config.modelTemplates = { 'Jewel Princess': 1010 };
+    f.config.weekendUpMinutes = REAL_CONFIG.weekendUpMinutes;
+    f.config.eventUpMinutes = REAL_CONFIG.eventUpMinutes;
+    f.config.onlyCensusIds = rows.map((r) => r.id);
+  };
+}
+const eventRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, region: 'WW', start, end, bosses, tier: 'quest LV 25', map: 'Curious Room', rewards: '', data: { hp: 'no' }, note: '', ...extra });
+const knotsOf = (r, k) => r[k].slice(0, r.validGrowth);
+
 const tests = {
+  old_hp_2016() {
+    // a 2016 event raid with its own 2016 row keeps that row: knots, HP, ATK, DEF, Lux and reward rows
+    const out = build(eventFixture([eventRow('WW-E1-1', 'one-off event', '2016-06-06', '2016-06-13', ['Trickmaster'], { data: { hp: 'yes (2016 row)' } })]));
+    const e = out.index.entries[0];
+    assert.ok(e.available, e.why);
+    assert.strictEqual(e.tier, 'single');
+    assert.strictEqual(e.hpSource, '2016');
+    const body = enemyOf(out, e.enemyId), part = enemyOf(out, e.enemyId + 1);
+    assert.deepStrictEqual(knotsOf(body, 'baseLv'), [1, 10, 30, 100]);
+    assert.deepStrictEqual(knotsOf(body, 'hp'), [12000, 36000, 180000, 900000]);
+    assert.deepStrictEqual(knotsOf(body, 'attack'), [12500, 15000, 25000, 80000]);
+    assert.deepStrictEqual(knotsOf(body, 'defense'), [1200, 1300, 1500, 2000]);
+    assert.deepStrictEqual(knotsOf(body, 'luxAttack'), [270, 1080, 6480, 38880], 'the original Lux, not the lux rule');
+    assert.deepStrictEqual(knotsOf(part, 'hp'), [7200, 24300, 121500, 607500]);
+    for (const l of ['hp', 'atk', 'def', 'partHp', 'lux', 'coinOdds', 'moves']) assert.ok(!e.reconstructed.includes(l), `${l} is original`);
+    // baseLv as the client reads it: linear between the knots, flat outside (docs/notes/raid.md)
+    assert.strictEqual(mr.atLevel(body, 'hp', 1), 12000);
+    assert.strictEqual(mr.atLevel(body, 'hp', 20), 108000);
+    assert.strictEqual(mr.atLevel(body, 'hp', 65), 540000);
+    assert.strictEqual(mr.atLevel(body, 'hp', 120), 900000);
+    // the 2016 reward rows, under our ids, garbage slots blanked
+    const victory = out.rewardRows.find((r) => r.raidRewardId === body.rewardId[0]);
+    assert.strictEqual(body.rewardId[0], rr.rewardRowId(e.enemyId, 1, 1));
+    assert.deepStrictEqual([victory.validReward, victory.type, victory.num, victory.oddsUpPerLv], [3, [15, 15, 15, 0], [11, 13, 16, 0], 50]);
+    assert.strictEqual(enemyOf(out, e.enemyId).rewardId[3], rr.rewardRowId(e.enemyId, 1, 4));
+    // the quest of the event: its AP, level and objectives with their own rewards (Event Coin 15, Jewel 2, Raid Coin 16)
+    const st = out.stageRows.find((s) => s.stageId === e.stageId);
+    assert.deepStrictEqual(e.questAp, [10]);
+    assert.strictEqual(st.useAp, 10);
+    assert.deepStrictEqual(st.submissionRewardType, [15, 2, 16]);
+    assert.deepStrictEqual(st.submissionItemNum, [10, 10, 5]);
+    assert.strictEqual(st.name, 'Trickmaster');
+  },
+  old_hp_curve_labelled() {
+    // 2016-11 to 2019-08 without a 2016 row of that raid: the one-tier cap (1.2 billion carried back before 2018-10-07,
+    // rising to 16.5 billion), shares below it as singleEra; labelled; never below the boss's own 2016 row
+    const out = build(eventFixture([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'], { data: { hp: 'older row only' } }),
+      eventRow('WW-E3-1', 'monthly', '2018-06-11', '2018-06-18', ['Trickmaster'], { tier: 'Beginner/Intermediate/Advanced (quest LV 25/80/120)', map: 'Curious Room; Curious Room; Curious Room' })]));
+    const [e, ...three] = out.index.entries;
+    assert.ok(e.available, e.why);
+    assert.strictEqual(e.hpSource, 'rule');
+    assert.strictEqual(e.hp, 1200000000);
+    for (const l of ['hp', 'hp_step', 'atk', 'atk_curve', 'def']) assert.ok(e.reconstructed.includes(l), `label ${l}`);
+    const body = enemyOf(out, e.enemyId);
+    assert.deepStrictEqual(knotsOf(body, 'baseLv'), [1, 10, 20, 30, 99]);
+    assert.deepStrictEqual(knotsOf(body, 'hp'), [0.015, 0.2, 0.4, 1, 1].map((s) => Math.round(1200000000 * s)));
+    // three tiers of 2018: one HP curve, ATK by tier, quest level of the census
+    assert.deepStrictEqual(three.map((x) => [x.tier, x.level, x.hp]), [['Beginner', 25, 1200000000], ['Intermediate', 80, 1200000000], ['Advanced', 120, 1200000000]]);
+    const atk = three.map((x) => enemyOf(out, x.enemyId).attack[3]);
+    assert.ok(atk[0] < atk[1] && atk[1] < atk[2], `ATK by tier ${atk}`);
+    // never lowered: a source value above the rule wins
+    const low = build((f) => { eventFixture([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'])])(f); f.orig2016.raidEnemy[0].hp = [30000000, 40000000, 180000000, 900000000, 0]; });
+    assert.deepStrictEqual(knotsOf(enemyOf(low, low.index.entries[0].enemyId), 'hp'), [30000000, 240000000, 480000000, 1200000000, 1200000000]);
+    assert.ok(low.index.entries[0].reconstructed.includes('hpFloor'));
+  },
+  old_level_bands() {
+    // one tier before 2019-08-12: coins by level band (1-9, 10-19, 20-29, 30-99) on the event raids too
+    const out = build(eventFixture([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'])]));
+    const e = out.index.entries[0], body = enemyOf(out, e.enemyId);
+    const victory = (k) => out.rewardRows.find((r) => r.raidRewardId === body.rewardId[k]);
+    assert.deepStrictEqual([0, 1, 2, 3, 4].map((k) => victory(k).num.slice(0, 2)), [[40, 60], [120, 180], [150, 220], [180, 270], [180, 270]]);
+    assert.ok(e.reconstructed.includes('eventCoins'));
+  },
+  timers() {
+    // normal 10, Ω 20, Gummi Hound 180 (its 2016 setting), weekend 3 h before May 2018 and 1 h after
+    const out = build(eventFixture([
+      eventRow('WW-E4-1', 'monthly', '2017-04-24', '2017-05-01', ['Trickmaster']),
+      eventRow('WW-E5-1', 'monthly', '2017-05-22', '2017-05-29', ['Jewel Princess']),
+      eventRow('WW-E6-1', 'monthly', '2017-08-14', '2017-08-21', ['Gummi Hound']),
+      eventRow('WW-E7-1', 'weekend-only', '2017-04-08', '2017-04-10', ['Trickmaster']),
+      eventRow('WW-E8-1', 'weekend-only', '2018-06-02', '2018-06-04', ['Trickmaster'])]));
+    const up = (id) => out.index.entries.find((e) => e.censusId === id);
+    assert.deepStrictEqual(['WW-E4-1', 'WW-E5-1', 'WW-E6-1', 'WW-E7-1', 'WW-E8-1'].map((id) => up(id).upMinutes), [10, 20, 180, 180, 60]);
+    assert.ok(up('WW-E4-1').reconstructed.includes('upMinutes'));
+    assert.ok(up('WW-E6-1').reconstructed.includes('setting2016'));
+    assert.ok(up('WW-E7-1').reconstructed.includes('weekendTimer'));
+    for (const id of ['WW-E4-1', 'WW-E6-1', 'WW-E8-1']) {
+      const s = out.settingRows.find((x) => x.raidSettingId === up(id).settingId);
+      assert.strictEqual(s.bossUpTime, up(id).upMinutes);
+      assert.strictEqual(s.rareBossUpTime, up(id).upMinutes, 'a rare 2 body reads the rare fields');
+    }
+  },
+  use_ap_from_row() {
+    // AP of a further attempt: the raid's 2016 setting (1 for Gummi Hound and Fortress Crab), else 10
+    const out = build(eventFixture([eventRow('WW-E6-1', 'weekend-only', '2016-09-03', '2016-09-05', ['Gummi Hound'], { data: { hp: 'yes (2016 row)' } }),
+      eventRow('WW-E4-1', 'monthly', '2017-04-24', '2017-05-01', ['Trickmaster'])]));
+    const [g, t] = out.index.entries;
+    assert.deepStrictEqual([g.useAp, g.upMinutes, t.useAp], [1, 180, 10]);
+    assert.ok(!g.reconstructed.includes('useAp') && !g.reconstructed.includes('upMinutes') && !g.reconstructed.includes('setting2016'), 'its own dated 2016 setting');
+    assert.ok(t.reconstructed.includes('useAp'));
+    const s = out.settingRows.find((x) => x.raidSettingId === g.settingId);
+    assert.deepStrictEqual([s.useAp, s.rareUseAp], [1, 1]);
+  },
+  rare_boss() {
+    // Queen Bee and Queen Bee Ω: one quest, the setting holds both; the client fights rareBossId when parts[0].rare is 2
+    const out = build(eventFixture([eventRow('WW-E9-1', 'one-off event', '2016-05-02', '2016-05-16', ['Queen Bee', 'Queen Bee Ω'], { data: { hp: 'yes (2016 row)' } })],
+      { 'WW-E9-1': [eventQuest('Queen Bee', 25, '15')] }));
+    assert.strictEqual(out.index.entries.length, 1);
+    const e = out.index.entries[0];
+    assert.ok(e.available, e.why);
+    assert.ok(e.rare && e.rare.enemyId && e.rare.enemyId !== e.enemyId);
+    assert.deepStrictEqual([e.upMinutes, e.useAp, e.rare.upMinutes, e.rare.useAp, e.rare.every], [10, 10, 20, 10, 5]);
+    assert.ok(e.reconstructed.includes('rareOdds'));
+    const s = out.settingRows.find((x) => x.raidSettingId === e.settingId);
+    assert.deepStrictEqual([s.bossId, s.rareBossId, s.bossUpTime, s.rareBossUpTime, s.useAp, s.rareUseAp, s.rareUpType, s.rareUpTypeArg], [e.enemyId, e.rare.enemyId, 10, 20, 10, 10, 3, 5]);
+    const body = enemyOf(out, e.enemyId), rare = enemyOf(out, e.rare.enemyId);
+    assert.deepStrictEqual([body.rare, rare.rare, rare.raidDisplayId, rare.validParts], [1, 2, 16, 1]);
+    assert.ok(enemyOf(out, e.rare.enemyId + 1), 'the rare body has its part rows');
+    assert.ok(rare.rewardId.slice(0, rare.validGrowth).every((id) => out.rewardRows.some((r) => r.raidRewardId === id)));
+  },
+  weekend_and_daily_open() {
+    // weekend-only: the census dates plus the other periods of the notice, as Pacific days; daily showdown: one boss per day
+    const out = build(eventFixture([
+      eventRow('WW-E22111-1', 'weekend-only', '2016-11-05', '2016-11-07', ['Trickmaster'], { note: 'Other periods in notice: ["2016-11-12T08:00Z..2016-11-14T07:59Z", "2017-03-18T07:00Z..2017-03-20T06:59Z"].' }),
+      eventRow('WW-E10-1', 'daily showdown', '2016-12-26', '2017-01-02', ['Trickmaster', 'Gummi Hound'], { map: 'Curious Room; Curious Room' }),
+      eventRow('WW-E11-1', 'daily', '2017-07-03', '2017-07-10', ['Trickmaster'])]));
+    const [w, d1, d2, daily] = out.index.entries;
+    assert.deepStrictEqual([w.open, w.periods], ['weekend', [['2016-11-05', '2016-11-06'], ['2016-11-12', '2016-11-13'], ['2017-03-18', '2017-03-19']]]);
+    assert.deepStrictEqual([d1.open, d1.day, d1.boss, d2.day, d2.boss], ['day', '2016-12-26', 'Trickmaster', '2016-12-27', 'Gummi Hound']);
+    assert.notStrictEqual(d1.key, d2.key);
+    assert.deepStrictEqual([daily.open, daily.periods], ['daily', [['2017-07-03', '2017-07-09']]]);
+  },
+  unknown_rewards_standard() {
+    // a raid with no known board gets the standard board of its family (the nearest row of the same family that has one),
+    // labelled, without the medals exclusive to that other event; the coins are the standard table, labelled
+    const out = build((f) => {
+      eventFixture([eventRow('WW-E12-1', 'weekend-only', '2016-09-03', '2016-09-05', ['Trickmaster']), eventRow('WW-E13-1', 'weekend-only', '2016-10-01', '2016-10-03', ['Trickmaster'])])(f);
+      withBoards(f);
+      f.config.onlyCensusIds = ['WW-E12-1', 'WW-E13-1'];
+      f.eventRewards.rows[1].boards = [{ board: 'Weekend Warrior Raid Board', gender: null, completion_reward: '6★ Huey', title: null,
+        cells: [{ n: 1, type: 'medal', reward: '6★ Louie', cost: 50 }, { n: 2, type: 'medal', reward: '6★ Magic Mirror', cost: 70 }] }];
+      f.eventRewards.rows[1].exclusive_items = { '6★ Magic Mirror': 'this event only' };
+    });
+    const [none, known] = out.index.entries;
+    assert.ok(known.sphereBoardIds.length === 1 && !known.reconstructed.includes('boardStandard'));
+    assert.strictEqual(none.sphereBoardIds.length, 1);
+    assert.ok(none.reconstructed.includes('boardStandard'));
+    assert.notStrictEqual(none.sphereBoardIds[0], known.sphereBoardIds[0], 'its own board, its own progress');
+    const masu = out.masuRows.find((m) => m.masuId === none.sphereBoardIds[0]);
+    assert.deepStrictEqual(masu.rewardId.slice(0, 2), [90036, 0], 'the exclusive medal is left off');
+    assert.ok(none.reconstructed.includes('eventCoins'));
+  },
+  event_families_only() {
+    // lure weeks, rare spawns in ordinary events and rows with no dates are not raid events: reported, not built
+    const out = build(eventFixture([eventRow('WW-LUX-1', 'regular-boss lure week', '2016-11-07', '2016-11-13', ['Trickmaster']), eventRow('WW-E4-1', 'monthly', '2017-04-24', '2017-05-01', ['Trickmaster'])]));
+    assert.deepStrictEqual(out.index.entries.map((e) => e.censusId), ['WW-E4-1']);
+    assert.deepStrictEqual(out.report.skipped.map((s) => s.censusId), ['WW-LUX-1']);
+  },
   trickmaster_row() {
     const out = build();
     const e = entry(out, 'Trickmaster');
@@ -861,8 +1043,8 @@ const tests = {
     assert.deepStrictEqual(out.sphereRows.filter((r) => mine[0].sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board 10/7/19', 'Enhancement Board 10/7/19'], 'the original title, twice, with the week');
     assert.deepStrictEqual(out.sphereRows.filter((r) => other.sphereBoardIds.includes(r.sphereBoardId)).map((r) => r.boardName), ['Enhancement Board 10/14/19', 'Enhancement Board 10/14/19']);
     assert.deepStrictEqual([rb.usDate('2019-03-11'), rb.usDate('2020-12-28')], ['3/11/19', '12/28/20']);
-    // ids: every Weekly / Radiant row is numbered whatever the filter; pre-series rows are not boards of this task
-    assert.deepStrictEqual(Object.keys(out.ids.boards).sort(), ['WW-W-2018-09-03/radiant-01', `${W1}/enhancement-A1`, `${W1}/enhancement-A2`, 'WW-W-2019-10-14/enhancement-A1',
+    // ids: every Weekly / Radiant row is numbered whatever the filter, and the pre-series rows since Task 10
+    assert.deepStrictEqual(Object.keys(out.ids.boards).sort(), ['WW-E1-1/enhancement-A1', 'WW-W-2018-09-03/radiant-01', `${W1}/enhancement-A1`, `${W1}/enhancement-A2`, 'WW-W-2019-10-14/enhancement-A1',
       'WW-W-2019-10-14/enhancement-A2', 'WW-W-2019-10-28/halloween-board-2019'].sort());
     // only raids that exist get rows; the label of an inferred set
     assert.strictEqual(out.sphereRows.length, 4);
@@ -1052,8 +1234,10 @@ const tests = {
     for (const r of out.enemyRows.filter((x) => x.weakness === 1)) {
       for (const k of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) assert.ok(r[k].slice(0, r.validGrowth).every((x) => rewards.has(x)), `${k} of ${r.raidEnemyId}`);
     }
-    // nothing leaves a board cell off (seasonal Draw Tickets, Spirit parts, the reconstructed Sora & Moogle B included)
-    assert.deepStrictEqual(out.report.boards.unmatched, []);
+    // nothing leaves a Weekly board cell off (seasonal Draw Tickets, Spirit parts, the reconstructed Sora & Moogle B included);
+    // the event boards leave off only the declared Boosted medals and the Booster (Task 10)
+    assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E')), []);
+    assert.ok(out.report.boards.unmatched.every((u) => u.reward in REAL_CONFIG.boards.unmatched), 'only declared cells are left off');
     const of130 = new Set(the130.map((r) => r.id));
     const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));
     const withBoards = [...avail130].filter((id) => on.some((e) => e.censusId === id && e.sphereBoardIds.length));
@@ -1067,11 +1251,19 @@ const tests = {
     const real = realInputs();
     if (!real) return;
     const out = mr.buildRaid(real);
-    let table = 0, read = 0;
+    let table = 0, read = 0, events2016 = 0, eventsRule = 0;
     for (const e of out.index.entries.filter((x) => x.available)) {
       assert.ok(e.hp > 0, `HP of ${e.key}`);
       const body = out.enemyRows.find((r) => r.raidEnemyId === e.enemyId);
       assert.ok(body.hp.slice(0, body.validGrowth).every((h) => h > 0), `HP knots of ${e.key}`);
+      if (e.event) {
+        // event raids (Task 10): their own 2016 row unlabelled, else the one-tier cap of their date, labelled
+        if (e.hpSource === '2016') { assert.ok(!e.reconstructed.includes('hp'), `label of ${e.key}`); events2016++; continue; }
+        assert.strictEqual(e.hp, mr.tierHp(real.values, 'single', e.start).hp, `cap of ${e.key}`);
+        assert.ok(e.reconstructed.includes('hp') && e.reconstructed.includes('hp_step'), `label of ${e.key}`);
+        eventsRule++;
+        continue;
+      }
       const rule = mr.tierHp(real.values, e.tier, e.start);
       assert.ok(rule && rule.hp > 0, `tier rule for ${e.key}`);
       if (e.tier === 'single') {
@@ -1085,7 +1277,7 @@ const tests = {
         assert.strictEqual(e.reconstructed.includes('hp_step'), rule.step, `hp_step of ${e.key}`);
       } else read++;
     }
-    console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp)`);
+    console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp; event raids: ${events2016} on their 2016 row, ${eventsRule} on the cap rule)`);
     assert.ok(table > 0 && read > 0);
   },
   real_census_week() {
