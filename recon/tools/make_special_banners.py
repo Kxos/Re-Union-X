@@ -326,7 +326,7 @@ def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, 
         dr.ellipse((tx - r, ty - r * .7, tx + r, ty + r * .7), outline=(255, 255, 255, a), width=2)
     im = Image.alpha_composite(im, rp)
     im.alpha_composite(tap_arrow(44), (tx + 3, ty - 47))
-    ImageDraw.Draw(im).rounded_rectangle((1, 1, 638, 138), radius=8, outline=(236, 196, 84, 255), width=3)
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(236, 196, 84, 255), width=3)   # square corners like the original cards (user 04-11)
     return im
 
 

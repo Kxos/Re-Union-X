@@ -134,7 +134,7 @@ def catalog_banner(strips_dir, medals_dir=None):
     ImageDraw.Draw(im).text((22, 104), CATALOG_SUB, font=font(18), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=(20, 16, 40, 255))
     im.alpha_composite(sb.sticker('ALL BANNERS', w=136, h=42, angle=8), (392, -6))
-    ImageDraw.Draw(im).rounded_rectangle((1, 1, 638, 138), radius=8, outline=GOLD, width=3)
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=GOLD, width=3)   # square corners like the original cards (user 04-11)
     return im
 
 
