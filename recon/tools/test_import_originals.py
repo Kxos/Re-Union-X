@@ -15,6 +15,8 @@ try:
         p = os.path.join(root, rel)
         os.makedirs(os.path.dirname(p), exist_ok=True)
         open(p, 'w').write(data)
+        io.jp_listing.cache_clear()       # listings are cached per folder during a real run (sources are read-only)
+        io.plain_listing.cache_clear()
 
     put(b16, 'img/stage/ico_1.png', 'b1')
     put(b16, 'img/stage/ico_2.png', 'b2')
@@ -65,6 +67,16 @@ try:
     put(i440, 'img/union/Union_01.png', 'u1')
     io.run(io.parse(['img/union/Union_0*.png' + chr(9) + 'i440']), b16, jp, out, set(), i440)
     assert rd('img/union/Union_01.png') == 'u1', 'fonte i440'
+    # --skip-prefix: rows still resolve (a vanished original is still an error) but the files under the prefix are not copied
+    shutil.rmtree(out)
+    rep = io.run(io.parse(['lwf/mog/\tjp', 'img/ui/h.png\tb16,jp']), b16, jp, out, skip_prefixes=('lwf/mog/',))
+    assert not os.path.exists(os.path.join(out, 'lwf')) and rd('img/ui/h.png') == 'plain', 'skip-prefix: folder skipped, the rest copied'
+    assert rep[0]['files'] == 0 and rep[0]['skippedPrefix'] == 2 and rep[1]['skippedPrefix'] == 0, rep
+    try:
+        io.run(io.parse(['lwf/none/\tjp']), b16, jp, out, skip_prefixes=('lwf/none/',))
+        raise AssertionError('skip-prefix: a vanished original must still be an error')
+    except SystemExit:
+        pass
     try:
         io.run(io.parse(['img/none.png\tb16,jp']), b16, jp, out)
         raise AssertionError('riga senza originale accettata')

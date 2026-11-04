@@ -412,3 +412,29 @@ the client keeps the previous texture (wrong icon, no crash: case
 - `tutorial_%d` with id >= 53: `popupFlag` is 2^53 - 1 when the tutorial is finished (`server.js`), so the windows
   beyond bit 52, if the bit is the id, would still open; to be seen on the bench whether they appear (all without an English source).
 - No line in the Notices: they are original graphics (2016, JP or WW under another path).
+
+## Build speed and safety (4 Nov 2026)
+
+A `-Quick` build took 14 minutes (the script said ~1 min); memory was never the problem (RAM available stayed above 3.9 GB,
+no Python process above 450 MB; the machine has 16 GB, D: is a spinning disk). Measured with `tools/ldplayer/session/buildlog.ps1`
+(every `python` call is timed; summary of the slowest steps at the end and in `logs\build-resources-steps.log`):
+
+| step | before | after | what changed |
+|---|---|---|---|
+| `import_originals.py` | 484 s | 44 s | listings of the source folders are cached per folder (`functools.lru_cache`, `scandir`): 14,950 rows re-listed and `stat`ed the same folders (300 s of pure listing; resolution now 3 s, identical result for all rows); `--skip-prefix` (below) |
+| `btf_fix.py` | 74 s | 43 s | 52k files became 20k because the raid models are no longer copied; at most 4 workers (`BTF_WORKERS`) |
+| `resource_pack.py` | 78 s | 27 s | records built by at most 4 processes (`REC_WORKERS`), `Pool.imap` keeps the order; same lengths and index, only the random nonce differs |
+| total | 843 s | 281 s | output identical: 30,713 files / 459,801,213 bytes in the generated pack, 226,185 records / 473,681 names, 5,144,571,437 data bytes |
+
+- `-Quick` with `raid_gen` in the installed version no longer copies `lwf/character/raid` and `lwf/raid/demo` (37,574 of 54,117 files,
+  about 70% of the originals) into `stage_gen\files`: the script took them out of the generated pack right after anyway.
+  `import_originals.py --skip-prefix <dest prefix>` (repeatable) still resolves every row, so a vanished original is still an error.
+- Pre-flight (`Assert-BuildPreflight`): refuses to start when another `build-resources.ps1` runs, when less than 2.5 GB of RAM is
+  available or less than 10 GB is free on D:; sets the build to below-normal priority. `KHUX_BUILD_FORCE=1` skips the checks.
+- Still slow, in order: `import_jp_coco.py` (45-90 s), `btf_fix.py` (43 s, 1.8k real conversions but every BTF is read and
+  inspected each run), `resource_pack.py` (27 s), `jp_sound_effects.py` (20 s), ~50 s of PowerShell/adb. A per-file «unchanged»
+  state for `import_originals` + `btf_fix` (copy and convert only changed files) would save another ~1.5 minutes but needs the two
+  steps to share state; not done.
+- Pitfalls met: a `python` function shadowing the exe must forward `$input` (a piped `resource_parts --check-installed` hung);
+  `Remove-Item` of a folder that `-Quick` no longer creates stops the script (error invisible with `-Command ... *>`: wrap the call in
+  try/catch when launching in the background).

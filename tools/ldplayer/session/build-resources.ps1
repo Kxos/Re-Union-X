@@ -33,6 +33,8 @@
 #   La versione dopo, senza -TestStraddle, torna sotto i 4 GiB (nuovo download completo).
 param([int]$Version, [switch]$Quick, [switch]$DryRun, [switch]$NoJp, [switch]$NoRooms, [switch]$NoEnemies, [switch]$NoRaisedraw, [switch]$NoCompact, [string]$TestStraddle)
 $ErrorActionPreference = 'Stop'
+. "$PSScriptRoot\buildlog.ps1"
+Assert-BuildPreflight
 $repo = Split-Path (Split-Path (Split-Path $PSScriptRoot))
 Set-Location $repo
 $D = 'D:\Progetto_Restauro_KH_UX'
@@ -253,9 +255,13 @@ $i440Need = @('img/union/Union_01.png', 'img/union/Union_02.png', 'img/union/Uni
   'cocostudio/publish/MenuDialog_account_select_ver401.json', 'cocostudio/publish/appleid_button_2x.png',
   'cocostudio/publish/facebook_button_2x.png', 'cocostudio/publish/SQEXBridge_button_2x.png') | Where-Object { -not (Test-Path "$i440\$_") }
 if ($i440Need) { python -I recon\tools\res_get.py "$D\ipa440\names440misc.tsv" "$D\ipa440\miscdata" $i440 @i440Need; if ($LASTEXITCODE) { throw 'res_get ipa440 fallito' } }
+# -Quick with raid_gen in the installed version: the raid boss models (lwf/character/raid, lwf/raid/demo) are taken out of
+# the generated pack further down anyway; do not copy (and btf_fix) their ~37k files first (04-11: 70% of this step, ~5 min)
+$origSkip = @()
+if ($Quick -and $instPacks -contains 'raid_gen') { $origSkip = @('--skip-prefix', 'lwf/character/raid/', '--skip-prefix', 'lwf/raid/demo/') }
 python -I recon\tools\import_originals.py recon\tools\originals.tsv "$refWork\bundle2016\files" `
   "$jpData" "$sg\files" `
-  --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv" --i440 $i440 --jp501 "$D\tmp\jp501\x" --loc "$D\raid_loc" --report "$sg\originals.json"
+  --served "$D\resource_data\names_v4.tsv,$D\ipa431\names_addnl.tsv" --i440 $i440 --jp501 "$D\tmp\jp501\x" --loc "$D\raid_loc" --report "$sg\originals.json" @origSkip
 if ($LASTEXITCODE) { throw 'import_originals fallito' }
 # Raid Board card pictures, one per board id (list written by server/make-raid.js; the cards cut from screenshots are made
 # in --loc by recon/tools/raid_board_screens.py, docs/notes/bacheche.md «Raid Boards»)
@@ -282,7 +288,8 @@ if (-not $Quick -or $instPacks -contains 'raid_gen') {
       if ($LASTEXITCODE -ge 8) { throw "copia di $rd in raid_gen non riuscita" }
       $global:LASTEXITCODE = 0
     }
-    Remove-Item "$sg\files\$rd" -Recurse -Force
+    # absent when -Quick skipped copying the raid models (import_originals --skip-prefix): nothing to remove
+    if (Test-Path "$sg\files\$rd") { Remove-Item "$sg\files\$rd" -Recurse -Force }
   }
 }
 python -I recon\tools\resource_pack.py "$sg\files" $key "$sg\gen.mp4" "$sg\gen.png"
@@ -553,6 +560,7 @@ if (-not $Quick) {
   if ($total -gt 2 * [int64]2147483648) { Write-Warning "dati oltre 4 GiB ($total byte): misc.mp4.2, non ancora provato al banco (I-171)" }
   Rename-Item $v (Split-Path -Leaf $vFinal)
   "versione $Version pronta in $vFinal (il server la annuncia da ora)"
+  Show-BuildSteps
   return
 }
 
@@ -590,3 +598,4 @@ for ($i = 0; $i -lt $want.Count; $i++) {
 if (Get-Process node -ErrorAction SilentlyContinue) {
   & "$repo\tools\ldplayer\bench_start.ps1" -Out 'D:\Progetto_Restauro_KH_UX\logs\server.log' -Shot 'quick_home' -Settle 6 | Select-Object -Last 1
 } else { & "$PSScriptRoot\relogin.ps1" -Tag 'quick' | Select-Object -Last 1 }
+Show-BuildSteps
