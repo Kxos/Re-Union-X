@@ -150,8 +150,12 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(rb && rb.tag === 'IMPORTANT', 'Raid Bosses: notizia IMPORTANT');
   check(/18 raid bosses/.test(t) && /Jewel Princess/.test(t) && /Closehanded Captain/.test(t) && /twin or related/.test(t), 'Raid Bosses: grafiche ricostruite');
   // render9 (user decision 4 Nov): Jewel Sorceress, Circus Crab, Crabby Cake, with their list banners and template moves
-  check(/Jewel Sorceress, Circus Crab\*\* and \*\*Crabby Cake/.test(t) && /list banners\*\* of 20 raid bosses/.test(t) &&
+  check(/Jewel Sorceress, Circus Crab\*\* and \*\*Crabby Cake/.test(t) && /list banners\*\* of 21 raid bosses/.test(t) &&
     /The 18 bosses above/.test(t), 'Raid Bosses: Jewel Sorceress, Circus Crab, Crabby Cake ricostruiti (grafiche, banner, mosse)');
+  // render10 (user decision 4 Nov): Enraged Arachnid served, JP demos with the English subtitle and copies, banner from its card
+  check(/\*\*Enraged Arachnid\*\* now appears in the Story raids/.test(t) && /original Japanese ones with the English subtitle/.test(t) &&
+    /copies of identical files/.test(t) && /Its list banner is \*\*reconstructed\*\* from its original Japanese boss card/.test(t) &&
+    !/Arachnid[^.]*(do not|does not|never) spawn/.test(t), 'Raid Bosses: Enraged Arachnid servito (demo JP inglesi, copie, banner)');
   check(/Enraged Arachnid/.test(t) && /Egg Master/.test(t) && /Trickmaster/.test(t) && /Spinneret/.test(t) && /900 of 24,000/.test(t), 'Raid Bosses: modelli e ragni');
   check(/Queen Bee, Queen Bee Ω/.test(t) && /Lion Headliner/.test(t) && /older version of their animations/.test(t), 'Raid Bosses: api e Lion Headliner');
   check(/moves, part HP shares and rarity/.test(t) && /all their weak points/.test(t) && /Closehanded Captain\*\* keep/.test(t), 'Raid Bosses: modelli dei 15 e parti complete');

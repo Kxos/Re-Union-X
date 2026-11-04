@@ -3099,6 +3099,8 @@ img/adventure/boss_L/RaidBoss_16.png	loc	=img/adventure/boss_L/RaidBoss_16.png	#
 img/adventure/boss_L/RaidBoss_17.png	loc	=img/adventure/boss_L/RaidBoss_17.png	# RECONSTRUCTED from raid_boss_17 (scaled, cropped)
 img/adventure/boss_L/RaidBoss_1012.png	loc	=img/adventure/boss_L/RaidBoss_1012.png	# RECONSTRUCTED from raid_boss_1012 (scaled, cropped)
 img/adventure/boss_L/RaidBoss_1016.png	loc	=img/adventure/boss_L/RaidBoss_1016.png	# RECONSTRUCTED from raid_boss_1016 (scaled, cropped)
+#     5000 (render10, after the user OK): RECONSTRUCTED from its own JP card raid_boss_5000 (raid_list_banners.py --ids 5000).
+img/adventure/boss_L/RaidBoss_5000.png	loc	=img/adventure/boss_L/RaidBoss_5000.png	# RECONSTRUCTED from raid_boss_5000 (scaled, cropped)
 img/adventure/boss_L/raid_boss_18.png	jp	img/adventure/boss_L/raid_boss_2007.png	# card of the twin model 2007 (identical textures)
 img/adventure/boss_L/RaidBoss_18.png	loc	=img/adventure/boss_L/RaidBoss_18.png	# RECONSTRUCTED from raid_boss_2007 (scaled, cropped)
 img/adventure/boss_L/raid_boss_19.png	jp	img/adventure/boss_L/raid_boss_2001.png	# card of the twin model 2001 (identical textures)
@@ -17449,6 +17451,288 @@ lwf/raid/demo/escape_1016/escape_1016_e38393e38383e38388e3839ee38383e3839720312e
 lwf/raid/demo/put_down_1016/put_down_1016.lwf	loc	=lwf/raid/demo/put_down_1016/put_down_1016.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
 lwf/raid/demo/put_down_1016/put_down_1016_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
 lwf/raid/demo/put_down_1016/put_down_1016_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+# 49j. Enraged Arachnid 5000 (render10, after the user OK; I-221). Fight: the 2016 package folders, complete (category 1;
+#      wait/knockback weak points 1-5 = the 2016 raidEnemy 5000 parts 50000002-50000005, weaknesses 2-5). Demos: JP, plus
+#      the textures the JP extraction keeps once, as copies (category 2: L2 copy rules 99.4%; the 4 JP-era put_down
+#      effect slots, bitmaps 36/38/39/40, by name + size + table run shared with put_down_1000/0017/9101, GN2 99.4% held out).
+lwf/character/raid/5000/atk1/	b16
+lwf/character/raid/5000/atk2/	b16
+lwf/character/raid/5000/knockback1/	b16
+lwf/character/raid/5000/knockback2/	b16
+lwf/character/raid/5000/wait/	b16
+lwf/raid/demo/start_5000/	jp
+lwf/raid/demo/escape_5000/	jp
+lwf/raid/demo/put_down_5000/	jp
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038362e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972038362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038332e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972038332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038322e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972038322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038302e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972038302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038312e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972038312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037392e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972037392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037362e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972037362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037352e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972037352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037382e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972037382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037372e706e67.png	b16	lwf/raid/demo/escape_0011/escape_0011_e38393e38383e38388e3839ee38383e383972037372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035332e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035322e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972032372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972035302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972034302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972033352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972031302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_19.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_20.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_22.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_23.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036302e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_24.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_25.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_26.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035302e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_35.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_34.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_33.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_31.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_30.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_29.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035362e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_28.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972039312e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972039302e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972035372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_27.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_36.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_37.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_38.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034362e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_39.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_40.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_44.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_42.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_41.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_111.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_0.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_1.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038362e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_2.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_3.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_4.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_5.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_6.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_7.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972038302e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_8.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_9.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_11.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_12.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037362e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_13.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_14.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_15.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_16.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_17.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_18.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972037302e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_58.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_59.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_60.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_61.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036362e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_62.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972036352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_63.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034312e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972034312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033372e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972033372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032372e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_73.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032382e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_72.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032392e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_71.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033302e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_70.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_69.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033322e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_68.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033332e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033342e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_66.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033352e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_64.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032362e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972032362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032352e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972032352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032342e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972032342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972032312e706e67.png	b16	lwf/character/raid/5000/atk2/atk2_91.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720342e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972031322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972031312e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972031312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972031302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720392e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720372e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720362e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720382e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720352e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e3839720352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_77617465725f77617465725f312e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_77617465725f77617465725f322e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_77617465725f77617465725f332e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_77617465725f77617465725f342e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f312e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f322e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f332e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f342e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f352e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f362e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f372e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_726564666972655f726564666972655f382e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033392e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972033392e706e67.png	# cat 2 LGN 99.4% (GN2 held out 2211/2224)
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972034302e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972034302e706e67.png	# cat 2 LGN 99.4% (GN2 held out 2211/2224)
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033382e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972033382e706e67.png	# cat 2 LGN 99.4% (GN2 held out 2211/2224)
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e383972033362e706e67.png	jp	lwf/raid/demo/put_down_1000/put_down_1000_e38393e38383e38388e3839ee38383e383972033362e706e67.png	# cat 2 LGN 99.4% (GN2 held out 2211/2224)
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp	lwf/raid/demo/put_down_1003/put_down_1003_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038372e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972038372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038362e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038352e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972038342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038342e706e67.png	jp	lwf/raid/demo/start_2010/start_2010_e38393e38383e38388e3839ee38383e383972038352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038332e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972038332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038312e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972038312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038322e706e67.png	jp	lwf/raid/demo/start_2010/start_2010_e38393e38383e38388e3839ee38383e383972038332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972038302e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972038302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037372e706e67.png	jp	lwf/raid/demo/start_2010/start_2010_e38393e38383e38388e3839ee38383e383972037382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037362e706e67.png	jp	lwf/raid/demo/start_2010/start_2010_e38393e38383e38388e3839ee38383e383972037372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037392e706e67.png	jp	lwf/raid/demo/start_2010/start_2010_e38393e38383e38388e3839ee38383e383972038302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037382e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972037382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037342e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037332e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037312e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037322e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972037312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037302e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036372e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036362e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e383972036352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_77617465725f77617465725f312e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_77617465725f77617465725f322e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_77617465725f77617465725f332e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_77617465725f77617465725f342e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_77617465725f77617465725f342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f312e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f322e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f332e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f342e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f352e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f362e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f372e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_726564666972655f726564666972655f382e706e67.png	jp	lwf/raid/demo/escape_5000/escape_5000_726564666972655f726564666972655f382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972039302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035332e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035322e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972035322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972032372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972035302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972035302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972038302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034332e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034322e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972034302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972037302e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036382e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972033352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972036372e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031312e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972031302e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e383972034322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720392e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720362e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720382e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720372e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720362e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720352e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720342e706e67.png	b16	lwf/character/raid/5000/knockback2/knockback2_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972037352e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972037352e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036392e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972036392e706e67.png	# cat 2 L2 99.4%
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e383972036382e706e67.png	b16	lwf/raid/demo/start_0011/start_0011_e38393e38383e38388e3839ee38383e383972036382e706e67.png	# cat 2 L2 99.4%
+# 49k. English demo subtitles of 5000 (render10, after the user OK): the 3 JP demo LWFs rewritten as in 49g
+#      (raid_demo_english.py --models 5000, --loc) and the 2016 English subtitle images. After 49j, whose folder lines
+#      copy the JP demo LWFs, so these win.
+lwf/raid/demo/start_5000/start_5000.lwf	loc	=lwf/raid/demo/start_5000/start_5000.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_5000/start_5000_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_5000/escape_5000.lwf	loc	=lwf/raid/demo/escape_5000/escape_5000.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/escape_0007/escape_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_5000/put_down_5000.lwf	loc	=lwf/raid/demo/put_down_5000/put_down_5000.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
 
 # Raid AP 0 (docs/notes/raid.md «AP 0 campaign»): blue AP plate shown at AP 0 with the Cursor_Anim_AP glow; absent from WW
 img/ui/World_Stage_AP2.png	b16,jp
