@@ -397,6 +397,48 @@ const tests = {
     assert.strictEqual(rare.player.raid.boss.useAp, 1);
     assert.strictEqual(rare.call('list').selfRaid.raid.useAp, 1, 'the rare AP after the first attempt');
   },
+  ap0_campaign_every_quest() {
+    // review I-2: in a bonus hour the AP 0 campaign goes out only when every listed raid quest costs 0 at that moment; an event
+    // quest of 1 AP beside one of 0 would otherwise show 0 and be charged 1
+    const BONUS = Date.parse('2026-10-27T15:00:00Z');
+    const w = world();
+    const ev = (key, ap, stageId) => ({ key, censusId: key, available: true, stageId, evStageId: 8002, enemyId: ENEMY, modelId: 7, tier: 'single', upMinutes: 10, useAp: 10,
+      questAp: [ap], start: '2016-11-21', end: '2016-11-28', level: 25, event: true, periods: [['2016-11-21', '2016-11-27']] });
+    w.index.entries = [ev('WW-E1-1', 0, STAGE), ev('WW-E2-1', 1, STAGE + 1)];
+    w.tables.evCampaign = evCampaign.raidAp0Rows([{ stageId: STAGE }, { stageId: STAGE + 1 }]);
+    w.week = { shopFrom: '2016-11-24', shopTo: '2016-11-30' };
+    assert.deepStrictEqual([w.raid.stageAp(STAGE, BONUS), w.raid.stageAp(STAGE + 1, BONUS)], [0, 1]);
+    assert.deepStrictEqual(w.raid.campaignIds(BONUS), [], 'one quest costs 1: no campaign');
+    w.index.entries[1].questAp = [0];
+    assert.notDeepStrictEqual(w.raid.campaignIds(BONUS), [], 'both cost 0: the campaign');
+  },
+  weekend_quest_after_midnight_counts_live() {
+    // review M-2: a weekend quest cleared just after Sunday 23:59 PT spawns on the live counter, not on the Catalog's
+    const w = world();
+    Object.assign(w.index.entries[0], { event: true, open: 'weekend', start: '2016-11-05', end: '2016-11-07', periods: [['2016-11-05', '2016-11-06']], questAp: [1] });
+    w.week = { shopFrom: '2016-11-03', shopTo: '2016-11-09' };
+    w.now = Date.parse('2026-11-09T08:05:00Z'); // Monday 00:05 PST
+    const boss = w.spawn();
+    assert.strictEqual(boss.levelKey, undefined, 'live level key');
+    w.start(); w.clearParts([0, 100, 200]);
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 2);
+  },
+  level_drop_paid() {
+    // review I-3: a level drop (entry.levelDrops, its raidReward row: every slot paid) at the level the boss is defeated, to the
+    // Present Box; not at another level
+    const DROP = ENEMY * 100 + 40;
+    const run = (level) => {
+      const w = world();
+      w.tables.raidReward.push({ raidRewardId: DROP, oddsUpPerLv: 0, pointUpPerLv: 0, validReward: 2, type: [3, 3, 0, 0], id: [90056, 90066, 0, 0], num: [1, 1, 0, 0], odds: [100000, 100000, 0, 0],
+        assignSkillType: [1, 1, 1, 1], assignSkillId: [0, 0, 0, 0], assignSkillLv: [1, 1, 1, 1], burstUpperNumber: [0, 0, 0, 0] });
+      w.index.entries[0].levelDrops = [{ level: 2, rewardId: DROP }];
+      w.player.raid = { levels: { 'WW-1/Beginner': level }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': '2019-10-07' } };
+      w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+      return w.presents.map((p) => p.id);
+    };
+    assert.deepStrictEqual(run(2), [90056, 90066]);
+    assert.deepStrictEqual(run(3), []);
+  },
   daily_level_resets_daily() {
     // daily raids (notice 29805: «The raid boss's level will reset every day (PT)»): one occurrence per Pacific day
     const w = world();
@@ -867,10 +909,13 @@ const tests = {
     w.now = BONUS;
     w.spawnAt(STAGE + 5); w.start(); w.clearParts([0, 100, 200]);
     assert.strictEqual(w.player.raid.levels['cat:WW-0/Beginner'], 3, '+2 in bonus time for a 2019-03 week');
-    // only the kept raid has 0 AP in the bonus hours: the campaign is listed
+    // only the kept raid has 0 AP in the bonus hours: no campaign, since the week's quest still costs 90 (review I-2, .every)
     Object.assign(w.index.entries[0], { questAp: [5, 90], start: '2019-03-11', end: '2019-03-17' });
     w.week = { shopFrom: '2019-03-11', shopTo: '2019-03-17' };
-    assert.deepStrictEqual(w.raid.campaignIds(BONUS), [98000]);
+    assert.deepStrictEqual(w.raid.campaignIds(BONUS), []);
+    Object.assign(w.index.entries[0], { questAp: [0, 5, 90] });
+    assert.deepStrictEqual(w.raid.campaignIds(BONUS), [98000], 'both 0 in bonus time: the campaign');
+    Object.assign(w.index.entries[0], { questAp: [5, 90] });
     w.raid.unkeep();
     assert.deepStrictEqual(w.raid.campaignIds(BONUS), [], 'without it, none');
   },

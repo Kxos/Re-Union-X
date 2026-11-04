@@ -86,7 +86,11 @@ function catalogRows(index) {
     if (e.boss && !r.bosses.includes(e.boss)) r.bosses.push(e.boss);
   }
   const list = [...rows.values()];
-  for (const r of list) r.available = r.entries.some((e) => e.available);
+  for (const r of list) {
+    r.available = r.entries.some((e) => e.available);
+    // an event row ends on its last period (a weekend row's later weekends, review M-3), so rowState never offers to keep it early
+    for (const e of r.entries) for (const p of e.periods || []) if (p[1] > r.end) r.end = p[1];
+  }
   return list.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
 }
 

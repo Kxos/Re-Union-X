@@ -93,6 +93,11 @@ const tests = {
     // a week between its periods: nothing
     assert.strictEqual(keys(cal.raidsForWeek(EV, { ...week('2016-11-17', '2016-11-20'), nowMs: PT_NOON('2016-11-19') })), '');
     assert.strictEqual(cal.openNow(WEEKEND, PT_NOON('2016-11-12')), true);
+    // review M-3: the catalogue row ends on its last period, so on a Wednesday of its last weekend's week it reads 'other', not 'can'
+    const row = cal.catalogRows(EV).find((r) => r.censusId === 'WW-E22111-1');
+    assert.strictEqual(row.end, '2016-11-27');
+    const current = new Set(cal.raidsForWeek(EV, { ...late, nowMs: PT_NOON('2016-11-30') }).map((e) => e.censusId));
+    assert.strictEqual(cal.rowState(row, { ...late, current, kept: null }), 'other');
     const ix = realOrSkip('weekend_only_real_days');
     if (!ix) return;
     const real = ix.entries.filter((e) => e.censusId === 'WW-E22111-1');

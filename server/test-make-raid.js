@@ -67,7 +67,7 @@ function fixture() {
       world: [{ worldId: 1, raidBackground: 'bg_DB1' }, { worldId: 3, raidBackground: 'bg_WL1' }, { worldId: 7, raidBackground: 'bg_CD1' }] },
     models: { '0007': { fight: true, start: true, escape: true, put_down: true }, 1003: { fight: true, start: true, escape: true, put_down: true }, '0021': { fight: true, start: true, escape: true, put_down: true } },
     config: { onlyCensusIds: [W1], stats, weeklyUpMinutes: 20, useAp: 10, brokenBackgrounds: ['bg_CD1', 'bg_ED1'], backgroundFallbackWorld: 1, tierQuestLv: { single: 25, Beginner: 25, Intermediate: 75, Advanced: 125, Legendary: 175, Epic: 225 },
-      singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {}, reconstructedWhy: REAL_CONFIG.reconstructedWhy },
+      singleEra: { knots: [1, 10, 20, 30, 99], hpShare: [0.015, 0.2, 0.4, 1, 1], atkShare: [0.15, 0.25, 0.5, 1, 1] }, modelTemplates: {}, mapWorlds: {}, eventHp: REAL_CONFIG.eventHp, reconstructedWhy: REAL_CONFIG.reconstructedWhy },
   };
 }
 const build = (mutate) => { const f = fixture(); if (mutate) mutate(f); return mr.buildRaid(f); };
@@ -195,7 +195,7 @@ const reward2016 = (id, num) => ({ raidRewardId: id, oddsUpPerLv: 50, pointUpPer
   assignSkillId: [0, 0, 0, 0], assignSkillLv: [1, 1, 1, 1], num: [num, num + 2, num + 5, -1892354936], odds: [100000, 5000, 3333, -1892354936] });
 const setting2016 = (raidSettingId, bossId, rareBossId, bossUpTime, useAp, rareBossUpTime, rareUseAp, rareUpTypeArg = 1) => ({ raidSettingId, bossId, bossUpTime, useAp, rareBossId, rareBossUpTime, rareUseAp,
   rareUpType: 3, rareUpTypeArg, rareUpTriggerBossId: bossId, validUnlockRare: 0, unlockRareBossId: [0, 0, 0], unlockRareNum: [0, 0, 0] });
-function eventFixture(rows, quests = {}) {
+function eventFixture(rows, quests = {}, more = null) {
   return (f) => {
     f.census.rows.push(...rows);
     f.census.bosses.push({ ww: 'Queen Bee', raid_model_id: 15 }, { ww: 'Queen Bee Ω', raid_model_id: 16 }, { ww: 'Gummi Hound', raid_model_id: 1010 }, { ww: 'Jewel Princess', raid_model_id: 20 });
@@ -215,6 +215,7 @@ function eventFixture(rows, quests = {}) {
     f.config.weekendUpMinutes = REAL_CONFIG.weekendUpMinutes;
     f.config.eventUpMinutes = REAL_CONFIG.eventUpMinutes;
     f.config.onlyCensusIds = rows.map((r) => r.id);
+    if (more) more(f);
   };
 }
 const eventRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, region: 'WW', start, end, bosses, tier: 'quest LV 25', map: 'Curious Room', rewards: '', data: { hp: 'no' }, note: '', ...extra });
@@ -237,6 +238,7 @@ const tests = {
     assert.deepStrictEqual(knotsOf(part, 'hp'), [7200, 24300, 121500, 607500]);
     for (const l of ['hp', 'atk', 'def', 'partHp', 'lux', 'coinOdds', 'moves']) assert.ok(!e.reconstructed.includes(l), `${l} is original`);
     // baseLv as the client reads it: linear between the knots, flat outside (docs/notes/raid.md)
+    // the server's rule (review M-6): no client oracle for the rounding between knots; one off-knot level is a bench check
     assert.strictEqual(mr.atLevel(body, 'hp', 1), 12000);
     assert.strictEqual(mr.atLevel(body, 'hp', 20), 108000);
     assert.strictEqual(mr.atLevel(body, 'hp', 65), 540000);
@@ -254,27 +256,97 @@ const tests = {
     assert.deepStrictEqual(st.submissionItemNum, [10, 10, 5]);
     assert.strictEqual(st.name, 'Trickmaster');
   },
-  old_hp_curve_labelled() {
-    // 2016-11 to 2019-08 without a 2016 row of that raid: the one-tier cap (1.2 billion carried back before 2018-10-07,
-    // rising to 16.5 billion), shares below it as singleEra; labelled; never below the boss's own 2016 row
-    const out = build(eventFixture([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'], { data: { hp: 'older row only' } }),
-      eventRow('WW-E3-1', 'monthly', '2018-06-11', '2018-06-18', ['Trickmaster'], { tier: 'Beginner/Intermediate/Advanced (quest LV 25/80/120)', map: 'Curious Room; Curious Room; Curious Room' })]));
-    const [e, ...three] = out.index.entries;
+  old_hp_scale_labelled() {
+    // fix round 1, user decision I-1 (b): 2016-11 to 2018-08 without an original row, HP is the boss's own 2016 row (its growth
+    // shape) scaled by date, log-linear and monotone, from x1 on 2016-10-31 to 1 billion at LV 30 on 2018-09-11 (RAID_VALUES.md:
+    // «1,000,000,000 at LV 30 cap», Closehanded Captain); the 1.2-16.5 billion cap is not used before 2018-10-07
+    const cfg = REAL_CONFIG.eventHp;
+    assert.deepStrictEqual([cfg.from, cfg.single.date, cfg.single.level, cfg.single.hp, cfg.advanced.lv1, cfg.capFrom], ['2016-10-31', '2018-09-11', 30, 1000000000, 500000000, '2018-10-07']);
+    const day = (d) => Date.parse(`${d}T00:00:00Z`);
+    const trick = body2016(7, 'Trickmaster', 1, [70002, 70003]), shape = (lv) => mr.atLevel(trick, 'hp', lv), s30 = shape(30);
+    const line = (date, lv) => {
+      const t = Math.min(1, Math.max(0, (day(date) - day(cfg.from)) / (day(cfg.single.date) - day(cfg.from))));
+      return s30 * Math.pow(Math.max(1, cfg.single.hp / s30), t) * shape(lv) / s30;
+    };
+    const KN = [1, 10, 20, 30, 99];
+    const one = (rows) => build(eventFixture(rows));
+    const out = one([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'], { data: { hp: 'older row only' } })]);
+    const e = out.index.entries[0], body = enemyOf(out, e.enemyId);
     assert.ok(e.available, e.why);
-    assert.strictEqual(e.hpSource, 'rule');
-    assert.strictEqual(e.hp, 1200000000);
-    for (const l of ['hp', 'hp_step', 'atk', 'atk_curve', 'def']) assert.ok(e.reconstructed.includes(l), `label ${l}`);
-    const body = enemyOf(out, e.enemyId);
-    assert.deepStrictEqual(knotsOf(body, 'baseLv'), [1, 10, 20, 30, 99]);
-    assert.deepStrictEqual(knotsOf(body, 'hp'), [0.015, 0.2, 0.4, 1, 1].map((s) => Math.round(1200000000 * s)));
-    // three tiers of 2018: one HP curve, ATK by tier, quest level of the census
-    assert.deepStrictEqual(three.map((x) => [x.tier, x.level, x.hp]), [['Beginner', 25, 1200000000], ['Intermediate', 80, 1200000000], ['Advanced', 120, 1200000000]]);
-    const atk = three.map((x) => enemyOf(out, x.enemyId).attack[3]);
-    assert.ok(atk[0] < atk[1] && atk[1] < atk[2], `ATK by tier ${atk}`);
-    // never lowered: a source value above the rule wins
-    const low = build((f) => { eventFixture([eventRow('WW-E2-1', 'monthly', '2017-03-20', '2017-03-27', ['Trickmaster'])])(f); f.orig2016.raidEnemy[0].hp = [30000000, 40000000, 180000000, 900000000, 0]; });
-    assert.deepStrictEqual(knotsOf(enemyOf(low, low.index.entries[0].enemyId), 'hp'), [30000000, 240000000, 480000000, 1200000000, 1200000000]);
-    assert.ok(low.index.entries[0].reconstructed.includes('hpFloor'));
+    assert.strictEqual(e.hpSource, 'scale');
+    assert.deepStrictEqual(knotsOf(body, 'baseLv'), KN);
+    assert.deepStrictEqual(knotsOf(body, 'hp'), KN.map((lv) => Math.round(line('2017-03-20', lv))));
+    assert.strictEqual(e.hp, body.hp[0], 'entry.hp is the LV 1 HP');
+    for (const l of ['eventHp', 'atk', 'atk_curve', 'def']) assert.ok(e.reconstructed.includes(l), `label ${l}`);
+    for (const l of ['hp', 'hp_step']) assert.ok(!e.reconstructed.includes(l), `no cap label ${l}`);
+    assert.ok(knotsOf(body, 'hp').every((h, i) => h >= shape(KN[i])), 'never below the 2016 row');
+    assert.ok(body.hp[3] < 1200000000, 'far below the 1.2 billion cap');
+    // monotone by date at every level
+    const at = (start) => { const o = one([eventRow('WW-E2-1', 'monthly', start, start, ['Trickmaster'])]); return knotsOf(enemyOf(o, o.index.entries[0].enemyId), 'hp'); };
+    const dates = ['2016-11-21', '2017-03-20', '2017-08-14', '2018-03-19', '2018-08-20'], series = dates.map(at);
+    for (let i = 1; i < series.length; i++) assert.ok(series[i].every((h, k) => h > series[i - 1][k]), `${dates[i]} above ${dates[i - 1]}`);
+    // the three tiers of 2018: Beginner the line, Advanced 500M at LV 1 (2018-07-23 reading «500,000,000 at LV 1»), Intermediate
+    // their geometric mean; different at every level, Beginner < Intermediate < Advanced
+    const t3 = one([eventRow('WW-E3-1', 'monthly', '2018-06-11', '2018-06-18', ['Trickmaster'], { tier: 'Beginner/Intermediate/Advanced (quest LV 25/80/120)', map: 'Curious Room; Curious Room; Curious Room' })]);
+    const [b, i, a] = t3.index.entries.map((x) => knotsOf(enemyOf(t3, x.enemyId), 'hp'));
+    assert.deepStrictEqual(b, KN.map((lv) => Math.round(line('2018-06-11', lv))));
+    assert.deepStrictEqual(a, KN.map((lv) => Math.round(Math.max(cfg.advanced.lv1 * shape(lv) / shape(1), line('2018-06-11', lv)))));
+    assert.strictEqual(a[0], 500000000);
+    assert.ok(b.every((h, k) => h < i[k] && i[k] < a[k]), 'B < I < A');
+    assert.ok(i.every((h, k) => Math.abs(h - Math.round(Math.sqrt(line('2018-06-11', KN[k]) * a[k]))) <= 1), 'Intermediate = geometric mean');
+    assert.ok(t3.index.entries.every((x) => x.reconstructed.includes('eventHp') && x.reconstructed.includes('hpTier')));
+    // weekend raids before the 2018-05-05 weekend: twice the HP («half of previous» that weekend, reddit 8h8217)
+    const wk = (start) => { const o = one([eventRow('WW-E4-1', 'weekend-only', start, start, ['Trickmaster']), eventRow('WW-E5-1', 'monthly', start, start, ['Trickmaster'])]);
+      return o.index.entries.map((x) => enemyOf(o, x.enemyId).hp[0]); };
+    const [wBefore, mBefore] = wk('2018-04-07'), [wAfter, mAfter] = wk('2018-05-05');
+    assert.strictEqual(wBefore, 2 * mBefore);
+    assert.strictEqual(wAfter, mAfter);
+    // a 2016 row stronger than the target: never lowered, the factor stays 1
+    const strong = build((f) => { eventFixture([eventRow('WW-E2-1', 'monthly', '2018-08-20', '2018-08-27', ['Trickmaster'])])(f); f.orig2016.raidEnemy[0].hp = [30000000, 400000000, 2000000000, 9000000000, 0]; });
+    const sb = enemyOf(strong, strong.index.entries[0].enemyId);
+    assert.deepStrictEqual(knotsOf(sb, 'hp'), KN.map((lv) => Math.round(mr.atLevel({ ...trick, hp: [30000000, 400000000, 2000000000, 9000000000, 0] }, 'hp', lv))));
+  },
+  cap_era_boundaries() {
+    // the 1.2-16.5 billion cap: one-tier weeks from 2018-10-07 to 2019-08-11 only; a one-tier week before it with no video reading
+    // uses the scale (pre-series 2018-09, flat from LV 30: «caps out at level 30 with 1bn HP»); 2019-08-12 the tier table
+    const single = (start, tier = 'single', end = start) => build((f) => {
+      addWeek(f, `WW-W-${start}`, start, end, tier);
+      f.values.hp_tier_era.rows.push(era('single, cap at LV 30+', 16500000000, '2019-07-21', '2019-08-11'));
+    });
+    const hpOf = (out) => { const e = out.index.entries[0]; return [e, knotsOf(enemyOf(out, e.enemyId), 'hp')]; };
+    const [c1, h1] = hpOf(single('2018-10-07'));
+    assert.strictEqual(c1.hp, 1200000000);
+    assert.strictEqual(h1[3], 1200000000);
+    assert.ok(c1.reconstructed.includes('hp') && !c1.reconstructed.includes('eventHp'));
+    const [c2, h2] = hpOf(single('2019-08-11'));
+    assert.deepStrictEqual([c2.hp, h2[4]], [16500000000, 16500000000]);
+    const [c0, h0] = hpOf(single('2018-09-17'));
+    assert.ok(c0.reconstructed.includes('eventHp') && !c0.reconstructed.includes('hp'), 'before 2018-10-07: the scale');
+    assert.deepStrictEqual([h0[3], h0[4]], [1000000000, 1000000000], 'the 2018-09-11 reading, flat above LV 30');
+    // the week holding the reading (Closehanded Captain, 2018-09-10..16) reaches it: read at its last day
+    assert.strictEqual(hpOf(single('2018-09-10', 'single', '2018-09-16'))[1][3], 1000000000);
+    assert.ok(hpOf(single('2018-09-03', 'single', '2018-09-09'))[1][3] < 1000000000, 'the week before: still rising');
+    const [c3] = hpOf(single('2019-08-12', 'Beginner'));
+    assert.strictEqual(c3.hp, 150000000);
+  },
+  level_drops() {
+    // fix round 1 (I-3): the level drops the notices name, as raidReward rows of their own; a row pays every slot (all items);
+    // the rest («not itemised», «chance drop», Boosted, coins with no amount) stays out, labelled
+    const out = build((f) => {
+      eventFixture([eventRow('WW-E6-1', 'weekend-only', '2017-03-04', '2017-03-06', ['Trickmaster'])])(f);
+      f.master.medal = [{ medalId: 90056, rare: 6, name: 'Chip', groupId: 0 }, { medalId: 90066, rare: 6, name: 'Dale', groupId: 0 }, { medalId: 90076, rare: 6, name: 'Moogle', groupId: 0 },
+        { medalId: 300500, rare: 5, name: 'Young Kairi', groupId: 0 }];
+      f.eventRewards.rows[0].level_rewards = [{ level: 10, reward: 'one 6★ Chip, one 6★ Dale, one 6★ Moogle' }, { level: '30, then every 10 levels', reward: 'Young Kairi' },
+        { level: 'every 10th level', reward: 'additional Medals, not itemised' }, { level: '96+', reward: 'Young Kairi, chance drop' }];
+    });
+    const e = out.index.entries[0];
+    assert.deepStrictEqual(e.levelDrops.map((d) => d.level), [10, 30, 40, 50, 60, 70, 80, 90]);
+    const row = (d) => out.rewardRows.find((r) => r.raidRewardId === d.rewardId);
+    assert.deepStrictEqual([row(e.levelDrops[0]).validReward, row(e.levelDrops[0]).type.slice(0, 3), row(e.levelDrops[0]).id.slice(0, 3)], [3, [3, 3, 3], [90056, 90066, 90076]]);
+    assert.deepStrictEqual([row(e.levelDrops[1]).validReward, row(e.levelDrops[1]).id[0], row(e.levelDrops[1]).num[0]], [1, 300500, 1]);
+    assert.ok(e.levelDrops.every((d) => d.rewardId > e.enemyId * 100 + 35 && d.rewardId < (e.enemyId + 1) * 100), 'ids of the boss, past its coin tables');
+    assert.ok(e.reconstructed.includes('levelDropsPartial'), 'the not itemised ones are declared');
+    assert.ok(e.reconstructed.includes('eventCoins'), 'the coins stay the standard table');
   },
   old_level_bands() {
     // one tier before 2019-08-12: coins by level band (1-9, 10-19, 20-29, 30-99) on the event raids too
@@ -291,9 +363,17 @@ const tests = {
       eventRow('WW-E5-1', 'monthly', '2017-05-22', '2017-05-29', ['Jewel Princess']),
       eventRow('WW-E6-1', 'monthly', '2017-08-14', '2017-08-21', ['Gummi Hound']),
       eventRow('WW-E7-1', 'weekend-only', '2017-04-08', '2017-04-10', ['Trickmaster']),
-      eventRow('WW-E8-1', 'weekend-only', '2018-06-02', '2018-06-04', ['Trickmaster'])]));
+      eventRow('WW-E8-1', 'weekend-only', '2018-06-02', '2018-06-04', ['Trickmaster']),
+      eventRow('WW-E9-1', 'monthly', '2017-06-19', '2017-06-26', ['Darkside Ω'])], {}, (f) => {
+      // a real Ω with no 2016 setting of its own (review M-9): Darkside Ω, rare 2
+      f.census.bosses.push({ ww: 'Darkside Ω', raid_model_id: 2 });
+      f.orig2016.raidEnemy.push(body2016(2, 'Darkside Ω', 2, [20002]), part2016(20002, 2));
+      f.orig2016.raidEnemyAttack.push(attack2016(201), attack2016(202));
+      f.models['0002'] = f.models['0007'];
+    }));
     const up = (id) => out.index.entries.find((e) => e.censusId === id);
-    assert.deepStrictEqual(['WW-E4-1', 'WW-E5-1', 'WW-E6-1', 'WW-E7-1', 'WW-E8-1'].map((id) => up(id).upMinutes), [10, 20, 180, 180, 60]);
+    assert.deepStrictEqual(['WW-E4-1', 'WW-E5-1', 'WW-E6-1', 'WW-E7-1', 'WW-E8-1', 'WW-E9-1'].map((id) => up(id).upMinutes), [10, 20, 180, 180, 60, 20]);
+    assert.ok(up('WW-E9-1').reconstructed.includes('upMinutes') && !up('WW-E9-1').reconstructed.includes('setting2016'));
     assert.ok(up('WW-E4-1').reconstructed.includes('upMinutes'));
     assert.ok(up('WW-E6-1').reconstructed.includes('setting2016'));
     assert.ok(up('WW-E7-1').reconstructed.includes('weekendTimer'));
@@ -342,6 +422,8 @@ const tests = {
     assert.deepStrictEqual([d1.open, d1.day, d1.boss, d2.day, d2.boss], ['day', '2016-12-26', 'Trickmaster', '2016-12-27', 'Gummi Hound']);
     assert.notStrictEqual(d1.key, d2.key);
     assert.deepStrictEqual([daily.open, daily.periods], ['daily', [['2017-07-03', '2017-07-09']]]);
+    // review M-1: one-off and monthly rows end on the Pacific day before their Monday 07:00Z end too
+    assert.deepStrictEqual(mr.eventPeriods(eventRow('WW-E12-1', 'monthly', '2016-11-21', '2016-11-28', ['Trickmaster'])), [['2016-11-21', '2016-11-27']]);
   },
   unknown_rewards_standard() {
     // a raid with no known board gets the standard board of its family (the nearest row of the same family that has one),
@@ -1251,19 +1333,23 @@ const tests = {
     const real = realInputs();
     if (!real) return;
     const out = mr.buildRaid(real);
-    let table = 0, read = 0, events2016 = 0, eventsRule = 0;
+    let table = 0, read = 0, events2016 = 0, eventsRule = 0, scaled = 0;
+    const capFrom = REAL_CONFIG.eventHp.capFrom;
     for (const e of out.index.entries.filter((x) => x.available)) {
       assert.ok(e.hp > 0, `HP of ${e.key}`);
       const body = out.enemyRows.find((r) => r.raidEnemyId === e.enemyId);
       assert.ok(body.hp.slice(0, body.validGrowth).every((h) => h > 0), `HP knots of ${e.key}`);
       if (e.event) {
-        // event raids (Task 10): their own 2016 row unlabelled, else the one-tier cap of their date, labelled
+        // event raids (Task 10): their own 2016 row unlabelled, else the scale of their boss's row (fix round 1), labelled, far
+        // below the cap of the later era
         if (e.hpSource === '2016') { assert.ok(!e.reconstructed.includes('hp'), `label of ${e.key}`); events2016++; continue; }
-        assert.strictEqual(e.hp, mr.tierHp(real.values, 'single', e.start).hp, `cap of ${e.key}`);
-        assert.ok(e.reconstructed.includes('hp') && e.reconstructed.includes('hp_step'), `label of ${e.key}`);
+        assert.strictEqual(e.hpSource, 'scale', e.key);
+        assert.ok(e.reconstructed.includes('eventHp') && !e.reconstructed.includes('hp'), `label of ${e.key}`);
+        assert.ok(e.tier === 'Advanced' ? body.hp[0] >= 500000000 : body.hp[0] < 1200000000, `scale of ${e.key}`);
         eventsRule++;
         continue;
       }
+      if (e.tier === 'single' && e.start < capFrom && e.reconstructed.includes('eventHp')) { scaled++; continue; } // 2018-09 one-tier weeks
       const rule = mr.tierHp(real.values, e.tier, e.start);
       assert.ok(rule && rule.hp > 0, `tier rule for ${e.key}`);
       if (e.tier === 'single') {
@@ -1277,7 +1363,7 @@ const tests = {
         assert.strictEqual(e.reconstructed.includes('hp_step'), rule.step, `hp_step of ${e.key}`);
       } else read++;
     }
-    console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp; event raids: ${events2016} on their 2016 row, ${eventsRule} on the cap rule)`);
+    console.log(`  (HP: ${read} tier rows read on video, ${table} from the tier rule, labelled hp; event raids: ${events2016} on their 2016 row, ${eventsRule} on the scale; ${scaled} one-tier weeks of 2018-09 on the scale)`);
     assert.ok(table > 0 && read > 0);
   },
   real_census_week() {
