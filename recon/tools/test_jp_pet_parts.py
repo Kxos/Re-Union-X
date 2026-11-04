@@ -84,3 +84,22 @@ if os.path.isdir(red) and not os.path.isdir(os.path.join(dd.JP431, 'lwf', 'pet',
         shutil.rmtree(rr, ignore_errors=True)
 else:
     print('skip recon-only check: no JP dump')
+
+# stamp cache of the PNG sizes and LWF texture tables (4 Nov 2026): same files and report without the cache, on the first
+# run (all misses) and on the second (all hits)
+if os.path.isdir(os.path.join(dd.JP431, 'lwf', 'pet', 'part')):
+    import shutil
+    import tempfile
+    import stamp_cache
+    ct = tempfile.mkdtemp(prefix='jpp_cache_')
+    try:
+        ref = jpp.collect(dd.JP431)
+        sc = stamp_cache.StampCache(os.path.join(ct, 'c.json'), 'v')
+        assert jpp.collect(dd.JP431, cache=sc) == ref, 'cache: first run'
+        assert sc.misses, 'cache: first run computes'
+        sc.save()
+        sc = stamp_cache.StampCache(os.path.join(ct, 'c.json'), 'v')
+        assert jpp.collect(dd.JP431, cache=sc) == ref and sc.hits and not sc.misses, 'cache: second run'
+        print('OK: stamp cache gives the same parts (%d values remembered)' % sc.hits)
+    finally:
+        shutil.rmtree(ct, ignore_errors=True)

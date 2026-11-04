@@ -50,14 +50,34 @@ def _latest(files):
     return {b: f for b, (r, f) in best.items()}
 
 
-def _png_size(path):
+def _png_size_read(path):
     with open(path, 'rb') as fh:
         h = fh.read(24)
     return struct.unpack('>II', h[16:24]) if h[:4] == b'\x89PNG' else None
 
 
+# optional stamp_cache.StampCache set by collect(cache=...) and the stats of the files seen in the listings (free on Windows):
+# the ~7.8k PNG headers and ~1.8k LWF tables of the dump are read again only when a file changes (51 s -> seconds, 4 Nov 2026)
+_CACHE = None
+_STAT = {}
+
+
+def _png_size(path):
+    if _CACHE is None:
+        return _png_size_read(path)
+    v = _CACHE.get('png_size', path, _png_size_read, _STAT.get(path))
+    return tuple(v) if v is not None else None
+
+
 def _lwf_textures(path):
     """{nome texture: (w, h)} dalla tabella texture di un LWF (formato di make_pet_motions.py)."""
+    if _CACHE is None:
+        return _lwf_textures_read(path)
+    return {k: tuple(v) for k, v in _CACHE.get('lwf_textures', path, lambda p: [[k, list(v)] for k, v in _lwf_textures_read(p).items()],
+                                                 _STAT.get(path))}
+
+
+def _lwf_textures_read(path):
     sys.path.insert(0, HERE)
     from make_pet_motions import SECTIONS
     d = open(path, 'rb').read()
@@ -159,18 +179,64 @@ def hires_lwf(data, real):
     return bytes(b[:end]) + blob + bytes(b[end:])
 
 
-def collect(jp_root, served=(), recon_root=None):
-    """{nome servito: percorso JP} per tutte le parti e le icone non gia' servite, piu' il resoconto."""
+def _hires(lwf, real):
+    """hires_lwf of the LWF file; with the cache, an LWF that needs no patch for these real sizes is not read again (the
+    sizes are part of the cache kind, the LWF bytes are behind its stamp)."""
+    def compute(p):
+        with open(p, 'rb') as fh:
+            return hires_lwf(fh.read(), real)
+    if _CACHE is None:
+        return compute(lwf)
+    kind = 'hires_none|' + repr(sorted(real.items()))
+    if _CACHE.get(kind, lwf, lambda p: compute(p) is None, _STAT.get(lwf)):
+        return None
+    return compute(lwf)
+
+
+def _scan(folder):
+    """(names in listing order, {name: is a directory}) of a folder, remembering the stats of its files for the cache."""
+    names, isdir = [], {}
+    with os.scandir(folder) as it:
+        for e in it:
+            names.append(e.name)
+            try:
+                isdir[e.name] = e.is_dir()
+            except OSError:
+                isdir[e.name] = False
+            if not isdir[e.name]:
+                try:
+                    _STAT[e.path] = e.stat()
+                except OSError:
+                    pass
+    return names, isdir
+
+
+def collect(jp_root, served=(), recon_root=None, cache=None):
+    """{nome servito: percorso JP} per tutte le parti e le icone non gia' servite, piu' il resoconto.
+    cache: optional stamp_cache.StampCache for the PNG sizes and LWF texture tables (same result, fewer reads)."""
+    global _CACHE
+    _CACHE = cache
+    _STAT.clear()
+    try:
+        return _collect(jp_root, served, recon_root)
+    finally:
+        _CACHE = None
+        _STAT.clear()
+
+
+def _collect(jp_root, served, recon_root):
     root = os.path.join(jp_root, 'lwf', 'pet', 'part')
     dirs = {}            # (serie, parte) -> {nome logico: percorso}
-    for series in sorted(os.listdir(root)):
+    names, isdir = _scan(root)
+    for series in sorted(names):
         sd = os.path.join(root, series)
-        if not os.path.isdir(sd):
+        if not isdir[series]:
             continue
-        for part in sorted(os.listdir(sd)):
+        pnames, pisdir = _scan(sd)
+        for part in sorted(pnames):
             pd = os.path.join(sd, part)
-            if os.path.isdir(pd):
-                dirs[(series, part)] = {k: os.path.join(pd, f) for k, f in _latest(os.listdir(pd)).items()}
+            if pisdir[part]:
+                dirs[(series, part)] = {k: os.path.join(pd, f) for k, f in _latest(_scan(pd)[0]).items()}
     # indici delle gemelle: LWF per (parte, {texture: dimensioni}), texture per (nome, dimensioni)
     lwf_by_key, png_by_key = {}, {}
     for (series, part), files in dirs.items():
@@ -203,13 +269,15 @@ def collect(jp_root, served=(), recon_root=None):
     # avatar accessory textures: (name without the part prefix, size) -> [paths]
     av_root = os.path.join(jp_root, 'lwf', 'avatar', 'accessory')
     av_png = {}
-    for aid in sorted(os.listdir(av_root)) if os.path.isdir(av_root) else []:
+    av_names, av_isdir = _scan(av_root) if os.path.isdir(av_root) else ([], {})
+    for aid in sorted(av_names):
         ad = os.path.join(av_root, aid)
-        for part in sorted(os.listdir(ad)) if os.path.isdir(ad) else []:
+        a_names, a_isdir = _scan(ad) if av_isdir[aid] else ([], {})
+        for part in sorted(a_names):
             pd = os.path.join(ad, part)
-            if not os.path.isdir(pd):
+            if not a_isdir[part]:
                 continue
-            for name, path in _latest(os.listdir(pd)).items():
+            for name, path in _latest(_scan(pd)[0]).items():
                 if name.endswith('.png') and name.startswith(part + '_'):
                     av_png.setdefault((name[len(part) + 1:], _png_size(os.path.join(pd, path))), []).append(os.path.join(pd, path))
 
@@ -265,7 +333,8 @@ def collect(jp_root, served=(), recon_root=None):
             out[base + part + '.lwf'] = lwf
             for name, path in pick.items():
                 out[base + name] = path
-            hi = hires_lwf(open(lwf, 'rb').read(), {n: _png_size(p) for n, p in pick.items()})
+            real = {n: _png_size(p) for n, p in pick.items()}
+            hi = _hires(lwf, real)
             if hi:
                 report['hires'][base + part + '.lwf'] = hi
             continue

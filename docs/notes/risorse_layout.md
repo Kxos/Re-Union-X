@@ -438,3 +438,21 @@ no Python process above 450 MB; the machine has 16 GB, D: is a spinning disk). M
 - Pitfalls met: a `python` function shadowing the exe must forward `$input` (a piped `resource_parts --check-installed` hung);
   `Remove-Item` of a folder that `-Quick` no longer creates stops the script (error invisible with `-Command ... *>`: wrap the call in
   try/catch when launching in the background).
+
+Second pass (4 Nov 2026, evening), for the full build (`import_originals` 424 s, `import_jp_coco` 414 s in the log). Measured on
+copies of `stage_gen` under `tmp\perf_import`; outputs compared file by file (names + sha1) between the old and new code on
+identical copies, cold and second run: identical trees, reports and stdout (the manifest differs only by the work folder in the
+backup paths).
+
+| step | old | new | what changed |
+|---|---|---|---|
+| `import_jp_coco.py` first run | 471 s (OS cache cold, profiled) | 102 s (no stamp cache, OS cache partly warm) | old: 33.9k `open` (257 s) and 80.7k `stat` (78 s), the same JP and static-pack files read at every run |
+| `import_jp_coco.py` second run | 31-56 s | 8.5-12 s | `stamp_cache.py`: values read from unchanged files (PNG sizes, LWF texture tables and sound events, UI texts, the sha1 of a texture once converted to BTF) remembered by size + mtime in `jp_import\stamp_cache.json` (version = the code); an output that already holds the right bytes is neither encoded nor rewritten (0 of 5,275 written); directory listings give the stats (`scan_tree`, free on Windows); the JP cocostudio tree listed once instead of twice; the resource key worked out once (was twice, ~6 s each); left: 8.2k opens instead of 33.9k |
+| `import_originals.py` (realistic: after `btf_fix`, raid models removed) | 147 s | 101 s | every row resolved first, then each destination written once by 8 threads (`ORIG_WORKERS`); destinations with identical bytes not rewritten (14.7k of 52.4k); a plain file name is a lookup, not `fnmatch` over the folder |
+| same, sources in the OS cache | 76 s (1 thread) | 44 s | |
+
+- The full-build `import_originals` time is the ~37.6k raid model files (`lwf/character/raid`, `lwf/raid/demo`): the script deletes them
+  from `stage_gen` after the mirror to `raid_gen`, so every full build copies them again (and `btf_fix` converts them again). Only a
+  change of that flow (keep them out of `stage_gen` when `raid_gen` already holds them) would remove that cost.
+- `make_trait_medal_images.py` 80 s in the 20:16 build was not a skip miss: that was the first full build after the skip landed
+  (script changed at 14:13, so `DEPS_MTIME` was newer than every output); now all 939 outputs are skipped.

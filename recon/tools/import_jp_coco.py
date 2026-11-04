@@ -93,17 +93,40 @@ except ImportError:                  # python -I: niente Pillow, la conversione 
     btf = Image = None
 
 
+# Values read from unchanged source files are remembered between runs (stamp_cache.py: size + modification time of the
+# file; 4 Nov 2026, the full build spent ~8 minutes here re-reading the same files on the spinning disk). The version is the
+# code that computes them: these scripts, btf.py and the libraries of the BTF encoding (a change discards the cache).
+def _cache_version():
+    import zlib
+    h = hashlib.sha1()
+    for f in ('import_jp_coco.py', 'jp_pet_parts.py', 'jp_sound_effects.py', 'btf.py', 'stamp_cache.py', 'make_pet_motions.py'):
+        with open(os.path.join(HERE, f), 'rb') as fh:
+            h.update(f.encode() + b'\0' + fh.read() + b'\0')
+    pil = getattr(sys.modules.get('PIL'), '__version__', None)
+    h.update(repr((sys.version, zlib.ZLIB_RUNTIME_VERSION, pil, btf is not None)).encode())
+    return h.hexdigest()
+
+
+import stamp_cache  # noqa: E402
+CACHE = stamp_cache.StampCache(os.path.join(REPORT, 'stamp_cache.json'), _cache_version())
+_BGAD_KEY = []                       # the resource key, worked out once (bgad.lib_key reads the whole library: ~6 s)
+
+
+SRC_STAT = {}                        # path -> stat of the source files seen in the listings (CACHE stamps without a stat)
+
+
 def latest(root):
     """nome logico relativo (con /) -> percorso della revisione corrente."""
     idx = {}
-    for dp, _, fs in os.walk(root):
-        rel = os.path.relpath(dp, root).replace(os.sep, '/')
-        for f in fs:
-            m = REV.match(f)
-            base, r = (m.group(1) + m.group(3), int(m.group(2))) if m else (f, -1)
-            key = base if rel == '.' else rel + '/' + base
-            if key not in idx or idx[key][0] < r:
-                idx[key] = (r, os.path.join(dp, f))
+    # same order and paths as os.walk (stamp_cache.scan_tree), with the file stats of the listing
+    for name, (p, st) in stamp_cache.scan_tree(root).items():
+        rel, _, f = name.rpartition('/')
+        SRC_STAT[p] = st
+        m = REV.match(f)
+        base, r = (m.group(1) + m.group(3), int(m.group(2))) if m else (f, -1)
+        key = base if not rel else rel + '/' + base
+        if key not in idx or idx[key][0] < r:
+            idx[key] = (r, p)
     return {k: v[1] for k, v in idx.items()}
 
 
@@ -219,7 +242,7 @@ for n in ours:
 jp_ui = {}
 for k, p in latest(args.jp_text).items():
     if k.endswith('.txt') and '/' not in k:
-        jp_ui[k[:-4]] = read_text(p).strip()
+        jp_ui[k[:-4]] = CACHE.get('text', p, read_text, SRC_STAT.get(p)).strip()
 by_jp = {}
 for i, t in jp_ui.items():
     by_jp.setdefault(re.sub(r'\s+', '', t), set()).add(i)
@@ -288,7 +311,7 @@ def suspicious_revision(name):
 # publish/ puo' esistere solo con lo stesso nome in un'altra cartella (cocostudio/Panel10.png,
 # img/ui/Complete_icon1.png...). Si cerca per nome, prima in cocostudio/, poi in img/.
 jp_any = {}
-for _k, _p in latest(args.jp).items():
+for _k, _p in jp.items():                              # = latest(args.jp), listed once above (read-only dump)
     if not _k.startswith('publish/'):
         jp_any.setdefault(_k.split('/')[-1], _p)
 for _k, _p in sorted(latest(os.path.join(os.path.dirname(args.jp), 'img')).items()):
@@ -918,7 +941,13 @@ for _name, _src in sorted(_rank_img.items()):
 # perse ricostruite con un'altra texture JP reale (jp_reconstructed.tsv, I-194 del 21-10: ombre 144x35 di 5009 e 9002),
 # solo per gli NPC che cosi' diventano completi.
 def _lwf_textures(path):
-    """{nome texture: (w, h)} dalla tabella texture di un LWF (formato di make_pet_motions.py)."""
+    """{nome texture: (w, h)} dalla tabella texture di un LWF (formato di make_pet_motions.py); remembered in CACHE."""
+    return {k: tuple(v) for k, v in CACHE.get('lwf_textures', path,
+                                               lambda p: [[k, list(v)] for k, v in _lwf_textures_read(p).items()],
+                                               SRC_STAT.get(path))}
+
+
+def _lwf_textures_read(path):
     import struct
     from make_pet_motions import SECTIONS
     d = open(path, 'rb').read()
@@ -953,8 +982,9 @@ def _served_bytes(name):
         fh.seek(off)
         buf = fh.read(h['hsize'] + h['nlen'] + h['size'])
     lib = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'ext', 'ww431', 'libcocos2dcpp.so')
-    key = bytes.fromhex(os.environ['BGAD_KEY']) if os.environ.get('BGAD_KEY') else bgad.lib_key(lib)
-    return bgad.decode(buf, bgad.parse(buf), key)
+    if not _BGAD_KEY:
+        _BGAD_KEY.append(bytes.fromhex(os.environ['BGAD_KEY']) if os.environ.get('BGAD_KEY') else bgad.lib_key(lib))
+    return bgad.decode(buf, bgad.parse(buf), _BGAD_KEY[0])
 
 
 NPC_SHADOW = 'lwf/character/npc/4001/wait/wait_7.png'
@@ -1013,7 +1043,8 @@ if os.path.isdir(os.path.join(JP_ROOT, 'lwf', 'pet', 'part')):
     # textures lost from every source, rebuilt by hand (user decision 2 Nov 2026), kept in the private folder with
     # their record (pet_parts_recon/README.md): used only where no original file exists
     _pp, _pp_rep = jp_pet_parts.collect(JP_ROOT, _served_all,
-                                        recon_root=os.path.join(private_tools.root(), 'pet_parts_recon', 'files'))
+                                        recon_root=os.path.join(private_tools.root(), 'pet_parts_recon', 'files'),
+                                        cache=CACHE)
     # an LWF whose textures are stored larger than declared is served as the patched copy (jp_pet_parts.hires_lwf:
     # real size declared, same drawn size), otherwise the client draws them at the declared resolution (blurry, 3 Nov 2026)
     for _name, _src in sorted(_pp.items()):
@@ -1104,8 +1135,9 @@ if not os.path.exists(args.served):
     print('jp_se: ATTENZIONE, indice servito %s assente: suoni dei soli LWF generati' % args.served)
 _se = jp_sound_effects.collect(
     OUT, _served_all, writes=writes, owned=set(old), jp_root=JP_ROOT,
-    served=jp_sound_effects.Served(args.served, os.path.join(D, 'resource_data', '7', 'data'))
-    if os.path.exists(args.served) else None,
+    served=jp_sound_effects.Served(args.served, os.path.join(D, 'resource_data', '7', 'data'),
+                                   key=_BGAD_KEY[0] if _BGAD_KEY else None)
+    if os.path.exists(args.served) else None, cache=CACHE,
     static_roots=jp_sound_effects.static_dirs(args.no_static),
     cache_path=os.path.join(REPORT, 'served_lwf_sounds.json'), save_cache=not args.check)
 for _name, _src in sorted(list(_se['add'].items()) + list(_se['texts'].items())):
@@ -1119,8 +1151,25 @@ def out_path(name):
     return os.path.join(OUT if name.startswith(('lwf/', 'img/', 'audio/', 'text/')) else pub_out, *name.split('/'))
 
 
+def _file_blob(src, is_png, made):
+    """(sha1, conversion, bytes) of a file taken as it is: a true PNG under a .png name becomes BTF (conversion 'btf'), or
+    stays PNG for btf_fix.py without Pillow ('png'); anything else is copied byte for byte (None). made[0] = the bytes."""
+    with open(src, 'rb') as fh:
+        blob = fh.read()
+    conv = None
+    if is_png and blob[:8] == b'\x89PNG\r\n\x1a\n':
+        if btf is not None:
+            from io import BytesIO
+            blob = btf.encode(Image.open(BytesIO(blob)).convert('RGBA'))
+            conv = 'btf'
+        else:
+            conv = 'png'
+    made[:] = [blob]
+    return sha(blob), conv, blob
+
+
 # ---- scrittura --------------------------------------------------------------------------------
-manifest, n_btf, n_png, removed = {}, 0, 0, []
+manifest, n_btf, n_png, removed, n_written, _dirs_made = {}, 0, 0, [], 0, set()
 if not args.check:
     for name, w in sorted(writes.items()):
         dst = out_path(name)
@@ -1129,37 +1178,54 @@ if not args.check:
                 os.remove(dst)
             continue
         src, data = w[1], w[2]
+        blob = None
         if isinstance(data, bytes):                   # testo gia' pronto (plist rinominato)
             blob = data
         elif data is not None:
             blob = json.dumps(data, ensure_ascii=False).encode('utf-8')
+        if blob is not None:
+            want = sha(blob)
         else:
-            blob = open(src, 'rb').read()
-            if name.lower().endswith('.png') and blob[:8] == b'\x89PNG\r\n\x1a\n':
-                if btf is not None:
-                    from io import BytesIO
-                    blob = btf.encode(Image.open(BytesIO(blob)).convert('RGBA'))
-                    n_btf += 1
-                else:
-                    n_png += 1
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
+            # a file taken as it is (PNG -> BTF): the hash of what it becomes is remembered by the source's stamp, so an
+            # output that already holds it is neither encoded nor written again (most of the ~5k files of a rebuild)
+            is_png = name.lower().endswith('.png')
+            _made = []
+            want, conv = CACHE.get('blob_png' if is_png else 'blob', src,
+                                   lambda p: list(_file_blob(p, is_png, _made)[:2]), SRC_STAT.get(src))
+            if conv == 'btf':
+                n_btf += 1
+            elif conv == 'png':
+                n_png += 1
+        if os.path.dirname(dst) not in _dirs_made:    # os.makedirs costs three calls even when the folder exists
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            _dirs_made.add(os.path.dirname(dst))
         # un file nostro sostituito (layout generato, texture disegnata) si mette da parte: se poi
         # nessun generatore lo riscrive, la pulizia lo rimette com'era
         backup = None
-        if os.path.exists(dst):
-            cur = open(dst, 'rb').read()
+        try:
+            with open(dst, 'rb') as fh:
+                cur = fh.read()
+        except FileNotFoundError:
+            cur = None
+        if cur is not None:
+            cur_sha = sha(cur)
             prev = old.get(name)
-            if prev and sha(cur) == prev['sha1']:
+            if prev and cur_sha == prev['sha1']:
                 backup = prev.get('backup')           # e' ancora la nostra copia: resta la copia di prima
             else:
                 backup = os.path.join(REPORT, 'orig', *name.split('/'))
                 os.makedirs(os.path.dirname(backup), exist_ok=True)
                 with open(backup, 'wb') as fh:
                     fh.write(cur)
-        with open(dst, 'wb') as fh:
-            fh.write(blob)
+        if cur is None or cur_sha != want:
+            if blob is None:
+                blob = _made[0] if _made else _file_blob(src, is_png, _made)[2]
+                want = sha(blob)
+            with open(dst, 'wb') as fh:
+                fh.write(blob)
+            n_written += 1
         rel = os.path.relpath(src, JP_ROOT) if src.startswith(JP_ROOT) else src
-        manifest[name] = dict(src=rel.replace(os.sep, '/'), sha1=sha(blob), backup=backup)
+        manifest[name] = dict(src=rel.replace(os.sep, '/'), sha1=want, backup=backup)
     # file scritti dalla corsa precedente e non piu' richiesti: se nessuno li ha riscritti, si
     # rimette la copia di prima (se c'era) o si tolgono
     for name, m in old.items():
@@ -1175,7 +1241,10 @@ if not args.check:
     json.dump(manifest, open(man_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     # stima del pacchetto generato (file senza intestazioni BGAD) contro la riserva delle versioni complete;
     # il controllo vero e' in build-resources.ps1 (gen.mp4 contro la dimensione installata)
-    _tot = sum(os.path.getsize(p) for p in jp_sound_effects.walk_names(OUT).values())
+    _tot = sum(st.st_size for _, st in stamp_cache.scan_tree(OUT).values())   # sizes from the listing: no stat per file
+    CACHE.save()
+    print('jp_coco: %d of %d files written (the others already identical); cache %d hits, %d misses'
+          % (n_written, len(manifest), CACHE.hits, CACHE.misses))
     print('pacchetto generato stimato: %d byte di file su %d di riserva (%.1f%%)%s' % (
         _tot, jp_sound_effects.RESERVE, 100.0 * _tot / jp_sound_effects.RESERVE,
         '' if _tot < jp_sound_effects.RESERVE else ' -- OLTRE LA RISERVA'))
