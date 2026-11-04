@@ -22,7 +22,7 @@ const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entr
 const CATALOG_LEVEL_PREFIX = 'cat:'; // levels of the kept raids' bosses (Raid Catalog): a key space of their own in player.raid.levels
 // Version segment of the raid event card URL (/web/raid/img/v<N>/<evStageId>.png): the client caches banner images by URL, so
 // bump RAID_IMG_VERSION whenever recon/tools/make_raid_banners.py output changes (as SPECIAL_IMG_VERSION in special.js).
-const RAID_IMG_VERSION = 2; // 1: weekly event cards from the archived original banners (render8, 3 Nov); 2: the 5 weeks
+const RAID_IMG_VERSION = 3; // 3: the 62 older event raids get their original notice/wiki cards (user approved 04-11); 1: weekly event cards from the archived original banners (render8, 3 Nov); 2: the 5 weeks
 // 2018-09-03..10-01 from the official notices (no more plain cards)
 const NO_RAID = 5; // raidTimeStatus «No available Raid Boss»: a clear with no fight running (texts read, not run on the bench)
 
