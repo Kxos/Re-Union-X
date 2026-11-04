@@ -218,6 +218,50 @@ function eventFixture(rows, quests = {}, more = null) {
     if (more) more(f);
   };
 }
+// Story raid bosses (Task 11): census story rows, the 2016 story settings and rows, story stage rows naming those settings.
+// Quests 4-23 Behemoth, 24 Trickmaster (census; the 2016 table says Behemoth: a conflict), 25-34 Behemoth, 221-250 Trickmaster (230 is
+// a target raid of Trickmaster Ω), 556-561 Behemoth (outside the 2016 table), 609-613 Trickmaster, 614-615 «???», 616-621 Behemoth,
+// 622-825 Enraged Arachnid (model 5000 not served), then 826-979 no spawn; quest 835 a target raid past the last range.
+const storyRow = (id, family, tier, bosses, extra = {}) => ({ id, family, region: 'WW+JP', start: null, end: family === 'story spawn' ? '2019-01-24' : null, bosses, tier, map: null, rewards: null, ...extra });
+const storySetting = (id, bossId, rareBossId, arg, type = 3) => ({ ...setting2016(id, bossId, rareBossId, 10, 10, 20, 10, arg), rareUpType: type });
+const ITEM_MEDAL = 90023, ITEM_MATERIAL = 3;
+const storyReward = (id) => ({ raidRewardId: id, oddsUpPerLv: 50, pointUpPerLv: 0, validReward: 2, type: [3, 5, -1892354936, -1892354936], id: [ITEM_MEDAL, ITEM_MATERIAL, -1892354936, -1892354936],
+  assignSkillType: [1, 1, 1, 1], assignSkillId: [0, 0, 0, 0], assignSkillLv: [1, 1, 1, 1], num: [1, 1, -1892354936, -1892354936], odds: [100000, 5000, -1892354936, -1892354936] });
+function storyFixture(more = null) {
+  return (f) => {
+    f.census.rows.push(storyRow('S-001-003', 'tutorial / no spawn', 'quests 1-3', []), storyRow('S-004-023', 'story spawn', 'quests 4-23', ['Behemoth']),
+      storyRow('S-024-024', 'story spawn', 'quests 24-24', ['Trickmaster']), storyRow('S-025-034', 'story spawn', 'quests 25-34', ['Behemoth', 'Behemoth Ω']),
+      storyRow('S-221-250', 'story spawn', 'quests 221-250', ['Trickmaster', 'Trickmaster Ω']), storyRow('S-556-561', 'story spawn', 'quests 556-561', ['Behemoth']),
+      storyRow('S-609-613', 'story spawn', 'quests 609-613', ['Trickmaster']), storyRow('S-614-615', 'story spawn', 'quests 614-615', []),
+      storyRow('S-616-621', 'story spawn', 'quests 616-621', ['Behemoth']), storyRow('S-622-825', 'story spawn', 'quests 622-825', ['Enraged Arachnid']),
+      storyRow('S-826-979', 'story: no spawn (rule from 2019-01-24)', 'quests 826-979', []), storyRow('S-T024', 'story target raid', 'quest 24', ['Trickmaster']),
+      storyRow('S-T230', 'story target raid', 'quest 230', ['Trickmaster Ω']), storyRow('S-T835', 'story target raid', 'quest 835', ['Trickmaster']));
+    f.census.story_conflicts = [[24, 'Quest 24: Escorting Alice Pt. 2', 'Escorting Alice Pt. 2', 'Trickmaster', 'Behemoth']];
+    f.census.bosses.push({ ww: 'Behemoth', raid_model_id: 3 }, { ww: 'Behemoth Ω', raid_model_id: 4 }, { ww: 'Trickmaster Ω', raid_model_id: 8 }, { ww: 'Enraged Arachnid', raid_model_id: 5000 });
+    f.orig2016.raidEnemy.push(body2016(3, 'Behemoth', 1, [30002]), part2016(30002, 2), body2016(4, 'Behemoth Ω', 2, [40002]), part2016(40002, 2),
+      body2016(8, 'Trickmaster Ω', 2, [80002, 80003]), part2016(80002, 2), part2016(80003, 3), body2016(5000, 'Enraged Arachnid', 1, [50000002]), part2016(50000002, 2), body2016(12, 'Venomous Spider', 2, []));
+    for (const id of [3, 4, 8, 5000]) f.orig2016.raidEnemyAttack.push(attack2016(id * 100 + 1), attack2016(id * 100 + 2));
+    f.orig2016.raidSetting = [storySetting(2000, 3, 4, 10000), storySetting(2010, 3, 4, 2), storySetting(4000, 7, 8, 10000), storySetting(4010, 7, 8, 2), storySetting(50000000, 5000, 12, 1, 1)];
+    f.orig2016.raidReward = [3, 4, 7, 8, 5000].flatMap((id) => [1, 2, 3].flatMap((t) => [1, 2, 3].map((k) => storyReward(id * 10000 + t * 100 + k))));
+    for (const b of f.orig2016.raidEnemy.filter((x) => x.weakness === 1 && [3, 4, 7, 8, 5000].includes(x.raidEnemyId))) {
+      for (const [field, t] of [['rewardId', 1], ['mvpRewardId', 2], ['destroyAllRewardId', 3]]) b[field] = [1, 2, 3, 3, 0].map((k) => (k ? b.raidEnemyId * 10000 + t * 100 + k : 0));
+    }
+    // story rows: quest -> [world, raidBoss of the master row]
+    const rows = { 4: [2, 2000], 5: [2, 2010], 24: [3, 2000], 25: [3, 2000], 230: [3, 4010], 231: [3, 4000], 232: [3, 4000], 556: [7, 5015], 613: [2, 5015], 614: [2, 5015], 615: [2, 5015],
+      616: [2, 5015], 700: [4, 5015], 825: [4, 6000], 826: [4, 5015] };
+    f.master.stage = f.master.stage.filter((s) => s.id !== 500);
+    for (const [q, [worldId, raidBoss]] of Object.entries(rows)) f.master.stage.push({ stageId: 10000 + Number(q), id: Number(q), stageKind: 1, worldId, mapName: `Map ${q}`, raidBoss, name: `Q${q}`, useAp: 5 });
+    f.master.stage.push({ stageId: 1000700, id: 700, stageKind: 4, worldId: 4, mapName: 'Map 700', raidBoss: 5015, name: 'P700', useAp: 5 });
+    f.master.world.push({ worldId: 2, raidBackground: 'bg_DW1' }, { worldId: 4, raidBackground: 'bg_AG1' });
+    f.master.medal = [{ medalId: ITEM_MEDAL, rare: 3, name: 'Huey', groupId: 0 }];
+    f.master.material = [{ materialId: ITEM_MATERIAL, name: 'Mythril Stone' }];
+    Object.assign(f.models, { '0003': f.models['0007'], '0004': f.models['0007'], '0008': f.models['0007'] });
+    f.config.story = REAL_CONFIG.story;
+    if (more) more(f);
+  };
+}
+const storyOf = (out) => out.index.story;
+
 const eventRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, region: 'WW', start, end, bosses, tier: 'quest LV 25', map: 'Curious Room', rewards: '', data: { hp: 'no' }, note: '', ...extra });
 const knotsOf = (r, k) => r[k].slice(0, r.validGrowth);
 
@@ -1403,6 +1447,138 @@ const tests = {
       assert.ok(!t || /"stageId"[^}]*int\[5\]|int\[5\]/.test(t) || t === '{}', 'evStage.stageId is int[5] in the schema');
     }
   },
+  // ---- Story raid bosses (Task 11) ----
+  range_boss() {
+    const s = storyOf(build(storyFixture()));
+    assert.ok(s, 'raids.json has a story block');
+    assert.strictEqual(s.quests[24].boss, 'Trickmaster');
+    assert.strictEqual(s.quests[4].boss, 'Behemoth');
+    assert.strictEqual(s.quests[230].boss, 'Trickmaster');
+    const behemoth = s.bosses.find((b) => b.boss === 'Behemoth');
+    assert.ok(behemoth.available, behemoth.why);
+    assert.strictEqual(s.quests[4].stageId, behemoth.stages[2], 'quest 4 (world 2) fights on the boss\'s world-2 stage');
+    assert.strictEqual(s.quests[25].stageId, behemoth.stages[3]);
+    // the 2016 setting of the master row gives the Ω chance where it is the quest's boss: 2000 (1 in 10000), 2010 (1 in 2)
+    assert.deepStrictEqual([s.quests[4].every, s.quests[5].every, s.quests[25].every], [10000, 2, 10000]);
+    assert.deepStrictEqual(s.quests[4].reconstructed, []);
+  },
+  story_stage_links() {
+    // the client fights stage.raidBoss -> raidSetting.bossId (rareBossId for the Ω): every fight stage leads to served rows
+    const f = fixture(); storyFixture()(f);
+    const out = mr.buildRaid(f);
+    const s = storyOf(out);
+    assert.ok(s.bosses.filter((x) => x.available).length >= 2);
+    for (const b of s.bosses.filter((x) => x.available)) {
+      for (const [w, sid] of Object.entries(b.stages)) {
+        const st = out.stageRows.find((r) => r.stageId === sid);
+        assert.ok(st && st.stageKind === 2 && st.worldId === Number(w), `stage ${sid}`);
+        assert.ok(sid >= 980000 && sid <= 989999);
+        assert.ok(f.master.stage.some((r) => r.stageKind === 1 && r.stageId === st.stageBinId && r.worldId === Number(w)), 'stageBinId: a story row of that world (its map)');
+        const set = out.settingRows.find((r) => r.raidSettingId === st.raidBoss);
+        assert.strictEqual(set.bossId, b.enemyId);
+        const body = enemyOf(out, set.bossId);
+        assert.strictEqual(body.raidDisplayId, b.modelId);
+        for (const id of body.parts.slice(0, body.validParts)) assert.ok(enemyOf(out, id), `part ${id}`);
+        if (b.rare) assert.ok(enemyOf(out, set.rareBossId) && set.rareBossId === b.rare.enemyId && enemyOf(out, b.rare.enemyId).rare === 2);
+      }
+    }
+    const ids = new Set(out.rewardRows.map((r) => r.raidRewardId));
+    for (const body of out.enemyRows.filter((r) => r.weakness === 1)) {
+      for (const f of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) assert.ok(body[f].slice(0, body.validGrowth).every((x) => ids.has(x)), `${body.name} ${f}`);
+    }
+    // no story row of the master is rewritten: a raid Info names our fight stage, never the story row
+    assert.ok(!out.stageRows.some((r) => r.stageKind === 1));
+  },
+  stops_at_825() {
+    const s = storyOf(build(storyFixture()));
+    assert.strictEqual(s.last, 825);
+    assert.ok(Object.keys(s.quests).every((q) => Number(q) <= 825), 'no quest past 825');
+    assert.strictEqual(s.quests[826], undefined);
+    assert.strictEqual(s.quests[835], undefined, 'a target raid past the last range is an ordinary target');
+    for (const q of [1, 2, 3]) assert.strictEqual(s.quests[q], undefined, 'tutorial quests spawn nothing');
+  },
+  unknown_quest_nearest() {
+    const out = build(storyFixture());
+    const s = storyOf(out);
+    assert.strictEqual(s.quests[614].boss, 'Trickmaster', 'nearest: 613');
+    assert.strictEqual(s.quests[615].boss, 'Behemoth', 'nearest: 616');
+    assert.strictEqual(s.quests[614].nearest, 613);
+    assert.ok(s.quests[614].reconstructed.includes('storyBoss') && s.quests[615].reconstructed.includes('storyBoss'));
+    assert.ok(!s.quests[613].reconstructed.includes('storyBoss'));
+    assert.deepStrictEqual(s.unknown, [614, 615], 'listed for the Notices');
+    assert.ok(out.index.reasons.storyBoss, 'its reason');
+  },
+  conflict_rule() {
+    const s = storyOf(build(storyFixture()));
+    assert.deepStrictEqual(s.conflicts, [{ quest: 24, title: 'Quest 24: Escorting Alice Pt. 2', census: 'Trickmaster', wiki: 'Trickmaster', table: 'Behemoth' }], 'listed for the Notices');
+    const q = s.quests[24];
+    assert.strictEqual(q.boss, 'Trickmaster', 'the census choice, not the table\'s Behemoth');
+    assert.ok(q.reconstructed.includes('storyConflict'));
+    assert.strictEqual(q.stageId, s.bosses.find((b) => b.boss === 'Trickmaster').stages[3]);
+    assert.strictEqual(q.every, 10000, 'the master row names a Behemoth setting: Trickmaster\'s rule (4000) instead');
+  },
+  fixed_quest_rows() {
+    const s = storyOf(build(storyFixture()));
+    const tm = s.bosses.find((b) => b.boss === 'Trickmaster');
+    assert.deepStrictEqual(s.quests[24].fixed, { boss: 'Trickmaster', rare: false, name: 'Trickmaster', census: 'S-T024', stageId: tm.stages[3] });
+    assert.deepStrictEqual(s.quests[230].fixed, { boss: 'Trickmaster', rare: true, name: 'Trickmaster Ω', census: 'S-T230', stageId: tm.stages[3] });
+    assert.strictEqual(tm.rare.boss, 'Trickmaster Ω');
+  },
+  story_pays_items() {
+    const out = build(storyFixture());
+    const b = storyOf(out).bosses.find((x) => x.boss === 'Behemoth');
+    const body = enemyOf(out, b.enemyId);
+    assert.deepStrictEqual(knotsOf(body, 'hp'), [12000, 36000, 180000, 900000], 'the 2016 row as it stands');
+    assert.deepStrictEqual(knotsOf(body, 'luxAttack'), [270, 1080, 6480, 38880], '2016 Lux, not the raid-event Lux rule');
+    assert.strictEqual(b.upMinutes, 10);
+    assert.strictEqual(b.useAp, 10);
+    for (const f of ['rewardId', 'mvpRewardId', 'destroyAllRewardId']) {
+      for (const id of knotsOf(body, f)) {
+        const row = out.rewardRows.find((r) => r.raidRewardId === id);
+        assert.ok(row, `${f} ${id}`);
+        const types = row.type.slice(0, row.validReward);
+        assert.deepStrictEqual(types, [3, 5], 'medal and material, by level');
+        assert.ok(!types.includes(rr.CONFIG.coinType), 'no Raid Coins');
+      }
+    }
+    // a reward item the master does not hold: the boss is not emitted
+    const bad = storyOf(build(storyFixture((f) => { f.master.material = []; })));
+    assert.strictEqual(bad.bosses.find((x) => x.boss === 'Behemoth').why, 'rewards');
+  },
+  unavailable_story_boss() {
+    const out = build(storyFixture());
+    const s = storyOf(out);
+    const ea = s.bosses.find((b) => b.boss === 'Enraged Arachnid');
+    assert.strictEqual(ea.available, false);
+    assert.strictEqual(ea.why, 'graphics');
+    assert.strictEqual(s.quests[700].boss, 'Enraged Arachnid');
+    assert.strictEqual(s.quests[700].stageId, 0, 'no stage: no spawn');
+    assert.ok(!out.enemyRows.some((r) => r.name === 'Enraged Arachnid'), 'no master row');
+    assert.ok(!out.settingRows.some((r) => r.raidSettingId === ea.settingId));
+  },
+  omega_roll() {
+    const s = storyOf(build(storyFixture()));
+    // 556 (outside the 2016 table): Behemoth's rule, the setting the table gives it most often (2000 on 4 and 25, 2010 on 5; 24 is a conflict)
+    assert.strictEqual(s.quests[556].every, 10000);
+    assert.ok(s.quests[556].reconstructed.includes('storyOmega'));
+    assert.ok(!s.quests[5].reconstructed.includes('storyOmega'));
+    assert.strictEqual(s.quests[231].every, 10000, 'Trickmaster 4000 twice, 4010 once');
+    assert.strictEqual(s.quests[613].every, 10000);
+    assert.ok(s.quests[613].reconstructed.includes('storyOmega'));
+    assert.ok(s.quests[556].reconstructed.includes('background'), 'world 7 draws the fallback background');
+    assert.strictEqual(s.quests[556].stageId, s.bosses.find((b) => b.boss === 'Behemoth').stages[1]);
+    // Enraged Arachnid: rareUpType 1, no reading: no rare
+    assert.strictEqual(s.bosses.find((b) => b.boss === 'Enraged Arachnid').rare, null);
+  },
+  story_ids_append_only() {
+    const f = fixture(); storyFixture()(f);
+    const a = mr.buildRaid(f);
+    const keys = Object.keys(a.ids.entries).filter((k) => k.startsWith('story/'));
+    assert.deepStrictEqual(keys.slice(0, 3), ['story/Behemoth', 'story/Behemoth+rare', 'story/Behemoth@w1']);
+    const again = mr.buildRaid({ ...f, ids: a.ids });
+    assert.deepStrictEqual(again.ids, a.ids, 'idempotent');
+    assert.deepStrictEqual(again.index.story, a.index.story);
+  },
   real_census_week() {
     const real = realInputs();
     if (!real) return;
@@ -1418,7 +1594,8 @@ const tests = {
     assert.ok(row(b).hp.slice(0, row(b).validGrowth).every((h) => h === 150000000));
     assert.strictEqual(row(a).hp[0], 70000000000);
     assert.deepStrictEqual(out.enemyRows.filter((r) => r.raidEnemyId > b.enemyId && r.raidEnemyId <= b.enemyId + 5).map((r) => r.weakness), [2, 3]);
-    assert.ok(out.stageRows.every((s) => s.worldId === 3 && s.raidBoss));
+    // the week's raid stages (the story fight stages are built whatever onlyCensusIds says)
+    assert.ok(out.stageRows.filter((s) => out.index.entries.some((e) => e.stageId === s.stageId)).every((s) => s.worldId === 3 && s.raidBoss));
     // all rows, as Task 8 will build them: nothing throws and the 2016 bosses come out
     const every = mr.buildRaid(real);
     assert.deepStrictEqual(every.ids, seeded);
