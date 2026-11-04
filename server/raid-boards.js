@@ -162,6 +162,16 @@ function cellsOf(board, fixes = []) {
   } else {
     cells = [...(board.cells || [])].sort((a, b) => a.n - b.n).map((c) => ({ ...c, kind: c.kind || c.type }));
   }
+  // an event board often writes the amount in the reward name («100 Jewels», «Draw Ticket x 10») with no qty: read it there
+  // (user 04-11: Jewels & Mirrors paid 1 Jewel a cell instead of 100). Medals («6★ Chip») are never amounts.
+  for (const c of cells) {
+    if (c.qty || norm(c.kind) === 'medal') continue;
+    const m = /^\s*([\d,]+)\s+(?!★)(.+)$/.exec(String(c.reward)) || /^(.+?)\s*[x×]\s*([\d,]+)\s*$/.exec(String(c.reward));
+    if (!m) continue;
+    const [n, name] = /^\s*[\d,]/.test(String(c.reward)) ? [m[1], m[2]] : [m[2], m[1]];
+    c.qty = num(n);
+    if (norm(c.kind) !== 'jewel') c.reward = name.trim();
+  }
   for (const f of fixes) {
     if (slug(f.board) !== board.id && norm(f.board) !== norm(board.name)) continue;
     const c = cells.find((x) => x.n === f.n);
