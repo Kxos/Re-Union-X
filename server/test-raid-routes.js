@@ -950,6 +950,7 @@ function wiring() {
   process.env.KHUX_RAID_INDEX = path.join(dir, 'raids.json');
   process.env.KHUX_RAID_MODELS = path.join(dir, 'raid_models.json');
   process.env.KHUX_RAID_IMG = path.join(dir, 'img');
+  process.env.KHUX_RAID_NOTICES = path.join(dir, 'raid_notices.json');
   delete process.env.KHUX_REAL_NOW;
   delete process.env.KHUX_SERVER_TIME;
   const FAKE = 989999; // far from any generated row
@@ -1033,6 +1034,20 @@ function wiring() {
   assert.strictEqual(web('/web/raid/img/v1/8999-kept.png').body.toString(), 'own', 'no -kept file: the card itself');
   fs.writeFileSync(path.join(process.env.KHUX_RAID_IMG, '8999-kept.png'), 'kept');
   assert.strictEqual(web('/web/raid/img/v1/8999-kept.png').body.toString(), 'kept');
+  // original notice of a raid (Details of its banner): no file -> friendly page, 200; with the file -> the notice
+  {
+    const none = web('/web/raid/notice/8999');
+    assert.strictEqual(none.code, 200, 'no raid_notices.json: never a crash');
+    assert(/not available/i.test(none.body.toString()));
+    fs.writeFileSync(process.env.KHUX_RAID_NOTICES, JSON.stringify({ rows: { K: { noticeId: 5, how: 'census id', confidence: 'high' } },
+      notices: { 5: { title: 'A <Raid>', date: '2019-10-07', time: '07:00', category: 'EVENT', body: ['Line'] } } }));
+    const one = web('/web/raid/notice/8999?from=raid');
+    assert.strictEqual(one.code, 200);
+    assert(one.body.toString().includes('A &lt;Raid&gt;') && one.body.toString().includes('class="back"'), 'notice page');
+    assert(/not available/i.test(web('/web/raid/notice/12').body.toString()), 'unknown id');
+    fs.writeFileSync(process.env.KHUX_RAID_NOTICES, '{broken');
+    assert.strictEqual(web('/web/raid/notice/8999').code, 200, 'broken file: friendly page');
+  }
   assert.strictEqual(t.route('/web/raid/catalog'), 'raidweb');
   {
     const cat = web('/web/raid/catalog?session=1');

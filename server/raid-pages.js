@@ -243,7 +243,11 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   lux: 'Lux', moves: 'moves', hp: 'boss HP (from the tier tables)', hp_step: 'the week of an HP change', atk_curve: 'ATK below the level cap',
   attribute: 'attribute (from the boss colour)', background: 'fight background', boardAlias: 'a Raid Board reward name', boardPath: 'the order of the Raid Board cells',
   boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week',
-  boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)' };
+  boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)',
+  // the labels of the event raids (Task 10)
+  rareOdds: 'odds of the rare boss', boardGender: 'both gender boards open', weekendTimer: 'weekend time limit', questObjectives: 'quest objectives',
+  levelDrops: 'level drops', levelDropsPartial: 'level rewards (in part)', boardStandard: 'Raid Board (from a similar raid)', eventCoins: 'Raid Coin rewards',
+  eventHp: 'boss HP (scaled by date)', setting2016: 'time limit and AP (from 2016)', hpTier: 'boss HP of the tiers', boardCells: 'missing Raid Board cells' };
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 function detailPage(index, evStageId, ctx = {}) {
   const rows = calendar.catalogRows(index), row = rows.find((r) => r.evStageId === Number(evStageId));
@@ -271,6 +275,7 @@ function detailPage(index, evStageId, ctx = {}) {
   return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
     + `${st.pill}<div id="pinmsg" class="pinmsg"></div><div class="why ${st.cls}">${st.why}</div>${replacesLine(st, kept)}${button}`
+    + (ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
     + '<p class="n">The boss starts at LV 1 and gains a level at every win, up to LV 99; levels reset on the 1st of every month.</p>'
@@ -278,4 +283,56 @@ function detailPage(index, evStageId, ctx = {}) {
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }
 
-module.exports = { catalogPage, detailPage, statusOf, khuxMatch };
+// Original notice of a raid (Details of its banner in the Events tab, as the event cards of the original game): GET
+// /web/raid/notice/<evStageId>. doc = game_data/raid_notices.json (make-raid-notices.js, git-ignored SQUARE ENIX text):
+// {rows: {censusId: {noticeId, how, confidence, note?}}, notices: {id: {title, date, time, category, body: [lines]}}}.
+// The card, the notice title, its date, the original text unchanged (■ / ● / ★ lines as headings, ・ / • / * lines as list
+// lines), then a separate «On this server» box: the status of the raid here, the fake clock, the reconstructed values with
+// their reasons (index.reasons), the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid'
+// (opened from the details page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
+const NOTICE_CSS = '.nt{background:#06283e;border-radius:6px;padding:8px 12px;margin:8px 0 12px;font-size:15px;line-height:1.55;overflow-wrap:break-word}'
+  + '.nt p{margin:2px 0 6px}.nt p.sec{color:#00d4ed;font-weight:bold;margin-top:12px}.nt p.li{margin:0 0 2px 12px}'
+  + '.dt{color:#b9cfdc;font-size:14px;margin:0 0 4px}.cat{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:10px;padding:0 8px;margin-right:8px;font-size:12px;color:#fff}'
+  + '.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:16px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
+  + '.srv a,.na a{color:#9fd4ff}.srv li{margin:4px 0}';
+// the first sentence of a reason of raids.json (the rest is the builder's notes: config keys, files, commands)
+const firstSentence = (s) => { const m = /^.*?[.!?](?=\s+[A-Z(]|$)/.exec(String(s)); return m ? m[0] : String(s); };
+const noticeLine = (l) => (/^[■●★]/.test(l) ? `<p class="sec">${esc(l)}</p>` : /^[・•*＊]/.test(l) ? `<p class="li">${esc(l)}</p>` : `<p>${esc(l)}</p>`);
+function noticeMissing(row, ctx) {
+  const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
+  return PAGE_HEAD('Notice not available', CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}><h1>Notice not available</h1>`
+    + '<p class="na">The original notice of this raid is not available on this server.'
+    + (row ? ` <a href="/web/raid/raid/${row.evStageId}">See this raid in the Raid Catalog ›</a>` : '') + `</p>${back}</body></html>`;
+}
+function noticePage(index, evStageId, doc, ctx = {}) {
+  let row = null;
+  try {
+    row = calendar.catalogRows(index || { entries: [] }).find((r) => r.evStageId === Number(evStageId)) || null;
+    const hit = row && doc && doc.rows ? doc.rows[row.censusId] : null;
+    const n = hit && doc.notices ? doc.notices[hit.noticeId] : null;
+    if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
+    const st = statusOf(row, ctx);
+    const labels = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
+    const reasons = (index && index.reasons) || {};
+    const recon = labels.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources:</p><ul class="pl">${labels.map((l) => `<li><b>${esc(RECON_LABEL[l] || l)}</b>`
+      + `${reasons[l] ? `: ${esc(firstSentence(reasons[l]))}` : ''}</li>`).join('')}</ul>` : '';
+    const off = row.entries.filter((e) => !e.available);
+    const offLine = off.length ? `<p>Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')}. Its graphics or data are incomplete in the surviving game files.</p>` : '';
+    const back = ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
+    return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
+      + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
+      + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="cat">${esc(n.category)}</span>` : ''}${esc(niceDay(n.date))}${n.time ? ` ${esc(n.time)} (UTC)` : ''}</p>`
+      + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
+      + `<div class="nt">${n.body.map(noticeLine).join('')}</div>`
+      + '<div class="srv"><h2>On this server</h2>'
+      + '<p>The text above is the original notice, unchanged. This server follows your Story instead of the calendar: the dates in the notice '
+      + `are those of the original game (${esc(dateRange(row))}); the raid opens when your Story reaches that week.</p>`
+      + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}`
+      + `<ul class="ow"><li><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a></li><li><a href="/web/raid/catalog">Raid Catalog ›</a></li></ul></div>`
+      + `${back}</body></html>`;
+  } catch (e) {
+    return noticeMissing(row, ctx);
+  }
+}
+
+module.exports = { catalogPage, detailPage, noticePage, statusOf, khuxMatch };
