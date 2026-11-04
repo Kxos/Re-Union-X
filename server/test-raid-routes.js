@@ -1275,6 +1275,9 @@ function wiring() {
   const started = call(t.raid().start, { raidId, supportUserId: 0, userKeybladeId: 0 });
   assert.strictEqual(started.startRaidData.raidId, raidId);
   const money = p.money || 0, luxBefore = p.lux;
+  // raid_missions_count: the counts of every mission row before the defeat (conditions 3 and 6 must rise by 1)
+  const missionRows = t.masterRows('mission');
+  const countBefore = new Map(missionRows.map((r) => [r.id, p.missions?.[r.id]?.count || 0]));
   const cleared = call(t.raid().clear, { parts: [{ raidEnemyId: bossRow.raidEnemyId, partsId: 1, hp: 0, damage: 1000 }], getPoint: { exp: 0, money: 5, lux: 7 }, burst: 1000 });
   assert.strictEqual(cleared.raidTimeStatus, 3);
   assert.strictEqual(cleared.getLux, 7);
@@ -1286,6 +1289,20 @@ function wiring() {
     assert(counted.includes(2007) && counted.includes(1023) && counted.includes(1024), `counted: ${counted}`);
     assert(counted.some((id) => id >= 3001 && id <= 3013), `a Weekly series counts: ${counted}`);
   }
+  // raid_missions_count (Task 12): one defeat raises condition 3 (Daily, Beginner) and condition 6 (Weekly) by exactly 1,
+  // and no other condition moves
+  try {
+    const rose = (r) => (p.missions?.[r.id]?.count || 0) - countBefore.get(r.id);
+    for (const cond of [3, 6]) {
+      const rows = missionRows.filter((r) => r.conditionId === cond);
+      assert(rows.length, `condition ${cond} rows in the master`);
+      assert(rows.some((r) => rose(r) === 1), `condition ${cond} rose: ${rows.map((r) => `${r.id}+${rose(r)}`)}`);
+      assert(rows.every((r) => rose(r) === 0 || rose(r) === 1), `condition ${cond} at most +1: ${rows.map((r) => `${r.id}+${rose(r)}`)}`);
+    }
+    const others = missionRows.filter((r) => ![3, 6].includes(r.conditionId) && t.MISSION_COUNTER[r.conditionId] !== 'lux' && rose(r) !== 0);
+    assert.deepStrictEqual(others.map((r) => r.id), [], 'only the raid conditions (and Lux, from the fight) move');
+    console.log('ok raid_missions_count');
+  } catch (e) { failed++; console.error(`FAIL raid_missions_count: ${e.message}`); }
   assert.strictEqual(p.money, money + 5);
   assert.strictEqual(p.lux, luxBefore + 7);
   assert.strictEqual(cleared.userData.stageResumption.resumptionStatus, 0);
@@ -1294,6 +1311,17 @@ function wiring() {
   assert.strictEqual(shown.userData.userPoint.raidSpherePoint, coins + 360, 'Victory, MVP and All Points, 120 each, through grantItem');
   assert.strictEqual(call(t.raid().member, { raidId }).cooperators[0].damage, 1000);
   assert.strictEqual(call(t.raid().reward).userData.userPoint.raidSpherePoint, coins + 360, 'once');
+  // raid_missions_count, VIP part: every raid and Lux Weekly mission done still leaves VIP unearned, because the
+  // Union Cross Weekly rows (condition 12) cannot move yet; vip-benefit.js keeps its rule
+  try {
+    quiet(() => { t.missionCount('raid', 1000); t.missionCount('lux', 1e15); });
+    const weekly = missionRows.filter((r) => r.missionType === 3);
+    const done = (r) => (p.missions?.[r.id]?.count || 0) >= (r.targetNum?.[0] || 1);
+    assert(weekly.filter((r) => t.MISSION_COUNTER[r.conditionId] === 'raid').some(done), 'a raid Weekly series is complete');
+    assert(weekly.some((r) => r.conditionId === 12 && !done(r)), 'Union Cross Weekly rows still open');
+    assert(!(p.vip && Number.isInteger(p.vip.earnedWeek)), `VIP unearned: ${JSON.stringify(p.vip)}`);
+    console.log('ok raid_missions_count (VIP unearned until Union Cross)');
+  } catch (e) { failed++; console.error(`FAIL raid_missions_count VIP: ${e.message}`); }
   Object.assign(bossRow, original);
   fs.readFileSync = readFile;
   Date.now = realDateNow;

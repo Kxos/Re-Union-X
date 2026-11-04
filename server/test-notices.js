@@ -161,6 +161,28 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(/moves, part HP shares and rarity/.test(t) && /all their weak points/.test(t) && /Closehanded Captain\*\* keep/.test(t), 'Raid Bosses: modelli dei 15 e parti complete');
   check(!n.NOTICES.some((x) => /Raid Bosses and Union Cross, which are not available yet/.test(x.body.join(' '))), 'VIP/Special: i raid sono tornati');
   check(/4 weak points/.test(t) && /spiderlings/.test(t) && /\*\*not original\*\* here/.test(t), 'Raid Bosses: ragni con 4 parti dichiarati');
+  // Raids Part 2 Task 12: solo play, kept damage, reconstructed values, story and event raids, what is not back yet
+  check(/\*\*solo for now\*\*/.test(t) && /keeps the damage/.test(t), 'Raid Bosses: solo, il boss tiene il danno');
+  check(/8,600/.test(t) && /6,000/.test(t) && /about 80/.test(t), 'Raid Bosses: soglia di comparsa');
+  check(/3 minutes/.test(t) && /half of their HP/.test(t), 'Raid Bosses: ritorno dei punti deboli');
+  check(/ATK and DEF/.test(t) && /below the cap/.test(t) && /midpoint/.test(t) && /higher amount and of Gems/.test(t) && /Intermediate/.test(t), 'Raid Bosses: valori ricostruiti');
+  check(/2016/.test(t) && /every replay/.test(t) && /nearest quest/.test(t), 'Raid Bosses: boss della Storia');
+  check(/weekend-only/.test(t) && /1-hour windows/.test(t), 'Raid Bosses: raid evento 2016-2018');
+  check(/Japanese version/.test(t) && /given at every win/.test(t) && /AI/.test(t) && /Medal pictures/.test(t), 'Raid Bosses: JP, monete ripetibili, immagini');
+}
+{
+  // the counts come from raids.json: a fixture with one tier off and one story boss off
+  const dir = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'khux-notice-raid-'));
+  const f = require('path').join(dir, 'raids.json');
+  require('fs').writeFileSync(f, JSON.stringify({ entries: [{ boss: 'A', available: true }, { boss: 'B', available: false }, { boss: 'A', available: true }],
+    story: { last: 825, bosses: [{ boss: 'X', available: true, hp: 8000, rare: { boss: 'X Ω' } }, { boss: 'Y', available: false }], quests: { 4: { boss: 'X' }, 5: { boss: 'Y' } },
+      unknown: [614, 615], conflicts: [{ quest: 24 }] } }));
+  const facts = n.raidNoticeFacts(f);
+  check(facts && facts.tiers === 3 && facts.off === 1 && facts.bosses === 2 && facts.storyOff.join() === 'Y' && facts.storyQuests === 1 && facts.unknown === 2, `conteggi dei raid: ${JSON.stringify(facts)}`);
+  const lines = n.raidNoticeLines(facts).join(' ');
+  check(/\*\*1\*\* of the 3 raid tiers/.test(lines) && /Not restored yet/.test(lines) && /\*\*Y\*\*/.test(lines), `righe dei raid assenti: ${lines}`);
+  check(n.raidNoticeFacts(require('path').join(dir, 'missing.json')) === null && n.raidNoticeLines(null).length > 0, 'senza raids.json: righe generiche');
+  require('fs').rmSync(dir, { recursive: true, force: true });
 }
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 console.log('OK: notices');
