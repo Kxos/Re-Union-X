@@ -148,7 +148,10 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const rb = n.NOTICES.find((x) => x.title === 'Raid Bosses');
   const t = rb ? rb.body.join(' ') : '';
   check(rb && rb.tag === 'IMPORTANT', 'Raid Bosses: notizia IMPORTANT');
-  check(/15 raid bosses/.test(t) && /Jewel Princess/.test(t) && /Closehanded Captain/.test(t) && /twin or related/.test(t), 'Raid Bosses: grafiche ricostruite');
+  check(/18 raid bosses/.test(t) && /Jewel Princess/.test(t) && /Closehanded Captain/.test(t) && /twin or related/.test(t), 'Raid Bosses: grafiche ricostruite');
+  // render9 (user decision 4 Nov): Jewel Sorceress, Circus Crab, Crabby Cake, with their list banners and template moves
+  check(/Jewel Sorceress, Circus Crab\*\* and \*\*Crabby Cake/.test(t) && /list banners\*\* of 20 raid bosses/.test(t) &&
+    /The 18 bosses above/.test(t), 'Raid Bosses: Jewel Sorceress, Circus Crab, Crabby Cake ricostruiti (grafiche, banner, mosse)');
   check(/Enraged Arachnid/.test(t) && /Egg Master/.test(t) && /Trickmaster/.test(t) && /Spinneret/.test(t) && /900 of 24,000/.test(t), 'Raid Bosses: modelli e ragni');
   check(/Queen Bee, Queen Bee Ω/.test(t) && /Lion Headliner/.test(t) && /older version of their animations/.test(t), 'Raid Bosses: api e Lion Headliner');
   check(/moves, part HP shares and rarity/.test(t) && /all their weak points/.test(t) && /Closehanded Captain\*\* keep/.test(t), 'Raid Bosses: modelli dei 15 e parti complete');
