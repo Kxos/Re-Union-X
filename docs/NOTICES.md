@@ -106,9 +106,11 @@ The graphics of 18 raid bosses were incomplete in the surviving game files: **As
 
 The three spiders (**Scourge Spider, Wicked Spider, Malicious Spider**) use the version of their animations that has the **Spinneret** target, and some of their pictures are copied from the same spider or its twin.
 
+**Enraged Arachnid** now appears in the Story raids: its fight is the original 2016 one, and its encounter, escape and defeat scenes are the original Japanese ones with the English subtitle; as for the spiders, some of their pictures are copies of identical files of the same boss or of other raid bosses. Its list banner is **reconstructed** from its original Japanese boss card.
+
 **Queen Bee, Queen Bee Ω** and **Lion Headliner** use an older version of their animations from the game files, whose weak points match their surviving data (the abdomen; the two arms); some of their pictures are copied from the same boss's 2016 files.
 
-The **list banners** of 20 raid bosses (the picture in the raid list) are **reconstructed**: the worldwide originals were not found, so they are cut from the original Japanese **boss cards**. The boss cards of **Assault Dragon, Adventurer, Jewel Princess, Gear Golem** and **Closehanded Captain** are the original cards of their twin bosses. The **Raid Time!** card of each week is the original weekly raid banner of that week, from archived copies of the original notices.
+The **list banners** of 21 raid bosses (the picture in the raid list) are **reconstructed**: the worldwide originals were not found, so they are cut from the original Japanese **boss cards**. The boss cards of **Assault Dragon, Adventurer, Jewel Princess, Gear Golem** and **Closehanded Captain** are the original cards of their twin bosses. The **Raid Time!** card of each week is the original weekly raid banner of that week, from archived copies of the original notices.
 
 ### Moves and stats
 
