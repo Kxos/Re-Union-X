@@ -124,7 +124,9 @@ delete process.env.KHUX_VIP;
 const evRows = t.servedMasterRows('evStage', Date.now());
 check(evRows.length > 0 && evRows.every((r) => r.bannerUrl.startsWith(t.WEB_BASE + '/')), 'evStage.bannerUrl non assoluto');
 check(evRows.find((r) => r.eventStageId === 7000)?.detailUrl === t.WEB_BASE + '/web/special/catalog', 'evStage 7000 detailUrl');
-check(evRows.filter((r) => r.eventStageId !== 7000 && r.eventStageId !== 8000).every((r) => r.detailUrl === ''), 'detailUrl vuoti cambiati');
+const isRaidEv = (id) => id >= 8001 && id <= 8999; // raid banners: Details = the original notice (make-raid.js, ce87672)
+check(evRows.filter((r) => r.eventStageId !== 7000 && r.eventStageId !== 8000 && !isRaidEv(r.eventStageId)).every((r) => r.detailUrl === ''), 'detailUrl vuoti cambiati');
+check(evRows.filter((r) => isRaidEv(r.eventStageId)).every((r) => r.detailUrl === '' || r.detailUrl === `${t.WEB_BASE}/web/raid/notice/${r.eventStageId}`), 'evStage raid detailUrl: vuoto o la notizia, assoluto');
 // Raid Catalog banner (raids Part 2, Task 9), present once make-raid.js has run on this master
 { const rc = evRows.find((r) => r.eventStageId === 8000); check(!rc || rc.detailUrl === t.WEB_BASE + '/web/raid/catalog', 'evStage 8000 detailUrl'); }
 

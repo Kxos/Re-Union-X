@@ -241,7 +241,7 @@ function storyFixture(more = null) {
     f.orig2016.raidEnemy.push(body2016(3, 'Behemoth', 1, [30002]), part2016(30002, 2), body2016(4, 'Behemoth Ω', 2, [40002]), part2016(40002, 2),
       body2016(8, 'Trickmaster Ω', 2, [80002, 80003]), part2016(80002, 2), part2016(80003, 3), body2016(5000, 'Enraged Arachnid', 1, [50000002]), part2016(50000002, 2), body2016(12, 'Venomous Spider', 2, []));
     for (const id of [3, 4, 8, 5000]) f.orig2016.raidEnemyAttack.push(attack2016(id * 100 + 1), attack2016(id * 100 + 2));
-    f.orig2016.raidSetting = [storySetting(2000, 3, 4, 10000), storySetting(2010, 3, 4, 2), storySetting(4000, 7, 8, 10000), storySetting(4010, 7, 8, 2), storySetting(50000000, 5000, 12, 1, 1)];
+    f.orig2016.raidSetting = [storySetting(2000, 3, 4, 10000), storySetting(2010, 3, 4, 2), storySetting(4000, 7, 8, 10000), storySetting(4010, 7, 8, 2, 2), storySetting(50000000, 5000, 12, 1, 1)];
     f.orig2016.raidReward = [3, 4, 7, 8, 5000].flatMap((id) => [1, 2, 3].flatMap((t) => [1, 2, 3].map((k) => storyReward(id * 10000 + t * 100 + k))));
     for (const b of f.orig2016.raidEnemy.filter((x) => x.weakness === 1 && [3, 4, 7, 8, 5000].includes(x.raidEnemyId))) {
       for (const [field, t] of [['rewardId', 1], ['mvpRewardId', 2], ['destroyAllRewardId', 3]]) b[field] = [1, 2, 3, 3, 0].map((k) => (k ? b.raidEnemyId * 10000 + t * 100 + k : 0));
@@ -1567,6 +1567,11 @@ const tests = {
     assert.ok(s.quests[613].reconstructed.includes('storyOmega'));
     assert.ok(s.quests[556].reconstructed.includes('background'), 'world 7 draws the fallback background');
     assert.strictEqual(s.quests[556].stageId, s.bosses.find((b) => b.boss === 'Behemoth').stages[1]);
+    // review M-4: a quest whose own 2016 setting has rareUpType 2 (fixture 4010 on quest 230) carries rareType2 itself
+    assert.strictEqual(s.quests[230].every, 2);
+    assert.ok(s.quests[230].reconstructed.includes('rareType2'));
+    assert.ok(!s.quests[231].reconstructed.includes('rareType2'), 'its rule 4000 is type 3');
+    assert.ok(!s.bosses.find((b) => b.boss === 'Trickmaster').reconstructed.includes('rareType2'));
     // Enraged Arachnid: rareUpType 1, no reading: no rare
     assert.strictEqual(s.bosses.find((b) => b.boss === 'Enraged Arachnid').rare, null);
   },
