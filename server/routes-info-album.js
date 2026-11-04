@@ -35,6 +35,44 @@ function storyStopgaps() {
   const dir = process.env.KHUX_MASTER_DIR || path.join(__dirname, 'master_data');
   try { return countStopgaps(JSON.parse(fs.readFileSync(path.join(dir, 'stage.json'), 'utf8'))); } catch { return 0; }
 }
+// Raid counts for the Raid Bosses notice (raids Part 2 Task 12), read from the served raids.json (make-raid.js) so the
+// text follows the data: a boss recovered later changes the numbers at the next build. null without the file.
+function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirname, 'game_data', 'raids.json')) {
+  let r;
+  try { r = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+  const entries = Array.isArray(r.entries) ? r.entries : [];
+  const story = r.story || {};
+  const sb = Array.isArray(story.bosses) ? story.bosses : [];
+  const served = new Set(sb.filter((b) => b.available).map((b) => b.boss));
+  return {
+    tiers: entries.length, off: entries.filter((e) => !e.available).length, bosses: new Set(entries.map((e) => e.boss)).size,
+    storyLast: story.last || 0, storyOn: sb.filter((b) => b.available), storyOff: sb.filter((b) => !b.available).map((b) => b.boss),
+    storyQuests: Object.values(story.quests || {}).filter((q) => served.has(q.boss)).length,
+    unknown: (story.unknown || []).length, conflicts: (story.conflicts || []).length,
+  };
+}
+const nameList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a.join(''));
+function raidNoticeLines(f) {
+  const jp = 'The raids held only in the **Japanese version** are not here yet: they will come later in the Raid Catalog, marked JP, once enough of their data is known.';
+  if (!f) return [jp];
+  const out = [];
+  if (f.off) out.push(`**${f.off}** of the ${f.tiers} raid tiers of the worldwide game are marked **Not restored yet**: the graphics or data of their boss are incomplete in the surviving game files. The Raid Catalog lists them, and they come back as soon as their boss is recovered.`);
+  else out.push(`All **${f.tiers}** raid tiers of the worldwide game (**${f.bosses}** bosses) can be played.`);
+  if (f.storyOff.length) out.push(`The Story raid bosses **${nameList(f.storyOff)}** are not back yet: their quests do not bring a boss, and the raid gauge waits for the next quest that can.`);
+  out.push(jp);
+  return out;
+}
+// story raid bosses: names (with their rare versions), quests that bring one, last quest, unknown and disputed quests
+function raidStoryLines(f) {
+  if (!f || !f.storyOn.length) return [];
+  const names = f.storyOn.map((b) => `**${b.boss}**` + (b.rare && b.rare.boss ? ` (rare: ${b.rare.boss})` : ''));
+  const low = f.storyOn.find((b) => b.boss === 'Behemoth') || f.storyOn[0];
+  const out = [`Raid bosses appear again in the Story, from Quest 4 to **Quest ${f.storyLast}** (${f.storyQuests} quests): ${nameList(names)}. After Quest ${f.storyLast} raid bosses appear only in raid events, as in the original game.`,
+    `Their HP, moves and rewards are the original **2016** ones (for example ${low.boss} has ${Number(low.hp || 0).toLocaleString('en-US')} HP at LV 1), so they are weak for late quests: no later values survive. They give Medals and Mythril materials, not Raid Coins.`];
+  if (f.unknown) out.push(`The sources do not name the raid boss of **${f.unknown} Story Quests** (between Quest 614 and Quest ${f.storyLast}): each takes the boss of the nearest quest with a known boss (**reconstructed**).` + (f.conflicts ? ` For ${f.conflicts} quests the sources disagree: the community wiki's boss is used.` : ''));
+  return out;
+}
+
 const stopgapParagraph = (n) => (n ? [`${n} mission objectives show their original text, but they are checked as "Complete without having to continue", because the way the original game checked them is unknown.`] : []);
 
 // Finestre stagionali dello Shop: generate dalla tabella SEASONS, cosi' la notizia non puo' divergere
@@ -112,9 +150,24 @@ const NOTICES = [
   // boss raid ricostruiti (I-221, Raids Part 2: originals.tsv 49d/49e, raid_config.json modelTemplates/bossAttributes/modelParts,
   // docs/notes/raid.md), decisione dell'utente del 2-11: tutti i boss serviti, i 15 ricostruiti approvati a vista;
   // 0017, 1012, 1016 (49h/49i, render9) approvati il 4-11; 5000 Enraged Arachnid (49j/49k, render10, banner 48c) il 4-11
-  { date: '11/02', tag: 'IMPORTANT', title: 'Raid Bosses',
+  // Task 12 (4-11): solo play, values, story and 2016-2018 event raids, counts from raids.json (raidNoticeFacts)
+  { date: '11/04', tag: 'IMPORTANT', title: 'Raid Bosses',
     body: ['The weekly **Raid Bosses** follow your Story like the Shop: each week shows the raids of the matching week of the original game. Their graphics, moves and strength come from the original game files wherever they survive; the parts below are **reconstructed**.',
       'Each Raid Boss has its own level: it rises by 1 for every defeat, up to **LV 99**, and all levels **reset to LV 1 on the 1st of every month** (00:00 Pacific time), as in the original game. A boss that comes back in a later week starts again at LV 1; a boss already on the field keeps its level until it is defeated or escapes.',
+      '## Playing alone',
+      'Raids are **solo for now**: no other player joins your fight, and nobody is simulated. Every raid can be won alone with its original HP, over several attempts.',
+      'A boss you do not defeat **keeps the damage** you dealt: it stays on the field with the HP it has left until you defeat it or its timer runs out and it escapes. The first fight costs 0 AP; each further attempt costs the AP shown.',
+      'Weak points you break stay down for **3 minutes** from the end of your latest fight, then come back with **half of their HP** (**reconstructed**: the sources only say weak points came back with part of their HP).',
+      'Each Raid Boss you defeat counts for the Daily, Weekly and Beginner raid missions. VIP still cannot be earned, because the Weekly Missions also include Union Cross (see the VIP Draws notice).',
+      'Defeating enemies in the Story Quests that have a raid boss (replays too) and in raid event quests fills a hidden raid gauge. At **8,600** points a Raid Boss appears; in Bonus Time **6,000** are enough. Both numbers are **reconstructed** from values in the game data and from the original rule of about 80 defeated enemies per boss. Proud, Special and other event quests do not fill the gauge, and no new boss appears while one is on the field.',
+      ...raidStoryLines(raidNoticeFacts()),
+      'Some Story Quests always bring their boss when cleared, and here they do so **at every replay** (**reconstructed**: the sources do not say whether a replay brought it again).',
+      'The chance of meeting a rare (Ω) boss is read from the 2016 data up to Quest 555; from Quest 556 each boss keeps its most common 2016 chance (**reconstructed**). In two worlds whose raid background is incomplete, the fight shows the background of Daybreak Town.',
+      '## Event raids of 2016-2018',
+      'The older raid events are back too: one-off, weekend-only, monthly, daily and daily showdown raids. A weekend-only raid opens only on a real Saturday or Sunday (Pacific time), and a daily showdown shows the boss of the real weekday.',
+      'Daily raids stay open all day (**not original**: they opened in two 1-hour windows). Where an event had a male and a female Raid Board, both are open (**not original**: the original showed only the one of your avatar).',
+      'Where no original value survives, the HP of these raids is the boss\'s 2016 HP scaled by date up to the few readings of 2018, and the three tiers of 2018 (Beginner, Intermediate, Advanced) are inferred from one reading each (**reconstructed**). Timers and AP of further attempts come from the same boss\'s 2016 rows, or from the weekend rule (3 hours, 1 hour from May 2018).',
+      'Level rewards named in an event\'s notice reach your Presents when you defeat its boss at that level; rewards the notice does not detail are not given. In Bonus Time event bosses rise by 1 level per defeat, not by 5 as some events stated.',
       '## Graphics',
       'The graphics of 18 raid bosses were incomplete in the surviving game files: **Assault Dragon, Adventurer, Jewel Princess, Gear Golem, Heartless Tsum, Loudmouth Parade, Greedy Grouch, Mysterious Sir, Merry-Go-Rowdy, Holiday Sleigh, Demon Tide, Cranky Cake, Mischief Bouquet, Red-Nosed Chariot, Closehanded Captain, Jewel Sorceress, Circus Crab** and **Crabby Cake**. Their missing pieces are **reconstructed** from the game\'s own files: pieces of their twin or related bosses and enemies, and pieces of the same size chosen by rule. Every one of them was checked by eye against the original look.',
       'The three spiders (**Scourge Spider, Wicked Spider, Malicious Spider**) use the version of their animations that has the **Spinneret** target, and some of their pictures are copied from the same spider or its twin.',
@@ -126,20 +179,26 @@ const NOTICES = [
       'The 18 bosses above have no surviving data either: their **moves, part HP shares and rarity** come from a 2016 boss with the same number of weak points (for example Trident Tail, Behemoth, Savage Spider, Fortress Crab; Jewel Sorceress uses Savage Spider, Circus Crab Fortress Crab and Crabby Cake Behemoth), so they are **reconstructed**. Each boss keeps its own attribute where the wiki gives it; its parts take the same attribute, not the separate attributes some wiki pages list for them.',
       '**Assault Dragon, Adventurer, Jewel Princess, Gear Golem** and **Closehanded Captain** keep **all their weak points** in every week (**not original**): in some later weekly raids they had fewer (for example Assault Dragon only its Head), but every surviving version of their animations has the full set, and the game cannot start the fight if a weak point has no HP bar.',
       'The spiders have **4 weak points**: the **Spinneret** and the three **spiderlings**, as from 2016 to July 2018. In the weekly raids from September 2018 only the Spinneret was a target (**not original** here): the only surviving spider animations that have the Spinneret also mark the spiderlings as weak points, and the game cannot start the fight if a weak point has no HP bar. The HP shares are the 2016 ones (Spinneret 900 of 24,000, each spiderling a quarter).',
-      'Raid **ATK and DEF** after 2016 are not known and are **reconstructed**; HP comes from recordings of the original game where one exists, otherwise from the tier tables.',
+      'Raid **ATK and DEF** after 2016 are not known and are **reconstructed**: ATK follows the story enemies of the same period, DEF is 1,000 (50,000 on Epic, from a player report).',
+      'From August 2019 HP depends on tier and period and comes from recordings of the original game; a boss, tier or week that was not recorded takes the value of its tier and period, and a change of HP is placed at the midpoint between two recordings (**reconstructed**). Before August 2019 HP grew with level up to a cap: the curve below the cap is **reconstructed**. The share of HP of each weak point is **reconstructed** where no screenshot shows it.',
+      'Weekly raid timers are about **20 minutes**, from timers seen in videos (**reconstructed**). Raid Coin amounts come from the community wiki tables; the chance of the higher amount and of Gems has no source (**reconstructed**).',
       // Raid Boards: card pictures and names (3 Nov 2026, docs/notes/bacheche.md «Raid Boards»)
       '## Raid Boards',
       'Each **Raid Board** has its original name and card picture, so the boards of a week can be told apart by their picture, as in the original game (two boards of a week can share a name, such as **Enhancement Board**). Raid Coins have their original coin.',
       'The **week’s date is added to each Raid Board title** (**not original**, an addition of this server), for example **Enhancement Board 10/14/19**, so the boards of a kept raid can be told apart from those of the current week.',
       'The card pictures of 4 Raid Boards are **cut from screenshots** of the original game, because the picture files were not found: the **Enhancement Board** of March 11-17, 2019 and the **Radiant Rewards Boards** of July 8-14, 2019, October 14-20, 2019 and January 6-12, 2020.',
-      'The positions of the cells on the Raid Boards are **not original**: they follow one path from START in the order of the original list of rewards.',
+      'Some Raid Board card pictures were recomposed from original Medal pictures and screenshots of the original game; a few pieces were upscaled with AI where no larger original exists.',
+      'The positions of the cells on the Raid Boards are **not original**: they follow one path from START in the order of the original list of rewards. A few cells whose reward has no item here are left off.',
+      '**Raid Coins** are given at every win, also when you play a raid again, and each raid keeps its own Raid Boards, which you can always complete; each board reward is given once.',
       // Raid Catalog (raids Part 2, Task 9; user 02-11: catalogue bosses have a level of their own)
       '## Raid Catalog',
       'The **Raid Catalog** is **not original**: it is an addition of this server, in the style of the Special Catalog. Its banner in the Events tab opens the **Training Grounds** when tapped, and its **Details** button lists every raid week of the game with its bosses, tiers and Raid Boards.',
       'One **past raid** at a time can be **kept** in the Events tab, beside the raids of the week. Raids later than your Story stay locked (**Unlocks at Story Quest N**), and raids whose boss cannot be served yet are marked **Not restored yet** and cannot be kept.',
       'The catalogue **Filters** (**not original**) find raids by boss, board or reward name, by type, tier and state, and by **Progress**: **Completed** shows the raids whose objectives you have all completed; **Raid Boards** shows the raids whose Raid Boards are all unlocked, or those with cells still to unlock.',
       'A kept raid follows the rules of its own week (AP, Bonus Time). Its boss has a **level of its own**, starting at **LV 1**: playing it never changes the level of the boss of the week, and the other way round. Its **Raid Boards** are the same as in its week, so a board reward is never given twice; **Raid Coins** are given at every win, as for the raid of the week.',
-      'Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.'] },
+      'Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.',
+      '## Raids not here yet',
+      ...raidNoticeLines(raidNoticeFacts())] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
   { date: '10/27', tag: 'INFORMATION', title: 'Support Medal Cost',
     body: ['The support Medals (EXP Medals such as Huey, Dewey, Louie and Scrooge, Moogle Medals, Boost Medals such as Chip, Dale and Magic Mirror, Cid, and the Evolve Medals such as Merlin, Flora, Fantasia Mickey and the Blue Fairy) now show **cost 999**, like the Trait Medals.',
@@ -472,4 +531,4 @@ function albumData(owned, medalRows, maxGuilt) {
   };
 }
 
-module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData };
+module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines };
