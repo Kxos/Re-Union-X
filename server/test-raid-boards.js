@@ -62,6 +62,13 @@ const check = (body) => call(t.respondSphereCheck, body);
 const medals = () => (p.medals || []).length;
 
 const tests = {
+  amount_in_reward_name() {
+    // user 04-11: «100 Jewels» cells of the event boards paid 1 Jewel; the amount in the name is the quantity, medals are not amounts
+    const cells = rb.cellsOf({ id: 'b', name: 'Jewels & Mirrors', cells: [
+      { n: 1, type: 'jewel', reward: '100 Jewels', cost: 5 }, { n: 2, type: 'medal', reward: '6★ Chip', cost: 20 },
+      { n: 3, type: 'material', reward: 'Draw Ticket x 10', cost: 50 }, { n: 4, type: 'jewel', reward: 'Jewels', qty: 50, cost: 5 }] });
+    assert.deepStrictEqual(cells.map((c) => [c.reward, c.qty || 1]), [['100 Jewels', 100], ['6★ Chip', 1], ['Draw Ticket', 10], ['Jewels', 50]]);
+  },
   boosted_cell_resolves() {
     // review of 04-11: «6★ Trickmaster (Boosted)» was left off the boards although the boosted rows exist: the resolver skipped them.
     // The notices give +1,000 base Strength only, so the STR+DEF row of the banners (id 2xxxxxx) must NOT be taken for it.
