@@ -61,27 +61,127 @@ const tests = {
     const n = Object.keys(doc.rows).length;
     console.log(`  (real: ${n} census rows with a notice, ${doc.unmatched.length} without)`);
   },
-  notice_page_escapes() {
+  no_player_rankings() {
+    // a ▽…△CLOSE△ ranking block and a bare ranking table (fixture names, not originals) are dropped by the generator
+    const body = ['● Dragon Battle Event!', 'Here are some of the top players!', '▽Top 3 Players▽', 'User IDUser NameParty Name', '5101482FixtureAFixture Party',
+      '190560FixtureB✨Party B✨', '△CLOSE△', '★ Defeat the dragon!', '▽ Ursus (50 Fastest Players)▽', '865 players completed the challenge!', 'Player ID Player NameParty Name',
+      '4356590FixtureCParty C', '△CLOSE△', '▽Anguis▽', 'User IDUser NameParty Name', '7377FixtureDParty D', '△CLOSE△', '△PAGE TOP',
+      'Here are the top 50 players!', 'User IDUser NameParty Name', '349539FixtureE Party E', '5112FixtureF13Party F', '★ Next event!', 'Last line.',
+      'Follow us on Twitter for the latest news! @fixture', 'Top of Page'];
+    const s = mn.scrub(body);
+    assert.strictEqual(s.removed, 3, 'three ranking regions (two blocks in a row count once)');
+    assert.deepStrictEqual(s.body, ['● Dragon Battle Event!', 'Here are some of the top players!', mn.OMIT_LINE, '★ Defeat the dragon!', mn.OMIT_LINE,
+      'Here are the top 50 players!', mn.OMIT_LINE, '★ Next event!', 'Last line.']);
+    // build() writes the scrubbed body; the page scrubs again (an older file)
+    const census = { rows: [censusRow('WW-E9-1', '2019-10-07', '2019-10-13', ['Trickmaster'], { family: 'one-off event' })] };
+    const doc = mn.build({ census, noticeText: { 9: noticeText('Raid!', '10/07/2019', body.join('\n')) } });
+    assert.ok(!/Fixture[A-F]/.test(JSON.stringify(doc.notices)), 'no player names in the generated file');
+    assert.deepStrictEqual(doc.scrubbed, [9]);
+    const raw = { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } };
+    const html = pages.noticePage(index(), 8100, raw, ctx());
+    assert.ok(!/Fixture[A-F]|User ?ID|Follow us on Twitter|PAGE TOP|Top of Page/.test(html), 'no ranking or boilerplate on the page');
+    assert.ok(html.includes(mn.OMIT_LINE));
+    // the real generated file, when present: no ranking table header and no «<user id><name>» row left
+    if (fs.existsSync(mn.OUT)) {
+      const real = JSON.parse(fs.readFileSync(mn.OUT, 'utf8'));
+      const bad = Object.entries(real.notices).flatMap(([id, n]) => (n ? n.body : []).filter((l) => mn.RANK_HEAD.test(l) || mn.looksLikeIdRow(l)).map(() => id));
+      // ids only in the message: a failure must not print the names it found
+      assert.deepStrictEqual([...new Set(bad)], [], `ranking rows left in raid_notices.json (${bad.length} lines)`);      console.log(`  (real: ${(real.scrubbed || []).length} notices had a player ranking removed)`);
+    }
+  },
+  sections_parsed() {
+    const body = ['[Updated May 21]', 'Intro line.', '● Dragon Battle Event!', '★ Defeat the dragon!', '■ Event Details', 'Plain text.', '・First', '・Second', '* A note.',
+      '▽More info▽', 'Hidden text.', '△CLOSE△', '▼Sub heading', 'Text under it.'];
+    const p = pages.parseNotice(body);
+    assert.deepStrictEqual(p.sections.map((s) => s.head), [null, 'Dragon Battle Event!']);
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
+    assert.ok(/<h2[^>]*>Dragon Battle Event!<\/h2>/.test(html), '● heading as h2, marker dropped');
+    assert.ok(/<h3[^>]*>Event Details<\/h3>/.test(html), '■ heading as h3');
+    assert.ok(/class="tg"[^>]*>Defeat the dragon!</.test(html), '★ line as the tagline');
+    assert.ok(/<ul class="nl"><li>First<\/li><li>Second<\/li><\/ul>/.test(html), '・ lines as one list');
+    assert.ok(/<p class="nb">\* A note\.<\/p>/.test(html), '* notes kept with their asterisk');
+    assert.ok(/<details class="fold"><summary>More info<\/summary>[\s\S]*Hidden text\.[\s\S]*<\/details>/.test(html), '▽…△CLOSE△ as a collapsed block');
+    assert.ok(!/CLOSE/.test(html));
+    assert.ok(/<h4[^>]*>Sub heading<\/h4>/.test(html), '▼ heading as h4');
+    assert.ok(/class="upd"[^>]*>\[Updated May 21\]</.test(html), '[Updated …] line marked');
+    for (const l of ['Intro line.', 'Plain text.', 'Text under it.']) assert.ok(html.includes(`<p>${l}</p>`), l);
+  },
+  reward_table() {
+    const body = ['● Weekly Raid Event', 'Accomplished Players: Over 1,500 Players', 'Draw Ticket x 10', 'Power Gem x 30', '・Sun Gem x 5', 'Quest Key×5', 'Huey 6★ x 1, Dewey 6★ x 1,'];
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
+    const t = /<table class="rw">([\s\S]*?)<\/table>/.exec(html);
+    assert.ok(t, 'a reward table');
+    assert.ok(t[1].includes('<th>Item</th><th>Quantity</th>'));
+    for (const [n, q] of [['Draw Ticket', '10'], ['Power Gem', '30'], ['Sun Gem', '5'], ['Quest Key', '5']]) assert.ok(t[1].includes(`<tr><td>${n}</td><td class="q">× ${q}</td></tr>`), n);
+    assert.ok(html.includes('<p>Accomplished Players: Over 1,500 Players</p>') && html.includes('<p>Huey 6★ x 1, Dewey 6★ x 1,</p>'), 'other lines unchanged');
+  },
+  period_table() {
+    const body = ['● Weekly Raid Event', '■ Event Period', 'May. 11, 2020 12:00 p.m. to May. 17, 2020 11:59 p.m. (PT)', 'May. 11, 2020 19:00 to May. 18, 2020 6:59 (UTC)',
+      '■ Raid Boss Bonus Time', 'Pacific Time', 'UTC', '2:00 a.m. - 2:59 a.m.', '8:00 a.m. - 8:59 a.m.', '9:00 - 9:59', '15:00 - 15:59', 'After.'];
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
+    assert.ok(html.includes('<table class="kv pd"><tr><th>Pacific Time</th><td>May. 11, 2020 12:00 p.m. to May. 17, 2020 11:59 p.m.</td></tr><tr><th>UTC</th><td>May. 11, 2020 19:00 to May. 18, 2020 6:59</td></tr></table>'), 'PT / UTC period');
+    assert.ok(html.includes('<table class="bt"><tr><th>Pacific Time</th><th>UTC</th></tr><tr><td>2:00 a.m. - 2:59 a.m.</td><td>9:00 - 9:59</td></tr><tr><td>8:00 a.m. - 8:59 a.m.</td><td>15:00 - 15:59</td></tr></table>'), 'bonus hours paired');
+    assert.ok(html.includes('<p>After.</p>'));
+    // the 2016-2018 form «2:00 a.m. to 3:00 a.m.», with the daylight-saving caption and «→»
+    const old = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07',
+      body: ['Pacific Time', 'UTC', '(Before → After)', '2:00 a.m. to 3:00 a.m.', '10:00 to 11:00　→　9:00 to 10:00'] } } }, ctx());
+    assert.ok(old.includes('<p class="nb">(Before → After)</p><table class="bt">') && old.includes('<tr><td>2:00 a.m. to 3:00 a.m.</td><td>10:00 to 11:00　→　9:00 to 10:00</td></tr>'));
+  },
+  multi_event_raid_first() {
+    const body = ['● Dragon Battle Event!', 'Dragon text.', '● Weekly Raid Event', '★ Fight the Raid Boss!', 'Raid text.', '● Union Cross', 'Cross text.'];
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
+    const at = (s) => html.indexOf(s);
+    assert.ok(at('Raid text.') > 0 && at('Raid text.') < at('Dragon text.') && at('Dragon text.') < at('Cross text.'), 'the raid first, the others in their order');
+    assert.ok(!/<details[^>]*>\s*<summary>[^<]*Weekly Raid Event/.test(html), 'the raid section is open');
+    assert.ok(/<details class="oth"><summary>Other news in this notice: Dragon Battle Event!<\/summary>/.test(html));
+    assert.ok(/<details class="oth"><summary>Other news in this notice: Union Cross<\/summary>/.test(html));
+    // the boss named in a heading also marks the raid section; one section only: no folding
+    const boss = pages.parseNotice(['● News', 'a', '● Trickmaster appears!', 'b'], ['Trickmaster']);
+    assert.deepStrictEqual(boss.sections.map((s) => s.raid), [false, true]);
+    // «● Raid Boss Bonus Time» (a sub-heading) and «● 2:00 p.m. - …» hour lines do not open an event: nothing folded
+    const sub = pages.parseNotice(['●Get Avatar Accessories!', 'a', '● Raid Boss Bonus Time', '●  2:00 a.m. - 2:59 a.m. (PT) / 9:00 - 9:59 (UTC)']);
+    assert.deepStrictEqual(sub.sections.map((s) => s.head), ['Get Avatar Accessories!']);
+    const subHtml = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07',
+      body: ['●Get Avatar Accessories!', 'a', '● Raid Boss Bonus Time', '●  2:00 a.m. - 2:59 a.m. (PT) / 9:00 - 9:59 (UTC)'] } } }, ctx());
+    assert.ok(!/class="oth"/.test(subHtml) && subHtml.includes('<h3>Raid Boss Bonus Time</h3>') && subHtml.includes('<li>2:00 a.m. - 2:59 a.m. (PT) / 9:00 - 9:59 (UTC)</li>'));
+    // no heading names it: the event whose text speaks of raids most
+    const text = pages.parseNotice(['● News', 'a raid line', '● May Campaign!', 'Raid event!', '■ Raid Boss Bonus Time', '● Other']);
+    assert.deepStrictEqual(text.sections.map((s) => s.raid), [false, true, false]);
+    const one = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body: ['★ Monthly Raid Event!', 'x'] } } }, ctx());
+    assert.ok(!/class="oth"/.test(one));
+    // the «On this server» box last, with the player-facing labels, not the builder notes
+    assert.ok(at('On this server') > at('Cross text.'));
+    assert.ok(html.includes('ATK') && !html.includes('No ATK of a raid is known'), 'labels, not the reasons of raids.json');
+  },
+  escapes() {
     const doc = { rows: { 'WW-W-2019-10-07': { noticeId: 9, how: 'census catalogue', confidence: 'high' } },
-      notices: { 9: { title: 'Raid <script>alert(1)</script>', date: '2019-10-07', time: '07:00', category: 'EVENT', body: ['■ Period & "time"', '・<img src=x onerror=alert(2)>', 'Plain line'] } } };
-    const ix = index();
-    ix.reasons.atk = 'Ours <b>bold</b>';
-    const html = pages.noticePage(ix, 8100, doc, ctx());
-    assert.ok(!/<script>alert|<img src=x|<b>bold/.test(html), 'nothing from the notice or the reasons is markup');
-    assert.ok(html.includes('Raid &lt;script&gt;alert(1)&lt;/script&gt;') && html.includes('■ Period &amp; &quot;time&quot;') && html.includes('Ours &lt;b&gt;bold&lt;/b&gt;'));
+      notices: { 9: { title: 'Raid <script>alert(1)</script>', date: '2019-10-07', time: '07:00', category: 'EVENT',
+        body: ['■ Period & "time"', '・<img src=x onerror=alert(2)>', 'Plain <b>line</b>', '<i>Gem</i> x 3', '▽<u>t</u>▽', 'x', '△CLOSE△', '● <s>Raid</s>'] } } };
+    const html = pages.noticePage(index(), 8100, doc, ctx());
+    assert.ok(!/<script>alert|<img src=x|<b>line|<i>Gem|<u>t|<s>Raid/.test(html), 'nothing from the notice is markup');
+    assert.ok(html.includes('Raid &lt;script&gt;alert(1)&lt;/script&gt;') && html.includes('Period &amp; &quot;time&quot;') && html.includes('&lt;i&gt;Gem&lt;/i&gt;'));
     assert.ok(html.includes('/web/raid/img/v2/8100.png'), 'event card at the top');
     assert.ok(/On this server/.test(html) && html.includes('/web/raid/raid/8100'), 'our box with a link to the raid');
-    assert.ok(/Oct 7, 2019/.test(html) || /2019/.test(html), 'original date');
-    assert.ok(/class="li"/.test(html) && /class="sec"/.test(html), 'the ■ headings and ・ lists are styled');
+    assert.ok(html.includes('Oct 7, 2019'), 'original date');
     // from the raid details page: BACK bar
-    assert.ok(pages.noticePage(ix, 8100, doc, ctx({ from: 'raid' })).includes('class="back"'));
+    assert.ok(pages.noticePage(index(), 8100, doc, ctx({ from: 'raid' })).includes('class="back"'));
+  },
+  real_pages_render() {
+    // every census row with a notice renders a full page (no fallback), when the generated file and the index exist
+    const ixFile = path.join(__dirname, 'game_data', 'raids.json');
+    if (!fs.existsSync(mn.OUT) || !fs.existsSync(ixFile)) { console.log('  (skipped: no generated files)'); return; }
+    const real = JSON.parse(fs.readFileSync(mn.OUT, 'utf8')), ix = JSON.parse(fs.readFileSync(ixFile, 'utf8'));
+    const ids = [...new Set(ix.entries.filter((e) => real.rows[e.censusId]).map((e) => e.evStageId))];
+    const bad = ids.filter((id) => /Notice not available/.test(pages.noticePage(ix, id, real, ctx())));
+    assert.deepStrictEqual(bad, []);
+    console.log(`  (real: ${ids.length} notice pages render)`);
   },
   details_page_links_notice() {
     const html = pages.detailPage(index(), 8100, ctx({ hasNotice: (id) => id === 'WW-W-2019-10-07' }));
     assert.ok(html.includes('/web/raid/notice/8100?from=raid'));
     assert.ok(!pages.detailPage(index(), 8101, ctx({ hasNotice: (id) => id === 'WW-W-2019-10-07' })).includes('/web/raid/notice/'), 'no notice: no link');
   },
-  missing_notice_page() {
+  missing_notice() {
     for (const [doc, id] of [[null, 8100], [{ rows: {}, notices: {} }, 8100], [{ rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: {} }, 8100], [{ rows: {}, notices: {} }, 1234], [undefined, 'x']]) {
       const html = pages.noticePage(index(), id, doc, ctx());
       assert.ok(typeof html === 'string' && /notice (is )?not available/i.test(html), `friendly page for ${id}`);
