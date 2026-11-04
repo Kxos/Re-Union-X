@@ -1,7 +1,7 @@
 """Originali al posto delle nostre ricostruzioni (I-170, audit del 19-10: tmp\\gen_audit\\RESULT.md).
 
     python -I recon/tools/import_originals.py <elenco.tsv> <bundle2016/files> <jp_final_4.3.1> <uscita>
-        [--served names_v4.tsv[,names_addnl.tsv]] [--i440 cartella] [--report f.json]
+        [--served names_v4.tsv[,names_addnl.tsv]] [--i440 cartella] [--report f.json] [--skip-prefix prefisso]...
 
 Gira in build-resources.ps1 DOPO i generatori (make_layouts, make_textures, make_quest_thumbs...): i file scritti
 qui sostituiscono i nostri nel pacchetto generato. Elenco (recon/tools/originals.tsv), colonne separate da TAB:
@@ -24,8 +24,14 @@ saltano (gli originali riempiono i buchi, non cambiano cio' che il client WW ha 
 scrive sempre (scelta esplicita).
 Ogni riga deve trovare almeno un file, altrimenti errore (un originale che sparisce non deve passare in silenzio).
 Le texture JP sono PNG veri: btf_fix.py (dopo, in build-resources) le porta in BTF premoltiplicato.
+
+--skip-prefix <prefisso> (ripetibile): le destinazioni che cominciano cosi' non si copiano (le righe si risolvono lo stesso,
+quindi un originale che sparisce da' ancora errore). Lo usa build-resources.ps1 -Quick per i modelli dei boss raid
+(lwf/character/raid/, lwf/raid/demo/) quando la versione installata li ha nel pacchetto statico raid_gen: lo script li
+toglierebbe dal pacchetto generato subito dopo, e copiarli (37 mila file, ~70% degli originali) costava ~5 minuti.
 """
 import fnmatch
+import functools
 import json
 import os
 import re
@@ -35,26 +41,32 @@ import sys
 REV = re.compile(r'^(?P<stem>.+?)\.(?P<rev>\d{8})(?P<ext>\.[^.]+)$')
 
 
+@functools.lru_cache(maxsize=None)
 def jp_listing(folder):
-    """{nome senza revisione: percorso della revisione piu' alta} di una cartella JP"""
+    """{nome senza revisione: percorso della revisione piu' alta} di una cartella JP.
+    In cache per cartella: le sorgenti sono di sola lettura e ~15 mila righe rileggevano le stesse cartelle (migliaia di
+    file, un stat ciascuno, su HDD): 8 minuti; scandir non fa stat in piu'."""
     best = {}
     if not os.path.isdir(folder):
         return {}
-    for f in os.listdir(folder):
-        p = os.path.join(folder, f)
-        if not os.path.isfile(p):
-            continue
-        m = REV.match(f)
-        name, rev = (m.group('stem') + m.group('ext'), int(m.group('rev'))) if m else (f, -1)
-        if name not in best or rev > best[name][0]:
-            best[name] = (rev, p)
+    with os.scandir(folder) as it:
+        for e in it:
+            if not e.is_file():
+                continue
+            f = e.name
+            m = REV.match(f)
+            name, rev = (m.group('stem') + m.group('ext'), int(m.group('rev'))) if m else (f, -1)
+            if name not in best or rev > best[name][0]:
+                best[name] = (rev, e.path)
     return {k: v[1] for k, v in best.items()}
 
 
+@functools.lru_cache(maxsize=None)
 def plain_listing(folder):
     if not os.path.isdir(folder):
         return {}
-    return {f: os.path.join(folder, f) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))}
+    with os.scandir(folder) as it:
+        return {e.name: e.path for e in it if e.is_file()}
 
 
 def resolve(src, roots):
@@ -94,7 +106,7 @@ def served_names(paths):
     return names
 
 
-def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None, loc=None):
+def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None, loc=None, skip_prefixes=()):
     roots = {'b16': (b16, 'b16'), 'jp': (jp, 'jp'), 'i440': (i440 or '', 'i440'), 'jp501': (jp501 or '', 'jp501'),
              'loc': (loc or '', 'loc')}
     report = []
@@ -110,15 +122,20 @@ def run(rows, b16, jp, out, served=frozenset(), i440=None, jp501=None, loc=None)
         dest_dir = r['dest'] if r['dest'].endswith('/') else os.path.dirname(r['dest'])
         single = not r['dest'].endswith('/') and not any(c in r['dest'] for c in '*?[')
         skipped = 0
+        skipped_prefix = 0
         for name, path in hits:
             rel = r['dest'] if single else (dest_dir.rstrip('/') + '/' + name)
             if not single and rel in served:
                 skipped += 1
                 continue
+            if skip_prefixes and rel.startswith(tuple(skip_prefixes)):
+                skipped_prefix += 1
+                continue
             target = os.path.join(out, rel)
             os.makedirs(os.path.dirname(target), exist_ok=True)
             shutil.copyfile(path, target)
-        report.append({'dest': r['dest'], 'source': used, 'files': len(hits) - skipped, 'servedWW': skipped})
+        report.append({'dest': r['dest'], 'source': used, 'files': len(hits) - skipped - skipped_prefix, 'servedWW': skipped,
+                       'skippedPrefix': skipped_prefix})
     return report
 
 
@@ -129,11 +146,13 @@ def main(argv):
     i440 = argv[argv.index('--i440') + 1] if '--i440' in argv else None
     jp501 = argv[argv.index('--jp501') + 1] if '--jp501' in argv else None
     loc = argv[argv.index('--loc') + 1] if '--loc' in argv else None
-    report = run(rows, b16, jp, out, served, i440, jp501, loc)
+    skip = [argv[i + 1] for i, a in enumerate(argv) if a == '--skip-prefix']
+    report = run(rows, b16, jp, out, served, i440, jp501, loc, skip)
     if '--report' in argv:
         json.dump(report, open(argv[argv.index('--report') + 1], 'w', encoding='utf8'), indent=1)
-    print('originali: %d righe, %d file (%s)' % (len(report), sum(r['files'] for r in report),
-          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440', 'jp501', 'loc'))))
+    print('originali: %d righe, %d file (%s)%s' % (len(report), sum(r['files'] for r in report),
+          ', '.join('%s %d' % (k, sum(r['files'] for r in report if r['source'] == k)) for k in ('b16', 'jp', 'i440', 'jp501', 'loc')),
+          ', %d saltati (--skip-prefix)' % sum(r['skippedPrefix'] for r in report) if skip else ''))
 
 
 if __name__ == '__main__':

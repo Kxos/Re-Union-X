@@ -43,6 +43,7 @@ def fix(p):
 if __name__ == '__main__':
     files = [os.path.join(r, f) for top in sys.argv[1:] for r, _, fs in os.walk(top) for f in fs
              if f.lower().endswith('.png')]
-    with Pool() as pool:
+    # at most 4 workers (BTF_WORKERS): each holds a whole texture decoded (up to ~64 MB) plus copies; Pool() used every core
+    with Pool(max(1, min(int(os.environ.get('BTF_WORKERS', '4')), (os.cpu_count() or 2) - 1))) as pool:
         n = sum(pool.map(fix, files, chunksize=16))
     print('texture riscritte: %d su %d' % (n, len(files)))
