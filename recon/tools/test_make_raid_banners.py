@@ -37,6 +37,23 @@ try:
     done, missing = mrb.build(idx, rows, t, os.path.join(t, 'out'))
     assert list(done) == [981001] and missing == [(981002, 'B')], (done, missing)
     assert Image.open(os.path.join(t, 'out', '981001.png')).size == (640, 140)
+    # notice cards bound to one evStageId (the 62 older event raids): matched by id, never by date
+    items = [{'file': 'sqex/44001_k.png', 'from': '2016-05-02', 'to': '2016-05-16', 'notice': 17890, 'evStageId': 981010},
+             {'file': 'sqex/44001_k.png', 'from': '2018-09-03', 'to': '2018-09-09', 'notice': 44001}]
+    assert mrb.notice_rows(items) == [('sqex/44001_k.png', dt.date(2018, 9, 3), dt.date(2018, 9, 9))], 'id-bound items stay out of the date rows'
+    assert mrb.notice_by_id(items) == {981010: 'sqex/44001_k.png'}, mrb.notice_by_id(items)
+    idx3 = {'entries': [{'evStageId': 981010, 'start': '2016-05-02', 'end': '2016-05-16', 'censusId': 'E'},
+                        {'evStageId': 981001, 'start': '2018-10-15', 'end': '2018-10-21', 'censusId': 'A'},
+                        {'evStageId': 981011, 'start': '2018-10-15', 'end': '2018-10-21', 'censusId': 'F'}]}
+    out3 = os.path.join(t, 'out3')
+    d3, m3 = mrb.build(idx3, rows, t, out3, by_id={981010: 'sqex/44001_k.png', 981011: 'sqex/44001_k.png'})
+    assert d3 == {981010: 'sqex/44001_k.png', 981001: 'Event_-_Weekly_Raid_Event_2_banner_KHUX.png', 981011: 'sqex/44001_k.png'}, d3
+    assert Image.open(os.path.join(out3, '981010.png')).getpixel((0, 0)) == (4, 5, 6), 'id-bound card wins over the date'
+    out4 = os.path.join(t, 'out4')
+    d4, m4 = mrb.build(idx3, rows, t, out4, by_id={981010: 'sqex/44001_k.png'}, ids={981010})
+    assert d4 == {981010: 'sqex/44001_k.png'} and not m4 and sorted(os.listdir(out4)) == ['981010.png'], (d4, m4)
+    assert mrb.parse_ids('8001-8003,8070') == {8001, 8002, 8003, 8070}
+    assert Image.open(os.path.join(out4, '981010.png')).mode == 'RGB'
 finally:
     shutil.rmtree(t)
 print('OK: make_raid_banners')

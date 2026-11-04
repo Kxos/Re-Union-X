@@ -10,7 +10,10 @@ An entry takes the banner whose dates hold its census row start (else the one wh
 entry with no banner (rows outside the Weekly Raid Event and outside --notices) keeps 0.png, the plain plate.
 --notices: JSON list [{"file", "from", "to", "notice"}] of raid cards taken from the official notices (SQUARE ENIX BRIDGE
 notice id, cache.sqex-bridge.jp/img/<key>, archived copy): the weeks the wiki page does not list (the 5 pre-series raid
-weeks 2018-09-03 to 10-01). "file" is relative to --banners, dates ISO; they are added after the wiki rows.
+weeks 2018-09-03 to 10-01). "file" is relative to --banners, dates ISO; they are added after the wiki rows. An item
+with "evStageId" is bound to that id and never matched by date (the 62 older WW event raids 2016-05 to 2018-09, whose
+one-off, weekend, monthly and daily runs overlap the weekly rows; card = the 640x140 image of the event's own notice).
+--ids A-B,C: write only these evStageIds (e.g. --ids 8001-8062 --out <staging folder> for a review before serving).
 """
 import argparse
 import datetime as dt
@@ -37,8 +40,23 @@ def banner_rows(wikitext):
 
 
 def notice_rows(items):
-    """[(file, start date, end date)] of the --notices list"""
-    return [(it['file'], dt.date.fromisoformat(it['from']), dt.date.fromisoformat(it.get('to') or it['from'])) for it in items]
+    """[(file, start date, end date)] of the --notices list, without the items bound to an evStageId"""
+    return [(it['file'], dt.date.fromisoformat(it['from']), dt.date.fromisoformat(it.get('to') or it['from']))
+            for it in items if not it.get('evStageId')]
+
+
+def notice_by_id(items):
+    """{evStageId: file} of the --notices items bound to an evStageId"""
+    return {int(it['evStageId']): it['file'] for it in items if it.get('evStageId')}
+
+
+def parse_ids(s):
+    """'8001-8003,8070' -> {8001, 8002, 8003, 8070}"""
+    out = set()
+    for part in s.split(','):
+        a, _, b = part.strip().partition('-')
+        out.update(range(int(a), int(b or a) + 1))
+    return out
 
 
 def pick(rows, start, end):
@@ -53,17 +71,19 @@ def pick(rows, start, end):
     return best
 
 
-def build(index, rows, banners, out):
+def build(index, rows, banners, out, by_id=None, ids=None):
+    """by_id: {evStageId: file} taken before the date rows; ids: only these evStageIds (None: all)"""
     from PIL import Image
     os.makedirs(out, exist_ok=True)
     done, missing = {}, []
+    by_id = by_id or {}
     for e in index.get('entries', []):
         ev = e.get('evStageId')
-        if not ev or ev in done or not e.get('start'):
+        if not ev or ev in done or not e.get('start') or (ids is not None and ev not in ids):
             continue
         s = dt.date.fromisoformat(e['start'])
         en = dt.date.fromisoformat(e.get('end') or e['start'])
-        r = pick(rows, s, en)
+        r = (by_id[ev],) if ev in by_id else pick(rows, s, en)
         if not r:
             missing.append((ev, e.get('censusId')))
             continue
@@ -84,15 +104,19 @@ def main(argv=None):
     ap.add_argument('--wiki', required=True)
     ap.add_argument('--banners', required=True)
     ap.add_argument('--notices', help='JSON list of raid cards from the official notices (weeks not on the wiki page)')
+    ap.add_argument('--ids', help='write only these evStageIds: A-B,C')
     ap.add_argument('--index', default=os.path.join(ROOT, 'server', 'game_data', 'raids.json'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'server', 'game_data', 'raid_img'))
     a = ap.parse_args(argv)
     w = json.load(open(a.wiki, encoding='utf-8-sig'))
     text = w['parse']['wikitext']['*'] if 'parse' in w else w
-    rows = banner_rows(text)
+    rows, by_id = banner_rows(text), {}
     if a.notices:
-        rows += notice_rows(json.load(open(a.notices, encoding='utf-8-sig')))
-    done, missing = build(json.load(open(a.index, encoding='utf-8')), rows, a.banners, a.out)
+        items = json.load(open(a.notices, encoding='utf-8-sig'))
+        rows += notice_rows(items)
+        by_id = notice_by_id(items)
+    done, missing = build(json.load(open(a.index, encoding='utf-8')), rows, a.banners, a.out, by_id,
+                          parse_ids(a.ids) if a.ids else None)
     print('raid banners: %d banner rows on the page, %d event cards written, %d without a banner (0.png): %s' % (
         len(rows), len(done), len(missing), missing[:12]))
 
