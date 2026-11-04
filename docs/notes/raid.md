@@ -314,8 +314,8 @@ Seen on the way: the RAID BOSS ALERT card of Assault Dragon shows the layout's d
 - **A master table that breaks the schema is not served at all.** The server checks every table against `recon/out/master_types_ww431.json` and drops the whole
   table when one row is out of schema (the log prints `[master] <table>: N errori ... non la servo` and `!!! MASTER: N tabelle scartate dallo schema`). The client then
   keeps its old copy of that table, with no error on the device. Task 10 had a 7-stage evStage row (the daily Showdown of Dec 2016, `stageId` is `int[5]`): the whole
-  `evStage` table was dropped, the client never received the new event ids, and the Events list crashed (SIGSEGV, null + 0x10) on the first event id it could not
-  find (client function that builds the Events cell: it looks the evStage row up by id and reads the Details URL from it). It looked like a data bug in the entry for
+  `evStage` table was dropped, the client never received the new event ids, and the Events list crashed on the first event id it could not
+  find in its evStage table (crash details in the private notes). It looked like a data bug in the entry for
   an hour of bisecting (ids, banner, stage row, reward types, number of tiers were all innocent). **After every `make-game-tables.js` read the `[master]` lines of the
   server log and expect `106 tabelle valide` and no `evStage` line.**
 - `make-raid.js` `evStageRow` keeps at most 5 stage ids (`EVSTAGE_MAX_STAGES`) and the full range in `stageStartId` / `stageEndId`; `/stage/event` lists the stages itself.
