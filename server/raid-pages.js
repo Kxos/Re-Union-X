@@ -286,18 +286,124 @@ function detailPage(index, evStageId, ctx = {}) {
 // Original notice of a raid (Details of its banner in the Events tab, as the event cards of the original game): GET
 // /web/raid/notice/<evStageId>. doc = game_data/raid_notices.json (make-raid-notices.js, git-ignored SQUARE ENIX text):
 // {rows: {censusId: {noticeId, how, confidence, note?}}, notices: {id: {title, date, time, category, body: [lines]}}}.
-// The card, the notice title, its date, the original text unchanged (■ / ● / ★ lines as headings, ・ / • / * lines as list
-// lines), then a separate «On this server» box: the status of the raid here, the fake clock, the reconstructed values with
-// their reasons (index.reasons), the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid'
-// (opened from the details page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
-const NOTICE_CSS = '.nt{background:#06283e;border-radius:6px;padding:8px 12px;margin:8px 0 12px;font-size:15px;line-height:1.55;overflow-wrap:break-word}'
-  + '.nt p{margin:2px 0 6px}.nt p.sec{color:#00d4ed;font-weight:bold;margin-top:12px}.nt p.li{margin:0 0 2px 12px}'
-  + '.dt{color:#b9cfdc;font-size:14px;margin:0 0 4px}.cat{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:10px;padding:0 8px;margin-right:8px;font-size:12px;color:#fff}'
-  + '.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:16px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
+// Layout of the details pages (DETAIL_CSS): the card, the title, a category and date chip, then the notice in boxes, one per
+// event of the notice (● headings; ★ before any ●), every sentence unchanged, only laid out: ■ headings h3, ▼ / ◇ headings h4,
+// a ★ line under a heading as its tagline, «[Updated …]» lines marked, ・ / • lines one list, * lines notes, «Name x N» runs a
+// table (item, quantity), a PT + UTC period pair a small table, the «Pacific Time / UTC» hour lists (PT column then UTC column
+// in the source) paired in a table, ▽title▽ … △CLOSE△ a collapsed block. A notice of several events (2019-2021): the raid's
+// section first and open (heading with «Raid», «Radiant» or a boss of the week), the others below, collapsed («Other news in
+// this notice: …»). Player rankings and page boilerplate are removed (make-raid-notices.js scrub, run again here). Last, the
+// «On this server» box: the status of the raid here, the fake clock, the reconstructed values in the player's words (RECON_LABEL),
+// the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid' (opened from the details
+// page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
+const { scrub: scrubNotice, OMIT_LINE: OMIT } = require('./make-raid-notices');
+const NOTICE_CSS = '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
+  + '.chip.d{background:#06283e;border-color:#ffcd4a;color:#ffcd4a}'
+  + '.ns{border-left:5px solid #5d8aa6;background:#06283e;border-radius:0 8px 8px 0;padding:6px 12px 8px;margin:10px 0;font-size:16px;line-height:1.55;overflow-wrap:break-word}'
+  + '.ns.raid{border-left-color:#ffcd4a}.ns h2{margin:4px 0 4px}.ns.raid h2{color:#ffcd4a}.ns h3{font-size:16px;margin:12px 0 2px}.ns h4{color:#00d4ed;font-size:15px;margin:10px 0 2px}'
+  + '.ns p{margin:3px 0 6px}.ns .tg{color:#fff;font-weight:bold;margin:2px 0 6px}.ns .upd{display:inline-block;background:#b8860b;border-radius:10px;padding:0 10px;font-size:13px;line-height:1.7;margin:4px 0}'
+  + '.ns .nb{color:#b9cfdc;font-size:14px;margin:2px 0 4px}.ns .om{color:#b9cfdc;font-style:italic;font-size:14px;border:1px dashed #5d8aa6;border-radius:6px;padding:4px 10px}'
+  + 'ul.nl{margin:2px 0 8px;padding-left:22px}ul.nl li{margin:2px 0}.ns table{margin:4px 0 10px}.rw td.q{width:28%;color:#ffcd4a;white-space:nowrap}.pd th{width:30%}.bt th{width:50%}'
+  + 'details.fold{margin:6px 0;border:1px solid #2f5d78;border-radius:6px;padding:2px 10px}details.fold>summary{cursor:pointer;color:#00d4ed;padding:4px 0}'
+  + 'details.oth{margin:10px 0}details.oth>summary{cursor:pointer;color:#b9cfdc;font-size:15px;padding:6px 10px;background:#0a4466;border-radius:6px}details.oth[open]>summary{color:#fff}'
+  + 'h2.on{margin-top:20px}.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:18px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
   + '.srv a,.na a{color:#9fd4ff}.srv li{margin:4px 0}';
-// the first sentence of a reason of raids.json (the rest is the builder's notes: config keys, files, commands)
-const firstSentence = (s) => { const m = /^.*?[.!?](?=\s+[A-Z(]|$)/.exec(String(s)); return m ? m[0] : String(s); };
-const noticeLine = (l) => (/^[■●★]/.test(l) ? `<p class="sec">${esc(l)}</p>` : /^[・•*＊]/.test(l) ? `<p class="li">${esc(l)}</p>` : `<p>${esc(l)}</p>`);
+
+// notice body (lines) -> {sections: [{head (null: the lines before the first heading), lines, raid}]}; bosses: of the week
+// ● / ◆ open an event, except an hour line «● 2:00 p.m. - …» (a list line) and «● Raid Boss Bonus Time» (17890: a sub-heading)
+const EVENT_HEAD = /^[●◆](?!\s*\d)(?!.*Bonus Time\s*$)\s*/, STAR = /^★\s*/, BRACKET = /^【[^】]*】$/;
+function parseNotice(body, bosses = []) {
+  const lines = scrubNotice((body || []).map((l) => String(l ?? ''))).body;
+  const top = lines.some((l) => EVENT_HEAD.test(l) || BRACKET.test(l));
+  const sections = [{ head: null, lines: [] }];
+  let seenEvent = false;
+  for (const l of lines) {
+    const ev = EVENT_HEAD.test(l) || BRACKET.test(l);
+    // ★ opens an event when the notice has no ● at all, or before its first ● (61221: the ★ events before the ● ones)
+    if (ev || (STAR.test(l) && (!top || !seenEvent) && !(sections[sections.length - 1].head && !sections[sections.length - 1].lines.length))) {
+      if (ev) seenEvent = true;
+      sections.push({ head: l.replace(EVENT_HEAD, '').replace(STAR, '').replace(/^【([^】]*)】$/, '$1').trim(), star: !ev, lines: [] });
+    } else sections[sections.length - 1].lines.push(l);
+  }
+  if (!sections[0].lines.length) sections.shift();
+  const names = bosses.filter(Boolean).map((b) => b.toLowerCase());
+  for (const s of sections) s.raid = !!s.head && (/\braid|radiant/i.test(s.head) || names.some((b) => s.head.toLowerCase().includes(b)));
+  // no heading names the raid (65407 «May Special Campaign!», the end-of-service notice): the event that speaks of raids most
+  if (!sections.some((s) => s.raid)) {
+    const n = (s) => (s.head ? s.lines.filter((l) => /\braid/i.test(l)).length : 0);
+    const best = sections.reduce((a, s) => (n(s) > n(a) ? s : a), sections[0]);
+    if (best && n(best) >= 2) best.raid = true;
+  }
+  return { sections };
+}
+
+// an hour range «2:00 a.m. - 2:59 a.m.» / «9:00 to 10:00», or two of them around «→» (the daylight-saving change of 2017)
+const RANGE = '\\d{1,2}:\\d\\d(\\s*[ap]\\.?m\\.?)?\\s*(-|–|~|to)\\s*\\d{1,2}:\\d\\d(\\s*[ap]\\.?m\\.?)?';
+const PT_LINE = /^(.*\S)\s*\(PT\)$/, UTC_LINE = /^(.*\S)\s*\(UTC\)$/, HOURS = new RegExp(`^${RANGE}(\\s*→\\s*${RANGE})?$`, 'i');
+// «Name x N» (one item: not «A x 1, B x 1»)
+const REWARD = /^[・•]?\s*((?:(?![xX×]\s*\d).)+?)(?:\s+[xX]|\s*×)\s*(\d{1,3}(?:,\d{3})+|\d+)$/;
+const LIST = /^(?:[・•]|[●◆](?=\s*\d))\s*/, NOTE = /^[*＊※]/, OPEN = /^▽\s*(.*?)\s*▽$/, CLOSE = /^△\s*CLOSE\s*△$/i;
+// the lines of one section -> html (every line escaped; the markers are layout and are dropped, * notes keep theirs)
+function noticeBlocks(lines) {
+  let h = '';
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    let m;
+    if ((m = OPEN.exec(l))) {
+      let j = i + 1;
+      while (j < lines.length && !CLOSE.test(lines[j])) j++;
+      h += `<details class="fold"><summary>${esc(m[1])}</summary>${noticeBlocks(lines.slice(i + 1, j))}</details>`;
+      i = j;
+    } else if (CLOSE.test(l)) {
+      // a stray close marker: layout only
+    } else if (l === OMIT) {
+      h += `<p class="om">${esc(l)}</p>`;
+    } else if (/^[■●◆](?!\s*\d)/.test(l)) {
+      h += `<h3>${esc(l.replace(/^[■●◆]\s*/, ''))}</h3>`;
+    } else if (/^[▼◇]\s*/.test(l)) {
+      h += `<h4>${esc(l.replace(/^[▼◇]\s*/, ''))}</h4>`;
+    } else if (STAR.test(l)) {
+      h += `<p class="tg">${esc(l.replace(STAR, ''))}</p>`;
+    } else if (/^\[?(Updated|Edited)\b/i.test(l)) {
+      h += `<p><span class="upd">${esc(l)}</span></p>`;
+    } else if (PT_LINE.test(l) && UTC_LINE.test(lines[i + 1] || '')) {
+      h += `<table class="kv pd"><tr><th>Pacific Time</th><td>${esc(PT_LINE.exec(l)[1])}</td></tr><tr><th>UTC</th><td>${esc(UTC_LINE.exec(lines[i + 1])[1])}</td></tr></table>`;
+      i++;
+    } else if (/^Pacific Time$/i.test(l) && /^UTC$/i.test(lines[i + 1] || '')) {
+      // optional caption line «(…)» under the header, then the PT column and the UTC column
+      const cap = /^\(.*\)$/.test(lines[i + 2] || '') ? 1 : 0;
+      let j = i + 2 + cap;
+      while (j < lines.length && HOURS.test(lines[j].replace(/　/g, ' '))) j++;
+      const hrs = lines.slice(i + 2 + cap, j), n = hrs.length / 2;
+      if (n >= 1 && Number.isInteger(n)) {
+        h += (cap ? `<p class="nb">${esc(lines[i + 2])}</p>` : '')
+          + `<table class="bt"><tr><th>Pacific Time</th><th>UTC</th></tr>${hrs.slice(0, n).map((x, k) => `<tr><td>${esc(x)}</td><td>${esc(hrs[n + k])}</td></tr>`).join('')}</table>`;
+        i = j - 1;
+      } else h += `<p>${esc(l)}</p>`;
+    } else if (REWARD.test(l)) {
+      let j = i;
+      while (j < lines.length && REWARD.test(lines[j])) j++;
+      h += `<table class="rw"><tr><th>Item</th><th>Quantity</th></tr>${lines.slice(i, j).map((x) => { const [, a, b] = REWARD.exec(x); return `<tr><td>${esc(a)}</td><td class="q">× ${esc(b)}</td></tr>`; }).join('')}</table>`;
+      i = j - 1;
+    } else if (LIST.test(l)) {
+      let j = i;
+      while (j < lines.length && LIST.test(lines[j]) && !REWARD.test(lines[j])) j++;
+      h += `<ul class="nl">${lines.slice(i, j).map((x) => `<li>${esc(x.replace(LIST, ''))}</li>`).join('')}</ul>`;
+      i = j - 1;
+    } else if (NOTE.test(l)) {
+      h += `<p class="nb">${esc(l)}</p>`;
+    } else h += `<p>${esc(l)}</p>`;
+  }
+  return h;
+}
+function noticeBody(body, bosses) {
+  const { sections } = parseNotice(body, bosses);
+  const box = (s, cls = '') => `<div class="ns${cls}">${s.head ? `<h2>${esc(s.head)}</h2>` : ''}${noticeBlocks(s.lines)}</div>`;
+  const named = sections.filter((s) => s.head);
+  if (named.length < 2 || !sections.some((s) => s.raid)) return sections.map((s) => box(s, s.raid ? ' raid' : '')).join('');
+  return sections.filter((s) => s.raid).map((s) => box(s, ' raid')).join('')
+    + sections.filter((s) => !s.raid).map((s) => `<details class="oth"><summary>Other news in this notice: ${esc(s.head || 'opening lines')}</summary>${box(s)}</details>`).join('');
+}
 function noticeMissing(row, ctx) {
   const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
   return PAGE_HEAD('Notice not available', CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}><h1>Notice not available</h1>`
@@ -312,20 +418,18 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     const n = hit && doc.notices ? doc.notices[hit.noticeId] : null;
     if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
     const st = statusOf(row, ctx);
-    const labels = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
-    const reasons = (index && index.reasons) || {};
-    const recon = labels.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources:</p><ul class="pl">${labels.map((l) => `<li><b>${esc(RECON_LABEL[l] || l)}</b>`
-      + `${reasons[l] ? `: ${esc(firstSentence(reasons[l]))}` : ''}</li>`).join('')}</ul>` : '';
+    const labels = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))].map((l) => RECON_LABEL[l] || l);
+    const recon = labels.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources: ${labels.map(esc).join(', ')}.</p>` : '';
     const off = row.entries.filter((e) => !e.available);
     const offLine = off.length ? `<p>Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')}. Its graphics or data are incomplete in the surviving game files.</p>` : '';
     const back = ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
-      + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="cat">${esc(n.category)}</span>` : ''}${esc(niceDay(n.date))}${n.time ? ` ${esc(n.time)} (UTC)` : ''}</p>`
+      + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
-      + `<div class="nt">${n.body.map(noticeLine).join('')}</div>`
+      + noticeBody(n.body, row.bosses)
       + '<div class="srv"><h2>On this server</h2>'
-      + '<p>The text above is the original notice, unchanged. This server follows your Story instead of the calendar: the dates in the notice '
+      + '<p>The text above is the original notice, unchanged (the lists of top players are left out). This server follows your Story instead of the calendar: the dates in the notice '
       + `are those of the original game (${esc(dateRange(row))}); the raid opens when your Story reaches that week.</p>`
       + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}`
       + `<ul class="ow"><li><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a></li><li><a href="/web/raid/catalog">Raid Catalog ›</a></li></ul></div>`
@@ -335,4 +439,4 @@ function noticePage(index, evStageId, doc, ctx = {}) {
   }
 }
 
-module.exports = { catalogPage, detailPage, noticePage, statusOf, khuxMatch };
+module.exports = { catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch };
