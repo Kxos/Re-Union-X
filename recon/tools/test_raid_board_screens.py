@@ -30,6 +30,8 @@ def shot(size, box, card=(235, 190, 235)):
     x, y, s = box
     d.rounded_rectangle((x, y, x + s - 1, y + s - 1), radius=max(2, s // 12), fill=card)
     d.rectangle((x + s // 4, y + s // 4, x + s // 2, y + s // 2), fill=(200, 30, 30))
+    # board title just above the card (white text antialiased on the dark blue screen: light and bluish)
+    d.rectangle((x + s // 5, max(0, y - 14), x + s // 2, max(0, y - 5)), fill=(185, 195, 240))
     # nodes on the right: light circles, must not be taken for the card
     for k in range(4):
         d.ellipse((size[0] // 2 + k * 90, 40, size[0] // 2 + k * 90 + 70, 110), fill=(120, 130, 200))

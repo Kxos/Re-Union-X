@@ -47,7 +47,11 @@ def find_box(im):
     if not n:
         raise SystemExit('no card found in a screenshot of %dx%d' % (w, h))
     k = int(np.argmax(ndimage.sum(m, lab, range(1, n + 1)))) + 1
-    ys, xs = np.where(lab == k)
+    card = lab == k
+    # rows crossing the whole card; the board title just above it (light text merged by the closing) is narrower
+    rows = card.sum(axis=1)
+    ys = np.where(rows >= rows.max() * 0.6)[0]
+    xs = np.where(card[ys.min():ys.max() + 1].any(axis=0))[0]
     side = int(max(xs.max() - xs.min(), ys.max() - ys.min()) + 1)
     if side < h * 0.15:
         raise SystemExit('no card found in a screenshot of %dx%d (largest light area %d px)' % (w, h, side))
