@@ -248,6 +248,42 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   rareOdds: 'odds of the rare boss', boardGender: 'both gender boards open', weekendTimer: 'weekend time limit', questObjectives: 'quest objectives',
   levelDrops: 'level drops', levelDropsPartial: 'level rewards (in part)', boardStandard: 'Raid Board (from a similar raid)', eventCoins: 'Raid Coin rewards',
   eventHp: 'boss HP (scaled by date)', setting2016: 'time limit and AP (from 2016)', hpTier: 'boss HP of the tiers', boardCells: 'missing Raid Board cells' };
+// One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
+const RECON_TEXT = {
+  atk: 'The boss\'s attack is not known after 2016: it is deduced from the bosses with original values.',
+  def: 'The boss\'s defense is not known after 2016: it is deduced from the bosses with original values.',
+  partHp: 'The HP of the weak points are a share of the boss HP, taken from the 2016 bosses.',
+  upMinutes: 'The time limit comes from the videos and posts of the time, not from the game data.',
+  useAp: 'The AP of a further attempt comes from the rules of the time, not from this raid\'s own data.',
+  coinOdds: 'How many Raid Coins a win gives comes from the community tables, not from the game data.',
+  lux: 'The Lux of a win is calculated from the boss HP.',
+  moves: 'The boss uses the attacks of a similar boss with original data.',
+  hp: 'The boss HP comes from the HP tables of the tiers, read from videos and posts of the time.',
+  hp_step: 'The exact week of an HP change is not known: the middle of the known range is used.',
+  atk_curve: 'The attack below the maximum level follows the growth of the 2016 bosses.',
+  attribute: 'The boss attribute is deduced from its colour.',
+  background: 'The fight background is the closest world to the original map.',
+  boardAlias: 'A Raid Board reward is matched to its item by name.',
+  boardPath: 'The cells of the Raid Boards follow one path: their original layout is not restored yet.',
+  boardTexture: 'One Spirit part picture is rebuilt from the original files.',
+  boardCost: 'One Raid Board cell cost is corrected (the source had a typo).',
+  boardSet: 'Which Raid Boards ran this week comes from the community lists.',
+  boardArt: 'A Raid Board card picture is cut from a screenshot of the original game.',
+  boardNoArt: 'A Raid Board card picture is missing.',
+  rareOdds: 'How often the rare boss appears is deduced from the 2016 data.',
+  boardGender: 'Both the male and the female board are open (the original showed only your gender\'s).',
+  weekendTimer: 'The weekend time limit comes from the rule of the time (3 hours, 1 hour from May 2018).',
+  questObjectives: 'An objective of the event quest is replaced by the standard Raid objectives.',
+  levelDrops: 'The level rewards of the notice are paid to your Present Box when the boss is defeated at that level.',
+  levelDropsPartial: 'Some level rewards of the notice are not given: their item or amount is not known.',
+  boardStandard: 'This raid\'s boards are not known: it uses the boards of a similar raid, without its exclusive medals.',
+  eventCoins: 'The coin rewards of this event are not known: the standard Raid Coin table is used.',
+  eventHp: 'The boss HP is scaled from its 2016 values up to the HP seen in 2018.',
+  setting2016: 'The time limit and AP come from the 2016 data of the same boss.',
+  hpTier: 'The HP of each tier is deduced, since no reading of the tiers exists.',
+  boardCells: 'Some Raid Board cells are left out: their reward is not known.',
+};
+const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 function detailPage(index, evStageId, ctx = {}) {
   const rows = calendar.catalogRows(index), row = rows.find((r) => r.evStageId === Number(evStageId));
@@ -266,8 +302,8 @@ function detailPage(index, evStageId, ctx = {}) {
       return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;
     }).join('')}</ul>` : '');
   // the labels of raids.json in the player's words (index.reasons holds the builder's notes: file names, config keys)
-  const labels = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))].map((l) => RECON_LABEL[l] || l);
-  const recon = labels.length ? `<h2>Reconstructed values</h2><p>${labels.map(esc).join(', ')}.</p>`
+  const codes = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
+  const recon = codes.length ? `<h2>Reconstructed values</h2>${reconList(codes)}`
     + '<p class="n">The original values are lost: these are rebuilt from the surviving sources, as the Raid Bosses notice explains.</p>' : '';
   const others = rows.filter((r) => r !== row && r.bosses.some((b) => row.bosses.includes(b))).sort((a, b) => (a.start < b.start ? 1 : a.start > b.start ? -1 : 0));
   const other = others.length ? `<h2>Other weeks of ${esc(title)}</h2><ul class="ow">${others.map((r) => `<li><a href="${detailHref(r.evStageId)}">${dateRange(r)}</a> · ${esc(titleOf(r))}<br>${statusOf(r, ctx).pill}</li>`).join('')}</ul>` : '';
@@ -419,8 +455,8 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     const hit = row && doc && doc.rows ? doc.rows[row.censusId] : null;
     const n = hit && doc.notices ? doc.notices[hit.noticeId] : null;
     const st = row && statusOf(row, ctx);
-    const labels = row ? [...new Set(row.entries.flatMap((e) => e.reconstructed || []))].map((l) => RECON_LABEL[l] || l) : [];
-    const recon = labels.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources: ${labels.map(esc).join(', ')}.</p>` : '';
+    const codes = row ? [...new Set(row.entries.flatMap((e) => e.reconstructed || []))] : [];
+    const recon = codes.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources:</p>${reconList(codes)}` : '';
     const off = row ? row.entries.filter((e) => !e.available) : [];
     const offLine = off.length ? `<p>Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')}. Its graphics or data are incomplete in the surviving game files.</p>` : '';
     const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';

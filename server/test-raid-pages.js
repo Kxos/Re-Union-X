@@ -186,7 +186,7 @@ const tests = {
     assert(/<td>Beginner<\/td><td>Trickmaster<\/td>/.test(d) && /<td>Advanced<\/td><td>Blue Trident Tail<\/td>/.test(d), 'tier table');
     assert(/150,000,000/.test(d), 'HP');
     assert(/Enhancement Boards/.test(d) && /Lux Crystal/.test(d), 'boards and their rewards');
-    assert(d.includes('<h2>Reconstructed values</h2><p>ATK.</p>'), 'reconstructed values in the player\'s words');
+    assert(d.includes('<h2>Reconstructed values</h2><ul class="pl"><li><b>ATK</b>: The boss') && d.includes('deduced from the bosses with original values.'), 'reconstructed values: one short sentence each (user 04-11)');
     assert(!/No ATK of a raid is known after 2016/.test(d), 'not the builder\'s notes');
     // other weeks of the same bosses, newest first, each a link to its page
     const other = d.slice(d.indexOf('Other weeks'));
