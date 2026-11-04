@@ -23,6 +23,7 @@
 //   available tier, eventCategory and eventType 2), raidEnemy, raidSetting, raidReward, raidEnemyAttack;
 // - game_data/raids.json: {entries: [...], reasons: {label: why}, own: {...}}, entries in the shape of the plan plus gemDrop,
 //   hp, worldId, level; reasons comes from reconstructedWhy of raid_config.json, one per label in use;
+// - evStage detailUrl /web/raid/notice/<evStageId> when game_data/raid_notices.json (make-raid-notices.js) has the census row;
 // - game_data/raid_maps.json: stage list for recon/tools/gen_story_maps.py (config key "special", as special_maps.json);
 // - Raid Boards (raid-boards.js, from raid_rewards/a_weekly/boards_weekly.json): sphere / sphereArray / sphereMasu rows of type 5,
 //   one set per census row with a raid, ids 3000000 + n (raid_ids.json `boards`); entries carry sphereBoardIds, raids.json `boards`
@@ -54,6 +55,8 @@ const EV_BASE = 8000, EGG_ID = 100, EGG = 'Eggcognito', ENEMY_REWARD = 1;
 // and a tap always opens the banner's quest list, so it holds the Training Grounds of the Special Catalog (make-special.js
 // TRAINING_STAGE): our own quest (no Lux, no drops), never raid content. Emitted only when that stage row is in the master.
 const CATALOG_EV = EV_BASE, CATALOG_STAGE = 970000, CATALOG_URL = '/web/raid/catalog';
+// Details of a raid banner: /web/raid/notice/<evStageId>, the original notice (game_data/raid_notices.json, git-ignored)
+const NOTICE_URL = '/web/raid/notice/';
 const START = '2015-01-01 00:00:00', END = '2030-12-31 23:59:59';
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\sources';
 const DEFAULT_2016 = 'D:\\Progetto_Restauro_KH_UX\\external\\thethiny_2026-10-13\\KHUx-Server\\data';
@@ -518,7 +521,7 @@ function applyLux(rows, lux) {
   }
 }
 
-function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids }) {
+function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null }) {
   checkRanges(master);
   const fixes = parseCorrections((rewards || {}).correctionsMd);
   const weeks = correctedWeeks(values.weeks, fixes.dates);
@@ -775,7 +778,9 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         enemies: [[egg(), egg()]], treasures: [], rooms: 1 });
       entry.available = true;
     });
-    if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds)); withRaid.add(row.id); }
+    // Details of the banner: the raid's original notice (make-raid-notices.js), only when there is one (no dead button)
+    const detailUrl = notices && notices.rows && notices.rows[row.id] ? `${NOTICE_URL}${evStageId}` : '';
+    if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds, { detailUrl })); withRaid.add(row.id); }
   });
   // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
   if (boards) {
@@ -919,7 +924,13 @@ function patch(masterDir, opts = {}) {
   for (const t of ITEM_TABLES) master[t] = readJson(path.join(masterDir, `${t}.json`), []);
   if (!master.stage.some((r) => r.stageKind === 1)) throw new Error(`raid: ${path.join(masterDir, 'stage.json')} has no story rows`);
   const idsFile = opts.idsFile || IDS_FILE;
-  const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig(), ids: readIds(idsFile) });
+  let notices = opts.notices;
+  if (notices === undefined) {
+    const file = path.join(gameData, 'raid_notices.json');
+    try { notices = readJson(file, null); } catch (e) { console.warn(e.message); notices = null; }
+    if (!notices) console.warn(`raid: ${file} not readable (node server/make-raid-notices.js): no Details button on the raid banners`);
+  }
+  const out = buildRaid({ ...sources, master, models, config: opts.config || loadConfig(), ids: readIds(idsFile), notices });
   const added = { stage: out.stageRows, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStageRows], raidSetting: out.settingRows, raidEnemy: out.enemyRows, raidReward: out.rewardRows, raidEnemyAttack: out.attackRows,
     sphere: out.sphereRows, sphereArray: out.arrayRows, sphereMasu: out.masuRows };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
@@ -937,6 +948,7 @@ function patch(masterDir, opts = {}) {
     + `${out.index.entries.map((e) => e.end || e.start).sort().pop() || '-'}`);
   console.log(`raid: ${on} of ${out.index.entries.length} tier rows available; +${out.stageRows.length} stage, +${out.evStageRows.length} evStage, +${out.settingRows.length} raidSetting, `
     + `+${out.enemyRows.length} raidEnemy, +${out.rewardRows.length} raidReward, +${out.attackRows.length} raidEnemyAttack`);
+  console.log(`raid: Details (original notice) on ${out.evStageRows.filter((r) => r.detailUrl).length} of ${out.evStageRows.length} raid banners`);
   const bd = out.report.boards;
   if (bd) {
     console.log(`raid: +${bd.count} Raid Boards (sphere, sphereArray, sphereMasu: ${(bd.bytes / 1048576).toFixed(2)} MB), ${bd.unmatched.length} cells left off for a reward with no item, `

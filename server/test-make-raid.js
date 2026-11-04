@@ -716,6 +716,19 @@ const tests = {
     });
     assert.strictEqual(out.maps[0].level, 25);
   },
+  detail_url_on_rows() {
+    // Details of a raid banner: its original notice (game_data/raid_notices.json of make-raid-notices.js), none without one
+    const f = fixture();
+    f.master.stage.push({ stageId: 970000, id: 970000, stageKind: 2, worldId: 1, mapName: 'Training', raidBoss: 0, name: 'Training Grounds', useAp: 0 });
+    const plain = mr.buildRaid(f);
+    assert.ok(plain.evStageRows.length && plain.evStageRows.every((r) => r.detailUrl === ''), 'no notices file: no Details');
+    const out = mr.buildRaid({ ...fixture(), master: f.master, notices: { rows: { [W1]: { noticeId: 51000 } }, notices: {} } });
+    const ev = out.index.entries.find((e) => e.censusId === W1).evStageId;
+    assert.strictEqual(out.evStageRows.find((r) => r.eventStageId === ev).detailUrl, `/web/raid/notice/${ev}`);
+    assert.strictEqual(out.catalogEvStage.detailUrl, '/web/raid/catalog', 'the Raid Catalog banner keeps its page');
+    const other = mr.buildRaid({ ...fixture(), master: f.master, notices: { rows: { 'WW-W-1999-01-01': { noticeId: 1 } }, notices: {} } });
+    assert.ok(other.evStageRows.every((r) => r.detailUrl === ''), 'a row without a notice: no dead button');
+  },
   catalog_banner_row() {
     // Task 9: the Raid Catalog banner, evStage 8000 (kept free by the numbering), Details -> /web/raid/catalog, a tap opens
     // the Training Grounds of the Special Catalog (970000): an evStage needs a quest

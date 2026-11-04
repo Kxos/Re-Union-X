@@ -1385,6 +1385,17 @@ let specialMemo = null;
 const RAID_INDEX = process.env.KHUX_RAID_INDEX || path.join(__dirname, 'game_data', 'raids.json');
 const RAID_MODELS = process.env.KHUX_RAID_MODELS || path.join(__dirname, 'game_data', 'raid_models.json');
 const RAID_IMG = process.env.KHUX_RAID_IMG || path.join(__dirname, 'game_data', 'raid_img');
+// original notices of the raids (make-raid-notices.js, git-ignored SQUARE ENIX text), read at request time (a new file is seen
+// without a restart); absent or broken: null, the notice pages say «not available»
+const RAID_NOTICES = process.env.KHUX_RAID_NOTICES || path.join(__dirname, 'game_data', 'raid_notices.json');
+let raidNoticesMemo = { mtime: -1, doc: null };
+function raidNotices() {
+  try {
+    const mtime = fs.statSync(RAID_NOTICES).mtimeMs;
+    if (mtime !== raidNoticesMemo.mtime) raidNoticesMemo = { mtime, doc: JSON.parse(fs.readFileSync(RAID_NOTICES, 'utf8')) };
+    return raidNoticesMemo.doc;
+  } catch { raidNoticesMemo = { mtime: -1, doc: null }; return null; }
+}
 let raidMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
@@ -4380,15 +4391,25 @@ function raidBoardDoneLookup() {
 }
 const raidPageCtx = (fromCatalog = false) => ({ ...raid().catalogCtx(), periods: special.PERIODS, imgVersion: routesRaid.RAID_IMG_VERSION, fromCatalog,
   unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
-  boardItems: raidBoardItems, boardName: raidBoardName, stageDone: (id) => catalogStageDone(id), boardDone: raidBoardDoneLookup() });
+  boardItems: raidBoardItems, boardName: raidBoardName, stageDone: (id) => catalogStageDone(id), boardDone: raidBoardDoneLookup(),
+  hasNotice: (censusId) => !!raidNotices()?.rows?.[censusId] });
 // GET /web/raid/img/<evStageId>.png and <id>-kept.png (the kept raid's card): as /web/special/img, from game_data/raid_img. No
 // card of its own: 0.png, the plate of make_special_banners.py (a missing -kept copy: the card itself); none: 404.
 // GET /web/raid/catalog (Details of the Raid Catalog banner) and /web/raid/raid/<evStageId> (details page; ?from=catalog: BACK).
+// GET /web/raid/notice/<evStageId> (Details of a raid banner): its original notice (raid-pages.js noticePage; ?from=raid: BACK),
+// always a page, «not available» without the notice.
 function respondRaidWeb(res, url) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   if (/^\/web\/raid\/catalog$/i.test(p)) return page(raidPages.catalogPage(raidIndex(), raidPageCtx()));
+  const nt = /^\/web\/raid\/notice\/([^/]*)$/i.exec(p);
+  if (nt) {
+    const from = new URLSearchParams(url.split('?')[1] || '').get('from');
+    let ctx = { from };
+    try { ctx = { ...raidPageCtx(), from }; } catch (e) { console.warn(`raid notice page: ${e.message}`); }
+    return page(raidPages.noticePage(raidIndex(), /^\d+$/.test(nt[1]) ? Number(nt[1]) : -1, raidNotices(), ctx));
+  }
   const det = /^\/web\/raid\/raid\/(\d+)$/i.exec(p);
   if (det) {
     const html = raidPages.detailPage(raidIndex(), Number(det[1]), raidPageCtx(new URLSearchParams(url.split('?')[1] || '').get('from') === 'catalog'));
