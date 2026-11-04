@@ -19,6 +19,10 @@
 // it (status «recon-ok»); its textures then move into the private pet_parts_recon/files (resources).
 //
 //   node server/make-pet-parts.js     (scrive server/tables/petParts.json, alzare la revisione)
+//
+// The server reads server/master_data/petParts.json, NOT server/tables: after this script run make-game-tables.js (it copies
+// every server/tables/*.json) or copy the file by hand, otherwise the new part is missing from the client's Outfits list and
+// is never drawn (04-11: Olaf's Snow Cloud looked «not drawn» for an hour because only tables/ had the row).
 'use strict';
 const fs = require('fs');
 const path = require('path');

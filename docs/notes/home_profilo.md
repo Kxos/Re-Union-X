@@ -486,9 +486,7 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX	mp\spirit_partsenderecon_review.html` (scripts
     `render\scriptsecon_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
     poses instead of 8). 402126 has no JP folder: `collect()` now reads a part folder that exists only in `recon_root` whole
-    (LWF + textures, report key `recon_only`). Not approved: **410013 Olaf's Snow Cloud** (its 10x10 falling particle
-    «img_snow01» is drawn, lost in pet and avatar; the render shows a narrow, sparse snowfall against the dense, wide one of the
-    game icon and the khuxwiki pictures). Notice «Spirit Parts» (11/03) updated; Elsa's Magic VIP week pays the part.
+    (LWF + textures, report key `recon_only`). **410013 Olaf's Snow Cloud** approved 4 Nov 2026 after a redraw: the LWF is intact (movie6 = 6-7 dots x4 copies, movie2 = 5 snowflakes); only the 10x10 dot «img_snow01» was lost, and the first drawing was a faint glow (alpha peak at the centre only), which read as a sparse snowfall. The references (khuxwiki picture, game icon) show hard white discs, so the dot is now a solid disc (radius 4.7, 1 px antialiased edge); render and references agree on density. 18 of 18 reconstructed parts served (707 rows, rev 245). Notice «Spirit Parts» (11/03) updated; Elsa's Magic VIP week pays the part.
 - **Visible pet** (11 October evening, to be tested on the bench): `make_pet_motions.py` writes every
   motion as a root with 9 empty movies named like the parts of 001 (only those: no
   load towards missing files) and one pose per frame (PLACE at the first, MOVEM afterwards; strings,
