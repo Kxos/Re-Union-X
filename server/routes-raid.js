@@ -118,7 +118,8 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   function forceSmoke(r, nowMs) {
     const key = smokeKey();
     if (!key || r.boss?.key === key) return;
-    const entry = entries().find((e) => e.key === key);
+    // a story boss key (story/<boss>) too, on its first fight stage
+    const entry = entries().find((e) => e.key === key) || ((raidIndex().story || {}).bosses || []).find((b) => b.key === key && b.available);
     if (!entry) {
       if (smokeMissing !== key) log(`[raid] smoke: ${key} is not an available entry`);
       smokeMissing = key;
@@ -310,12 +311,49 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     return true;
   }
 
-  // From respondStageClear. For now only the raid events' quests count (Task 11 adds the story); a stored boss blocks a
+  // Story raid bosses (Task 11): raids.json `story` of make-raid.js. A story quest is a stage row of stageKind 1 (the Q555
+  // variants 18300 + union - 1 read as their row, as stageRowOf of server.js) listed in story.quests: quests 1-3 (tutorial),
+  // past story.last (826 on, notice 49535) and any Proud (stageKind 4), Special or event quest are not, so they add nothing.
+  const storyIndex = () => raidIndex().story || null;
+  function storyQuestOf(stageId) {
+    const s = storyIndex();
+    if (!s || !s.quests) return null;
+    const id = Number(stageId), rows = masterRows('stage');
+    const row = rows.find((x) => x.stageId === id) || rows.find((x) => x.branchType === 1 && id > x.stageId && id < x.stageId + 5);
+    if (!row || row.stageKind !== 1 || !(row.id >= 1 && row.id <= s.last)) return null;
+    const q = s.quests[String(row.id)];
+    return q ? { n: row.id, ...q } : null;
+  }
+  const storyBoss = (name) => ((storyIndex() || {}).bosses || []).find((b) => b.boss === name && b.available);
+  // the boss entry on the fight stage of the quest's world, its Ω with a chance of 1 in `every` (null: none; 1 with force: the Ω itself)
+  const storyEntry = (b, stageId, every) => ({ ...b, stageId, rare: b.rare && every ? { ...b.rare, every } : null });
+  // A target raid quest (`fixed`) spawns its boss at the clear whatever the counter; otherwise the counter's rule. A boss alive
+  // blocks both; a boss that is not served holds the counter (it spawns at the next quest whose boss is served).
+  function storyClear(sq, points) {
+    const r = state(), nowMs = realNow();
+    if (Number.isFinite(points) && points > 0) r.points += points;
+    if (r.boss) return;
+    const f = sq.fixed, fb = f && f.stageId && storyBoss(f.boss);
+    if (fb && (!f.rare || fb.rare)) {
+      if (spawn(r, storyEntry(fb, f.stageId, f.rare ? 1 : null), nowMs)) { log(`[raid] story quest ${sq.n}: target raid ${f.name}`); return; }
+    }
+    if (r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
+    const b = sq.stageId && storyBoss(sq.boss);
+    if (!b) { log(`[raid] story quest ${sq.n}: ${sq.boss} is not served, the counter (${r.points}) is held`); return; }
+    if (spawn(r, storyEntry(b, sq.stageId, sq.every), nowMs)) r.points = 0;
+  }
+
+  // From respondStageClear: the raid events' quests and the story quests (storyClear) feed one counter; a stored boss blocks a
   // new one and the counter goes on; the caller saves.
   function onStageClear(stageId, getPoint) {
     const entry = entryOfStage(stageId);
     const points = Number(getPoint?.raidPoint);
-    if (!entry || !Number.isFinite(points) || points <= 0) return;
+    if (!entry) {
+      const sq = storyQuestOf(stageId);
+      if (sq) storyClear(sq, points);
+      return;
+    }
+    if (!Number.isFinite(points) || points <= 0) return;
     const r = state(), nowMs = realNow();
     r.points += points;
     if (r.boss || r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;

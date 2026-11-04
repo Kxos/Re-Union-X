@@ -10,6 +10,8 @@
 // Older WW event raids (Task 10): the tier rows of the event families come from the census row itself (eventTierRows), their quests
 // and boards from raid_rewards/b_events/event_raid_rewards.json, their 2016 rows, settings and rewards from KHUX_RAID_2016
 // (docs/notes/raid.md «Older WW event raids»).
+// Story raid bosses (Task 11): raids.json `story` {last, bosses, quests, conflicts, unknown} from the census story ranges and the 2016
+// rows and settings of the story bosses, fought on fight stages of their own (storyPlan, buildStory; docs/notes/raid.md «Story raid bosses»).
 // One entry per tier row of a census row; every WW row with week data is built (onlyCensusIds of raid_config.json is a filter
 // for tests and benches, absent in the shipped file). Which rows run in the player's week is raid-calendar.js's business: it
 // reads censusId, start and end of the entries. Ids come from server/raid_ids.json (versioned, append-only), because they live in
@@ -417,6 +419,116 @@ function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
 }
 const correctedFrom = (values, rewards) => correctedWeeks(values.weeks, parseCorrections((rewards || {}).correctionsMd).dates);
 
+// ---- Story raid bosses (plan Task 11, spec step 6; docs/notes/raid.md «Story raid bosses») ----
+// Which boss a story quest spawns: the census «story spawn» rows (quest ranges, the census's choice where the wiki and the 2016
+// table disagree, HOLES.md); a quest whose boss is unknown (wiki «???») takes the nearest known quest's boss (tie: the earlier
+// quest), label storyBoss. Quests past the last range (826 on: notice 49535, raid bosses only in raid events) spawn nothing.
+// The Ω chance of a quest: the 2016 raidSetting its master row names (stage.raidBoss) while the quest is inside the 2016 table
+// (config.story.tableLast) and that setting is of the quest's boss; otherwise the boss's rule, the setting the 2016 table gives that
+// boss most often (label storyOmega; conflicts storyConflict). rareUpType 3 and 2 are read as a chance of 1 in rareUpTypeArg
+// (rareOdds; type 2 also rareType2), any other type has no rare. «story target raid» rows: that boss at the quest's clear.
+// One fight stage per boss and stage world (no map of its own: stageBinId is a story row of that world), ids from raid_ids.json
+// keys story/<boss>, story/<boss>+rare, story/<boss>@w<world>.
+const STORY_FAMILY = 'story spawn', STORY_FIXED = 'story target raid', STORY_KEY = 'story/';
+const questSpan = (tier) => {
+  const m = /^quests? (\d+)(?:\s*-\s*(\d+))?$/.exec(String(tier || '').trim());
+  return m ? [num(m[1]), num(m[2] || m[1])] : null;
+};
+const storyKeys = (plan) => (plan ? plan.bosses.flatMap((b) => [`${STORY_KEY}${b.boss}`, ...(b.rare ? [`${STORY_KEY}${b.boss}${RARE_KEY}`] : []),
+  ...[...b.worlds].sort((x, y) => x - y).map((w) => `${STORY_KEY}${b.boss}@w${w}`)]) : []);
+function storyPlan({ census, orig2016, master, config }) {
+  const rows = ((census || {}).rows || []).filter((r) => r.family === STORY_FAMILY);
+  if (!rows.length) return null;
+  const cfg = config.story || {};
+  const known = new Map(), unknown = [];
+  let last = 0;
+  for (const r of rows) {
+    const span = questSpan(r.tier);
+    if (!span) throw new Error(`raid: ${r.id}: story tier «${r.tier}» not understood`);
+    for (let q = span[0]; q <= span[1]; q++) {
+      last = Math.max(last, q);
+      if ((r.bosses || []).length) known.set(q, { boss: r.bosses[0], census: r.id });
+      else unknown.push(q);
+    }
+  }
+  const name = new Map(((orig2016 || {}).raidEnemy || []).map((e) => [e.raidEnemyId, e.name]));
+  const settings = new Map(((orig2016 || {}).raidSetting || []).map((s) => [s.raidSettingId, s]));
+  const conflicts = ((census.story_conflicts || [])).map(([quest, title, , wiki, table]) => ({ quest, title, census: (known.get(quest) || {}).boss || null, wiki, table }));
+  const conflictSet = new Set(conflicts.map((c) => c.quest));
+  const storyRows = new Map((master.stage || []).filter((s) => s.stageKind === 1 && s.stageId < 100000 && s.id >= 1 && s.id <= last).map((s) => [s.id, s]));
+  const tableLast = Number(cfg.tableLast) || 0;
+  // the 2016 setting of a quest, only when it is of the quest's boss
+  const ownSetting = (q, boss) => {
+    const s = q <= tableLast && !conflictSet.has(q) && storyRows.get(q) ? settings.get(storyRows.get(q).raidBoss) : null;
+    return s && name.get(s.bossId) === boss ? s : null;
+  };
+  const counts = new Map();
+  for (const [q, k] of known) {
+    const s = ownSetting(q, k.boss);
+    if (!s) continue;
+    const c = counts.get(k.boss) || new Map();
+    c.set(s.raidSettingId, (c.get(s.raidSettingId) || 0) + 1);
+    counts.set(k.boss, c);
+  }
+  const ruleOf = (boss) => {
+    const c = counts.get(boss);
+    if (!c) return null;
+    const [id] = [...c].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
+    return settings.get(id);
+  };
+  const quests = new Map();
+  const knownList = [...known.keys()].sort((a, b) => a - b);
+  for (let q = 1; q <= last; q++) {
+    if (!storyRows.has(q)) continue; // a quest the master does not serve cannot be cleared
+    let k = known.get(q);
+    const labels = [];
+    if (!k && unknown.includes(q)) {
+      let best = null;
+      for (const n of knownList) if (!best || Math.abs(n - q) < Math.abs(best - q)) best = n; // ascending: a tie keeps the earlier quest
+      if (best === null) continue;
+      k = { boss: known.get(best).boss, census: (rows.find((r) => { const s = questSpan(r.tier); return s[0] <= q && q <= s[1]; }) || {}).id, nearest: best };
+      labels.push('storyBoss');
+    }
+    if (!k) continue;
+    if (conflictSet.has(q)) labels.push('storyConflict');
+    const own = ownSetting(q, k.boss), setting = own || ruleOf(k.boss);
+    if (!own && setting && name.get(setting.rareBossId) && setting.rareBossId !== setting.bossId) labels.push('storyOmega');
+    quests.set(q, { ...k, setting, labels });
+  }
+  // fixed spawns («story target raid», quest N): the boss itself, or the rare boss of a story boss («Trickmaster Ω»)
+  const fixed = new Map();
+  for (const r of ((census || {}).rows || []).filter((x) => x.family === STORY_FIXED)) {
+    const span = questSpan(r.tier);
+    if (!span || span[0] > last || !(r.bosses || []).length) continue;
+    fixed.set(span[0], { name: r.bosses[0], census: r.id });
+  }
+  const rareOf = (setting) => (setting && setting.rareBossId !== setting.bossId && [2, 3].includes(setting.rareUpType) ? name.get(setting.rareBossId) || null : null);
+  const bossNames = [...new Set([...[...quests.values()].map((x) => x.boss)])];
+  for (const [, f] of fixed) {
+    const base = bossNames.find((b) => rareOf(ruleOf(b)) === f.name);
+    f.boss = base || f.name;
+    f.rare = !!base;
+    if (!bossNames.includes(f.boss)) bossNames.push(f.boss);
+  }
+  const worldBg = new Map((master.world || []).map((w) => [w.worldId, w.raidBackground]));
+  const broken = config.brokenBackgrounds || [], fallback = config.backgroundFallbackWorld || 1;
+  const stageWorld = (q) => {
+    const w = (storyRows.get(q) || {}).worldId || 0;
+    return { world: w, stage: worldBg.has(w) && !broken.includes(worldBg.get(w)) ? w : fallback };
+  };
+  for (const [q, x] of quests) {
+    Object.assign(x, stageWorld(q));
+    if (x.stage !== x.world) x.labels.push('background');
+  }
+  for (const [q, f] of fixed) Object.assign(f, stageWorld(q));
+  const firstQuest = (b) => Math.min(...[...quests].filter(([, x]) => x.boss === b).map(([q]) => q), ...[...fixed].filter(([, f]) => f.boss === b).map(([q]) => q));
+  const bosses = bossNames.sort((a, b) => firstQuest(a) - firstQuest(b) || (a < b ? -1 : 1)).map((boss) => {
+    const rule = ruleOf(boss);
+    return { boss, rule, rare: rareOf(rule), worlds: new Set([...[...quests.values()].filter((x) => x.boss === boss).map((x) => x.stage), ...[...fixed.values()].filter((f) => f.boss === boss).map((f) => f.stage)]) };
+  });
+  return { last, tableLast, quests, fixed, bosses, conflicts, unknown };
+}
+
 function checkNumbers(map, what, max) {
   const seen = new Map();
   for (const [k, v] of Object.entries(map)) {
@@ -427,7 +539,7 @@ function checkNumbers(map, what, max) {
 }
 // Copy of ids with a number for every WW row and its tier rows, and for the rows the filter names. Stops on a key that two
 // tier rows would share, or a tier row that two census rows would claim.
-function allocateIds({ census, weeks, ids, only }) {
+function allocateIds({ census, weeks, ids, only, story = [] }) {
   const out = { ...ids, rows: { ...(ids || {}).rows }, entries: { ...(ids || {}).entries } };
   checkNumbers(out.rows, 'row', RANGES.evStage[2] - EV_BASE);
   checkNumbers(out.entries, 'entry', RANGES.stage[2] - RANGES.stage[1]);
@@ -447,6 +559,8 @@ function allocateIds({ census, weeks, ids, only }) {
       if (w.rare && !(key + RARE_KEY in out.entries)) out.entries[key + RARE_KEY] = nextEntry++;
     }
   }
+  // story raid bosses (storyKeys): numbered after the rows, append-only as the rest
+  for (const key of story) if (!(key in out.entries)) out.entries[key] = nextEntry++;
   checkNumbers(out.rows, 'row', RANGES.evStage[2] - EV_BASE);
   checkNumbers(out.entries, 'entry', RANGES.stage[2] - RANGES.stage[1]);
   return out;
@@ -546,7 +660,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     return near.length ? near[near.length - 1].worldId : 0;
   };
   const only = config.onlyCensusIds ? new Set(config.onlyCensusIds) : null;
-  const numbers = allocateIds({ census, weeks, ids, only });
+  const plan = storyPlan({ census, orig2016, master, config });
+  const numbers = allocateIds({ census, weeks, ids, only, story: storyKeys(plan) });
   const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], sphereRows: [], arrayRows: [], masuRows: [], maps: [],
     index: { entries: [], reasons: {} }, ids: numbers, report: { why: {}, templateGap: [], boards: null, skipped: [] } };
   const withRaid = new Set();
@@ -782,6 +897,94 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     const detailUrl = notices && notices.rows && notices.rows[row.id] ? `${NOTICE_URL}${evStageId}` : '';
     if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds, { detailUrl })); withRaid.add(row.id); }
   });
+  if (plan) out.index.story = buildStory(plan);
+  // Story raid bosses (storyPlan): every boss with its own 2016 rows as they stand (HP, ATK, DEF, Lux, parts, moves) and its 2016
+  // raidReward rows (medals and materials by level, no coins) under our ids; its 2016 raidSetting (the boss's rule) for the timer and
+  // AP; the rare body of that setting as entry.rare. A boss whose model, weak points, moves or reward items are missing is not
+  // emitted (available false, why) and its quests spawn nothing.
+  function buildStory(p) {
+    const bossOf = (n) => (census.bosses || []).find((b) => b.ww === n);
+    const medals = master.medal ? new Set(master.medal.map((m) => m.medalId)) : null, materials = master.material ? new Set(master.material.map((m) => m.materialId)) : null;
+    const itemsKnown = (list) => list.every((r) => r.type.slice(0, r.validReward).every((t, i) => (t === 3 ? !medals || medals.has(r.id[i]) : t === 5 ? !materials || materials.has(r.id[i]) : true)));
+    const madeOf = (bossName, enemyId) => {
+      const modelId = bossOf(bossName) ? bossOf(bossName).raid_model_id : 0, m = modelOf(modelId), own = orig.get(modelId);
+      if (!usable(m)) return { modelId, why: 'graphics' };
+      if (!own || own.name !== bossName) return { modelId, why: 'template' };
+      const rows = bossRows({ e: { boss: bossName, modelId, enemyId }, template: own, orig, blankEnemy, exact: true });
+      if (rows.why) return { modelId, why: rows.why };
+      if (lackingSlots(m, rows).length) return { modelId, why: 'parts', missingSlots: lackingSlots(m, rows) };
+      if (skillsMissing(own)) return { modelId, why: 'template' };
+      const made = { rows, labels: [], template: own, own, original: true };
+      const rewardList = rewardRowsOf(made, enemyId, 'story', null, false);
+      if (!itemsKnown(rewardList)) return { modelId, why: 'rewards' };
+      return { modelId, made, rewardList };
+    };
+    const reasons = new Set();
+    const bosses = p.bosses.map((b) => {
+      const n = numbers.entries[`${STORY_KEY}${b.boss}`], enemyId = RANGES.raidEnemy[1] + 10 * n, settingId = RANGES.raidSetting[1] + n;
+      const entry = { key: `${STORY_KEY}${b.boss}`, story: true, boss: b.boss, modelId: 0, available: false, why: null, tier: 'story', start: null, settingId, enemyId,
+        upMinutes: 0, useAp: 0, rare: null, stageId: 0, stages: {}, reconstructed: [] };
+      const got = madeOf(b.boss, enemyId);
+      entry.modelId = got.modelId;
+      if (got.why) { entry.why = got.why; if (got.missingSlots) entry.missingSlots = got.missingSlots; } else if (!b.rule) entry.why = 'setting';
+      if (entry.why) return entry;
+      Object.assign(entry, { upMinutes: b.rule.bossUpTime, useAp: b.rule.useAp, hp: got.made.rows.body.hp[0] });
+      let rareExtra = {};
+      if (b.rare) {
+        const rn = numbers.entries[`${STORY_KEY}${b.boss}${RARE_KEY}`], rareEnemy = RANGES.raidEnemy[1] + 10 * rn;
+        const r = madeOf(b.rare, rareEnemy);
+        if (r.why) (out.report.rareLeftOut ||= []).push({ key: entry.key, rare: b.rare, why: r.why });
+        else {
+          r.made.rows.body.rare = 2;
+          emit(r.made, r.rewardList);
+          entry.rare = { boss: b.rare, modelId: r.modelId, enemyId: rareEnemy, upMinutes: b.rule.rareBossUpTime, useAp: b.rule.rareUseAp };
+          entry.reconstructed.push('rareOdds', ...(b.rule.rareUpType === 2 ? ['rareType2'] : []));
+          rareExtra = { rareBossId: rareEnemy, rareBossUpTime: b.rule.rareBossUpTime, rareUseAp: b.rule.rareUseAp, rareUpTypeArg: b.rule.rareUpTypeArg };
+        }
+      }
+      emit(got.made, got.rewardList);
+      out.settingRows.push({ raidSettingId: settingId, bossId: enemyId, bossUpTime: entry.upMinutes, useAp: entry.useAp, rareBossId: enemyId, rareBossUpTime: entry.upMinutes,
+        rareUseAp: entry.useAp, rareUpType: 3, rareUpTypeArg: 1, rareUpTriggerBossId: enemyId, validUnlockRare: 0, unlockRareBossId: [0, 0, 0], unlockRareNum: [0, 0, 0], ...rareExtra });
+      // fight stages: a copy of a story row of the world (its map, never played: no evStage lists it), raidBoss = the setting
+      for (const w of [...b.worlds].sort((x, y) => x - y)) {
+        const sid = RANGES.stage[1] + numbers.entries[`${STORY_KEY}${b.boss}@w${w}`];
+        const ref = refByWorld.get(w) || story[story.length - 1];
+        if (!ref) throw new Error('raid: no story rows in the stage table');
+        out.stageRows.push({ ...JSON.parse(JSON.stringify(ref)), stageId: sid, stageBinId: ref.stageId, id: sid, name: b.boss, useAp: 0, chapterId: Math.floor(sid / 1000), worldId: w,
+          onlyDrama: 0, stageKind: STAGE_KIND, validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0,
+          disableContinue: 0, addLevel: 0, holdKeyblade: 0, validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, validClearGetItem: 0,
+          clearGetItemType: [], clearGetItemId: [], clearGetAssignSkillType: [], clearGetAssignSkillId: [], clearGetAssignSkillLv: [], clearGetItemNum: [], resetSubMission: 0,
+          combinedSubmissionFlag: 0, raidBoss: settingId });
+        entry.stages[w] = sid;
+      }
+      entry.stageId = entry.stages[Math.min(...b.worlds)] || 0;
+      entry.available = true;
+      return entry;
+    });
+    const byName = new Map(bosses.map((b) => [b.boss, b]));
+    const quests = {};
+    for (const [q, x] of p.quests) {
+      const b = byName.get(x.boss), labels = [...x.labels];
+      const rare = b && b.rare && x.setting && x.setting.rareBossId !== x.setting.bossId && [2, 3].includes(x.setting.rareUpType) ? x.setting.rareUpTypeArg : null;
+      quests[q] = { boss: x.boss, census: x.census, stageId: b && b.available ? b.stages[x.stage] : 0, every: rare, reconstructed: labels,
+        ...(x.nearest ? { nearest: x.nearest } : {}) };
+      labels.forEach((l) => reasons.add(l));
+    }
+    for (const [q, f] of p.fixed) {
+      const b = byName.get(f.boss);
+      const ok = b && b.available && (!f.rare || b.rare);
+      (quests[q] ||= { boss: f.boss, census: f.census, stageId: 0, every: null, reconstructed: [] }).fixed = { boss: f.boss, rare: f.rare, name: f.name, census: f.census, stageId: ok ? b.stages[f.stage] : 0 };
+    }
+    for (const b of bosses) b.reconstructed.forEach((l) => reasons.add(l));
+    for (const label of reasons) {
+      const reason = (config.reconstructedWhy || {})[label];
+      if (!reason) throw new Error(`raid: no reason for the label ${label} in reconstructedWhy of raid_config.json`);
+      out.index.reasons[label] = reason;
+    }
+    out.report.story = { bosses: bosses.length, available: bosses.filter((b) => b.available).length, quests: Object.keys(quests).length,
+      spawning: Object.values(quests).filter((q) => q.stageId).length, unknown: p.unknown.length, conflicts: p.conflicts.length, stages: bosses.reduce((t, b) => t + Object.keys(b.stages).length, 0) };
+    return { last: p.last, tableLast: p.tableLast, bosses, quests, conflicts: p.conflicts, unknown: p.unknown };
+  }
   // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
   if (boards) {
     const { doc, ev } = boardDocOf(boards, census, eventRewards);
@@ -936,7 +1139,9 @@ function patch(masterDir, opts = {}) {
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[tableKey[t]])]));
-  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), boards: out.report.boards, own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), ...(out.index.story ? { story: out.index.story } : {}), boards: out.report.boards, own }, null, 1));
+  const st = out.report.story;
+  if (st) console.log(`raid: story bosses ${st.available} of ${st.bosses} available, ${st.spawning} of ${st.quests} story quests spawn (to quest ${out.index.story.last}), ${st.unknown} with the nearest boss, ${st.conflicts} conflicts, ${st.stages} fight stages`);
   if (!out.index.catalog) console.warn(`raid: no Raid Catalog banner: the Training Grounds stage ${CATALOG_STAGE} is not in the master (make-special first)`);
   writeIds(idsFile, out.ids);
   fs.writeFileSync(path.join(gameData, 'raid_maps.json'), JSON.stringify(out.maps, null, 1));
@@ -964,7 +1169,10 @@ function patch(masterDir, opts = {}) {
 function writeIdsFile() {
   const src = process.env.KHUX_RAID_SRC || DEFAULT_SRC, dir2016 = process.env.KHUX_RAID_2016 || DEFAULT_2016;
   const { census, values, rewards, boards, eventRewards } = readSources(src, dir2016);
-  const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null });
+  // the story keys need the story rows (worlds) and the worlds' backgrounds of the served master (read only)
+  const md = path.join(__dirname, 'master_data');
+  const plan = storyPlan({ census, orig2016: readSources(src, dir2016).orig2016, master: { stage: readJson(path.join(md, 'stage.json')), world: readJson(path.join(md, 'world.json')) }, config: loadConfig() });
+  const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null, story: storyKeys(plan) });
   ids.boards = raidBoards.allocateBoardIds(boardDocOf(boards, census, eventRewards).doc, ids, BOARD_FAMILIES);
   writeIds(IDS_FILE, ids);
   console.log(`raid_ids.json: ${Object.keys(ids.rows).length} rows, ${Object.keys(ids.entries).length} entries, ${Object.keys(ids.boards).length} boards`);
@@ -994,4 +1202,4 @@ if (require.main === module) {
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { storyPlan, storyKeys, evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };

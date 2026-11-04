@@ -289,7 +289,7 @@ const tests = {
     w.raid.onStageClear(SPECIAL, { raidPoint: 9000 });
     assert.strictEqual(w.player.raid?.points || 0, 0, 'a Special quest adds nothing');
     w.raid.onStageClear(1010, { raidPoint: 9000 });
-    assert.strictEqual(w.player.raid?.points || 0, 0, 'a story quest adds nothing for now');
+    assert.strictEqual(w.player.raid?.points || 0, 0, 'a story quest adds nothing when raids.json has no story block');
     w.raid.onStageClear(STAGE, { raidPoint: 3000 });
     w.raid.onStageClear(STAGE, { raidPoint: 3000 });
     assert.strictEqual(w.player.raid.boss, null);
@@ -938,6 +938,151 @@ function catWorld() {
   return w;
 }
 
+// ---- Story raid bosses (Task 11): raids.json `story` of make-raid.js on the stub server ----
+// Story rows: quest 4 (Behemoth), 24 (target raid: Trickmaster), 30 (Behemoth, its boss not served), 2 (tutorial), 826 (past the last
+// range), a Proud copy of quest 4 and a Special quest. Behemoth fights on stage 980050, Trickmaster on 980060.
+const STORY_B = 2000500, STORY_T = 2000600, STORY_BR = 2000700, STAGE_B = 980050, STAGE_T = 980060;
+const Q = { 2: 1016, 4: 1019, 24: 10024, 30: 10030, 230: 10230, 826: 40826 };
+function storyWorld(opts = {}) {
+  const w = world(opts);
+  const story = (boss, enemyId, stageId, extra = {}) => ({ key: `story/${boss}`, story: true, boss, modelId: boss === 'Behemoth' ? 3 : 7, available: true, why: null, tier: 'story', start: null,
+    settingId: 30050, enemyId, upMinutes: 10, useAp: 10, rare: null, stageId, stages: { 2: stageId }, reconstructed: [], ...extra });
+  const victoryItem = { raidRewardId: STORY_B * 100 + 11, oddsUpPerLv: 0, pointUpPerLv: 0, validReward: 1, type: [3, 0, 0, 0], id: [90023, 0, 0, 0], assignSkillType: [1, 1, 1, 1],
+    assignSkillId: [0, 0, 0, 0], assignSkillLv: [1, 1, 1, 1], burstUpperNumber: [0, 0, 0, 0], num: [1, 0, 0, 0], odds: [100000, 0, 0, 0] };
+  const mvpItem = { ...victoryItem, raidRewardId: STORY_B * 100 + 21, type: [5, 0, 0, 0], id: [3, 0, 0, 0] };
+  const allItem = { ...victoryItem, raidRewardId: STORY_B * 100 + 31 };
+  w.tables.raidReward.push(victoryItem, mvpItem, allItem);
+  const ids = (r) => [r.raidRewardId, r.raidRewardId, 0, 0, 0];
+  w.tables.raidEnemy.push(enemyRow(STORY_B, 1, 8000, { validParts: 1, parts: [STORY_B + 1, 0, 0, 0, 0], rewardId: ids(victoryItem), mvpRewardId: ids(mvpItem), destroyAllRewardId: ids(allItem) }),
+    enemyRow(STORY_B + 1, 2, 900),
+    enemyRow(STORY_T, 1, 12000, { validParts: 0, rewardId: ids(victoryItem), mvpRewardId: ids(mvpItem), destroyAllRewardId: ids(allItem) }),
+    enemyRow(STORY_BR, 1, 36000, { rare: 2, validParts: 0, rewardId: ids(victoryItem), mvpRewardId: ids(mvpItem), destroyAllRewardId: ids(allItem) }));
+  w.tables.stage.push({ stageId: STAGE_B, raidBoss: 30050, stageKind: 2, id: STAGE_B }, { stageId: STAGE_T, raidBoss: 30060, stageKind: 2, id: STAGE_T },
+    ...Object.entries(Q).map(([q, stageId]) => ({ stageId, id: Number(q), stageKind: 1, worldId: 2 })), { stageId: 1000004, id: 4, stageKind: 4, worldId: 2 },
+    { stageId: SPECIAL, id: SPECIAL, stageKind: 2, worldId: 1 }, { stageId: 18300, id: 555, stageKind: 1, worldId: 2, branchType: 1 });
+  w.index.models = { ...w.index.models, '0003': w.index.models['0007'], '0004': w.index.models['0007'] };
+  w.index.story = {
+    last: 825, tableLast: 555,
+    bosses: [story('Behemoth', STORY_B, STAGE_B, { rare: { boss: 'Behemoth Ω', modelId: 4, enemyId: STORY_BR, upMinutes: 20, useAp: 10 } }), story('Trickmaster', STORY_T, STAGE_T, { settingId: 30060 }),
+      { key: 'story/Enraged Arachnid', story: true, boss: 'Enraged Arachnid', available: false, why: 'graphics', stages: {} }],
+    quests: { 4: { boss: 'Behemoth', stageId: STAGE_B, every: 10000, reconstructed: [] }, 24: { boss: 'Trickmaster', stageId: STAGE_T, every: 10000, reconstructed: ['storyConflict'],
+      fixed: { boss: 'Trickmaster', rare: false, name: 'Trickmaster', stageId: STAGE_T } }, 30: { boss: 'Enraged Arachnid', stageId: 0, every: null, reconstructed: [] },
+    230: { boss: 'Behemoth', stageId: STAGE_B, every: 10000, reconstructed: [], fixed: { boss: 'Behemoth', rare: true, name: 'Behemoth Ω', stageId: STAGE_B } },
+    555: { boss: 'Behemoth', stageId: STAGE_B, every: 10000, reconstructed: [] } },
+    conflicts: [], unknown: [],
+  };
+  w.storyClear = (q, raidPoint = 9000) => w.raid.onStageClear(Q[q] ?? q, { raidPoint });
+  return w;
+}
+Object.assign(tests, {
+  story_spawn_from_points() {
+    const w = storyWorld();
+    w.storyClear(4, 3000); w.storyClear(4, 3000);
+    assert.strictEqual(w.player.raid.boss, null, '6000 < 8600');
+    assert.strictEqual(w.player.raid.points, 6000);
+    w.storyClear(4, 3000);
+    const b = w.player.raid.boss;
+    assert(b, 'the third clear spawns');
+    assert.deepStrictEqual([b.key, b.stageId, b.parts[0].raidEnemyId, b.parts.length, b.useAp, b.endsAt - TUE, b.level], ['story/Behemoth', STAGE_B, STORY_B, 2, 10, 10 * 60000, 1]);
+    assert.strictEqual(w.player.raid.points, 0, 'the counter restarts');
+    // the event raid's quest and a story quest feed one counter (plan decision 3)
+    const v = storyWorld();
+    v.raid.onStageClear(STAGE, { raidPoint: 3000 });
+    v.storyClear(4, 6000);
+    assert.strictEqual(v.player.raid.boss.key, 'story/Behemoth');
+  },
+  replays_count() {
+    const w = storyWorld();
+    w.player.stageScores = { [Q[4]]: 1 }; // quest 4 already cleared: a replay counts the same
+    w.storyClear(4, 5000); w.storyClear(4, 5000);
+    assert(w.player.raid.boss, 'two replays reach the threshold');
+    for (const [id, what] of [[1000004, 'Proud'], [SPECIAL, 'Special'], [9999, 'unknown stage']]) {
+      const v = storyWorld();
+      v.raid.onStageClear(id, { raidPoint: 9000 });
+      assert.strictEqual(v.player.raid?.points || 0, 0, `${what} adds nothing`);
+      assert.strictEqual(v.player.raid?.boss || null, null);
+    }
+    // the variant of Q555 (branchType 1, 18300 + union - 1) is quest 555
+    const u = storyWorld();
+    u.raid.onStageClear(18302, { raidPoint: 9000 });
+    assert.strictEqual(u.player.raid.boss.key, 'story/Behemoth');
+  },
+  tutorial_no_spawn() {
+    const w = storyWorld();
+    for (let i = 0; i < 5; i++) w.storyClear(2, 9000);
+    assert.strictEqual(w.player.raid?.boss || null, null);
+    assert.strictEqual(w.player.raid?.points || 0, 0, 'tutorial quests do not count');
+  },
+  story_stops_at_825() {
+    const w = storyWorld();
+    for (let i = 0; i < 5; i++) w.storyClear(826, 9000);
+    assert.strictEqual(w.player.raid?.boss || null, null, 'quest 826: no spawn whatever the counter');
+    assert.strictEqual(w.player.raid?.points || 0, 0);
+    // a counter already full from earlier quests still spawns nothing at 826
+    w.storyClear(4, 8000);
+    w.storyClear(826, 9000);
+    assert.strictEqual(w.player.raid.boss, null);
+    assert.strictEqual(w.player.raid.points, 8000);
+  },
+  fixed_quest_always() {
+    const w = storyWorld();
+    w.storyClear(24, 0);
+    const b = w.player.raid.boss;
+    assert(b, 'a target raid quest spawns at its clear, with no points');
+    assert.deepStrictEqual([b.key, b.stageId, b.parts[0].raidEnemyId], ['story/Trickmaster', STAGE_T, STORY_T]);
+    assert.strictEqual(w.player.raid.points, 0, 'the counter is untouched');
+    // Ω target: the rare body itself
+    const o = storyWorld();
+    o.storyClear(230, 100);
+    assert.deepStrictEqual([o.player.raid.boss.parts[0].raidEnemyId, o.player.raid.boss.parts[0].rare, o.player.raid.boss.endsAt - TUE], [STORY_BR, 2, 20 * 60000]);
+    assert.strictEqual(o.player.raid.points, 100, 'the clear\'s points still count');
+    // a boss alive blocks the target raid too
+    const z = storyWorld();
+    z.storyClear(4, 9000);
+    const first = z.player.raid.boss;
+    z.storyClear(24, 0);
+    assert.strictEqual(z.player.raid.boss, first, 'no second boss');
+  },
+  story_omega_roll() {
+    const w = storyWorld({ rng: () => 0.00005 }); // below 1 / 10000
+    w.storyClear(4, 9000);
+    assert.strictEqual(w.player.raid.boss.parts[0].raidEnemyId, STORY_BR, 'the Ω with a chance of 1 in every');
+    const v = storyWorld({ rng: () => 0.5 });
+    v.storyClear(4, 9000);
+    assert.strictEqual(v.player.raid.boss.parts[0].raidEnemyId, STORY_B);
+  },
+  unavailable_story_boss_held() {
+    const w = storyWorld();
+    w.storyClear(30, 9000);
+    assert.strictEqual(w.player.raid.boss, null, 'the range\'s boss is not served: no spawn');
+    assert.strictEqual(w.player.raid.points, 9000, 'the counter is held');
+    w.storyClear(4, 100);
+    assert(w.player.raid.boss, 'the next quest with a served boss spawns at once');
+    assert.strictEqual(w.player.raid.points, 0);
+  },
+  story_pays_items_route() {
+    const w = storyWorld();
+    w.storyClear(4, 9000);
+    w.call('list'); w.start();
+    assert.strictEqual(w.clearParts([0, 0]).raidTimeStatus, 3);
+    assert.strictEqual(w.player.raid.levels['story/Behemoth'], 2, '+1 level per defeat');
+    const shown = w.call('reward');
+    assert.strictEqual(shown.raidRewards.length, 1);
+    const paid = w.grants.map((g) => [g.type, g.id]);
+    assert.deepStrictEqual(paid.filter(([t]) => t === 16), [], 'no Raid Coins');
+    assert.ok(paid.some(([t, id]) => t === 3 && id === 90023) && paid.some(([t, id]) => t === 5 && id === 3), `medal and material: ${JSON.stringify(paid)}`);
+    // the next Behemoth starts at LV 2
+    w.storyClear(4, 9000);
+    assert.strictEqual(w.player.raid.boss.level, 2);
+  },
+  story_boss_orphan_dropped() {
+    const w = storyWorld();
+    w.storyClear(4, 9000);
+    w.tables.stage = w.tables.stage.filter((s) => s.stageId !== STAGE_B);
+    assert.strictEqual(w.call('notice').raidNotice.isSelfRaid, 0, 'its fight stage is gone: dropped, as any boss');
+  },
+});
+
 let failed = 0;
 for (const [name, fn] of Object.entries(tests)) {
   try { fn(); console.log(`ok ${name}`); } catch (e) { failed++; console.error(`FAIL ${name}: ${e.message}`); }
@@ -1013,7 +1158,7 @@ function wiring() {
   }
   call(t.respondStageStart, { stageId: 1010, userKeybladeId: 0 });
   call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [], getPoint: { lux: 0, raidPoint: 3000 } });
-  assert.strictEqual(p.raid.points, 3000, 'a story quest adds nothing for now');
+  assert.strictEqual(p.raid.points, 3000, 'a story quest adds nothing when raids.json has no story block');
 
   // a raid error never costs a quest clear
   const onClear = t.raid().onStageClear;

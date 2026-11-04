@@ -247,7 +247,9 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the event raids (Task 10)
   rareOdds: 'odds of the rare boss', boardGender: 'both gender boards open', weekendTimer: 'weekend time limit', questObjectives: 'quest objectives',
   levelDrops: 'level drops', levelDropsPartial: 'level rewards (in part)', boardStandard: 'Raid Board (from a similar raid)', eventCoins: 'Raid Coin rewards',
-  eventHp: 'boss HP (scaled by date)', setting2016: 'time limit and AP (from 2016)', hpTier: 'boss HP of the tiers', boardCells: 'missing Raid Board cells' };
+  eventHp: 'boss HP (scaled by date)', setting2016: 'time limit and AP (from 2016)', hpTier: 'boss HP of the tiers', boardCells: 'missing Raid Board cells',
+  // the labels of the story raid bosses (Task 11)
+  storyBoss: 'story raid boss (unknown quest)', storyOmega: 'odds of the Ω boss in the story', storyConflict: 'story raid boss (sources disagree)', rareType2: 'odds of the rare boss (rule type)' };
 // One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
 const RECON_TEXT = {
   atk: 'The boss\'s attack is not known after 2016: it is deduced from the bosses with original values.',
@@ -282,6 +284,10 @@ const RECON_TEXT = {
   setting2016: 'The time limit and AP come from the 2016 data of the same boss.',
   hpTier: 'The HP of each tier is deduced, since no reading of the tiers exists.',
   boardCells: 'Some Raid Board cells are left out: their reward is not known.',
+  storyBoss: 'The raid boss of this story quest is not known: the boss of the nearest quest is used.',
+  storyOmega: 'How often the Ω boss appears in this story quest is not known: the boss\'s usual rule from the 2016 data is used.',
+  storyConflict: 'The sources name two different raid bosses for this story quest: the community wiki\'s boss is used.',
+  rareType2: 'The rule for the rare boss of this boss is not fully understood: it is read like the usual one-in-N chance.',
 };
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';

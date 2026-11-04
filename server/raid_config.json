@@ -10,6 +10,7 @@
     "capFrom": "2018-10-07"
   },
   "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
+  "story": { "tableLast": 555 },
   "tierQuestLv": {
     "single": 25,
     "Beginner": 25,
@@ -69,6 +70,11 @@
     "levelDrops": "Level drops named by the event's notice (Chip and Dale at LV 10, Setzer at 31 and 71, Young Kairi from LV 30, Halloween Sora at 90 ...): paid to the Present Box when the boss is defeated at that level. The rarity of a medal named without one is the only one the medal table has.",
     "levelDropsPartial": "Some level rewards of this event's notice are not served: not itemised («bonus Medals»), a chance drop with no odds, a Boosted medal with no row, coins with no amount, or Event Coins every 5 levels with no amount.",
     "hpFloor": "HP is never lowered: where the boss's own 2016 row is stronger than the one-tier rule at a level, that level keeps the 2016 HP.",
+    "story": "Story raid bosses (Task 11): tableLast = the last story quest of the 2016 stage table (thethiny 1.1.3 data, quests 1-555), whose stage.raidBoss names the original raidSetting of each quest; the master rows after it were copied by make-story-oltre.js with no source, so they are not read.",
+    "storyBoss": "The wiki gives «???» as this story quest's raid boss (89 quests between 614 and 825, HOLES.md): it takes the boss of the nearest quest with a known boss (the earlier one on a tie). Our choice, declared in the Notices.",
+    "storyOmega": "The Ω chance of this story quest is not known (outside the 2016 table, or its row names another boss): it uses the boss's rule below quest 555, the 2016 raidSetting the table gives that boss most often.",
+    "storyConflict": "The wiki and the 2016 table name different raid bosses for this quest (24 quests, HOLES.md): the census's choice (the wiki's boss) is used, as the plan rules; listed in the Notices.",
+    "rareType2": "The 2016 setting of this boss has rareUpType 2 (Guard Armor 3010, arg 6), a type whose meaning is not read: it is read as type 3, a chance of 1 in rareUpTypeArg.",
     "rareOdds": "The rare boss of this quest (raidSetting rareBossId of the 2016 table) appears with a chance of 1 in rareUpTypeArg per spawn (rareUpType 3). The meaning of the two fields is inferred from their values (Fortress Crab 1: always the Ω the notice names; Queen Bee 5), not read.",
     "questObjectives": "One objective of this event quest has no code here or pays an item we do not have (Avatar Coin, a keyblade or skill objective): the quest uses the standard Raid Time! objectives (Raid Coin x 5).",
     "boardStandard": "No board of this raid is known: it gets the board of the nearest raid of the same type (spec, Answer 5), without the medals exclusive to that other event.",
