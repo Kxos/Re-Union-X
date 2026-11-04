@@ -76,9 +76,9 @@ petPartsId	name	status
 303075	Yellow Squirrelstar Ears
 303076	Red Squirrelstar Ears
 303077	White Mummystar Ears
-303081	[unidentified goat/sheep-like species, gray] Ears
-303082	[unidentified goat/sheep-like species, black-faced] Ears
-303083	[unidentified dog-like species, white with wings] Ears
+303081	Mystery Gray Goat Ears
+303082	Mystery Black Sheep Ears
+303083	Mystery Winged White Dog Ears
 303084	Blue Fenstar Ears
 303085	Gray Fenstar Ears
 303086	Orange Fenstar Ears
@@ -168,9 +168,9 @@ petPartsId	name	status
 304076	Red Squirrelstar Head
 304077	White Mummystar Head
 304078	Brown Mummystar Head
-304081	[unidentified goat/sheep-like species, gray] Head
-304082	[unidentified goat/sheep-like species, black-faced] Head
-304083	[unidentified dog-like species, white with wings] Head
+304081	Mystery Gray Goat Head
+304082	Mystery Black Sheep Head
+304083	Mystery Winged White Dog Head
 304084	Blue Fenstar Head
 304085	Gray Fenstar Head
 304086	Orange Fenstar Head
@@ -262,9 +262,9 @@ petPartsId	name	status
 306078	Brown Mummystar Legs
 306079	Gingerbread Dog Legs
 306080	Gingerbread Cat Legs
-306081	[unidentified goat/sheep-like species, gray] Legs
-306082	[unidentified goat/sheep-like species, black-faced] Legs
-306083	[unidentified dog-like species, white with wings] Legs
+306081	Mystery Gray Goat Legs
+306082	Mystery Black Sheep Legs
+306083	Mystery Winged White Dog Legs
 306084	Blue Fenstar Legs
 306085	Gray Fenstar Legs
 306086	Orange Fenstar Legs
@@ -357,9 +357,9 @@ petPartsId	name	status
 308078	Brown Mummystar Body
 308079	Gingerbread Dog Body
 308080	Gingerbread Cat Body
-308081	[unidentified goat/sheep-like species, gray] Body
-308082	[unidentified goat/sheep-like species, black-faced] Body
-308083	[unidentified dog-like species, white with wings] Body
+308081	Mystery Gray Goat Body
+308082	Mystery Black Sheep Body
+308083	Mystery Winged White Dog Body
 308084	Blue Fenstar Body
 308085	Gray Fenstar Body
 308086	Orange Fenstar Body
@@ -446,9 +446,9 @@ petPartsId	name	status
 309076	Red Squirrelstar Tail
 309079	Gingerbread Dog Tail
 309080	Gingerbread Cat Tail
-309081	[unidentified goat/sheep-like species, gray] Tail
-309082	[unidentified goat/sheep-like species, black-faced] Tail
-309083	[unidentified dog-like species, white with wings] Tail
+309081	Mystery Gray Goat Tail
+309082	Mystery Black Sheep Tail
+309083	Mystery Winged White Dog Tail
 309084	Blue Fenstar Tail
 309085	Gray Fenstar Tail
 309086	Orange Fenstar Tail
@@ -528,8 +528,8 @@ petPartsId	name	status
 402046	Clover Crown
 402047	Cherry Blossom Hat
 402048	Red Lionstar Style
-402049	[unidentified pink fluffy wig]
-402050	[unidentified white starry hair]
+402049	Mystery Pink Wig
+402050	Mystery White Starry Hair
 402051	Tadashi's Hat
 402052	Blue Spring Bunny Cowl
 402053	Pink Spring Bunny Cowl
@@ -538,7 +538,7 @@ petPartsId	name	status
 402056	Fire Samurai: Helm
 402057	Water Samurai: Helm
 402058	Monsters, Inc. Helmet
-402059	[unidentified black starry wig]
+402059	Mystery Black Starry Wig
 402060	KH III Sora Ornament A	recon-ok
 402061	KH III Sora Ornament B
 402062	White Hydrangea: Hat
@@ -609,7 +609,7 @@ petPartsId	name	status
 402127	Red Heart-Shaped Hat
 405001	Red Bowtie
 405002	Yellow Scarf
-405003	[unidentified orange striped scarf]
+405003	Mystery Orange Striped Scarf
 405004	Wreath
 405005	Collar
 405006	Furoshiki Cloth
@@ -633,8 +633,8 @@ petPartsId	name	status
 405024	Valentine Rouge: Choker
 405025	Staff Pass
 405026	Analog Watch
-405027	[unidentified gold chain with blue pendant]
-405028	[unidentified Egyptian collar]
+405027	Mystery Gold Pendant Chain
+405028	Mystery Egyptian Collar
 405029	Chirithy Scarf
 405030	Collar of Hearts
 407001	Angel Wings

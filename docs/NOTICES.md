@@ -66,7 +66,7 @@ The **SPIRIT PART GET!** title of the result survives only in the Japanese files
 
 Some Spirit parts (for example Balloon Fairies and Flying Carpet) looked blurry: their original pictures are sharp but were drawn at a smaller size and then enlarged. They are now drawn at their full size; the pictures themselves are unchanged.
 
-**18 Spirit parts whose pictures were lost are back**, among them **Elsa’s Magic, Kite, Balloon Zazu**, Goldfish, Popcorn Hat, Mickey Mask, Minnie Mask and **Olaf’s Snow Cloud**. Their pictures are **reconstructed** from the original game files: the same item’s avatar accessory kept the identical pictures, and a few small missing pieces are copies of a twin piece of the same part (the Kite tails wave through 4 poses instead of 8; the Black Heart-Shaped Hat uses the placement of the Red one); Olaf’s Snow Cloud has its small round snow dot redrawn as a plain white disc. The Elsa’s Magic VIP week now gives the part.
+**18 Spirit parts whose pictures were lost are back**, among them **Elsa’s Magic, Kite, Balloon Zazu**, Goldfish, Popcorn Hat, Mickey Mask, Minnie Mask and **Olaf’s Snow Cloud**. Their pictures are **reconstructed** from the original game files: the same item’s avatar accessory kept the identical pictures, and a few small missing pieces are copies of a twin piece of the same part (the Kite tails wave through 4 poses instead of 8; the Black Heart-Shaped Hat uses the placement of the Red one); Olaf’s Snow Cloud has its small round snow dot redrawn as a plain white disc. The Elsa’s Magic VIP week now gives the part. 21 parts have lost their original names (three unknown species and six accessories): they have provisional names that start with **Mystery**.
 
 ## Draw Points
 
