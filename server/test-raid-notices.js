@@ -58,6 +58,11 @@ const tests = {
     assert.deepStrictEqual([doc.rows['WW-W-2018-09-03'].noticeId, doc.rows['WW-W-2018-09-03'].confidence], [44001, 'high']);
     assert.strictEqual(doc.rows['WW-W-2018-10-15'].noticeId, 45652);
     assert.strictEqual(doc.rows['WW-E17890-1'].noticeId, 17890);
+    // user 04-11: the end-of-service weeks (from 2021-03-01) had no notice of their own: a Details row marked eos, never the
+    // end-of-service notice itself
+    assert.ok(!Object.values(doc.rows).some((r) => r.noticeId === mn.EOS.noticeId), 'never the end-of-service notice');
+    const eos = Object.entries(doc.rows).filter(([id]) => /^WW-W-2021-0[3-6]/.test(id));
+    assert.ok(eos.length === 12 && eos.every(([, r]) => r.eos && r.noticeId === null), `12 end-of-service weeks marked eos (${eos.length})`);
     const n = Object.keys(doc.rows).length;
     console.log(`  (real: ${n} census rows with a notice, ${doc.unmatched.length} without)`);
   },
@@ -131,10 +136,12 @@ const tests = {
     const body = ['● Dragon Battle Event!', 'Dragon text.', '● Weekly Raid Event', '★ Fight the Raid Boss!', 'Raid text.', '● Union Cross', 'Cross text.'];
     const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
     const at = (s) => html.indexOf(s);
-    assert.ok(at('Raid text.') > 0 && at('Raid text.') < at('Dragon text.') && at('Dragon text.') < at('Cross text.'), 'the raid first, the others in their order');
+    // user 04-11: only the raid part of a notice that covers several events (the other parts go to their own catalogs later)
+    assert.ok(at('Raid text.') > 0 && at('Dragon text.') < 0 && at('Cross text.') < 0 && !/class="oth"/.test(html), 'only the raid section');
     assert.ok(!/<details[^>]*>\s*<summary>[^<]*Weekly Raid Event/.test(html), 'the raid section is open');
-    assert.ok(/<details class="oth"><summary>Other news in this notice: Dragon Battle Event!<\/summary>/.test(html));
-    assert.ok(/<details class="oth"><summary>Other news in this notice: Union Cross<\/summary>/.test(html));
+    // the Union Cross Radiant Rewards section of a 2021 notice is not the raid's (user 04-11, notice of 2021-01-01)
+    const ux = pages.parseNotice(['● New Year Raid Event', 'r', '● New Year Union Cross Radiant Rewards', 'u', '● Radiant Rewards Board', 'b']);
+    assert.deepStrictEqual(ux.sections.map((s) => s.raid), [true, false, true]);
     // the boss named in a heading also marks the raid section; one section only: no folding
     const boss = pages.parseNotice(['● News', 'a', '● Trickmaster appears!', 'b'], ['Trickmaster']);
     assert.deepStrictEqual(boss.sections.map((s) => s.raid), [false, true]);
@@ -150,7 +157,7 @@ const tests = {
     const one = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body: ['★ Monthly Raid Event!', 'x'] } } }, ctx());
     assert.ok(!/class="oth"/.test(one));
     // the «On this server» box last, with the player-facing labels, not the builder notes
-    assert.ok(at('On this server') > at('Cross text.'));
+    assert.ok(at('On this server') > at('Raid text.'));
     assert.ok(html.includes('ATK') && !html.includes('No ATK of a raid is known'), 'labels, not the reasons of raids.json');
   },
   escapes() {
@@ -180,6 +187,11 @@ const tests = {
     const html = pages.detailPage(index(), 8100, ctx({ hasNotice: (id) => id === 'WW-W-2019-10-07' }));
     assert.ok(html.includes('/web/raid/notice/8100?from=raid'));
     assert.ok(!pages.detailPage(index(), 8101, ctx({ hasNotice: (id) => id === 'WW-W-2019-10-07' })).includes('/web/raid/notice/'), 'no notice: no link');
+  },
+  eos_week_page() {
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: null, eos: true } }, notices: {} }, ctx());
+    assert.ok(/No notice for this week/.test(html) && /end of service/.test(html) && /<img class="banner"/.test(html) && /On this server/.test(html), 'end-of-service page');
+    assert.ok(!/Notice not available/.test(html));
   },
   missing_notice() {
     for (const [doc, id] of [[null, 8100], [{ rows: {}, notices: {} }, 8100], [{ rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: {} }, 8100], [{ rows: {}, notices: {} }, 1234], [undefined, 'x']]) {

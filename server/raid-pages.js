@@ -291,8 +291,8 @@ function detailPage(index, evStageId, ctx = {}) {
 // a ★ line under a heading as its tagline, «[Updated …]» lines marked, ・ / • lines one list, * lines notes, «Name x N» runs a
 // table (item, quantity), a PT + UTC period pair a small table, the «Pacific Time / UTC» hour lists (PT column then UTC column
 // in the source) paired in a table, ▽title▽ … △CLOSE△ a collapsed block. A notice of several events (2019-2021): the raid's
-// section first and open (heading with «Raid», «Radiant» or a boss of the week), the others below, collapsed («Other news in
-// this notice: …»). Player rankings and page boilerplate are removed (make-raid-notices.js scrub, run again here). Last, the
+// section only (heading with «Raid», «Radiant» or a boss of the week; user 04-11: the other events go to their own catalogs
+// later). Player rankings and page boilerplate are removed (make-raid-notices.js scrub, run again here). Last, the
 // «On this server» box: the status of the raid here, the fake clock, the reconstructed values in the player's words (RECON_LABEL),
 // the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid' (opened from the details
 // page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
@@ -327,7 +327,9 @@ function parseNotice(body, bosses = []) {
   }
   if (!sections[0].lines.length) sections.shift();
   const names = bosses.filter(Boolean).map((b) => b.toLowerCase());
-  for (const s of sections) s.raid = !!s.head && (/\braid|radiant/i.test(s.head) || names.some((b) => s.head.toLowerCase().includes(b)));
+  // «Radiant Rewards» is a raid section only when it is not the Union Cross one («New Year Union Cross Radiant Rewards», 2021)
+  for (const s of sections) s.raid = !!s.head && (/\braid/i.test(s.head) || (/radiant/i.test(s.head) && !/union\s*cross|\bcross\b/i.test(s.head))
+    || names.some((b) => s.head.toLowerCase().includes(b)));
   // no heading names the raid (65407 «May Special Campaign!», the end-of-service notice): the event that speaks of raids most
   if (!sections.some((s) => s.raid)) {
     const n = (s) => (s.head ? s.lines.filter((l) => /\braid/i.test(l)).length : 0);
@@ -401,8 +403,8 @@ function noticeBody(body, bosses) {
   const box = (s, cls = '') => `<div class="ns${cls}">${s.head ? `<h2>${esc(s.head)}</h2>` : ''}${noticeBlocks(s.lines)}</div>`;
   const named = sections.filter((s) => s.head);
   if (named.length < 2 || !sections.some((s) => s.raid)) return sections.map((s) => box(s, s.raid ? ' raid' : '')).join('');
-  return sections.filter((s) => s.raid).map((s) => box(s, ' raid')).join('')
-    + sections.filter((s) => !s.raid).map((s) => `<details class="oth"><summary>Other news in this notice: ${esc(s.head || 'opening lines')}</summary>${box(s)}</details>`).join('');
+  // only the raid part (user 04-11): the other events of the notice belong to their own catalogs and are added there later
+  return sections.filter((s) => s.raid).map((s) => box(s, ' raid')).join('');
 }
 function noticeMissing(row, ctx) {
   const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
@@ -416,24 +418,36 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     row = calendar.catalogRows(index || { entries: [] }).find((r) => r.evStageId === Number(evStageId)) || null;
     const hit = row && doc && doc.rows ? doc.rows[row.censusId] : null;
     const n = hit && doc.notices ? doc.notices[hit.noticeId] : null;
-    if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
-    const st = statusOf(row, ctx);
-    const labels = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))].map((l) => RECON_LABEL[l] || l);
+    const st = row && statusOf(row, ctx);
+    const labels = row ? [...new Set(row.entries.flatMap((e) => e.reconstructed || []))].map((l) => RECON_LABEL[l] || l) : [];
     const recon = labels.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources: ${labels.map(esc).join(', ')}.</p>` : '';
-    const off = row.entries.filter((e) => !e.available);
+    const off = row ? row.entries.filter((e) => !e.available) : [];
     const offLine = off.length ? `<p>Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')}. Its graphics or data are incomplete in the surviving game files.</p>` : '';
-    const back = ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
+    const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
+    const links = row ? `<ul class="ow"><li><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a></li><li><a href="/web/raid/catalog">Raid Catalog ›</a></li></ul>` : '';
+    // end-of-service weeks (from 2021-03-01, make-raid-notices.js eos): no notice of their own existed (user 04-11)
+    if (hit && hit.eos) {
+      const title = titleOf(row);
+      return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
+        + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
+        + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>`
+        + '<div class="ns raid"><h2>No notice for this week</h2><p>This raid ran in the last weeks of the original game, during the end of service: '
+        + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div>'
+        + `<div class="srv"><h2>On this server</h2><p>This server follows your Story instead of the calendar: this week of the original game (${esc(dateRange(row))}) `
+        + 'opens when your Story reaches it.</p>'
+        + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
+    }
+    if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
       + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
       + noticeBody(n.body, row.bosses)
       + '<div class="srv"><h2>On this server</h2>'
-      + '<p>The text above is the original notice, unchanged (the lists of top players are left out). This server follows your Story instead of the calendar: the dates in the notice '
+      + '<p>The text above is the raid part of the original notice, unchanged (other events of the same notice and the lists of top players are left out). This server follows your Story instead of the calendar: the dates in the notice '
       + `are those of the original game (${esc(dateRange(row))}); the raid opens when your Story reaches that week.</p>`
       + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}`
-      + `<ul class="ow"><li><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a></li><li><a href="/web/raid/catalog">Raid Catalog ›</a></li></ul></div>`
-      + `${back}</body></html>`;
+      + `${links}</div>${back}</body></html>`;
   } catch (e) {
     return noticeMissing(row, ctx);
   }
