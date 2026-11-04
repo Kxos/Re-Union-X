@@ -306,11 +306,12 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
 
 // Lines of the list read by recon/tools/import_originals.py (destination, source, path): the card picture of every Raid Board
 // under its own id. jp: the JP 4.3.1 file of the same art; screenshot: the card cut from a screenshot of the original game by
-// recon/tools/raid_board_screens.py into the --loc folder (img/sphere_incentive_ww/<board key>.png).
+// recon/tools/raid_board_screens.py into the --loc folder (img/sphere_incentive_ww/<board key>.png, «:» of an event key as «_»:
+// Windows file names have no colon).
 function artLines(art) {
   const head = ['# Raid Board card pictures, written by server/make-raid.js from raid_config.json boards.art (docs/notes/bacheche.md «Raid Boards»).',
     '# Columns as in originals.tsv. jp = the JP 4.3.1 picture of the same board art; loc = cut from a screenshot of the original game.'];
-  const line = (a) => [`img/sphere_incentive/${a.sphereBoardId}.png`, a.jp ? 'jp' : 'loc', a.jp || `=img/sphere_incentive_ww/${a.board}.png`].join('\t');
+  const line = (a) => [`img/sphere_incentive/${a.sphereBoardId}.png`, a.jp ? 'jp' : 'loc', a.jp || `=img/sphere_incentive_ww/${String(a.board).replace(/:/g, '_')}.png`].join('\t');
   return [...head, ...art.map(line)].join('\n') + '\n';
 }
 
