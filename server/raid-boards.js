@@ -65,6 +65,12 @@ function itemIndex(master) {
   };
   return {
     medal: by((master.medal || []).filter((r) => !r.groupId || r.groupId === r.medalId), (r) => `${r.rare}|${norm(r.name)}`),
+    // boosted rows (medal-boost.js: a separate row, groupId = the normal medal) by normal id and bonus: `<groupId>:<STR>:<DEF>`
+    boosted: (() => {
+      const base = new Map((master.medal || []).map((r) => [r.medalId, r]));
+      return by((master.medal || []).filter((r) => r.groupId && r.groupId !== r.medalId && base.has(r.groupId)),
+        (r) => `${r.groupId}:${r.attack - base.get(r.groupId).attack}:${r.defense - base.get(r.groupId).defense}`);
+    })(),
     material: by(master.material, (r) => norm(r.name)),
     pet: by(master.petParts, (r) => norm(r.name)),
     avatar: by(master.avatarParts, (r) => `${r.gender}|${norm(r.name)}`),
@@ -78,11 +84,22 @@ const one = (list, what) => {
 };
 
 // {sel, id, value} or {why}
+const BOARD_BOOST = { str: 1000, def: 0 };
 function matchReward(idx, kind, name, qty) {
   const k = norm(kind), value = qty || 1;
   if (k === 'jewel') return { sel: SEL.jewel, id: 0, value };
   if (TICKETS[norm(name)] !== undefined) return { sel: SEL.drawTicket, id: TICKETS[norm(name)], value };
   if (k === 'medal') {
+    // «6★ Trickmaster (Boosted)»: the boosted row of that medal with the bonus the raid notices give: +1,000 base Strength only
+    // (notices 33888 and 34680, khuxwiki; docs/notes/raid.md «Boosted medals on the boards»)
+    const bm = /^(\d+)\s*★\s*(.+?)\s*\(Boosted\)\s*$/i.exec(String(name).trim());
+    if (bm) {
+      const base = one(idx.medal.get(`${bm[1]}|${norm(bm[2])}`), 'medal');
+      if (!base) return { why: 'no medal of that name and rarity' };
+      if (base.why) return base;
+      const hit = one(idx.boosted && idx.boosted.get(`${base.medalId}:${BOARD_BOOST.str}:${BOARD_BOOST.def}`), 'boosted medal');
+      return !hit ? { why: `no boosted row (+${BOARD_BOOST.str} STR, +${BOARD_BOOST.def} DEF) of that medal` } : hit.why ? hit : { sel: SEL.medal, id: hit.medalId, value };
+    }
     const m = /^(\d+)\s*★\s*(.+)$/.exec(String(name).trim());
     const r = m && one(idx.medal.get(`${m[1]}|${norm(m[2])}`), 'medal');
     return !r ? { why: 'no medal of that name and rarity' } : r.why ? r : { sel: SEL.medal, id: r.medalId, value };

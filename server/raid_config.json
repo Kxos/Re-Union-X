@@ -163,9 +163,11 @@
       "gems-sun": {"jp": "img/sphere_incentive/2400440.png"},
       "gems-moon": {"jp": "img/sphere_incentive/2400441.png"}
     },
+    "boostedMedals": [
+      {"name": "Trickmaster", "rare": 6, "str": 1000, "def": 0, "source": "notice 33888 (Nov 2017 Daily Raid Event): Boosted Trickmaster: 1,000 more base Strength; khuxwiki Trickmaster (Medal)"},
+      {"name": "Destroyer Behemoth", "rare": 6, "str": 1000, "def": 0, "source": "notice 34680 (Dec 2017 Monthly Raid Event): one boosted copy; khuxwiki Destroyer Behemoth: 1,000 more base strength; JP digest: atk +1000"}
+    ],
     "unmatched": {
-      "6★ Trickmaster (Boosted)": "Boosted Trickmaster (+1,000 base Strength, notice 33888): no Boosted row is identified in the medal table; the cell is left off rather than paying the plain medal.",
-      "6★ Destroyer Behemoth (Boosted)": "Boosted Destroyer Behemoth: no Boosted row is identified in the medal table; the cell is left off rather than paying the plain medal.",
       "Booster [HD Vanitas (EX+)] +5%": "Event Boosters are not built yet (they come with the events, I-166): the cell is left off."
     },
     "reconstructedTexture": ["Starlight Ears", "Dazzling Disco"],
