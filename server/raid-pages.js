@@ -44,10 +44,10 @@ const boardsOf = (row, ctx) => {
   if (!ids.length) return 'none';
   return ctx.boardDone && ids.every((id) => ctx.boardDone(id)) ? 'done' : 'todo';
 };
-const BOARD_OPTS = [['all', 'All'], ['done', 'Completed', 'unlocked'], ['todo', 'Not completed', 'lock']];
+const BOARD_OPTS = [['all', 'All'], ['done', 'Completed', 'bdone'], ['todo', 'Not completed', 'btodo']];
 const boardCls = (v) => (v === 'all' ? '' : ` bd-${v}`);
 // chips chosen: Completed blue (the open padlock), Not completed grey
-const CSS = SPECIAL_CSS + '.o.bd-done.on{background:#1a6fa8;border-color:#62a7ff}.o.bd-todo.on{background:#5a6470;border-color:#9aa4ae}';
+const CSS = SPECIAL_CSS + '.o.bd-done.on{background:#2e9e3e;border-color:#6fd47f}.o.bd-todo.on{background:#5a6470;border-color:#9aa4ae}';
 
 const pill = (c, k, text) => `<span class="s s-${c}">${k ? icon(k) : ''}${text}</span>`;
 // the pills the page script writes after a keep / remove: [row class, html]

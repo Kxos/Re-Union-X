@@ -168,7 +168,45 @@ def draw_medal():
     return c
 
 
-DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal, 'unlocked': draw_unlocked}
+# Raid Boards filter (RAID BOARDS: Completed / Not completed): a board is a grid of nodes, so the chips show a 3x3 board.
+# Completed = every node lit (white) on a green dot with a check mark; Not completed = a grey dot with only some nodes lit and
+# the others hollow. (The padlocks used before said «locked», not «how far the board is».)
+DOT['bdone'] = (46, 158, 62)
+DOT['btodo'] = (90, 100, 112)
+
+
+def _board(d, lit):
+    """3x3 nodes: lit ones filled, the others a hollow ring; thin white links between neighbours."""
+    xs, ys = (56, 96, 136), (54, 94, 134)
+    for i in range(3):
+        d.line((xs[0], ys[i], xs[2], ys[i]), fill=(255, 255, 255, 150), width=5)
+        d.line((xs[i], ys[0], xs[i], ys[2]), fill=(255, 255, 255, 150), width=5)
+    for r, y in enumerate(ys):
+        for q, x in enumerate(xs):
+            box = (x - 15, y - 15, x + 15, y + 15)
+            if (r, q) in lit:
+                d.ellipse(box, fill=WHITE_GLYPH)
+            else:
+                d.ellipse(box, fill=None, outline=(255, 255, 255, 105), width=5)   # dim ring: clearly not lit at chip size
+
+
+def draw_bdone():
+    c, d = dot(DOT['bdone'])
+    _board(d, {(r, q) for r in range(3) for q in range(3)})
+    d.ellipse((112, 112, 184, 184), fill=(255, 255, 255, 255))          # check badge, bottom right
+    d.line((126, 150, 142, 166), fill=DOT['bdone'] + (255,), width=12)
+    d.line((140, 168, 170, 128), fill=DOT['bdone'] + (255,), width=12)
+    return c
+
+
+def draw_btodo():
+    c, d = dot(DOT['btodo'])
+    _board(d, {(0, 0), (1, 1), (2, 2)})   # a few nodes lit: in progress
+    return c
+
+
+DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal, 'unlocked': draw_unlocked,
+         'bdone': draw_bdone, 'btodo': draw_btodo}
 
 
 def main(argv):

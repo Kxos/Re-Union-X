@@ -138,7 +138,7 @@ const tests = {
     assert.strictEqual(bd(html, 8180), 'done');
     assert.strictEqual(bd(pages.catalogPage(ix, ctx({ index: ix })), 8071), 'todo', 'no lookup: nothing completed');
     assert(/<h4>RAID BOARDS<\/h4><div class="opts" data-g="bd">/.test(html), 'RAID BOARDS group');
-    assert(/data-v="done"><img[^>]*unlocked\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*lock\.png[^>]*>Not completed</.test(html), 'chips with the padlock icons');
+    assert(/data-v="done"><img[^>]*bdone\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*btodo\.png[^>]*>Not completed</.test(html), 'chips with the board icons (completed board with a check, partly lit board), not padlocks');
     assert(html.includes('Raid Boards: '), 'summary tag label');
     assert.strictEqual(count(rowOf(html, 8071), 'class="s s-'), 1, 'still one status line');
   },
