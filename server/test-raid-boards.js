@@ -62,6 +62,20 @@ const check = (body) => call(t.respondSphereCheck, body);
 const medals = () => (p.medals || []).length;
 
 const tests = {
+  boosted_cell_resolves() {
+    // review of 04-11: «6★ Trickmaster (Boosted)» was left off the boards although the boosted rows exist: the resolver skipped them.
+    // The notices give +1,000 base Strength only, so the STR+DEF row of the banners (id 2xxxxxx) must NOT be taken for it.
+    const base = { medalId: 301180, name: 'Trickmaster', rare: 6, groupId: 0, attack: 7261, defense: 7000 };
+    const strOnly = { medalId: 1301180, name: 'Trickmaster', rare: 6, groupId: 301180, attack: 8261, defense: 7000 };
+    const strDef = { medalId: 2301180, name: 'Trickmaster', rare: 6, groupId: 301180, attack: 8261, defense: 8000 };
+    const idx = rb.itemIndex({ medal: [base, strDef, strOnly] });
+    const hit = rb.matchReward(idx, 'medal', '6★ Trickmaster (Boosted)', 1);
+    assert.strictEqual(hit.id, 1301180, JSON.stringify(hit));
+    assert.strictEqual(rb.matchReward(idx, 'medal', '6★ Trickmaster', 1).id, 301180, 'the plain name still gives the normal medal');
+    const none = rb.matchReward(rb.itemIndex({ medal: [base, strDef] }), 'medal', '6★ Trickmaster (Boosted)', 1);
+    assert.ok(none.why && /boosted/.test(none.why), 'no STR-only row: the cell is refused, not paid with another variant');
+  },
+
   listed_with_the_raid() {
     p.raidSpherePoint = 0;
     const datas = list();

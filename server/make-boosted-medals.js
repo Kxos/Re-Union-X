@@ -83,6 +83,16 @@ function patch(masterDir, catalogFile) {
       }
     }
   }
+  // Raid Board boosted medals (raid_config.json boards.boostedMedals: notices 33888 / 34680): a boosted copy with a bonus no banner
+  // uses (+1,000 STR only), so its row is made here, before make-raid.js matches the board cells
+  const cfgFile = path.join(__dirname, 'raid_config.json');
+  if (fs.existsSync(cfgFile)) {
+    for (const e of (JSON.parse(fs.readFileSync(cfgFile, 'utf8')).boards || {}).boostedMedals || []) {
+      const rows = (byName.get(mb.norm(e.name)) || []).filter((r) => r.rare === e.rare);
+      if (!rows.length) missingNames.add(e.name);
+      for (const r of rows) want('raid', r, e.str, e.def);
+    }
+  }
   if (added.length || regrouped) {
     added.sort((a, b) => a.medalId - b.medalId);
     fs.writeFileSync(medalFile, JSON.stringify(medals.concat(added)));
