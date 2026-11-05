@@ -22,7 +22,8 @@ const mb = require('./medal-boost');
 
 const familyOf = (on) => (on.tierMin !== undefined ? 'tier' : on.names ? 'names' : on.slots ? 'slots' : 'star');
 
-function patch(masterDir, catalogFile) {
+// raidConfigFile: the raid_config.json with boards.boostedMedals (default server/raid_config.json; tests pass their own)
+function patch(masterDir, catalogFile, raidConfigFile = path.join(__dirname, 'raid_config.json')) {
   const medalFile = path.join(masterDir, 'medal.json');
   const medals = JSON.parse(fs.readFileSync(medalFile, 'utf8'));
   const catalog = require('./medal-renumber').mapCatalog(JSON.parse(fs.readFileSync(catalogFile, 'utf8'))); // I-225 ids
@@ -85,8 +86,8 @@ function patch(masterDir, catalogFile) {
   }
   // Raid Board boosted medals (raid_config.json boards.boostedMedals: notices 33888 / 34680): a boosted copy with a bonus no banner
   // uses (+1,000 STR only), so its row is made here, before make-raid.js matches the board cells
-  const cfgFile = path.join(__dirname, 'raid_config.json');
-  if (fs.existsSync(cfgFile)) {
+  const cfgFile = raidConfigFile;
+  if (cfgFile && fs.existsSync(cfgFile)) {
     for (const e of (JSON.parse(fs.readFileSync(cfgFile, 'utf8')).boards || {}).boostedMedals || []) {
       const rows = (byName.get(mb.norm(e.name)) || []).filter((r) => r.rare === e.rare);
       if (!rows.length) missingNames.add(e.name);

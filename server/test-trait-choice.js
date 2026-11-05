@@ -13,6 +13,8 @@ try { fs.unlinkSync(SAVE); } catch { /* nuovo */ }
 process.env.KHUX_MASTER_DIR = MASTER;
 process.env.KHUX_SAVE = SAVE;
 process.env.KHUX_PET = '1';
+// two training slots open: since the Spirit Training slot rules (9ef1f02) slot 2 needs VIP, and the test trains 101 + 102
+process.env.KHUX_PET_TRAIN_SLOTS = '2';
 const log = console.log;
 const quiet = (fn) => { console.log = () => {}; try { return fn(); } finally { console.log = log; } };
 const { _test: t } = quiet(() => require('./server'));

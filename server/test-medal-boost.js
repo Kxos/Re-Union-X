@@ -44,8 +44,8 @@ const log = console.log;
 console.log = () => {};
 let p1, p2, p3;
 try {
-  p1 = patch(master, catFile);
-  p2 = patch(master, catFile);
+  p1 = patch(master, catFile, null);
+  p2 = patch(master, catFile, null);
 } finally { console.log = log; }
 const rows = JSON.parse(fs.readFileSync(path.join(master, 'medal.json'), 'utf8'));
 check(p1 && p1.added === 1, `prima chiamata: 1 aggiunta (${JSON.stringify(p1)})`);
@@ -60,7 +60,7 @@ cat.banners[0].enhance.boosted = [
 ];
 fs.writeFileSync(catFile, JSON.stringify(cat));
 console.log = () => {};
-try { p3 = patch(master, catFile); } finally { console.log = log; }
+try { p3 = patch(master, catFile, null); } finally { console.log = log; }
 const rows3 = JSON.parse(fs.readFileSync(path.join(master, 'medal.json'), 'utf8'));
 check(p3 && p3.added === 1 && rows3.some((x) => x.medalId === 3301993) && !rows3.some((x) => x.medalId === 1301993), `per Tier (${JSON.stringify(p3)})`);
 check(p3 && p3.families && p3.families.tier && p3.families.tier.added === 1, 'conteggio per famiglia');
@@ -100,6 +100,21 @@ const orig = new Map([[X.medalId, X], [XR.medalId, XR]]);
 check(mb.origBoostedBase(XR, orig) === 31196 && mb.origBoostedBase(X, orig) === 0, 'rara originale: base');
 check(mb.origBoostedBase({ ...XR, name: 'Altro' }, orig) === 0, 'rara originale: nome diverso = no');
 check(mb.boostedIndex([X, { ...XR, groupId: 31196 }]).get('31196:1000:0') === 131196, 'indice: rara originale per differenza di STR');
+
+// Raid Board boosted medals (raid_config.json boards.boostedMedals, 2ac3b24): a +1,000 STR-only copy matched by name and rarity
+const tmpR = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-boost-raid-'));
+fs.writeFileSync(path.join(tmpR, 'medal.json'), JSON.stringify([{ ...N, type: 1, rare: 6, guiltValue: 10 }]));
+const raidCfg = path.join(tmpR, 'raid_config.json');
+fs.writeFileSync(raidCfg, JSON.stringify({ boards: { boostedMedals: [{ name: 'SN++ - Master Eraqus', rare: 6, str: 1000, def: 0 }, { name: 'Assente', rare: 6, str: 1000, def: 0 }] } }));
+const catR = path.join(tmpR, 'gacha_catalog.json');
+fs.writeFileSync(catR, JSON.stringify({ ...cat, banners: [] }));
+let pr;
+console.log = () => {};
+try { pr = patch(tmpR, catR, raidCfg); } finally { console.log = log; }
+const rowsR = JSON.parse(fs.readFileSync(path.join(tmpR, 'medal.json'), 'utf8'));
+check(pr && pr.added === 1 && pr.missing === 1 && rowsR.some((x) => x.medalId === 1301993 && x.attack === 45011 && x.defense === 16591),
+  `Raid Board boosted: +1,000 STR only (${JSON.stringify(pr)})`);
+fs.rmSync(tmpR, { recursive: true, force: true });
 
 if (errors.length) { console.log(`ERRORI (${errors.length})`); errors.forEach((e) => console.log(' -', e)); process.exit(1); }
 console.log('OK: righe boosted (id, badge, statistiche, indice, patch idempotente, famiglie)');
