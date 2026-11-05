@@ -293,6 +293,8 @@ edge (x 1722) and check that Undo is gray. To do: `target` 3 for the random Supe
 <a id="evolve-open-questions"></a>
 ### Evolve: open questions of I-205 (research 05-11, no bench)
 
+**Applied 05-11 (user decisions, rev 270, e96843d):** Kyroo LV 7-9 no longer evolve (`make-game-tables.js` skips the `Reference` chain of «[SAB LV N]» medals), Queen of Hearts kept at 1/2/2, 90085 renamed «Fantasia Mickey A» (`medal-name-fix.js`); benched on a copy of `maxpower`. Below, the research that led to them.
+
 Sources checked: khuxwiki pages in `wiki_all.json`, Roboloid `medal_db.json`, thethiny 2017 SE master
 (`external\thethiny\medal_dec.json`), the EN notices in `private\events\sources\raid_census\work\notice_text.json`,
 JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `server/master_data/medal.json` (05-11).
