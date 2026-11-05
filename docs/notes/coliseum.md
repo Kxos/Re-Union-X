@@ -86,3 +86,29 @@ is therefore not enough (and probably useless): the season, tiers and rounds mus
 3. Stage files for the WW months not in the JP data (regenerate from the wiki lineups, mark as a deviation).
 4. Coliseum boards (rows, node costs) and the `/colosseum/reward/list` format.
 5. Exact shortcut rule, loss rule and ranking score.
+
+## Gap research (5 November 2026, night)
+
+Web and data side; details and per-id tables in the private dossier.
+
+- **Arena.** 545 of the 546 JP stage files use room `OC_0001_00_00` with one part (the other is a test id); every enemy
+  has level = round number (one exception). A missing month needs only its lineup (proven; matches the user's memory
+  that the map never changed).
+- **Wiki lineups are exact.** On the 18 WW months whose JP stage set is on disk, one khuxwiki enemy row = one wave:
+  wave count equal in 180 of 180 rounds, enemy count per wave 177 of 180 (proven).
+- **Gap months.** WW 2017-06 .. 2017-12 = JP 2016-11 .. 2017-05 (khuxwiki and the JP wiki agree round by round, 10 of 10
+  in all 7 months: proven). WW 2018-04 = JP 2017-09 and WW 2018-05 = JP 2017-10, both on disk (proven). WW 2019-05, 06,
+  08, 09 = the same JP month, on disk (proven). Still lineup-only (wiki, probable): WW 2016-08 .. 2016-11 and 2019-07.
+- **Enemy variant rule** (1.1.3 master, 110 Coliseum rows with their base): same level knots and ATK (110 of 110), same
+  DEF (103), same HP at LV 1/35/100 (90 of 95 changed rows), HP at LV 300 = 3 x base (78 of 95), HP at LV 999 =
+  40/11 x own LV 300 (81 of 95), no munny or raid points (proven). Applied to the 202 missing ids: 3 derivable by
+  the rule, 34 month-specific copies of a 1.1.3 row (probable), 15 weak (2019 ids), **150 unknown** (no original row
+  for the model anywhere on disk; KHUX shows no enemy HP numbers, so only estimates as for raids).
+- **Tier rewards.** The 1.1.3 master does carry the tier medals (reward slots 1-2, Moogle and Cid medals) and matches
+  the 2016-05 notice exactly (proven); 2016-12 .. 2018 from the wiki templates (probable). Reward type 32 appears only on
+  the endless tier and on a trailing 0-round row of every season (an end / no-reward marker).
+- **Boards.** Node lists with costs for every WW Coliseum board 2016-04 .. 2021-06 are on the English wiki (avatar boards
+  19 nodes / 1100 coins in 2016-2017, 3500 in 2018, 1230 from 2018-12, 4900 + 260 from 2019-05; Tier 10 Bonus 3090
+  coins, 3390 in 2016-05). Contents of one board checked against its notice: equal (proven); costs probable.
+- **Ranking.** Metric progress (rounds cleared), ties broken by the time the round was reached (JP 1.0.5 change,
+  probable). **Loss rule still unknown** from web sources.
