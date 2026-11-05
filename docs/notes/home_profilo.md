@@ -506,7 +506,7 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
   97x24 = NPC_SHADOW) instead of ours; battle_all, pvp_start/total_*,
   recovery_skill, rolling3 stay generated (effect textures missing). `petPartsOffset` stays empty (rest
   positions). `GET /pet/coordinate/members` (pets of the party members) is not handled.
-- **All Spirit parts (3 Nov 2026, user decision).** Audit: `D:\Progetto_Restauro_KH_UX	mp\spirit_partsudit\AUDIT.md` (708
+- **All Spirit parts (3 Nov 2026, user decision).** Audit: `D:\Progetto_Restauro_KH_UX\tmp\spirit_parts\audit\AUDIT.md` (708
   original ids, 672 rows, 219 obtainable before). Changes:
   - **VIP Spirit Part quests** (22 Special quests): `make-special.js` resolves «Spirit: <name> xN» to reward type 33 from
     `server/tables/petParts.json`; the weekly set «VIP! Jewels & Spirit Part Quest» has `spirit: true` (every reward that is not
@@ -531,11 +531,8 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     407030 Balloon Aliens, 410003 Falling Snow, 410007 Goldfish, 410012 Elsa's Magic, 410021 Confetti & Butterflies: status
     `recon-ok`, textures in the private `pet_parts_recon/files` (record in its README), 706 rows. Each was rendered on the pink
     Kitstar on the served path (hires LWF applied: 402029, 407006, 410003, 410021) and compared with the khuxwiki pictures and the
-    game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX	mp\spirit_parts
-ender
-econ_review.html` (scripts
-    `render\scripts
-econ_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
+    game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX\tmp\spirit_parts\render\recon_review.html` (scripts
+    `render\scripts\recon_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
     poses instead of 8). 402126 has no JP folder: `collect()` now reads a part folder that exists only in `recon_root` whole
     (LWF + textures, report key `recon_only`). **410013 Olaf's Snow Cloud** approved 4 Nov 2026 after a redraw: the LWF is intact (movie6 = 6-7 dots x4 copies, movie2 = 5 snowflakes); only the 10x10 dot «img_snow01» was lost, and the first drawing was a faint glow (alpha peak at the centre only), which read as a sparse snowfall. The references (khuxwiki picture, game icon) show hard white discs, so the dot is now a solid disc (radius 4.7, 1 px antialiased edge); render and references agree on density. 18 of 18 reconstructed parts served (707 rows, rev 245).
   **Provisional names (4 Nov 2026, user decision):** the 21 parts with no known name (series 081-083: Mystery Gray Goat, Mystery Black Sheep, Mystery Winged White Dog x Ears/Head/Legs/Body/Tail; accessories 402049 Mystery Pink Wig, 402050 Mystery White Starry Hair, 402059 Mystery Black Starry Wig, 405003 Mystery Orange Striped Scarf, 405027 Mystery Gold Pendant Chain, 405028 Mystery Egyptian Collar) replace the unidentified placeholders. No source has the original names (the JP dump has no master text, khuxwiki and khwiki do not list them, web search 04-11). The Outfits list shows two lines of about 16 characters per name: keep names short (Black-Faced Sheep was cut). Rev 248. Notice «Spirit Parts» (11/03) updated; Elsa's Magic VIP week pays the part.
