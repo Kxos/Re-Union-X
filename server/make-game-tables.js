@@ -538,11 +538,20 @@ for (const id of [...new Set([...chestRewards, ...enemyRewards])].sort((a, b) =>
 // (sopra: per 150911 l'acqua della fontana). Posizioni nostre (KHUX_BG_X/Y).
 const bgX = Number(process.env.KHUX_BG_X || 0);
 const bgY = Number(process.env.KHUX_BG_Y || 0);
-const backgrounds = [150911, 2, 3, 4, 5, 6, 99].map((id, i) => Object.assign(blank('mypageBackground'), {
+// Seasonal plazas (I-233, docs/notes/home_profilo.md#seasonal-backgrounds): JP 4.3.1 folders lwf/home/<id>/
+// (originals.tsv section 50); an id with a LWF-only layer (..12/..22) gets it as a third part above the plaza.
+// The Dark Road world backgrounds 2-6/99 have only the LWF (no <id>.png): one part, dataType 2.
+// /mypage chooses the id by date (server/home-plaza.js); startTime/endTime are not read by the client.
+const plazaLayers = { 150911: [], 160211: [], 160311: [], 160911: [160912], 170911: [170912], 180911: [180912], 190911: [190912],
+  200911: [200912], 161011: [], 161211: [], 161221: [161222], 161231: [], 170111: [] };
+const backgrounds = [
+  ...Object.entries(plazaLayers).map(([id, layers]) => ({ id: Number(id), parts: [Number(id), Number(id), ...layers], types: [1, 2, ...layers.map(() => 2)] })),
+  ...[2, 3, 4, 5, 6, 99].map((id) => ({ id, parts: [id], types: [2] })),
+].map(({ id, parts, types }, i) => Object.assign(blank('mypageBackground'), {
   id, backgroundId: id, sortId: i + 1,
   startTime: '2015-01-01 00:00:00', endTime: '2099-12-31 23:59:59',
-  validParts: 2, partsId: [id, id], dataType: [1, 2],
-  xPostion: [bgX, bgX], yPostion: [bgY, bgY], zSort: [0, 1],
+  validParts: parts.length, partsId: parts, dataType: types,
+  xPostion: parts.map(() => bgX), yPostion: parts.map(() => bgY), zSort: parts.map((_, k) => k),
 }));
 
 // burst: attacchi speciali. La 5.0.1 (e thethiny) ne ha 11 righe, mentre le medaglie ne

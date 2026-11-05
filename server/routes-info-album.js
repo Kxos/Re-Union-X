@@ -147,6 +147,15 @@ function updateNotice(realMs) {
 // Solo informazioni utili per capire come funziona il gioco (decisione dell'utente del 16-10): niente
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
+  // seasonal home plazas (I-233, user decisions 05-11): server/home-plaza.js, make-game-tables.js mypageBackground,
+  // originals.tsv section 50; docs/notes/home_profilo.md#seasonal-backgrounds
+  { date: '11/05', tag: 'INFORMATION', title: 'Seasonal Home Plaza',
+    body: ['The plaza of the **Home** screen is decorated again for the seasons, every year, with the original pictures: **New Year** (January 1-14), **Valentine\'s Day** (February 1-14), **White Day** (March 1-14), **Happy Anniversary** (April 1-30 and September 1-30), **Halloween** (all of October), **winter** (December 1-20), **Christmas night** with falling snow (December 21-26) and **end of the year** (December 27-31). On the other days it is the usual Daybreak Town plaza. The day changes at the daily reset.',
+      'The dates are **reconstructed**: no notice of the original game says when the plaza changed, so they follow the seasonal events of the original game. The plazas themselves are the original ones.',
+      '**White Day** comes from the **Japanese version**: the worldwide version had no White Day event, but its plaza is in the Japanese game data.',
+      'The anniversary plaza is shown both in **April** (anniversary of the worldwide version) and in **September** (anniversary of the Japanese version). Its number follows your **Story**: the year of your Story date minus 2015, from **1st** (2016) to **5th** (2020 and later), so a new player sees the 1st Anniversary and a player who finished the Story the 5th.',
+      'The confetti of the **2nd, 3rd and 5th Anniversary** plazas are **reconstructed**: only their animation survives, and its four small confetti pieces are the identical ones of the 1st and 4th Anniversary.',
+      'Not here: the «Thank You For Playing!» plaza of the end of service (the game goes on), and the plazas of the Moogle of Glory event and of a Raid Boss attack, whose pictures are lost.'] },
   // boss raid ricostruiti (I-221, Raids Part 2: originals.tsv 49d/49e, raid_config.json modelTemplates/bossAttributes/modelParts,
   // docs/notes/raid.md), decisione dell'utente del 2-11: tutti i boss serviti, i 15 ricostruiti approvati a vista;
   // 0017, 1012, 1016 (49h/49i, render9) approvati il 4-11; 5000 Enraged Arachnid (49j/49k, render10, banner 48c) il 4-11

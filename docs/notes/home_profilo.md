@@ -60,7 +60,7 @@ History: [../journal/fino-al-2026-10-11.md](../journal/fino-al-2026-10-11.md). T
   (24), Colosseum (130).
 
 <a id="seasonal-backgrounds"></a>
-## Seasonal backgrounds (I-233, 5 Nov 2026, research only)
+## Seasonal backgrounds (I-233, 5 Nov 2026)
 
 **Ids.** The ids are `YYMM` + index in the month + part: `..11` = first background of the month, `..21`/`..31` =
 second/third, `..12`/`..22` = an extra LWF-only layer of the one before it. All the seasonal ones exist only in the JP 4.3.1
@@ -102,6 +102,17 @@ so `startTime`/`endTime` are parsed but not used by the client (the original ser
 `misc` 712-714) to a value from a stored option; any other value uses preset 1 (misc 712). Then `validParts` parts:
 `dataType` 1 png, 2 lwf, 3 plist, positions and `zSort`. So a seasonal plaza = master row with e.g. `partsId
 [160911, 160911, 160912]`, `dataType [1, 2, 2]` + `/mypage` `backgroundId` 160911.
+
+**Implementation (5 Nov 2026, user decisions in ISSUES I-233).** Graphics: `recon/tools/originals.tsv` section 50 copies
+the 13 JP folders (`lwf/home/<id>/`, the `.000000NN` duplicates are byte-identical) and the overlay layers into the
+generated pack; 170912/180912/200912 have only their LWF in the dump, so their 4 confetti pieces («ビットマップ 1-4», 81-93
+bytes each) are the 160912 files (identical to 190912's), declared in the Notice «Seasonal Home Plaza». Master:
+`make-game-tables.js` `plazaLayers` -> one row per plaza, parts `[id png, id lwf, overlay lwf...]` (`dataType [1,2,2]`,
+`zSort` 0,1,2), rows 2-6/99 now `validParts 1`, `dataType [2]` (LWF only). Choice: `server/home-plaza.js` (`plazaId`,
+test `server/test-home-plaza.js`) on the game day (real time - 8 h, the daily reset; `-RealNow` moves it):
+1-14 Jan 170111, 1-14 Feb 160211, 1-14 Mar 160311, 1-30 Apr and 1-30 Sep 1N0911 (N = story year - 2015, 1..5),
+October 161011, 1-20 Dec 161211, 21-26 Dec 161221, 27-31 Dec 161231, otherwise 150911. `server.js` `homePlazaId()` sends
+150911 when the served master has no row for the id (older revision).
 
 **Player choice.** None found: no option or text about a home background in the client UI texts (the only home
 customisation is the BGM, changed by the partner medal: «Your Home screen music will change.»).
