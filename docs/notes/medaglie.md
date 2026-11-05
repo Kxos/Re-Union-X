@@ -361,6 +361,13 @@ JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `serve
   reward is a guaranteed Necho Cat **★6** with STR +1000 (status bonus, kept only when it is the base of a same-medal
   fusion); LV30 and LV70 give a guaranteed ★5. Sora Santa Ver. (Dec 2015): ★1 from the avatar boards (6 in total), ★5 from
   the bonus boards, rare drop from Jack in the Box LV30+. Board cell lists are still unknown.
+- JP-only medals, third pass (05-11, JP client recording of the Jan 2017 KH2.8 raid boards): «KH3D Sora & Riku» set 1 =
+  18 cells, 3,500 Raid Coins, completion reward the title «feat.»; set 2 = 16 cells, 5,000 coins, completion reward a
+  Moogle sale medal; cells hold KH3D Sora & Riku (3 in set 1, 4 in set 2 among those seen), Moogle, Huey, Dewey, Louie;
+  7 cells of set 1 and 1 of set 2 not shown. Other boards of that event: «Munny» set (19 cells, 2,500) and Speed / Magic
+  / Power growth sets (18 cells each). Lion Headliner raid rewards: 600 / 800 / 1,000 coins (one of them) for kill,
+  MVP/finder and all-parts break. Flavor texts, the missing evolution recipes and the Christmas 2015 / Assault Dragon
+  board cells are still unknown.
 - Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
   is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
   (later official name); nothing else to add.
