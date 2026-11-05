@@ -24,6 +24,10 @@ const KEPT_STYLE = 2;
 // (9001-v<N>.png, il file resta 9001.png) cosi' il client, che tiene le immagini per URL, scarica quella nuova
 const CATALOG_PLATE_STYLE = 4; // 4: square gold frame (user 04-11)
 const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYLE}.png`;
+// I-135 (user 05-11): the Catalog plate pays with payType 3 = PAID Jewels (userStone.payStone, always 0 here: the server
+// never grants or sells paid Jewels), so its button stays grey and the Gold Ticket art (payType 6, Star7_Ticket_39) is
+// the original again. Before 05-11: payType 6 with our banner-list icon in place of Star7_Ticket_39.
+const CATALOG_PAY_TYPE = 3;
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 // payType 8: player.drawTickets[currency]; payType 9 Draw Points (Draw Points Deal): player.drawPoints, served as
 // userPoint.limitedDrawTicket3 (client 4.3.1: the payType 9 plate reads limitedDrawTicket3 with icon 42; points from selling
@@ -151,10 +155,11 @@ function shopLeaveWeeks(catalog, { storyQuest, week, rot: rot0, sizes, show, sea
   return out;
 }
 
-// Piastra «Banner Catalog» (spec 4.1): Gold Ticket (payType 6, drawTicket3 sempre 0) prezzo 1: pulsante
-// grigio, il tocco non manda richieste; Details apre il catalogo (detailUrl del master).
+// Piastra «Banner Catalog» (spec 4.1): paid Jewels (CATALOG_PAY_TYPE 3, payStone always 0) price 1: grey button;
+// a /gacha/draw for it is refused (no banner 9001 in the catalogue, payType 3 not in DRAWABLE_PAY); Details opens
+// the catalogue (detailUrl del master).
 function catalogRow() {
-  return gd.drawMedalTypeRow({ drawMedalTypeId: gd.CATALOG_ID, name: 'Banner Catalog', payType: 6, price: 1, sortId: 1,
+  return gd.drawMedalTypeRow({ drawMedalTypeId: gd.CATALOG_ID, name: 'Banner Catalog', payType: CATALOG_PAY_TYPE, price: 1, sortId: 1,
     bannerUrl: CATALOG_PLATE_URL, detailUrl: '/web/gacha/catalog', comment: 'Open Details to browse all banners' });
 }
 
@@ -275,7 +280,7 @@ function guardWarrant(w, b, ex, catalog, validComment, safeMedalId, nameOf = nul
 }
 
 function catalogPlate(webBase) {
-  return { ...plate({ drawMedalTypeId: gd.CATALOG_ID, payType: 6, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1), bannerUrl: `${webBase}${CATALOG_PLATE_URL}` };
+  return { ...plate({ drawMedalTypeId: gd.CATALOG_ID, payType: CATALOG_PAY_TYPE, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1), bannerUrl: `${webBase}${CATALOG_PLATE_URL}` };
 }
 
 // Limiti giornalieri: al cambio di giorno (clock.dayIndex) si azzera solo «used».
@@ -876,7 +881,7 @@ function catalogPage(banners, ctx) {
 
 module.exports = {
   KIND_OPTS, niceRange, PAY_ICON,
-  KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS, page, PIN_JS, esc,
+  KEPT_STYLE, CATALOG_PLATE_STYLE, CATALOG_PAY_TYPE, PAY_ICON_KEYS, page, PIN_JS, esc,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, listedCurrency, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };

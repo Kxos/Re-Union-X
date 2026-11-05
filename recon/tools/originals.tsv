@@ -105,11 +105,14 @@ lwf/medal/medaltype/MedalType01/	jp
 img/wipe/wipe_[2-8].png	jp
 img/wipe/wipe_[2-8].png	b16
 
-# 14. Biglietti col segno provvisorio «仮» (I-135): grafica finale JP. Star7_Ticket_39 resta quella della piastra
-#     Banner Catalog (make_shop_art.py): scelta dell'utente in sospeso
+# 14. Biglietti col segno provvisorio «仮» (I-135): grafica finale JP. Gold 39 and Bronze 37 restored 05-11 (user's choice):
+#     the Banner Catalog plate moved to payType 3 (server/gacha.js CATALOG_PAY_TYPE), so 39 is the Gold Ticket only again;
+#     the bronze final art exists only under cocostudio/publish in the JP data
 img/incentive/draw_Ticket_40.png	jp
 img/incentive/draw_Ticket_41.png	jp
 img/incentive/Star7_Ticket_38.png	jp
+img/incentive/Star7_Ticket_39.png	jp
+img/incentive/Star7_Ticket_37.png	jp	cocostudio/publish/Star7_Ticket_37.png
 # Draw Points (payType 9, plate icon 42): the plain JP/WW file is a gold «仮»-era ticket; revision 00391970 is the
 #     rainbow crystal printed on the Draw Points Deal art (B0794) and on JP cocostudio/publish/IncentiveIcon_42
 img/incentive/draw_Ticket_42.png	jp	=img/incentive/draw_Ticket_42.00391970.png
