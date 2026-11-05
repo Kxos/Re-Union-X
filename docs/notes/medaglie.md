@@ -356,6 +356,11 @@ JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `serve
   master: all targets, gauge 2, x1.49 at ★1 to x1.67 at ★6, heal 2500-3000) instead of the WW STR & DEF Boost; Necho Cat
   (JP images 22135-22137, Speed, Thunder Barrage) and KH3D Sora & Riku (JP images 22395-22397, Speed, Blade of Glory, all
   targets, gauge 5) have no WW row; JP image 22266 is KH CoM Sora & Riku.
+- JP-only medals, second pass (05-11, from recordings of the JP client): KH3D Sora & Riku ★5 -> ★6 = 3 Fantasia Mickey A
+  + 2 Fauna ★5, 80000 munny; max STR/DEF ★5 5392/5354, ★6 7189/7138; Necho Cat ★6 max 7270/7154. The LV95 Assault Dragon
+  reward is a guaranteed Necho Cat **★6** with STR +1000 (status bonus, kept only when it is the base of a same-medal
+  fusion); LV30 and LV70 give a guaranteed ★5. Sora Santa Ver. (Dec 2015): ★1 from the avatar boards (6 in total), ★5 from
+  the bonus boards, rare drop from Jack in the Box LV30+. Board cell lists are still unknown.
 - Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
   is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
   (later official name); nothing else to add.
