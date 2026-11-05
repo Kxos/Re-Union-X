@@ -368,6 +368,10 @@ JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `serve
   / Power growth sets (18 cells each). Lion Headliner raid rewards: 600 / 800 / 1,000 coins (one of them) for kill,
   MVP/finder and all-parts break. Flavor texts, the missing evolution recipes and the Christmas 2015 / Assault Dragon
   board cells are still unknown.
+- JP-only medals, fourth pass (06-11, a JP player's in-game screenshot of 19 Dec 2015): Sora Santa Ver. ★1 = album
+  No.406, Magic, LV cap **20**, STR 1356 / DEF 1257 (LV1), cost 1, Christmas Gift x1.49, gauge 2, «[All] slightly
+  powerful hit + slight HP recovery»; no skill. The other gaps (flavor texts, missing recipes, ★7 stats, board cells)
+  are still unknown.
 - Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
   is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
   (later official name); nothing else to add.
