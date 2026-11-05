@@ -84,8 +84,8 @@ if os.path.exists(out):
     w = Image.open(out)
     check(w.size == (640, 140) and w.mode == 'RGB', 'written plate RGB 640x140')
     check(ImageChops.difference(w.convert('RGB'), full.convert('RGB')).getbbox() is None, 'written plate = catalog_banner(strips, medals)')
-check(os.path.exists(os.path.join(sg, 'text', 'ui', '106140420.txt')) and os.path.exists(os.path.join(sg, 'img', 'incentive', 'Star7_Ticket_39.png')),
-      'texts and icon still written')
+check(not os.path.exists(os.path.join(sg, 'text', 'ui', '106140420.txt')) and not os.path.exists(os.path.join(sg, 'img', 'incentive', 'Star7_Ticket_39.png')),
+      'Gold Ticket texts and icon no longer replaced (I-135: originals again, the plate is on payType 3)')
 
 if errors:
     print('ERRORS (%d)' % len(errors))

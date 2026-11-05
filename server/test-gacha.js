@@ -117,8 +117,8 @@ const bySort = [...lo.gachaList].sort((a, b) => a.sortId - b.sortId);
 check(JSON.stringify(bySort.map((x) => x.drawMedalTypeId)) === JSON.stringify(wantIds), `ordine per sortId: ${bySort.map((x) => x.drawMedalTypeId)}`);
 check(new Set(lo.gachaList.map((x) => x.sortId)).size === lo.gachaList.length, 'sortId distinti');
 const cat = l.gachaList[0];
-check(cat.payType === 6 && cat.price === 1 && cat.drawType === 1, 'Catalog innocuo');
-check(l.gachaList.every((x) => x.price >= 1 && x.payType !== 3), 'mai prezzo 0 o payType 3');
+check(cat.payType === 3 && cat.price === 1 && cat.drawType === 1, 'Catalog innocuo (paid Jewels, I-135)');
+check(l.gachaList.every((x) => x.price >= 1 && (x.payType !== 3 || x.drawMedalTypeId === 9001)), 'mai prezzo 0; payType 3 only on the Catalog plate');
 l = g.gachaListData([inside], {}, { realMs: t0, webBase: 'http://h', ...opt });
 check(l.gachaList.length === 2, 'senza payType 8');
 const pNone = {};
@@ -192,7 +192,7 @@ check(q.limitedDrawTicket1 === 2, 'biglietto Platinum scalato');
 // campi del risultato
 const r = g.drawResultFields([501, 502], [501]);
 check(JSON.stringify(r) === JSON.stringify({ gachaBonus: { addType: 1, number: 0, userMedalIds: [] }, firstGetUserMedalIds: [501], userMedalIds: [501, 502], effectNumbers: [0, 0] }), 'campi del risultato');
-check(g.catalogRow().drawMedalTypeId === 9001 && g.catalogRow().payType === 6 && g.catalogPlate('http://h').price === 1, 'piastra Catalog');
+check(g.catalogRow().drawMedalTypeId === 9001 && g.catalogRow().payType === 3 && g.CATALOG_PAY_TYPE === 3 && g.catalogPlate('http://h').payType === 3 && g.catalogPlate('http://h').price === 1, 'piastra Catalog');
 check(g.catalogRow().bannerUrl === `/web/gacha/img/9001-v${g.CATALOG_PLATE_STYLE}.png` && g.catalogPlate('http://h').bannerUrl === `http://h/web/gacha/img/9001-v${g.CATALOG_PLATE_STYLE}.png`, 'piastra Catalog: immagine versionata (il client la riscarica)');
 
 // piccole correzioni del Task 6

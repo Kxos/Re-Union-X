@@ -205,8 +205,8 @@ foreach ($k in $alias.Keys) {
     New-Item -ItemType Directory -Force (Split-Path "$sg\files\img\$k.png") | Out-Null
     Copy-Item "$ac\$($alias[$k])" "$sg\files\img\$k.png" -Force
 }
-# piastra «Banner Catalog» dello Shop: testi del pulsante Gold Ticket (106140420-424) e icona
-# Star7_Ticket_39 (aveva il segno «仮»), dopo i testi IPA; banner 9001 in server\game_data\gacha_img
+# Shop «Banner Catalog» plate: banner 9001 in server\game_data\gacha_img (since I-135, 05-11, the plate is on payType 3:
+# the Gold Ticket texts 106140420-424 and Star7_Ticket_39 are the originals again, originals.tsv section 14)
 python recon\tools\make_shop_art.py "$sg\files" server\game_data
 if ($LASTEXITCODE) { throw 'make_shop_art fallito' }
 # LWF del risultato delle estrazioni (raisedraw_gen\files, pacchetto statico: vedi sotto) importati PRIMA di

@@ -64,5 +64,18 @@ check(ticket2() === 15, `after grantItem spooky +5: ${ticket2()}`);
 setQuest(260);
 check(ticket2() === 1, `after the season: limitedDrawTicket2 ${ticket2()} (want the 1 Draw Ticket)`);
 
+// I-135: the Banner Catalog plate pays with paid Jewels (payType 3), which the server never grants: a draw on it is
+// refused with a bare {ret} (client: «200 ERROR :76», back to the Shop) and nothing is charged or given
+const cat = l.gachaList.find((x) => x.drawMedalTypeId === 9001);
+check(cat && cat.payType === 3 && cat.price === 1, `Catalog plate on payType 3: ${JSON.stringify(cat && { payType: cat.payType, price: cat.price })}`);
+check(l.gachaList.filter((x) => x.payType === 3).length === 1, 'payType 3 only on the Catalog plate');
+p.freeStone = 5000;
+quiet(() => t.grantItem(2, 0, 300));
+check(p.freeStone === 5300 && p.payStone === undefined, `a Jewel reward is free Jewels only (freeStone ${p.freeStone}, payStone ${p.payStone})`);
+const before = JSON.stringify({ s: p.freeStone, m: (p.medals || []).length, d: p.drawTickets });
+const d = call(t.respondGachaDraw, { drawMedalTypeId: 9001, count: 1 });
+check(d && d.ret && Object.keys(d).length === 1, `draw on the Catalog plate refused with {ret} only: ${Object.keys(d || {})}`);
+check(JSON.stringify({ s: p.freeStone, m: (p.medals || []).length, d: p.drawTickets }) === before, 'nothing charged or given by the refused draw');
+
 if (errors.length) { console.log(`ERRORS (${errors.length}):\n  ${errors.join('\n  ')}`); process.exit(1); }
 console.log('test-listed-currency: OK');

@@ -2,12 +2,11 @@
 
     python recon/tools/make_shop_art.py <stage_gen\\files> <server\\game_data> (Pillow: senza -I)
 
-La piastra Catalog e' un'estrazione a Gold Ticket (payType 6) che nessuno possiede: il pulsante resta
-grigio e mostra i testi 106140420-424 e l'icona img/incentive/Star7_Ticket_39.png.
-Qui i testi diventano l'invito ad aprire Details e l'icona (originale con il segno «仮») diventa un
-piccolo elenco di banner. Si scrive anche il banner 640x140 della piastra (servito dal server,
-/web/gacha/img/9001-v<N>.png, N = gacha.CATALOG_PLATE_STYLE). Testi dopo la copia dei testi IPA in build-resources.ps1
-(altrimenti vincerebbero quelli). Nessuna bitmap nel repo.
+The Catalog plate pays with paid Jewels (payType 3, server/gacha.js CATALOG_PAY_TYPE) that nobody owns here: the button
+stays grey. Until 05-11 it was a Gold Ticket draw (payType 6) and this script replaced the Gold Ticket texts 106140420-424
+and the icon img/incentive/Star7_Ticket_39.png with our own; since I-135 (user 05-11) both are the originals again
+(originals.tsv section 14) and only the 640x140 plate banner is written here (served by the server,
+/web/gacha/img/9001-v<N>.png, N = gacha.CATALOG_PLATE_STYLE). Nessuna bitmap nel repo.
 
 Plate art (catalog_banner, user 30-10, in the style of the Special tab's «SPECIAL CATALOG» banner,
 make_special_banners.catalog_banner, whose helpers are imported): darkened oblique strips of original Shop banners
@@ -27,8 +26,6 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import btf  # noqa: E402
 
-TEXT = 'Open Details to browse\nthe Banner Catalog'
-TEXT_IDS = [106140420, 106140421, 106140422, 106140423, 106140424]
 GOLD = (236, 196, 84, 255)
 BLUE = (31, 84, 140, 255)
 LIGHT = (220, 236, 250, 255)
@@ -48,16 +45,6 @@ def font(size):
         if os.path.exists(f):
             return ImageFont.truetype(f, size)
     return ImageFont.load_default()
-
-
-def icon():
-    """83x83: tre piastre impilate (elenco di banner) con bordo dorato."""
-    im = Image.new('RGBA', (83, 83), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    for i, y in enumerate((10, 32, 54)):
-        d.rounded_rectangle((8, y, 75, y + 18), radius=4, fill=BLUE, outline=GOLD, width=3)
-        d.rectangle((14, y + 6, 14 + 30 - i * 6, y + 11), fill=LIGHT)
-    return im
 
 
 def banner(title='BANNER CATALOG', subtitle='Every original banner - open Details'):
@@ -151,19 +138,10 @@ def main():
         print('uso: make_shop_art.py <stage_gen\\files> <server\\game_data> [--medals D]', file=sys.stderr)
         return 2
     sg, game_data = args
-    for tid in TEXT_IDS:
-        p = os.path.join(sg, 'text', 'ui', f'{tid}.txt')
-        os.makedirs(os.path.dirname(p), exist_ok=True)
-        with open(p, 'w', encoding='utf-8', newline='\n') as f:
-            f.write(TEXT)
-    p = os.path.join(sg, 'img', 'incentive', 'Star7_Ticket_39.png')
-    os.makedirs(os.path.dirname(p), exist_ok=True)
-    with open(p, 'wb') as f:
-        f.write(btf.encode(icon()))
     out = os.path.join(game_data, 'gacha_img')
     os.makedirs(out, exist_ok=True)
     catalog_banner(out, medals).convert('RGB').save(os.path.join(out, '9001.png'))
-    print('make_shop_art: testi', TEXT_IDS, 'icona Star7_Ticket_39, banner 9001')
+    print('make_shop_art: banner 9001 (sg %s unused since I-135)' % sg)
     return 0
 
 
