@@ -185,6 +185,6 @@ To test the popups again: stop the server, `unlock` of 2100001 to [1..5], `spher
 - Quests → Events → Raid Time! → Raid Boards opens the list of the week's two boards (3000110, 3000111) with Raid Coins and «To Complete».
 - Board 3000110: path and costs drawn, one node bought (EXP Medal Huey, 870 → 770 Raid Coins), Unlock All (9,900) completes it: COMPLETE with an Evolve Medal, then the list shows COMPLETE 16/16.
 - Not original yet: the cards have no picture (no `sphere_incentive/<id>.png` for these ids) and the coin icon is the generic one (`img/incentive/SpherePointIcon_Raid.png` is not shipped). Fixed 3 Nov 2026 (card pictures, names, coin: «Card, name and coin» above), bench pending.
-- Not seen yet: nodes paying Draw Tickets, Jewels, materials or Spirit parts (this week's boards pay medals only); to check when Task 8 serves other weeks.
+- Seen on the bench 5 Nov 2026 (kept raids of 9/3/20, 9/14/20, 10/12/20): nodes paying a Draw Ticket, a Power Gem, Spirit part 402109, 6★ Sora & Moogle B and 10 Spooky Cookies, each with its popup and its item in the save ([ISSUES](../ISSUES.md) I-221).
   Also the seasonal ones (rewardSelect 41 with rewardId 1-3: icon and «Draw Ticket» text expected, balance in the Shop's
   seasonal banner) and the new items Sora & Moogle B, Balloon Mike & Sulley, Balloon Axel.
