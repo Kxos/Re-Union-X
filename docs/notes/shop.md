@@ -993,3 +993,11 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   with 39 and 37 restored, the only candidates are Silver (payType 5, `Star7_Ticket_38`, already the JP final art) or payType
   3 (paid Jewels only, never earnable here, but drawn with the Jewel label and its own purchase flow, untested) or an
   unknown payType (no icon, untested button behaviour). Choice sent back to the user (I-135 row).
+- **Implemented 05-11 (user's option c, commit 832b9d4, revision 271)**: Catalog plate on payType 3 (Purchased Jewels,
+  `gacha.js` `CATALOG_PAY_TYPE`; the server never grants `payStone`). Client behaviour on the bench: the case 3 plate draws the
+  `MagicStone`/`Txt_Jewels` panel «Purchased [jewel] 0» and «Spend 1 Purchased Jewels to get 1 Medal» on an orange button (not grey);
+  tapping it gives «You don't have enough Jewels. Would you like to buy some?»; OK runs the same chain as the Jewel pack button
+  (`/payment/info`, `/user/shop`, `/shop/campaign` -> our 400 popup «Jewels cannot be bought on this server»), then the client
+  shows «Failed to retrieve product information.» and returns to the Shop. No `/gacha/draw`, no crash, no store UI. Gold/Silver/
+  Bronze plates (forced into the list with a temporary patch) show the restored JP tickets; the payType 4 plate count read
+  7 = the Draw Points balance (client quirk; ticket plates are never listed).
