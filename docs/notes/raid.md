@@ -86,6 +86,82 @@ Recovery measured 1 November on the real gaps of the 31 models the 2016 package 
 - `put_down` plays on every win and is loaded with no visible null check: treat it as mandatory (crash inferred, not observed). `start` and `escape` can be avoided by never sending `raidStatus` 4 or 2.
 - With `start` skipped, `9102` and `9103` make 29 bosses. All 49 is not proven. Estimated raid pack for all 49: 260-370 MB before compression, without the missing textures.
 
+<a id="texture-audit"></a>
+## Boss texture audit (2026-11-05)
+
+Supersedes the per-boss counts of [Texture coverage](#texture-coverage-measured-1-november-2026) (1 November, before the reconstruction rounds) and the line «All 49 is not proven». Measured on the assembled raid pack tree `D:\Progetto_Restauro_KH_UXaid_geniles` (what `raid_gen` packs), not on the client. For each of the 49 census bosses (one model each, `recon/tools/raid_models.txt` = the 49 ids of the private census `raid_bosses.md`): the 8 LWFs (`lwf/character/raid/<id>/{atk1,atk2,knockback1,knockback2,wait}`, `lwf/raid/demo/{start,escape,put_down}_<id>`), every texture each LWF names, whether it is on disk, and which `originals.tsv` line wrote it (the last line naming a destination wins, as in `import_originals.py`).
+
+- **Slots**: distinct texture names per LWF, summed over the LWFs present. **2016 WW**: the 2016 English package at its own path. **JP own**: the JP 4.3.1 file at its own path (exact `=path` revisions included). **Cat 2 / 3 / 3c**: the categories of [Every boss served](#every-boss-served-part-2-2-november-2026-resources-95-master-revision-235), read from the line's comment (cat 2 = copy of an identical image placed by a measured rule; 3 / 3c = reconstructed). No texture in the tree came from a line-less source, and none is missing.
+- Model id links: 27 from the original tables, 22 inferred (census). The WW base resources carry only model `0001` (their own older 2016-named copy); every other boss lives only in the raid pack.
+- Donor folders (`Reddit Donators`): no raid model files, only notices; not a source for any piece.
+
+| Model | Boss | LWFs | Slots | 2016 WW | JP own | Cat 2 | Cat 3 / 3c | Missing | Status |
+|---|---|---|---:|---:|---:|---:|---:|---|---|
+| 0001 | Darkside | 8/8 | 108 | 108 | 0 | 0 | 0 | - | complete, original |
+| 0002 | Darkside Ω | 8/8 | 451 | 451 | 0 | 0 | 0 | - | complete, original |
+| 0003 | Behemoth | 8/8 | 460 | 460 | 0 | 0 | 0 | - | complete, original |
+| 0004 | Behemoth Ω | 8/8 | 425 | 425 | 0 | 0 | 0 | - | complete, original |
+| 0005 | Guard Armor | 8/8 | 505 | 505 | 0 | 0 | 0 | - | complete, original |
+| 0006 | Guard Armor Ω | 8/8 | 482 | 482 | 0 | 0 | 0 | - | complete, original |
+| 0007 | Trickmaster | 8/8 | 567 | 567 | 0 | 0 | 0 | - | complete, original |
+| 0008 | Trickmaster Ω | 8/8 | 639 | 639 | 0 | 0 | 0 | - | complete, original |
+| 0009 | Trident Tail | 8/8 | 407 | 407 | 0 | 0 | 0 | - | complete, original |
+| 0010 | Trident Tail Ω | 8/8 | 407 | 407 | 0 | 0 | 0 | - | complete, original |
+| 0011 | Savage Spider | 8/8 | 788 | 788 | 0 | 0 | 0 | - | complete, original |
+| 0012 | Venomous Spider | 8/8 | 764 | 764 | 0 | 0 | 0 | - | complete, original |
+| 0013 | Fortress Crab | 8/8 | 510 | 510 | 0 | 0 | 0 | - | complete, original |
+| 0014 | Fortress Crab Ω | 8/8 | 537 | 537 | 0 | 0 | 0 | - | complete, original |
+| 0015 | Queen Bee | 8/8 | 651 | 356 | 0 | 295 | 0 | - | complete, original + copies |
+| 0016 | Queen Bee Ω | 8/8 | 676 | 318 | 0 | 358 | 0 | - | complete, original + copies |
+| 1000 | Hocus Pocus | 8/8 | 510 | 510 | 0 | 0 | 0 | - | complete, original |
+| 1001 | Red Trident Tail | 8/8 | 407 | 407 | 0 | 0 | 0 | - | complete, original |
+| 1002 | Green Trident Tail | 8/8 | 415 | 415 | 0 | 0 | 0 | - | complete, original |
+| 1003 | Blue Trident Tail | 8/8 | 407 | 407 | 0 | 0 | 0 | - | complete, original |
+| 1004 | Jack in the Box | 8/8 | 675 | 675 | 0 | 0 | 0 | - | complete, original |
+| 1005 | Lion Headliner | 8/8 | 482 | 209 | 66 | 207 | 0 | - | complete, original + copies |
+| 1006 | Sinister Sweets | 8/8 | 509 | 509 | 0 | 0 | 0 | - | complete, original |
+| 1007 | Spiteful Sweets | 8/8 | 510 | 510 | 0 | 0 | 0 | - | complete, original |
+| 1008 | Egg Master | 8/8 | 575 | 575 | 0 | 0 | 0 | - | complete, original |
+| 1009 | Submarine Carp | 8/8 | 605 | 605 | 0 | 0 | 0 | - | complete, original |
+| 1010 | Gummi Hound | 8/8 | 865 | 865 | 0 | 0 | 0 | - | complete, original |
+| 9102 | Wicked Spider | 7/8 | 619 | 0 | 265 | 354 | 0 | start_9102 (not packed) | fight complete, start demo missing |
+| 9103 | Malicious Spider | 7/8 | 618 | 0 | 308 | 310 | 0 | start_9103 (not packed) | fight complete, start demo missing |
+| 9101 | Scourge Spider | 8/8 | 771 | 0 | 50 | 721 | 0 | - | complete, original + copies |
+| 0018 | Assault Dragon | 8/8 | 959 | 0 | 149 | 658 | 106 / 46 | - | complete, reconstructed pieces |
+| 0019 | Adventurer | 8/8 | 828 | 0 | 91 | 605 | 61 / 71 | - | complete, reconstructed pieces |
+| 0020 | Jewel Princess | 8/8 | 746 | 0 | 79 | 631 | 18 / 18 | - | complete, reconstructed pieces |
+| 0021 | Gear Golem | 8/8 | 582 | 0 | 225 | 185 | 118 / 54 | - | complete, reconstructed pieces |
+| 0022 | Heartless Tsum | 8/8 | 727 | 0 | 178 | 430 | 55 / 64 | - | complete, reconstructed pieces |
+| 0023 | Loudmouth Parade | 8/8 | 741 | 0 | 189 | 434 | 116 / 2 | - | complete, reconstructed pieces |
+| 0024 | Greedy Grouch | 8/8 | 611 | 0 | 129 | 361 | 22 / 99 | - | complete, reconstructed pieces |
+| 0025 | Mysterious Sir | 8/8 | 944 | 0 | 270 | 581 | 38 / 55 | - | complete, reconstructed pieces |
+| 0026 | Merry-Go-Rowdy | 8/8 | 1447 | 0 | 304 | 1010 | 105 / 28 | - | complete, reconstructed pieces |
+| 0027 | Holiday Sleigh | 8/8 | 664 | 0 | 150 | 381 | 94 / 39 | - | complete, reconstructed pieces |
+| 0028 | Demon Tide | 8/8 | 637 | 0 | 248 | 272 | 54 / 63 | - | complete, reconstructed pieces |
+| 0030 | Cranky Cake | 8/8 | 801 | 0 | 184 | 572 | 43 / 2 | - | complete, reconstructed pieces |
+| 0031 | Mischief Bouquet | 8/8 | 549 | 0 | 161 | 321 | 55 / 12 | - | complete, reconstructed pieces |
+| 0032 | Red-Nosed Chariot | 8/8 | 774 | 0 | 203 | 453 | 66 / 52 | - | complete, reconstructed pieces |
+| 1011 | Closehanded Captain | 8/8 | 819 | 0 | 193 | 457 | 116 / 53 | - | complete, reconstructed pieces |
+| 0017 | Jewel Sorceress | 8/8 | 658 | 0 | 156 | 493 | 5 / 4 | - | complete, reconstructed pieces |
+| 1012 | Circus Crab | 8/8 | 1094 | 0 | 252 | 794 | 29 / 19 | - | complete, reconstructed pieces |
+| 1016 | Crabby Cake | 8/8 | 924 | 0 | 104 | 655 | 124 / 41 | - | complete, reconstructed pieces |
+| 5000 | Enraged Arachnid | 8/8 | 789 | 484 | 41 | 264 | 0 | - | complete, original + copies |
+
+Totals: 31,639 slots; 13,895 from the 2016 package, 3,995 JP own files, 11,802 category 2 copies, 1,947 reconstructed (1,225 cat 3, 722 cat 3c).
+
+- **Complete with original files only: 24** (`0001`-`0014`, `1000`-`1004`, `1006`-`1010`).
+- **Complete, originals plus category 2 copies: 5** (`0015`, `0016`, `1005`: JP part-marker revisions of 49f; `9101` 49c/49e; `5000` 49j).
+- **Complete with reconstructed pieces: 18** (`0017`-`0028`, `0030`-`0032`, `1011`, `1012`, `1016`), every one approved by the user on rendered animations (render7, render9). The 7 textures of `0025` atk1 and `0028` atk2 drawn from the JP 5.0.1 enemy hit effects are cat 3 lines too.
+- **Fight complete, `start` demo not packed: 2** (`9102` Wicked Spider, `9103` Malicious Spider). `check_raid_models.py`: 49 of 49 available (fight, `put_down`, `escape`), `start` false only for these two; the server never sends `raidStatus` 4 for them.
+
+**The two `start` demos are recoverable without reconstruction.** Correction to [Models the pack carries](#models): the JP 4.3.1 data has `start_9102` and `start_9103` (LWF and 69 of 78 / 68 of 78 textures); the 2016 package has neither. The missing slots are `ビットマップ 44`-`52` (9102) and `43`-`52` (9103). Each one has a twin slot in the same LWF with the same declared size (`ビットマップ 53`-`64`, e.g. 52 and 64 are both 440x42), present in JP; the JP extraction keeps one copy of identical files. The independent recovery rules of 1 November (`tmpaid_tex\proposal.tsv`: int-DD, x-D and, for the 440x42, 464x487 and 331x345 portal images, common art) chose, for all 19 slots, an image pixel-identical to that own twin (checked by decoding to RGBA, 19 of 19). The served `start_9101` already pairs the same 10 slots with identical images (10 of 10).
+
+Recommended fixes (not done here):
+
+1. `start_9102`, `start_9103`: JP folder lines plus 19 single-file lines copying each missing slot from its own twin slot (category 2, own LWF), then the English subtitle as 49g (`raid_demo_english.py --models 9102,9103`), `check_raid_models.py` (expected `start` true for 49 of 49) and a full version (`raid_gen` is static). Then the two spiders may use `raidStatus` 4 like the others.
+2. Nothing else is missing in the model textures. Pieces still below the original bar are the 1,947 reconstructed slots of the 18 bosses above (declared in the Raid Bosses notice); only an original source would replace them: the JP data and the 2016 package have nothing more, the 19 single-part JP models `2000`-`2018` are already the twin source of 0018-0021 and 1011, and the donor folders hold no raid files.
+3. Outside the models (unchanged since [Models the pack carries](#models)): list banners `RaidBoss_<id>` exist for all 49 (28 original, 21 reconstructed from JP cards); backgrounds `bg_CD1`, `bg_ED1`, `RB_0003_00_00_eff_back3` stay incomplete and must not be used in `world`.
+
 <a id="models"></a>
 ## Models the pack carries (Part 2, Task 1, 2 November 2026)
 
