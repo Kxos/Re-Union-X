@@ -148,9 +148,10 @@ function updateNotice(realMs) {
 // elenchi di modifiche. In lista prima la notizia dinamica dei dati aggiornati (updateNotice), poi queste, dalla piu' recente.
 const NOTICES = [
   // conditional Present campaigns (I-234): server/campaign-gifts.js, campaign_gifts.json, docs/notes/campaigns.md
-  { date: '11/05', tag: 'IMPORTANT', title: 'Campaign Medals',
-    body: ['Some campaigns of the original game sent a Medal to the **Present Box** when you met a condition: owning certain Medals, unlocking their Special Attack Bonus or their traits, drawing a Deal a number of times, or clearing a Story Quest. They are back, so their Medals can be obtained again.',
+  { date: '11/05', tag: 'IMPORTANT', title: 'Campaign Rewards',
+    body: ['Some campaigns of the original game sent rewards to the **Present Box** when you met a condition: owning certain Medals, unlocking their Special Attack Bonus or their traits, drawing a Deal a number of times, clearing a Story Quest, your LUX level or your Medal storage. They are back, so their Medals, titles, Gems, Jewels and Draw Tickets can be obtained again.',
       '## The campaigns',
+      '**600 Jewels**: for clearing Story Quest 200 (September 2016).',
       '**Terra & Ventus & Aqua** (3 dots): one for each of Illustrated Terra, Illustrated Ventus and Illustrated Aqua you own (from September 2016).',
       '**10 Magic Mirrors**: for Sora & Donald & Goofy and for SP Axel with the Special Attack Bonus unlocked (September 2016).',
       '**Sora & Riku & Kairi** (2 dots): one for each of Illustrated Kairi, Illustrated Sora A and Illustrated Riku A with the Special Attack Bonus unlocked (October 2016).',
@@ -164,12 +165,17 @@ const NOTICES = [
       '**KH 0.2 King Mickey B** (2 dots): one for every KH 0.2 Terra, KH 0.2 Sora or Lingering Will with the Special Attack Bonus unlocked (September 2017).',
       '**Anna & Elsa** after 5 VIP Draws of the Frozen Medals Deal, plus a **Trait Medal #64** for every VIP Draw of it (December 2018).',
       '**Supernova - Terra, Ven, Aqua**: for 3 Medals with 5 traits unlocked among Supernova - HD Terra, HD Ventus and HD Aqua, plus a **Trait Medal #72** for every draw of their Falling Price Deals (January 2019).',
+      '**Draw Tickets**, one for each LUX level you have when the campaign starts for you (3rd anniversary, March 2019). The level is read once: levels gained later add nothing.',
+      '**30 Draw Tickets**: for a Medal storage of 3,000 slots (September 2020). In the original only players who already had 3,000 slots on the collection date got them; here they arrive whenever you reach 3,000 slots (**differs from the original**).',
       '**SN++ - Strelitzia** and 100 Trait Medals #256: one set for every 3 of the September 2020 SN++ - Illus. KH III Medals you own (copies count).',
       '**Flantastic Seven**: the Flan Medals, their Trait Medals, Kyroo Medals, Gems, the title and SN++ - Flantastic Seven (Boosted at 110) as you collect 10 to 110 **Sora & Moogle B** Medals (September 2020).',
       '**SN++ - MoM Kairi** and 100 Trait Medals #284: one set for every 4 SN++ - Stained Glass #10-#13 you own (November 2020).',
+      'Draw Tickets are spent on the **Ticket Draw** Deals, when the Shop shows one.',
       '## How they work',
-      'A campaign starts when your **Story** reaches the week it began in the original game, like the Shop, and then **never ends**: the original deadlines would make these Medals impossible to get later (**differs from the original**). Medals you already own count. The Medals arrive in the Present Box when you open the Home screen or the Present Box, each reward **only once** (not again for duplicates of the same Medal, except where a campaign counted every copy). Present Box items expire after 30 days, as usual.',
-      'The original game sent these Medals some days after the campaign ended; here they arrive as soon as the condition is met. The Timeless River Mickey of the 2016 Proud Quest event is not here yet: those event quests are not in the game.'] },
+      'A campaign starts when your **Story** reaches the week it began in the original game, like the Shop, and then **never ends**: the original deadlines would make these Medals impossible to get later (**differs from the original**). Medals you already own count. The rewards arrive in the Present Box when you open the Home screen or the Present Box, each reward **only once** (not again for duplicates of the same Medal, except where a campaign counted every copy). Present Box items expire after 30 days, as usual.',
+      'The original game sent these rewards some days after the campaign ended; here they arrive as soon as the condition is met.',
+      '## Not here yet',
+      'The Timeless River Mickey of the 2016 Proud Quest event and the Royal Captain and Royal Magician titles of the January 2017 Classic Goofy and Classic Donald events: those event quests are not in the game, so their Medals (Classic Goofy, Boosted Classic Donald) cannot be obtained. The campaigns that gave 1,000 Jewels for each Sora & Moogle, Illustrated Moogle, Toon Moogle or KH II Sora & Moogle Medal you owned (2017-2018): those Medals are not in the game data.'] },
   // seasonal home plazas (I-233, user decisions 05-11): server/home-plaza.js, make-game-tables.js mypageBackground,
   // originals.tsv section 50; docs/notes/home_profilo.md#seasonal-backgrounds
   { date: '11/05', tag: 'INFORMATION', title: 'Seasonal Home Plaza',

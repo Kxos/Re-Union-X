@@ -1,11 +1,11 @@
-// Conditional Present campaigns (I-234, docs/notes/campaigns.md): original campaigns that sent Medals to the Present
-// Box when the player met a condition (own some Medals, unlock their Special Attack Bonus or traits, draw a Deal N
-// times, clear a Story Quest). Data: server/campaign_gifts.json (paraphrased from the WW notices, ids cited there).
+// Conditional Present campaigns (I-234, docs/notes/campaigns.md): original campaigns that sent Medals, titles, Gems,
+// Jewels or Draw Tickets to the Present Box when the player met a condition (own some Medals, unlock their Special
+// Attack Bonus or traits, draw a Deal N times, clear a Story Quest, LUX level, Medal storage). Data: server/campaign_gifts.json (paraphrased from the WW notices, ids cited there).
 // Pure rules: server.js (checkCampaignGifts) gives the player state and sends the presents.
 //
 // Opening: a campaign opens when the Shop week of the player's Story reaches its start date (storyCtx().shopTo, the
 // same calendar as the Shop) and then stays open: the original deadlines would make the rewards impossible to get in
-// a game that follows the Story (declared in the Notice «Campaign Medals»).
+// a game that follows the Story (declared in the Notice «Campaign Rewards»).
 // Condition kinds (each reward is sent once per unit; units already given are remembered in player.campaignGifts):
 // - each:     one unit per listed Medal (by name) of which at least one copy passes the test
 // - eachCopy: one unit per copy (userMedalId) that passes the test, no limit (32512)
@@ -15,6 +15,12 @@
 // - tiers:    tier k is reached when the copies passing the test are at least tiers[k].at; each tier its own reward
 // - draws:    draws of the listed Deals (player.gacha.count): every N -> one unit per N draws, at N -> one unit once
 // - story:    one unit once the Story Quest is cleared
+// - lux:      one unit per LUX level (51531: one Draw Ticket per level); with once: true the level is read only the
+//             first time the campaign is checked open (the original read it on a fixed date), never topped up later
+// - storage:  one unit once the Medal storage reaches `slots` (69125: 3,000 slots)
+// Rewards: {medal, rare, num, dots?, skill?, boosted?} type 3, {material} 5, {title} 7, {jewels: n} 2,
+// {ticket: currency, num} 41 (payType 8 Shop currency, index in `tickets` = gacha.TICKET_CURRENCIES; Bronze/Silver/Gold
+// Tickets have no Shop currency here and are rejected, docs/notes/campaigns.md).
 // Tests: own (any copy), saBonus (Special Attack Bonus unlocked: guiltFactor > 0), traits (at least `traits` traits).
 'use strict';
 const fs = require('fs');
@@ -29,7 +35,7 @@ function load(file = FILE) {
 
 // Master tables -> compiled campaigns: Medal names become id sets, rewards become present rows
 // {type, id, num, dots?, skillId?}. Unknown names go to errors (the campaign is dropped, the others stay).
-function compile(campaigns, { medals = [], materials = [], titles = [], skills = [], drawIdOf = () => undefined } = {}) {
+function compile(campaigns, { medals = [], materials = [], titles = [], skills = [], drawIdOf = () => undefined, tickets = [] } = {}) {
   const errors = [];
   const idsByName = new Map();
   for (const m of medals) {
@@ -74,7 +80,13 @@ function compile(campaigns, { medals = [], materials = [], titles = [], skills =
       if (!row) { errors.push(`${where}: title «${r.title}» missing`); return null; }
       return { type: 7, id: row.titleId, num: 1 };
     }
-    errors.push(`${where}: reward without medal/material/title`);
+    if (r.jewels) return { type: 2, id: 0, num: Number(r.jewels) };
+    if (r.ticket) {
+      const i = tickets.indexOf(r.ticket);
+      if (i < 0) { errors.push(`${where}: ticket «${r.ticket}» is not a Shop currency`); return null; }
+      return { type: 41, id: i, num: r.num || 1 };
+    }
+    errors.push(`${where}: reward without medal/material/title/jewels/ticket`);
     return null;
   });
   const out = [];
@@ -94,7 +106,7 @@ function compile(campaigns, { medals = [], materials = [], titles = [], skills =
   return { campaigns: out, errors };
 }
 
-// state: {medals: [{userMedalId, medalId, guiltFactor, traits}], drawCount(drawMedalTypeId), storyQuest}
+// state: {medals: [{userMedalId, medalId, guiltFactor, traits}], drawCount(drawMedalTypeId), storyQuest, luxLevel, medalSlots}
 function passes(m, cond) {
   if (cond.test === 'saBonus') return (m.guiltFactor || 0) > 0;
   if (cond.test === 'traits') return (m.traits || 0) >= (cond.traits || 1);
@@ -122,6 +134,8 @@ function earned(c, state) {
       return { units: cond.at ? (total >= cond.at ? 1 : 0) : Math.floor(total / (cond.every || 1)) };
     }
     case 'story': return { units: (state.storyQuest || 0) >= cond.quest ? 1 : 0 };
+    case 'lux': return { units: Math.max(0, Number(state.luxLevel) || 0) };
+    case 'storage': return { units: (state.medalSlots || 0) >= cond.slots ? 1 : 0 };
     default: return { units: 0 };
   }
 }
@@ -142,6 +156,7 @@ function due(compiled, state, given) {
       for (let k = 0; k < fresh.length; k++) rows.push(...c.reward);
     } else {
       const had = g.units || 0;
+      if (c.condition.once && had) continue; // snapshot campaigns (lux): read once, never topped up
       if (e.units <= had) continue;
       if (c.condition.kind === 'tiers') rows = c.condition.tiers.slice(had, e.units).flatMap((t) => t.reward);
       else for (let k = had; k < e.units; k++) rows.push(...c.reward);
