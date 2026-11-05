@@ -247,6 +247,11 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   25 weekly rows from September 2018 (the JP weekly raids were the WW ones, same dates), 4 events of 2018 with a WW row of the
   same boss starting the same day, 3 regular-boss lure weeks (not raid events, as in WW), 5 rows whose boss no source names
   (December 2016, August and September 2017 monthly raids, two 2018 weekends).
+- **The two 2018 weekends** (research 5 November 2026, facts only). JP weekend raid bosses followed one 7-boss cycle (Malicious
+  Spider, Blue Trident Tail, Wicked Spider, Red Trident Tail, Fortress Crab Ω, Scourge Spider, Green Trident Tail) on every dated
+  weekend 2016-10 to 2018-06; a JP notice of 2018-06-23 (Scourge Spider after the empty 6/16) shows the cycle skips weekends with
+  no raid (6/16 and 6/30 had none). Hence **probable**, not proven: 2018-08-04 Red Trident Tail, 2018-09-01 Malicious Spider.
+  2018-09-01 was the last JP weekend raid. No HP source (players read about 1.5 billion from 2018-06-23). Still not served.
 - **Ids.** `raid_ids.json`: the JP rows are numbered after every WW row (append-only): rows 202-349, entries 470-628.
 - **Calendar.** Entries carry `jp: true`, `region: 'JP'`. `raid-calendar.js` `weekRows` drops them, `catalogRows` keeps them
   (`row.jp`), so a JP raid is played only when kept (`rowState` `can` once the Story has passed its dates). Raid Catalog:
