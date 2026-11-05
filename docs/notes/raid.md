@@ -248,6 +248,16 @@ User report (bench 3 November, every tier): far too little Lux. `/raid/clear` re
 
 **Confidence:** the client side (sum of `luxAttack`) high, read from 9 logged fights; the 2% share medium (3 forum totals and one video, all with Lux++ decks); the split between rows and Lux++ x5 low, but only the product matters for a full Lux++ deck; Beginner and Intermediate have no reading. **Open for the bench:** whether the orange panel shows `getLux` or its own count in bonus time; with its own count it shows half; then serve a type 10 campaign instead, after checking that the client applies it in a raid.
 
+**Bench 5 November 2026 (rev 268, Epic Trickmaster LV 1, 999,999,999,999 HP, smoke key `WW-W-2021-03-15/Epic`, saves `luxA2`/`luxB` copied from `maxpower`, `-SkillProb 100`, AUTO, Give Up after 60 s, outside bonus time).** The client pays raid Lux **per hit, in proportion to the HP removed**: `getPoint.lux` = sum over body and parts of `luxAttack` x damage / max HP, times the deck's Lux skills, so a full kill gives exactly the `luxAttack` sum (the rule of `applyLux`), and a lost fight gives its share. Measured (all three match the formula to the unit):
+
+| Deck | Damage (body / part 2 / part 3) | `getPoint.lux` | Base by the formula | Factor |
+| --- | --- | --- | --- | --- |
+| no Lux skill (Attack Boost XV Max x5), run 1 | 170.9B / 173.5B / 171.4B | 870,084,653 | 870,084,653 | x1.00 |
+| no Lux skill, run 2 (fresh boss) | 357.9B / 366.8B / 364.0B | 1,833,417,366 | 1,833,417,366 | x1.00 |
+| Lux++ on the 5 deck medals and the friend medal (ATK B XI Max & Lux++) | 259.7B / 262.5B / 264.1B | 5,951,270,065 | about 1,325,509,600 | **x4.49** |
+
+The Lux++ deck is weaker (XI Max against XV Max), so it dealt less damage in the same 60 s, yet earned 3.2x the Lux; per damage dealt it earns 4.49x (5 expected with `luxUp` 50000; the 6th Spirit slot medal has no Lux skill and dilutes it). An Epic kill with a full Lux++ deck therefore pays 4B x about 4.5-5 = **18-20B**, the video's 19.83B (I-223). The YOU LOSE panel shows `getPoint.lux` (screenshot `lux_a2_result`, `lux_b_result`; a shot taken while the numbers still count up shows less: `lux_a_13`). Earlier bench readings (450, 600 for a kill) were kills of 2016 rows, where the sum of `luxAttack` is what a full kill pays: same rule.
+
 **Master:** `raidEnemy` regenerated in place (1067 rows changed, only `luxAttack`/`luxSuppress`; backup `D:\Progetto_Restauro_KH_UX	mp
 aid_lux_backup`): **needs a master revision bump** before the client sees it.
 
