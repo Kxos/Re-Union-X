@@ -11,7 +11,7 @@
 // enhanceDefense 100 (the ability text: medal-guilt.js applyEnhance adds them up to addMaxAttack/addMaxDefense),
 // sortId = album number 1879, advantage = the ability text, flavor empty (no source), sell 800 and the other fields
 // of the template (not sourced). attribute 4 and darklight 3 are the template's and match Roboloid's «no attribute»
-// (Fantasia Mickey Ver. A, also «None» there, has 4 too). Cut-in/art/display ids stay the template's (as Fantasia Mickey B;
+// (Fantasia Mickey A, also «None» there, has 4 too). Cut-in/art/display ids stay the template's (as Fantasia Mickey B;
 // a Boost Medal never fights): the bench should check the Medal detail and the Album entry for Chip's picture.
 // Idempotent; make-game-tables.js applies it before support-medal-cost.js. On its own (then raise the master revision):
 //   node server/make-campaign-medals.js [master folder]

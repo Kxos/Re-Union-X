@@ -328,7 +328,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
 // round 11: FIND matches at word starts, item name by item name (khuxMatch, shared with the page)
 {
   const m = pages.khuxMatch, page = new Function(`${pages.MATCH_JS};return khuxMatch;`)();
-  const cases = [['key', 'Fantasia Mickey Ver. A', false], ['key', 'Key Art #3', true], ['key', 'Keyblade Materials', true],
+  const cases = [['key', 'Fantasia Mickey A', false], ['key', 'Key Art #3', true], ['key', 'Keyblade Materials', true],
     ['key art', 'Key Art #19', true], ['key art', 'Keyblade Materials: Olympia', false], ['key', 'Monkey', false],
     ['KEY  art', 'key art #19', true], ['#19', 'Key Art #19', true], ['art #1', 'Key Art #19', true], ['olympia', 'Keyblade Materials: Olympia', true],
     ["donald's", "Donald's Hat", true], ['', 'anything', true]];

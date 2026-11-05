@@ -983,3 +983,13 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   currency. Options in the I-135 row.
 - Side note: `img/incentive/Star7_Ticket_37` (bronze, payType 4) is still the WW «仮» file; the JP final art exists only as
   `cocostudio/publish/Star7_Ticket_37.png` (same 83x83 size) and could be mapped in `originals.tsv` like draw_Ticket_42.
+- **Blocker of the 05-11 decision (bench agent, 05-11, not implemented)**: the client has no free currency slot for a
+  generic icon. The Shop plate ([fn], `tmp\extra_attack\out\dp\plate.c`) switches on `payType` and draws a
+  fixed file per value: 3 = paid Jewels (`Txt_Jewels` label, no ticket file), 4/5/6 = `img/incentive/Star7_Ticket_37/38/39`
+  (Bronze/Silver/Gold, `drawTicket1-3`), 7/8/9 = `img/incentive/draw_Ticket_40/41/42` (Platinum, Draw Ticket and the
+  seasonal currencies, Draw Points); any other payType draws no currency at all (no case), and the plate row has no field
+  for an icon of its own (the last argument of [fn] is the days-left value of the «Limited» label). Every file
+  37-42 is an original currency's art, so «another currency with our generic icon» means giving one of them our icon:
+  with 39 and 37 restored, the only candidates are Silver (payType 5, `Star7_Ticket_38`, already the JP final art) or payType
+  3 (paid Jewels only, never earnable here, but drawn with the Jewel label and its own purchase flow, untested) or an
+  unknown payType (no icon, untested button behaviour). Choice sent back to the user (I-135 row).

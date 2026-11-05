@@ -190,7 +190,9 @@ if (process.env.KHUX_MEDALS_ALL === '1' && ROBO.length) {
     const base = tpl(d.Rarity, ATTR[d.Attribute]);
     if (!base) continue;
     const id = robo2id(d.ID);
-    const chain = d.Reference || [];
+    // Reference = the tabs of one wiki page. For the Kyroo Subslot medals [SAB LV 7-10] each tab is a
+    // separate reward medal that never evolved into the next tier (I-205, notice 55885): no chain there.
+    const chain = /\[SAB LV \d+\]/.test(d.Name || '') ? [] : (d.Reference || []);
     const next = chain[chain.indexOf(d.ID) + 1];
     const burstId = 3000000 + d.ID;
     const ab = d.Ability || {};

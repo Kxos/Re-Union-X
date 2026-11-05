@@ -9,7 +9,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const NAME_FIX = { 41036: 'Illustrated Sora A', 42036: 'Illustrated Riku A' };
+// 90085 «Fantasia Mickey Ver. A» (2017 SE master) is «Fantasia Mickey A», its later official name (khuxwiki; user
+// decision 05-11, I-205); the boards and the Raid Catalog aliases use the new name.
+const NAME_FIX = { 41036: 'Illustrated Sora A', 42036: 'Illustrated Riku A', 90085: 'Fantasia Mickey A' };
 
 // -> numero di righe rinominate (la normale e le sue boosted, groupId = id)
 function applyNameFix(medals) {
