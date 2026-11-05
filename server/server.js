@@ -2036,7 +2036,9 @@ const MYPAGE_TICKER = "Tap the face icon to customize your avatar. Tap the scree
 function homePlazaId() {
   let id = homePlaza.NORMAL;
   try { id = homePlaza.plazaId(realNow(), storyCtx().storyDay); } catch (e) { return homePlaza.NORMAL; }
-  return masterRows('mypageBackground').some((r) => r.backgroundId === id) ? id : homePlaza.NORMAL;
+  const served = masterRows('mypageBackground').some((r) => r.backgroundId === id) ? id : homePlaza.NORMAL;
+  console.log(`  [mypage] backgroundId ${served}${served !== id ? ` (no master row for ${id})` : ''}`);
+  return served;
 }
 function respondMyPage(res) {
   const body = schemaResponse('/mypage') || { ret: ret() };
