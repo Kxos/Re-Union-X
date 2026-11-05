@@ -99,7 +99,7 @@
     "boardCost": "A board cost corrected from the wiki: Halloween Board 2019, cell 17 reads 700 on the wiki, but the page total and the cost ladder need 1,600 (inferred).",
     "boardCells": "Some cells of this week's boards are missing: their reward has no item here, so the cell is left off rather than replaced.",
     "boardTexture": "A Spirit part of this week's boards (Starlight Ears, Dazzling Disco) is drawn with one reconstructed texture: the original is lost (a small sparkle, a tiny dot).",
-    "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey Ver. A (no 6★ exists)."
+    "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey A (no 6★ exists)."
   },
   "boards": {
     "background": 5,
@@ -313,7 +313,7 @@
     },
     "reconstructedTexture": ["Starlight Ears", "Dazzling Disco"],
     "aliases": {
-      "6★ Fantasia Mickey A": {"item": "5★ Fantasia Mickey Ver. A", "why": "Fantasia Mickey A exists only at 5★ (Roboloid's full medal list, the medal table); the board pairs it with Magic Brooms, the 5★ evolve recipe, and the wiki infobox lists it as mickeya=1 without a rarity: the 6★ is read as a slip of the wiki layout."}
+      "6★ Fantasia Mickey A": {"item": "5★ Fantasia Mickey A", "why": "Fantasia Mickey A exists only at 5★ (Roboloid's full medal list, the medal table); the board pairs it with Magic Brooms, the 5★ evolve recipe, and the wiki infobox lists it as mickeya=1 without a rarity: the 6★ is read as a slip of the wiki layout."}
     }
   },
   "rewards": {

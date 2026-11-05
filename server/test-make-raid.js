@@ -1313,8 +1313,8 @@ const tests = {
     const out = build((f) => {
       withBoards(f);
       f.boards.boards[1].cells.push(cell(2, 50, 'Medal', '6★ Fantasia Mickey A'), cell(3, 50, 'Cookie', 'Spooky Cookie', 10));
-      f.master.medal = [...(f.master.medal || []), { medalId: 90085, rare: 5, name: 'Fantasia Mickey Ver. A', groupId: 0 }];
-      f.config.boards = { aliases: { '6★ Fantasia Mickey A': { item: '5★ Fantasia Mickey Ver. A', why: 'x' } } };
+      f.master.medal = [...(f.master.medal || []), { medalId: 90085, rare: 5, name: 'Fantasia Mickey A', groupId: 0 }];
+      f.config.boards = { aliases: { '6★ Fantasia Mickey A': { item: '5★ Fantasia Mickey A', why: 'x' } } };
     });
     const id = entry(out, 'Trickmaster').sphereBoardIds[1];
     const masu = out.masuRows.find((r) => r.masuId === id);

@@ -46,7 +46,7 @@ assert.deepEqual(ew.puppyGroups(wiki).map((g) => [g.from, g.to, g.result, g.memb
 
 const medals = [
   row(FMB, 'Fantasia Mickey B', 6, { validPack: 1 }),
-  row(90085, 'Fantasia Mickey Ver. A', 5, evo(FMB, 5, [300948, 300948, 300948, 300948, 300948])),
+  row(90085, 'Fantasia Mickey A', 5, evo(FMB, 5, [300948, 300948, 300948, 300948, 300948])),
   row(300948, 'Magic Broom', 5),
   row(300715, 'Illustrated King Mickey', 7, evo(302050)), row(302050, 'SN++ - Illus. BC King Mickey', 7),
   row(2300715, 'Illustrated King Mickey', 7, { ...evo(302050), groupId: 300715 }),

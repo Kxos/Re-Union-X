@@ -593,6 +593,18 @@ const tests = {
     const WEEK = Date.parse('2026-10-27T10:00:00Z'), BONUS = Date.parse('2026-10-27T15:00:00Z'), SAT = Date.parse('2026-10-31T10:00:00Z');
     const now = e('2019-07-15', [5]);
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(now, t)), [0, 5, 90], 'from 2019-07-15');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-07-15', [0, 5, 90]), t)), [0, 5, 90], 'rule week');
+    // I-236: Radiant Reward weeks «0 / 5» cost 5 all week outside bonus time (notice 58020), June 2020 «0» costs 0 all day
+    // (notice 66114); the master useAp (the last census value) is what the quest top shows, so the charge must agree
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-09-23', [0, 5]), t)), [0, 5, 5], 'Radiant Reward week');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2020-06-01', [0]), t)), [0, 0, 0], 'June 2020: 0 all day');
+    // the served raids (when built): on a weekday outside bonus time the charge = the master stage useAp (last census value)
+    const served = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(served)) {
+      const bad = JSON.parse(fs.readFileSync(served, 'utf8')).entries.filter((x) => Array.isArray(x.questAp) && x.questAp.length)
+        .filter((x) => questApAt(x, WEEK) !== x.questAp[x.questAp.length - 1]).map((x) => `${x.start} ${x.boss} ${x.questAp.join('/')}`);
+      assert.deepStrictEqual(bad, [], 'weekday charge = master useAp on every served raid quest');
+    }
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-02-11', [0, 5]), t)), [0, 5, 5], 'bonus / other');
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-03-01', [5, 90]), t)), [90, 5, 90], 'weekend / weekday, no bonus value');
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2018-10-01', [5]), t)), [5, 5, 5], 'one value');

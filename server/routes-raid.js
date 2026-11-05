@@ -42,11 +42,16 @@ const isBonusTime = (ms) => BONUS_HOURS.has(ptNow(ms).hour);
 const BONUS_LUX = 2;
 const luxFactorAt = (ms) => (isBonusTime(ms) ? BONUS_LUX : 1);
 
-// AP of a raid quest at this moment. From 2019-07-15 the rule; earlier the week's own «ap»: 3 values bonus / weekend /
-// weekday, «0 / 5» bonus / the rest, «5 / 90» weekend / weekday (no bonus value: those weeks read as weekday in bonus time).
+// AP of a raid quest at this moment. From 2019-07-15 the rule 0 / 5 / 90, except the weeks whose census «ap» is «0 / 5»
+// (Radiant Reward Raid Events: «Outside of the above times, the raid quest will cost 5 AP», notices 56463, 58020, 70818)
+// or «0» (June 2020, «Bonus time will go on 24 hours all day», notice 66114): those follow the census (I-236), like the
+// master row's useAp (make-raid.js: the last census value), so the quest top and the charge agree. Earlier the week's own
+// «ap»: 3 values bonus / weekend / weekday, «0 / 5» bonus / the rest, «5 / 90» weekend / weekday (no bonus value: those
+// weeks read as weekday in bonus time).
+const ownApWeek = (a) => (a.length === 2 && a[0] === 0) || (a.length === 1 && a[0] === 0);
 function questApAt(entry, ms) {
   const { weekend } = ptNow(ms), bonus = isBonusTime(ms), a = entry.questAp || [];
-  if (String(entry.start) >= AP_RULE_FROM) return bonus ? AP_RULE.bonus : weekend ? AP_RULE.weekend : AP_RULE.weekday;
+  if (String(entry.start) >= AP_RULE_FROM && !ownApWeek(a)) return bonus ? AP_RULE.bonus : weekend ? AP_RULE.weekend : AP_RULE.weekday;
   if (a.length >= 3) return bonus ? a[0] : weekend ? a[1] : a[2];
   if (a.length === 2) {
     if (a[0] === 0) return bonus ? 0 : a[1];

@@ -131,7 +131,7 @@ Plan `docs/superpowers/plans/2026-11-02-raids-part2.md`, Task 7 (2 November 2026
     (B0731/B0732), Holiday Draw Tickets Deal (B0758/B0759) and Moogle Points Deal (B0800/B0801) spend. The client names
     type 41 «Draw Ticket» in the popups (text 106180322): Notices, Differences.
   - 6★ Sora & Moogle B: reconstructed medal row 302016 (`server/make-campaign-medals.js`, [medaglie](medaglie.md)).
-  - 6★ Fantasia Mickey A: `boards.aliases` gives the 5★ Fantasia Mickey Ver. A (90085), label `boardAlias`. No 6★ exists
+  - 6★ Fantasia Mickey A: `boards.aliases` gives the 5★ Fantasia Mickey A (90085, «Ver. A» in the 2017 SE master, renamed I-205), label `boardAlias`. No 6★ exists
     (Roboloid's full list and the medal table have it only at 5★); the board pairs it with 5 Magic Brooms (the 5★ evolve
     recipe) and the wiki infobox lists `mickeya=1` without a rarity. Not checked against the board image (not downloaded).
   - Balloon Mike & Sulley (407026), Balloon Axel (407047): Spirit parts with their original artwork, recovered from the
