@@ -155,7 +155,7 @@ function shopLeaveWeeks(catalog, { storyQuest, week, rot: rot0, sizes, show, sea
   return out;
 }
 
-// Piastra «Banner Catalog» (spec 4.1): paid Jewels (CATALOG_PAY_TYPE 3, payStone always 0) price 1: grey button;
+// Piastra «Banner Catalog» (spec 4.1): paid Jewels (CATALOG_PAY_TYPE 3, payStone always 0) price 1; the list greys the button (catalogPlate);
 // a /gacha/draw for it is refused (no banner 9001 in the catalogue, payType 3 not in DRAWABLE_PAY); Details opens
 // the catalogue (detailUrl del master).
 function catalogRow() {
@@ -280,7 +280,11 @@ function guardWarrant(w, b, ex, catalog, validComment, safeMedalId, nameOf = nul
 }
 
 function catalogPlate(webBase) {
-  return { ...plate({ drawMedalTypeId: gd.CATALOG_ID, payType: CATALOG_PAY_TYPE, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1), bannerUrl: `${webBase}${CATALOG_PLATE_URL}` };
+  // isDayLimited 1 + userLimitedCount 0 = the client's own «no draws left» state (as an already used DAILY DEAL!):
+  // grey button, the tap does nothing and sends no request, no «Chances left today» strip; Details still opens
+  // (I-135, benched 05-11 on save i135g)
+  return { ...plate({ drawMedalTypeId: gd.CATALOG_ID, payType: CATALOG_PAY_TYPE, lotCount: 1, name: 'Banner Catalog' }, webBase, 0, 1, 1),
+    isDayLimited: 1, userLimitedCount: 0, bannerUrl: `${webBase}${CATALOG_PLATE_URL}` };
 }
 
 // Limiti giornalieri: al cambio di giorno (clock.dayIndex) si azzera solo «used».

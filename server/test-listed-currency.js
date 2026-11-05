@@ -69,6 +69,8 @@ check(ticket2() === 1, `after the season: limitedDrawTicket2 ${ticket2()} (want 
 const cat = l.gachaList.find((x) => x.drawMedalTypeId === 9001);
 check(cat && cat.payType === 3 && cat.price === 1, `Catalog plate on payType 3: ${JSON.stringify(cat && { payType: cat.payType, price: cat.price })}`);
 check(l.gachaList.filter((x) => x.payType === 3).length === 1, 'payType 3 only on the Catalog plate');
+// grey, untappable button: the client's «no draws left» state (isDayLimited 1, userLimitedCount 0), as a used DAILY DEAL!
+check(cat.isDayLimited === 1 && cat.userLimitedCount === 0, `Catalog plate greyed (isDayLimited ${cat.isDayLimited}, userLimitedCount ${cat.userLimitedCount})`);
 p.freeStone = 5000;
 quiet(() => t.grantItem(2, 0, 300));
 check(p.freeStone === 5300 && p.payStone === undefined, `a Jewel reward is free Jewels only (freeStone ${p.freeStone}, payStone ${p.payStone})`);

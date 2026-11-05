@@ -60,7 +60,7 @@ is no longer written). Tests: `node server/test-gacha-data.js`, `node server/tes
 - Button text: drawType 1/3/5 + payType -> texts 1061404xx / 1061803xx; the Catalog uses the Gold Ticket
   (payType 6, price 1, nobody has any) with texts 106140420-424 rewritten by `recon/tools/make_shop_art.py`
   («Open Details to browse the Banner Catalog») and the Star7_Ticket_39 icon without «仮».
-- Catalog plate: tap on the grey button = no action, no request (bench).
+- Catalog plate: grey button (payType 6 without tickets until 05-11; since 05-11 payType 3 with `isDayLimited` 1 + `userLimitedCount` 0, [gold ticket](#gold-ticket)); a tap = no action, no request (bench).
 
 <a id="risorse"></a>
 ## Raisedraw resources
@@ -1001,3 +1001,14 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   shows «Failed to retrieve product information.» and returns to the Shop. No `/gacha/draw`, no crash, no store UI. Gold/Silver/
   Bronze plates (forced into the list with a temporary patch) show the restored JP tickets; the payType 4 plate count read
   7 = the Draw Points balance (client quirk; ticket plates are never listed).
+- **Greyed 05-11 (user's request)**: the orange paid-Jewel button looked tappable. The plate's own «no draws left» state
+  needs only list fields: `catalogPlate` sends `isDayLimited` 1 and `userLimitedCount` 0 (as a DAILY DEAL! already used
+  today). Bench, test save `i135g` (copy of `maxpower`, rev 271, no master change): the payType 3 panel keeps «Purchased
+  [jewel] 0 / Spend 1 Purchased Jewels to get 1 Medal» but on a GREY button (`i135g_02_shop`); two taps: no popup, no
+  request (only the periodic `/chatsvc/user` poll) (`i135g_03_greytap`, `i135g_03b_greytap2`); Details sends
+  `GET /web/gacha/catalog` and opens the WebView frame, closing it returns to the same grey plate (`i135g_07_back`). In that
+  session every WebView (login Notices, DAILY DEAL! Details too) drew an empty frame in the screenshots, so the catalogue
+  page content itself was not seen again (it was on 05-11, `i135_07`). No Play Store, billing or browser.
+  Client hooks seen in the plate function (FUN_00a1509c) and not used: the `ImageButton_LockMask` node and FUN_00a18fac
+  (a flag + id of the plate row checked against a list of the player: an open condition that greys the button, master
+  data), both would need a master change; the list state is enough.
