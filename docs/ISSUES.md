@@ -34,7 +34,7 @@ Last revision: 5 November 2026.
 | I-031 | OPEN | Death notice in the tutorial never captured | [battaglia](notes/battaglia.md#sconfitta) | 10-08 |
 | I-033 | OPEN | Generated special attacks: animations solved by I-180; **144** burst rows still named «Special Attack» (119 Puppies, Sea-Salt Ice Cream, 24 Kyroo [SAB LV 7-10]): names, descriptions and targets from the khuxwiki | [medaglie](notes/medaglie.md#burst) | 7da38e3, I-180 |
 | I-191 | OPEN | **Active banners on the home screen** (user 21-10): between the two arrows at the bottom of the home screen, as in the original, the screens of the banners active at this moment; in the original also the notices of the ongoing events (to be evaluated later). Look for screenshots/videos of the original and for the home widget | [home_profilo](notes/home_profilo.md) | - |
-| I-192 | OPEN | **Beginner's Guide WebView to redo** (user 21-10): make it nicer and clearer like the other WebView pages already redone (Notices, Draw Odds, Details: style from `notices_detail_yt_03.jpg`, small headings with the little square, keywords in orange, fixed BACK); first look for screenshots/videos of the original guide | [home_profilo](notes/home_profilo.md#notices-stile) | - |
+| I-192 | ON HOLD | **Beginner's Guide WebView to redo** (user 21-10; **user 05-11: rewrite it only after all the game modes are restored**, so it covers them all): make it nicer and clearer like the other WebView pages already redone (Notices, Draw Odds, Details: style from `notices_detail_yt_03.jpg`, small headings with the little square, keywords in orange, fixed BACK); first look for screenshots/videos of the original guide | [home_profilo](notes/home_profilo.md#notices-stile) | - |
 
 ### Resources and layout
 
