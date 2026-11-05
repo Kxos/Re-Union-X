@@ -63,7 +63,11 @@ function traitMedalRow(e, med) {
 function patch(masterDir, list = JSON.parse(fs.readFileSync(path.join(__dirname, 'trait_medals.json'), 'utf8'))) {
   const medalFile = path.join(masterDir, 'medal.json');
   const burstFile = path.join(masterDir, 'burst.json');
-  const medals = JSON.parse(fs.readFileSync(medalFile, 'utf8')).filter((r) => !isTraitMedal(r));
+  const all = JSON.parse(fs.readFileSync(medalFile, 'utf8'));
+  // the Trait Medal rows go back where they already are (later generators, e.g. make-campaign-medals, append after them):
+  // a second run on a finished master leaves medal.json unchanged
+  const at = all.findIndex(isTraitMedal); // = number of other rows before the first Trait Medal row
+  const medals = all.filter((r) => !isTraitMedal(r));
   const bursts = JSON.parse(fs.readFileSync(burstFile, 'utf8'));
   const byId = new Map(medals.map((r) => [r.medalId, r]));
   const model = bursts.find((b) => b.burstId === byId.get(10095)?.burstId) || bursts.find((b) => b.target === 1);
@@ -91,7 +95,7 @@ function patch(masterDir, list = JSON.parse(fs.readFileSync(path.join(__dirname,
     r.burstEnhanceCategory = [l[0] || 0, l[1] || 0];
   }
   const before = fs.readFileSync(medalFile, 'utf8');
-  const after = JSON.stringify([...medals, ...rows]);
+  const after = JSON.stringify(at < 0 ? [...medals, ...rows] : [...medals.slice(0, at), ...rows, ...medals.slice(at)]);
   if (after !== before) fs.writeFileSync(medalFile, after);
   if (burstChanged) fs.writeFileSync(burstFile, JSON.stringify(bursts));
   console.log(`trait medal: ${rows.length} righe, ${links.size} linee collegate${after !== before || burstChanged ? '' : ' (invariato)'}`);
