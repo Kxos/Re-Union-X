@@ -1,4 +1,4 @@
-# Funzioni comuni del banco (da includere con: . "$PSScriptRoot\bench_lib.ps1").
+﻿# Funzioni comuni del banco (da includere con: . "$PSScriptRoot\bench_lib.ps1").
 #
 # Niente attese fisse: prima di ogni tocco si aspetta che il pulsante sia sullo
 # schermo. Lo schermo si legge dentro il guest: screencap in formato grezzo (16
@@ -199,6 +199,12 @@ function TapRed([int]$x, [int]$y, [string]$what, [double]$timeout = 60) {
 
 # Attende una riga del log del server che corrisponda a $pattern, scritta dopo $from righe.
 function LogLines([string]$file) { @(Get-Content $file -ErrorAction SilentlyContinue).Count }
+# richieste di gioco nel log, senza le righe DNS (anche le query del PC, con il DNS di Windows sul server) e senza
+# i poll periodici della home (chat, playtime, push): con quelle righe il log non resta mai fermo e l'attesa
+# della home arrivava sempre al limite di 300 s
+function GameLines([string]$file) {
+    @(Get-Content $file -ErrorAction SilentlyContinue | Where-Object { $_ -match '^\S*\[(ok|\?|!)\S*\s+#\d+\s' -and $_ -notmatch 'chatsvc/user|/playtime/|/system/push' }).Count
+}
 function WaitLog([string]$file, [string]$pattern, [int]$from, [double]$timeout = 60, [string]$what = $pattern) {
     $sw = [Diagnostics.Stopwatch]::StartNew()
     while ($sw.Elapsed.TotalSeconds -lt $timeout) {
