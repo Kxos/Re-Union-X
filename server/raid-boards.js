@@ -285,10 +285,11 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       // about 520 px at 26 pt (list title bar 540) and 440 px at 22 pt (board screen title, 448 px since make_layouts 3 Nov).
       const boardName = `${String(r.board.name)} ${weekDate}`.slice(0, 128);
       // artFrom: a board standing in for an unknown one (Japan-only raids, make-raid.js) shows its donor board's card picture
-      const art = artOf(r.board.id) || (r.board.artFrom ? artOf(r.board.artFrom) : null);
+      // (board = the key whose picture is used: a screenshot card is a file named by that key, artLines)
+      const ownArt = artOf(r.board.id), art = ownArt || (r.board.artFrom ? artOf(r.board.artFrom) : null);
       if (!art) labels.add('boardNoArt');
       else if (art.screenshot) labels.add('boardArt');
-      if (art) out.art.push({ sphereBoardId: id, board: r.board.id, ...art });
+      if (art) out.art.push({ sphereBoardId: id, board: ownArt ? r.board.id : r.board.artFrom, ...art });
       out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: background, arryId: id, masuId: id, type: TYPE, openId: 0, openParam: 0, price: 0, detailUrl: '',
         startDatetime: START, endDatetime: END });
       out.arrayRows.push(gridRow(id, r.cells.length));

@@ -364,7 +364,8 @@ const tests = {
       f.eventRewards.rows.push({ row_id: 'JP-SHR-2', region: 'JP', boards_summary: [], inferred_board: { value: 'same standard super-hard board' } },
         { row_id: 'JP-SHR-1', region: 'JP', boards_summary: [{ board: 'Super-hard defeat reward', cells: '**13**', coins: '**40,500**' }] });
       f.config.jpBoards = { superHard: { donor: 'WW-E8-1', board: 'Legendary Raid Reward', cells: 13, coins: 40500 } };
-      f.config.boards = { art: { 'WW-E8-1:ev1-legendary-raid-reward': { jp: 'img/sphere_incentive/1.png' } } };
+      f.config.boards = { art: { 'WW-E8-1:ev1-legendary-raid-reward': { jp: 'img/sphere_incentive/1.png' },
+        'WW-E9-1:ev2-seasoned-wielder-bonus-both': { screenshot: 'shot.png' } } };
       f.boards = { boards: [], weeks: [] };
       f.master.medal = ['Chip', 'Dale', 'Moogle'].flatMap((n, i) => [5, 6].map((rare) => ({ medalId: 100 + 10 * i + rare, name: n, rare })));
       f.master.avatarParts = [];
@@ -373,6 +374,9 @@ const tests = {
     // a JP event: only the generic board of the nearest WW one-off event, never its avatar board
     assert.deepStrictEqual(boardsOf('JP-RAID-1/single'), ['Seasoned Wielder Bonus 4/10/16']);
     assert.ok(jpEntry(out, 'JP-RAID-1/single').reconstructed.includes('boardStandard'));
+    // its donor's screenshot card: the art line names the donor's file, not a JP key (no such file: build stopped, 05-11)
+    const jpArt = rb.artLines(out.boardArt).split('\n').find((l) => l.startsWith(`img/sphere_incentive/${jpEntry(out, 'JP-RAID-1/single').sphereBoardIds[0]}.png`));
+    assert.strictEqual(jpArt.split('\t').slice(1).join('\t'), 'loc\t=img/sphere_incentive_ww/WW-E9-1_ev2-seasoned-wielder-bonus-both.png');
     // super-hard weekends: the WW board equal to the JP one; its card picture (artFrom); inferred after the wiki's dates
     for (const key of ['JP-SHR-1/single', 'JP-SHR-2/single']) {
       const e = jpEntry(out, key);
