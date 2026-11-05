@@ -23,6 +23,14 @@ const path = require('path');
 
 const ROBO_BURST = 3000000;
 const step = (i) => 300 * ((i + 1) * (i + 2) / 2);   // potenza in piu' al pallino i+1 (tierPower)
+// Equal steps per dot (I-212, user decision 05-11, docs/notes/medaglie.md#sn-fiend): the khuxwiki 7★ rows with only the
+// full-dot value (dmg7, no dmg6/dmg6m: the SN, SN+ and SN++ Medals) take the step of the thethiny originals with a similar
+// full value. In the originals every 5-dot row raises the power by the same amount at each dot, and the amount grows with
+// the full value: below x2.00 +400 (61 of the 70 rows of x1.50-1.99; the 7 rows under x1.50 have no common step, 164-350),
+// x2.00-2.99 +600 (31 of 55), x3.00-3.49 +800 (5 of 13), from x3.50 +1000 (14 of 16). The khuxwiki 6★ gaps agree
+// (0.2/0.3/0.4/0.5 = 400/600/800/1000 per dot; never above 0.5). Powers in ten-thousandths.
+const EQUAL_STEP_BANDS = [[20000, 400], [30000, 600], [35000, 800], [Infinity, 1000]];
+const equalStep = (top) => EQUAL_STEP_BANDS.find(([lim]) => top < lim)[1];
 
 // Solo le righe sotto le 6★ che si evolvono in una rarita' maggiore (quelle che il client bloccherebbe): il
 // badge mostra comunque il Tier della forma evoluta; le 5★ senza Evolve (Halloween C) tengono il loro.
@@ -45,6 +53,14 @@ function burstPowerFix(bursts, opts) {
   const { origBursts = new Map(), wikiInfo = new Map(), multiOf = () => undefined, medals = [] } = opts;
   const owner = new Map();
   for (const m of medals) if (m.validBurst && m.burstId && m.type !== 9 && !owner.has(m.burstId)) owner.set(m.burstId, m);
+  // bursts of an «adjusted» form: the evolution of a Medal into one of the same name and rarity (the SN++ of notice 69365,
+  // 2020-09-03, with Fantasia Mickey B). The khuxwiki card is shared and gives the adjusted value as dmgevo (I-212, 302012)
+  const byId = new Map(medals.map((m) => [m.medalId, m]));
+  const evolvedBurst = new Set();
+  for (const m of medals) {
+    const e = m.validEvolve ? byId.get(m.evolveId) : null;
+    if (e && e.burstId && e.name === m.name && e.rare === m.rare) evolvedBurst.add(e.burstId);
+  }
   const num = (v) => { const x = parseFloat(String(v ?? '').replace(/,/g, '')); return Number.isFinite(x) ? x : null; };
   const linear = (base, top, want) => [0, 1, 2, 3, 4].map((i) => (i < want ? Math.round(base + (top - base) * (i + 1) / want) : 1));
   const set = (b, base, per, display = base, dper = per) =>
@@ -72,14 +88,16 @@ function burstPowerFix(bursts, opts) {
     if (w) {
       const n = m.rare;
       let base = num(w['dmg' + n]), top = num(w['dmg' + n + 'm']);
-      if (top == null && n >= 7 && base != null) {   // la 7★: solo il valore a pallini pieni
+      const evo = evolvedBurst.has(b.burstId) ? num(w.dmgevo) : null;
+      if (evo != null) { base = null; top = evo; stats.evo = (stats.evo || 0) + 1; }   // forma «adjusted»: dmgevo a pallini pieni
+      else if (top == null && n >= 7 && base != null) {   // la 7★: solo il valore a pallini pieni
         top = base;
         const b6 = num(w.dmg6), t6 = num(w.dmg6m);
         base = b6 != null && t6 != null ? top - (t6 - b6) : null;
       }
-      if (base == null && top != null && want) {   // base ignota: passi di tierPower sotto il valore pieno
-        const t = Math.round(top * 10000), p0 = t - step(want - 1);
-        set(b, p0, [0, 1, 2, 3, 4].map((i) => (i < want ? p0 + step(i) : 1)));
+      if (base == null && top != null && want) {   // base ignota: passi uguali degli originali sotto il valore pieno
+        const t = Math.round(top * 10000), s = equalStep(t), p0 = t - s * want;
+        set(b, p0, [0, 1, 2, 3, 4].map((i) => (i < want ? p0 + s * (i + 1) : 1)));
         stats.wiki++;
         continue;
       }

@@ -890,7 +890,8 @@ changed (468 new variable + 18 Critical), displayPower and medal.json unchanged;
   in thethiny Wind Dash (original) is type 28 and Gale Assault type 27, against the code's map (28 enemies defeated,
   27 next medal, 31 less Lux): the code is followed, to be verified on the bench.
 - 9 rows with the display at full dots (khuxwiki) different from LowMulti (3000545, 3000701, 3001893, 3001981, 3002008-3002012):
-  display kept, gap hi − lo.
+  display kept, gap hi − lo. Since 05-11 (I-212) the five adjusted SN++ 3002008-3002012 read the khuxwiki `dmgevo` and equal
+  LowMulti: 4 rows left.
 
 <a id="sn-fiend"></a>
 ### SN++ - Fiend multiplier (I-212, check 27-10)
@@ -900,16 +901,43 @@ powers in ten-thousandths, guilt factor applied by the client on both ends (tier
 
 | level | ours (displayPower - displayMaxPower) | khuxwiki |
 |---|---|---|
-| 0 dots | 5500 - 155500 = x0.55 - 15.55 | not given |
-| 1-4 dots | x0.58/0.64/0.73/0.85 - 15.58/15.64/15.73/15.85 | not given |
+| 0 dots | 8000 - 158000 = x0.80 - 15.80 (before 05-11: x0.55 - 15.55) | not given |
+| 1-4 dots | x0.84/0.88/0.92/0.96 - 15.84/15.88/15.92/15.96 (before: x0.58/0.64/0.73/0.85) | not given |
 | 5 dots | 10000 - 160000 = **x1.00 - 16.00** | **x1.00 - 16.00** |
 | 5 dots, SAB tier 10 max | x1.00·4.2 - 16.00·4.2 = **x4.20 - 67.20** | **x4.20 - 67.20** («Max») |
 
-sp1 150000 (S1 = 15) = 16.00 − 1.00, Roboloid LowMulti 1 / HighMulti 16: the documented levels match, nothing
-changed. The 0-4 dot values come from the `tierPower` fallback of `medal-power-fix.js` (wiki 7★ with only `dmg7`,
-no `dmg6`: full value minus +300/+900/+1800/+3000/+4500). All 163 SN++ rows use it, but only Fiend (and SN/SN+ - KH III
-Pirate Sora, SN/SN+ - KH III Dark Baymax: x0.55 -> x1.00) have a base so low that the -0.45 is about half of the
-multiplier; the thethiny originals use equal steps per dot (+400/+600/+800/+1000). Open user decision.
+sp1 150000 (S1 = 15) = 16.00 − 1.00, Roboloid LowMulti 1 / HighMulti 16: the documented levels match.
+
+**Equal steps per dot (user decision 05-11).** The khuxwiki gives a 7★ with only `dmg7` (no `dmg6`/`dmg6m`) at full dots
+only: 216 bursts, the SN, SN+ and SN++ Medals and a few other late 7★. Until 05-11 `medal-power-fix.js` put the 0-4 dots
+on the `tierPower` steps (full value minus +300/+900/+1800/+3000/+4500, growing steps); on a x1.00 Medal (Fiend, SN - KH III
+Pirate Sora, SN - KH III Dark Baymax) that halved the value at 0 dots. Now the rule of the thethiny originals: **the same
+step at every dot**, chosen by the full value like the originals do:
+
+| full value (5 dots) | step per dot | originals (thethiny, 5-dot rows) |
+|---|---|---|
+| below x2.00 | +400 (0.04) | 61 of the 70 rows of x1.50-1.99 (the 7 rows under x1.50 have no common step: 164-350) |
+| x2.00-2.99 | +600 | 31 of 55 |
+| x3.00-3.49 | +800 | 5 of 13 (weak; no burst of the fallback falls here today) |
+| from x3.50 | +1000 (0.10) | 14 of 16 |
+
+The khuxwiki 6★ gaps say the same (0.2 / 0.3 / 0.4 / 0.5 over 5 dots = 400 / 600 / 800 / 1000 per dot, never above 0.5,
+0.2 for 175 of the 218 rows of x1.50-1.99, 0.5 for 26 of the 33 rows from x5). Only the 0-4 dot values change (215 bursts: power
+and maximum of the dots); the 5-dot value, the maximum at 5 dots, sp1 and so the tier-10 value are as before. Examples:
+Fiend x0.55 -> **x0.80** at 0 dots (maximum 15.55 -> 15.80); SN++ - KH III Terra x16.19 -> 16.14, dots
+16.24/16.34/16.44/16.54 (before 16.22/16.28/16.37/16.49), 5 dots x16.64 - 18.14 unchanged; Sora & Peter Pan x3.05 -> 3.00.
+Test `server/test-medal-power-fix.js`. Not changed: the Roboloid fallback (174 bursts with no khuxwiki card, only Roboloid's
+full-dot Multi) still uses the `tierPower` steps; it can take the same rule if the user wants.
+
+**302012 SN++ - KH III Xion (the adjusted form, I-212, 05-11).** It showed x15.64 - 17.14 at 5 dots: the base of the
+*original* Xion (khuxwiki `dmg7` 15.64) with the gap of the *adjusted* one (Roboloid 2012: 18.64 - 20.14, gap 1.5). The four
+other adjusted SN++ (302008-302011) had the same fault, hidden because their original gap is also 1.5 (16.64 - 18.14,
+Terra, Ven, Aqua 17.14 - 18.64). The khuxwiki card of each of them has the adjusted values as `dmgevo` / `dmgevob`
+(«Evo»), equal to Roboloid: Terra, Ventus, Aqua and Xion **x18.64 - 20.14**, Terra, Ven, Aqua **x19.14 - 20.64** (STR was
+already the `strevo` value). `burstPowerFix` now reads `dmgevo` for the burst of a Medal reached by evolving one of the
+same name and rarity (only these five today; notice 69365 of 2020-09-03: «The adjusted stats will appear on medals evolved
+with a Fantasia Mickey B medal»). Shown at 5 dots: 302008-302010 and 302012 x16.64/15.64 -> **18.64 - 20.14**, 302011 x17.14 ->
+**19.14 - 20.64**.
 
 ## Campaign Medals in the Present Box (I-234)
 

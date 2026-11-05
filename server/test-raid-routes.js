@@ -375,6 +375,52 @@ const tests = {
     assert.strictEqual(run('2018-09-10', BONUS), 2, 'before 2018-09-17: +1');
     assert.strictEqual(run('2017-03-20', BONUS), 2, 'event raids of 2016-2018: +1');
   },
+  event_level_steps() {
+    // I-229: event raids with their own notice rule (EVENT_LEVEL_STEPS): +5 every defeat (23794, 37768), +5 in Bonus Time
+    // only (42613, 43551; inferred 38250, 38970, 40165), +2 in Bonus Time for the week of 2018-09-10 (inferred from 44500)
+    const run = (censusId, start, now, from = 1) => {
+      const w = world();
+      Object.assign(w.index.entries[0], { censusId, start, end: start, questAp: [0] });
+      w.week = { shopFrom: start, shopTo: start };
+      w.now = now;
+      w.player.raid = { levels: { 'WW-1/Beginner': from }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': start } };
+      w.spawn(); w.start(); w.clearParts([0, 100, 200]);
+      return w.player.raid.levels['WW-1/Beginner'];
+    };
+    const BONUS = Date.parse('2026-10-27T15:00:00Z'), PLAIN = Date.parse('2026-10-27T10:00:00Z');
+    assert.deepStrictEqual([run('WW-E37768-1', '2018-03-05', PLAIN), run('WW-E37768-1', '2018-03-05', BONUS)], [6, 6], 'Mysterious Sir: +5 always');
+    assert.strictEqual(run('WW-E37768-1', '2018-03-05', PLAIN, 26), 31, 'reaches the Setzer level 31');
+    assert.strictEqual(run('WW-E37768-1', '2018-03-05', PLAIN, 96), 99, 'capped at LV 99');
+    assert.strictEqual(run('WW-E23794-1', '2016-12-26', PLAIN), 6, 'daily raid events of 2016-12: +5 always');
+    assert.deepStrictEqual([run('WW-E42613-1', '2018-07-23', PLAIN), run('WW-E42613-1', '2018-07-23', BONUS)], [2, 6], 'Gear Golem 2018-07: +5 in Bonus Time');
+    assert.deepStrictEqual([run('WW-E43551-1', '2018-08-20', PLAIN), run('WW-E43551-1', '2018-08-20', BONUS)], [2, 6], 'Gummi Hound 2018-08');
+    assert.strictEqual(run('WW-E38250-1', '2018-03-19', BONUS), 6, 'Queen Bee 2018-03 (inferred)');
+    assert.deepStrictEqual([run('WW-W-2018-09-10', '2018-09-10', PLAIN), run('WW-W-2018-09-10', '2018-09-10', BONUS)], [2, 3], '2018-09-10 (inferred +2)');
+    assert.strictEqual(run('WW-E41141-1', '2018-06-11', BONUS), 2, 'an event without the rule: +1');
+    // every census id of the rules is a served raid (when built)
+    const served = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(served)) {
+      const ids = new Set(JSON.parse(fs.readFileSync(served, 'utf8')).entries.map((x) => x.censusId));
+      assert.deepStrictEqual([...Object.keys(routesRaid.EVENT_LEVEL_STEPS), ...Object.keys(routesRaid.EVENT_COIN_LAST)].filter((id) => !ids.has(id)), [], 'census ids of the rules');
+    }
+  },
+  daily_coins_every_5_levels() {
+    // I-229: daily raid events (notices 29805 .. 35529): coins only at LV 5, 10, ... up to LV 55 (50 for 33888 / 35529)
+    const run = (censusId, level) => {
+      const w = world();
+      Object.assign(w.index.entries[0], { censusId, open: 'daily', start: '2017-07-03', end: '2017-07-09', questAp: [1] });
+      w.week = { shopFrom: '2017-07-03', shopTo: '2017-07-09' };
+      w.player.raid = { levels: { 'WW-1/Beginner': level }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': `2017-07-03@${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date(w.now))}` } };
+      const boss = w.spawn();
+      assert.strictEqual(boss.level, level);
+      w.start(); w.clearParts([0, 100, 200]);
+      assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], level + 1, 'the level still rises');
+      return w.player.raid.pending.length;
+    };
+    assert.deepStrictEqual([1, 4, 5, 10, 55, 56, 60].map((lv) => run('WW-E29805-1', lv)), [0, 0, 1, 1, 1, 0, 0]);
+    assert.deepStrictEqual([50, 55].map((lv) => run('WW-E35529-1', lv)), [1, 0], 'none after LV 50');
+    assert.strictEqual(run('WW-1', 3), 1, 'other raids: coins at every defeat');
+  },
   rare_boss_spawn() {
     // an entry with a rare boss (raidSetting rareBossId): rareUpType 3 reads as one chance in rareUpTypeArg per spawn; the
     // rare body, its timer and its AP; the stage is the same, so the client fights rareBossId through parts[0].rare 2

@@ -16,6 +16,23 @@ const BONUS_HOURS = new Set([2, 8, 14, 20]); // PT, one hour each, on the real c
 // Bonus-time level step (notices #44500 2018-09-17 .. #55884 2019-08-01: «The raid boss will gain an increased 2 levels upon
 // successful defeat!» in Raid Boss Bonus Time, every day of the event; removed by #56463 of 2019-08-12): weeks starting in [FROM, TO)
 const BONUS_LEVEL_FROM = '2018-09-17', BONUS_LEVEL_TO = '2019-08-12', BONUS_LEVEL_STEP = 2;
+// Level step of the event raids whose notice states another rule (I-229), by census id: `always` every defeat, `bonus` only in
+// Raid Boss Bonus Time (+1 otherwise). Stated: 23794 (2016-12-26 daily raid events: «instead of the raid boss increasing its
+// level by one, it will increase by five levels»), 37768 (Mysterious Sir: «The Raid Boss's level will increase by 5 each time you
+// defeat him!»; its Setzer levels 31, 71 and 96 are all 1 + 5n), 42613 and 43551 (Bonus Time: «Gain an increased 5 levels upon
+// successful defeat of the boss!»). Inferred (`inferred`: the notice says only that bosses level faster in Bonus Time, «there
+// is the chance that your Raid Boss could skip past level 90»): 38250, 38970, 40165 take the +5 of 42613, the same notice
+// pattern; 44005 (2018-09-10, «Raid Bosses will gain more levels with each defeat!») the +2 of 44500, its next week.
+const EVENT_LEVEL_STEPS = {
+  'WW-E23794-1': { always: 5 }, 'WW-E37768-1': { always: 5 }, 'WW-E42613-1': { bonus: 5 }, 'WW-E43551-1': { bonus: 5 },
+  'WW-E38250-1': { bonus: 5, inferred: true }, 'WW-E38970-1': { bonus: 5, inferred: true }, 'WW-E40165-1': { bonus: 5, inferred: true },
+  'WW-W-2018-09-10': { bonus: 2, inferred: true },
+};
+// Daily raid events whose coins come every 5 levels (notices 29805, 31611, 33007: «Get Event Coins every 5 levels!», «Raid boss
+// will not yield any Event Coins after level 55»; 33888, 35529: after level 50), by census id -> last level that pays (I-229).
+// Read as: a defeat pays its coin tables only at a level that is a multiple of 5, up to that level; the amounts stay ours.
+const EVENT_COIN_EVERY = 5;
+const EVENT_COIN_LAST = { 'WW-E29805-1': 55, 'WW-E31611-1': 55, 'WW-E33007-1': 55, 'WW-E33888-1': 50, 'WW-E35529-1': 50 };
 const AP_RULE_FROM = '2019-07-15', AP_RULE = { bonus: 0, weekend: 5, weekday: 90 };
 const RAID_QUEST_FIRST = 980000, RAID_QUEST_LAST = 989999; // stage ids of the raid events (make-raid.js)
 const FIRST_LEVEL = 1, MAX_LEVEL = 99; // +1 per defeat, LV 1 to 99 (spec); entry.level is the quest's level, not the boss's
@@ -193,23 +210,33 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
 
   // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
   // a story boss has no week (occ null): always +1 (review M-5)
-  const levelStep = (boss, ms) => (boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1);
+  // an event raid with its own notice rule (EVENT_LEVEL_STEPS, I-229) follows it, also as a kept raid of the Raid Catalog
+  const levelStep = (boss, ms, entry) => {
+    const ev = entry && EVENT_LEVEL_STEPS[entry.censusId];
+    if (ev) return ev.always || (ev.bonus && isBonusTime(ms) ? ev.bonus : 1);
+    return boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1;
+  };
   function bossDefeated(r, boss, allPoints, nowMs = realNow()) {
     const lk = boss.levelKey || boss.key; // a kept raid's boss feeds its own counter (cat:<key>), never the live week's
-    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[lk] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs)); (r.levelOcc ||= {})[lk] = boss.occ; } // a boss of an older month does not feed the new one
+    const entryOf = (raidIndex().entries || []).find((e) => e.key === boss.key);
+    if (boss.month === undefined || boss.month === r.levelsMonth) { r.levels[lk] = Math.min(MAX_LEVEL, boss.level + levelStep(boss, nowMs, entryOf)); (r.levelOcc ||= {})[lk] = boss.occ; } // a boss of an older month does not feed the new one
     r.lastFight = { raidId: boss.raidId, damage: boss.damage || 0 };
     const parts = fight.listView(boss, boss.endsAt - 1, serverTimeAt).raid.parts; // read as alive: a win past the timer counts
     r.boss = null;
     onDefeat(boss); // Daily, Weekly and Beginner «Defeat Raid Boss» missions (server.js missionCount 'raid')
     // level drops of the event's notice (make-raid.js entry.levelDrops, review I-3): every slot of the drop row of this level, to the
     // Present Box (the RAID RESULTS popup shows only the three coin tables)
-    const entryOf = (raidIndex().entries || []).find((e) => e.key === boss.key);
     for (const d of (entryOf && entryOf.levelDrops) || []) {
       if (d.level !== boss.level) continue;
       const row = rewardRow(d.rewardId);
       if (!row) { log(`[raid] level drop ${d.rewardId} of ${boss.key} not served`); continue; }
       for (let i = 0; i < row.validReward; i++) addPresent({ type: row.type[i], id: row.id[i], num: row.num[i], skillId: 0, skillLv: 1, from: 'levelDrop' });
       log(`[raid] ${boss.key}: level ${boss.level} drop ${row.raidRewardId} to the Present Box`);
+    }
+    // daily raid events: coins only every 5 levels, none past the notice's last level (EVENT_COIN_LAST, I-229)
+    const coinLast = entryOf && EVENT_COIN_LAST[entryOf.censusId];
+    if (coinLast && (boss.level % EVENT_COIN_EVERY !== 0 || boss.level > coinLast)) {
+      return log(`[raid] ${boss.key}: LV ${boss.level} defeated, no coins (every ${EVENT_COIN_EVERY} levels up to LV ${coinLast})`);
     }
     const rows = rewardRowsOf(boss);
     if (!rows?.victory || !rows.mvp) return log(`[raid] boss ${boss.raidId} defeated, no reward: its raidReward rows are not served`);
@@ -506,3 +533,5 @@ module.exports.SMOKE_MAX_AGE_MS = SMOKE_MAX_AGE_MS;
 module.exports.isBonusTime = isBonusTime;
 module.exports.questApAt = questApAt;
 module.exports.RAID_IMG_VERSION = RAID_IMG_VERSION;
+module.exports.EVENT_LEVEL_STEPS = EVENT_LEVEL_STEPS;
+module.exports.EVENT_COIN_LAST = EVENT_COIN_LAST;
