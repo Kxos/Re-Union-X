@@ -954,3 +954,32 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   bench crash: the client adds the LWF to `Area_Point` without a null check, so a missing file is a SIGSEGV). 11 textures
   from JP, 5 dropped by the JP export from the served WW twin `Draw_MedalGet` (same name, size and registration), 3 title
   letters with no file anywhere from the same letter of the title (I, R, T): `DR_TWIN` / `DR_LETTER` of import_jp_raisedraw.py.
+
+<a id="gold-ticket"></a>
+## Gold Ticket: what it was (I-135, research 05-11)
+
+- **Name**: «Gold Ticket» (JP ゴールドチケット, texts 106140420-425 and 106180213 of the JP 4.3.1 client; WW notices use the
+  same name). It is the third of a set: payType 4/5/6 = drawTicket1-3 = **Bronze / Silver / Gold Ticket** (JP texts
+  106140400-405, 106140410-415, 106180211-212). The «Star7» in the file name means the tickets of the 7★ evolution draws.
+- **Use**: the permanent «Ticket Draw for 7★ Evolve Medals» (WW notice 40755, 25 May 2018): 5-medal deals, one per ticket
+  colour, each giving five **Blue Fairy** Evolve Medals (5 of the same SA Bonus tier evolve a 6★ medal to 7★). Gold: Blue Fairy
+  SA Bonus LV 5-8; Silver: LV 4-8 (LV 3 removed on 14 Sep 2018); Bronze: LV 1-3. Not used by any other banner.
+- **How it was obtained** (WW): PvP Mode (Coliseum) ranking rewards, e.g. the Deluxe PvP Ranking weeks (notice 44931, 9-15
+  Oct 2018: 1st place 6 Gold, rank 1,501-2,000 3 Gold); 1 Gold Ticket as weekly bonus of the Weekly Jewels Extravaganza from
+  the week of 20 Aug 2018 to the week of 11 Mar 2019 (notices 43554 ... 51109; the week of 6 Aug 2018 gave a Silver one,
+  43028); 1 Gold Ticket to every member of a party with a new player (recruit campaign 25 Oct - 4 Nov 2018, notice 46205);
+  Silver Tickets also from the PvP weekly Limited missions (from 18 Sep 2018, notice 44735) and as an apology gift (41796).
+- **End**: notice 51102 (12 Mar 2019): the ticket draws were discontinued and Bronze/Silver/Gold Tickets became unusable after
+  31 Mar 2019 11:59 p.m. PT; the PvP missions gave a Blue Fairy LV 8 and a Platinum Ticket instead.
+- KH Wiki «Currencies» lists them among the discontinued Union χ currencies (from PvP Mode, draws giving Blue Fairy medals).
+- **Icon**: the notice 40755 prints the three tickets: a slanted metal ticket with a white moogle face, scroll ornaments in
+  the corners and a sparkle at the top right, in gold, silver and bronze. The JP 4.3.1 data has the **final art without «仮»**
+  for all three: `img/incentive/Star7_Ticket_39.png` (gold, 83x83, same design as the notice), `Star7_Ticket_38` (silver),
+  Star7_Ticket_37 (bronze, only under `cocostudio/publish/`), plus the reward icons `img/incentive/IncentiveIcon_37/38/39`
+  (90x90). Only the WW client files had the «仮» placeholder. Local references: `reference\tickets\` (see SOURCES.md).
+- So the original art for 39 exists (it is already used, reduced, as the «other» currency icon of the Catalog page,
+  `shop_icons.py`). Our generic icon on the Catalog plate (`make_shop_art.py icon()`, three stacked banner plates) is a
+  deliberate choice, because the plate is a Gold Ticket draw that nobody can pay: the gold ticket would suggest a real
+  currency. Options in the I-135 row.
+- Side note: `img/incentive/Star7_Ticket_37` (bronze, payType 4) is still the WW «仮» file; the JP final art exists only as
+  `cocostudio/publish/Star7_Ticket_37.png` (same 83x83 size) and could be mapped in `originals.tsv` like draw_Ticket_42.
