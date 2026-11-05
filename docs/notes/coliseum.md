@@ -160,3 +160,27 @@ Web and data side; details and per-id tables in the private dossier.
   proven), their JP Coliseum cells are unknown.
 - **Ranking.** Metric progress (rounds cleared), ties broken by the time the round was reached (JP 1.0.5 change,
   probable). **Loss rule still unknown** from web sources.
+
+## Probable data check (6 November 2026)
+
+Cross-check of the wiki-only data against the official WW notices, period reddit threads (via the Wayback Machine) and
+WW gameplay videos of 2016-2017 (round-select screens, boards, ranking screens).
+
+- **Lineups.** WW 2016-08 .. 2016-11: every round visible in the videos (10 rounds over the four months) matches the
+  English wiki; the other rounds stay wiki-only. The 1.1.3 master row for 2016-11 (stage set of 2016-03 again) is not what
+  WW played (refuted). WW 2019-07: a period infographic matches the wiki in all 10 rounds, waves, counters and buffs
+  (proven). WW 2017-05 = JP 2016-10 stage set (proven on video).
+- **Enemy level** shown in battle = rounds of all earlier tiers + current round number (9 readings, 2016-08 .. 2017-05);
+  the stage is the round within the tier cycled by 10 (proven).
+- **Shortcut.** A one-turn clear unlocks exactly the tier's skip value (18 / 12 / 8 in tiers 1 / 3 / 5 of 2016-11); the
+  next round is the cleared round + that value, also across tiers ("Tier 1 > 3"), and the skipped rounds are reported as
+  complete with their per-round coins (proven).
+- **Boards.** Node costs of the 2016-2017 avatar boards (19 nodes, 1100 coins) and of the Tier 10 Bonus board (3090) are
+  proven on video (August, October, November 2016). Tier 11 Bonus present in 2017-05 (proven). Totals of the boards from
+  2018-12 (1230 / 1470 / 1900 / 3500 = 8100 = all tier-clear coins) and from 2019-05 (4900 + 260 + 3 x 8580 = 30900 =
+  all coins up to tier 9) close exactly and agree with the JP wiki / a 2019 player report; their per-node costs and the
+  2018 3500-coin boards remain wiki-only (probable).
+- **Ranking.** Ordered by progress (tier, round): proven on a 2016 Top 10 screen, each entry shows the time the round was
+  reached; tie-break by that time still probable. Notice brackets 2016-06 .. 2016-11 equal the wiki except the two lowest
+  brackets of 2016-07 (notice: 5-star Chip/Dale x1).
+- **Enemy stats.** No other enemy master exists on disk; the 2019 ids and the month-specific copies stay probable/weak.
