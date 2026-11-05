@@ -908,3 +908,8 @@ changed. The 0-4 dot values come from the `tierPower` fallback of `medal-power-f
 no `dmg6`: full value minus +300/+900/+1800/+3000/+4500). All 163 SN++ rows use it, but only Fiend (and SN/SN+ - KH III
 Pirate Sora, SN/SN+ - KH III Dark Baymax: x0.55 -> x1.00) have a base so low that the -0.45 is about half of the
 multiplier; the thethiny originals use equal steps per dot (+400/+600/+800/+1000). Open user decision.
+
+## Campaign Medals in the Present Box (I-234)
+
+Medals that the original sent to the Present Box for a condition (owned Medals, Special Attack Bonus, traits, Deal
+draws, Story Quests): [campaigns.md](campaigns.md).
