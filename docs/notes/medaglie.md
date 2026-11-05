@@ -949,6 +949,8 @@ same name and rarity (only these five today; notice 69365 of 2020-09-03: «The a
 with a Fantasia Mickey B medal»). Shown at 5 dots: 302008-302010 and 302012 x16.64/15.64 -> **18.64 - 20.14**, 302011 x17.14 ->
 **19.14 - 20.64**.
 
+**Bench 5 November 2026 (rev 272, resources 104, test copy of `maxpower`).** Medal detail: SN++ - Fiend 5 dots **x1.00 - 16.00** (`t272_fiend5`), 0 dots **x0.80 - 15.80** (`t272_fiend0`); SN++ - Terra, Ven, Aqua evolved **x19.14 - 20.64** (`t272_tva`); SN++ - KH III Xion evolved **x18.64 - 20.14** (`t272_xion`); SN+ - KH III Pirate Sora (Roboloid fallback) 0 dots **x0.80 - 16.80** (`t272_pirate0`). Left to the user: the «320% BONUS» hit of Fiend in battle.
+
 ## Campaign Medals in the Present Box (I-234)
 
 Medals that the original sent to the Present Box for a condition (owned Medals, Special Attack Bonus, traits, Deal
