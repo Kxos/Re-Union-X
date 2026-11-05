@@ -17,11 +17,38 @@ New-Item -ItemType Directory -Force $SHOTS | Out-Null
 # insieme, o uccidendone uno a meta', LDPlayer va in errore «g_pPipeMemHead->arBufHead[i].
 # usingPipeId != nPipeId» e crasha (11 ottobre). Mai Stop-Process su ld.exe.
 $LD_MUTEX = New-Object System.Threading.Mutex($false, 'Global\khux_ld_exe')
-function Sh([string]$cmd) {
+# Shell di root (ld.exe): solo per i comandi che ne hanno bisogno (/data/tombstones, /data/data, setprop, /mnt/shared).
+function ShRoot([string]$cmd) {
     $own = $false
     try { $own = $LD_MUTEX.WaitOne(120000) } catch [System.Threading.AbandonedMutexException] { $own = $true }
     if (-not $own) { throw "ld.exe occupato da piu' di 120 s: $cmd" }
     try { & "$LD\ld.exe" -s 0 $cmd } finally { $LD_MUTEX.ReleaseMutex() }
+}
+
+# Tutto il resto passa da adb (utente shell, niente root: su non c'e'), con un tempo massimo: 05-11 un ld.exe
+# «pidof» e' rimasto appeso 10 minuti e il relogin con lui; un adb appeso si puo' chiudere senza toccare
+# LDPlayer, e lo script si ferma con un errore chiaro invece di aspettare per sempre.
+$ADB = Join-Path $LD 'adb.exe'
+$ADB_SERIAL = 'emulator-5554'   # istanza 0
+$ADB_MUTEX = New-Object System.Threading.Mutex($false, 'Global\khux_adb')
+function Sh([string]$cmd, [int]$TimeoutSec = 60) {
+    if ($cmd -match '/data/tombstones|/data/data|/mnt/shared|setprop') { return ShRoot $cmd }
+    $own = $false
+    try { $own = $ADB_MUTEX.WaitOne(120000) } catch [System.Threading.AbandonedMutexException] { $own = $true }
+    if (-not $own) { throw "adb occupato da piu' di 120 s: $cmd" }
+    try {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo $ADB
+        $psi.Arguments = "-s $ADB_SERIAL shell `"" + ($cmd -replace '"', '\"') + "`""
+        $psi.UseShellExecute = $false; $psi.CreateNoWindow = $true
+        $psi.RedirectStandardOutput = $true; $psi.RedirectStandardError = $true
+        $p = [System.Diagnostics.Process]::Start($psi)
+        $out = $p.StandardOutput.ReadToEndAsync(); $null = $p.StandardError.ReadToEndAsync()
+        if (-not $p.WaitForExit($TimeoutSec * 1000)) {
+            try { $p.Kill() } catch {}
+            throw "il guest non risponde ad adb da $TimeoutSec s: $cmd"
+        }
+        @($out.Result -split "`r?`n" | Where-Object { $_ -ne '' })
+    } finally { $ADB_MUTEX.ReleaseMutex() }
 }
 
 # Mai toccare con il gioco chiuso: sulla home di LDPlayer i tocchi aprono i banner pubblicitari nel
@@ -50,9 +77,10 @@ function Swipe([int]$x1, [int]$y1, [int]$x2, [int]$y2, [int]$ms = 250) {
 function Px([int[][]]$pts) {
     $dd = ($pts | ForEach-Object {
         $o = 16 + ($_[1] * $SCREEN_W + $_[0]) * 4
-        "dd if=/data/local/tmp/s.raw bs=1 skip=$o count=3 2>/dev/null | od -An -tu1"
+        "dd if=/data/local/tmp/px.raw bs=1 skip=$o count=3 2>/dev/null | od -An -tu1"
     }) -join '; '
-    $out = Sh "screencap /data/local/tmp/s.raw; $dd"
+    # px.raw e non s.raw: s.raw e' di root (era scritto da ld.exe) e l'utente shell di adb non puo' sovrascriverlo
+    $out = Sh "screencap /data/local/tmp/px.raw; $dd"
     @($out | Where-Object { $_.Trim() } | ForEach-Object { , [int[]]($_.Trim() -split '\s+') })
 }
 
@@ -220,18 +248,31 @@ function WaitLog([string]$file, [string]$pattern, [int]$from, [double]$timeout =
 
 # Screenshot in $SHOTS\<name>.png (passa dalla cartella condivisa e viene spostato).
 function Shot([string]$name) {
-    Sh "screencap -p /sdcard/Pictures/$name.png" | Out-Null
-    $src = Join-Path $SHARED "$name.png"
+    # PNG letto direttamente dallo stdout di «adb exec-out screencap -p», ~0,5 s. Prima si scriveva in
+    # /sdcard/Pictures (cartella condivisa) e lo screencap di LDPlayer lanciava poi «am broadcast
+    # MEDIA_SCANNER_SCAN_FILE», che restava appeso per minuti quando Android era lento (05-11: ANR di
+    # com.google.android.gms; ld.exe e relogin fermi con lui). Due tentativi da 30 s, poi avviso e $null.
     $dst = Join-Path $SHOTS "$name.png"
-    for ($i = 0; $i -lt 20 -and -not (Test-Path -LiteralPath $src); $i++) { Start-Sleep -Milliseconds 100 }
-    # il file compare prima che il guest abbia finito di scriverlo: Move-Item fallisce con
-    # «in uso da un altro processo» e FindTarget/FindSpotlight ricevono un'immagine nulla
-    # (story.ps1 fermo nel campo, 14-10): si riprova per ~3 s
-    for ($i = 0; $i -lt 30; $i++) {
-        try { Move-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop; break }
-        catch [System.IO.IOException] { Start-Sleep -Milliseconds 100 }
+    for ($t = 0; $t -lt 2; $t++) {
+        $own = $false
+        try { $own = $ADB_MUTEX.WaitOne(120000) } catch [System.Threading.AbandonedMutexException] { $own = $true }
+        if (-not $own) { throw "adb occupato da piu' di 120 s: screenshot $name" }
+        try {
+            $psi = New-Object System.Diagnostics.ProcessStartInfo $ADB
+            $psi.Arguments = "-s $ADB_SERIAL exec-out screencap -p"
+            $psi.UseShellExecute = $false; $psi.CreateNoWindow = $true; $psi.RedirectStandardOutput = $true
+            $p = [System.Diagnostics.Process]::Start($psi)
+            $ms = New-Object System.IO.MemoryStream
+            $copy = $p.StandardOutput.BaseStream.CopyToAsync($ms)
+            if ($p.WaitForExit(30000) -and $copy.Wait(5000) -and $ms.Length -gt 1000) {
+                [System.IO.File]::WriteAllBytes($dst, $ms.ToArray()); return $dst
+            }
+            try { $p.Kill() } catch {}
+            Write-Warning "screenshot $name : screencap non ha risposto (tentativo $($t + 1))"
+        } finally { $ADB_MUTEX.ReleaseMutex() }
     }
-    $dst
+    Write-Warning "screenshot $name non riuscito"
+    $null
 }
 
 # Ultime richieste al server (senza DNS e master), una per riga.
