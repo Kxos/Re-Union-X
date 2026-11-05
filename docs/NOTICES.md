@@ -542,7 +542,7 @@ Special Login Bonuses (campaigns with gifts on set dates) will come with the eve
 
 **INFORMATION** · 10/20
 
-The first banner in the Shop, **Banner Catalog**, cannot be drawn: tap its **Details** to see the banners and the Medals they contain. Its price is shown in **Purchased Jewels**, which cannot be bought on this server, so its draw button only answers that you do not have enough Jewels (**not original**).
+The first banner in the Shop, **Banner Catalog**, cannot be drawn: tap its **Details** to see the banners and the Medals they contain. Its price is shown in **Purchased Jewels**, which cannot be bought on this server, so its draw button is greyed out and does nothing, like a deal already used up (**not original**).
 
 Draws cost Jewels or Tickets earned in the game. **Draw Odds** shows the rates used by this restoration.
 
