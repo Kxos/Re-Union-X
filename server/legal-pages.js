@@ -74,7 +74,7 @@ function helpPage() {
       ['Where are the raid bosses?', 'In the Events tab: the Raid Catalog lists the raids you can keep and play again.'],
       ['Can I buy Jewels?', 'No. There are no real-money purchases: Jewels, Medals and items come from quests, missions, presents and events.']]],
     ['Your save', [
-      ['Where is it?', 'On PC it is the file player.json in the folder %LOCALAPPDATA%\Re-Union X\save.'],
+      ['Where is it?', 'On PC it is the file player.json in the folder %LOCALAPPDATA%\\Re-Union X\\save.'],
       ['Backup', 'Close the game first, then copy player.json somewhere safe. To restore it, close the game and copy it back.'],
       ['Start over', 'Close the game and delete player.json: the next start creates a new player. This cannot be undone.'],
       ['Updates', 'A new version of the game keeps your save.']]],
