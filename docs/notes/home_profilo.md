@@ -112,7 +112,11 @@ bytes each) are the 160912 files (identical to 190912's), declared in the Notice
 test `server/test-home-plaza.js`) on the game day (real time - 8 h, the daily reset; `-RealNow` moves it):
 1-14 Jan 170111, 1-14 Feb 160211, 1-14 Mar 160311, 1-30 Apr and 1-30 Sep 1N0911 (N = story year - 2015, 1..5),
 October 161011, 1-20 Dec 161211, 21-26 Dec 161221, 27-31 Dec 161231, otherwise 150911. `server.js` `homePlazaId()` sends
-150911 when the served master has no row for the id (older revision).
+150911 when the served master has no row for the id (older revision) and logs `[mypage] backgroundId N`.
+Bench 5 Nov (all 14 plazas drawn, ISSUES I-233): `/mypage` comes only after the login Notices and the login bonus are
+closed; a `-RealNow` in another month changes the master revision, and its Download popup can come after `bench_start`
+gave up (tap 1220,715). Script used: `D:\Progetto_Restauro_KH_UX\tmp\plaza_tour.ps1` (relogin, close popups until `/mypage`,
+two screenshots).
 
 **Player choice.** None found: no option or text about a home background in the client UI texts (the only home
 customisation is the BGM, changed by the partner medal: «Your Home screen music will change.»).
