@@ -14,13 +14,13 @@ answers status 2 «This event is unavailable.»).
 | Season | one per calendar month, day 1 00:00 PT to month end (UTC 07:00/08:00 with DST) | proven |
 | Structure | Tiers (client `rank`) of N Rounds (`stageCount`); one round = one Coliseum stage `cl_stg<YYYYMMNN>`, room `OC_0001_00_00`, one map part, 1-4 waves (map teams) | proven |
 | Stage set | 10 stages per month (9 from 2020-02), rounds cycle through them | proven (data), cycle probable |
-| Enemy strength | 1.0.1 client: level rise = rounds of all previous tiers + `lvPerLoop` x floor((round-1)/`loopStageCount`) (10 / 10 in the master); stage files carry levels 1..10 | proven for 1.0.1; 5.0.1 unknown |
-| Last tier | endless (999 rounds, shown as «∞») | proven |
+| Enemy strength | 1.0.1 client: level rise = rounds of all previous tiers + `lvPerLoop` x floor((round-1)/`loopStageCount`) (10 / 10 in the master); stage files carry levels 1..10 ; the 4.3.1 client uses (rounds of previous tiers + round) x floor(`lvPerLoop`/`loopStageCount`) | proven (1.0.1 and 4.3.1 code) |
+| Last tier | endless; the 2016 master writes 999, the 4.3.1 client shows «∞» only for `arrivalStageCount` 0 | proven |
 | One-turn shortcut | clearing all waves in one turn unlocks the next rounds at once («Unlocked Round %d!», «Shortcut Unlocked!»); clearing a round locks the skipped ones again; size per tier = master `excellentUnlockCount` (= wiki "skip limit") | proven that the values match, exact rule probable |
 | AP | 3-5 per round until 2017-04 (1 AP / 0 AP campaigns), 0 at every tier from 2017-05 | proven (notices + wiki) |
-| Currency | Coliseum Coins (`userPoint.colosseumSpherePoint`, reward type 17) per round and per tier clear; spent on Coliseum boards | probable (type 17) |
+| Currency | Coliseum Coins (`userPoint.colosseumSpherePoint`, reward type 17) per round and per tier clear; spent on Coliseum boards | proven (type 17 in the 4.3.1 client) |
 | Ranking | monthly ranking by progress (total rounds cleared), brackets with rewards | probable (metric) |
-| Loss | run ends (`/colosseum/retire`); progress kept or not | unknown |
+| Loss | the client sends `/colosseum/retire` by itself; progress kept or not is the server's rule | client proven, original rule unknown |
 
 ## Numbers per era (WW)
 
@@ -60,32 +60,76 @@ Magic Mirror and others). Values: 2016 seasons from the 1.1.3 master, the rest f
 - JP 4.3.1 layouts cover every Colosseum layout the server is missing (`AdventureTop2_Colosseum_Button/Panel/Target`,
   `Colosseum_MainPanel`, `BattleResultColosseumScene`, ...).
 
-## Client API
+## Client schema (WW 4.3.1 client, analysed 5 November 2026)
 
-| Action | Path | Request | Response (keys the client reads) |
+The bench runs the unmodified **WW 4.3.1** client. It **does** read the master tables `colosseum` and `colosseumStage`
+(the 5.0.1 offline client dropped them together with the whole Coliseum UI; that build is not what we run). Our
+`server/master_data/colosseum.json` and `colosseumStage.json` are empty, so the season and the tiers must be served
+there. Every key below is required (a missing or mistyped key makes the client reject the response) unless marked.
+
+### Master rows
+
+| Table | Fields (all int unless noted) | What the client uses them for |
+|---|---|---|
+| `colosseumStage` (one per season) | `colosseumStageId`, `openDate`, `closeDate`, `rankingCloseDate` (date strings), `headColosseumId`, `termColosseumId`, `rankingId`, `validStage`, `stageId` (array of 10), `loopStageCount`, `lvPerLoop` | `closeDate` -> «Ends in %s»; head..term = the tier rows of the season; `lvPerLoop / loopStageCount` = level gain per round |
+| `colosseum` (one per tier) | `colosseumId`, `colosseumStageId`, `round` (= tier number), `ap`, `arrivalStageCount` (rounds in the tier, **0 = «∞»**), `rankId` (string), `excellentUnlockCount`, `validStageReward`, `stageReward{Type,Id,AssignType,SkillId,SkillLv,Num}`, `validReward` (slots used), `reward{Type,Id,AssignType,SkillId,SkillLv,Num}` (arrays of 4) | tier labels and «Round x/y», per-round reward, tier rewards, shortcut size |
+| `stage` (existing story table) | one row per round stage id (the 2016 master used `stageKind` 3, `mapName` "Coliseum", world 5) | the round list reads it for the AP display |
+
+The client finds a tier by scanning head..term for the row whose `round` equals the response `rank`.
+
+- **Enemy level rise** (client side): (rounds of all previous tiers + current round) x floor(`lvPerLoop` /
+  `loopStageCount`), added to the levels in the stage file. With the 2016 values (10/10) every round adds +1 level.
+- **Stage files**: battle loads `stage/cl_stg<stageId 8 digits>.bin` + `_00.bin` for the `stageId` of
+  `startColosseumData`. They only hold the waves and the enemies (id, level) plus the room name; the arena is the shared
+  room `OC_0001_00_00` (proven in code and data, and it matches the user's memory). A missing month only needs its
+  enemy lineups.
+
+### Requests and responses
+
+| Action | Path | Request | Response keys |
 |---|---|---|---|
-| 124 | GET `/colosseum` | - | `colosseumInfo{colosseumStageId, status}` (1 open, 2 unavailable), `colosseumStages[]{stageId, useAp, rank, stageCount}`, `colosseumRank`, `userColosseum{userRank, userStageCount, userStageTotalCount}` |
-| 125 | GET `/colosseum/reward/list` | - | unknown |
-| 126 | POST `/colosseum/start` | `rank, stageCount, stageId, userKeybladeId` | `userData.userPoint` (parsed first), the 124 block, `userTreasures[]`, `startColosseumData{rank, stageCount, stageId, userKeybladeId}`, `campaigns[]` |
-| 127 | POST `/colosseum/retire` | - | `userKeyblades`, `userData.stageResumption{..., colosseumStageId}` |
-| 128 | POST `/colosseum/clear` | unknown | `userData.userPoint`, `userData.userDetail`, `clearColosseums[]{rank, stageCount}`, `getLux`, `userData.stageResumption` |
-| 139/140/180 | GET `/ranking/colosseum`, `/own`, `/border` | - | `{rankingDatas[], rankingStatus, rankingTermStart, rankingTermEnd}` like PvP |
+| 124 | GET `/colosseum` | - | `colosseumInfo{colosseumStageId, status}` (2 = «This event is unavailable.»), `colosseumStages[]{rank, stageCount, stageId, useAp}`, `colosseumRank` (uint), `userColosseum{userRank, userStageCount, userStageTotalCount}` |
+| 125 | GET `/colosseum/reward/list` | - | `getRewardRankIds`: int array of tier numbers whose tier reward was obtained, **sorted ascending** (the client binary-searches it); drives the clear mark in the Tier Rewards list. No board data |
+| 126 | POST `/colosseum/start` | `rank, stageCount, stageId, userKeybladeId` (the chosen element) | `userData.userPoint`, `colosseumInfo`, `userColosseum` (stages and `colosseumRank` not read here), `userTreasures[]`, `startColosseumData{rank, stageCount, stageId, userKeybladeId (uint64)}`, `campaigns[]` (int array) |
+| 127 | POST `/colosseum/retire` | `burst` | `userKeyblades[]`, `userData.stageResumption{resumptionStatus, stageId, raidId, colosseumStageId}` |
+| 128 | POST `/colosseum/clear` | `isSkip` (bool, = all waves cleared in one turn), `enemyDeadNumber`, `mimicDeadNumber`, `maximumDamage`, `guiltBurstMaximumDamage`, `userKeybladeId`, `burst`, `lux`, `rank`, `stageCount`, `stageId` | `userData.userPoint`, `userData.userDetail`, `clearColosseums[]{rank, stageCount}` (**never empty**), `userMaterials[]`, `userMedals[]`, `userSkills[]`, `userTitles[]`, `userKeyblades[]`, `userDecks[]`, `userAvatarParts[]`, `userKeybladeSubslots[]`, `getLux` (uint64), `userData.stageResumption` |
+| 139/140/180 | GET `/ranking/colosseum`, `/own`, `/border` | - | `{rankingDatas[], rankingStatus, rankingTermStart, rankingTermEnd}`; each entry = the usual ranking user fields + `userColosseum{userRank, userStageCount, userStageTotalCount}` + `arrivalTime` (date) |
+
+Behaviour read from the client:
+
+- Each `colosseumStages` element is one selectable round (list row «Tier» / «Round stageCount/arrivalStageCount» /
+  «AP Cost useAp», map panel, enemy preview). The in-game help says «Select a round to play. You cannot replay rounds»:
+  the server decides which rounds are playable.
+- **Loss**: the client sends 127 by itself when the battle is lost and reads nothing Coliseum-related back, so what
+  happens to progress is entirely the server's rule (the original rule is still unknown).
+- **Shortcut**: with a one-turn clear the client plays the «All 1 Turn» animation showing the tier's
+  `excellentUnlockCount`, then sends 128 with `isSkip` 1. The jump itself is done by the server (the next 124 must list
+  the unlocked round). The texts «Unlocked Round %d!» / «Shortcut Unlocked!» are not loaded by client code.
+- **Result**: for each `clearColosseums` entry the result shows «Tier %d, Round %d Complete!» with the round reward
+  (if `validStageReward`), and the tier rewards when `stageCount` = `arrivalStageCount`; the tier-up panel
+  (`BattleResultRankUPScene_ver103`) shows the first and the new tier. The server must actually grant what the master
+  rows say.
+- **Ranking**: tier/round progress with `arrivalTime` as tie-break.
+- **Reward types**: 17 = Coliseum Coins, **32 = Cross Coins** (Union Cross currency); in the 2016 master 32 only appears
+  with amount 0 as an end marker.
+- `Base_Colosseum_Rank` / `base_colosseum_rank` is just the Coliseum-rank widget of the profile page.
+
+Screens the client loads that are still missing on our server: `AdventureTop2_Colosseum_Button/_Panel/_Target`,
+`Colosseum_MainPanel`, `BattleResultColosseumScene`, `RankingColosseumScene_ver1301`, plus the non-layout assets
+`ActMapColosseumAnim` (armature), `img/colosseum/*` (Colosseum01-03 plists, ClassNum, RoundNum, Rank_Num) and
+`img/adventure/stage/OC_Colosseum_Panel(B).png`. Present: `BattleResultRankUPScene_ver103`, `Colosseum_FieldMenu_ver350`.
 
 Also: `/mypage rankingRewards.rankingColosseum`, profile `userColosseumRanking`, record `colosseumRankingHighest`,
 `stageAchievement.colosseumRank`, `lastPlayColosseumSphereBoardId`.
 
-**The 5.0.1 client has no `Colosseum`/`ColosseumStage` master classes** (master_classes_ww501.txt) but keeps the API
-parsers, the `stage/cl_stg%08d(_%02d).bin` loader, the Colosseum images and battle-result scenes. Serving master rows
-is therefore not enough (and probably useless): the season, tiers and rounds must come from the responses.
-
 ## Missing before implementation
 
-1. How 5.0.1 gets tier count, round totals, AP and the enemy level rise without master rows (Ghidra on the 5.0.1
-   library, or bench probing of 124/126/128).
+1. Bench probe: what the colosseumStages elements are exactly (one per tier, or current round plus the shortcut target),
+   where 125 is called, the screen after an `isSkip` clear, status 1 with an empty list.
 2. Stats for the Coliseum enemy variants (rebuild as for raids).
 3. Stage files for the WW months not in the JP data (regenerate from the wiki lineups, mark as a deviation).
-4. Coliseum boards (rows, node costs) and the `/colosseum/reward/list` format.
-5. Exact shortcut rule, loss rule and ranking score.
+4. Coliseum boards (rows, node costs).
+5. Original loss rule (not decidable from the client).
 
 ## Gap research (5 November 2026, night)
 
