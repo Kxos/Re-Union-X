@@ -345,3 +345,12 @@ Seen on the way: the RAID BOSS ALERT card of Assault Dragon shows the layout's d
 - Bench of Task 10 (rev 257): story Q260 shows Queen Bee (AP 15, objectives Moogle 5★ / Chip 3★ / Dale 3★, Raid Boards); story Q560 with `-RealNow` on a Saturday shows the
   weekend event «Legendary Raid Level: Don't Go Alone! (March)» (AP 1) and on a Wednesday only the monthly «Lure a Queen Bee» (AP 0). The 62 event raids have no card of their
   own yet (generic «Raid Time!» plate).
+
+## Play package rehearsal (5 November 2026, Task 12 step 5)
+
+Package `build 103` (master revision 268, resources 103, built with `make-play-package.ps1 -Resources 103 -Revision 268`). The raid tables
+and images ship with the server copy (`server/game_data/raids.json`, `raid_models.json`, `raid_maps.json`, `raid_notices.json`, `raid_img/`,
+`server/raid_config.json`); they are git-ignored and generated, so they must exist in the working tree before building.
+`test-package-layout.ps1` now checks them. Rehearsed on instance 1 with a new data folder: full download, home, Notices with
+«Raid Bosses», Events tab with the RAID CATALOG banner, a kept raid and the weekly raid, the weekly raid's Eggcognito quest started and
+given up, Raid Boards list with the cards; guest server `106 tabelle valide`, no crash. Not checked in the package: a raid boss fight to the end.
