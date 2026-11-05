@@ -8,7 +8,7 @@
 // 2. Potenza degli speciali delle medaglie di Roboloid (burst 3000000 + id): il campo Multi e' il
 //    valore a pallini pieni (6★ Lexaeus A: 3.24 = khuxwiki a 5 pallini), mentre la riga lo usava come
 //    base e teneva il displayPower del modello (Wakka 7★): Lexaeus A 7★ mostrava x1.95 invece di x11.10.
-//    Ora displayPower = basePower = Multi - passi dei pallini (+300, +900, ... come tierPower).
+//    Ora displayPower = basePower = Multi - 5 passi uguali per pallino (EQUAL_STEP_BANDS, I-212; prima i passi di tierPower).
 // 3. Passi per pallino: dove la riga burst di thethiny (originale) ha la stessa base, i suoi
 //    basePowerPerEnforce/displayPowerPerEnforce (es. 10566: +800 a pallino, x3.24 a 5 pallini).
 //
@@ -22,7 +22,6 @@ const fs = require('fs');
 const path = require('path');
 
 const ROBO_BURST = 3000000;
-const step = (i) => 300 * ((i + 1) * (i + 2) / 2);   // potenza in piu' al pallino i+1 (tierPower)
 // Equal steps per dot (I-212, user decision 05-11, docs/notes/medaglie.md#sn-fiend): the khuxwiki 7★ rows with only the
 // full-dot value (dmg7, no dmg6/dmg6m: the SN, SN+ and SN++ Medals) take the step of the thethiny originals with a similar
 // full value. In the originals every 5-dot row raises the power by the same amount at each dot, and the amount grows with
@@ -112,8 +111,8 @@ function burstPowerFix(bursts, opts) {
       const multi = multiOf(b.burstId - ROBO_BURST);
       if (multi) {
         const top = Math.round(multi * 10000);
-        const base = want ? top - step(want - 1) : top;
-        set(b, base, [0, 1, 2, 3, 4].map((i) => (i < want ? base + step(i) : 1)));
+        const s = equalStep(top), base = want ? top - s * want : top;   // passi uguali anche qui (I-212, utente 05-11)
+        set(b, base, [0, 1, 2, 3, 4].map((i) => (i < want ? base + s * (i + 1) : 1)));
         stats.robo++;
         continue;
       }

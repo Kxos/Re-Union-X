@@ -926,8 +926,12 @@ The khuxwiki 6★ gaps say the same (0.2 / 0.3 / 0.4 / 0.5 over 5 dots = 400 / 6
 and maximum of the dots); the 5-dot value, the maximum at 5 dots, sp1 and so the tier-10 value are as before. Examples:
 Fiend x0.55 -> **x0.80** at 0 dots (maximum 15.55 -> 15.80); SN++ - KH III Terra x16.19 -> 16.14, dots
 16.24/16.34/16.44/16.54 (before 16.22/16.28/16.37/16.49), 5 dots x16.64 - 18.14 unchanged; Sora & Peter Pan x3.05 -> 3.00.
-Test `server/test-medal-power-fix.js`. Not changed: the Roboloid fallback (174 bursts with no khuxwiki card, only Roboloid's
-full-dot Multi) still uses the `tierPower` steps; it can take the same rule if the user wants.
+Test `server/test-medal-power-fix.js`. **Roboloid fallback too (user decision 05-11, consistency):** the 174 bursts with no
+khuxwiki card (only Roboloid's full-dot Multi) take the same bands instead of the `tierPower` steps (164 at +1000, 9 at +400,
+1 at +600; 166 with 5 dots, 7 with 2, 1 with 1); 5-dot values and maxima unchanged. Examples: SN+ - KH III Pirate Sora and
+SN+ - KH III Dark Baymax x0.55 -> **x0.80** at 0 dots (x1.00 at 5 as before); SN - Illustrated Cloud x15.41 -> 15.36, dots
+15.46/15.56/15.66/15.76 (before 15.44/15.50/15.59/15.71), 5 dots x15.86; Supernova - KH III Hiro x6.33 -> 6.28 (5 dots
+x6.78). No `tierPower` step is left in `medal-power-fix.js`.
 
 **302012 SN++ - KH III Xion (the adjusted form, I-212, 05-11).** It showed x15.64 - 17.14 at 5 dots: the base of the
 *original* Xion (khuxwiki `dmg7` 15.64) with the gap of the *adjusted* one (Roboloid 2012: 18.64 - 20.14, gap 1.5). The four
