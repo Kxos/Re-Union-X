@@ -118,7 +118,7 @@ Not here: the «Thank You For Playing!» plaza of the end of service (the game g
 
 The weekly **Raid Bosses** follow your Story like the Shop: each week shows the raids of the matching week of the original game. Their graphics, moves and strength come from the original game files wherever they survive; the parts below are **reconstructed**.
 
-Each Raid Boss has its own level: it rises by 1 for every defeat, up to **LV 99**, and all levels **reset to LV 1 on the 1st of every month** (00:00 Pacific time), as in the original game. A boss that comes back in a later week starts again at LV 1; a boss already on the field keeps its level until it is defeated or escapes.
+Each Raid Boss has its own level: it rises by 1 for every defeat (some event raids by more, see below), up to **LV 99**, and all levels **reset to LV 1 on the 1st of every month** (00:00 Pacific time), as in the original game. A boss that comes back in a later week starts again at LV 1; a boss already on the field keeps its level until it is defeated or escapes.
 
 ### Playing alone
 
@@ -150,7 +150,7 @@ Daily raids stay open all day (**not original**: they opened in two 1-hour windo
 
 Where no original value survives, the HP of these raids is the boss's 2016 HP scaled by date up to the few readings of 2018, and the three tiers of 2018 (Beginner, Intermediate, Advanced) are inferred from one reading each (**reconstructed**). Timers and AP of further attempts come from the same boss's 2016 rows, or from the weekend rule (3 hours, 1 hour from May 2018).
 
-Level rewards named in an event's notice reach your Presents when you defeat its boss at that level; rewards the notice does not detail are not given. In Bonus Time event bosses rise by 1 level per defeat, not by 5 as some events stated.
+Level rewards named in an event's notice reach your Presents when you defeat its boss at that level; rewards the notice does not detail are not given. Where an event's notice gives another level rule, it is followed: in the Daily Raid Events of December 2016 and in the Mysterious Sir raid of March 2018 the boss rises by **5 levels** at every defeat; in the Gear Golem raid of July 2018 and the Gummi Hound raid of August 2018 by 5 in Bonus Time. Three raid events of spring 2018 (Queen Bee, Crabby Cake, Gear Golem) only said that bosses level faster in Bonus Time: they rise by 5 too, and the Closehanded Captain week of September 10, 2018 by 2 like the next weeks (**reconstructed**: the amount is not stated). In the Daily Raid Events of July 2017 to January 2018 coins come every **5 levels**, up to LV 55 (LV 50 from November 2017), as their notices said; the coin amounts are **reconstructed**.
 
 ### Graphics
 
