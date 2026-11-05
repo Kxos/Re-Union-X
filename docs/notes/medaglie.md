@@ -372,6 +372,10 @@ JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `serve
   No.406, Magic, LV cap **20**, STR 1356 / DEF 1257 (LV1), cost 1, Christmas Gift x1.49, gauge 2, «[All] slightly
   powerful hit + slight HP recovery»; no skill. The other gaps (flavor texts, missing recipes, ★7 stats, board cells)
   are still unknown.
+- JP-only medals, fifth pass (06-11, 2ch threads of Feb-Mar 2017 on the Wayback + their imgur screenshots):
+  in-game album screen proves Necho Cat = album **No.878 (★5) / No.879 (★6)**; a ★6 detail screen of the first day shows
+  Thunder Barrage +5 with 5 dots at x1.87-3.49, LV100 STR 8270 (LV95 boosted copy) / DEF 7154, cost 46. The Dec 2015
+  threads (Sora Santa) are not archived. Flavor texts, missing recipes, ★7 stats and board cells are still unknown.
 - Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
   is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
   (later official name); nothing else to add.
