@@ -425,7 +425,7 @@ const NOTICES = [
       'Evolved versions count as the same Medal: SN, SN+ and SN++ of the same character, or a Medal and its Supernova, share their Album slot and give each other traits (reconstructed from the original deals).',
       '**Trait Medals** are back: grey 6★ Medals that belong to one Medal and share its Album slot. Fused onto their Medal they give a trait and one Special Attack dot, or unlock or re-roll the Special Attack Bonus when the dots are full; fused onto other Medals they only give EXP. Their pictures are recreated in black and white from their Medal, and their EXP and sell price are those of their Medal (reconstructed).'] },
   { date: '10/20', tag: 'INFORMATION', title: 'Shop',
-    body: ['The first banner in the Shop, **Banner Catalog**, cannot be drawn: tap its **Details** to see the banners and the Medals they contain.',
+    body: ['The first banner in the Shop, **Banner Catalog**, cannot be drawn: tap its **Details** to see the banners and the Medals they contain. Its price is shown in **Purchased Jewels**, which cannot be bought on this server, so its draw button only answers that you do not have enough Jewels (**not original**).',
       'Draws cost Jewels or Tickets earned in the game. **Draw Odds** shows the rates used by this restoration.',
       'Guarantees work as on the original banners: the yellow line under a banner counts down the draws left to its guaranteed Medal.',
       'When a guarantee covers too many Medals to name them all, the yellow line names the kind of Medal from the banner\'s original notice instead (for example "A SN or higher Medal is guaranteed! Draws left: 3"). This wording is written by this restoration.',
