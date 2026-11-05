@@ -17751,3 +17751,38 @@ img/incentive/SpherePointIcon_Raid.png	jp	cocostudio/publish/SpherePointIcon_Rai
 cocostudio/publish/SpherePointIcon_Raid.png	jp
 img/incentive/SpherePointIcon_SP.png	jp	cocostudio/publish/SpherePointIcon_SP.png
 cocostudio/publish/SpherePointIcon_SP.png	jp
+
+# 50. Seasonal home plazas lwf/home/<id>/ (I-233, 05-11; notes/home_profilo.md#seasonal-backgrounds): the JP 4.3.1 folders of the 13
+#     plazas (base png + LWF + textures) and their LWF-only layers (160912..200912 confetti, 161222 snowfall). 210211 «Thank You
+#     For Playing!» is NOT used (user 05-11). 170912/180912/200912 have only the LWF in the dump: their 4 confetti pieces
+#     (ビットマップ 1-4) are taken from 160912, whose pieces are byte-identical to those of 190912 (RECONSTRUCTED, declared in the Notice).
+lwf/home/160211/	jp
+lwf/home/160311/	jp
+lwf/home/160911/	jp
+lwf/home/160912/	jp
+lwf/home/170911/	jp
+lwf/home/180911/	jp
+lwf/home/190911/	jp
+lwf/home/190912/	jp
+lwf/home/200911/	jp
+lwf/home/161011/	jp
+lwf/home/161211/	jp
+lwf/home/161221/	jp
+lwf/home/161222/	jp
+lwf/home/161231/	jp
+lwf/home/170111/	jp
+lwf/home/170912/170912.lwf	jp
+lwf/home/170912/170912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/170912/170912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/170912/170912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/170912/170912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/180912/180912.lwf	jp
+lwf/home/180912/180912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/180912/180912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/180912/180912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/180912/180912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/200912/200912.lwf	jp
+lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)

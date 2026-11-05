@@ -41,6 +41,7 @@ const chatRoutes = require('./routes-chat'); // chat del party (I-210)
 const medalSkill = require('./medal-skill');
 const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
+const homePlaza = require('./home-plaza');
 const gachaSeasons = require('./gacha-seasons');
 const petDraw = require('./pet-draw');
 const petDrawPages = require('./pet-draw-pages');
@@ -1857,6 +1858,19 @@ function selfPlayerElement(now, medal, partyId = 0) {
   };
 }
 
+// I-235: the client keeps ONE payType 8 balance (limitedDrawTicket2) from the last userPoint it received and the Shop
+// plate reads it before /gacha/list (which carries no userPoint) can change it. So every userPoint carries the balance
+// of the currency the Shop lists NOW (same choice as /gacha/list), not the one of the previous Shop opening.
+function listedCurrencyNow() {
+  try {
+    const cur = gacha.listedCurrency(gachaShopList(storyCtx()));
+    if (player.gacha) player.gacha.listedCurrency = cur;
+    return cur;
+  } catch (e) {
+    return player.gacha?.listedCurrency || 'draw';
+  }
+}
+
 function userPointData(now) {
   const ap = apState();
   return {
@@ -1886,7 +1900,7 @@ function userPointData(now) {
     // la valuta stagionale elencata nello Shop (player.drawTickets, server/gacha.js ticketsOf; spec 9.7).
     // premi 40 Platinum Ticket e 41 Draw Ticket (anche Holiday Draw Ticket, Moogle Point, Spooky
     // Cookie: stessa valuta rinominata dall'evento); reference/missions/limited_rewards_map.md
-    limitedDrawTicket1: player.limitedDrawTicket1 || 0, limitedDrawTicket2: gacha.ticketsOf(player)[player.gacha?.listedCurrency || 'draw'] || 0,
+    limitedDrawTicket1: player.limitedDrawTicket1 || 0, limitedDrawTicket2: gacha.ticketsOf(player)[listedCurrencyNow()] || 0,
     // Draw Points (payType 9, Draw Points Deal; 4.3.1 client: the payType 9 plate reads limitedDrawTicket3 with icon 42)
     limitedDrawTicket3: player.drawPoints || 0,
   };
@@ -2017,6 +2031,13 @@ function respondUser(res) {
 // screen to view party members' progress.», testo che non sta in text/ui), ma chi li legge
 // non e' ancora trovato, ne' il significato di type/priority: solo con KHUX_MYPAGE_TICKER=1.
 const MYPAGE_TICKER = "Tap the face icon to customize your avatar. Tap the screen to view party members' progress.";
+// Seasonal plaza (I-233, server/home-plaza.js): by the server real time (-RealNow moves it) and the story year for the
+// anniversary; without its mypageBackground row in the served master (older revision) the client would crash: 150911.
+function homePlazaId() {
+  let id = homePlaza.NORMAL;
+  try { id = homePlaza.plazaId(realNow(), storyCtx().storyDay); } catch (e) { return homePlaza.NORMAL; }
+  return masterRows('mypageBackground').some((r) => r.backgroundId === id) ? id : homePlaza.NORMAL;
+}
 function respondMyPage(res) {
   const body = schemaResponse('/mypage') || { ret: ret() };
   Object.assign(body, {
@@ -2025,7 +2046,7 @@ function respondMyPage(res) {
     openBanners: [],
     userPresentCount: livePresents().length, // badge «!» del pulsante Presents
     isChangeCoordinate: 0,
-    backgroundId: body.backgroundId || 150911,
+    backgroundId: homePlazaId(), // seasonal plaza by the real date (I-233)
     isNewAlbumChallenge: 0,
     isMissionReward: false,
   });

@@ -99,6 +99,9 @@ const activeOn = (b, day) => b.start <= day && day <= (b.end || '2099-12-31');
 // seasonal (banner delle stagioni attive, gia' in ordine, sp3 4.2) e pinned (banner fissato, 6.2) stanno in cima, prima
 // della rotazione; ordine di visualizzazione (richiesta dell'utente 20-10): fissato, stagionali, rotazione. La precedenza
 // per la valuta payType 8 e il tetto restano stagione > fissato > rotazione (si decide chi sopravvive, poi si ordina); un banner presente anche nella rotazione compare una volta sola (al posto della stagione/del fissato)
+// payType 8 currency of a Shop list (shopBanners keeps one): the balance the client shows on that plate (I-235)
+const listedCurrency = (list) => list.find((b) => b.payType === 8)?.currency || 'draw';
+
 function shopBanners(banners, { storyQuest, storyDay, shopFrom, shopTo, sizes, show = new Set(), seasonal = [], pinned = null }) {
   const inside = (b) => (b.start >= shopFrom && (b.end || '2099-12-31') <= shopTo ? 1 : 0);
   const inWindow = (b) => (shopFrom ? b.start <= shopTo && (b.end || '2099-12-31') >= shopFrom : activeOn(b, storyDay));
@@ -301,7 +304,7 @@ function drawsLeft(player, b, realMs) {
 function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, storyDay, shopFrom, shopTo, show, seasonal, pinned, exFor, catalog, validCommentOf, safeMedalId, nameOf }) {
   ticketsOf(player);
   const list = shopBanners(banners, { storyQuest, storyDay, shopFrom, shopTo, sizes, show, seasonal, pinned });
-  gstate(player).listedCurrency = list.find((b) => b.payType === 8)?.currency || 'draw';
+  gstate(player).listedCurrency = listedCurrency(list);
   const warrantOfList = (b) => {
     const ex = exFor?.(b);
     return guardWarrant(warrantFields(b, ex, drawState(player, b), catalog, nameOf), b, ex, catalog, validCommentOf?.(b), safeMedalId, nameOf);
@@ -874,6 +877,6 @@ function catalogPage(banners, ctx) {
 module.exports = {
   KIND_OPTS, niceRange, PAY_ICON,
   KEPT_STYLE, CATALOG_PLATE_STYLE, PAY_ICON_KEYS, page, PIN_JS, esc,
-  SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, catalogRow, catalogPlate,
+  SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, listedCurrency, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };
