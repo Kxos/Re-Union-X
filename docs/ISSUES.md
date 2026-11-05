@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-233**).
+a new issue takes the number after the last one used (last: **I-234**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,7 @@ Last revision: 5 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-234 | OPEN | **Conditional Present Medal campaigns** (user 05-11): some original campaigns sent a Medal to the Presents when the player met a condition, e.g. the «Supernova Terra, Ven, Aqua Medal campaign»: owning the three single Medals in the box gave also the trio Medal Supernova - Terra & Ven & Aqua. Without these campaigns some Medals may be impossible to get. To do: list all such campaigns from the notices of the period (conditions, Medal, dates), check for each Medal that the restored game gives a way to get it, and implement the campaigns (condition check + Present) where it does not | - | - |
 | I-233 | OPEN | **Seasonal home plaza background** (user 05-11): in the original the home plaza background changed with the period of the year. The master table `mypageBackground` has 7 rows (150911, 2-6, 99) with startTime/endTime always 2015-2099, and `/mypage` always sends backgroundId 150911 (`server.js` respondMyPage). To check: which backgrounds existed and when (notices, screenshots, videos), which ones have graphics in the resources, then serve them by date | [home_profilo](notes/home_profilo.md) | - |
 | I-232 | OPEN | **Japan-only raids not served** (05-11): the raids held only in the Japanese version are not in the Raid Catalog yet (notice «Raids not here yet»); they need their HP, boards and rewards from the JP sources (census in the private events folder) | [raid](notes/raid.md) | - |
 | I-231 | OPEN | **Blue AP plate of the AP 0 campaign never seen** (03-11): the yellow «Bonus Time: Raids cost 0 AP!» balloon shows, but the blue AP plate of the original (quest top, boss list, keyblade popup) never appeared on the bench; route that lights it unknown | [raid](notes/raid.md#ap-0-campaign-3-november-2026-benched-on-rev-237--resources-97) | - |
