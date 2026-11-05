@@ -42,6 +42,7 @@ const medalSkill = require('./medal-skill');
 const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
 const homePlaza = require('./home-plaza');
+const campaignGifts = require('./campaign-gifts'); // conditional Present campaigns (I-234)
 const gachaSeasons = require('./gacha-seasons');
 const petDraw = require('./pet-draw');
 const petDrawPages = require('./pet-draw-pages');
@@ -2041,6 +2042,7 @@ function homePlazaId() {
   return served;
 }
 function respondMyPage(res) {
+  checkCampaignGifts(); // before the badge count
   const body = schemaResponse('/mypage') || { ret: ret() };
   Object.assign(body, {
     adminMypageTexts: process.env.KHUX_MYPAGE_TICKER === '1'
@@ -3122,12 +3124,52 @@ function seedTestPresents() {
 // skillId: medaglia con quella skill al livello massimo (Scrooge dei Skills to Thrill, catalogo bonus[3])
 let noticesServedAt = 0;
 
-function addPresent(resourceType, resourceId, number, comment, skillId) {
+// dots: Medal pre-strengthened to that many Special Attack dots (campaign rewards, I-234), set when collected
+function addPresent(resourceType, resourceId, number, comment, skillId, dots) {
   player.presents = player.presents || [];
   const id = Math.max(player.presentLastId || 0, ...player.presents.map((p) => p.userPresentId)) + 1;
   player.presents.push({ userPresentId: id, resourceType, resourceId, number,
-    limitDatetime: realNow() + 30 * 86400000, comment, created: realNow(), ...(skillId ? { skillId } : {}) });
+    limitDatetime: realNow() + 30 * 86400000, comment, created: realNow(), ...(skillId ? { skillId } : {}), ...(dots ? { dots } : {}) });
   player.presentLastId = id;
+}
+
+// Conditional Present campaigns (I-234, campaign-gifts.js, campaign_gifts.json): campaigns open when the
+// Story Shop week reaches their start and stay open; each reward unit is sent once (player.campaignGifts). Checked
+// when the Home screen and the Present Box load, so a Medal drawn, levelled or traited shows up there.
+let campaignMemo = null;
+function campaignList() {
+  const medals = masterRows('medal');
+  if (campaignMemo?.medals === medals) return campaignMemo.list;
+  let list = [];
+  try {
+    const banners = gachaCatalog().banners;
+    const r = campaignGifts.compile(campaignGifts.load(), { medals, materials: masterRows('material'), titles: masterRows('title'),
+      skills: [...skillRowsById().values()], drawIdOf: (rowId) => banners.find((b) => b.rowId === rowId)?.drawMedalTypeId });
+    for (const e of r.errors) console.log(`  [campaign] ${e}`);
+    list = r.campaigns;
+  } catch (e) { console.log(`  [campaign] campaign_gifts.json not read: ${e.message}`); }
+  campaignMemo = { medals, list };
+  return list;
+}
+function checkCampaignGifts() {
+  const list = campaignList();
+  if (!list.length) return 0;
+  const given = (player.campaignGifts ||= {}), before = JSON.stringify(given);
+  const open = campaignGifts.openCampaigns(list, storyCtx().shopTo, given);
+  const special = new Set(masterRows('shuffleskill').filter((r) => r.type === 2).map((r) => r.shuffleSkillId));
+  const state = {
+    medals: userMedalList().map((m) => ({ userMedalId: m.userMedalId, medalId: m.medalId, guiltFactor: m.guiltFactor || 0,
+      traits: (player.medalTraits?.[m.userMedalId] || []).filter((t) => !special.has(t.shuffleSkillId)).length })),
+    drawCount: (id) => player.gacha?.count?.[id] || 0,
+    storyQuest: stageNumber(lastStoryStageId()),
+  };
+  let n = 0;
+  for (const { campaign, rows } of campaignGifts.due(open, state, given)) {
+    for (const r of rows) { addPresent(r.type, r.id, r.num, 'Campaign: ' + campaign.name, r.skillId, r.dots); n++; }
+    console.log(`  [campaign] ${campaign.id}: ${rows.length} present(s) sent`);
+  }
+  if (n || JSON.stringify(given) !== before) savePlayer(); // presents, open flags and units
+  return n;
 }
 
 // regali ancora validi: quelli scaduti (limitDatetime passato, ora del server) si tolgono
@@ -3157,6 +3199,7 @@ function userPresentData() {
 }
 
 function respondUserPresent(res) {
+  checkCampaignGifts();
   send(res, 200, { ret: ret(), userPresent: userPresentData() });
 }
 
@@ -3177,6 +3220,7 @@ function respondPresentReceive(res, body) {
     const before = (player.medals || []).length;
     grantItem(p.resourceType === 1 ? 2 : p.resourceType, p.resourceId, p.number);
     if (p.skillId && p.resourceType === 3) giveSkill(player.medals.slice(before), p.skillId);
+    if (p.dots && p.resourceType === 3) presetDots(player.medals.slice(before), p.dots);
     console.log(`[presents] riscosso ${p.userPresentId}: tipo ${p.resourceType} id ${p.resourceId} x${p.number}`);
   }
   player.presents = keep;
@@ -3188,6 +3232,19 @@ function respondPresentReceive(res, body) {
     lastUserPresentIds: keep.map((p) => p.userPresentId),
     userStone: { freeStone: player.freeStone || 0, payStone: 0 },
   });
+}
+
+// Special Attack dots of Medals just received (campaign rewards «pre-strengthened to N dots», I-234), up to the burst max
+function presetDots(medals, dots) {
+  const rows = new Map(masterRows('medal').map((r) => [r.medalId, r]));
+  let bursts = null;
+  for (const m of medals) {
+    const row = rows.get(m.medalId);
+    if (!row?.validBurst || row.validPack) continue;
+    bursts ??= new Map(masterRows('burst').map((b) => [b.burstId, b]));
+    const max = bursts.get(row.burstId)?.maxEnhanceCount || 0;
+    setMedalState(m.userMedalId, { burstUpperNumber: Math.min(Number(dots) || 0, max) });
+  }
 }
 
 // Premio dell'obiettivo n (1-3) di una riga stage: l'oggetto (grantItem) e, per una medaglia con submissionSkillId (VIP! Skill,
@@ -5176,6 +5233,7 @@ if (require.main === module) start();
 module.exports = { SESSION, parseBody, start, route, multi };
 // per i test senza client (server/test-medal-enhance.js, con KHUX_SAVE e KHUX_MASTER_DIR propri)
 module.exports._test = {
+  checkCampaignGifts, respondUserPresent, respondPresentReceive, livePresents, // server/test-campaign-gifts.js (I-234)
   respondMedalSell, drawPointsUnlocked, // server/test-draw-points.js
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
