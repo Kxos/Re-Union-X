@@ -154,5 +154,9 @@ Web and data side; details and per-id tables in the private dossier.
 - **Boards.** Node lists with costs for every WW Coliseum board 2016-04 .. 2021-06 are on the English wiki (avatar boards
   19 nodes / 1100 coins in 2016-2017, 3500 in 2018, 1230 from 2018-12, 4900 + 260 from 2019-05; Tier 10 Bonus 3090
   coins, 3390 in 2016-05). Contents of one board checked against its notice: equal (proven); costs probable.
+  The 1.1.3 master board tables (`sphere`/`sphereArray`/`sphereMasu`, `type` 3) hold the WW Coliseum boards 2016-04 .. 2016-10
+  with exact cells, costs and grid (proven). The three «???» boards of the wiki (Cid SR+, KH Cloud/Yuffie Costume) are JP-only
+  (2015-09, 2015-12): Cid SR+ = the WW 6★ Cid board (probable); KH Cloud/Yuffie ran in WW only as 3000-Jewel boards (2016-07,
+  proven), their JP Coliseum cells are unknown.
 - **Ranking.** Metric progress (rounds cleared), ties broken by the time the round was reached (JP 1.0.5 change,
   probable). **Loss rule still unknown** from web sources.
