@@ -53,4 +53,51 @@ function licensePage() {
     + '<h2>&#9632; Restoration server</h2><p>The restoration server and its tools are original code written for this project.</p>');
 }
 
-module.exports = { agreementPage, licensePage };
+// Other > Help (I-110) and Other > Credits (I-112): login links "help" and "staff" (LOGIN_LINKS[3], [4]), same style.
+// Safety rules (user 05-11, I-110 row): the game name only to describe it, with the non-affiliation line; no logos, art
+// or copied texts; nothing on where to get the client or game files, on the DNS redirect or on the protector; no request
+// for logs or personal data; NO links and no names of the project's channels (Discord, site, GitHub, e-mail).
+// TODO (user 05-11): a «Common problems» section, written also for players on phones.
+const NOT_AFFILIATED = 'Re-Union X is a fan restoration of KINGDOM HEARTS Union χ[Cross]. It is not affiliated with, endorsed or supported by SQUARE ENIX or Disney.';
+const section = ([h, ps]) => `<h2>&#9632; ${esc(h)}</h2>` + ps.map((p) => (Array.isArray(p)
+  ? `<p><b>${esc(p[0])}</b><br>${esc(p[1])}</p>` : `<p>${esc(p)}</p>`)).join('');
+
+function helpPage() {
+  const sections = [
+    ['What is Re-Union X', [
+      NOT_AFFILIATED,
+      'It brings back the single-player game after the end of the official service: the original game talks to a small restoration server that runs on your own device, and your progress stays there.']],
+    ['Frequently asked questions', [
+      ['Why does the game download data?', 'The first start downloads the game resources (a few GB). After an update of the server only the game data is downloaded again (some MB): tap Download when the popup asks.'],
+      ['Why do events come back on their own dates?', 'Events, raids and campaigns return on a reconstructed calendar. The Notices explain how it works.'],
+      ['Can I play with other players?', 'No: the restoration is single player. Parties, Union Cross, Coliseum and PvP are not available yet; the Notices say what changes in their place.'],
+      ['Where are the raid bosses?', 'In the Events tab: the Raid Catalog lists the raids you can keep and play again.'],
+      ['Can I buy Jewels?', 'No. There are no real-money purchases: Jewels, Medals and items come from quests, missions, presents and events.']]],
+    ['Your save', [
+      ['Where is it?', 'On PC it is the file player.json in the folder %LOCALAPPDATA%\Re-Union X\save.'],
+      ['Backup', 'Close the game first, then copy player.json somewhere safe. To restore it, close the game and copy it back.'],
+      ['Start over', 'Close the game and delete player.json: the next start creates a new player. This cannot be undone.'],
+      ['Updates', 'A new version of the game keeps your save.']]],
+    ['Differences from the original', [
+      'Every feature that works differently from the original game is explained in the in-game Notices.']],
+  ];
+  return page('<h1>Help</h1><p class="n">Re-Union X</p>' + sections.map(section).join(''));
+}
+
+function creditsPage() {
+  const sections = [
+    ['Re-Union X Project', ['The restoration server, its tools and these pages were made by the Re-Union X Project team.']],
+    ['With the help of', [
+      ['thethiny', 'Tools and documentation of the game formats, server research and original data, on which most of this work builds.'],
+      ['Roboloid and Ultimadei', 'The KHUχ database: Medal data, multipliers and special attack conditions.'],
+      ['KHUX Wiki and KH Wiki', 'Quests, Medals, special attacks, events and images used as references.'],
+      ['ReLux Team', 'Research on events, raids, Union Cross and campaigns, and player-made calculators.'],
+      ['The community', 'Players who shared screenshots, videos, notes and memories of the game, and the testers of the restoration.']]],
+    ['The original game', [
+      'KINGDOM HEARTS Union χ[Cross] was developed and published by SQUARE ENIX. KINGDOM HEARTS and all its characters, images, music and texts belong to SQUARE ENIX and Disney.',
+      NOT_AFFILIATED]],
+  ];
+  return page('<h1>Credits</h1><p class="n">Re-Union X</p>' + sections.map(section).join(''));
+}
+
+module.exports = { agreementPage, licensePage, helpPage, creditsPage, NOT_AFFILIATED };

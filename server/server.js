@@ -248,6 +248,8 @@ function route(url) {
   if (p === '/web/notices/shown') return 'noticesshown';
   if (p === '/web/agreement') return 'agreementpage';
   if (p === '/web/license') return 'licensepage';
+  if (p === '/web/help') return 'helppage'; // Other > Help (I-110)
+  if (p === '/web/credits') return 'creditspage'; // Other > Credits (I-112)
   if (p.startsWith('/user/album/') && !p.startsWith('/user/album/challenge')) return 'album';
   if (p === '/user/sphere') return 'spherelist';
   if (p === '/user/sphere/update') return 'sphereupdate';
@@ -399,6 +401,9 @@ function respondLogin(res) {
   // Legal Information: User Agreement e License, WebView (server/legal-pages.js)
   body.agreement = `${SESSION_BASE.replace(/^https:/, 'http:')}/web/agreement`;
   body.license = `${SESSION_BASE.replace(/^https:/, 'http:')}/web/license`;
+  // Other > Help and Other > Credits: WebView on the links help and staff (server/legal-pages.js)
+  body.help = `${SESSION_BASE.replace(/^https:/, 'http:')}/web/help`;
+  body.staff = `${SESSION_BASE.replace(/^https:/, 'http:')}/web/credits`;
   // Draw Odds dello Shop (pulsante su ogni piastra, link odds): il client
   // accoda il drawMedalTypeId della piastra all'url (banco 16-10: GET /web/gacha/odds9001), da qui la «/»
   body.odds = `${WEB_BASE}/web/gacha/odds/`;
@@ -4804,8 +4809,9 @@ function handler(scheme) {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': buf.length });
         return res.end(buf);
       }
-      if (kind === 'agreementpage' || kind === 'licensepage') {
-        const buf = Buffer.from(kind === 'agreementpage' ? legalPages.agreementPage() : legalPages.licensePage(), 'utf8');
+      if (['agreementpage', 'licensepage', 'helppage', 'creditspage'].includes(kind)) {
+        const buf = Buffer.from({ agreementpage: legalPages.agreementPage, licensepage: legalPages.licensePage,
+          helppage: legalPages.helpPage, creditspage: legalPages.creditsPage }[kind](), 'utf8');
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': buf.length });
         return res.end(buf);
       }
