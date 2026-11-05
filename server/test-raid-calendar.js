@@ -77,6 +77,14 @@ const DAILY = entry('WW-E29805-1', 'daily', '2017-07-03', '2017-07-10', 'single'
 const EV = { entries: [WEEKEND, MONTHLY, ...SHOWDOWN, DAILY] };
 
 const tests = {
+  jp_rows_catalog_only() {
+    // I-232: a Japan-only raid is never a raid of the week, even inside its dates; the Catalog lists it, marked jp
+    const ix = { entries: [...FIX.entries, entry('JP-RAID-1', 'event', '2019-10-07', '2019-10-13', 'single', { jp: true, event: true, periods: [['2019-10-07', '2019-10-13']] })] };
+    assert.ok(!cal.weekRows(ix, week('2019-10-07', '2019-10-13')).some((r) => r.censusId === 'JP-RAID-1'));
+    assert.ok(!cal.weekRaids(ix, { ...week('2019-10-07', '2019-10-13'), nowMs: Date.parse('2019-10-08T20:00:00Z') }).entries.some((e) => e.jp));
+    const row = cal.catalogRows(ix).find((r) => r.censusId === 'JP-RAID-1');
+    assert.deepStrictEqual([row.jp, cal.rowState(row, week('2019-10-14', '2019-10-20'))], [true, 'can']);
+  },
   weekend_only_real_days() {
     // shown on a real Saturday or Sunday of a Shop week holding one of its periods, never on another day
     const w = week('2016-11-10', '2016-11-16');
@@ -178,7 +186,8 @@ const tests = {
     const ix = realOrSkip('no_raid_week');
     if (!ix) return;
     for (const d of ['2016-04-07', '2016-04-25', '2016-05-01']) assert.deepStrictEqual(cal.raidsForWeek(ix, week(d, d)), [], d);
-    assert.ok(ix.entries.every((e) => e.start >= '2016-05-02'), 'no row before the first WW raid');
+    // the Japan-only raids (I-232) start in 2015, but only in the Raid Catalog, never as a raid of the week
+    assert.ok(ix.entries.filter((e) => !e.jp).every((e) => e.start >= '2016-05-02'), 'no WW row before the first WW raid');
   },
   partial_week() {
     const w = cal.weekRaids(FIX, week('2019-10-14', '2019-10-20'));

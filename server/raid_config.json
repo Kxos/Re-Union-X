@@ -10,6 +10,9 @@
     "capFrom": "2018-10-07"
   },
   "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
+  "jpTimer": { "super-hard weekend": { "before": 720, "after": 60, "oneHourFrom": "2018-05-05" }, "monthly (30-minute)": { "minutes": 30 } },
+  "jpQuestAp": { "JP-RAID-32": 0 },
+  "jpBoards": { "superHard": { "donor": "WW-E41605-1", "board": "Legendary Raid Reward", "cells": 13, "coins": 40500 } },
   "story": { "tableLast": 555 },
   "tierQuestLv": {
     "single": 25,
@@ -99,7 +102,14 @@
     "boardCost": "A board cost corrected from the wiki: Halloween Board 2019, cell 17 reads 700 on the wiki, but the page total and the cost ladder need 1,600 (inferred).",
     "boardCells": "Some cells of this week's boards are missing: their reward has no item here, so the cell is left off rather than replaced.",
     "boardTexture": "A Spirit part of this week's boards (Starlight Ears, Dazzling Disco) is drawn with one reconstructed texture: the original is lost (a small sparkle, a tiny dot).",
-    "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey A (no 6★ exists)."
+    "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey A (no 6★ exists).",
+    "jp": "Japan-only raid (census JP row, I-232): served only in the Raid Catalog, never as a raid of the week (spec Answer 3); one tier, its boss, dates and HP from the JP sources (wikiwiki.jp, khux-guides digests of the JP notices).",
+    "jpQuest": "No JP quest page survives: the quest plays on the map file of the WW event raid of the same boss nearest in date (else the nearest WW event raid), with its level, AP and world, and the standard Raid Time! objectives (make-raid.js jpDonorOf).",
+    "jpDates": "The JP source gives only the start date: the raid is dated one week from it.",
+    "jp2016": "HP, ATK, DEF, Lux and rewards are the boss's 2016 worldwide row as it stands (census «yes (2016 row)»): the JP values of this run are not known and may differ (the JP wiki notes it for Hocus Pocus 2015 against 2016).",
+    "jpTimer": "Time limits of the JP wiki: super-hard weekend raids 12 hours, 1 hour from the 2018-05-05 weekend; the monthly «30-minute» raids 30 minutes (the windows themselves, 12:00 and 22:00 JST, are not applied: the raid stays open all day, as the daily raids, I-228).",
+    "jpBoard": "The JP super-hard weekend board (JP wiki: 13 cells, 40,500 Raid Coins, 6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW Legendary Raid Reward board of WW-E41605-1, which has the same cells, items and total cost (jpBoards.superHard).",
+    "jpQuestAp": "Quest AP of a JP row when the JP wiki states it (November 2017 monthly raid: AP 0)."
   },
   "boards": {
     "background": 5,

@@ -206,11 +206,21 @@ A kept raid follows the rules of its own week (AP, Bonus Time). Its boss has a *
 
 Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.
 
+### Raids of the Japanese version
+
+The **148** raids held only in the **Japanese version** of the game (October 2015 to August 2018: raid events, super-hard weekend raids, monthly 30-minute raids and a daily rotating raid) are in the **Raid Catalog**, marked **Japan only** (**not original**: the worldwide game never had them). They never appear in the Events tab by themselves: keep one from the Raid Catalog to play it, like any past raid. A Japanese raid can be kept once your Story has passed its dates.
+
+No quest of these raids survives: each one uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives. Their Raid Boards are the generic boards (Medals, Jewels) of a similar worldwide raid; the **super-hard weekend** board is the original Japanese one, which has the same cells, rewards and costs as the worldwide **Legendary Raid Reward** board. The Japanese avatar parts, titles and level rewards of these raids are not given.
+
+The boss HP is the Japanese one where it is known (the fixed HP of the super-hard weekends, Adventurer and Jewel Princess of 2016), otherwise the 2016 worldwide values of the same boss or the rule of the worldwide raids of the time; attack and defense are deduced like those of the worldwide raids. The super-hard weekend raids keep their Japanese time limit (12 hours, 1 hour from May 2018) and open only on Saturday and Sunday; the monthly 30-minute raids give 30 minutes to defeat the boss but stay open all day (the original opened them twice a day). Each raid lists what is reconstructed on its Raid Catalog page.
+
 ### Raids not here yet
 
 All **424** raid tiers of the worldwide game (**46** bosses) can be played.
 
-The raids held only in the **Japanese version** are not here yet: they will come later in the Raid Catalog, marked JP, once enough of their data is known.
+**5** raids held only in the **Japanese version** are not here: no surviving source names their boss (December 25, 2016, August 2, 2017, September 1, 2017, August 4, 2018 and September 1, 2018).
+
+The Japanese weekly raids from September 2018 and 4 Japanese raid events of 2018 were the same raids as the worldwide ones, on the same dates: the Raid Catalog lists them once, as worldwide raids.
 
 ## Spirit Parts
 

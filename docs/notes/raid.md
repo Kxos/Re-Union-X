@@ -234,6 +234,53 @@ otices.json`): #44001 Merry-Go-Rowdy (8071), #44005 Closehanded Captain (8072), 
   - **Coverage (dry run, 4 November 2026, real `raid_models.json`):** 75 of 80 event tier rows available (57 of 62 rows; Jewel Sorceress, Circus Crab, Crabby Cake have no model: `graphics`), 344 of 344 weekly tier rows unchanged; 419 tier rows, 189 census rows, +492 Raid Boards, master +1.03 MB.
 - **Size:** all rows add about 2.4 MB to the master (243 stage, 93 evStage, 243 raidSetting, 810 raidEnemy, 945 raidReward, 42 raidEnemyAttack, 245 Raid Boards).
 
+<a id="japan-only-raids"></a>
+## Japan-only raids (I-232, 5 November 2026, tests and dry run, bench pending)
+
+User goal: every original raid, no exclusions. The census has 185 JP rows (2015-10 to 2019-05). Spec Answer 3: they are served
+**only in the Raid Catalog**, marked **Japan only**, never as a raid of the week. The full per-row list (dates, HP, donors,
+rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
+
+- **Which rows** (`make-raid.js` `jpStatus`). Served: 148 rows, 155 tiers, all available: 38 raid events (2015-10 to 2018-08;
+  JP-RAID-23 has two bosses, two quests), 97 super-hard weekends (2016-06 to 2018-06), 12 monthly 30-minute raids (2017-06 to
+  2018-08), the daily rotating raid of October 2017 (7 bosses, one per day). Not served (37, `raids.json` `jp.skipped`):
+  25 weekly rows from September 2018 (the JP weekly raids were the WW ones, same dates), 4 events of 2018 with a WW row of the
+  same boss starting the same day, 3 regular-boss lure weeks (not raid events, as in WW), 5 rows whose boss no source names
+  (December 2016, August and September 2017 monthly raids, two 2018 weekends).
+- **Ids.** `raid_ids.json`: the JP rows are numbered after every WW row (append-only): rows 202-349, entries 470-628.
+- **Calendar.** Entries carry `jp: true`, `region: 'JP'`. `raid-calendar.js` `weekRows` drops them, `catalogRows` keeps them
+  (`row.jp`), so a JP raid is played only when kept (`rowState` `can` once the Story has passed its dates). Raid Catalog:
+  TYPE «Japan only», «Japan only ·» on the row, JP family labels (ours, translated: Raid Event (Japan), Super-Hard Weekend Raid
+  (Japan), Monthly 30-Minute Raid (Japan), Daily Rotating Raid (Japan)).
+- **Quest** (label `jpQuest`). No JP quest page survives: each tier plays on the quest of a WW event raid (`jpDonorOf`: the
+  same boss nearest in date, else the WW event raid nearest in date), reusing its **map file** (`stage.stageBinId` = the donor's
+  stage; `server.js` `poiStageId` and `check-stage-data.js` follow it), its level, AP and world, with the standard Raid Time!
+  objectives. So no new map and **no new resource** is needed for the stages. Known JP AP: November 2017 monthly 0
+  (`jpQuestAp`). A row with no end date lasts a week (`jpDates`).
+- **HP.** Super-hard weekends: the JP wiki's fixed HP at every level (99,999,990 / 50M / 30M / 150M by era), parts at their
+  template share. JP wiki lines of RAID_VALUES.md dated in the row's month: Adventurer 2016-10 (body 7,777,777, each part
+  77,777, all levels), Jewel Princess 2016-11 (by level, linear between the wiki's levels). Rows with census «yes (2016 row)»:
+  the WW 2016 row as it stands, rewards included (`jp2016`). Others: the `eventHp` rule of the WW event raids. No 2016 floor
+  under a JP wiki HP. ATK / DEF as the WW raids of the time.
+- **Timer** (`jpTimer`, `raid_config.json`): super-hard weekends 12 h, 1 h from 2018-05-05; monthly 30-minute raids 30 minutes
+  (their two daily windows are not applied: open all day, as I-228). Super-hard weekends open on Saturday and Sunday only
+  (`open: 'weekend'`), the daily rotating raid on its weekday (`open: 'day'`).
+- **Boards.** No JP board survives cell by cell. Super-hard weekends: the JP standard board (13 cells, 40,500 Raid Coins,
+  6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW **Legendary Raid Reward** board of
+  WW-E41605-1, the same cells, items and total (`jpBoards.superHard`, label `jpBoard`; `boardSet` when the census only infers
+  it, from 2017-05-26); the first five weekends had other small boards: `boardStandard`. Other rows: the generic boards (no
+  title, no gender, Medals and Jewels only: the JP «Advanced bonus» = WW «Seasoned Wielder Bonus») of the nearest WW row of the
+  matching family, without its exclusive items (`boardStandard`). Card picture of the donor board (`artFrom`, `raid-boards.js`):
+  190 new lines in `game_data/raid_board_art.tsv`, which only a resource build imports. The JP avatar parts, titles and level
+  drops are not given (list and WW availability in the private file).
+- **Cards.** No JP raid banner was collected: the Events card is the plain plate (`0.png`). Models and list banners are the
+  served ones of each boss.
+- **Notices.** «Raid Bosses»: section «Raids of the Japanese version» (`raidJpLines`), and «Raids not here yet» lists the unnamed
+  bosses and the WW twins (`raidNoticeLines`, from `raids.json` `jp`).
+- **Master** (make-raid.js + make-ev-campaign.js on rev 271 data): stage +155, evStage +148, raidSetting +155, raidEnemy +608,
+  raidReward +1,920, sphere / sphereArray / sphereMasu +190, evCampaign +31 (AP 0 rows over the new stages); no WW raid row
+  changed; about +1.6 MB. Needs a master revision bump.
+
 <a id="lux"></a>
 ## Lux (3 November 2026, tests only, bench pending)
 

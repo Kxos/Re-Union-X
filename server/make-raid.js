@@ -187,8 +187,8 @@ function checkRanges(master) {
   }
 }
 
-const tierOf = (w, date) => (w.tier === SINGLE && date >= REWARDS.tierFrom ? 'Beginner' : w.tier);
-const keyOf = (row, w) => `${row.id}/${tierOf(w, row.start)}${w.gem_drop ? '+gem' : ''}${w.day ? `@${w.day}` : ''}`;
+const tierOf = (w, date) => (w.tier === SINGLE && date >= REWARDS.tierFrom && !w.jp ? 'Beginner' : w.tier);
+const keyOf = (row, w) => `${row.id}/${tierOf(w, row.start)}${w.gem_drop ? '+gem' : ''}${w.day ? `@${w.day}` : ''}${w.slot ? `#${w.slot}` : ''}`;
 const RARE_KEY = '+rare'; // raid_ids.json entry of the rare body of a tier row (Queen Bee Ω beside Queen Bee): its own enemy id block
 
 // ---- Older WW event raids (plan Task 10, spec step 5) ----
@@ -251,8 +251,8 @@ const tierRowsOf = (row, weeks) => (isEventRow(row) ? (row.start ? eventTierRows
 // 6★» as «6★ Moogle», «6★ Cid 10» as ten Cids. A row with no known board gets the boards of the nearest row of its family that
 // has some and no title (spec, Answer 5), without the items exclusive to that event; label boardStandard. Pre-series rows keep
 // their weekly-list boards.
-const BOARD_FAMILIES = new Set(['weekly', 'radiant reward', 'weekly (pre-series raid event)', ...EVENT_FAMILIES]);
-function eventBoardDoc(census, eventRewards) {
+const BOARD_FAMILIES = new Set(['weekly', 'radiant reward', 'weekly (pre-series raid event)', ...EVENT_FAMILIES, 'event', 'super-hard weekend', 'monthly (30-minute)', 'daily rotating']);
+function eventBoardDoc(census, eventRewards, jpCfg = null) {
   const byId = new Map(((eventRewards || {}).rows || []).filter((r) => r.region === 'WW').map((r) => [r.row_id, r]));
   const rows = ((census || {}).rows || []).filter((r) => isEventRow(r) && r.start && String(r.id).startsWith('WW-'));
   const gName = (g) => (g === 'm' ? 'Male' : g === 'f' ? 'Female' : null);
@@ -301,10 +301,51 @@ function eventBoardDoc(census, eventRewards) {
     }
     weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs });
   }
-  return { boards, weeks, gendered, standard };
+  // Japan-only rows (I-232): no JP board survives with its cells and costs (the JP wiki lists cells, total coins and main rewards
+  // only), so the generic boards of the nearest WW row of the matching family (JP_FAMILIES), else of any event family, without
+  // that event's exclusive items (boardStandard, as a WW row with no known board), with the card picture of the donor board
+  // (artFrom, raid-boards.js). Generic: no title, no gender, every cell a Medal or Jewels (the JP «Advanced bonus» boards are the
+  // WW «Seasoned Wielder Bonus» ones), never a WW event's avatar boards, which the JP raid did not have. The super-hard weekends
+  // (jpCfg.superHard) get the WW board whose 13 cells, items and 40,500 coins equal the JP «超難度レイド 討伐報酬» board (JP wiki,
+  // 2016-08-20 to 2017-05; «the usual weekend raid board» of the digests after it, census inferred_board): label jpBoard, plus
+  // boardSet when inferred; the first super-hard weekends had other small boards (5 or 4 cells), not itemised: boardStandard.
+  const jpRows = new Map(((eventRewards || {}).rows || []).filter((r) => r.region === 'JP').map((r) => [r.row_id, r]));
+  const exclusive = (r) => new Set(Object.keys((byId.get(r.id) || {}).exclusive_items || {}));
+  const generic = (b, drop = new Set()) => !b.title && (!b.gender || b.gender === 'both') && (b.cells || []).length && b.cells.every((c) => /★|Jewel/i.test(String(c.reward)))
+    && b.cells.some((c) => !drop.has(c.reward));
+  const ok = (r) => (byId.get(r.id)?.boards || []).some((b) => generic(b, exclusive(r)));
+  const digits = (s) => Number(String(s || '').replace(/[^\d]/g, '')) || 0;
+  const jpBoard = new Set();
+  const sh = (jpCfg || {}).superHard || null;
+  for (const row of ((census || {}).rows || []).filter((r) => jpServed(r, census))) {
+    const byDate = (a, c) => Math.abs(dayMs(a.start) - dayMs(row.start)) - Math.abs(dayMs(c.start) - dayMs(row.start));
+    let donorRow, pick = null, confidence = '';
+    if (sh && row.family === 'super-hard weekend') {
+      donorRow = rows.find((r) => r.id === sh.donor);
+      pick = (b) => b.board === sh.board;
+      const jr = jpRows.get(row.id) || {};
+      const own = (jr.boards_summary || []).some((b) => digits(b.cells) === sh.cells && digits(b.coins) === sh.coins);
+      if (own) jpBoard.add(row.id);
+      else if (jr.inferred_board) { jpBoard.add(row.id); confidence = 'inferred (census inferred_board)'; } else standard.add(row.id);
+    } else {
+      donorRow = rows.filter((r) => r.family === JP_FAMILIES[row.family] && ok(r)).sort(byDate)[0] || rows.filter(ok).sort(byDate)[0];
+      standard.add(row.id);
+    }
+    if (!donorRow) { standard.delete(row.id); continue; }
+    const donor = byId.get(donorRow.id), drop = exclusive(donorRow);
+    const refs = [];
+    donor.boards.forEach((b, i) => {
+      if (!(pick ? pick(b) : generic(b, drop))) return;
+      const own = `ev${i + 1}-${slug(b.board)}${b.gender ? `-${b.gender}` : ''}`, id = `${row.id}:std${i + 1}-${slug(b.board)}`;
+      boards.push({ ...layout(b, id, drop), artFrom: `${donorRow.id}:${own}` });
+      refs.push({ board: id, confidence: confidence || b.confidence || '' });
+    });
+    weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs, donor: donorRow.id });
+  }
+  return { boards, weeks, gendered, standard, jpBoard };
 }
-const boardDocOf = (boards, census, eventRewards) => {
-  const ev = eventBoardDoc(census, eventRewards);
+const boardDocOf = (boards, census, eventRewards, jpCfg = null) => {
+  const ev = eventBoardDoc(census, eventRewards, jpCfg);
   return { doc: { ...(boards || {}), boards: [...((boards || {}).boards || []), ...ev.boards], weeks: [...((boards || {}).weeks || []), ...ev.weeks] }, ev };
 };
 
@@ -405,6 +446,14 @@ function levelDropsOf(evRow, medals) {
 function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
   const s = setting2016Of(settings, orig, w, rareBody), labels = [];
   let up, ap;
+  // JP rules of the JP wiki (raid_config.json jpTimer): super-hard weekends 12 h, 1 h from 2018-05-05; the monthly raids' 30 minutes
+  const jp = w.jp ? (config.jpTimer || {})[row.family] : null;
+  if (jp) {
+    up = jp.minutes || (row.start < jp.oneHourFrom ? jp.before : jp.after);
+    labels.push('jpTimer');
+    if (s) ap = s.ap; else { ap = config.useAp; labels.push('useAp'); }
+    return { up, ap, labels, setting: s };
+  }
   if (s && s.dated) { up = s.up; ap = s.ap; } else {
     if (row.family === 'weekend-only') {
       const rule = config.weekendUpMinutes;
@@ -418,6 +467,90 @@ function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
   return { up, ap, labels, setting: s };
 }
 const correctedFrom = (values, rewards) => correctedWeeks(values.weeks, parseCorrections((rewards || {}).correctionsMd).dates);
+
+// ---- Japan-only raids (I-232; docs/notes/raid.md «Japan-only raids») ----
+// The census JP rows (JP 2015-10 to 2019-05). Served only in the Raid Catalog (entries jp: true, never a raid of the week: spec
+// Answer 3), as event raids of one tier. JP_FAMILIES: JP family -> the WW family whose Raid Boards stand in for the unknown JP
+// boards (boardStandard). A JP row is not served when it is the same raid as a WW row (the weekly raids from September 2018 ran
+// in both versions; a 2018 event of the same boss starting the same day), when its boss is not named, or when it is not a raid
+// event (the regular-boss lure weeks, as in WW).
+const JP_FAMILIES = { event: 'one-off event', 'super-hard weekend': 'weekend-only', 'monthly (30-minute)': 'monthly', 'daily rotating': 'daily showdown' };
+const JP_SAME_AS_WW = new Set(['weekly', 'weekly (date-coded enemy row)']);
+const isJpRow = (row) => String(row.id).startsWith('JP-');
+// {why} when the JP row is not served, else {}. A WW row of the same boss starting within a day (same family kind: event)
+function jpStatus(row, census) {
+  if (NOT_RAID_EVENT[row.family]) return { why: NOT_RAID_EVENT[row.family] };
+  if (JP_SAME_AS_WW.has(row.family)) return { why: 'the same weekly raid as the worldwide one (from September 2018 both versions ran the same weekly raids)' };
+  if (!JP_FAMILIES[row.family]) return { why: `family «${row.family}» not understood` };
+  if (!(row.bosses || []).length || !row.start) return { why: 'boss not named by any source' };
+  if (row.family === 'event') {
+    const twin = ((census || {}).rows || []).find((r) => String(r.id).startsWith('WW-') && EVENT_FAMILIES.has(r.family) && r.start && (r.bosses || []).some((b) => row.bosses.includes(b))
+      && Math.abs(dayMs(r.start) - dayMs(row.start)) <= DAY);
+    if (twin) return { why: `the same raid as ${twin.id} (same boss, same dates)`, twin: twin.id };
+  }
+  return {};
+}
+const jpServed = (row, census) => isJpRow(row) && !jpStatus(row, census).why;
+// Tier rows of a JP row (one tier, quest level from the donor): two bosses «X» and its rare (X Ω, or the rare boss of a 2016
+// raidSetting pairing them: Savage Spider / Venomous Spider) are one quest; other bosses each a quest of their own (slot); the
+// daily rotating raid one boss per day, the last N days of the row (the census start is the Pacific day before the JP Monday).
+// Period: the census dates, a week when the end is missing (label jpDates).
+function jpTierRows(row, pairs = new Set()) {
+  if (eventMemo.has(row)) return eventMemo.get(row);
+  const end = row.end || isoDay(dayMs(row.start) + 6 * DAY);
+  const base = { start: row.start, end, tier: SINGLE, quest_lv: 0, gem_drop: false, event: true, jp: true, map: null, ...(row.end ? {} : { noEnd: true }) };
+  const bosses = row.bosses || [];
+  let out;
+  if (row.family === 'daily rotating') {
+    const first = dayMs(end) - (bosses.length - 1) * DAY;
+    out = bosses.map((boss, i) => ({ ...base, boss, day: isoDay(first + i * DAY) }));
+  } else if (bosses.length === 2 && (bosses[1] === `${bosses[0]} Ω` || pairs.has(`${bosses[0]}|${bosses[1]}`))) {
+    out = [{ ...base, boss: bosses[0], rare: bosses[1] }];
+  } else out = bosses.map((boss, i) => ({ ...base, boss, ...(bosses.length > 1 ? { slot: i + 1 } : {}) }));
+  eventMemo.set(row, out);
+  return out;
+}
+// 2016 raidSetting pairs «boss|rare boss» (by name), for jpTierRows
+function rarePairsOf(orig2016) {
+  const name = new Map(((orig2016 || {}).raidEnemy || []).map((e) => [e.raidEnemyId, e.name]));
+  return new Set(((orig2016 || {}).raidSetting || []).filter((s) => s.rareBossId !== s.bossId && name.get(s.bossId) && name.get(s.rareBossId))
+    .map((s) => `${name.get(s.bossId)}|${name.get(s.rareBossId)}`));
+}
+// JP HP of a row: census data.hp «yes: fixed N» (the super-hard weekends, JP wiki), else the JP wiki lines of RAID_VALUES.md under
+// the boss's heading dated in the row's month: «hp fixed: body N; each part M» (Adventurer 2016-10), «hp body: N at LV 1; N LV 10; ...»
+// (Jewel Princess 2016-11). {fixed, partFixed} | {knots: [[lv, hp]]} | null
+function parseJpHp(md) {
+  const out = {};
+  let boss = null;
+  for (const line of String(md || '').split(/\r?\n/)) {
+    const h = /^### (.+?)\s*$/.exec(line);
+    if (h) { boss = h[1]; continue; }
+    const m = /^\| (hp fixed: body ([\d,]+); each part ([\d,]+)|hp body: ([^|]+?)) \|[^|]*\| JP \| (\d{4}-\d{2}) \|/.exec(line);
+    if (!m || !boss) continue;
+    if (m[2]) { (out[boss] ||= []).push({ month: m[5], fixed: num(m[2]), partFixed: num(m[3]) }); continue; }
+    const knots = [...m[4].split('.')[0].matchAll(/([\d,]+) (?:at )?LV (\d+)/g)].map((k) => [num(k[2]), num(k[1])]).sort((a, b) => a[0] - b[0]);
+    if (knots.length >= 2) (out[boss] ||= []).push({ month: m[5], knots });
+  }
+  return out;
+}
+function jpHpOf(row, boss, jpHp) {
+  const fixed = /fixed ([\d,]+)/.exec(String((row.data || {}).hp || ''));
+  if (fixed) return { fixed: num(fixed[1]) };
+  return (jpHp[boss] || []).find((x) => String(row.start).startsWith(x.month)) || null;
+}
+const knotHp = (knots) => (lv) => {
+  if (lv <= knots[0][0]) return knots[0][1];
+  for (let i = 1; i < knots.length; i++) if (lv <= knots[i][0]) return knots[i - 1][1] + (knots[i][1] - knots[i - 1][1]) * (lv - knots[i - 1][0]) / (knots[i][0] - knots[i - 1][0]);
+  return knots[knots.length - 1][1];
+};
+// Quest of a JP raid (no JP quest page survives): the map, level, AP and world of a WW event raid stage, its map file reused
+// (stageBinId: no new map), the standard Raid Time! objectives. The donor: the WW event raid of the same boss nearest in date,
+// else the WW event raid nearest in date. Label jpQuest.
+function jpDonorOf(entries, w) {
+  const pool = entries.filter((e) => e.event && !e.jp && e.available && e.stageId);
+  const near = (list) => list.slice().sort((a, b) => Math.abs(dayMs(a.start) - dayMs(w.start)) - Math.abs(dayMs(b.start) - dayMs(w.start)) || a.stageId - b.stageId)[0] || null;
+  return near(pool.filter((e) => e.boss === w.boss)) || near(pool);
+}
 
 // ---- Story raid bosses (plan Task 11, spec step 6; docs/notes/raid.md «Story raid bosses») ----
 // Which boss a story quest spawns: the census «story spawn» rows (quest ranges, the census's choice where the wiki and the 2016
@@ -539,17 +672,20 @@ function checkNumbers(map, what, max) {
 }
 // Copy of ids with a number for every WW row and its tier rows, and for the rows the filter names. Stops on a key that two
 // tier rows would share, or a tier row that two census rows would claim.
-function allocateIds({ census, weeks, ids, only, story = [] }) {
+function allocateIds({ census, weeks, ids, only, story = [], pairs = new Set() }) {
   const out = { ...ids, rows: { ...(ids || {}).rows }, entries: { ...(ids || {}).entries } };
   checkNumbers(out.rows, 'row', RANGES.evStage[2] - EV_BASE);
   checkNumbers(out.entries, 'entry', RANGES.stage[2] - RANGES.stage[1]);
   let nextRow = Math.max(0, ...Object.values(out.rows)) + 1, nextEntry = Math.max(0, ...Object.values(out.entries)) + 1;
   const claimed = new Map();
-  for (const row of census.rows) {
-    if (!String(row.id).startsWith('WW-') && !(only && only.has(row.id))) continue;
+  // WW rows first, then the served JP rows (I-232): the JP numbers come after every WW one
+  const jp = (row) => jpServed(row, census);
+  for (const row of [...census.rows.filter((r) => !isJpRow(r)), ...census.rows.filter(jp)]) {
+    if (!String(row.id).startsWith('WW-') && !jp(row) && !(only && only.has(row.id))) continue;
+    if (isJpRow(row) && !jp(row)) continue;
     if (!(row.id in out.rows)) out.rows[row.id] = nextRow++;
     const keys = new Set();
-    for (const w of tierRowsOf(row, weeks)) {
+    for (const w of (isJpRow(row) ? jpTierRows(row, pairs) : tierRowsOf(row, weeks))) {
       const key = keyOf(row, w);
       if (keys.has(key)) throw new Error(`raid: two tier rows give the key ${key} (${w.boss})`);
       keys.add(key);
@@ -661,7 +797,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   };
   const only = config.onlyCensusIds ? new Set(config.onlyCensusIds) : null;
   const plan = storyPlan({ census, orig2016, master, config });
-  const numbers = allocateIds({ census, weeks, ids, only, story: storyKeys(plan) });
+  const pairs = rarePairsOf(orig2016), jpHpTable = parseJpHp(values.partHpMd);
+  const numbers = allocateIds({ census, weeks, ids, only, story: storyKeys(plan), pairs });
   const out = { enemyRows: [], settingRows: [], rewardRows: [], attackRows: [], stageRows: [], evStageRows: [], sphereRows: [], arrayRows: [], masuRows: [], maps: [],
     index: { entries: [], reasons: {} }, ids: numbers, report: { why: {}, templateGap: [], boards: null, skipped: [] } };
   const withRaid = new Set();
@@ -678,7 +815,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     const own = orig.get(modelId), tplId = (config.modelTemplates || {})[bossName], template = own || orig.get(tplId);
     if (!template) return { why: 'template' };
     if (!own) labels.push('moves');
-    const original = !!(w.event && own && /^yes/i.test(String((row.data || {}).hp || '')));
+    // a JP row with an HP of the JP wiki (fixed, or by level) is not «yes (2016 row)», whatever its census text (I-232)
+    const jpHp = w.jp ? jpHpOf(row, bossName, jpHpTable) : null;
+    const original = !!(w.event && own && !jpHp && /^yes \(2016 row/i.test(String((row.data || {}).hp || '')));
+    if (original && w.jp) labels.push('jp2016');
     const e = { boss: bossName, modelId, enemyId };
     const cap = (config.modelParts || {})[bossName];
     if (original) {
@@ -689,9 +829,14 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     // before the cap era (eventHp.capFrom, 2018-10-07) a raid with no reading follows the scale of its boss's 2016 row (review I-1,
     // user decision): every event raid, and the one-tier weeks of 2018-09 (flat above LV 30)
     const ecfg = config.eventHp;
-    const scaled = !reading && !!ecfg && (w.event || (tier === SINGLE && date < ecfg.capFrom));
-    let hpBody, hpCurve = null;
-    if (scaled) {
+    const scaled = !reading && !jpHp && !!ecfg && (w.event || (tier === SINGLE && date < ecfg.capFrom));
+    let hpBody, hpCurve = null, partFixed = null;
+    if (jpHp) {
+      // JP wiki HP (I-232): the body at every level (fixed, or linear between the wiki's levels); parts fixed when the wiki says so
+      hpCurve = jpHp.knots ? knotHp(jpHp.knots) : () => jpHp.fixed;
+      hpBody = Math.round(hpCurve(1));
+      if (jpHp.partFixed) partFixed = jpHp.partFixed;
+    } else if (scaled) {
       // a one-tier week is read at its last day, so the week of the 2018-09-11 reading (2018-09-10..16) reaches it, never below
       hpCurve = eventHpCurve({ ref: own || template, date: w.event ? date : row.end || date, tier, weekend: row.family === 'weekend-only', cfg: ecfg, flatFrom: w.event ? null : ecfg.single.level });
       hpBody = Math.round(hpCurve(1));
@@ -708,15 +853,15 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     const stat = statsAt(config.stats, tier, date, template.rare);
     if (stat.atk === undefined) throw new Error(`raid: raid_stats.json has no ATK for ${tier}`);
     const near = (partHp[bossName] || []).slice().sort((a, b) => Math.abs(dayMs(a.date) - dayMs(date)) - Math.abs(dayMs(b.date) - dayMs(date)))[0];
-    const partShare = (p, i) => (near ? near.parts[i % near.parts.length] / near.body : p.hp[0] / template.hp[0]);
+    const partShare = (p, i) => (partFixed && jpHp.fixed ? partFixed / jpHp.fixed : near ? near.parts[i % near.parts.length] / near.body : p.hp[0] / template.hp[0]);
     const knots = single ? single.knots : null;
-    // HP is never lowered: an event raid never goes below its boss's own 2016 row at the same level
-    const floor = w.event && own ? (lv) => atLevel(own, 'hp', lv) : null;
+    // HP is never lowered: an event raid never goes below its boss's own 2016 row at the same level (a JP wiki HP stands as it is)
+    const floor = w.event && own && !jpHp ? (lv) => atLevel(own, 'hp', lv) : null;
     const rows = bossRows({ e, template, orig, blankEnemy, stat, hpBody, partShare, knots, single, cap, floor, hpCurve });
     if (rows.why) return rows;
     if (rows.hpFloored) labels.push('hpFloor');
     if (config.lux) applyLux(rows, config.lux);
-    return { rows, labels, hp: scaled ? rows.body.hp[0] : hpBody, hpSource: reading ? 'video' : scaled ? 'scale' : 'rule', template, own, original };
+    return { rows, labels, hp: scaled || jpHp ? rows.body.hp[0] : hpBody, hpSource: jpHp ? 'jp' : reading ? 'video' : scaled ? 'scale' : 'rule', partFixed: !!partFixed, template, own, original };
   };
   // every weak point of the model (raid_models.json `slots`, parts<N> of its wait LWF) needs a part of weakness N: at fight
   // load the client looks up a raidEnemy row for each one and crashes on an empty slot (docs/notes/raid.md «Weak points»)
@@ -764,14 +909,15 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     out.enemyRows.push(made.rows.body, ...made.rows.partRows);
   };
 
-  census.rows.forEach((row) => {
-    if (only ? !only.has(row.id) : !String(row.id).startsWith('WW-')) return;
-    if (NOT_RAID_EVENT[row.family] || (EVENT_FAMILIES.has(row.family) && !row.start)) {
-      out.report.skipped.push({ censusId: row.id, family: row.family, why: NOT_RAID_EVENT[row.family] || 'no dates' });
+  const buildRow = (row) => {
+    if (only ? !only.has(row.id) : !(String(row.id).startsWith('WW-') || isJpRow(row))) return;
+    const jpWhy = isJpRow(row) ? jpStatus(row, census).why : null;
+    if (NOT_RAID_EVENT[row.family] || (EVENT_FAMILIES.has(row.family) && !row.start) || jpWhy) {
+      out.report.skipped.push({ censusId: row.id, family: row.family, why: jpWhy || NOT_RAID_EVENT[row.family] || 'no dates', ...(isJpRow(row) ? { jp: true, start: row.start, bosses: row.bosses || [] } : {}) });
       return;
     }
     const evStageId = EV_BASE + numbers.rows[row.id];
-    const tierRows = tierRowsOf(row, weeks);
+    const tierRows = isJpRow(row) ? jpTierRows(row, pairs) : tierRowsOf(row, weeks);
     const evRow = eventRows.get(row.id);
     const stageIds = [];
     tierRows.forEach((w) => {
@@ -781,24 +927,32 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       const bossOf = (name) => (census.bosses || []).find((b) => b.ww === name);
       const modelId = bossOf(w.boss) ? bossOf(w.boss).raid_model_id : 0;
       const m = modelOf(modelId);
-      const evQuest = w.event ? eventQuestOf(evRow, w) : null;
+      const evQuest = w.event && !w.jp ? eventQuestOf(evRow, w) : null;
+      // a JP raid plays on the quest of a WW event raid (jpDonorOf): its map file, level, AP and world
+      const donor = w.jp ? jpDonorOf(out.index.entries, w) : null;
       const questKey = w.event ? (evQuest && evQuest.page ? String(evQuest.page).replace(/\s*\(Quest\)\s*$/, '') : w.boss)
         : w.tier === SINGLE ? 'Raid Time!' : `(${w.tier}) ${w.gem_drop ? 'Gem Drop: ' : ''}Raid Time!`;
       const quest = (values.quests || {})[w.event ? 'Raid Time!' : questKey];
-      const worldReal = mapWorld(w.map);
+      const map = donor ? donor.map : w.map;
+      const worldReal = mapWorld(map);
       const reconstructed = ['atk', 'def', 'partHp', 'upMinutes', 'useAp', 'coinOdds', config.lux ? 'lux' : 'rewards2016'];
-      const entry = { key: keyOf(row, w), censusId: row.id, family: row.family, start: row.start, end: row.end, tier, gemDrop: !!w.gem_drop,
+      const jpAp = w.jp && (config.jpQuestAp || {})[row.id];
+      const entry = { key: keyOf(row, w), censusId: row.id, family: row.family, start: row.start, end: w.jp ? w.end : row.end, tier, gemDrop: !!w.gem_drop,
         boss: w.boss, modelId, available: false, why: null, stageId: RANGES.stage[1] + n, evStageId, settingId: RANGES.raidSetting[1] + n, enemyId: RANGES.raidEnemy[1] + 10 * n,
-        upMinutes: config.weeklyUpMinutes, useAp: config.useAp, questAp: w.event ? [num(evQuest && evQuest.ap)] : String(w.ap).split('/').map(num), map: w.map, worldId: 0,
-        level: w.event ? w.quest_lv : (config.tierQuestLv || {})[tier] || num(w.quest_lv), hp: 0,
-        boards: w.event ? ((evRow && evRow.boards) || []).map((b) => b.board) : (values.week_boards || []).find((b) => b.start === row.start)?.boards || fixes.boards[row.id] || String(row.rewards || '').split(/\s*[;,|]\s*/).filter(Boolean),
+        upMinutes: config.weeklyUpMinutes, useAp: config.useAp, questAp: w.jp ? (jpAp !== undefined ? [num(jpAp)] : donor ? [...donor.questAp] : [0]) : w.event ? [num(evQuest && evQuest.ap)] : String(w.ap).split('/').map(num), map, worldId: 0,
+        level: w.jp ? (donor ? donor.level : 0) : w.event ? w.quest_lv : (config.tierQuestLv || {})[tier] || num(w.quest_lv), hp: 0,
+        boards: w.jp ? [] : w.event ? ((evRow && evRow.boards) || []).map((b) => b.board) : (values.week_boards || []).find((b) => b.start === row.start)?.boards || fixes.boards[row.id] || String(row.rewards || '').split(/\s*[;,|]\s*/).filter(Boolean),
         reconstructed };
       // event raids (Task 10): when they open (raid-calendar.js openNow), on Pacific days
       if (w.event) {
         entry.event = true;
-        entry.periods = w.day ? [[row.start, isoDay(dayMs(row.end) - DAY)]] : eventPeriods(row);
-        if (row.family === 'weekend-only') entry.open = 'weekend';
-        else if (row.family === 'daily showdown') { entry.open = 'day'; entry.day = w.day; } else if (row.family === 'daily') entry.open = 'daily';
+        entry.periods = w.jp ? [[w.start, w.end]] : w.day ? [[row.start, isoDay(dayMs(row.end) - DAY)]] : eventPeriods(row);
+        if (row.family === 'weekend-only' || row.family === 'super-hard weekend') entry.open = 'weekend';
+        else if (row.family === 'daily showdown' || row.family === 'daily rotating') { entry.open = 'day'; entry.day = w.day; } else if (row.family === 'daily') entry.open = 'daily';
+      }
+      // Japan-only raid (I-232): served only in the Raid Catalog (raid-calendar.js never lists it as a raid of the week)
+      if (w.jp) {
+        Object.assign(entry, { jp: true, region: 'JP', ...(donor ? { questFrom: donor.key } : {}) });
       }
       out.index.entries.push(entry);
 
@@ -806,7 +960,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (!usable(m)) entry.why = 'graphics';
       else if (!orig.get(modelId) && !orig.get((config.modelTemplates || {})[w.boss])) entry.why = 'template';
       else if (!worldReal) entry.why = 'map';
-      else if (!quest || (w.event && !evQuest)) entry.why = 'quest';
+      else if (!quest || (w.event && !w.jp && !evQuest) || (w.jp && !donor)) entry.why = 'quest';
       if (entry.why) return;
       const made = makeBoss({ row, w, bossName: w.boss, modelId, enemyId: entry.enemyId, tier, date, single });
       if (made.why) { entry.why = made.why; return; }
@@ -830,6 +984,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         const keep = new Set(made.original ? [] : ['atk', 'def', 'partHp', 'coinOdds', config.lux ? 'lux' : 'rewards2016']);
         reconstructed.splice(0, reconstructed.length, ...reconstructed.filter((l) => keep.has(l)), ...timer.labels);
         if (!made.original) reconstructed.push('eventCoins');
+        // Japan-only (I-232): Catalog only, quest of a WW raid, a week when the end date is not known; the parts of a wiki HP are its own
+        if (w.jp) {
+          if (made.partFixed && reconstructed.includes('partHp')) reconstructed.splice(reconstructed.indexOf('partHp'), 1);
+          reconstructed.push('jp', 'jpQuest', ...(w.noEnd ? ['jpDates'] : []));
+        }
         // the rare boss of the same quest (Queen Bee Ω beside Queen Bee): its own rows, timer and AP; chance 1 in rareUpTypeArg
         if (w.rare) {
           const rareModel = bossOf(w.rare) ? bossOf(w.rare).raid_model_id : 0, rm = modelOf(rareModel);
@@ -876,10 +1035,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (!ref) throw new Error('raid: no story rows in the stage table');
       const questAp = entry.questAp;
       // objectives: the event quest's own, with their rewards; the standard Raid Time! ones when one cannot be served
-      let subs = w.event ? eventQuestSubs(evQuest, medalIndex) : null;
-      if (w.event && !subs) reconstructed.push('questObjectives');
+      let subs = w.event && !w.jp ? eventQuestSubs(evQuest, medalIndex) : null;
+      if (w.event && !w.jp && !subs) reconstructed.push('questObjectives');
       subs = subs || questSubs(quest.info, REWARDS.coinType, entry.key);
-      const stage = { ...JSON.parse(JSON.stringify(ref)), stageId: entry.stageId, stageBinId: entry.stageId, id: entry.stageId, name: questKey, mapName: w.map,
+      // a JP raid reuses the map file of its donor's stage (stageBinId; server.js poiStageId follows it): no new map
+      const stage = { ...JSON.parse(JSON.stringify(ref)), stageId: entry.stageId, stageBinId: donor ? donor.stageId : entry.stageId, id: entry.stageId, name: questKey, mapName: map,
         useAp: questAp[questAp.length - 1], chapterId: Math.floor(entry.stageId / 1000), worldId: stageWorld, onlyDrama: 0, stageKind: STAGE_KIND,
         validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0, disableContinue: 0, addLevel: 0, holdKeyblade: 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, validClearGetItem: 0, clearGetItemType: [], clearGetItemId: [],
@@ -889,14 +1049,17 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       stageIds.push(entry.stageId);
       // map: one target plus two, each worth raidPoint 3000 (enemy row 100); `world` is the room's world, for the room choice
       const egg = () => ({ name: EGG, enemyId: EGG_ID, n: 1, reward: ENEMY_REWARD });
-      out.maps.push({ stageId: entry.stageId, world: worldReal, name: questKey, room: w.map, target: EGG, targetId: EGG_ID, targetReward: ENEMY_REWARD, level: entry.level,
+      if (!donor) out.maps.push({ stageId: entry.stageId, world: worldReal, name: questKey, room: w.map, target: EGG, targetId: EGG_ID, targetReward: ENEMY_REWARD, level: entry.level,
         enemies: [[egg(), egg()]], treasures: [], rooms: 1 });
       entry.available = true;
     });
     // Details of the banner: the raid's original notice (make-raid-notices.js), only when there is one (no dead button)
     const detailUrl = notices && notices.rows && notices.rows[row.id] ? `${NOTICE_URL}${evStageId}` : '';
     if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds, { detailUrl })); withRaid.add(row.id); }
-  });
+  };
+  // WW rows first: the JP rows take their quests from the WW event raids built before them (jpDonorOf)
+  census.rows.filter((r) => !isJpRow(r)).forEach(buildRow);
+  census.rows.filter(isJpRow).forEach(buildRow);
   if (plan) out.index.story = buildStory(plan);
   // Story raid bosses (storyPlan): every boss with its own 2016 rows as they stand (HP, ATK, DEF, Lux, parts, moves) and its 2016
   // raidReward rows (medals and materials by level, no coins) under our ids; its 2016 raidSetting (the boss's rule) for the timer and
@@ -988,14 +1151,14 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   }
   // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
   if (boards) {
-    const { doc, ev } = boardDocOf(boards, census, eventRewards);
+    const { doc, ev } = boardDocOf(boards, census, eventRewards, config.jpBoards);
     const b = raidBoards.buildBoards({ doc, correctionsMd: (rewards || {}).correctionsMd, master, ids: numbers, config: config.boards || {}, censusIds: withRaid, families: BOARD_FAMILIES });
     Object.assign(out, { sphereRows: b.sphereRows, arrayRows: b.arrayRows, masuRows: b.masuRows, boardArt: b.art });
     out.ids = { ...out.ids, boards: b.boardIds };
     out.report.boards = { ...b.report, count: b.sphereRows.length };
     for (const e of out.index.entries) {
       e.sphereBoardIds = b.byCensus[e.censusId] || [];
-      if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []));
+      if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []));
     }
   } else for (const e of out.index.entries) e.sphereBoardIds = [];
   for (const e of out.index.entries) {
@@ -1006,6 +1169,14 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (!reason) throw new Error(`raid: no reason for the label ${label} in reconstructedWhy of raid_config.json`);
       out.index.reasons[label] = reason;
     }
+  }
+  // Japan-only raids (I-232): what the Notices and the Catalog say about them (routes-info-album.js raidNoticeFacts)
+  const jpEntries = out.index.entries.filter((e) => e.jp), jpSkipped = out.report.skipped.filter((s) => s.jp);
+  if (jpEntries.length || jpSkipped.length) {
+    out.index.jp = { rows: new Set(jpEntries.map((e) => e.censusId)).size, available: new Set(jpEntries.filter((e) => e.available).map((e) => e.censusId)).size,
+      tiers: jpEntries.length, from: jpEntries.map((e) => e.start).sort()[0] || null, to: jpEntries.map((e) => e.end).sort().pop() || null,
+      notServed: jpEntries.filter((e) => !e.available).map((e) => ({ censusId: e.censusId, boss: e.boss, why: e.why })),
+      skipped: jpSkipped.map((s) => ({ censusId: s.censusId, family: s.family, start: s.start, bosses: s.bosses, why: s.why })) };
   }
   // Raid Catalog banner (CATALOG_EV): kept apart from the raid rows; patch() writes it in evStage
   const training = (master.stage || []).find((r) => r.stageId === CATALOG_STAGE);
@@ -1140,7 +1311,7 @@ function patch(masterDir, opts = {}) {
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[tableKey[t]])]));
-  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), ...(out.index.story ? { story: out.index.story } : {}), boards: out.report.boards, own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'raids.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), ...(out.index.story ? { story: out.index.story } : {}), ...(out.index.jp ? { jp: out.index.jp } : {}), boards: out.report.boards, own }, null, 1));
   const st = out.report.story;
   if (st) console.log(`raid: story bosses ${st.available} of ${st.bosses} available, ${st.spawning} of ${st.quests} story quests spawn (to quest ${out.index.story.last}), ${st.unknown} with the nearest boss, ${st.conflicts} conflicts, ${st.stages} fight stages`);
   if (!out.index.catalog) console.warn(`raid: no Raid Catalog banner: the Training Grounds stage ${CATALOG_STAGE} is not in the master (make-special first)`);
@@ -1173,8 +1344,8 @@ function writeIdsFile() {
   // the story keys need the story rows (worlds) and the worlds' backgrounds of the served master (read only)
   const md = path.join(__dirname, 'master_data');
   const plan = storyPlan({ census, orig2016: readSources(src, dir2016).orig2016, master: { stage: readJson(path.join(md, 'stage.json')), world: readJson(path.join(md, 'world.json')) }, config: loadConfig() });
-  const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null, story: storyKeys(plan) });
-  ids.boards = raidBoards.allocateBoardIds(boardDocOf(boards, census, eventRewards).doc, ids, BOARD_FAMILIES);
+  const ids = allocateIds({ census, weeks: correctedFrom(values, rewards), ids: readIds(IDS_FILE), only: null, story: storyKeys(plan), pairs: rarePairsOf(readSources(src, dir2016).orig2016) });
+  ids.boards = raidBoards.allocateBoardIds(boardDocOf(boards, census, eventRewards, loadConfig().jpBoards).doc, ids, BOARD_FAMILIES);
   writeIds(IDS_FILE, ids);
   console.log(`raid_ids.json: ${Object.keys(ids.rows).length} rows, ${Object.keys(ids.entries).length} entries, ${Object.keys(ids.boards).length} boards`);
 }

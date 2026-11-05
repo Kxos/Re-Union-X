@@ -40,7 +40,9 @@ function storyStopgaps() {
 function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirname, 'game_data', 'raids.json')) {
   let r;
   try { r = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
-  const entries = Array.isArray(r.entries) ? r.entries : [];
+  const all = Array.isArray(r.entries) ? r.entries : [];
+  const entries = all.filter((e) => !e.jp); // the worldwide raids; the Japan-only ones apart (I-232)
+  const jpOn = all.filter((e) => e.jp && e.available), jp = r.jp || null;
   const story = r.story || {};
   const sb = Array.isArray(story.bosses) ? story.bosses : [];
   const served = new Set(sb.filter((b) => b.available).map((b) => b.boss));
@@ -49,18 +51,37 @@ function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirna
     storyLast: story.last || 0, storyOn: sb.filter((b) => b.available), storyOff: sb.filter((b) => !b.available).map((b) => b.boss),
     storyQuests: Object.values(story.quests || {}).filter((q) => served.has(q.boss)).length,
     unknown: (story.unknown || []).length, conflicts: (story.conflicts || []).length,
+    jp: jp ? { rows: new Set(jpOn.map((e) => e.censusId)).size, off: (jp.notServed || []).length, unnamed: (jp.skipped || []).filter((s) => /not named/.test(s.why)).map((s) => s.start),
+      sameEvents: (jp.skipped || []).filter((s) => /^the same raid as/.test(s.why)).length } : null,
   };
 }
 const nameList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a.join(''));
 function raidNoticeLines(f) {
-  const jp = 'The raids held only in the **Japanese version** are not here yet: they will come later in the Raid Catalog, marked JP, once enough of their data is known.';
+  const jp = 'The raids held only in the **Japanese version** are not here yet: they will come later in the Raid Catalog, marked Japan only, once enough of their data is known.';
   if (!f) return [jp];
   const out = [];
   if (f.off) out.push(`**${f.off}** of the ${f.tiers} raid tiers of the worldwide game are marked **Not restored yet**: the graphics or data of their boss are incomplete in the surviving game files. The Raid Catalog lists them, and they come back as soon as their boss is recovered.`);
   else out.push(`All **${f.tiers}** raid tiers of the worldwide game (**${f.bosses}** bosses) can be played.`);
   if (f.storyOff.length) out.push(`The Story raid bosses **${nameList(f.storyOff)}** are not back yet: their quests do not bring a boss, and the raid gauge waits for the next quest that can.`);
-  out.push(jp);
+  // Japan-only raids (I-232): the ones not here and why
+  if (!f.jp || !f.jp.rows) out.push(jp);
+  else {
+    const n = f.jp;
+    if (n.off) out.push(`**${n.off}** raid tiers held only in the **Japanese version** are marked **Not restored yet** in the Raid Catalog: the graphics or data of their boss are incomplete.`);
+    if (n.unnamed.length) out.push(`**${n.unnamed.length}** raids held only in the **Japanese version** are not here: no surviving source names their boss (${nameList(n.unnamed.map(usDay))}).`);
+    out.push(`The Japanese weekly raids from September 2018${n.sameEvents ? ` and ${n.sameEvents} Japanese raid event${n.sameEvents === 1 ? '' : 's'} of 2018` : ''} were the same raids as the worldwide ones, on the same dates: the Raid Catalog lists them once, as worldwide raids.`);
+  }
   return out;
+}
+// 2016-12-25 -> December 25, 2016
+const usDay = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+// Japan-only raids (I-232): served only in the Raid Catalog (not original), and what is reconstructed for them
+function raidJpLines(f) {
+  if (!f || !f.jp || !f.jp.rows) return [];
+  return ['## Raids of the Japanese version',
+    `The **${f.jp.rows}** raids held only in the **Japanese version** of the game (October 2015 to August 2018: raid events, super-hard weekend raids, monthly 30-minute raids and a daily rotating raid) are in the **Raid Catalog**, marked **Japan only** (**not original**: the worldwide game never had them). They never appear in the Events tab by themselves: keep one from the Raid Catalog to play it, like any past raid. A Japanese raid can be kept once your Story has passed its dates.`,
+    'No quest of these raids survives: each one uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives. Their Raid Boards are the generic boards (Medals, Jewels) of a similar worldwide raid; the **super-hard weekend** board is the original Japanese one, which has the same cells, rewards and costs as the worldwide **Legendary Raid Reward** board. The Japanese avatar parts, titles and level rewards of these raids are not given.',
+    'The boss HP is the Japanese one where it is known (the fixed HP of the super-hard weekends, Adventurer and Jewel Princess of 2016), otherwise the 2016 worldwide values of the same boss or the rule of the worldwide raids of the time; attack and defense are deduced like those of the worldwide raids. The super-hard weekend raids keep their Japanese time limit (12 hours, 1 hour from May 2018) and open only on Saturday and Sunday; the monthly 30-minute raids give 30 minutes to defeat the boss but stay open all day (the original opened them twice a day). Each raid lists what is reconstructed on its Raid Catalog page.'];
 }
 // story raid bosses: names (with their rare versions), quests that bring one, last quest, unknown and disputed quests
 function raidStoryLines(f) {
@@ -235,6 +256,7 @@ const NOTICES = [
       'The catalogue **Filters** (**not original**) find raids by boss, board or reward name, by type, tier and state, and by **Progress**: **Completed** shows the raids whose objectives you have all completed; **Raid Boards** shows the raids whose Raid Boards are all unlocked, or those with cells still to unlock.',
       'A kept raid follows the rules of its own week (AP, Bonus Time). Its boss has a **level of its own**, starting at **LV 1**: playing it never changes the level of the boss of the week, and the other way round. Its **Raid Boards** are the same as in its week, so a board reward is never given twice; **Raid Coins** are given at every win, as for the raid of the week.',
       'Raid **Lux** is **reconstructed** from what players reported: as in the original game it depends on the HP you take and on your Lux skills, not on hits or damage, and with Lux++ on every Medal a kill is worth about 2% of the boss HP (about 8 billion on Advanced, 14 billion on Legendary, 20 billion on Epic). In **Bonus Time** the Lux of a raid fight is **doubled**, as in the original game: the game counts the normal amount during the fight and the server doubles it when the fight ends.',
+      ...raidJpLines(raidNoticeFacts()),
       '## Raids not here yet',
       ...raidNoticeLines(raidNoticeFacts())] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
@@ -569,4 +591,4 @@ function albumData(owned, medalRows, maxGuilt) {
   };
 }
 
-module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines };
+module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines };
