@@ -281,6 +281,31 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   raidReward +1,920, sphere / sphereArray / sphereMasu +190, evCampaign +31 (AP 0 rows over the new stages); no WW raid row
   changed; about +1.6 MB. Needs a master revision bump.
 
+### Japan-only raids: research on the open gaps (5 November 2026, research only, nothing served yet)
+
+Sourced from the original JP notices (read from web archives), JP community digests, the JP wiki board pages and the JP 4.3.1
+client images, against the WW master. Details, sources and confidence per item in the private `JP_ONLY.md`.
+
+- **Monthly 30-minute raids 2017 were daily rotating, one boss per weekday** (JP notices, proven). July 2017: Mon Assault Dragon,
+  Tue Queen Bee Ω, Wed Jewel Princess, Thu Jack in the Box, Fri Gummi Hound, Sat Closehanded Captain, Sun Gear Golem (7/1-7/31;
+  today served as Closehanded Captain only). August 2017: Lion Headliner, Circus Crab, Jewel Sorceress, Egg Master, Hocus Pocus,
+  Adventurer, Submarine Carp (8/2-8/31). September 2017: Gummi Hound, Gear Golem, Queen Bee, Assault Dragon, Circus Crab, Furious
+  Whole Cake (= Crabby Cake, probable), Jack in the Box (9/2-9/30). Level resets after each 30-minute window; LV5+ kills give the
+  big coin payout; the Saturday boss at LV10 drops a status-boosted copy (ATK +1000) of the month's medal (Trickmaster, Twilight
+  Thorn, Destroyer Behemoth).
+- **Year-end 2016** (12/26-1/1) was also a daily rotating raid, boss level +10 per kill (JP notice); the bosses per day are not in
+  the text: probably the WW «2016 Showdown!» lineup of the same dates and rewards (Green Trident Tail, Wicked Spider, Submarine
+  Carp, Fortress Crab, Gummi Hound, Blue Trident Tail, Hocus Pocus).
+- **Weekends 2018-08-04 and 2018-09-01**: still unnamed (their notices are not archived). JP weekend raids ran every weekend in
+  2018 (standing notice, 60-minute limit); by the 7-boss cycle each date has two candidates (8/4 Scourge Spider or Red Trident
+  Tail, 9/1 Wicked Spider or Malicious Spider). Not served.
+- **Rewards found in WW data**: Santa Sora (= WW Christmas Sora art; JP had ★1-★6), Yellow / Treasure Trove Frog Caps (JP «Kero
+  caps»), Meow Wow Snuggly (JP «Snuggly Wandanyan»), Sweetheart Minnie and Mickey & Minnie (JP Valentine medals, same art),
+  Sweetheart Beast and Prince & Belle (JP White Day medals, same ids), Rainbow Kitstar / Pupstar pet parts (probable), the JP
+  board titles as WW title rows 12012-12137 (probable, same order). **Only in JP images, not in the WW master**: Mickey & Magic
+  Broom (the Fantasia Mickey evolution with 5 Magic Brooms, an ability-up fodder medal), Necho Cat, KH3D Sora & Riku, Santa
+  Sora ★1-★4, the JP ★5 Valentine Minnie art. No board survives cell by cell; no HP for these rows.
+
 <a id="lux"></a>
 ## Lux (3 November 2026, tests only, bench pending)
 
