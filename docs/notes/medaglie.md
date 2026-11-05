@@ -290,6 +290,68 @@ edge (x 1722) and check that Undo is gray. To do: `target` 3 for the random Supe
 - Unequip: `POST /user/medal/remove` (237); first the client requests `GET /user/medal/preremove`, to which
   the server gives a generic response (ISSUES I-038).
 
+<a id="evolve-open-questions"></a>
+### Evolve: open questions of I-205 (research 05-11, no bench)
+
+Sources checked: khuxwiki pages in `wiki_all.json`, Roboloid `medal_db.json`, thethiny 2017 SE master
+(`external\thethiny\medal_dec.json`), the EN notices in `private\events\sources\raid_census\work\notice_text.json`,
+JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `server/master_data/medal.json` (05-11).
+
+**1. Kyroo subslot medals [SAB LV 7-10]**
+- Original: six Subslot medals (Spirit/NM x Lord/Chef/Sir Kyroo), each tier a **separate medal with its own album
+  number** (khuxwiki: e.g. Spirit Lord Kyroo NA 1769/1775/1781/1794). Notice 55885 (Event Coins Galore, Aug 2019)
+  presents them as "6 types x 3 tiers (SAB LV 7, 8, 9)" handed out by the SP Deal event boards (board of 8 cells:
+  5x LV 7, 2x LV 8, 1x LV 9); LV 10 came later from High Score Challenge party rankings, Union Challenge rewards
+  (notices 63813, 64600) and the weekly VIP «Subslot Medal Quest» (notices 64148 ... 70065, Mar-Oct 2020). Notice
+  57832 announces that they become stackable (late Oct 2019). **No source mentions evolving one tier into the next**
+  (no `{{Evo}}` block on the khuxwiki pages, no notice); they were consumed only by putting them in Keyblade
+  Subslots, where the bonus depends on the SAB level.
+- Our master: 24 Roboloid rows (301901, 311903, 301903, 311905, 301905-301908, 301909-301911, 311913, 301913,
+  311915, 301915, 301916, 301917-301920, 301921, 311923, 301923, 311925), type 1, 7★, `validPack` 0. The 18 rows
+  LV 7-9 have `validEvolve` 1 -> the next tier, `evolveMoney` 99999, `validEvolveNeed` 0 (no materials); LV 10 does
+  not evolve. The chain is an artefact of the Roboloid import (`make-game-tables.js` turns `Reference` - the group
+  of tabs of one wiki page - into an evolve chain; 99999 is the template 7★ value), not an original rule.
+- Recommendation: **remove the evolution** (`validEvolve` 0, `evolveId` 0 on the 18 LV 7-9 rows), so each tier is
+  obtained only from its own rewards, as in the original. Side finding: the original made them stackable from Oct
+  2019 (`validPack` 1 would match; to check on the client before changing).
+
+**2. Queen of Hearts 3★ -> 6★**
+- Original: notice 19537 («Hide and Seek with Alice!», EN, July 2016) lists the requirement: Playing Card of the
+  **same rarity**, 3★->4★ one 3★, 4★->5★ two 4★, 5★->6★ two 5★ (only Playing Cards, no generic evolve medals).
+  The khuxwiki page shows 2/3/3 in its `{{Evo}}` blocks without a source; the thethiny 2017 SE master has 1/2/2,
+  same as the notice. The wiki numbers are therefore an error (or a JP value; the JP notice 15972 is not in our copy
+  and its URL no longer answers).
+- Our master: 21133 -> 21134 (15000 munny, [21123]), 21134 -> 21135 (40000, [21124 x2]), 21135 -> 21136 (80000,
+  [21125 x2]); 21136 6★ does not evolve. These are the original SE rows, untouched by `evolve-wiki.js`.
+- Recommendation: **keep 1/2/2** (official notice = SE master). Side finding: the 7★ exists (khuxwiki NA 1122,
+  Roboloid 534 -> our 300534, plus 300533 with groupId 300534) but 21136 does not evolve into it; no source found for
+  the 6★ -> 7★ requirement of this event medal (separate question if wanted).
+
+**3. Fantasia Mickey A / B**
+- Names: the 2017 SE master calls the 5★ «Fantasia Mickey Ver. A» (90085, type 6, evolve medal); the khuxwiki says
+  it was later renamed «Fantasia Mickey A». The 6★ is «Fantasia Mickey B» («Mickey & Brooms», JP «Mickey and Broom
+  Servants»), type 8 boost medal (+1 special attack dot, or guilt unlock/reroll at 5 dots). In the 2017 SE row 90085
+  already points to `evolveId` 90136 with `validEvolve` 0 (the 6★ was not in that dump).
+- Chain (khuxwiki Fantasia Mickey A/B and Magic Broom pages): Fantasia Mickey A 5★ + **5 Magic Broom 5★** ->
+  Fantasia Mickey B 6★; B does not evolve further and is itself a material (1 or 2 for the SN++ upgrades, see
+  `evolve-wiki.js`). A is also a generic material: 3 A + 2 Flora/Fauna/Merryweather 5★ take any 5★ medal to 6★.
+- How they were obtained:
+  - A (common): weekly «4★-5★ Evolve Medals» special quest (Monday on EN, Friday on JP), later the «EXP & Evolve
+    Medals» quests, Guard Armor / Guard Armor Ω raid bosses, rare King Pretender drops in story quests 270/300/323.
+  - B (event): evolving A with 5 Brooms; gifts to all players (notices 26679, 14 Mar 2017, and 26982, 23 Mar
+    2017); VIP quest «Get 6x Fantasia Mickey B!» (Feb 2019); limited VIP board «Fantasia Mickey Set 1» (Sep 2018,
+    19 cells); JP avatar board rewards (wikiwiki); the «Fantasia Mickey B Deal» draw bonuses (B0244/B0264/B0286).
+  - Magic Broom: premium avatar boards, high-level quest objectives, Coliseum rankings, VIP «Daily Magic Broom
+    Challenge» / «Get 7 Magic Broom Medals» (notices 27751, 28946).
+- Our master: 90085 -> 300913 (80000 munny, need [300948 x5]), 300913 and 300948 do not evolve (as in the
+  original). The ids are already referenced as rewards (count of rows, 05-11; the 23-10 journal line «A has no
+  source» is outdated): A in 22 `reward` rows, 16 `raidReward` rows, 30 board cells (`sphereMasu`), 1 stage
+  (`submissionItemId`) and the reconstructed evolve special quests (`server/special_periods.json`: evolve-4-5 and
+  the SQ13 upgrade quests); B in 44 board cells and 1 stage (976163); Broom in 141 board cells and 34 stages.
+- Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
+  is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
+  (later official name); nothing else to add.
+
 <a id="materiali"></a>
 ## Sell Materials
 
