@@ -737,7 +737,24 @@ const RESOURCE_DIR = process.env.KHUX_RESOURCE_DIR || path.join(__dirname, 'reso
 
 // I pacchetti possono pesare gigabyte (gli OBB): l'MD5 si calcola una volta, a
 // blocchi, e si tiene in cache finche' dimensione e data del file non cambiano.
-const md5Cache = new Map();
+// The cache is also kept on disk (LOG_DIR/resource-md5.json, same key path|size|mtime): without it every server
+// start re-read the whole latest version (4.9 GB on the HDD, ~75 s at 60-110 MB/s), the server listened only after
+// that and the emulator, whose disk is on the same HDD, sat at 60-85% iowait: system_server stalled (am force-stop
+// 47 s, ANRs), login 90-234 s after the launch (bench 05-11, docs/notes/server.md «Startup MD5 cache»).
+const MD5_CACHE_FILE = path.join(LOG_DIR, 'resource-md5.json');
+const md5Cache = new Map((() => {
+  try { return Object.entries(JSON.parse(fs.readFileSync(MD5_CACHE_FILE, 'utf8'))); } catch { return []; }
+})());
+
+function saveMd5Cache() {
+  // only the entries of files that still exist with the same size and date
+  const keep = {};
+  for (const [k, v] of md5Cache) {
+    const [file, size, mtime] = k.split('|');
+    try { const st = fs.statSync(file); if (String(st.size) === size && String(st.mtimeMs) === mtime) keep[k] = v; } catch { /* gone */ }
+  }
+  try { fs.writeFileSync(MD5_CACHE_FILE, JSON.stringify(keep)); } catch (e) { console.log('md5 cache not saved:', e.message); }
+}
 
 function fileMd5(file) {
   const st = fs.statSync(file);
@@ -750,6 +767,7 @@ function fileMd5(file) {
     while ((n = fs.readSync(fd, buf, 0, buf.length, null)) > 0) h.update(buf.subarray(0, n));
     fs.closeSync(fd);
     md5Cache.set(k, h.digest('hex'));
+    saveMd5Cache();
   }
   return md5Cache.get(k);
 }
@@ -5245,6 +5263,7 @@ module.exports._test = {
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, raidPageCtx, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
+  fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js

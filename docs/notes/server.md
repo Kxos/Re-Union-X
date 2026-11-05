@@ -272,6 +272,27 @@ node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # 
   (= sum of the data), otherwise «Save error». `recon/tools/resource_index.py` builds it.
 - One-off crash right after an installation: on restart it goes through.
 
+<a id="startup-md5-cache"></a>
+### Startup MD5 cache (slow guest, 05-11)
+
+- The server hashes the latest resource version before listening (`start()`, `fileMd5`). With version 103
+  (4.9 GB on the D: HDD) and the Windows file cache evicted (16 GB host, 6 GB to the VM) that was a full
+  re-read at 60-110 MB/s for ~75 s at **every** server start, i.e. every `relogin.ps1`. The emulator's disk is
+  on the same HDD: during the hash the guest sat at **60-85% iowait** with the CPU idle, system_server
+  stalled (`am force-stop` 47 s, `Slow dispatch 8686ms`, monitor contention, ANRs of gms/coreservice
+  broadcasts), the game reached `PUT /system/status` only after the server listened, and the login Notices
+  WebView drew an empty frame. node.exe had read 4.92 GB, 0 written, ~1 min after its start.
+- Fix: the cache is persisted in `LOG_DIR/resource-md5.json` (key `path|size|mtimeMs`, stale keys dropped on
+  save; test `server/test-md5-cache.js`). Only a new or rebuilt pack is hashed again.
+- Bench 05-11 (save `maxpower`, same emulator boot), time from launch to `POST /khux/login` in
+  `bench_start.ps1`: before 90.0 s and 105.3 s (the second wrote the cache); after 16.1 s and 14.6 s, Notices
+  list drawn (`screenshots\sg1_home` empty, `sg4_home` drawn). Guest iowait during the relogin: before
+  peaks 85%, after average 4-8%. Measurement helpers (not in the repo): `D:\Progetto_Restauro_KH_UX\tmp\slowguest\`
+  (`measure.ps1`: logcat + `/proc/stat` + host disk counters around one relogin).
+- Ruled out by the same logs: gms fails fast on the fake 2021 clock (`ERR_CERT_DATE_INVALID`, not retryable),
+  the billing check takes ~2 s (`Billing Unavailable`), Google hosts resolve through our DNS (forwarded to 1.1.1.1);
+  the load average ~7 is permanent emulator HAL threads in D state, not load.
+
 <a id="salvataggio"></a>
 ## Player save (`server/save/player.json`)
 
