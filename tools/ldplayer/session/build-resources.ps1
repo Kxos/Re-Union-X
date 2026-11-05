@@ -496,7 +496,8 @@ if ($Quick) {
   # contenuto 307 MiB, ~53 MiB per i -Quick; oltre 4 GiB in tutto (misc.mp4.2, provato con la 48, I-171)
   # 420 MiB dalla versione 91 (raid, I-221): contenuto 380 MiB
   # 512 MiB dalla versione 98 (Raid Boards, banner, Draw Points, Spirit Blind Box): contenuto 437 MiB, ~75 MiB per i -Quick
-  $dataSize = 512MB
+  # 640 MiB from version 104 (Japan-only raids, I-232: 190 Raid Board cards, +31 MB): content 535 MiB, ~105 MiB for -Quick
+  $dataSize = 640MB
   $mergeOpt = @('--filler', 65536)   # riserva dell'indice per i cicli -Quick (4 KB finivano presto)
 }
 # cartelle mixture/medal/compose/<imageId>/Medal_L dell'animazione di Level Up/Evolve come alias di
