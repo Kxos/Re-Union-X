@@ -258,6 +258,8 @@ User report (bench 3 November, every tier): far too little Lux. `/raid/clear` re
 
 The Lux++ deck is weaker (XI Max against XV Max), so it dealt less damage in the same 60 s, yet earned 3.2x the Lux; per damage dealt it earns 4.49x (5 expected with `luxUp` 50000; the 6th Spirit slot medal has no Lux skill and dilutes it). An Epic kill with a full Lux++ deck therefore pays 4B x about 4.5-5 = **18-20B**, the video's 19.83B (I-223). The YOU LOSE panel shows `getPoint.lux` (screenshot `lux_a2_result`, `lux_b_result`; a shot taken while the numbers still count up shows less: `lux_a_13`). Earlier bench readings (450, 600 for a kill) were kills of 2016 rows, where the sum of `luxAttack` is what a full kill pays: same rule.
 
+**Bench 5 November 2026, bonus time (rev 269, save `i223`, `-RealNow 2026-11-05T16:20:00Z` = 08:20 PT, Jewel Princess Beginner LV 1 killed).** Client `getPoint.lux` 600,001, server granted 1,200,002, CONGRATULATIONS panel 1,200,002 (`i223_07`): the panel shows the server's `getLux`, so the server-side doubling is what the player sees; no type 10 campaign needed (I-223 closed). Bonus time is read on the server clock (`isBonusTime(realNow())`).
+
 **Master:** `raidEnemy` regenerated in place (1067 rows changed, only `luxAttack`/`luxSuppress`; backup `D:\Progetto_Restauro_KH_UX	mp
 aid_lux_backup`): **needs a master revision bump** before the client sees it.
 
