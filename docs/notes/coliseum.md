@@ -1,0 +1,88 @@
+# Coliseum (PvE) - spec summary
+
+Research for the next game mode after raids (I-054 entry screen done, I-059 gameplay open). Facts only; the detailed
+per-month data and the sources stay in the private event catalogue (`private\events\sources\coliseum\COLISEUM.md`).
+Tags: **proven** = read from original data/code or two agreeing primary sources; **probable** = one good source or
+strong inference; **unknown** = not found yet. Current server state: [server.md](server.md#colosseo) (`respondColosseum`
+answers status 2 «This event is unavailable.»).
+
+## Rules
+
+| Rule | Value | Tag |
+|---|---|---|
+| Unlock | story quest 130 | proven (notices, bench) |
+| Season | one per calendar month, day 1 00:00 PT to month end (UTC 07:00/08:00 with DST) | proven |
+| Structure | Tiers (client `rank`) of N Rounds (`stageCount`); one round = one Coliseum stage `cl_stg<YYYYMMNN>`, room `OC_0001_00_00`, one map part, 1-4 waves (map teams) | proven |
+| Stage set | 10 stages per month (9 from 2020-02), rounds cycle through them | proven (data), cycle probable |
+| Enemy strength | 1.0.1 client: level rise = rounds of all previous tiers + `lvPerLoop` x floor((round-1)/`loopStageCount`) (10 / 10 in the master); stage files carry levels 1..10 | proven for 1.0.1; 5.0.1 unknown |
+| Last tier | endless (999 rounds, shown as «∞») | proven |
+| One-turn shortcut | clearing all waves in one turn unlocks the next rounds at once («Unlocked Round %d!», «Shortcut Unlocked!»); clearing a round locks the skipped ones again; size per tier = master `excellentUnlockCount` (= wiki "skip limit") | proven that the values match, exact rule probable |
+| AP | 3-5 per round until 2017-04 (1 AP / 0 AP campaigns), 0 at every tier from 2017-05 | proven (notices + wiki) |
+| Currency | Coliseum Coins (`userPoint.colosseumSpherePoint`, reward type 17) per round and per tier clear; spent on Coliseum boards | probable (type 17) |
+| Ranking | monthly ranking by progress (total rounds cleared), brackets with rewards | probable (metric) |
+| Loss | run ends (`/colosseum/retire`); progress kept or not | unknown |
+
+## Numbers per era (WW)
+
+| Era | Tiers | Rounds per tier | Tier-clear coins |
+|---|---|---|---|
+| 2016-04 (launch) | 6 | 20, 15, 15, 10, 10, 999 | 30, 40, 50, 70, 100 |
+| 2016-05 .. 2016-10 | 10 | 20, 15, 15, 10 x6, 999 | 30 .. 100, then 600 (900 in 2016-06) |
+| 2016-11 .. 2017-04 | 11-12 | + one 10-round tier | + 900 |
+| 2017-05 .. 2018-03 | 14-19 | ..., 50, 100, 300, 500, 999 | + 900, 1500 |
+| 2018-05 .. 2018-12 | 13-19 | as above | lump sums 50 .. 3000 (sum 8100), per-round coins dropped in 2018-12 |
+| 2019-05 .. 2021-06 | 11-15 | 200, 400 x6, 300, 200, then 100 | 100 .. 700; tier 10 gives the title "<Month> Victor" |
+
+Coins per round were 1, 3, 5, 7, 10 (later 0/10/30). Tier rewards also carried support medals (Moogle, Cid, later
+Magic Mirror and others). Values: 2016 seasons from the 1.1.3 master, the rest from the English wiki (probable).
+
+## Timeline
+
+- JP: master rows from 2015-06-29; JP wiki data from 2015-09.
+- WW: Coliseum present at launch (2016-04); first monthly update 2016-05-01; +1 tier 2016-11; 0 AP from 2017-05;
+  lump-sum coins 2018-05; renamed "PvE Coliseum" when the PvP Coliseum started (2018-09, WW titles from 2019-05);
+  structure revamp 2019-05; last month on record 2021-06 (service end 2021-06-30).
+- WW reused older JP stage sets: 2016-04..2016-11 per the master (JP 2015-07 .. 2016-03), 2016-12..2018-06 about
+  7-10 months behind JP (enemy-name match), same month as JP from 2018-07.
+- Side events at the Coliseum (Hercules tag team, Moon Gem Cup, Cloud battles, Keyblade Challenge) were event quests,
+  not this mode.
+
+## Data on disk
+
+- JP 4.3.1: 546 `cl_stg` stage files (2015-07 .. 2021-06 with gaps: 2016-01..04, 2016-11..2017-05, 2019-07, 2020-01,
+  2020-10 absent). Readable with `recon/tools/mapfile.py`.
+- WW months whose JP set is not on disk: 2016-08..11, 2017-06..12, 2018-04/05, 2019-07..09.
+- Coliseum enemy id = 20000 + base enemy id (later also 21xxx/22xxx); these variants have their own stats. 202 of
+  the 305 ids used by the stages are not in `server/master_data/enemy.json`.
+- Master `colosseum` (21 fields: tier row per season with `round`, `ap`, `arrivalStageCount`, `excellentUnlockCount`,
+  per-round and tier-clear reward slots) and `colosseumStage` (11 fields: season dates, head/term tier ids,
+  `rankingId`, `validStage`, `stageId[10]`, `loopStageCount`, `lvPerLoop`): rows exist only for 2015-06..2016-11.
+- JP 4.3.1 layouts cover every Colosseum layout the server is missing (`AdventureTop2_Colosseum_Button/Panel/Target`,
+  `Colosseum_MainPanel`, `BattleResultColosseumScene`, ...).
+
+## Client API
+
+| Action | Path | Request | Response (keys the client reads) |
+|---|---|---|---|
+| 124 | GET `/colosseum` | - | `colosseumInfo{colosseumStageId, status}` (1 open, 2 unavailable), `colosseumStages[]{stageId, useAp, rank, stageCount}`, `colosseumRank`, `userColosseum{userRank, userStageCount, userStageTotalCount}` |
+| 125 | GET `/colosseum/reward/list` | - | unknown |
+| 126 | POST `/colosseum/start` | `rank, stageCount, stageId, userKeybladeId` | `userData.userPoint` (parsed first), the 124 block, `userTreasures[]`, `startColosseumData{rank, stageCount, stageId, userKeybladeId}`, `campaigns[]` |
+| 127 | POST `/colosseum/retire` | - | `userKeyblades`, `userData.stageResumption{..., colosseumStageId}` |
+| 128 | POST `/colosseum/clear` | unknown | `userData.userPoint`, `userData.userDetail`, `clearColosseums[]{rank, stageCount}`, `getLux`, `userData.stageResumption` |
+| 139/140/180 | GET `/ranking/colosseum`, `/own`, `/border` | - | `{rankingDatas[], rankingStatus, rankingTermStart, rankingTermEnd}` like PvP |
+
+Also: `/mypage rankingRewards.rankingColosseum`, profile `userColosseumRanking`, record `colosseumRankingHighest`,
+`stageAchievement.colosseumRank`, `lastPlayColosseumSphereBoardId`.
+
+**The 5.0.1 client has no `Colosseum`/`ColosseumStage` master classes** (master_classes_ww501.txt) but keeps the API
+parsers, the `stage/cl_stg%08d(_%02d).bin` loader, the Colosseum images and battle-result scenes. Serving master rows
+is therefore not enough (and probably useless): the season, tiers and rounds must come from the responses.
+
+## Missing before implementation
+
+1. How 5.0.1 gets tier count, round totals, AP and the enemy level rise without master rows (Ghidra on the 5.0.1
+   library, or bench probing of 124/126/128).
+2. Stats for the Coliseum enemy variants (rebuild as for raids).
+3. Stage files for the WW months not in the JP data (regenerate from the wiki lineups, mark as a deviation).
+4. Coliseum boards (rows, node costs) and the `/colosseum/reward/list` format.
+5. Exact shortcut rule, loss rule and ranking score.
