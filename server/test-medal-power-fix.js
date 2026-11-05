@@ -16,7 +16,8 @@ const before = JSON.stringify(fixed);
 const stats = burstPowerFix([fixed, mult], { multiOf: (id) => ({ 1562: 200.45, 444: 11.1 })[id] });
 assert.strictEqual(JSON.stringify(fixed), before, 'riga a danno fisso modificata');
 assert.strictEqual(mult.displayPowerPerEnforce[4], 111000);
-assert.strictEqual(mult.displayPower, 106500);   // ramo Roboloid: 111000 - 4500 (passi di tierPower)
+assert.strictEqual(mult.displayPower, 106000);   // ramo Roboloid: 111000 - 5 x 1000 (passi uguali, I-212)
+assert.deepStrictEqual(mult.displayPowerPerEnforce, [107000, 108000, 109000, 110000, 111000]);
 assert.strictEqual(stats.robo, 1);
 console.log('ok', JSON.stringify(stats));
 
