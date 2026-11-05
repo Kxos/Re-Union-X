@@ -947,3 +947,108 @@ with a Fantasia Mickey B medal»). Shown at 5 dots: 302008-302010 and 302012 x16
 
 Medals that the original sent to the Present Box for a condition (owned Medals, Special Attack Bonus, traits, Deal
 draws, Story Quests): [campaigns.md](campaigns.md).
+
+<a id="full-artwork"></a>
+## Full artwork (I-147, I-237; research 05-11, no bench)
+
+**The original feature.** In the Medal detail of some Medals a small icon with two overlapping frames sits at the bottom
+right of the Medal picture; a tap fades a full-screen picture of the artwork in over the detail and a tap closes it again (exact closing control
+not checked; video of SN++ - Stained Glass #13, `reference\medal_illustration`). The khuxwiki calls it **«Inspect»** («By going to the
+Medal Details screen and tapping on "Inspect", a fullscreen version of the artwork can be viewed») and keeps the pictures as
+«<medal> (Artwork)» files. The client has it in WW 4.3.1 (offline analysis of the client, details outside the repository):
+
+- Button: widget `Button_Art` (layout `cocostudio/publish/MedalInfo_Button_Art.json`, textures `But_Art_On/Off.png`),
+  present in the Medal detail of several scenes (Medal List, deck, draw results...). It is shown only when the Medal row has
+  **`imageCategory` = 2** and **`validSource` != 0** (and the scene allows it); otherwise it is hidden.
+- Tap: a dialog loads the armature **`cocostudio/publish/MedalArtAnim.ExportJson`** (+ `MedalArtAnim0.plist/.png`,
+  bone `Art_Dummy` = `Art_Dummy00.png`, movements `Art_in` / `Art_wait` / `Art_out`, 21 frames of fade and zoom 0.5 -> 1) and
+  puts **`img/art/Art_<artId>.png`** (`medal.artId`) on the bone. The client checks neither the armature nor the picture:
+  a flagged Medal without these files must be expected to crash, so files first, flags after.
+- Picture format: **640x960 PNG, portrait**, the art lying on its side (the device shows it landscape, full screen);
+  RGB or RGBA, one grayscale (Orchestra Sora).
+
+**Our state: not implemented, nothing breaks.** `make-game-tables.js` writes `imageCategory` 0 on all 3,552 rows
+(`artId` = `imageId`), so the button never shows and the dialog cannot open. The WW 5.0.1 OBB and the IPA 4.4.0 have
+`MedalInfo_Button_Art.json` and `But_Art_*` (served) but **no `MedalArtAnim*`, no `Art_Dummy00.png` and no `img/art/`**.
+The JP 4.3.1 data has all of them.
+
+**The Medals with the artwork: 55**, every one found in the JP 4.3.1 data (`img/art/`, 55 files + one older revision of
+352467 with the same bytes), all in the client's format. Ids are the SE ids of the Medal that carries the art (6★, or 7★
+when the family starts at 7★); matched to our rows by the Medal icon (`Medal_S` of the JP data against our Medal_S: best
+distance 4-10, second best above 80 on all 55). The khuxwiki has the same 55 «(Artwork)» files and no other: 25 are the same
+picture (some saved landscape), 30 are other crops or sizes (letterbox removed, stained glass cut to the circle 600-800 px,
+up to 1120x1600): the JP files are the ones to serve. No Japanese text on the 55.
+
+| artId | Medal (No.) | Our rows of the family | khuxwiki copy |
+|---|---|---|---|
+| 21266 | Key Art #2 (No.569) | 300778(6★) 300779(7★) | same picture |
+| 21406 | Key Art #10 (No.740) | 311063(6★) 301063(7★) | other crop/size |
+| 21516 | The World Ends with You Art (No.797) | 301170(6★) 301171(7★) | other crop/size |
+| 21536 | Key Art #12 (No.817) | 311213(6★) 301213(7★) | same picture |
+| 21636 | Key Art #15 (No.993) | 301441(6★) 311443(7★) | other crop/size |
+| 21726 | Toon Roxas & Pals (No.1523) | 301571(6★) 311573(7★) | other crop/size |
+| 22346 | Key Art #5 (No.666) | 300936(6★) 300937(7★) | other crop/size |
+| 22446 | Key Art #9 (No.704) | 301000(6★) 301001(7★) | same picture |
+| 22606 | Key Art #14 (No.962) | 301380(6★) 301381(7★) | same picture |
+| 22716 | The World Ends with You Art 3 (No.1558) | 301606(6★) 301607(7★) | other crop/size |
+| 23386 | Orchestra Sora (No.705) | 311003(6★) 301003(7★) | same picture |
+| 23416 | Key Art #11 (No.759) | 311093(6★) 301093(7★) | other crop/size |
+| 23546 | Key Art #13 (No.832) | 311243(6★) 301243(7★) | other crop/size |
+| 23616 | Toon Sora & Goofy (No.1461) | 301509(6★) 301510(7★) | same picture |
+| 23656 | Key Art #18 (No.1543) | 301591(6★) 311593(7★) | other crop/size |
+| 41146 | Key Art #6 (No.687) | 300971(6★) 310973(7★) | other crop/size |
+| 41226 | Key Art "Sky" (No.711) | 311013(6★) 301013(7★) | same picture |
+| 41396 | The World Ends with You Art 2 (No.986) | 301428(6★) 301429(7★) | other crop/size |
+| 42096 | Key Art #3 (No.620) | 300860(6★) 300861(7★) 312045(7★ SN++) | other crop/size |
+| 42166 | Key Art "Bonds" (No.712) | 311015(6★) 301015(7★) | same picture |
+| 43086 | Key Art #1 (No.608) | 300840(6★) 300841(7★) | other crop/size |
+| 43106 | Key Art #4 (No.636) | 300886(6★) 300887(7★) | same picture |
+| 43146 | Key Art #7 (No.686) | 300969(6★) 300970(7★) | other crop/size |
+| 43186 | Key Art #8 (No.701) | 310995(6★) 300995(7★) 302098(7★ SN++) | other crop/size |
+| 43206 | Key Art "Beginning" (No.713) | 301016(6★) 301017(7★) | same picture |
+| 43416 | Prime - Key Art #17 (No.1465) | 301513(6★) 311515(7★) | other crop/size |
+| 51036 | Riku Art [EX] (No.794) | 311165(6★) 301165(7★) | other crop/size |
+| 51126 | Stained Glass #3 [EX+] (No.1008) | 301473(6★) 311475(7★) 301475(7★ SN) 301476(7★ SN+) | other crop/size |
+| 51136 | Stained Glass #4 [EX+] (No.1009) | 301477(6★) 301478(7★) 301479(7★ SN) 301480(7★ SN+) | other crop/size |
+| 51167 | Stained Glass #7 [EX+] (No.1555) | 301603(7★) | other crop/size |
+| 52016 | Axel Art [EX] (No.717) | 311025(6★) 301025(7★) 302031(7★ SN++) | other crop/size |
+| 52096 | Key Art #16 [EX+] (No.997) | 301448(6★) 301449(7★) | other crop/size |
+| 52106 | Stained Glass #5 [EX+] (No.1010) | 301481(6★) 311483(7★) 301483(7★ SN) 311485(7★ SN+) | other crop/size |
+| 52116 | Stained Glass #6 [EX+] (No.1011) | 301485(6★) 301486(7★) 301487(7★ SN) 301488(7★ SN+) | other crop/size |
+| 52167 | Stained Glass #9 [EX+] (No.1557) | 301605(7★) | other crop/size |
+| 52197 | SN+ - Terra, Ven, Aqua (No.1618) | 301673(7★ Supernova) 311675(7★) 311945(7★ SN++) 302011(7★ SN++) | other crop/size |
+| 53016 | Sora Art [EX] (No.739) | 301060(6★) 301061(7★) | other crop/size |
+| 53026 | Roxas Art [EX] (No.767) | 301115(6★) 301116(7★) 312033(7★ SN++) | same picture |
+| 53136 | Stained Glass #1 [EX+] (No.1006) | 301465(6★) 301466(7★) 301467(7★ SN) 301468(7★ SN+) | other crop/size |
+| 53146 | Stained Glass #2 [EX+] (No.1007) | 301469(6★) 301470(7★) 301471(7★ SN) 311473(7★ SN+) | other crop/size |
+| 53187 | Stained Glass #8 [EX+] (No.1556) | 311605(7★) | other crop/size |
+| 53197 | Supernova+ - Key Art #19 (No.1575) | 311625(7★ Supernova) 301625(7★) | other crop/size |
+| 53247 | Supernova+ - Key Art #20 (No.1703) | 301797(7★ Supernova) 301798(7★) 302088(7★ SN++) | same picture |
+| 351417 | SN++ - Key Art #22 (No.1807) | 301939(7★) | same picture |
+| 351617 | SN++ - Stained Glass #13 (No.1900) | 302051(7★) | same picture |
+| 352327 | Supernova+ - Key Art #21 (No.1758) | 301889(7★) | same picture |
+| 352467 | SN++ - Key Art #23 (No.1847) | 301979(7★) | same picture |
+| 352557 | SN++ - Stained Glass #11 (No.1898) | 302046(7★) | same picture |
+| 352567 | SN++ - Stained Glass #12 (No.1899) | 302049(7★) | same picture |
+| 352577 | SN++ - MoM Kairi (No.1909) | 302065(7★) | same picture |
+| 353497 | SN++ - Key Art #24 (No.1857) | 301989(7★) | same picture |
+| 353547 | SN++ - Strelitzia (No.1894) | 302036(7★) | same picture |
+| 353567 | SN++ - Stained Glass #10 (No.1897) | 302045(7★) | same picture |
+| 353587 | SN++ - Stained Glass #14 (No.1912) | 302069(7★) | same picture |
+| 353907 | SN++ - Key Art #25 (No.1875) | 302007(7★) | same picture |
+
+The «rows of the family» are our master rows with the same name once the prefixes (`SN`, `SN+`, `SN++`, `Supernova`,
+`Supernova+`, `Prime`) and `[EX]`/`[EX+]` are removed, without the boosted copies (114 more rows, x 10^6 + id). Which star
+variants showed the button is **not proven**: the JP data only tells which art ids exist, and `imageCategory`/`artId` are
+per row. The video shows it on a 7★-only Medal; the khuxwiki pages describe «Inspect» per family. The SN++ reissues of older
+families (Key Art #3 312045, Key Art #8 302098, Axel Art 302031, Roxas Art 312033, Terra, Ven, Aqua 311945/302011) are
+listed but have their own Medal picture; their art is a guess.
+
+**What serving it needs** (I-237): `originals.tsv` rows for `img/art/Art_*.png` (55 files, 33.2 MB of PNG) and the four
+`cocostudio/publish` files (`MedalArtAnim.ExportJson`, `MedalArtAnim0.plist`, `MedalArtAnim0.png`, `Art_Dummy00.png`) from
+the JP data (btf_fix converts them like the other JP textures; check the grayscale one); a resource build with them
+(`-Quick` if the generated pack keeps them within its reserve, otherwise a full `-Version N+1`); `make-game-tables.js` setting `imageCategory` 2 and
+`artId` = the JP art id on the family rows and their boosted copies (`validSource` is already 1 there); a master revision.
+Device checks: button on the detail of a flagged 6★ and 7★ (Medal List, deck, draw result), tap -> art in/out, a Medal
+without art still without button, no other visual change from `imageCategory` 2 (unknown whether the client uses it
+elsewhere), memory with several opens.
