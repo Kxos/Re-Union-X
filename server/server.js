@@ -3144,7 +3144,8 @@ function campaignList() {
   try {
     const banners = gachaCatalog().banners;
     const r = campaignGifts.compile(campaignGifts.load(), { medals, materials: masterRows('material'), titles: masterRows('title'),
-      skills: [...skillRowsById().values()], drawIdOf: (rowId) => banners.find((b) => b.rowId === rowId)?.drawMedalTypeId });
+      skills: [...skillRowsById().values()], drawIdOf: (rowId) => banners.find((b) => b.rowId === rowId)?.drawMedalTypeId,
+      tickets: gacha.TICKET_CURRENCIES });
     for (const e of r.errors) console.log(`  [campaign] ${e}`);
     list = r.campaigns;
   } catch (e) { console.log(`  [campaign] campaign_gifts.json not read: ${e.message}`); }
@@ -3162,6 +3163,7 @@ function checkCampaignGifts() {
       traits: (player.medalTraits?.[m.userMedalId] || []).filter((t) => !special.has(t.shuffleSkillId)).length })),
     drawCount: (id) => player.gacha?.count?.[id] || 0,
     storyQuest: stageNumber(lastStoryStageId()),
+    luxLevel: luxRankFor(player.lux), medalSlots: maxMedal(), // LUX level / Medal storage campaigns (51531, 69125)
   };
   let n = 0;
   for (const { campaign, rows } of campaignGifts.due(open, state, given)) {

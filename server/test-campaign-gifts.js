@@ -72,6 +72,21 @@ const total = (rows) => rows.reduce((s, r) => s + r.num, 0);
   const s = comp(mk({ kind: 'story', quest: 50 }));
   check(total(sent(s, st([], { storyQuest: 49 }), {})) === 0 && total(sent(s, st([], { storyQuest: 50 }), {})) === 1, 'story: Q50');
 }
+{ // non-Medal rewards: Jewels and Draw Tickets (Shop currencies only), LUX level once, Medal storage
+  const TK = ['draw', 'holiday', 'spooky', 'moogle'];
+  const r = cg.compile([mk({ kind: 'story', quest: 1 }, [{ jewels: 600 }, { ticket: 'spooky', num: 10 }])], { medals: M, tickets: TK });
+  check(r.errors.length === 0 && JSON.stringify(r.campaigns[0].reward) === JSON.stringify([{ type: 2, id: 0, num: 600 }, { type: 41, id: 2, num: 10 }]),
+    'rewards: 600 Jewels (type 2) and 10 Spooky Cookies (type 41 id 2)');
+  const bad = cg.compile([mk({ kind: 'story', quest: 1 }, [{ ticket: 'gold', num: 1 }])], { medals: M, tickets: TK });
+  check(bad.errors.length === 1 && bad.campaigns.length === 0, 'Gold Ticket: not a Shop currency, rejected');
+  const lux = cg.compile([mk({ kind: 'lux', once: true }, [{ ticket: 'draw', num: 1 }])], { medals: M, tickets: TK }).campaigns, g = {};
+  const r1 = sent(lux, st([], { luxLevel: 120 }), g);
+  check(r1.length === 1 && r1[0].type === 41 && r1[0].num === 120, 'lux: 120 Draw Tickets for LUX level 120');
+  check(total(sent(lux, st([], { luxLevel: 300 }), g)) === 0, 'lux once: no top-up after levelling');
+  const sto = cg.compile([mk({ kind: 'storage', slots: 3000 }, [{ ticket: 'draw', num: 30 }])], { medals: M, tickets: TK }).campaigns, h = {};
+  check(total(sent(sto, st([], { medalSlots: 2995 }), h)) === 0, 'storage: 2,995 slots = 0');
+  check(total(sent(sto, st([], { medalSlots: 3000 }), h)) === 30 && total(sent(sto, st([], { medalSlots: 3000 }), h)) === 0, 'storage: 3,000 slots = 30 tickets once');
+}
 { // opening: by the Story Shop week, then stays open
   const c = comp(mk({ kind: 'story', quest: 1 })), g = {};
   check(cg.openCampaigns(c, '2016-12-31', g).length === 0, 'closed before the start');
@@ -89,7 +104,7 @@ const rd = (n) => JSON.parse(fs.readFileSync(path.join(MD, n + '.json'), 'utf8')
 const gd = require('./gacha-data');
 const cat = gd.loadCatalog(path.join(__dirname, 'game_data', 'gacha_catalog.json'));
 const real = cg.compile(cg.load(), { medals: rd('medal'), materials: rd('material'), titles: rd('title'), skills: rd('skill'),
-  drawIdOf: (rowId) => cat.banners.find((b) => b.rowId === rowId)?.drawMedalTypeId });
+  drawIdOf: (rowId) => cat.banners.find((b) => b.rowId === rowId)?.drawMedalTypeId, tickets: require('./gacha').TICKET_CURRENCIES });
 check(real.errors.length === 0, 'campaign_gifts.json compiles: ' + real.errors.join('; '));
 check(real.campaigns.length === cg.load().length, 'every campaign kept');
 const byId = new Map(real.campaigns.map((c) => [c.id, c]));
@@ -103,6 +118,9 @@ check(byId.get('orgxiii-2017').reward.length === 14 && byId.get('orgxiii-2017').
 const flan = byId.get('flantastic-2020').condition.tiers;
 check(flan.length === 9 && flan[8].reward[0].id === 2302025, 'Flantastic Seven: 9 tiers, boosted at 110');
 check(flan[7].reward.some((r) => r.type === 7) && flan[0].reward.some((r) => r.type === 5), 'Flantastic Seven: title and gems');
+check(JSON.stringify(byId.get('story-q200-2016')?.reward) === '[{"type":2,"id":0,"num":600}]', 'Story Quest 200: 600 Jewels');
+check(JSON.stringify(byId.get('lux-tickets-2019')?.reward) === '[{"type":41,"id":0,"num":1}]' && byId.get('lux-tickets-2019').condition.once, 'LUX campaign: one Draw Ticket per level, once');
+check(JSON.stringify(byId.get('storage-2020')?.reward) === '[{"type":41,"id":0,"num":30}]', 'storage campaign: 30 Draw Tickets');
 check(byId.get('annaelsa-2018').condition.drawIds[0] > 0 && byId.get('sntva-trait-2019').condition.drawIds.length === 3, 'Deal ids resolved');
 
 // --- server: Home/Present Box check, once, collection with dots ---------------------------------------------------
@@ -123,6 +141,24 @@ const tva = campaignPresents().filter((x) => x.resourceId === 22166);
 check(tva.length === 1 && tva[0].number === 1 && tva[0].dots === 3, 'Q979: one Terra & Ventus & Aqua with 3 dots');
 check(campaignPresents().some((x) => x.resourceId === 300943 && x.number === 3), 'Story Quest 50 campaign: 3 Sora & Roxas');
 check(campaignPresents().some((x) => x.resourceId === 300948), 'Story Quest 600 campaign: Magic Broom');
+const jw = campaignPresents().filter((x) => x.resourceType === 2);
+check(jw.length === 1 && jw[0].number === 600, 'Story Quest 200 campaign: 600 Jewels');
+const lx = campaignPresents().filter((x) => x.resourceType === 41);
+check(lx.length === 1 && lx[0].resourceId === 0 && lx[0].number >= 1, 'LUX campaign: Draw Tickets = LUX level');
+check(!campaignPresents().some((x) => x.resourceType === 41 && x.number === 30), 'storage campaign: not below 3,000 slots');
+p.lux = (p.lux || 0) + 1e9; // a higher LUX level later: no top-up
+p.medalMaxExtra = 3000; // Medal storage at 3,000 slots: 30 Draw Tickets
+quiet(() => t.checkCampaignGifts());
+check(campaignPresents().filter((x) => x.resourceType === 41).length === 2 && campaignPresents().some((x) => x.resourceType === 41 && x.number === 30),
+  'storage 3,000: 30 Draw Tickets, LUX tickets not topped up');
+{ // collect Jewels and Draw Tickets
+  const stones = p.freeStone || 0, draw = require('./gacha').ticketsOf(p).draw || 0;
+  const ids = campaignPresents().filter((x) => x.resourceType === 2 || x.resourceType === 41).map((x) => x.userPresentId);
+  const nTk = campaignPresents().filter((x) => x.resourceType === 41).reduce((s, x) => s + x.number, 0);
+  call(t.respondPresentReceive, { receivePresentIds: ids });
+  check((p.freeStone || 0) === stones + 600, 'collected: +600 Jewels');
+  check((require('./gacha').ticketsOf(p).draw || 0) === draw + nTk, 'collected: Draw Tickets in the payType 8 draw currency');
+}
 const n0 = campaignPresents().length;
 give(43036); // a second Illustrated Aqua: no second reward
 check(quiet(() => t.checkCampaignGifts()) === 0 && campaignPresents().length === n0, 'duplicates of the same Medal give nothing more');
