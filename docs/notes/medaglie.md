@@ -350,6 +350,12 @@ JP wikiwiki notes, web search (Reddit/khwiki: nothing more). Our master = `serve
   source» is outdated): A in 22 `reward` rows, 16 `raidReward` rows, 30 board cells (`sphereMasu`), 1 stage
   (`submissionItemId`) and the reconstructed evolve special quests (`server/special_periods.json`: evolve-4-5 and
   the SQ13 upgrade quests); B in 44 board cells and 1 stage (976163); Broom in 141 board cells and 34 stages.
+- JP-only medal check (05-11): the JP «ミッキーとほうきの召使い» (JP id 90136, the `evolveId` of the 2017 row 90085) is this
+  Fantasia Mickey B (pixel-identical art), not a separate medal. Same research: JP «ソラ サンタ Ver» is the Christmas Sora
+  line from ★1 (JP images 23111-23116), with the special Christmas Gift (original burst rows 24001-24006 in thethiny's 2017
+  master: all targets, gauge 2, x1.49 at ★1 to x1.67 at ★6, heal 2500-3000) instead of the WW STR & DEF Boost; Necho Cat
+  (JP images 22135-22137, Speed, Thunder Barrage) and KH3D Sora & Riku (JP images 22395-22397, Speed, Blade of Glory, all
+  targets, gauge 5) have no WW row; JP image 22266 is KH CoM Sora & Riku.
 - Recommendation: **keep the chain as it is** (it matches the wiki and the SE `evolveId` intent). The 80000 munny
   is the standard 5★ -> 6★ value (no source for a different one). Optional: rename 90085 to «Fantasia Mickey A»
   (later official name); nothing else to add.
