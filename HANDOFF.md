@@ -7,6 +7,12 @@ This file exists **only to restart**: current state and next step. Problems are 
 [docs/journal/fino-al-2026-10-16.md](docs/journal/fino-al-2026-10-16.md), the state blocks from 17 to 22 October in
 [docs/journal/2026-10-22.md](docs/journal/2026-10-22.md)).
 
+## 05-11 late night: research round finished (START HERE on 06-11)
+
+Next step agreed with the user: **write one summary of all the 05-11 research, split into proven / probable / still unknown, then evaluate together** (no bench or master change before that). Sources to summarise:
+- JP-only medals + weekend raids + raid windows/Lux/blue plate: `D:\Progetto_Restauro_KH_UX\private\events\sources\raid_census\JP_ONLY.md` (sections «JP-only medals 2026-11-05», «Gap research 2-5», «C. Weekend research round 2», «Raid windows, Lux doubling, blue AP plate», «Raid unconfirmed points, round 2»); public facts in docs/notes/medaglie.md, docs/notes/raid.md (incl. «Boss texture audit (2026-11-05)»: 47/49 complete, spider start demos fixable).
+- Coliseum: `D:\Progetto_Restauro_KH_UX\private\events\sources\coliseum\COLISEUM.md` (web research, gap research G1-G5, client analysis on WW 4.3.1 = bench client, missing boards, probable data check) + docs/notes/coliseum.md (client schema). Open conflict: the client's enemy-level bonus reading vs footage (level = earlier tiers' rounds + round): decide on the bench.
+Open user decisions: (1) JP-only medals with proven+probable data, unknown evolutions/flavors/board cells left out (recommended); (2) I-231 close as not reproducible on 4.3.1 (blue plate function has no caller); (3) I-228 original daily windows (12:00/19:00 PT) or all day; (4) June 2020 24 h bonus (06-01 12:00 .. 06-30 23:59 PT) in the next round; (5) compare served boards with the 193 boards of the 1.1.3 master (sphere*.json in external\thethiny_2026-10-13). Already decided: 2018-08-04/09-01 JP weekend raids served as probable (item 5 of the combined round below). Session end: Windows DNS still 192.168.1.185 (set back to automatic when the user stops for good).
 ## The project
 
 Restoration of **Kingdom Hearts Union χ** (Android WW 4.3.1 client, service shut down in 2021): a
