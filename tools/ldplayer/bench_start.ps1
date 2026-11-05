@@ -20,7 +20,7 @@ while (-not (Get-Content $Out | Select-Object -Skip $from | Where-Object { $_ -m
     Start-Sleep -Seconds 2
 }
 Write-Host ("  {0,-28} {1,5:N1} s" -f 'POST /khux/login', $sw.Elapsed.TotalSeconds)
-$n = LogLines $Out; $quiet = [Diagnostics.Stopwatch]::StartNew(); $pastLogin = $false
+$n = GameLines $Out; $quiet = [Diagnostics.Stopwatch]::StartNew(); $pastLogin = $false
 # finche' non arriva /tutorial/status (il dialogo «Download» puo' comparire dopo 10 s di log fermo: banco 19-10) si
 # continua a guardare anche col log fermo, al massimo 120 s dal login
 $loginAt = $sw.Elapsed.TotalSeconds
@@ -34,7 +34,7 @@ while (($quiet.Elapsed.TotalSeconds -lt $Settle -or (-not $pastLogin -and $sw.El
         $c = Px @(@(1080, 740), @(600, 740))
         if ((IsRed $c[0]) -and (IsOrange $c[1])) { Tap 1080 740; $quiet.Restart() }
     }
-    $m = LogLines $Out
+    $m = GameLines $Out
     if ($m -ne $n) { $n = $m; $quiet.Restart() }
 }
 Shot $Shot | Out-Null
