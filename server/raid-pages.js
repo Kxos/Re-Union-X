@@ -312,7 +312,8 @@ function detailPage(index, evStageId, ctx = {}) {
     + `<td${e.available ? '' : ' class="r"'}>${e.available ? Number(e.hp || 0).toLocaleString('en-US') : 'Not restored yet'}</td></tr>`).join('');
   const ids = [...new Set(row.entries.flatMap((e) => e.sphereBoardIds || []))];
   const names = [...new Set(row.entries.flatMap((e) => e.boards || []))];
-  const boards = (names.length ? `<p>${names.map(esc).join(', ')}</p>` : '<p class="n">No Raid Boards this week.</p>')
+  // a Japan-only raid's boards have no census name, only the served boards' own (listed below): no «no boards» line then
+  const boards = (names.length ? `<p>${names.map(esc).join(', ')}</p>` : ids.length ? '' : '<p class="n">No Raid Boards this week.</p>')
     + (ids.length ? `<ul class="pl">${ids.map((id) => {
       const items = [...new Set(ctx.boardItems ? ctx.boardItems(id) : [])], name = ctx.boardName ? ctx.boardName(id) : '';
       return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;

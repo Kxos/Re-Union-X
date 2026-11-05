@@ -65,7 +65,7 @@ const tests = {
   jp_rows_typed_and_marked() {
     // I-232: a Japan-only raid is typed jp (TYPE «Japan only»), marked on its row, named by its JP family, and can be kept once past
     const ix = index();
-    ix.entries.push(tier('JP-SHR-6', 8300, '2016-08-19', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpQuest', 'jpBoard'] }));
+    ix.entries.push(tier('JP-SHR-6', 8300, '2016-08-19', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpQuest', 'jpBoard'], boards: [] }));
     const c = ctx({ index: ix }), html = pages.catalogPage(ix, c);
     const row = rowOf(html, 8300);
     assert(row.includes('data-type="jp"') && row.includes('Japan only · '), row);
@@ -73,6 +73,8 @@ const tests = {
     assert.strictEqual(calendar.rowState(calendar.catalogRows(ix).find((r) => r.censusId === 'JP-SHR-6'), c), 'can');
     const det = pages.detailPage(ix, 8300, c);
     assert(det.includes('<td>Super-Hard Weekend Raid (Japan)</td>') && det.includes('<b>Japan only</b>') && det.includes('Japanese super-hard board'), 'details');
+    // its board has no census name (only the served board's own): no «No Raid Boards this week» above the listed board (bench 05-11)
+    assert(!det.includes('No Raid Boards this week') && det.includes('<ul class="pl"><li>'), 'board listed without the empty line');
   },
   event_families_typed() {
     // Task 10 review M-5: the event raids of 2016-2018 are Raid Events, with a readable family name, not Weekly
