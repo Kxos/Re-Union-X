@@ -9,7 +9,7 @@ History: [../journal/fino-al-2026-10-11.md](../journal/fino-al-2026-10-11.md). T
 - Background: only from the parts of `mypageBackground` (`validParts`, `partsId`,
   `dataType` 1 = `lwf/home/<id>/<id>.png`, 2 = `.lwf`, 3 = `img/home/<id>/<id>.plist`, positions,
   `zSort`); without the row of the `backgroundId`, crash. `make-game-tables.js` generates one row for every
-  background with artwork (`lwf/home/{2..6,99,150911}`).
+  background with artwork (`lwf/home/{2..6,99,150911}`). Seasonal plazas: [below](#seasonal-backgrounds).
 - With the tutorial finished the home creates pet and NPCs: the client loads
   `lwf/pet/motion/<30 nomi>` and `lwf/character/npc/<id>/wait/wait.lwf` (no file = crash)
   without checking: the package contains empty LWFs for the 30 animations (now our own LWFs with
@@ -58,6 +58,54 @@ History: [../journal/fino-al-2026-10-11.md](../journal/fino-al-2026-10-11.md). T
 - Quests screen: `lastClearStageId` compared with
   `misc` 106 (130) for the Colosseum; buttons STORY, Special (quest 6), Events (14), Union Cross
   (24), Colosseum (130).
+
+<a id="seasonal-backgrounds"></a>
+## Seasonal backgrounds (I-233, 5 Nov 2026, research only)
+
+**Ids.** The ids are `YYMM` + index in the month + part: `..11` = first background of the month, `..21`/`..31` =
+second/third, `..12`/`..22` = an extra LWF-only layer of the one before it. All the seasonal ones exist only in the JP 4.3.1
+data dump (`lwf/home/<id>/`, plain PNG, local reference copy); none is in the served WW resources.
+
+| id | look (base 1590x896 + LWF) | extra layer | when (JP id month; WW notices) |
+|---|---|---|---|
+| 150911 | normal Daybreak Town, fountain water | - | default (JP launch 9/2015) |
+| 160211 | «Valentine's Day» ribbon, chocolate fountain, heart cake | - | February; WW Valentine notices 1-14 Feb (2017-2021) |
+| 160311 | «White Day» ribbon, white cake fountain | - | March (JP custom, 14 Mar); no WW notice |
+| 160911 | «Happy 1st Anniversary!», balloons, bunting, sparkles | 160912 confetti | JP 1st anniversary, Sep 2016 |
+| 170911 / 180911 / 190911 / 200911 | same with «2nd» / «3rd» / «4th» / «5th» | 170912 / 180912 / 190912 / 200912 confetti | JP anniversaries Sep 2017-2020; the WW ran «Anniversary Extravaganza» (Sep 2018) and «Japanese Version 4th/5th Anniversary» (Sep 2019, Sep 2020), its own anniversaries in April (notices 1-30 Apr) |
+| 161011 | Halloween: pumpkins, bats, lanterns, «HAPPY HALLOWEEN» banner, orange fountain | - | October; WW Halloween notices end Sep - 31 Oct (2016-2020) |
+| 161211 | snow, decorated tree, daylight | - | December 1st part; WW «Winter Holiday» from ~9 Dec |
+| 161221 | Christmas night, lit tree and coloured lights | 161222 snowfall | December 2nd part (Christmas) |
+| 161231 | snow, no tree, fountain | - | December 3rd part (end of year) |
+| 170111 | «HAPPY NEW YEAR!» arch, tree, balloons | - | January; WW New Year notices 1 Jan - ~11 Jan |
+| 210211 | «Thank You For Playing!» banner | - | end of service: announced 25 Feb 2021 (notice 75152), service end 30 Jun 2021 |
+
+References: `reference\home_bg\` (SOURCES.md «home_bg»): JP base images, overlay parts, the khwiki Daybreak Town gallery.
+The khwiki 960x720 images (2014) are the browser game KHχ, which had the same set (Valentine, White Day, Halloween, Winter,
+Christmas, New Year, 1st-3rd Anniversary, Closing, plus a darkened «attacked by a Raid Boss» plaza); the 1590x1079 ones
+(4th/5th Anniversary, «Moogle of Glory event» = balloons and bunting without text) come from Union χ. The «Moogle of Glory»
+plaza and the «attacked» plaza have no graphics in any local dump. No WW notice names the plaza decoration, so the WW
+dates are deduced from the seasonal events, not stated.
+
+**Our resources.** Served WW (names_v4 + names_addnl): only `lwf/home/150911/` (150911.png, 150911.lwf, fountain textures
+01-04, the 1590x186 strip `150911a.png`) and the Dark Road world backgrounds `lwf/home/2..6, 99` (one LWF + one 1500x764
+texture each: 2 Dwarf Woodlands cottage, 3 Wonderland tea party, 4 Agrabah, 5 Olympus Coliseum, 6 Beast's Castle hall, 99 a
+bright town with windmills; **no `<id>.png`**, so our master rows 2-6/99 with `dataType [1,2]` point at a missing png and
+should be `validParts 1, dataType [2]` or dropped). No `img/home/` anywhere. The JP folders have the base png, the LWF and
+its textures (the files with an `.000000NN` suffix are duplicate copies of the dump).
+
+**How the client picks (static analysis, ww431).** The home scene builder reads one row of `mypageBackground` by id: the
+`backgroundId` of `/mypage` (stored at login data +0x3c) when the session data exists, otherwise the fixed 150911; a
+second scene (the one built by the other caller) always uses 150911. Lookup by id only: no caller reads the table by date,
+so `startTime`/`endTime` are parsed but not used by the client (the original server must have chosen the id by date).
+`validChild` was not seen used. `viewType` (int after the two times) = 100 switches the camera preset (zoom/scroll,
+`misc` 712-714) to a value from a stored option; any other value uses preset 1 (misc 712). Then `validParts` parts:
+`dataType` 1 png, 2 lwf, 3 plist, positions and `zSort`. So a seasonal plaza = master row with e.g. `partsId
+[160911, 160911, 160912]`, `dataType [1, 2, 2]` + `/mypage` `backgroundId` 160911.
+
+**Player choice.** None found: no option or text about a home background in the client UI texts (the only home
+customisation is the BGM, changed by the partner medal: «Your Home screen music will change.»).
+The khwiki says the plaza «is festively decorated» during holiday periods such as Halloween and Christmas.
 
 <a id="other"></a>
 ## Other menu
@@ -483,8 +531,11 @@ Dry run (14-10): package at 81.6% of the reserve, index = installed: a `-Quick` 
     407030 Balloon Aliens, 410003 Falling Snow, 410007 Goldfish, 410012 Elsa's Magic, 410021 Confetti & Butterflies: status
     `recon-ok`, textures in the private `pet_parts_recon/files` (record in its README), 706 rows. Each was rendered on the pink
     Kitstar on the served path (hires LWF applied: 402029, 407006, 410003, 410021) and compared with the khuxwiki pictures and the
-    game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX	mp\spirit_partsenderecon_review.html` (scripts
-    `render\scriptsecon_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
+    game icon `pi<id>.png`: `D:\Progetto_Restauro_KH_UX	mp\spirit_parts
+ender
+econ_review.html` (scripts
+    `render\scripts
+econ_review.py`, `recon_long.py`). Kite: the 4 lost tail frames are copies of their partner frame (4 wave
     poses instead of 8). 402126 has no JP folder: `collect()` now reads a part folder that exists only in `recon_root` whole
     (LWF + textures, report key `recon_only`). **410013 Olaf's Snow Cloud** approved 4 Nov 2026 after a redraw: the LWF is intact (movie6 = 6-7 dots x4 copies, movie2 = 5 snowflakes); only the 10x10 dot «img_snow01» was lost, and the first drawing was a faint glow (alpha peak at the centre only), which read as a sparse snowfall. The references (khuxwiki picture, game icon) show hard white discs, so the dot is now a solid disc (radius 4.7, 1 px antialiased edge); render and references agree on density. 18 of 18 reconstructed parts served (707 rows, rev 245).
   **Provisional names (4 Nov 2026, user decision):** the 21 parts with no known name (series 081-083: Mystery Gray Goat, Mystery Black Sheep, Mystery Winged White Dog x Ears/Head/Legs/Body/Tail; accessories 402049 Mystery Pink Wig, 402050 Mystery White Starry Hair, 402059 Mystery Black Starry Wig, 405003 Mystery Orange Striped Scarf, 405027 Mystery Gold Pendant Chain, 405028 Mystery Egyptian Collar) replace the unidentified placeholders. No source has the original names (the JP dump has no master text, khuxwiki and khwiki do not list them, web search 04-11). The Outfits list shows two lines of about 16 characters per name: keep names short (Black-Faced Sheep was cut). Rev 248. Notice «Spirit Parts» (11/03) updated; Elsa's Magic VIP week pays the part.
