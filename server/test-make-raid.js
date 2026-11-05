@@ -265,7 +265,123 @@ const storyOf = (out) => out.index.story;
 const eventRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, region: 'WW', start, end, bosses, tier: 'quest LV 25', map: 'Curious Room', rewards: '', data: { hp: 'no' }, note: '', ...extra });
 const knotsOf = (r, k) => r[k].slice(0, r.validGrowth);
 
+// Japan-only raids (I-232): census JP rows beside two WW event raids (their quest donors), the JP sources' shapes
+const jpRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, region: 'JP', start, end, bosses, tier: null, map: null, rewards: null, data: { hp: 'no' }, note: '', ...extra });
+const JP_ROWS = () => [
+  jpRow('JP-RAID-1', 'event', '2016-04-10', '2016-04-24', ['Queen Bee', 'Queen Bee Ω'], { data: { hp: 'yes (2016 row)' } }),
+  jpRow('JP-SHR-1', 'super-hard weekend', '2016-08-12', '2016-08-14', ['Gummi Hound'], { data: { hp: 'yes: fixed 30,000,000 (JP wiki, all levels)' } }),
+  jpRow('JP-SHR-2', 'super-hard weekend', '2018-05-11', '2018-05-12', ['Gummi Hound'], { data: { hp: 'yes: fixed 150,000,000 (JP wiki, all levels)' } }),
+  jpRow('JP-D-2017-08-13', 'event', '2017-08-13', null, ['Trickmaster']),
+  jpRow('JP-D-2018-09-03', 'weekly', '2018-09-03', '2018-09-09', ['Trickmaster']),
+  jpRow('JP-TWIN-1', 'event', '2016-06-06', '2016-06-12', ['Queen Bee']),
+  jpRow('JP-RAID-21', 'event', '2016-12-25', '2017-01-01', []),
+  jpRow('JP-RAID-27', 'daily rotating', '2017-10-15', '2017-10-22', ['Trickmaster', 'Queen Bee']),
+  jpRow('JP-FAMRAID-1', 'regular-boss lure week', '2016-11-06', '2016-11-13', ['Trickmaster']),
+];
+const jpFixture = (more = null) => eventFixture([
+  eventRow('WW-E9-1', 'one-off event', '2016-06-06', '2016-06-13', ['Queen Bee', 'Queen Bee Ω'], { data: { hp: 'yes (2016 row)' } }),
+  eventRow('WW-E8-1', 'weekend-only', '2016-08-06', '2016-08-08', ['Gummi Hound'])], {}, (f) => {
+  const jp = JP_ROWS();
+  f.census.rows.push(...jp);
+  f.config.onlyCensusIds.push(...jp.map((r) => r.id));
+  f.config.jpTimer = REAL_CONFIG.jpTimer;
+  if (more) more(f);
+});
+const jpEntry = (out, key) => out.index.entries.find((e) => e.key === key);
+
 const tests = {
+  jp_rows_catalog_only() {
+    const out = build(jpFixture());
+    const jp = out.index.entries.filter((e) => e.jp);
+    assert.deepStrictEqual(jp.map((e) => e.key), ['JP-RAID-1/single', 'JP-SHR-1/single', 'JP-SHR-2/single', 'JP-D-2017-08-13/single', 'JP-RAID-27/single@2017-10-21', 'JP-RAID-27/single@2017-10-22']);
+    assert.ok(jp.every((e) => e.available && e.region === 'JP' && e.event && e.reconstructed.includes('jp') && e.reconstructed.includes('jpQuest')), JSON.stringify(jp.map((e) => [e.key, e.why])));
+    // not served: the same weekly raid as WW, the same event as a WW row, a boss no source names, a lure week
+    const why = Object.fromEntries(out.index.jp.skipped.map((s) => [s.censusId, s.why]));
+    assert.deepStrictEqual(Object.keys(why).sort(), ['JP-D-2018-09-03', 'JP-FAMRAID-1', 'JP-RAID-21', 'JP-TWIN-1']);
+    assert.match(why['JP-TWIN-1'], /WW-E9-1/);
+    assert.match(why['JP-RAID-21'], /not named/);
+    assert.deepStrictEqual([out.index.jp.rows, out.index.jp.available, out.index.jp.tiers], [5, 5, 6]);
+    // numbered after every WW row (raid_ids.json append-only)
+    assert.ok(Math.min(...jp.map((e) => out.ids.rows[e.censusId])) > Math.max(out.ids.rows['WW-E9-1'], out.ids.rows['WW-E8-1']));
+  },
+  jp_quest_reuses_ww_map() {
+    const out = build(jpFixture());
+    const qb = jpEntry(out, 'JP-RAID-1/single'), d = jpEntry(out, 'JP-D-2017-08-13/single');
+    // the WW event raid of the same boss (Queen Bee), else the WW event raid nearest in date (Gummi Hound, 2016-08-06)
+    assert.strictEqual(qb.questFrom, 'WW-E9-1/single');
+    assert.strictEqual(d.questFrom, 'WW-E8-1/single');
+    const donor = jpEntry(out, qb.questFrom), st = out.stageRows.find((s) => s.stageId === qb.stageId);
+    assert.strictEqual(st.stageBinId, donor.stageId, 'the map file of the WW quest, no new map');
+    assert.ok(!out.maps.some((m) => jp(m)), 'no map is generated for a JP stage');
+    function jp(m) { return out.index.entries.some((e) => e.jp && e.stageId === m.stageId); }
+    assert.deepStrictEqual([qb.level, qb.questAp, qb.map, qb.worldId], [donor.level, donor.questAp, donor.map, donor.worldId]);
+    assert.strictEqual(st.submissionRewardType.every((t) => t === rr.CONFIG.coinType), true, 'the standard Raid Time! objectives');
+    // one week from the start when the JP source gives no end
+    assert.deepStrictEqual([d.end, d.periods], ['2017-08-19', [['2017-08-13', '2017-08-19']]]);
+    assert.ok(d.reconstructed.includes('jpDates'));
+  },
+  jp_hp_sources() {
+    const out = build(jpFixture());
+    // the 2016 row as it stands, with its rare Ω (the 2016 setting pairs them)
+    const qb = jpEntry(out, 'JP-RAID-1/single');
+    assert.deepStrictEqual([qb.hpSource, qb.rare && qb.rare.boss], ['2016', 'Queen Bee Ω']);
+    assert.ok(qb.reconstructed.includes('jp2016') && !qb.reconstructed.includes('eventHp'));
+    // super-hard weekends: the JP wiki's fixed HP at every level (no 2016 floor), 12 h, 1 h from 2018-05-05, weekend only
+    for (const [key, hp, up] of [['JP-SHR-1/single', 30000000, 720], ['JP-SHR-2/single', 150000000, 60]]) {
+      const e = jpEntry(out, key), body = enemyOf(out, e.enemyId), part = enemyOf(out, e.enemyId + 1);
+      assert.strictEqual(e.hpSource, 'jp', key);
+      assert.ok(knotsOf(body, 'hp').every((h) => h === hp), `${key} ${knotsOf(body, 'hp')}`);
+      assert.strictEqual(new Set(knotsOf(part, 'hp')).size, 1, 'parts fixed too');
+      assert.deepStrictEqual([e.upMinutes, e.open], [up, 'weekend']);
+      assert.ok(e.reconstructed.includes('jpTimer') && !e.reconstructed.includes('hpFloor') && !e.reconstructed.includes('eventHp'));
+    }
+    // daily rotating: one boss per day, the last days of the row
+    const day = out.index.entries.filter((e) => e.censusId === 'JP-RAID-27');
+    assert.deepStrictEqual(day.map((e) => [e.boss, e.open, e.day]), [['Trickmaster', 'day', '2017-10-21'], ['Queen Bee', 'day', '2017-10-22']]);
+  },
+  jp_hp_wiki_lines() {
+    const md = ['### Adventurer', '| hp fixed: body 7,777,777; each part 77,777 | all | JP | 2016-10 | wikiwiki/raidboss_list.md | wiki |',
+      '### Jewel Princess', '| hp body: 60,000 at LV 1; 550,181 LV 10; 1,094,827 LV 20; 2,728,767 LV 50; 5,397,535 LV 99. Parts at LV 99: head 6,682,575 | LV 1-99 | JP | 2016-11 | wikiwiki | wiki |',
+      '| hp body: 150,000,000 (easy) | LV 1, static era | JP | 2019-08-12 | reddit | guide |'].join('\n');
+    const out = build(jpFixture((f) => {
+      f.values.partHpMd = md;
+      f.census.rows.push(jpRow('JP-RAID-20', 'event', '2016-11-20', '2016-11-27', ['Jewel Princess'], { data: { hp: 'other figure only' } }));
+      f.config.onlyCensusIds.push('JP-RAID-20');
+    }));
+    const e = jpEntry(out, 'JP-RAID-20/single'), body = enemyOf(out, e.enemyId);
+    assert.ok(e.available, e.why);
+    assert.strictEqual(e.hpSource, 'jp');
+    // knots 1, 10, 20, 30, 99 of the one-tier rows: the wiki's levels, linear between them (LV 30 between 20 and 50)
+    assert.deepStrictEqual(knotsOf(body, 'hp'), [60000, 550181, 1094827, Math.round(1094827 + (2728767 - 1094827) / 3), 5397535]);
+  },
+  jp_boards_stand_in() {
+    const out = build(jpFixture((f) => {
+      const cells = (rewards) => rewards.map((reward, i) => ({ n: i + 1, cost: 100 * (i + 1), type: 'medal', reward, qty: 1 }));
+      const board = (name, rewards, extra = {}) => ({ board: name, cells: cells(rewards), completion_reward: '6★ Moogle', ...extra });
+      // WW-E9-1: a gender board (an avatar board of the event) and a generic bonus board; WW-E8-1: the super-hard donor
+      Object.assign(f.eventRewards.rows.find((r) => r.row_id === 'WW-E9-1'), { boards: [board('Zootopia', ['5★ Chip', '6★ Dale'], { gender: 'm' }), board('Seasoned Wielder Bonus', ['6★ Chip', '6★ Dale'], { gender: 'both' })] });
+      Object.assign(f.eventRewards.rows.find((r) => r.row_id === 'WW-E8-1'), { boards: [board('Legendary Raid Reward', ['6★ Moogle', '6★ Chip'])] });
+      f.eventRewards.rows.push({ row_id: 'JP-SHR-2', region: 'JP', boards_summary: [], inferred_board: { value: 'same standard super-hard board' } },
+        { row_id: 'JP-SHR-1', region: 'JP', boards_summary: [{ board: 'Super-hard defeat reward', cells: '**13**', coins: '**40,500**' }] });
+      f.config.jpBoards = { superHard: { donor: 'WW-E8-1', board: 'Legendary Raid Reward', cells: 13, coins: 40500 } };
+      f.config.boards = { art: { 'WW-E8-1:ev1-legendary-raid-reward': { jp: 'img/sphere_incentive/1.png' } } };
+      f.boards = { boards: [], weeks: [] };
+      f.master.medal = ['Chip', 'Dale', 'Moogle'].flatMap((n, i) => [5, 6].map((rare) => ({ medalId: 100 + 10 * i + rare, name: n, rare })));
+      f.master.avatarParts = [];
+    }));
+    const boardsOf = (key) => jpEntry(out, key).sphereBoardIds.map((id) => out.sphereRows.find((r) => r.sphereBoardId === id).boardName);
+    // a JP event: only the generic board of the nearest WW one-off event, never its avatar board
+    assert.deepStrictEqual(boardsOf('JP-RAID-1/single'), ['Seasoned Wielder Bonus 4/10/16']);
+    assert.ok(jpEntry(out, 'JP-RAID-1/single').reconstructed.includes('boardStandard'));
+    // super-hard weekends: the WW board equal to the JP one; its card picture (artFrom); inferred after the wiki's dates
+    for (const key of ['JP-SHR-1/single', 'JP-SHR-2/single']) {
+      const e = jpEntry(out, key);
+      assert.strictEqual(boardsOf(key)[0].split(' ').slice(0, 3).join(' '), 'Legendary Raid Reward', key);
+      assert.ok(e.reconstructed.includes('jpBoard') && !e.reconstructed.includes('boardStandard'), key);
+      assert.ok(out.boardArt.some((a) => a.sphereBoardId === e.sphereBoardIds[0] && a.jp === 'img/sphere_incentive/1.png'), `art of ${key}`);
+    }
+    assert.ok(jpEntry(out, 'JP-SHR-2/single').reconstructed.includes('boardSet') && !jpEntry(out, 'JP-SHR-1/single').reconstructed.includes('boardSet'));
+  },
   old_hp_2016() {
     // a 2016 event raid with its own 2016 row keeps that row: knots, HP, ATK, DEF, Lux and reward rows
     const out = build(eventFixture([eventRow('WW-E1-1', 'one-off event', '2016-06-06', '2016-06-13', ['Trickmaster'], { data: { hp: 'yes (2016 row)' } })]));
@@ -1407,6 +1523,12 @@ const tests = {
         // event raids (Task 10): their own 2016 row unlabelled, else the scale of their boss's row (fix round 1), labelled, far
         // below the cap of the later era
         if (e.hpSource === '2016') { assert.ok(!e.reconstructed.includes('hp'), `label of ${e.key}`); events2016++; continue; }
+        // Japan-only raids (I-232): the JP wiki HP stands as it is, at every level when it is fixed
+        if (e.hpSource === 'jp') {
+          assert.ok(e.jp && !e.reconstructed.includes('eventHp') && !e.reconstructed.includes('hpFloor'), `label of ${e.key}`);
+          if (/^JP-SHR-/.test(e.censusId)) assert.ok(body.hp.slice(0, body.validGrowth).every((h) => h === e.hp) && [30000000, 50000000, 150000000, 99999990].includes(e.hp), `fixed HP of ${e.key}`);
+          continue;
+        }
         assert.strictEqual(e.hpSource, 'scale', e.key);
         assert.ok(e.reconstructed.includes('eventHp') && !e.reconstructed.includes('hp'), `label of ${e.key}`);
         assert.ok(e.tier === 'Advanced' ? body.hp[0] >= 500000000 : body.hp[0] < 1200000000, `scale of ${e.key}`);

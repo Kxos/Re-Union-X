@@ -55,7 +55,9 @@ let withMap = 0;
 for (const st of stages) {
   const s = `${st.stageId} ${st.name}`;
   // Proud (stageKind 4, I-200): la mappa della storia (stageBinId), come il client e server.js poiStageId
-  const p = poi[st.stageKind === 4 && st.stageBinId ? st.stageBinId : st.stageId];
+  // Japan-only raid quests (I-232): the map of a worldwide raid quest (stageBinId 980000-989999), as server.js poiStageId
+  const raidBin = st.stageId >= 980000 && st.stageId <= 989999 && st.stageBinId >= 980000 && st.stageBinId <= 989999;
+  const p = poi[(st.stageKind === 4 || raidBin) && st.stageBinId ? st.stageBinId : st.stageId];
   if (!p) {
     if (!st.onlyDrama) warn(s, 'nessuna mappa (mappoi): niente forzieri ne\' drop');
   } else {

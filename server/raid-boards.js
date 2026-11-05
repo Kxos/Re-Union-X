@@ -284,7 +284,8 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       // current week's). M/D/YY fits the title widgets: the longest, «JP 5th Anniv. Entry Medal Board 10/14/19», measures
       // about 520 px at 26 pt (list title bar 540) and 440 px at 22 pt (board screen title, 448 px since make_layouts 3 Nov).
       const boardName = `${String(r.board.name)} ${weekDate}`.slice(0, 128);
-      const art = artOf(r.board.id);
+      // artFrom: a board standing in for an unknown one (Japan-only raids, make-raid.js) shows its donor board's card picture
+      const art = artOf(r.board.id) || (r.board.artFrom ? artOf(r.board.artFrom) : null);
       if (!art) labels.add('boardNoArt');
       else if (art.screenshot) labels.add('boardArt');
       if (art) out.art.push({ sphereBoardId: id, board: r.board.id, ...art });

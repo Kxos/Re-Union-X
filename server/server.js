@@ -1206,7 +1206,10 @@ function chestDropTypes(rewardId) {
 function poiStageId(stageId) {
   const id = Number(stageId);
   const row = stageRowOf(id);
-  return row && row.stageKind === PROUD_KIND && row.stageBinId ? row.stageBinId + (id - row.stageId) : id;
+  if (row && row.stageKind === PROUD_KIND && row.stageBinId) return row.stageBinId + (id - row.stageId);
+  // a Japan-only raid quest (I-232, make-raid.js) plays on the map file of a worldwide raid quest: stageBinId, as the client
+  if (row && id >= 980000 && id <= 989999 && row.stageBinId >= 980000 && row.stageBinId <= 989999 && row.stageBinId !== id) return row.stageBinId;
+  return id;
 }
 const poiOf = (stageId) => STAGE_POI[poiStageId(stageId)];
 

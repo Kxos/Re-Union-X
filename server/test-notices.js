@@ -182,6 +182,17 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const lines = n.raidNoticeLines(facts).join(' ');
   check(/\*\*1\*\* of the 3 raid tiers/.test(lines) && /Not restored yet/.test(lines) && /\*\*Y\*\*/.test(lines), `righe dei raid assenti: ${lines}`);
   check(n.raidNoticeFacts(require('path').join(dir, 'missing.json')) === null && n.raidNoticeLines(null).length > 0, 'senza raids.json: righe generiche');
+  // I-232: the Japan-only raids are counted apart, with the ones not here (boss not named) and the ones that were WW raids too
+  const g = require('path').join(dir, 'raids-jp.json');
+  require('fs').writeFileSync(g, JSON.stringify({ entries: [{ boss: 'A', available: true }, { boss: 'J', available: true, jp: true, censusId: 'JP-SHR-6' }, { boss: 'K', available: true, jp: true, censusId: 'JP-RAID-1' }],
+    jp: { notServed: [], skipped: [{ censusId: 'JP-RAID-21', start: '2016-12-25', why: 'boss not named by any source' }, { censusId: 'JP-D-2018-06-11', why: 'the same raid as WW-E41141-1 (same boss, same dates)' },
+      { censusId: 'JP-D-2018-09-03', why: 'the same weekly raid as the worldwide one' }] } }));
+  const jf = n.raidNoticeFacts(g);
+  check(jf && jf.tiers === 1 && jf.jp && jf.jp.rows === 2 && jf.jp.unnamed.join() === '2016-12-25' && jf.jp.sameEvents === 1, `raid giapponesi: ${JSON.stringify(jf)}`);
+  const jl = [...n.raidJpLines(jf), ...n.raidNoticeLines(jf)].join(' ');
+  check(/## Raids of the Japanese version/.test(jl) && /\*\*2\*\* raids held only in the \*\*Japanese version\*\*/.test(jl) && /marked \*\*Japan only\*\*/.test(jl) && /not original/.test(jl)
+    && /December 25, 2016/.test(jl) && /1 Japanese raid event of 2018/.test(jl) && !/not here yet/.test(jl), `righe dei raid giapponesi: ${jl}`);
+  check(n.raidJpLines(facts).length === 0 && /not here yet/.test(n.raidNoticeLines(facts).join(' ')), 'senza raid giapponesi: la riga «not here yet»');
   require('fs').rmSync(dir, { recursive: true, force: true });
 }
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }

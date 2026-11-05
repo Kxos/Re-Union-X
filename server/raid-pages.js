@@ -17,13 +17,15 @@ const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, k
 const KEEP_LABEL = `${icon('pin')}Keep in Events`, REMOVE_LABEL = 'Remove from Events';
 const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)',
   // the event raids of 2016-2018 (Task 10)
-  'one-off event': 'Raid Event', 'weekend-only': 'Weekend Raid', monthly: 'Monthly Raid', daily: 'Daily Raid', 'daily showdown': 'Daily Raid Showdown' };
+  'one-off event': 'Raid Event', 'weekend-only': 'Weekend Raid', monthly: 'Monthly Raid', daily: 'Daily Raid', 'daily showdown': 'Daily Raid Showdown',
+  // the raids held only in the Japanese version (I-232): JP names translated (超難度レイド super-hard raid, 月間レイド討伐戦 monthly raid, 日替わりレイド daily rotating raid)
+  event: 'Raid Event (Japan)', 'super-hard weekend': 'Super-Hard Weekend Raid (Japan)', 'monthly (30-minute)': 'Monthly 30-Minute Raid (Japan)', 'daily rotating': 'Daily Rotating Raid (Japan)' };
 const EVENT_FAMILIES = new Set(['one-off event', 'weekend-only', 'monthly', 'daily', 'daily showdown']);
 const TIER_LABEL = { single: 'One tier' };
 const tierLabel = (t) => TIER_LABEL[t] || t;
 // TYPE of a row (family of its census row): [value, label, icon key]
-const typeOf = (row) => (row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
-const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp']];
+const typeOf = (row) => (row.jp ? 'jp' : row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
+const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp'], ['jp', 'Japan only']];
 const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced'], ['legendary', 'Legendary'], ['epic', 'Epic'], ['single', 'One tier']];
 const SHOW_OPTS = [['all', 'All raids'], ['now', 'In Events now', 'now'], ['can', 'Can be kept now', 'pin'], ['kept', 'Kept', 'pin'], ['later', 'Later in the Story', 'later'],
   ['removed', 'Not restored yet', 'removed']];
@@ -201,7 +203,7 @@ function catalogPage(index, ctx = {}) {
     return `${label}<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
       + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${esc(searchOf(row, ctx))}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
       + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
-      + `<div class="info"><a class="nm" href="${href}">${esc(titleOf(row))}${done ? CROWN : ''}</a><div class="d">${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}</div>${st.pill}`
+      + `<div class="info"><a class="nm" href="${href}">${esc(titleOf(row))}${done ? CROWN : ''}</a><div class="d">${row.jp ? 'Japan only · ' : ''}${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
       + '<div class="mt"></div></div><a class="go" href="' + href + '" aria-label="Details">›</a></div>\n';
   }).join('');
@@ -249,6 +251,8 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   levelDrops: 'level drops', levelDropsPartial: 'level rewards (in part)', boardStandard: 'Raid Board (from a similar raid)', eventCoins: 'Raid Coin rewards',
   eventHp: 'boss HP (scaled by date)', setting2016: 'time limit and AP (from 2016)', hpTier: 'boss HP of the tiers', boardCells: 'missing Raid Board cells',
   // the labels of the story raid bosses (Task 11)
+  // the labels of the Japan-only raids (I-232)
+  jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
   storyBoss: 'story raid boss (unknown quest)', storyOmega: 'odds of the Ω boss in the story', storyConflict: 'story raid boss (sources disagree)', rareType2: 'odds of the rare boss (rule type)' };
 // One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
 const RECON_TEXT = {
@@ -284,6 +288,12 @@ const RECON_TEXT = {
   setting2016: 'The time limit and AP come from the 2016 data of the same boss.',
   hpTier: 'The HP of each tier is deduced, since no reading of the tiers exists.',
   boardCells: 'Some Raid Board cells are left out: their reward is not known.',
+  jp: 'This raid was held only in the Japanese version of the game. Here it is played only from the Raid Catalog: keep it to play it.',
+  jpQuest: 'No quest of the Japanese raid survives: it uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives.',
+  jpDates: 'Only the start date is known: the raid lasts one week from it.',
+  jp2016: 'The boss HP, attack, defense and rewards are its 2016 worldwide values: the Japanese values of this raid are not known.',
+  jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids); the raid is open all day, not only in its two daily windows.',
+  jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
   storyBoss: 'The raid boss of this story quest is not known: the boss of the nearest quest is used.',
   storyOmega: 'How often the Ω boss appears in this story quest is not known: the boss\'s usual rule from the 2016 data is used.',
   storyConflict: 'The sources name two different raid bosses for this story quest: the community wiki\'s boss is used.',

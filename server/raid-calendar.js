@@ -37,7 +37,7 @@ function rowsOf(index) {
   const rows = new Map();
   for (const e of (index && index.entries) || []) {
     if (!e.censusId || !e.start || rows.has(e.censusId)) continue;
-    rows.set(e.censusId, { censusId: e.censusId, start: e.start, end: e.end || e.start, evStageId: e.evStageId || 0, event: !!e.event, periods: e.periods || [[e.start, e.end || e.start]] });
+    rows.set(e.censusId, { censusId: e.censusId, start: e.start, end: e.end || e.start, evStageId: e.evStageId || 0, event: !!e.event, jp: !!e.jp, periods: e.periods || [[e.start, e.end || e.start]] });
   }
   return [...rows.values()];
 }
@@ -46,7 +46,8 @@ function rowsOf(index) {
 function weekRows(index, { shopFrom, shopTo }) {
   if (!shopFrom) return [];
   const to = shopTo && shopTo >= shopFrom ? shopTo : shopFrom;
-  const all = rowsOf(index);
+  // Japan-only raids (I-232, entries jp: true) are never a raid of the week: the Raid Catalog only (spec Answer 3)
+  const all = rowsOf(index).filter((r) => !r.jp);
   const events = all.filter((r) => r.event && r.periods.some(([a, b]) => a <= to && b >= shopFrom));
   return [...weeklyRows(all.filter((r) => !r.event), shopFrom, to), ...events];
 }
@@ -74,13 +75,13 @@ function weekRaids(index, ctx = {}) {
 
 const raidsForWeek = (index, ctx = {}) => weekRaids(index, ctx).entries;
 
-// Raid Catalog (Task 9): one row per census row (a raid week), by date: {censusId, evStageId, start, end, family, entries (its
+// Raid Catalog (Task 9): one row per census row (a raid week), by date: {censusId, evStageId, start, end, family, jp, entries (its
 // tiers, index order), bosses (names, first appearance order), available (at least one tier available)}
 function catalogRows(index) {
   const rows = new Map();
   for (const e of (index && index.entries) || []) {
     if (!e.censusId || !e.start) continue;
-    if (!rows.has(e.censusId)) rows.set(e.censusId, { censusId: e.censusId, evStageId: e.evStageId || 0, start: e.start, end: e.end || e.start, family: e.family || '', entries: [], bosses: [] });
+    if (!rows.has(e.censusId)) rows.set(e.censusId, { censusId: e.censusId, evStageId: e.evStageId || 0, start: e.start, end: e.end || e.start, family: e.family || '', jp: !!e.jp, entries: [], bosses: [] });
     const r = rows.get(e.censusId);
     r.entries.push(e);
     if (e.boss && !r.bosses.includes(e.boss)) r.bosses.push(e.boss);
