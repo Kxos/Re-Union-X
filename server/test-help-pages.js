@@ -18,6 +18,7 @@ for (const [name, html] of [['help', lp.helpPage()], ['credits', lp.creditsPage(
   check(!/<img|<script|url\(/.test(text), `${name}: has images, scripts or external styles`);
 }
 check(lp.helpPage().includes('player.json'), 'help: no save section');
+check(lp.helpPage().includes('%LOCALAPPDATA%\\Re-Union X\\save'), 'help: save folder path lost its backslashes (bench 05-11)');
 check(lp.creditsPage().includes('Re-Union X Project'), 'credits: no project team');
 
 // the login links help and staff point to the pages
