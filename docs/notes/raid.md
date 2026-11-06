@@ -416,6 +416,12 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
       JP-D-2017-07-17 (30537): 3 hours, +1 / +5 in Bonus Time. JP-RAID-3: 2015-11-14 - 11-15 (Saturday-Sunday, the JP wiki /
       GAMY copy of its notice; label `jpDates` gone) and the board below. Dry run against round 1: 91 JP tier rows changed (72 dates,
       the rest labels / boards / two timers), no WW row, no HP; one new board id (747, JP-RAID-3).
+    - **Round 3 (06-11).** The 2015-2016 raid events JP-RAID-1, 7, 10, 11, 13, 16, 17, 19, 20 start on the JP Monday (one day
+      later): each date is the JP wiki's copy of the notice title and period (イベント pages, JP-RAID-19 also レイドボード;
+      Gap research 10 §3), the same standard as JP-RAID-3, so no probable label. Dry run: only these 9 tier rows change
+      (start, periods; the board names carry the new date), no HP, no id. JP Details: the standing notice 20079 also for the
+      52 two-day weekends of 2017-2018 (111 rows with facts); 40716 (from 2018-05-26) covers no JP-SHR row (the last is
+      2018-05-12) and the three 2018 Saturday-only rows have their own notices.
     - Dry run (`D:/Progetto_Restauro_KH_UX/tmp/raidjp_notice_dry`, local, HEAD config vs working copy): 608 of 608 tier rows,
       no WW entry changed, no key or id added (`raid_ids.json` unchanged), master row counts unchanged; 58 JP tier rows changed (dates, timers, steps, the
       three bosses with their donor quest); the event-rule HP of the rows whose start moved changes by about 1 % (date scale).

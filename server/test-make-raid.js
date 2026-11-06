@@ -517,7 +517,15 @@ const tests = {
     const ids = Object.keys(fix).filter((k) => !k.startsWith('_'));
     assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-05-22', 'JP-D-2017-06-19', 'JP-D-2017-07-17', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
       'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01',
-      'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+      'JP-RAID-1', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24',
+      'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+    // round 3 (06-11): the 2015-2016 raid events start on the JP Monday of the wiki copies of their notices (Gap research 10 §3)
+    assert.deepStrictEqual(['JP-RAID-1', 'JP-RAID-7', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20'].map((id) => fix[id].start),
+      ['2015-10-19', '2016-02-08', '2016-04-11', '2016-05-02', '2016-06-13', '2016-09-05', '2016-09-19', '2016-10-17', '2016-11-21']);
+    for (const id of ['JP-RAID-1', 'JP-RAID-7', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20']) {
+      assert.strictEqual(new Date(`${fix[id].start}T12:00:00Z`).getUTCDay(), 1, `${id}: a Monday`);
+      assert.ok(/JP wiki copy of the notice/.test(fix[id].source), id);
+    }
     // live JP notices (06-11): every super-hard weekend starts on the JP Saturday (18958, 19740, 19871, 19875, 20289, 24640;
     // standing 20079; the Saturday-only ones of the JP wiki banners 土曜限定), not on the Pacific Friday of the census
     const shr = ids.filter((k) => /^JP-SHR-/.test(k));
