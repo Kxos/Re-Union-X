@@ -28,7 +28,7 @@
 - **A week with raids and events together.** The raid list must keep its order and its kept raid; events come after it, and the Raid Catalog banner stays first. Pinned in Task 4 (`events_after_raids`).
 - **A save from before this part.** No `player.events` field: the tab works and nothing is reported as cleared. Pinned in Task 4 (`old_save`).
 - **A kept event whose census row is no longer built** (data changed, row filtered out): the kept id is cleared at load, never served as an empty banner. Pinned in Task 5 (`kept_unknown_cleared`).
-- **A quest row with an unknown enemy.** A donor enemy id missing from our master would crash the battle. The generator replaces it with the nearest story enemy and labels it, or skips the quest with a reason. Pinned in Task 3 (`enemies_exist`).
+- **A quest row with an unknown enemy.** A donor enemy id missing from our master would crash the battle. Enemies are never substituted (author): the generator skips a quest whose enemy is not in the master yet, with a reason the catalogue shows, and Task 2b's list says what is still searched. Pinned in Task 3 (`enemies_exist`, `missing_enemy_skips_quest`).
 
 ---
 
@@ -62,8 +62,22 @@ Private data work, with a report for the user.
 
 - [ ] **Step 1:** Select the census rows of types EQ, CELEB, KEY, QUIZ, STORY, COLLAB starting in 2019-04. Expected: 13 rows. The 2 COIN rows and the HSC row wait for Parts 3 and 8.
 - [ ] **Step 2:** For each row, build the quests from the donated master and cross-check each quest against khuxwiki (count, level, AP, targets, objectives, rewards). On a conflict, follow the order of trust and write it in `CROSSCHECK.md`.
-- [ ] **Step 3:** For each enemy, look it up in our master. Missing: nearest story enemy of the same family and level, labelled `enemy-substitute`.
-- [ ] **Step 4:** Show the user the report: rows, quests, conflicts, substitutes.
+- [ ] **Step 3:** For each enemy, look it up in our master. Every missing one goes to `tmp\events_p1\pilot\MISSING_ENEMIES.md` with its donor id, name, level, quests and what we know. **No substitutes (author, 06-11).**
+- [ ] **Step 4:** Show the user the report: rows, quests, conflicts, missing enemies.
+
+### Task 2b: Find every missing enemy of the pilot
+
+The author's rule: every enemy we do not have must be found. Private research, then kept product work.
+
+**Files:**
+- Modify: `D:\Progetto_Restauro_KH_UX	mp\events_p1\pilot\MISSING_ENEMIES.md` (each enemy: sources tried, what was found)
+- Modify: the enemy importer list (`recon/tools/make_jp_enemies.py` or the raid model importer, whichever fits) and the master enemy rows generator
+- Test: bench
+
+- [ ] **Step 1:** For each missing enemy, search in this order and record each attempt: donated enemy table (stats, cross-checked against the story enemy of the same family), WW 1.1.3 rows, JP 4.3.1 (enemy rows, `lwf/character` model, textures), khuxwiki enemy pages, footage. Expected: model, stats and attacks per enemy, each value with its source.
+- [ ] **Step 2:** Import the models found, as for the raid bosses; any value no source holds is deduced, labelled and declared.
+- [ ] **Step 3:** **Show the user** each new enemy assembled in its animations (rendered review), before serving.
+- [ ] **Step 4:** Enemies still not found stay in the list with what is known; their quests are not served and the research continues in later parts. Commit the importer changes.
 
 ### Task 3: Generator `server/make-events.js`
 
@@ -81,6 +95,7 @@ Private data work, with a report for the user.
   - `evstage_row_fits_schema`: at most 5 ids in `stageId`, range in `stageStartId` / `stageEndId`, `eventCategory` 2, `eventType` 2.
   - `no_raid_or_special_rows`: a record whose stage is a raid or Special stage is skipped with a reason.
   - `enemies_exist`: every enemy id of every built stage exists in the fixture master.
+  - `missing_enemy_skips_quest`: a quest with an enemy not in the master is not built; the entry carries the reason and the quest stays listed in the catalogue as «not served yet».
   - `labels_declared`: every label in use has a `reconstructedWhy` text.
   - `short_window_whole_day`: a category 3 record gets `days` covering its whole original day.
 - [ ] **Step 2:** Run `node server/test-make-events.js`. Expected: fail, module missing.

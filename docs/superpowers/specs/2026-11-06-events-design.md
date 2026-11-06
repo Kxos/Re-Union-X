@@ -93,8 +93,11 @@ Each part is usable when finished and has its own plan. The order follows value 
 
 ## Values
 
-- **Enemies.** Story enemies reuse their story rows. Event-only enemies: donor enemy table after cross-check, else the nearest
-  story enemy of the same family and level; labelled and declared. Never invented HP shown as original.
+- **Enemies (author, 06-11: «every missing enemy must be found»).** Story enemies reuse their story rows. Every enemy of an
+  event that we do not have is **searched until found**, never replaced by another: our master, then the donated enemy table
+  (cross-checked), the WW 1.1.3 rows, JP 4.3.1 (rows, models, textures), khuxwiki and footage. Its model is imported like the
+  raid bosses and shown to the author assembled in its animations. A quest whose enemy is still missing is not served yet: it is
+  listed with what is known and the research goes on. Only stats that no source holds are deduced, labelled and declared.
 - **Quests without a master row** (the 2016-11..2018-03 hole and the gaps elsewhere): built from khuxwiki infoboxes (world,
   level, AP, targets, objectives, rewards) with the Special pipeline, labelled reconstructed.
 - **Unknown rewards:** the quest ships with the rewards that are known; nothing invented as a rare reward (as for raids).
