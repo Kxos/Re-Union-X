@@ -129,7 +129,7 @@ const DIFFERENCES_BODY = [
   '## Medals',
   'A few Spirit parts without original graphics are replaced by a similar part.',
   'The "Medal STR +N" and "Medal DEF +N" effects of Special Attacks and Supernovas are rebuilt from their descriptions, because the original values are lost.',
-  'The **full artwork** of a Medal (the **Art** button in its details) is the original picture for the 55 Medal families that had one, on every star and on their boosted copies (which stars showed the button in the original is not known). Six SN++ reissues of older families (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art** and the two **Terra, Ven, Aqua**) show their family\'s artwork: whether they had it is not known (**reconstructed**).',
+  'The **full artwork** of a Medal (the **Art** button in its details) is the original picture of the 55 Medals that had one. It is shown only on Medals whose own picture is part of that artwork: every star of those families, the SN++ reissues with the same picture (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art**) and their boosted copies (which of them showed the button in the original is not known). Medals with a different picture, such as **SN++ - Terra, Ven, Aqua**, have no Art button.',
   '## Raid Boards',
   'The **Sora & Moogle B** Medal (JP 5th anniversary, a Raid Board reward) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.',
   'The Raid Board cell listed as a **6★ Fantasia Mickey A** gives the **5★ Fantasia Mickey A**: no 6★ version of that Medal is known, and the board pairs it with Magic Brooms, which evolve the 5★.',

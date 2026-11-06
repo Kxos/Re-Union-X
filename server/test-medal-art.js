@@ -6,7 +6,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { ART, REISSUES, applyMedalArt, familyArt } = require('./medal-art');
+const { ART, REISSUES, NO_ART, applyMedalArt, familyArt } = require('./medal-art');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -16,7 +16,11 @@ assert.strictEqual(new Set(ART.map((a) => a[0])).size, 55, 'art ids unique');
 const allRows = ART.flatMap((a) => a[2]);
 assert.strictEqual(new Set(allRows).size, allRows.length, 'a row belongs to one family only');
 for (const id of REISSUES) assert.ok(allRows.includes(id), `reissue ${id} is a listed family row`);
-assert.strictEqual(familyArt().size, allRows.length, 'reissues flagged too (user 06-11)');
+assert.strictEqual(familyArt().size, allRows.length, 'reissues with the family picture flagged too (06-11)');
+// user rule 06-11: only rows whose own picture is part of the art; SN++ Terra, Ven, Aqua has its own picture
+assert.deepStrictEqual([...NO_ART.keys()].sort(), [302011, 311945], 'rows without art');
+for (const id of NO_ART.keys()) assert.ok(!allRows.includes(id) && !familyArt().has(id), `${id} not flagged`);
+assert.deepStrictEqual([...REISSUES].sort(), [302031, 302098, 312033, 312045], 'reissues with the family picture');
 
 // unit: family row, boosted copy, reissue + its copy, unrelated row
 const rows = [
@@ -25,15 +29,19 @@ const rows = [
   { medalId: 312045, groupId: 0, imageCategory: 0, artId: 302044, validSource: 1 },
   { medalId: 2312045, groupId: 312045, imageCategory: 0, artId: 302044, validSource: 1 },
   { medalId: 11012, groupId: 0, imageCategory: 0, artId: 11012, validSource: 1 },
+  { medalId: 302011, groupId: 0, imageCategory: 2, artId: 52197, imageId: 302011, validSource: 1 },
+  { medalId: 2302011, groupId: 302011, imageCategory: 2, artId: 52197, imageId: 302011, validSource: 1 },
+  { medalId: 311945, groupId: 0, imageCategory: 0, artId: 301944, imageId: 301944, validSource: 1 },
 ];
 const r = applyMedalArt(rows);
 assert.deepStrictEqual(rows.map((m) => [m.imageCategory, m.artId]),
-  [[2, 21266], [2, 21266], [2, 42096], [2, 42096], [0, 11012]]);
+  [[2, 21266], [2, 21266], [2, 42096], [2, 42096], [0, 11012], [0, 302011], [0, 302011], [0, 301944]]);
 assert.strictEqual(r.rows, 2);
 assert.strictEqual(r.boosted, 2);
+assert.strictEqual(r.cleared, 2, 'NO_ART rows flagged by an older patch are unflagged');
 assert.ok(r.missing.includes(300779), 'family rows absent from the master are reported');
 applyMedalArt(rows);
-assert.deepStrictEqual(rows.map((m) => m.imageCategory), [2, 2, 2, 2, 0], 'idempotent');
+assert.deepStrictEqual(rows.map((m) => m.imageCategory), [2, 2, 2, 2, 0, 0, 0, 0], 'idempotent');
 
 // every art id staged by a single-destination line of originals.tsv (section 51), and nothing else under img/art/
 const tsv = fs.readFileSync(path.join(ROOT, 'recon', 'tools', 'originals.tsv'), 'utf8').split(/\r?\n/)
@@ -52,6 +60,7 @@ assert.ok(/'MedalArtAnim': \('ActMapTreasureBoxAnim0', 'MedalArtAnim0'\)/.test(c
 
 // the master in use (when generated): every imageCategory 2 row has a staged artId
 let flagged = 0;
+const stale = [];   // NO_ART rows still flagged: master generated before 06-11, regenerate it
 const file = path.join(process.env.KHUX_MASTER_DIR || path.join(__dirname, 'master_data'), 'medal.json');
 if (fs.existsSync(file)) {
   const medals = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -59,6 +68,7 @@ if (fs.existsSync(file)) {
     flagged++;
     assert.ok(staged.has(m.artId), `medal ${m.medalId} flagged with artId ${m.artId}, not staged`);
     assert.ok(m.validSource, `medal ${m.medalId} flagged but validSource 0`);
+    if (NO_ART.has(m.groupId && m.groupId !== m.medalId ? m.groupId : m.medalId)) stale.push(m.medalId);
   }
   assert.ok(!medals.some((x) => x.imageCategory && x.imageCategory !== 2), 'no other imageCategory');
 }
@@ -73,5 +83,7 @@ if (fi > 0) {
   assert.ok(fs.existsSync(path.join(dir, 'cocostudio', 'publish', 'MedalArtAnim.ExportJson')), 'MedalArtAnim.ExportJson in the pack');
   packed = `; pack ${dir}: 55 pictures + MedalArtAnim present`;
 }
-console.log(`OK: 55 art ids staged, ${familyArt().size} family rows, ${REISSUES.size} reissues included (reconstructed); ` +
-  `master: ${flagged} rows flagged${flagged ? '' : ' (master not regenerated yet)'}${packed}`);
+console.log(`OK: 55 art ids staged, ${familyArt().size} family rows (${REISSUES.size} SN++ reissues with the family picture), ` +
+  `${NO_ART.size} rows without art; ` +
+  `master: ${flagged} rows flagged${flagged ? '' : ' (master not regenerated yet)'}` +
+  `${stale.length ? `; STALE master, NO_ART rows still flagged (regenerate): ${stale.join(' ')}` : ''}${packed}`);

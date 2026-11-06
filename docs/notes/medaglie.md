@@ -992,7 +992,8 @@ Medal Details screen and tapping on "Inspect", a fullscreen version of the artwo
   bone `Art_Dummy` = `Art_Dummy00.png`, movements `Art_in` / `Art_wait` / `Art_out`, 21 frames of fade and zoom 0.5 -> 1) and
   puts **`img/art/Art_<artId>.png`** (`medal.artId`) on the bone. The client checks neither the armature nor the picture:
   a flagged Medal without these files must be expected to crash, so files first, flags after.
-- Picture format: **640x960 PNG, portrait**, the art lying on its side (the device shows it landscape, full screen);
+- Picture format: **640x960 PNG, portrait**, the art lying on its side (the device shows it landscape, full screen;
+  rotated 90 deg as in the original, user 06-11);
   RGB or RGBA, one grayscale (Orchestra Sora).
 
 **Our state until 6 Nov: not implemented, nothing breaks.** `make-game-tables.js` writes `imageCategory` 0 on all 3,552 rows
@@ -1002,10 +1003,11 @@ The JP 4.3.1 data has all of them.
 
 **Staged 6 Nov 2026 (I-237, not yet built or benched).** User decision 05-11: every star of the 55 families and their boosted
 copies. `server/medal-art.js` (run by `make-game-tables.js` after `make-sell-ticket`) sets `imageCategory` 2 and `artId` = the JP art
-id on the 108 family rows of the table below and their 107 boosted copies (`groupId` = family row; Orchestra Sora has none);
-`validSource` is already 1 on all of them. **The 6 SN++ reissues** whose art is only a guess (312045 Key Art #3,
-302098 Key Art #8, 302031 Axel Art, 312033 Roxas Art, 311945 and 302011 Terra, Ven, Aqua) and their boosted copies get their
-family's art too (user decision 06-11: **reconstructed**, to be declared in the Notices and checked on the bench), so 114 + 113 rows; 302088
+id on the family rows of the table below and their boosted copies (`groupId` = family row; Orchestra Sora has none);
+`validSource` is already 1 on all of them. The SN++ reissues 312045 Key Art #3, 302098 Key Art #8, 302031 Axel Art and
+312033 Roxas Art (and their boosted copies) are flagged with their family art: they serve the same Medal picture as the
+family's 7★ (see the check below). **311945 and 302011 SN++ - Terra, Ven, Aqua are not flagged** (`NO_ART`): their own
+picture is not part of any of the 55 arts. So 112 family rows + 111 boosted copies (rule and check of 06-11 below). 302088
 SN++ - Key Art #20 is flagged (same album number 1703 as its family, the art is its own Medal's). Files: `originals.tsv` section
 51 (the 55 `img/art/Art_<artId>.png`, JP; 29 MB as BTF after `btf_fix`, all 640x960, grayscale one checked); the armature
 `MedalArtAnim.ExportJson` through `JP_ARM` of `import_jp_coco.py` on the served atlas `ActMapTreasureBoxAnim0` (frame
@@ -1058,7 +1060,7 @@ up to 1120x1600): the JP files are the ones to serve. No Japanese text on the 55
 | 52106 | Stained Glass #5 [EX+] (No.1010) | 301481(6★) 311483(7★) 301483(7★ SN) 311485(7★ SN+) | other crop/size |
 | 52116 | Stained Glass #6 [EX+] (No.1011) | 301485(6★) 301486(7★) 301487(7★ SN) 301488(7★ SN+) | other crop/size |
 | 52167 | Stained Glass #9 [EX+] (No.1557) | 301605(7★) | other crop/size |
-| 52197 | SN+ - Terra, Ven, Aqua (No.1618) | 301673(7★ Supernova) 311675(7★) 311945(7★ SN++) 302011(7★ SN++) | other crop/size |
+| 52197 | SN+ - Terra, Ven, Aqua (No.1618) | 301673(7★ Supernova) 311675(7★); not 311945/302011 (SN++, own picture) | other crop/size |
 | 53016 | Sora Art [EX] (No.739) | 301060(6★) 301061(7★) | other crop/size |
 | 53026 | Roxas Art [EX] (No.767) | 301115(6★) 301116(7★) 312033(7★ SN++) | same picture |
 | 53136 | Stained Glass #1 [EX+] (No.1006) | 301465(6★) 301466(7★) 301467(7★ SN) 301468(7★ SN+) | other crop/size |
@@ -1083,8 +1085,34 @@ The «rows of the family» are our master rows with the same name once the prefi
 `Supernova+`, `Prime`) and `[EX]`/`[EX+]` are removed, without the boosted copies (114 more rows, x 10^6 + id). Which star
 variants showed the button is **not proven**: the JP data only tells which art ids exist, and `imageCategory`/`artId` are
 per row. The video shows it on a 7★-only Medal; the khuxwiki pages describe «Inspect» per family. The SN++ reissues of older
-families (Key Art #3 312045, Key Art #8 302098, Axel Art 302031, Roxas Art 312033, Terra, Ven, Aqua 311945/302011) are
-listed but have their own Medal picture; their art is a guess.
+families are checked one by one (next paragraph): four share the family picture, SN++ - Terra, Ven, Aqua does not.
+
+**Rule and check of 06-11 (user).** The full art is a direct extension of the Medal's own picture: a row may carry an
+art only if its own Medal picture is a crop or part of that art (on the bench SN++ - Terra, Ven, Aqua showed the art of
+«Supernova - Terra, Ven, Aqua», a different picture). Every flagged row was checked: SIFT features of the served `Medal_L`
+(outside of the Medal masked by alpha; the frame is not in the arts and drops out as outliers) against each of the 55 JP arts, RANSAC similarity, inliers counted; evidence images
+(medal, box on the art, overlay) and scores in `D:\Progetto_Restauro_KH_UX\tmp\art_match` (`scores.json`, `evidence\`).
+Result: **112 rows MATCH** their own art (18 to 735 inliers against at most 5-8 on unrelated arts, every alignment
+checked by eye), **2 NO MATCH**: 311945 and 302011 SN++ - Terra, Ven, Aqua (2 inliers on 52197, at most 6 on any art: own
+picture, Roboloid album No.1812). No row matches another art better than its own except where the same drawing is in
+two arts: Key Art #10 (Sora, also inside Stained Glass #9 52167), Axel Art [EX] (Axel also in Key Art #7 43146) and Roxas
+Art [EX] (Roxas also in Key Art #5 22346); they keep their own art, which the JP data pairs with them (the [EX] arts are
+the lettered «typography» editions of the same drawings: same face and pose, hair and clothes made of words). Low scores
+confirmed by eye: SN++ - Stained Glass #10 (6 inliers: Cinderella redrawn in the window, same pose, rotated), Sora Art
+[EX] 18, SN++ - Key Art #24 18 (small figure), SN++ - Key Art #25 25, SN++ - Stained Glass #11 25. The four reissues
+Key Art #3, Key Art #8, Axel Art, Roxas Art serve the very same picture as the family's 7★ (identical decoded pixels;
+Roboloid's database gives them the 7★ album picture), so they match. Not proven: which star variants showed the button,
+and whether the served reissue pictures are what the original showed for them.
+
+**Non-flagged Medals whose picture is inside one of the 55 arts (candidates only, not flagged; same scan over the 1,651
+other pictures of 5★-7★ rows, `candidates.json`, at least 12 inliers, the two SN++ - Terra, Ven, Aqua pictures included
+and not found).** In the original these had no art of their own (they are not among the 55): Illustrated Aqua / Aqua A /
+SN / SN+ (in 53136 Stained Glass #1, ~97), Illustrated Xemnas and SN++ - Illustrated Xemnas (43146 Key Art #7, ~106),
+Illustrated Sora B (52096 Key Art #16, 19), Illustrated Terra B (51167 Stained Glass #7, 43), Illustrated Donald B and
+Illustrated Goofy (21536 Key Art #12, 81-96), Illustrated Marluxia [EX] and SN++ - Illus. Marluxia (41146 Key Art #6, 61),
+SN++ - Illustrated Zexion (41146, 39), Illustrated Xion [EX] (21266 Key Art #2, 40), KH II Kairi [EX+] (353907 Key Art
+#25, 16), Supernova(+) - HD Terra / HD Ventus / HD Aqua and SN++ - Master Xehanort (52197 Terra, Ven, Aqua, 40-134).
+Flagging them would be our invention: left to a user decision.
 
 **What serving it needs** (I-237): `originals.tsv` rows for `img/art/Art_*.png` (55 files, 33.2 MB of PNG) and the four
 `cocostudio/publish` files (`MedalArtAnim.ExportJson`, `MedalArtAnim0.plist`, `MedalArtAnim0.png`, `Art_Dummy00.png`) from
