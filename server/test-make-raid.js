@@ -3,6 +3,7 @@
 'use strict';
 const assert = require('assert');
 const fs = require('fs'); const os = require('os'); const path = require('path');
+const raidWindows = require('./raid-windows');
 const mr = require('./make-raid');
 const rr = require('./raid-rewards');
 const rb = require('./raid-boards');
@@ -404,7 +405,7 @@ const tests = {
         'JP-D-2018-08-04': { bosses: ['Gummi Hound'], saturdayOnly: true, hp: 'yes: fixed 1,500,000,000 (carried over)', probableBosses: true, hpProbable: true },
         'JP-RAID-1': { levelDrops: [{ level: 40, reward: '5★ Magic Broom' }, { level: 95, reward: '6★ No Such Medal' }] },
       };
-      f.config.raidWindows = REAL_CONFIG.raidWindows; // I-228: the 2017 monthly 30-minute raids have opening hours
+      Object.assign(f.config, { costRule: REAL_CONFIG.costRule, weekdayZeroAp: REAL_CONFIG.weekdayZeroAp, raidWindows: REAL_CONFIG.raidWindows }); // I-228: the served rule
       census = f.census;
     }));
     assert.deepStrictEqual(census.rows.find((r) => r.id === 'JP-RAID-21').bosses, [], 'the census rows are not edited');
@@ -413,13 +414,13 @@ const tests = {
     const ye = out.index.entries.filter((e) => e.censusId === 'JP-RAID-21');
     assert.deepStrictEqual(ye.map((e) => [e.key, e.open, e.day, e.levelStep]), [['JP-RAID-21/single@2016-12-31', 'day', '2016-12-31', 10], ['JP-RAID-21/single@2017-01-01', 'day', '2017-01-01', 10]]);
     assert.ok(ye.every((e) => e.available && e.reconstructed.includes('jpBossProbable')), JSON.stringify(ye.map((e) => [e.why, e.reconstructed])));
-    // monthly by weekday: 7 tiers, each open on its weekday (e.day is its first date in the row), the opening hours (jpWindow, I-228:
-    // the master quest shows the outside price, 90), Saturday's drop
+    // monthly by weekday: 7 tiers, each open on its weekday (e.day is its first date in the row), the weekday / weekend rule (weekRule,
+    // I-228: the master quest shows the weekday price; no opening hours), Saturday's drop
     const mo = out.index.entries.filter((e) => e.censusId === 'JP-RAID-29');
     assert.deepStrictEqual(mo.map((e) => [e.boss, new Date(`${e.day}T12:00:00Z`).getUTCDay()]), WEEK.map((b, i) => [b, (i + 1) % 7]));
     assert.deepStrictEqual(mo.map((e) => e.day), ['2017-08-07', '2017-08-08', '2017-08-02', '2017-08-03', '2017-08-04', '2017-08-05', '2017-08-06']);
-    assert.ok(mo.every((e) => e.available && e.open === 'day' && e.upMinutes === 30 && e.reconstructed.includes('jpWindow') && !e.reconstructed.includes('jpWindowLevel') && !e.reconstructed.includes('jpBossProbable')));
-    assert.ok(mo.every((e) => out.stageRows.find((s) => s.stageId === e.stageId).useAp === 90), 'master useAp: the outside price');
+    assert.ok(mo.every((e) => e.available && e.open === 'day' && e.upMinutes === 30 && e.reconstructed.includes('weekRule') && !e.reconstructed.includes('jpWindow') && !e.reconstructed.includes('jpWindowLevel') && !e.reconstructed.includes('jpBossProbable')));
+    assert.ok(mo.every((e) => out.stageRows.find((s) => s.stageId === e.stageId).useAp === raidWindows.stageUseAp(e, REAL_CONFIG) && raidWindows.stageUseAp(e, REAL_CONFIG) > 0), 'master useAp: the weekday price');
     const sat = mo.find((e) => e.day === '2017-08-05');
     assert.deepStrictEqual(sat.levelDrops.map((d) => [d.level, d.items]), [[10, ['6★ Trickmaster (Boosted)']]]);
     const drop = out.rewardRows.find((r) => r.raidRewardId === sat.levelDrops[0].rewardId);
@@ -431,13 +432,13 @@ const tests = {
     assert.deepStrictEqual([we.boss, we.open, we.day, we.upMinutes, we.hp, we.hpSource], ['Gummi Hound', 'day', '2018-08-04', 60, 1500000000, 'jp']);
     assert.ok(knotsOf(enemyOf(out, we.enemyId), 'hp').every((h) => h === 1500000000));
     assert.ok(['jpBossProbable', 'jpHpProbable', 'jpTimer'].every((l) => we.reconstructed.includes(l)), we.reconstructed.join());
-    assert.ok(!we.reconstructed.includes('jpWindow') && out.stageRows.find((s) => s.stageId === we.stageId).useAp === we.questAp[we.questAp.length - 1], 'no opening hours: the census AP');
+    assert.ok(we.reconstructed.includes('weekRule') && out.stageRows.find((s) => s.stageId === we.stageId).useAp === raidWindows.stageUseAp(we, REAL_CONFIG), 'the weekday price');
     // a JP level drop with an item is paid; one with no item in the master is left off (levelDropsPartial), never replaced
     const qb = jpEntry(out, 'JP-RAID-1/single');
     assert.deepStrictEqual(qb.levelDrops.map((d) => [d.level, d.items]), [[40, ['5★ Magic Broom']]]);
     assert.ok(qb.reconstructed.includes('levelDropsPartial') && !qb.reconstructed.includes('jpRewardProbable'));
     // every label has its reason
-    for (const l of ['jpBossProbable', 'jpHpProbable', 'jpWindow', 'jpRewardProbable']) assert.ok(out.index.reasons[l], l);
+    for (const l of ['jpBossProbable', 'jpHpProbable', 'weekRule', 'jpRewardProbable']) assert.ok(out.index.reasons[l], l);
     // the overlay refuses an unknown row, an unknown field and a weekday rotation that is not 7 bosses
     const base = { rows: [{ id: 'JP-X', bosses: [] }] };
     assert.throws(() => mr.applyJpCensus(base, { 'JP-Y': { bosses: ['A'] } }), /not a census row/);
@@ -664,15 +665,23 @@ const tests = {
     assert.deepStrictEqual(mr.eventPeriods(eventRow('WW-E12-1', 'monthly', '2016-11-21', '2016-11-28', ['Trickmaster'])), [['2016-11-21', '2016-11-27']]);
   },
   raid_windows_labels() {
-    // I-228: a raid with opening hours (raid_config.json raidWindows) carries the rule's label with its reason, and its master quest the
-    // outside price (90, shown on the quest top); a daily raid without hours (notice 35529: all day) keeps its census AP
-    const out = build(eventFixture([eventRow('WW-E29805-1', 'daily', '2017-07-03', '2017-07-10', ['Trickmaster']), eventRow('WW-E35529-1', 'daily', '2018-01-08', '2018-01-15', ['Trickmaster'])],
-      {}, (f) => { f.config.raidWindows = REAL_CONFIG.raidWindows; }));
+    // I-228, served rule weekdayWeekend (06-11): every raid carries weekRule, a tier whose original AP is 0 weekdayAp too, and its master
+    // quest the weekday price (the census value, 5 for a 0); no opening-hours label
+    const rows = [eventRow('WW-E29805-1', 'daily', '2017-07-03', '2017-07-10', ['Trickmaster']), eventRow('WW-E35529-1', 'daily', '2018-01-08', '2018-01-15', ['Trickmaster'])];
+    const cfg = (rule) => (f) => { Object.assign(f.config, { costRule: rule, weekdayZeroAp: REAL_CONFIG.weekdayZeroAp, raidWindows: REAL_CONFIG.raidWindows }); };
+    const out = build(eventFixture(rows, { 'WW-E35529-1': [eventQuest('Trickmaster', 25, '0')] }, cfg('weekdayWeekend')));
     const [jul, jan] = out.index.entries;
     const ap = (e) => out.stageRows.find((s) => s.stageId === e.stageId).useAp;
-    assert.deepStrictEqual([jul.reconstructed.includes('raidWindow'), ap(jul)], [true, 90]);
-    assert.deepStrictEqual([jan.reconstructed.includes('raidWindow'), ap(jan)], [false, jan.questAp[jan.questAp.length - 1]]);
-    assert.ok(/I-228/.test(out.index.reasons.raidWindow));
+    assert.deepStrictEqual([jul.reconstructed.includes('weekRule'), jul.reconstructed.includes('raidWindow'), ap(jul)], [true, false, raidWindows.stageUseAp(jul, REAL_CONFIG)]);
+    assert.deepStrictEqual([jan.questAp, jan.reconstructed.includes('weekdayAp'), ap(jan)], [[0], true, 5], 'an original 0 pays 5 on weekdays');
+    assert.ok(/I-228/.test(out.index.reasons.weekRule) && /I-228/.test(out.index.reasons.weekdayAp));
+    // originalWindows (switched off, kept): the opening-hours label and the outside price, 90
+    const orig = build(eventFixture(rows, {}, cfg('originalWindows')));
+    const [ojul, ojan] = orig.index.entries;
+    const oap = (e) => orig.stageRows.find((s) => s.stageId === e.stageId).useAp;
+    assert.deepStrictEqual([ojul.reconstructed.includes('raidWindow'), ojul.reconstructed.includes('weekRule'), oap(ojul)], [true, false, 90]);
+    assert.deepStrictEqual([ojan.reconstructed.includes('raidWindow'), oap(ojan)], [false, ojan.questAp[ojan.questAp.length - 1]]);
+    assert.ok(/I-228/.test(orig.index.reasons.raidWindow));
     for (const l of ['raidWindow', 'jpWindow', 'weeklyWindow']) assert.ok(REAL_CONFIG.reconstructedWhy[l], l);
     assert.ok(!REAL_CONFIG.reconstructedWhy.jpWindowLevel, 'the old label is gone');
   },

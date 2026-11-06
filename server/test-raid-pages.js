@@ -91,6 +91,15 @@ const tests = {
     assert(we.includes('<b>boss HP (probable)</b>') && we.includes('1.5 billion'), 'weekend 2018');
     assert(mo.includes('<b>opening hours (open outside them at 90 AP)</b>') && mo.includes('12:00-12:29 and 22:00-22:29 Japan time') && mo.includes('in 2018 its level carried over') && !mo.includes('no reset after each window') && mo.includes('<b>level reward (probable match)</b>') && mo.includes('gains a level at every win'), 'monthly 2017');
   },
+  weekday_weekend_labels() {
+    // I-228 (06-11): every raid names the one rule; a free quest names its weekday AP; the detail page states the rule
+    const ix = index();
+    ix.entries.push(tier('WW-E31611-1', 8022, '2017-09-04', '2017-09-11', 'single', 'Jewel Sorceress', { family: 'daily', reconstructed: ['weekRule', 'weekdayAp'] }));
+    const d = pages.detailPage(ix, 8022, ctx({ index: ix }));
+    assert(d.includes('<b>AP and Bonus Time (one rule for all raids)</b>') && d.includes('<b>weekday AP of a quest that was free</b>') && d.includes('costs 5 AP from Monday to Friday'));
+    assert(d.includes('AP and Bonus Time: one rule for every raid on this server (not original)'), 'the rule line');
+    assert(!/open all day|30-minute window|stays open outside/i.test(d.replace(/<li><b>opening hours[^]*?<\/li>/g, '')), 'no hours claim');
+  },
   opening_hours_labels() {
     // I-228: the WW daily raids and the weekday weekly raids of 2018-09 .. 2019-07 name their hours and the 90 AP outside them
     const ix = index();

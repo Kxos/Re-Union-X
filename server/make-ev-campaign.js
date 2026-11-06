@@ -3,7 +3,8 @@
 // raid event quests cost 0 AP in the daily bonus hours. The client shows the cost of a quest as master useAp changed by the
 // active campaigns of type 7 (power 0 -> AP 0), and it reads «active» from the ids the server lists (`campaigns` of GET
 // /campaign and of the start routes), not from the times or weekdays of the row. routes-raid.js campaignIds() lists these
-// ids in the bonus hours.
+// ids while every listed raid quest costs 0 in Bonus Time: with the served rule (raid_config.json costRule weekdayWeekend, I-228)
+// all day on Saturday and Sunday (Pacific), for every raid stage, kept and Japan-only ones included.
 // Rows: type 7, power 0, stageType 2 (explicit stage ids, at most 5 per row), one row per 5 raid quest stages (stage table,
 // 980000-989999, written by make-raid.js), ids RAID_AP0_BASE + n. The 2016 master (thethiny) has a «0 AP» row of stageType 4
 // (every event stage, campaign 2661): not used, because it would also take the Special tab's quests. Value formats mirror

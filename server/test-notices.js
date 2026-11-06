@@ -167,12 +167,12 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(/3 minutes/.test(t) && /half of their HP/.test(t), 'Raid Bosses: ritorno dei punti deboli');
   check(/ATK and DEF/.test(t) && /below the cap/.test(t) && /midpoint/.test(t) && /higher amount and of Gems/.test(t) && /Intermediate/.test(t), 'Raid Bosses: valori ricostruiti');
   check(/2016/.test(t) && /every replay/.test(t) && /nearest quest/.test(t), 'Raid Bosses: boss della Storia');
-  check(/weekend-only/.test(t) && /1-hour windows/.test(t), 'Raid Bosses: raid evento 2016-2018');
-  // I-228 (06-11, mixed): the hours served, open outside them at 90 AP (not original); June 2020 Bonus Time all day
+  check(/weekend-only/.test(t) && /daily showdown/.test(t) && /not their hours/.test(t), 'Raid Bosses: raid evento 2016-2018');
   const has = (s) => t.includes(s);
-  check(has('## Raid hours') && has('outside them the raid stays open** (**not original**') && has('**90 AP**') && has('level of its own')
-    && has('12:00-12:29** and **22:00-22:29** Japan time') && has('September 10, 2018** to **July 14, 2019') && has('**probable**: no notice says so'), 'Raid Bosses: orari dei raid (I-228)');
-  check(has('**June 2020**') && has('24 hours a day') && has('**0 AP**') && has('**doubled** at any hour'), 'Raid Bosses: giugno 2020 bonus tutto il giorno');
+  // I-228 (06-11, weekday / weekend, no exceptions): one rule for every raid, not original; free originals 5 AP on weekdays; June 2020 not served
+  check(has('## Raid AP and Bonus Time') && has('**one rule applies to every raid**') && has('(**not original**)') && has('**Monday to Friday**') && has('**original AP**')
+    && has('**Saturday and Sunday** raid quests cost **0 AP**') && has('**doubled**') && has('**no exceptions**') && has('costs **5 AP** from Monday to Friday') && has('Bonus Time came four times a day') && has('daily windows'), 'Raid Bosses: regola giorni feriali / weekend (I-228)');
+  check(has('24-hour Bonus Time of June 2020 is not served') && !has('outside them the raid stays open') && !has('## Raid hours') && !has('**90 AP**'), 'Raid Bosses: niente finestre, niente giugno 2020');
   check(!has('Daily raids stay open all day'), 'Raid Bosses: la vecchia riga «open all day» non c\'è più');
   check(/Japanese version/.test(t) && /given at every win/.test(t) && /AI/.test(t) && /Medal pictures/.test(t), 'Raid Bosses: JP, monete ripetibili, immagini');
 }
@@ -206,7 +206,7 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   require('fs').writeFileSync(h, JSON.stringify({ entries: [{ boss: 'A', available: true }, jpE('JP-RAID-1', '2015-10-18', '2015-10-31'), jpE('JP-RAID-21', '2016-12-25', '2017-01-01'),
     jpE('JP-RAID-30', '2017-09-01', '2017-09-30'), jpE('JP-D-2018-09-01', '2018-09-01', '2018-09-01'), jpE('JP-RAID-9', '2016-03-27', '2016-04-03')], jp: { notServed: [], skipped: [] } }));
   const kl = n.raidJpLines(n.raidNoticeFacts(h)).join(' ');
-  check(/October 2015 to September 2018/.test(kl) && /July, August and September 2017/.test(kl) && /two daily windows in Japan time/.test(kl) && !/stay open all day/.test(kl) && /Destroyer Behemoth/.test(kl)
+  check(/October 2015 to September 2018/.test(kl) && /July, August and September 2017/.test(kl) && /like every raid here, are open all day/.test(kl) && !/two daily windows in Japan time/.test(kl) && /Destroyer Behemoth/.test(kl)
     && /Crabby Cake\*\* \(\*\*probable\*\*/.test(kl) && /2016 Showdown!/.test(kl) && /10 levels/.test(kl) && /Saturday only/.test(kl) && /Malicious Spider/.test(kl) && /1\.5 billion/.test(kl)
     && /Magic Broom/.test(kl) && /Prince & Belle/.test(kl), `righe jpCensus: ${kl}`);
   require('fs').rmSync(dir, { recursive: true, force: true });

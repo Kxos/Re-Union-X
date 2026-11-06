@@ -301,7 +301,7 @@ otices.json`): #44001 Merry-Go-Rowdy (8071), #44005 Closehanded Captain (8072), 
 - **Coverage, 2 November 2026** (`raid_models.json` with 29 models, templates below): 93 census rows with an available tier, 243 of 344 tier rows. The other 101 tier rows (16 bosses) are `graphics`. After the weak-point check (master revision 234): 87 census rows, 230 tier rows; 13 more are `parts` (Queen Bee, Queen Bee Ω, Lion Headliner). Along the story, 104 of the 150 Shop weeks from 2018-08-30 list a raid; the other 46 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
 - **Templates** (`modelTemplates`, inferred from the LWFs, medium-high confidence): Scourge, Wicked and Malicious Spider (9101-9103) use row `5000` Enraged Arachnid. The three share one rig, and `5000` is the 2016 recolour that already reused Savage Spider's moves. Egg Master (1008) uses `0007` Trickmaster: identical frame counts in all five fight animations, 2 parts. The spiders keep the attribute of their colour (`bossAttributes`: red Power, green Speed, blue Magic, as the census reads it), labelled `attribute`; Egg Master keeps Trickmaster's.
 - <a id="events"></a>**Older WW event raids (Task 10, tests only, bench pending).** `make-raid.js` builds the 62 census rows of the families one-off event, weekend-only, monthly, daily and daily showdown (80 tier rows: «quest LV N» is one tier, `single`; «Beginner/Intermediate/Advanced (quest LV a/b/c)» three; a daily showdown one boss per day, key `<id>/single@<day>`; «X» with «X Ω» one quest whose rare boss is X Ω). The other 6 WW rows (two lure weeks, Daily Challenge #13, two rare spawns in ordinary events, the Gift event with no dates) are not raid events: `report.skipped`. Rules, ours unless a source is named:
-  - **Opening (spec Answer 4).** Entries carry `event`, `periods` (Pacific days: the census dates, plus the other weekends the census note copies from the notice) and `open`: `weekend` (listed only on a real Saturday or Sunday PT), `day` (daily showdown: the boss of the real weekday), `daily` (every day; the boss level resets each Pacific day, notice 29805). An event row runs when one of its periods overlaps the Shop week, beside the weekly rule; `raid-calendar.js` `openNow(entry, nowMs)`, `weekRaids(...).closed`. A kept raid of the Catalog follows the same days. The original daily raids also had one-hour windows (12:00 and 19:00 PT): served since 6 November 2026, see [Raid hours](#raid-hours).
+  - **Opening (spec Answer 4).** Entries carry `event`, `periods` (Pacific days: the census dates, plus the other weekends the census note copies from the notice) and `open`: `weekend` (listed only on a real Saturday or Sunday PT), `day` (daily showdown: the boss of the real weekday), `daily` (every day; the boss level resets each Pacific day, notice 29805). An event row runs when one of its periods overlaps the Shop week, beside the weekly rule; `raid-calendar.js` `openNow(entry, nowMs)`, `weekRaids(...).closed`. A kept raid of the Catalog follows the same days. The original daily raids also had one-hour windows (12:00 and 19:00 PT): not served; every raid follows the weekday / weekend rule, see [Raid hours](#raid-hours).
   - **HP.** A row whose census `data.hp` is «yes (2016 row)» (the 9 events of May-October 2016) serves its boss's 2016 rows as they stand: knots, HP, ATK, DEF, Lux, parts, and the 2016 `raidReward` rows (Event Coins, medals) under our ids; the client interpolates between the knots (linear, flat outside: `atLevel`). The other rows (fix round 1, user decision 4 November) follow `eventHp` of `raid_config.json`: the boss's own 2016 row (its template's when it has none) as the shape, scaled log-linearly by date from x1 on 2016-10-31 to 1 billion at LV 30 on 2018-09-11 (the reading «caps out at level 30 with 1bn HP»), never below x1; weekend raids before 2018-05-05 x2 («half of previous» that weekend). The three tiers of 2018: Beginner the line, Advanced at least 500 million at LV 1 (2018-07-23 reading, read as the hardest tier), Intermediate their geometric mean (labels `eventHp`, `hpTier`). The one-tier weeks of 2018-09 with no video reading follow the same line, read at the week's last day and flat above LV 30. The 1.2-16.5 billion cap applies from 2018-10-07 to 2019-08-11 only.
   - **Level drops** (fix round 1): the itemised level rewards of the notices (Chip and Dale at LV 10, every 10 levels for Gummi Hound 2016-09, Setzer at 31 and 71, Halloween Sora at 90 ...) are raidReward rows of their own (`enemyId x 100 + 40 + i`, every slot paid) named in `entry.levelDrops`; `routes-raid.js` sends them to the Present Box when the boss is defeated at that level. Not itemised, chance, Boosted and amount-less coin rewards stay out (`levelDropsPartial`).
   - **AP 0 campaign** (fix round 1): in a bonus hour only when every listed raid quest costs 0 then (`.every`), since the campaign rows cover every raid stage.
@@ -341,7 +341,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     Hound, Gear Golem, Queen Bee, Assault Dragon, Circus Crab, Crabby Cake, Jack in the Box). One tier per boss, key
     `<id>/single@<first date of that weekday in the row>`, `open: 'day'` (`raid-calendar.js` `openNow`: the real Pacific weekday);
     30 minutes (`jpTimer`). The old key `JP-RAID-28/single` stays numbered in `raid_ids.json` (append-only), unused. Windows and
-    level: [Raid hours](#raid-hours) (label `jpWindow`, which replaced `jpWindowLevel` on 6 November). Saturday boss at
+    level: open all day under the weekday / weekend rule, no per-window reset, the usual level rule ([Raid hours](#raid-hours); `jpWindowLevel` removed 6 November). Saturday boss at
     LV 10: a level drop of the boosted copy (+1,000 STR, `boards.boostedMedals`): Trickmaster 1301180 (July: bonus not stated,
     label `jpRewardProbable`), Twilight Thorn (August: new boosted row made by `make-boosted-medals.js` from the new
     `boostedMedals` entry, id 1301200), Destroyer Behemoth 1301235 (September). September's «Furious Whole Cake» = Crabby Cake:
@@ -381,7 +381,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   the WW 2016 row as it stands, rewards included (`jp2016`). Others: the `eventHp` rule of the WW event raids. No 2016 floor
   under a JP wiki HP. ATK / DEF as the WW raids of the time.
 - **Timer** (`jpTimer`, `raid_config.json`): super-hard weekends 12 h, 1 h from 2018-05-05; monthly 30-minute raids 30 minutes
-  (their two daily windows: [Raid hours](#raid-hours)). Super-hard weekends open on Saturday and Sunday only
+  (their two daily windows are not served: [Raid hours](#raid-hours)). Super-hard weekends open on Saturday and Sunday only
   (`open: 'weekend'`), the daily rotating raid on its weekday (`open: 'day'`).
 - **Boards.** No JP board survives cell by cell. Super-hard weekends: the JP standard board (13 cells, 40,500 Raid Coins,
   6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW **Legendary Raid Reward** board of
@@ -480,7 +480,7 @@ Mission rows that count raids, by original text: Beginner 1023 «Defeat Raid Bos
 Original rule (official notices 2019-2020): raid event quests cost 0 AP in the daily bonus hours, 5 AP all day Saturday and Sunday, 90 AP on weekdays. The server has charged this since Task 6 (`questApAt`); the client's own display of «AP 0» needs a campaign. The client computes a quest's shown AP from the master `useAp` and the active `evCampaign` rows of type 7 (power 0 = AP 0), and it reads «active» only from the id list the server sends: the row's times and weekdays are not checked. With an active AP campaign it shows a yellow balloon (`StartDeckEdit2_Announce`, `Camp_Balloon1`, text = `displayText`, fade loop) on the quest top, the raid list and the deck screens, and the blue AP plate (`img/ui/World_Stage_AP2.png` with the pulsing `Cursor_Anim_AP` armature) where AP is 0.
 
 - **Rows** (`server/make-ev-campaign.js`, run by `make-game-tables.js` after `make-raid.js`): type 7, power 0, `displayText` «Bonus Time: Raids cost 0 AP!», stageType 2 (explicit stage ids, 5 per row), ids 98000+. Today 344 raid quest stages → 69 rows. The 2016 master has a «0 AP» row of stageType 4 (every event stage); not used, as it would also take the Special tab's quests. Value formats as the 2016 rows (time strings, week flags 1, groupPattern 0, validMinute 0).
-- **Served:** the ids of those rows (from the served `evCampaign`) in `campaigns` of GET `/campaign` (143), `/stage/start` and `/raid/start`, only in the bonus hours (since 6 November 2026: in Bonus Time per entry, all day in June 2020, or inside a raid's opening hours, [Raid hours](#raid-hours)) and only when a raid quest of the player's week then costs 0 AP (`questApAt`: weeks before 2019-07-15 with a `5 / 90` rule get none). Otherwise `[]`, as before. `/multi/start` keeps `[]` (Union Cross has no raid quests). The AP charge is unchanged.
+- **Served:** the ids of those rows (from the served `evCampaign`) in `campaigns` of GET `/campaign` (143), `/stage/start` and `/raid/start`, only in the bonus hours (since 6 November 2026, served rule weekdayWeekend: all day on Saturday and Sunday, never on weekdays, [Raid hours](#raid-hours)) and only when a raid quest of the player's week then costs 0 AP (`questApAt`: weeks before 2019-07-15 with a `5 / 90` rule get none). Otherwise `[]`, as before. `/multi/start` keeps `[]` (Union Cross has no raid quests). The AP charge is unchanged.
 - **Bench switch:** `server/save/raid_ap0.json` `{"force": true}` lists the ids at any hour while the file is younger than 2 hours (same reader as `raid_smoke.json`). Display only: outside the bonus hours the quest still costs 90 (or 5) at `/stage/start`, so the AP shown and the AP charged differ while it is on.
 - **Unproven, for the bench:** which route feeds the client's active list (GET `/campaign` is the likely one); whether the blue plate shows on the event quest list (the code path was seen only on the raid boss, `Area_AP`); whether the 0 shown at the quest list comes from the campaign or from `/stage/event` `stages[].useAp` (already 0 in bonus time). The resources are all served by the WW data except `img/ui/World_Stage_AP2.png` (JP 4.3.1 and the 2016 bundle).
 - **Bench 3 November (rev 237, resources 97, save `raid2`, switch on):** the raid event quest panel shows «AP 0» and the yellow balloon under Begin, fading in and out (original loop). The client calls GET `/campaign` before the list opens, and that is the only route sending the ids then, so it is the one that feeds the active list. The first text «Raid Event quests cost 0 AP during Bonus Time!» was cut at the balloon's width after «0 AP»: shortened to «Bonus Time: Raids cost 0 AP!» (rev 238). The quest top, the raid boss list (Behemoth Ω, «AP 0» on its first attempt) and the Select a Keyblade popup showed neither the balloon nor the blue plate: where the blue plate shows is still unseen.
@@ -489,13 +489,42 @@ Original rule (official notices 2019-2020): raid event quests cost 0 AP in the d
 - **Research 5 November 2026, round 2 (client code, notices, archived r/KHUx; facts only).** Blue plate (I-231): the client turns the AP plate blue (with the `Cursor_Anim_AP` glow) only in the quest top's raid title panel (`AdventureTop2_Raid_Title`), whenever the AP it shows is 0 (raid `useAp` after type 7 campaigns; a `useAp` of 0 counts too). That code is live in the 2016 client 1.1.3 and has no caller in WW 4.3.1, so our client cannot show the blue plate; the RAID BOSS ALERT card has no blue branch. Raid AP campaigns match only `stageType` 8 (every raid boss) or 3 (body `raidEnemyId` in `stageId`), not 2. June 2020: bonus time from 2020-06-01 12:00 PT (notice 66106 text), 24 hours a day. WW weekday weekly raids from 2018-09-10 to 2019-01-31: the boss was unavailable outside the four hours (players; a 2018-09-11 screenshot shows the event banner with «0 minutes left»); 90 AP outside the hours from 2019-02-01. JP weekly raids from 2018-09-17: raid times on weekdays without bonus, all day at weekends; JP hours unknown.
 
 <a id="raid-hours"></a>
-## Raid hours (I-228) and the June 2020 all-day Bonus Time (6 November 2026, tests and dry run, master not regenerated)
+## Raid hours: the weekday / weekend rule (I-228, 6 November 2026, tests and dry run, master not regenerated)
 
-User decision 06-11 («mixed»): serve the original opening hours with their rules, and keep the boss available outside them at
-full AP. Rules in `raid_config.json` `raidWindows` and `bonusAllDay`, read by `server/raid-windows.js` (`ruleOf`, `stateAt`,
-`stageUseAp`, `allDayBonus`), used by `routes-raid.js` (charge, Lux, level, spawn gauge, AP 0 campaign) and `make-raid.js`
-(labels, master `stage.useAp`). Hours on the real clock of the rule's zone (PT, or JST for the Japanese raids), like the Bonus
-Time hours.
+**Served rule (user decisions 06-11, final: one rule for every raid, no exceptions; not original).** `raid_config.json`
+`costRule: "weekdayWeekend"` (`server/raid-windows.js` `costRule`, `stageUseAp`, `zeroAp`; `routes-raid.js` `questApAt`, `bonusAt`):
+
+- **Monday to Friday** (Pacific, as the rest of the raid calendar), every raid quest (weekly, event, daily, Japan-only, kept): its
+  **original AP** = the master `stage.useAp` = the last census value; **no Bonus Time at any hour** (Lux x1, spawn gauge 8,600,
+  the Bonus Time level steps of `EVENT_LEVEL_STEPS` / `BONUS_LEVEL_STEP` not applied). A tier whose original AP is **0** (a free
+  week or an AP 0 campaign of the time: 149 tiers, 45 WW event, 21 WW weekly, 83 JP) pays `weekdayZeroAp` **5** on weekdays
+  (label `weekdayAp`, reconstructed: the usual paid raid quest price of 2017-2019); its master `useAp` is 5 too, so the quest top
+  always shows the weekday charge. User correction 06-11: no original weekday AP 0 is kept.
+- **Saturday and Sunday**: 0 AP and **Bonus Time all day** for every raid and the story raid bosses: Lux x2 at `/raid/clear`,
+  spawn gauge 6,000, the Bonus Time level steps (e.g. Gear Golem 2018-07 +5), and the AP 0 campaign ids (every listed raid quest,
+  kept and JP ones included, costs 0; the campaign rows cover every raid stage 980000-989999), so the «Bonus Time: Raids cost 0
+  AP!» balloon is true.
+- **Everything else is unchanged**: bosses, weekday rotations (`open: day`), weekend-only raids, HP, timers, boards, level drops,
+  `levelStep`, the JP Saturday LV 10 boosted drops. **Level**: as before the windows work (+1 per defeat or the raid's own step,
+  one occurrence per week, per Pacific day for the WW daily raids, LV 1 on the 1st of the month); no `~out` counter, no per-window
+  reset.
+- **June 2020** all-day Bonus Time (`bonusAllDay`) is **not served** (user: the weekends are free anyway; its weekdays follow the
+  rule: 5 AP since its census AP is 0, Lux x1).
+- **Labels**: `weekRule` on every served entry (608), `weekdayAp` on the 149 free tiers; reasons in `reconstructedWhy`. The
+  Raid Catalog detail page has a rule line; every original notice page (`/web/raid/notice/<id>`, `raid-pages.js noticePage`,
+  also the end-of-service weeks) starts with a note that the notice's AP costs, Bonus Time hours and opening times are the
+  original game's and that the rule applies here (rendered at request time: `raid_notices.json` is not regenerated). Test
+  `rule_note_on_every_notice` (`test-raid-notices.js`) renders every served notice and detail page when the files exist.
+  Notice «Raid Bosses»: section «Raid AP and Bonus Time» (replaces «Raid hours»); the gauge, Lux, level-step, kept-raid and JP
+  lines point to it.
+- **Dry run** (copy, `D:/Progetto_Restauro_KH_UX/tmp/raidwin_dry`): only `stage.json` changes, 149 rows `useAp` 0 -> 5; raids.json
+  only by the labels (and the old `jpWindowLevel` gone from 21 JP tiers). **Needs:** master regeneration + revision bump,
+  `export-notices.js` for docs/NOTICES.md; bench: a weekday raid quest (original AP shown and charged, no balloon, Lux x1), a
+  Saturday (0 AP, balloon, Lux x2, a kept and a JP raid too), a free tier on a weekday (5).
+
+**Kept switched off: the original hours** (`costRule: "originalWindows"`, the first 06-11 «mixed» decision, tested with
+`ORIG` in `test-raid-routes.js`): the table below, 90 AP outside the hours, `~out` counters, the per-window JP reset and the
+June 2020 all-day Bonus Time.
 
 | Family / period | Hours (inside) | Inside | Outside (ours, not original) | Evidence |
 | --- | --- | --- | --- | --- |
@@ -519,9 +548,9 @@ Time hours.
   of `/stage/event` (I-236): shown 90, charged less inside the hours (as the weekend 5 of the 0 / 5 / 90 weeks). The AP 0
   campaign now goes out when every listed raid quest costs 0 and at least one is in Bonus Time **or inside its hours**, so a
   daily window at 0 AP shows «AP 0» with the «Bonus Time: Raids cost 0 AP!» balloon (text not exact for a daily window).
-  Dry run: 51 stage rows change (`useAp` only: 5 WW daily, 14 weekly 2018-09 .. 2019-01, 32 JP monthly; the 14 weeks
+  Dry run of originalWindows (first 06-11 run): 51 stage rows change (`useAp` only: 5 WW daily, 14 weekly 2018-09 .. 2019-01, 32 JP monthly; the 14 weeks
   `5 / 90` already had 90), no other master table changes, raids.json changes only by the labels.
-- **Labels** (`reconstructedWhy` + `raid-pages.js`): `raidWindow` (WW daily, 5 tiers), `jpWindow` (32 JP tiers, replaces
+- **Labels of originalWindows** (`reconstructedWhy` + `raid-pages.js`): `raidWindow` (WW daily, 5 tiers), `jpWindow` (32 JP tiers, replaces
   `jpWindowLevel` and the `windowLevel` field of `jpCensus`, now refused), `weeklyWindow` (28 tiers, probable). Notice «Raid
   Bosses»: section «Raid hours» (replaces «Daily raids stay open all day»), the JP section points to it.
 - **June 2020** (`bonusAllDay.periods`): a WW entry whose census start lies in 2020-06-01 .. 06-30 is in Bonus Time at any hour
@@ -532,7 +561,7 @@ Time hours.
   2017-10 (JP-RAID-27) bonus time 12:00-12:59 / 22:00-22:59 JST (Lux x2, AP halved, 2 eggs: not modelled, the PT bonus hours
   apply); the WW «gem weeks open 24/7, from Monday 12:00» player report (Radiant Reward weeks are simply all day); JP raid hours
   after 2018-08 (unknown, rows not served).
-- **Needs:** master regeneration (`make-game-tables.js`: make-raid stage `useAp` and the labels in `raids.json`) + revision bump,
+- **If re-enabled, needs:** master regeneration (`make-game-tables.js`: make-raid stage `useAp` and the labels in `raids.json`) + revision bump,
   `export-notices.js` for docs/NOTICES.md; then a bench: a WW daily kept raid at 12:xx PT (charge, level) and outside (90, `~out`).
 
 ## Bench 2 November 2026 (Part 2, save `raid2`, resources 93, rev 230)

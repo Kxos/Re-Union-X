@@ -11,6 +11,7 @@
 'use strict';
 const special = require('./special-pages');
 const calendar = require('./raid-calendar');
+const windows = require('./raid-windows');
 
 const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls } = special;
 
@@ -254,7 +255,8 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
   jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpRewardProbable: 'level reward (probable match)',
-  // opening hours (I-228, raid_config.json raidWindows)
+  // the AP / Bonus Time rule (I-228, raid_config.json costRule): weekdayWeekend served, the opening hours of originalWindows kept off
+  weekRule: 'AP and Bonus Time (one rule for all raids)', weekdayAp: 'weekday AP of a quest that was free',
   raidWindow: 'opening hours (open outside them at 90 AP)', jpWindow: 'opening hours (open outside them at 90 AP)', weeklyWindow: 'weekday hours (probable; open outside them at 90 AP)',
   storyBoss: 'story raid boss (unknown quest)', storyOmega: 'odds of the Ω boss in the story', storyConflict: 'story raid boss (sources disagree)', rareType2: 'odds of the rare boss (rule type)' };
 // One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
@@ -299,6 +301,8 @@ const RECON_TEXT = {
   jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
   jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»; August 4 and September 1, 2018: the next boss of the Japanese weekend cycle).',
   jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
+  weekRule: 'One rule for every raid on this server (not original): from Monday to Friday the raid quest costs its original AP and there is no Bonus Time; on Saturday and Sunday (Pacific time) it costs 0 AP and the Lux of the raid boss is doubled, all day. The original game had its own hours instead: Bonus Time four times a day, and some raids open only at set hours.',
+  weekdayAp: 'The original quest cost 0 AP (a free week or an AP 0 campaign of the time): with the rule of this server it costs 5 AP from Monday to Friday and 0 AP on Saturday and Sunday.',
   raidWindow: 'In the original the boss appeared only at set hours (Pacific time): 12:00 and 19:00 for one hour (four hours on the weekend of November 11-12, 2017), or 2:00, 8:00, 14:00 and 20:00 in July 2018. In those hours the raid follows its original rules. Outside them it stays open here (not original): each quest costs 90 AP, there is no Bonus Time, and the boss has a level of its own that does not change the level of the set hours.',
   jpWindow: 'In the original the raid opened twice a day for 30 minutes, 12:00-12:29 and 22:00-22:29 Japan time. In 2017 the boss went back to LV 1 after each window; in 2018 its level carried over to the next window (the months the Japanese notices do not cover follow their year: probable). Outside the windows the raid stays open here (not original): each quest costs 90 AP, there is no Bonus Time, and the boss has a level of its own that does not change the level of the windows.',
   weeklyWindow: 'From Monday to Friday this weekly raid boss came only in the four Bonus Time hours (2:00, 8:00, 14:00 and 20:00 Pacific time), and all day on Saturday and Sunday. Outside those hours it stays open here at 90 AP per quest, with no Bonus Time and a level of its own: the notices of February to July 2019 charged 90 AP outside the hours; before February 2019 players say the boss was not there at all (probable: no notice says so).',
@@ -308,6 +312,13 @@ const RECON_TEXT = {
   storyConflict: 'The sources name two different raid bosses for this story quest: the community wiki\'s boss is used.',
   rareType2: 'The rule for the rare boss of this boss is not fully understood: it is read like the usual one-in-N chance.',
 };
+// The AP / Bonus Time rule of this server (I-228, raid-windows.js costRule weekdayWeekend; user 06-11): one line on the detail page,
+// and a note at the top of every original notice page, whose AP costs, Bonus Time hours and opening times are the original game's
+const RULE_LINE = 'AP and Bonus Time: one rule for every raid on this server (not original). From Monday to Friday each raid quest costs its original AP '
+  + '(5 AP if it was free) and there is no Bonus Time; on Saturday and Sunday (Pacific time) raid quests cost 0 AP and the Lux of raid bosses is doubled, all day.';
+const RULE_NOTE = `${RULE_LINE} The AP costs, Bonus Time hours and opening times in the notice below are those of the original game: see the «Raid Bosses» notice.`;
+const ruleOn = () => windows.costRule() === windows.WEEKDAY_WEEKEND;
+const ruleNote = () => (ruleOn() ? `<div class="why rule" style="border-color:#ffcd4a">${esc(RULE_NOTE)}</div>` : '');
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 // levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
@@ -342,6 +353,7 @@ function detailPage(index, evStageId, ctx = {}) {
     + (ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
+    + (ruleOn() ? `<p class="n">${esc(RULE_LINE)}</p>` : '')
     + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win, up to LV 99; levels reset on the 1st of every month.</p>`
     + `<h2>Raid Boards</h2>${boards}${recon}${other}`
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
@@ -494,7 +506,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
       const title = titleOf(row);
       return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
         + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
-        + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>`
+        + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
         + '<div class="ns raid"><h2>No notice for this week</h2><p>This raid ran in the last weeks of the original game, during the end of service: '
         + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div>'
         + `<div class="srv"><h2>On this server</h2><p>This server follows your Story instead of the calendar: this week of the original game (${esc(dateRange(row))}) `
@@ -505,6 +517,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
       + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
+      + ruleNote()
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
       + noticeBody(n.body, row.bosses)
       + '<div class="srv"><h2>On this server</h2>'

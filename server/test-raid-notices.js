@@ -94,6 +94,28 @@ const tests = {
       assert.deepStrictEqual([...new Set(bad)], [], `ranking rows left in raid_notices.json (${bad.length} lines)`);      console.log(`  (real: ${(real.scrubbed || []).length} notices had a player ranking removed)`);
     }
   },
+  rule_note_on_every_notice() {
+    // I-228 (user 06-11): the original notices print their AP costs, Bonus Time hours and opening times; every notice page says first
+    // that one rule applies here to all raids (weekday original AP, weekend 0 AP and Lux x2, not original)
+    const note = /one rule for every raid on this server \(not original\)\. From Monday to Friday each raid quest costs its original AP/;
+    const body = ['★ Defeat the Trickmaster!', '・Raid quests cost 0 AP during Bonus Time (2:00 a.m. - 2:59 a.m. PT).'];
+    const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
+    assert.ok(note.test(html) && html.indexOf('one rule for every raid') < html.indexOf('Defeat the Trickmaster'), 'the note comes before the original text');
+    assert.ok(/«Raid Bosses» notice/.test(html));
+    const eos = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { eos: true } }, notices: {} }, ctx());
+    assert.ok(note.test(eos), 'end-of-service weeks too');
+    assert.ok(note.test(pages.detailPage(index(), 8100, ctx())), 'the Raid Catalog detail page states the rule');
+    // the served files, when built: every notice page and every detail page carries the rule
+    const ix = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(ix) && fs.existsSync(mn.OUT)) {
+      const real = JSON.parse(fs.readFileSync(ix, 'utf8')), doc = JSON.parse(fs.readFileSync(mn.OUT, 'utf8'));
+      const rows = require('./raid-calendar').catalogRows(real), c = { ...ctx(), boardItems: () => [], boardName: () => '' };
+      const missing = rows.filter((r) => doc.rows && doc.rows[r.censusId]).filter((r) => !note.test(pages.noticePage(real, r.evStageId, doc, c))).map((r) => r.censusId);
+      assert.deepStrictEqual(missing, [], 'notice pages without the rule');
+      const noDetail = rows.filter((r) => !note.test(pages.detailPage(real, r.evStageId, c) || '')).map((r) => r.censusId);
+      assert.deepStrictEqual(noDetail, [], 'detail pages without the rule');
+    }
+  },
   sections_parsed() {
     const body = ['[Updated May 21]', 'Intro line.', '● Dragon Battle Event!', '★ Defeat the dragon!', '■ Event Details', 'Plain text.', '・First', '・Second', '* A note.',
       '▽More info▽', 'Hidden text.', '△CLOSE△', '▼Sub heading', 'Text under it.'];

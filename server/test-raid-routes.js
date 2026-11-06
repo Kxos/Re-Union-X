@@ -10,6 +10,11 @@ const { isBonusTime, questApAt } = routesRaid;
 const { coinRows } = require('./raid-rewards');
 const evCampaign = require('./make-ev-campaign');
 const windows = require('./raid-windows');
+// The AP / Bonus Time rule of the routes (raid-windows.js costRule): the served one is weekdayWeekend; the tests of the original
+// hours (originalWindows, kept switched off in raid_config.json) run with ORIG (ORIG_TESTS, set by the runner below).
+const SERVED = windows.DEFAULT, ORIG = { ...windows.DEFAULT, costRule: windows.ORIGINAL_WINDOWS };
+let RULES = SERVED;
+const qAp = (e, t) => questApAt(e, t, RULES), bAt = (e, t) => routesRaid.bonusAt(e, t, RULES);
 
 const TUE = Date.parse('2026-10-27T10:00:00Z');
 const STAGE = 980001, ENEMY = 2000010, SPECIAL = 970001;
@@ -50,7 +55,7 @@ function world(opts = {}) {
     onDefeat: (boss) => { w.defeats = (w.defeats || 0) + 1; w.defeated = boss.raidId; },
     grantItem: (it) => { if (w.grantHook) w.grantHook(); w.grants.push(it); if (it.type === 7) w.player.titles = [...new Set([...w.player.titles, it.id])]; }, addPresent: (it) => w.presents.push(it),
     medalCount: () => w.medalCount, medalCap: () => w.medalCap,
-    stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: opts.rng || (() => 0.99), log: (m) => w.logs.push(m),
+    stageState: (id) => (w.stageStates && w.stageStates[id]) || ({ score: 0, playStatus: 0, clearMissionIds: [] }), webBase: 'http://x', rng: opts.rng || (() => 0.99), log: (m) => w.logs.push(m), rules: opts.rules || RULES,
   });
   w.call = (fn, ...a) => { w.sent = null; w.raid[fn]({}, ...a); return w.sent; };
   w.spawn = () => { w.raid.onStageClear(STAGE, { raidPoint: 9000 }); assert(w.player.raid.boss, 'boss spawned'); return w.player.raid.boss; };
@@ -643,24 +648,102 @@ const tests = {
     const e = (start, questAp) => ({ start, questAp });
     const WEEK = Date.parse('2026-10-27T10:00:00Z'), BONUS = Date.parse('2026-10-27T15:00:00Z'), SAT = Date.parse('2026-10-31T10:00:00Z');
     const now = e('2019-07-15', [5]);
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(now, t)), [0, 5, 90], 'from 2019-07-15');
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-07-15', [0, 5, 90]), t)), [0, 5, 90], 'rule week');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(now, t)), [0, 5, 90], 'from 2019-07-15');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2019-07-15', [0, 5, 90]), t)), [0, 5, 90], 'rule week');
     // I-236: Radiant Reward weeks «0 / 5» cost 5 all week outside bonus time (notice 58020), June 2020 «0» costs 0 all day
     // (notice 66114); the master useAp (the last census value) is what the quest top shows, so the charge must agree
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-09-23', [0, 5]), t)), [0, 5, 5], 'Radiant Reward week');
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2020-06-01', [0]), t)), [0, 0, 0], 'June 2020: 0 all day');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2019-09-23', [0, 5]), t)), [0, 5, 5], 'Radiant Reward week');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2020-06-01', [0]), t)), [0, 0, 0], 'June 2020: 0 all day');
     // the served raids (when built): on a weekday outside bonus time the charge = the master stage useAp (last census value)
     const served = path.join(__dirname, 'game_data', 'raids.json');
     if (fs.existsSync(served)) {
       const bad = JSON.parse(fs.readFileSync(served, 'utf8')).entries.filter((x) => Array.isArray(x.questAp) && x.questAp.length)
-        .filter((x) => questApAt(x, WEEK) !== windows.stageUseAp(x)).map((x) => `${x.start} ${x.boss} ${x.questAp.join('/')}`);
+        .filter((x) => qAp(x, WEEK) !== windows.stageUseAp(x, RULES)).map((x) => `${x.start} ${x.boss} ${x.questAp.join('/')}`);
       // (a raid with opening hours: the master row carries the outside price, 90, and WEEK is outside every window)
       assert.deepStrictEqual(bad, [], 'weekday charge = master useAp on every served raid quest');
     }
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-02-11', [0, 5]), t)), [0, 5, 5], 'bonus / other');
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-03-01', [5, 90]), t)), [90, 5, 90], 'weekend / weekday, no bonus value');
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2018-10-01', [5]), t)), [5, 5, 5], 'one value');
-    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2018-09-03', [0]), t)), [0, 0, 0]);
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2019-02-11', [0, 5]), t)), [0, 5, 5], 'bonus / other');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2019-03-01', [5, 90]), t)), [90, 5, 90], 'weekend / weekday, no bonus value');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2018-10-01', [5]), t)), [5, 5, 5], 'one value');
+    assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => qAp(e('2018-09-03', [0]), t)), [0, 0, 0]);
+  },
+  weekday_weekend_rule() {
+    // I-228, user decision 06-11 (served, not original, no exceptions): Monday-Friday the original AP and no Bonus Time at any hour,
+    // Saturday-Sunday 0 AP and Bonus Time all day, for every raid (WW, JP, daily, kept); a tier whose original AP is 0 pays
+    // weekdayZeroAp (5) on weekdays; no opening hours, no June 2020 all-day bonus
+    assert.strictEqual(windows.costRule(), 'weekdayWeekend', 'the served rule');
+    const TUE_BONUS = Date.parse('2026-10-27T15:00:00Z'), TUE_NOON = Date.parse('2026-10-27T19:30:00Z');
+    const SAT = Date.parse('2026-10-31T10:00:00Z'), SUN_LATE = Date.parse('2026-11-02T07:30:00Z'), MON_EARLY = Date.parse('2026-11-02T08:30:00Z'); // Sun 23:30 PST, Mon 00:30 PST
+    const e = (start, questAp, extra = {}) => ({ censusId: 'X', family: 'weekly', start, questAp, ...extra });
+    const cases = [
+      [e('2019-10-07', [0, 5, 90]), 90], [e('2019-09-23', [0, 5], { family: 'radiant reward' }), 5], [e('2019-03-04', [5, 90]), 90], [e('2018-11-12', [5]), 5],
+      [e('2018-09-17', [0]), 5], [e('2020-06-08', [0]), 5], [e('2017-07-03', [5], { censusId: 'WW-E29805-1', family: 'daily', open: 'daily' }), 5],
+      [e('2017-09-04', [0], { censusId: 'WW-E31611-1', family: 'daily', open: 'daily' }), 5], [e('2018-07-09', [1], { censusId: 'WW-E42150-1', family: 'daily' }), 1],
+      [e('2017-06-30', [1], { censusId: 'JP-RAID-28', family: 'monthly (30-minute)', jp: true }), 1], [e('2016-08-20', [15], { family: 'super-hard weekend', jp: true }), 15]];
+    for (const [x, weekday] of cases) {
+      const tag = `${x.censusId} ${x.start} ${x.questAp.join('/')}`;
+      assert.deepStrictEqual([TUE, TUE_BONUS, TUE_NOON, MON_EARLY].map((m) => questApAt(x, m)), [weekday, weekday, weekday, weekday], `${tag}: weekdays`);
+      assert.deepStrictEqual([SAT, SUN_LATE].map((m) => questApAt(x, m)), [0, 0], `${tag}: weekend`);
+      assert.strictEqual(windows.stageUseAp(x), weekday, `${tag}: the master shows the weekday charge`);
+      assert.deepStrictEqual([TUE, TUE_BONUS, TUE_NOON, MON_EARLY, SAT, SUN_LATE].map((m) => routesRaid.bonusAt(x, m)), [false, false, false, false, true, true], `${tag}: Bonus Time`);
+      assert.strictEqual(windows.stateAt(x, TUE), null, 'no opening hours');
+      assert.strictEqual(windows.allDayBonus(x), null, 'no all-day Bonus Time period');
+    }
+    assert.deepStrictEqual([windows.zeroAp(e('2018-09-17', [0])), windows.zeroAp(e('2019-10-07', [0, 5, 90]))], [true, false]);
+    assert.deepStrictEqual([routesRaid.bonusAt(null, TUE_BONUS), routesRaid.bonusAt(null, SAT)], [false, true], 'story raid bosses too');
+    assert.throws(() => windows.costRule({ costRule: 'other' }), /unknown costRule/);
+    // every served raid quest (when built): weekday charge = master useAp, weekend 0
+    const served = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(served)) {
+      const list = JSON.parse(fs.readFileSync(served, 'utf8')).entries.filter((x) => Array.isArray(x.questAp) && x.questAp.length);
+      assert.deepStrictEqual(list.filter((x) => questApAt(x, TUE) !== windows.stageUseAp(x) || !(questApAt(x, TUE) > 0) || questApAt(x, SAT) !== 0).map((x) => x.key), []);
+    }
+  },
+  weekday_weekend_routes() {
+    const SAT = Date.parse('2026-10-31T10:00:00Z'), TUE_BONUS = Date.parse('2026-10-27T15:00:00Z');
+    // weekly 0 / 5 / 90 week: Tuesday 90 even in an old bonus hour, no campaign; Saturday 0 with the campaign
+    const w = world();
+    assert.deepStrictEqual([TUE, TUE_BONUS, SAT].map((m) => w.raid.stageAp(STAGE, m)), [90, 90, 0]);
+    assert.deepStrictEqual([TUE, TUE_BONUS, SAT].map((m) => w.raid.campaignIds(m)), [[], [], [98000]]);
+    assert.deepStrictEqual(w.raid.events(SAT).filter((x) => x.eventType === 2).flatMap((x) => x.stages.map((s) => s.useAp)), [0], '/stage/event: 0 on Saturday');
+    assert.deepStrictEqual(w.raid.events(TUE_BONUS).filter((x) => x.eventType === 2).flatMap((x) => x.stages.map((s) => s.useAp)), [90]);
+    // Lux: x1 on weekdays at any hour, x2 on the weekend
+    w.now = TUE_BONUS;
+    w.spawn(); w.call('list'); w.start();
+    assert.strictEqual(w.clearParts([500, 100, 200]).getLux, 50, 'weekday: no Bonus Time');
+    w.now = SAT;
+    w.player.raid.boss.endsAt = w.now + 3600e3;
+    w.start();
+    assert.strictEqual(w.clearParts([500, 100, 200]).getLux, 100, 'weekend: Lux x 2');
+    // spawn gauge: 6,000 on the weekend only
+    const g = world();
+    g.now = TUE_BONUS; g.raid.onStageClear(STAGE, { raidPoint: 6500 });
+    assert.strictEqual(g.player.raid.boss, null, 'weekday: 8,600 needed even in an old bonus hour');
+    g.now = SAT; g.raid.onStageClear(STAGE, { raidPoint: 10 });
+    assert(g.player.raid.boss, 'weekend: 6,000 are enough');
+    // a daily raid: no ~out counter, the level per Pacific day as before
+    const d = world();
+    Object.assign(d.index.entries[0], { censusId: 'WW-E29805-1', family: 'daily', open: 'daily', start: '2017-07-03', end: '2017-07-09', questAp: [5] });
+    d.week = { shopFrom: '2017-07-03', shopTo: '2017-07-09' };
+    const b1 = d.spawn();
+    assert.deepStrictEqual([b1.outside, b1.levelKey], [undefined, undefined]);
+    d.call('list'); d.start(); d.clearParts([0, 100, 200]);
+    assert.strictEqual(d.spawn().level, 2, 'same Pacific day');
+    // Bonus Time level steps follow the weekend: Gear Golem 2018-07 (+5 in Bonus Time)
+    const s = world();
+    Object.assign(s.index.entries[0], { censusId: 'WW-E42613-1', start: '2018-07-23', end: '2018-07-23', questAp: [0] });
+    s.week = { shopFrom: '2018-07-23', shopTo: '2018-07-23' };
+    s.now = SAT; s.spawn(); s.call('list'); s.start(); s.clearParts([0, 100, 200]);
+    assert.strictEqual(s.player.raid.levels['WW-1/Beginner'], 6, 'weekend: +5');
+  },
+  weekday_weekend_kept_raid_campaign() {
+    // the Saturday campaign covers the kept raid of the Raid Catalog too (every listed quest costs 0)
+    const w = catWorld();
+    Object.assign(w.index.entries[1], { start: '2019-03-04', end: '2019-03-10', questAp: [5, 90] });
+    w.raid.keep(8002);
+    const SAT = Date.parse('2026-10-31T10:00:00Z');
+    assert.deepStrictEqual([w.raid.stageAp(STAGE + 5, TUE), w.raid.stageAp(STAGE + 5, SAT)], [90, 0]);
+    assert.deepStrictEqual([w.raid.campaignIds(TUE), w.raid.campaignIds(SAT)], [[], [98000]]);
   },
   raid_windows_rules() {
     // I-228 (user decision 06-11, mixed): raid_config.json raidWindows, raid-windows.js. Which raids have opening hours
@@ -672,10 +755,10 @@ const tests = {
       .map(([family, start]) => R({ censusId: 'W', family, start })), ['weeklyWindow', 'weeklyWindow', 'weeklyWindow', null, null, null], 'weekly 2018-09-10 .. 2019-07-14, Radiant Reward weeks all day');
     assert.strictEqual(windows.ruleOf({ censusId: 'W', family: 'weekly', start: '2018-10-08', jp: true }), null, 'a JP row is never a WW weekly');
     // master stage useAp: the outside price for a raid with hours, else the last census value
-    assert.deepStrictEqual([windows.stageUseAp({ censusId: 'WW-E31611-1', questAp: [0] }), windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5, 90] })], [90, 90]);
-    assert.strictEqual(windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5] }), 5);
+    assert.deepStrictEqual([windows.stageUseAp({ censusId: 'WW-E31611-1', questAp: [0] }, RULES), windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5, 90] }, RULES)], [90, 90]);
+    assert.strictEqual(windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5] }, RULES), 5);
     // hours on the real clock of the zone: PT (DST too) and JST
-    const st = (e, iso) => windows.stateAt(e, Date.parse(iso));
+    const st = (e, iso) => windows.stateAt(e, Date.parse(iso), RULES);
     const daily = { censusId: 'WW-E29805-1', start: '2017-07-03' };
     assert.deepStrictEqual(['2026-10-27T19:00:00Z', '2026-10-27T19:59:59Z', '2026-10-27T20:00:00Z', '2026-10-28T02:30:00Z', '2026-12-01T20:30:00Z', '2026-12-01T19:30:00Z']
       .map((iso) => st(daily, iso).inside), [true, true, false, true, true, false], '12:00-12:59 and 19:00-19:59 PT, PST in December');
@@ -691,22 +774,22 @@ const tests = {
     const TUE_BONUS = Date.parse('2026-10-27T15:00:00Z'), TUE_NOON = Date.parse('2026-10-27T19:30:00Z'), SAT = Date.parse('2026-10-31T10:00:00Z');
     // WW daily raid: its census AP in the windows, 90 outside (a bonus hour outside the windows is no Bonus Time)
     const daily = { censusId: 'WW-E29805-1', family: 'daily', open: 'daily', start: '2017-07-03', questAp: [5] };
-    assert.deepStrictEqual([TUE_NOON, TUE, TUE_BONUS, SAT].map((t) => questApAt(daily, t)), [5, 90, 90, 90]);
-    assert.deepStrictEqual([TUE_NOON, TUE_BONUS].map((t) => routesRaid.bonusAt(daily, t)), [false, false]);
+    assert.deepStrictEqual([TUE_NOON, TUE, TUE_BONUS, SAT].map((t) => qAp(daily, t)), [5, 90, 90, 90]);
+    assert.deepStrictEqual([TUE_NOON, TUE_BONUS].map((t) => bAt(daily, t)), [false, false]);
     const hours = { censusId: 'WW-E42150-1', family: 'daily', open: 'daily', start: '2018-07-09', questAp: [1] };
-    assert.deepStrictEqual([TUE_BONUS, TUE].map((t) => [questApAt(hours, t), routesRaid.bonusAt(hours, t)]), [[1, true], [90, false]], 'Raid Hours = the bonus hours');
+    assert.deepStrictEqual([TUE_BONUS, TUE].map((t) => [qAp(hours, t), bAt(hours, t)]), [[1, true], [90, false]], 'Raid Hours = the bonus hours');
     // weekly 2018-09-10 .. 2019-07-14 (probable): weekdays in the four hours its census AP (5 for the 5 / 90 weeks: notice 49544), 90 outside, weekend all day
     const w19 = { censusId: 'WW-W-2019-03-04', family: 'weekly', start: '2019-03-04', questAp: [5, 90] };
-    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt(w19, t)), [5, 90, 5]);
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => qAp(w19, t)), [5, 90, 5]);
     const w18 = { censusId: 'WW-W-2018-11-12', family: 'weekly', start: '2018-11-12', questAp: [5] };
-    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt(w18, t)), [5, 90, 5]);
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => qAp(w18, t)), [5, 90, 5]);
     // Radiant Reward weeks keep their rules
-    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt({ censusId: 'R', family: 'radiant reward', start: '2019-02-11', questAp: [0, 5] }, t)), [0, 5, 5]);
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => qAp({ censusId: 'R', family: 'radiant reward', start: '2019-02-11', questAp: [0, 5] }, t)), [0, 5, 5]);
     // June 2020 (notices 66106 / 66114: Bonus Time 24 hours a day): 0 AP and Bonus Time at any hour; not May or July
     const june = { censusId: 'WW-W-2020-06-08', family: 'weekly', start: '2020-06-08', questAp: [0] };
-    assert.deepStrictEqual([TUE, TUE_BONUS, SAT].map((t) => [questApAt(june, t), routesRaid.bonusAt(june, t)]), [[0, true], [0, true], [0, true]]);
-    assert.deepStrictEqual(['2020-05-25', '2020-07-01'].map((start) => routesRaid.bonusAt({ censusId: 'W', family: 'weekly', start, questAp: [0, 5, 90] }, TUE)), [false, false]);
-    assert.strictEqual(routesRaid.bonusAt({ censusId: 'JP-X', family: 'event', start: '2020-06-08', jp: true }, TUE), false, 'a worldwide notice: never a JP row');
+    assert.deepStrictEqual([TUE, TUE_BONUS, SAT].map((t) => [qAp(june, t), bAt(june, t)]), [[0, true], [0, true], [0, true]]);
+    assert.deepStrictEqual(['2020-05-25', '2020-07-01'].map((start) => bAt({ censusId: 'W', family: 'weekly', start, questAp: [0, 5, 90] }, TUE)), [false, false]);
+    assert.strictEqual(bAt({ censusId: 'JP-X', family: 'event', start: '2020-06-08', jp: true }, TUE), false, 'a worldwide notice: never a JP row');
   },
   june_2020_bonus_all_day() {
     // Task 2: from 2020-06-01 12:00 PT to 2020-06-30 23:59 PT raids cost 0 AP and Lux x2 all day: the AP 0 campaign and the
@@ -773,7 +856,7 @@ const tests = {
     assert.deepStrictEqual([y17.out.outside, y17.out.levelKey], [true, 'cat:WW-1/Beginner~out']);
     assert.deepStrictEqual(run('2018-03-02').lv, [1, 2, 3, 1, 4], '2018: the level carries over to the next window');
     const e = { censusId: 'JP-T', family: 'monthly (30-minute)', jp: true, start: '2018-03-02', questAp: [1] };
-    assert.deepStrictEqual([questApAt(e, Date.parse('2026-10-27T03:05:00Z')), questApAt(e, TUE)], [1, 90]);
+    assert.deepStrictEqual([qAp(e, Date.parse('2026-10-27T03:05:00Z')), qAp(e, TUE)], [1, 90]);
   },
   raid_windows_campaign() {
     // inside the hours of a raid with opening hours the master shows 90: when every listed quest costs 0, the AP 0 campaign shows it
@@ -1305,7 +1388,11 @@ Object.assign(tests, {
 });
 
 let failed = 0;
+const ORIG_TESTS = new Set(['clear_lux_doubles_in_bonus_time', 'spawn_bonus_threshold', 'bonus_level_step', 'event_level_steps', 'ap0_campaign_every_quest',
+  'quest_ap', 'raid_windows_rules', 'raid_windows_ap_and_bonus', 'june_2020_bonus_all_day', 'raid_windows_levels_and_lux', 'jp_monthly_window_levels',
+  'raid_windows_campaign', 'ap0_campaign_bonus_hours', 'ap0_campaign_start_and_force', 'catalog_week_rules', 'daily_coins_every_5_levels']);
 for (const [name, fn] of Object.entries(tests)) {
+  RULES = ORIG_TESTS.has(name) ? ORIG : SERVED;
   try { fn(); console.log(`ok ${name}`); } catch (e) { failed++; console.error(`FAIL ${name}: ${e.message}`); }
 }
 
