@@ -741,8 +741,8 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
 # ---- Catalogue card options (user 06-11: every catalogue card with the gold frame and the gold title, each design
 # different; options A/B/C per catalogue, chosen later with --catalog-style; nothing here changes a served card) ----
 FAMILY_GOLD = (236, 196, 84, 255)
-STICKER_XY, STICKER_WH = (548, 0), (86, 32)
-TITLE_MAX_RIGHT = STICKER_XY[0] - 12       # the title never runs under the TRAINING sticker
+STICKER_XY, STICKER_WH = (560, -2), (78, 30)
+TITLE_MAX_RIGHT = STICKER_XY[0] - 30       # the title keeps clear of the TRAINING sticker (its burst reaches left of its box)
 MEDALS = os.path.join(ROOT, 'medal_gen', 'files', 'img', 'medal')
 
 
@@ -861,6 +861,8 @@ RAID_PORTRAITS = ['0004', '0013', '1005', '1009']
 
 def raid_option(style, rigs=None):
     rigs = rigs or RAID_RIGS
+    if style in RAID_B_VARIANTS:
+        return raid_b_variant(style, rigs)
     if style == 'A':   # the current red design: rays and a group of raid bosses
         return family_finish(raid_catalog_banner(rigs, art_only=True), RAID_CATALOG_TITLE, RAID_CATALOG_SUB, (50, 4, 8))
     if style == 'B':   # black -> dark red, raid board cells, one large boss as a silhouette with a red rim
@@ -967,6 +969,182 @@ def event_option(style, coin=None):
     raise ValueError('event style %r' % style)
 
 
+# ---- Raid option B variants (user 06-11: «Raid B, improved»): dark red / black, raid board cells, one big boss ----
+RAID_B_VARIANTS = ('B1', 'B2', 'B3', 'B4')
+
+
+def lit_boss(mid, rigs, h, rim=(255, 70, 40)):
+    """the boss in full colour (wait pose) at height h with a red rim light on its outline and a soft red glow behind;
+    (figure, glow) RGBA pieces of the figure's size + margin, or (None, None) without the rig"""
+    f = enemy_figure(mid, rigs, frame=10, size=2400)
+    if f is None:
+        warn('raid boss %s left out of a Raid B variant (rig not found in %s)' % (mid, rigs))
+        return None, None
+    f = f.resize((max(1, int(f.width * h / f.height)), h), Image.LANCZOS)
+    pad = 16
+    big = Image.new('RGBA', (f.width + 2 * pad, f.height + 2 * pad), (0, 0, 0, 0))
+    big.alpha_composite(f, (pad, pad))
+    a = big.getchannel('A')
+    edge = ImageChops.subtract(a, a.filter(ImageFilter.MinFilter(5))).filter(ImageFilter.GaussianBlur(1))
+    rim_l = Image.new('RGBA', big.size, rim + (0,))
+    rim_l.putalpha(edge.point(lambda v: v * 200 // 255))
+    lit = Image.alpha_composite(big, rim_l)
+    glow = Image.new('RGBA', big.size, rim + (0,))
+    glow.putalpha(a.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(8)).point(lambda v: v * 210 // 255))
+    return lit, glow
+
+
+def burst(im, centre, colour=(255, 60, 30), n=22, alpha=60, core=150):
+    """red energy rays and a hot core behind the boss"""
+    L = Image.new('RGBA', (640 * S, 140 * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(L)
+    cx, cy = centre[0] * S, centre[1] * S
+    for k in range(n):
+        a0 = math.pi * 2 * k / n + (0.05 if k % 2 else 0)
+        a1 = a0 + math.pi / (n * (1.2 if k % 2 else 2.2))
+        d.polygon([(cx, cy), (cx + math.cos(a0) * 4000, cy + math.sin(a0) * 4000), (cx + math.cos(a1) * 4000, cy + math.sin(a1) * 4000)],
+                  fill=colour + (alpha if k % 2 else alpha // 2,))
+    im = Image.alpha_composite(im, L.resize((640, 140), Image.LANCZOS))
+    g = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    ImageDraw.Draw(g).ellipse((centre[0] - 90, centre[1] - 70, centre[0] + 90, centre[1] + 70), fill=(255, 120, 60, core))
+    return Image.alpha_composite(im, g.filter(ImageFilter.GaussianBlur(26)))
+
+
+def board_layer(cols, rows, cell=30, icons=False, gold_every=7):
+    """a raid board made of the original board cells (red cells, a gold one every gold_every) and, with icons, some original
+    reward icons (Moogle medal, Special quest orbs) on the gold cells; RGBA cols*cell x rows*cell"""
+    red = art(jp_img('sphere_board', 'Board_0102.png'), cell, 'board cell')
+    gold_c = art(jp_img('sphere_board', 'Board_0002.png'), cell, 'board cell')
+    ico = []
+    if icons:
+        ico = [x for x in (art(os.path.join(MEDALS, 'Medal_L_90016.png'), int(cell * .8), 'Moogle medal'),
+                           art(jp_img('material', 'material_48.png'), int(cell * .7), 'orb'),
+                           art(jp_img('material', 'material_55.png'), int(cell * .75), 'orb'),
+                           art(event_coin_path(), int(cell * .7), 'coin')) if x is not None]
+    L = Image.new('RGBA', (cols * cell, rows * cell), (0, 0, 0, 0))
+    k = 0
+    for r in range(rows):
+        for c in range(cols):
+            g = (r * 3 + c) % gold_every == 0
+            t = gold_c if g else red
+            if t is not None:
+                L.alpha_composite(t, (c * cell, r * cell))
+            if g and ico:
+                i = ico[k % len(ico)]
+                k += 1
+                L.alpha_composite(i, (c * cell + (cell - i.width) // 2, r * cell + (cell - i.height) // 2))
+    return L
+
+
+def perspective(layer, quad, size=(640, 140)):
+    """layer mapped onto quad [(x,y) top-left, top-right, bottom-right, bottom-left] of a size canvas"""
+    import numpy as np
+    w, h = layer.size
+    src = [(0, 0), (w, 0), (w, h), (0, h)]
+    A, B = [], []
+    for (x, y), (u, v) in zip(quad, src):     # canvas -> layer
+        A.append([x, y, 1, 0, 0, 0, -u * x, -u * y]); B.append(u)
+        A.append([0, 0, 0, x, y, 1, -v * x, -v * y]); B.append(v)
+    coeffs = np.linalg.solve(np.array(A, float), np.array(B, float))
+    return layer.transform(size, Image.PERSPECTIVE, tuple(coeffs), Image.BICUBIC)
+
+
+def fade_left(layer, x0, x1, top=255):
+    m = Image.new('L', layer.size, 0)
+    d = ImageDraw.Draw(m)
+    for x in range(layer.width):
+        d.line((x, 0, x, layer.height - 1), fill=max(0, min(top, int(top * (x - x0) / max(1, x1 - x0)))))
+    layer.putalpha(ImageChops.multiply(layer.getchannel('A'), m))
+    return layer
+
+
+def hp_gauge(im, x0, y0, x1, y1, fill=.72):
+    """a slim boss HP gauge (dark track, red -> orange fill, gold edge): the raid fight motif"""
+    L = Image.new('RGBA', ((x1 - x0) * S, (y1 - y0) * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(L)
+    W, H = L.size
+    d.rounded_rectangle((0, 0, W - 1, H - 1), H // 2, fill=(20, 0, 4, 230), outline=(236, 196, 84, 255), width=int(1.5 * S))
+    fw = int((W - 4 * S) * fill)
+    bar = kept.vgrad((fw, H - 4 * S), (255, 150, 60), (200, 20, 20), 0, H - 4 * S)
+    m = Image.new('L', bar.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, bar.width - 1, bar.height - 1), bar.height // 2, fill=255)
+    L.paste(bar, (2 * S, 2 * S), m)
+    im.alpha_composite(L.resize((x1 - x0, y1 - y0), Image.LANCZOS), (x0, y0))
+    return im
+
+
+def raid_b_variant(style, rigs=None):
+    rigs = rigs or RAID_RIGS
+    im = background((76, 6, 14), (8, 0, 4))
+    if style == 'B1':   # B with the boss lit (full colour, red rim and glow) on a red burst; flat board cells as B
+        im = burst(im, (520, 70))
+        cells = fade_left(board_layer(12, 5), 0, 140, 110)
+        im.alpha_composite(cells, (290, -6))
+        boss, x, h, yb = '0013', 520, 150, 146
+    elif style == 'B2':   # the classic dark raid boss (0001) lit, gold/orange cells with reward icons, burst
+        im = burst(im, (520, 66), alpha=70)
+        cells = fade_left(board_layer(12, 5, icons=True, gold_every=5), 0, 160, 150)
+        im.alpha_composite(cells, (290, -6))
+        boss, x, h, yb = '0001', 528, 156, 148
+    elif style == 'B3':   # the board as a floor in perspective under a lit boss (0004), a slim HP gauge
+        im = burst(im, (520, 60), alpha=50, core=120)
+        floor = perspective(board_layer(14, 6, cell=40, icons=True, gold_every=6), [(330, 78), (660, 78), (720, 150), (250, 150)])
+        im = Image.alpha_composite(im, fade_left(floor, 250, 400, 170))
+        boss, x, h, yb = '0004', 516, 118, 130
+    elif style == 'B4':   # all together: classic boss 0001 lit on a burst, perspective board floor with icons, HP gauge
+        im = burst(im, (522, 58), alpha=70)
+        floor = perspective(board_layer(14, 6, cell=40, icons=True, gold_every=5), [(340, 84), (660, 84), (720, 150), (260, 150)])
+        im = Image.alpha_composite(im, fade_left(floor, 260, 420, 170))
+        boss, x, h, yb = '0001', 522, 150, 138
+    else:
+        raise ValueError('raid B variant %r' % style)
+    lit, glow = lit_boss(boss, rigs, h)
+    if lit is not None:
+        pos = (int(x - lit.width / 2), int(yb - lit.height + 16))
+        g = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        g.alpha_composite(glow, pos)
+        im = Image.alpha_composite(im, g)
+        im = paste_shadowed(im, lit, pos, blur=4, alpha=120)
+        im.info['boss'] = boss
+    if style in ('B3', 'B4'):
+        im = hp_gauge(im, 430, 124, 618, 133, .72)
+    boss_id = im.info.get('boss')
+    out = family_finish(left_shade(im, (0, 0, 0), 130), RAID_CATALOG_TITLE, RAID_CATALOG_SUB, (50, 4, 8))
+    out.info['boss'] = boss_id
+    return out
+
+
+def raid_b_sheets(out_dir):
+    """raid_b_variants.png (old B and B1-B4 at real size) and raid_family.png (Special B, each Raid B variant, Event A in a
+    column) in out_dir; returns the two paths"""
+    from PIL import ImageFont
+    os.makedirs(out_dir, exist_ok=True)
+    try:
+        f = ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf', 16)
+    except OSError:
+        f = ImageFont.load_default()
+    cards = [('Raid B (old)', raid_option('B'))] + [('Raid %s' % v, raid_b_variant(v)) for v in RAID_B_VARIANTS]
+    sheet = Image.new('RGB', (660, len(cards) * 168 + 10), (36, 36, 44))
+    d = ImageDraw.Draw(sheet)
+    for i, (t, c) in enumerate(cards):
+        d.text((10, 10 + i * 168), t, font=f, fill=(255, 255, 255))
+        sheet.paste(c.convert('RGB'), (10, 32 + i * 168))
+    p1 = os.path.join(out_dir, 'raid_b_variants.png')
+    sheet.save(p1)
+    sp, ev = special_option('B').convert('RGB'), event_option('A').convert('RGB')
+    n = len(RAID_B_VARIANTS)
+    fam = Image.new('RGB', (n * 660 + 20, 3 * 152 + 50), (22, 30, 58))
+    d = ImageDraw.Draw(fam)
+    for i, (t, c) in enumerate(cards[1:]):
+        x = 20 + i * 660
+        d.text((x, 14), 'Special B + %s + Event A' % t, font=f, fill=(255, 255, 255))
+        for j, card in enumerate((sp, c.convert('RGB'), ev)):
+            fam.paste(card, (x, 44 + j * 152))
+    p2 = os.path.join(out_dir, 'raid_family.png')
+    fam.save(p2)
+    return p1, p2
+
+
 CATALOG_OPTIONS = {'special': special_option, 'raid': raid_option, 'event': event_option}
 
 
@@ -975,8 +1153,8 @@ def parse_styles(text):
     out = {}
     for part in filter(None, (text or '').split(',')):
         k, _, v = part.partition('=')
-        if k not in CATALOG_OPTIONS or v not in ('A', 'B', 'C'):
-            raise ValueError('catalog style %r: use special|raid|event=A|B|C' % part)
+        if k not in CATALOG_OPTIONS or v not in ('A', 'B', 'C') + (RAID_B_VARIANTS if k == 'raid' else ()):
+            raise ValueError('catalog style %r: use special|raid|event=A|B|C (raid also B1-B4)' % part)
         out[k] = v
     return out
 
@@ -1038,8 +1216,12 @@ def main():
                     help='the event cards of make_event_banners.py (run it first); output goes here too')
     ap.add_argument('--catalog-style', help='build only these catalogue cards in the chosen option, e.g. special=B,raid=A,event=C '
                     '(Catalog options: A/B/C each; 7000 in --out, 8000 in --raid-img, 20000 in --event-img)')
+    ap.add_argument('--raid-b-sheets', help='write raid_b_variants.png and raid_family.png (Raid B variants B1-B4) in this folder')
     ap.add_argument('--options-sheet', help='write catalog_options.png and catalog_family.png (all options) in this folder, nothing else')
     a = ap.parse_args()
+    if a.raid_b_sheets:
+        print('raid B variants: %s, %s' % raid_b_sheets(a.raid_b_sheets))
+        return
     if a.options_sheet:
         print('catalog options: %s, %s' % options_sheets(a.options_sheet))
         return
