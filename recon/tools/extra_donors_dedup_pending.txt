@@ -4,7 +4,6 @@
 # event_enemy_families.json gets approved: true); make_jp_enemies.py never builds a non-approved event family.
 # Read by test_dedup_export.py (rows of these families are allowed only while pending).
 1026
-1526
 1547
 1555
 1579
@@ -15,5 +14,3 @@
 1596
 1597
 1603
-97
-1556

@@ -5965,7 +5965,7 @@ lwf/character/enemy/262/wait/wait_e38393e38383e38388e3839ee38383e383972035382e70
 lwf/character/enemy/262/wait/wait_e38393e38383e38388e3839ee38383e383972035392e706e67.png	jp431:lwf/character/enemy/262/wait/wait_e38393e38383e38388e3839ee38383e383972036342e706e67.png	dedup-order	138x173	A
 # Events Part 1, Task 2b, user review 2 (06-11): slots that the same-name rule had filled with ANOTHER image (bitmap
 # numbering differs between the FLAs of 1556); the 2018 WW record names the identical file, served instead
-# (dedup-wwrecord-override). 5 rows. Events Task 2b, PENDING USER REVIEW.
+# (dedup-wwrecord-override). 5 rows. Events Task 2b, user-approved 06-11.
 lwf/character/enemy/1556/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031332e706e67.png	jp431:lwf/character/enemy/1556/wait/wait_e38393e38383e38388e3839ee38383e383972031322e706e67.png	dedup-wwrecord-override	115x103	A
 lwf/character/enemy/1556/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp431:lwf/character/enemy/1601/knockback/knockback_e38393e38383e38388e3839ee38383e3839720332e706e67.png	dedup-wwrecord-override	17x22	A
 lwf/character/enemy/1556/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp431:lwf/character/enemy/1601/knockback/knockback_e38393e38383e38388e3839ee38383e3839720332e706e67.png	dedup-wwrecord-override	17x22	A
@@ -5973,7 +5973,7 @@ lwf/character/enemy/1556/knockback/knockback_e38393e38383e38388e3839ee38383e3839
 lwf/character/enemy/1556/knockback/knockback_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp431:lwf/character/enemy/1601/knockback/knockback_e38393e38383e38388e3839ee38383e3839720332e706e67.png	dedup-wwrecord-override	17x22	A
 # Events Part 1, Task 2b, user review 2 (06-11): 97 Ringmaster from its JP 4.3.1 files (the 2016 folder is a Shadow
 # placeholder, no_b2016; the plain files of its old placeholder LWFs are dropped, stale_plain); pieces sharing a 2018 WW
-# record with a local JP file (2016 package excluded as sharer). 131 rows. Events Task 2b, PENDING USER REVIEW.
+# record with a local JP file (2016 package excluded as sharer). 131 rows. Events Task 2b, user-approved 06-11.
 lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp431:lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031302e706e67.png	dedup-order	4x4	A
 lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031352e706e67.png	jp431:lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031332e706e67.png	dedup-order	5x3	A
 lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031362e706e67.png	jp431:lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031332e706e67.png	dedup-order	5x3	A
@@ -6107,7 +6107,7 @@ lwf/character/enemy/97/wait/wait_e38393e38383e38388e3839ee38383e3839720382e706e6
 lwf/character/enemy/97/wait/wait_e38393e38383e38388e3839ee38383e3839720392e706e67.png	jp431:lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031302e706e67.png	dedup-order	4x4	A
 # Events Part 1, Task 2b, user review 2 (06-11): 97 slots that the same-name rule filled with another image (the bitmap
 # numbering differs between the FLAs of 97); the 2018 WW record names the identical file (dedup-wwrecord-override).
-# 25 rows. Events Task 2b, PENDING USER REVIEW.
+# 25 rows. Events Task 2b, user-approved 06-11.
 lwf/character/enemy/97/bwait/bwait_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp431:lwf/character/enemy/97/knockback/knockback_e38393e38383e38388e3839ee38383e383972031322e706e67.png	dedup-wwrecord-override	5x3	A
 lwf/character/enemy/97/bwait/bwait_e38393e38383e38388e3839ee38383e383972031312e706e67.png	jp431:lwf/character/enemy/97/move/move_e38393e38383e38388e3839ee38383e383972031312e706e67.png	dedup-wwrecord-override	5x2	A
 lwf/character/enemy/97/bwait/bwait_e38393e38383e38388e3839ee38383e383972031342e706e67.png	jp431:lwf/character/enemy/97/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031332e706e67.png	dedup-wwrecord-override	5x3	A

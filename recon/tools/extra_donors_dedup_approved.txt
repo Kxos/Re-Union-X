@@ -161,3 +161,8 @@
 1565
 1566
 1593
+# Events Task 2b, user-approved 06-11 (redone sheets, user review 2: 97 Ringmaster incl. its 2018 WW record and
+# override rows, 1526 Royal Pretender, 1556 Icy Beast incl. its override rows)
+1526
+97
+1556
