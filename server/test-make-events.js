@@ -227,7 +227,7 @@ const tests = {
     assert.strictEqual(CONFIG.catalogEvStage, 20000);
     const row = out.catalogEvStage;
     assert.deepStrictEqual([row.eventStageId, row.eventCategory, row.eventType, row.stageId, row.detailUrl], [20000, 2, 0, [970000], '/web/event/catalog']);
-    assert.ok(row.bannerUrl.endsWith('/web/event/img/v1/20000.png'), row.bannerUrl);
+    assert.ok(row.bannerUrl.endsWith(`/web/event/img/v${CONFIG.imgVersion}/20000.png`), row.bannerUrl);
     assert.deepStrictEqual(out.index.catalog, { evStageId: 20000, stageIds: [970000], useAp: [0] });
     assert.ok(!out.evStage.some((r) => r.eventStageId === 20000), 'apart from the event rows');
     assert.ok(Object.values(out.ids.rows).every((r) => CONFIG.evStageBase + r !== 20000), 'no record numbered on it');

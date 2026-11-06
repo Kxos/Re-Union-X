@@ -14,10 +14,11 @@ TRAINING sticker; and for every event of server/game_data/events.json a -kept co
 (top left, or top right where event_config.json keptTab says so). After a change bump imgVersion in
 server/event_config.json, then the master revision.
 
-Raid section (raids Part 2, Task 9; run after make_raid_banners.py, whose weekly event cards it reads): the Raid Catalog
-banner (raids.json catalog.evStageId, 8000) in the layout of the Special Catalog banner, «RAID CATALOG» over strips of five
-original weekly raid cards spread over the calendar and the same Training Grounds figures (a tap opens that quest); and for
-every raid week a -kept copy of its card with a gold «KEPT RAID» tab (the kept raid of the Raid Catalog in the Events tab).
+Raid section (raids Part 2, Task 9; run after make_raid_banners.py): the Raid Catalog banner (raids.json catalog.evStageId,
+8000; redesigned 06-11 on the user's request): a red background with light rays, a group of original raid bosses (their
+wait pose from the local raid rigs, --raid-rigs, RAID_BOSSES), the large gold «RAID CATALOG», the subtitle and the TRAINING
+sticker (a tap opens the Training Grounds); and for every raid week a -kept copy of its card with a gold «KEPT RAID» tab
+(the kept raid of the Raid Catalog in the Events tab; --catalog-only leaves them as they are).
 After a change of these files bump RAID_IMG_VERSION (server/routes-raid.js), then the master revision.
 
 Index: server/game_data/special.json (make-special.js). Each entry names the original khuxwiki banner file in `banner`
@@ -62,6 +63,10 @@ CATALOG_TITLE, CATALOG_SUB = 'SPECIAL CATALOG', 'Tap: Training Grounds · Detail
 # Raid Catalog (raids Part 2, Task 9): banner evStage 8000 in game_data/raid_img, kept raid cards <evStageId>-kept.png
 RAID_CATALOG_EV, RAID_CATALOG_TITLE, RAID_CATALOG_SUB = 8000, 'RAID CATALOG', 'Tap: Training Grounds · Details: all raids'
 RAID_KEPT_TEXT, RAID_STRIPS = 'KEPT RAID', 5
+# Raid Catalog bosses (redesign 06-11): original raid boss rigs (lwf/character/raid/<model>/wait, LWF + textures of the game
+# data, local only, --raid-rigs) as (model, height, centre x, baseline y, dark shade 0-1); back row first
+RAID_RIGS = os.path.join(ROOT, 'tmp', 'raid_p2', 'files', 'lwf', 'character', 'raid')
+RAID_BOSSES = [('1009', 80, 596, 86, .3), ('1005', 114, 418, 124, .2), ('0004', 116, 500, 140, 0), ('0013', 104, 594, 142, 0)]
 # Event Catalog (Events Part 1, Task 6): banner evStage 20000 in game_data/event_img, kept event cards <evStageId>-kept.png
 EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB = 'EVENT CATALOG', 'Tap: Training Grounds · Details: all events'
 EVENT_KEPT_TEXT = 'KEPT EVENT'
@@ -200,7 +205,7 @@ def _tab(im, text, hi, lo, dk, solid, size=18, side='left'):
 
 
 # ---- catalogue banner ----
-def enemy_figure(eid, root=None):
+def enemy_figure(eid, root=None, frame=0, size=800):
     """RGBA of an enemy in its wait pose, drawn from the local LWF rig (None when the rig is missing). The ground
     shadow piece (alpha < 1) is left out; flash masks are ignored (the two training enemies have none)."""
     d = os.path.join(root or ENEMIES, str(eid), 'wait')
@@ -224,10 +229,9 @@ def enemy_figure(eid, root=None):
             with open(q, 'rb') as f:
                 b = f.read()
             tex[i] = (Image.open(q) if b[:4] == b'\x89PNG' else btf.decode(b)).convert('RGBA')
-    size = 800
     out = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     off = np.array([[1, 0, size / 2], [0, 1, size * .7], [0, 0, 1.]])
-    for dr in L.draws(L.links.get('all', L.root), 0):
+    for dr in L.draws(L.links.get('all', L.root), frame):
         ti, (u, v, fw, fh), M, mul, add = dr
         if ti not in tex or mul[3] < .99:
             continue
@@ -495,27 +499,72 @@ def raid_cards(raid_img, skip=()):
     return [os.path.join(raid_img, '%d.png' % i) for i in ids]
 
 
-def raid_catalog_banner(raid_img, enemies=None, skip=()):
-    """640x140 RGBA of the Raid Catalog banner (evStage 8000): the Special Catalog banner's layout with «RAID CATALOG», strips
-    of RAID_STRIPS original weekly raid cards spread over the calendar, and the same Training Grounds figures (a tap opens
-    that quest, make-raid.js)"""
-    cards = raid_cards(raid_img, skip)
-    n = min(RAID_STRIPS, len(cards))
-    pick = [cards[round(i * (len(cards) - 1) / max(1, n - 1))] for i in range(n)] if n > 1 else cards[:n]
-    return catalog_banner(None, enemies, RAID_CATALOG_TITLE, RAID_CATALOG_SUB, pick)
+def raid_catalog_banner(rigs=None, bosses=None, title=RAID_CATALOG_TITLE, sub=RAID_CATALOG_SUB):
+    """640x140 RGBA of the Raid Catalog banner (evStage 8000; redesigned 06-11 on the user's request: red, the raid bosses):
+    a red background with light rays (the red of the original raid banners), a group of original raid bosses on the right
+    (their wait pose drawn from the local raid rigs, RAID_BOSSES; one missing -> left out with a WARNING), the large gold
+    «RAID CATALOG», the subtitle, the TRAINING sticker (a tap opens the Training Grounds) and the square gold frame"""
+    W, H = 640, 140
+    im = Image.new('RGBA', (W, H))
+    im.paste(kept.vgrad((W, H), (214, 34, 30), (92, 6, 12), 0, H), (0, 0))
+    rays = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(rays)
+    cx, cy = 470 * S, 64 * S
+    for k in range(18):
+        a0 = math.pi * 2 * k / 18
+        a1 = a0 + math.pi / 30
+        r = 900 * S
+        d.polygon([(cx, cy), (cx + math.cos(a0) * r, cy + math.sin(a0) * r), (cx + math.cos(a1) * r, cy + math.sin(a1) * r)],
+                  fill=(255, 190, 120, 34))
+    im = Image.alpha_composite(im, rays.resize((W, H), Image.LANCZOS))
+    glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(glow).ellipse((330, -10, 620, 150), fill=(255, 150, 60, 120))
+    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(24)))
+    dark = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    dd = ImageDraw.Draw(dark)
+    for x in range(W):
+        dd.line((x, 0, x, H - 1), fill=(30, 0, 4, max(0, int(150 - 150 * x / 360))))
+    im = Image.alpha_composite(im, dark)
+    # the bosses: back row first (smaller, darker), the front one last
+    figs = []
+    for mid, h, x, yb, shade in (bosses if bosses is not None else RAID_BOSSES):
+        f = enemy_figure(mid, rigs or RAID_RIGS, frame=10, size=1600)
+        if f is None:
+            warn('raid boss %s left out of the Raid Catalog banner (rig not found in %s)' % (mid, rigs or RAID_RIGS))
+            continue
+        f = f.resize((max(1, int(f.width * h / f.height)), h), Image.LANCZOS)
+        if shade:
+            f = Image.alpha_composite(f, Image.composite(Image.new('RGBA', f.size, (40, 0, 8, int(255 * shade))),
+                                                         Image.new('RGBA', f.size, (0, 0, 0, 0)), f.getchannel('A')))
+        figs.append(mid)
+        sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+        sh.alpha_composite(f, (int(x - f.width / 2), yb - h))
+        a = sh.getchannel('A').filter(ImageFilter.GaussianBlur(4)).point(lambda v: v * 120 // 255)
+        shadow = Image.new('RGBA', (W, H), (20, 0, 0, 0))
+        shadow.putalpha(a)
+        im = Image.alpha_composite(im, shadow)
+        im = Image.alpha_composite(im, sh)
+    gold_text(im, (20, 50), title, title_font(44), outline=6)
+    ImageDraw.Draw(im).text((22, 106), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
+                            stroke_width=3, stroke_fill=(50, 4, 8, 255))
+    im.alpha_composite(sticker(w=92, h=34, angle=-6), (300, -2))
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(236, 196, 84, 255), width=3)   # square gold frame (user 04-11)
+    im.info['bosses'] = figs
+    return im
 
 
-def build_raid(index, raid_img, mode, enemies=None):
-    """writes raid_img/8000.png (index.catalog of raids.json) and <evStageId>-kept.png for every raid week of the index, the
-    card with a «KEPT RAID» tab (its own card, else the plain plate 0.png; none: skipped). Run after make_raid_banners.py.
-    Returns the counts catalog / kept / missing."""
+def build_raid(index, raid_img, mode, rigs=None, catalog_only=False):
+    """writes raid_img/8000.png (index.catalog of raids.json: raid_catalog_banner) and, unless catalog_only, <evStageId>-kept.png
+    for every raid week of the index, the card with a «KEPT RAID» tab (its own card, else the plain plate 0.png; none:
+    skipped). Run after make_raid_banners.py. Returns the counts catalog / kept / missing."""
     os.makedirs(raid_img, exist_ok=True)
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        jp = {e['evStageId'] for e in index.get('entries', []) if e.get('jp') and e.get('evStageId')}
-        mbi.save_png(raid_catalog_banner(raid_img, enemies, jp), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
+        mbi.save_png(raid_catalog_banner(rigs), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
         n['catalog'] += 1
+    if catalog_only:
+        return n
     for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
         src = next((p for p in (os.path.join(raid_img, '%d.png' % ev), os.path.join(raid_img, '0.png')) if os.path.exists(p)), None)
         if not src:
@@ -553,47 +602,90 @@ def game_image(p):
 
 
 def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG_SUB):
-    """640x140 RGBA of the Event Catalog banner (evStage 20000): no collage, a clean cyan -> green background with soft light
-    rays, the game's Event Coin as emblem on the left, a large white «EVENT CATALOG» with a dark teal outline, the subtitle,
-    the small TRAINING sticker (a tap opens the Training Grounds) and a thin white frame"""
+    """640x140 RGBA of the Event Catalog banner (evStage 20000; user 06-11: cyan/green, clearly apart from the Raid Catalog,
+    then «more beautiful»): a cyan -> green background with light rays and soft bokeh as the original event banners, the
+    game's Event Coin three times (a large one in front of two tilted ones) on a glow with sparkles, the large title with
+    the original banners' lettering (white -> pale cyan fill, dark teal outline, white outer rim, drop shadow), the subtitle
+    on a dark teal ribbon with a white edge, the small TRAINING sticker and a thin white frame"""
+    import random
     W, H = 640, 140
+    rnd = random.Random(20000)
     im = Image.new('RGBA', (W, H))
     im.paste(kept.vgrad((W, H), EVENT_TOP, EVENT_BOT, 0, H), (0, 0))
     rays = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(rays)
-    cx, cy = 70 * S, 70 * S
-    for k in range(14):
-        a0 = math.pi * 2 * k / 14
-        a1 = a0 + math.pi / 28
+    cx, cy = 74 * S, 70 * S
+    for k in range(16):
+        a0 = math.pi * 2 * k / 16
+        a1 = a0 + math.pi / 26
         r = 900 * S
         d.polygon([(cx, cy), (cx + math.cos(a0) * r, cy + math.sin(a0) * r), (cx + math.cos(a1) * r, cy + math.sin(a1) * r)],
-                  fill=(255, 255, 255, 26))
+                  fill=(255, 255, 255, 30))
     im = Image.alpha_composite(im, rays.resize((W, H), Image.LANCZOS))
+    # bokeh: soft round lights
+    bk = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    db = ImageDraw.Draw(bk)
+    for _ in range(26):
+        x, y, r = rnd.randint(150, 640), rnd.randint(-10, 150), rnd.randint(6, 22)
+        db.ellipse((x - r, y - r, x + r, y + r), fill=(255, 255, 240, rnd.randint(28, 70)))
+    im = Image.alpha_composite(im, bk.filter(ImageFilter.GaussianBlur(2.5)))
     band = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(band).polygon([(250, 0), (330, 0), (230, 140), (150, 140)], fill=(255, 255, 255, 30))
+    ImageDraw.Draw(band).polygon([(250, 0), (330, 0), (230, 140), (150, 140)], fill=(255, 255, 255, 26))
     im = Image.alpha_composite(im, band.filter(ImageFilter.GaussianBlur(6)))
-    sp = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    ds = ImageDraw.Draw(sp)
-    for x, y, r in ((560, 52, 4), (604, 112, 3), (470, 122, 3), (515, 84, 2), (380, 18, 2), (150, 126, 3)):
-        ds.polygon([(x, y - r * 3), (x + r, y), (x, y + r * 3), (x - r, y)], fill=(255, 255, 255, 200))
-        ds.polygon([(x - r * 3, y), (x, y - r), (x + r * 3, y), (x, y + r)], fill=(255, 255, 255, 200))
-    im = Image.alpha_composite(im, sp)
     glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(glow).ellipse((14, 14, 126, 126), fill=(255, 255, 255, 150))
-    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(10)))
+    ImageDraw.Draw(glow).ellipse((4, 4, 150, 136), fill=(255, 255, 230, 170))
+    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(14)))
     if coin and os.path.exists(coin):
-        im.alpha_composite(game_image(coin).resize((108, 108), Image.LANCZOS), (16, 16))
+        c = game_image(coin)
+        for size, ang, x, y, shade in ((62, 24, 4, 8, .25), (62, -20, 84, 6, .25), (104, 0, 22, 26, 0)):
+            ci = c.resize((size, size), Image.LANCZOS).rotate(ang, Image.BICUBIC, expand=True)
+            if shade:
+                ci = Image.alpha_composite(ci, Image.composite(Image.new('RGBA', ci.size, (0, 60, 60, int(255 * shade))),
+                                                               Image.new('RGBA', ci.size, (0, 0, 0, 0)), ci.getchannel('A')))
+            sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+            sh.alpha_composite(ci, (x, y))
+            a = sh.getchannel('A').filter(ImageFilter.GaussianBlur(3)).point(lambda v: v * 110 // 255)
+            shadow = Image.new('RGBA', (W, H), (0, 40, 40, 0))
+            shadow.putalpha(a)
+            im = Image.alpha_composite(im, shadow)
+            im = Image.alpha_composite(im, sh)
     else:
         warn('Event Coin left out of the Event Catalog banner: %s not found (local JP data)' % (coin or '/'.join(EVENT_COIN)))
+    sp = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sp)
+    for x, y, r in ((128, 22, 4), (20, 112, 3), (140, 112, 3), (560, 60, 4), (604, 112, 3), (470, 124, 2), (380, 16, 2)):
+        ds.polygon([(x, y - r * 3), (x + r, y), (x, y + r * 3), (x - r, y)], fill=(255, 255, 255, 230))
+        ds.polygon([(x - r * 3, y), (x, y - r), (x + r * 3, y), (x, y + r)], fill=(255, 255, 255, 230))
+    im = Image.alpha_composite(im, sp)
+    # title: drop shadow, white outer rim, dark teal outline, white -> pale cyan fill
     f = title_font(46)
-    ImageDraw.Draw(im).text((142, 56), title, font=f, anchor='lm', fill=EVENT_INK, stroke_width=6, stroke_fill=EVENT_INK)
+    tx, ty = 150, 54
+    shd = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shd).text((tx + 3, ty + 4), title, font=f, anchor='lm', fill=(0, 40, 40, 150), stroke_width=9, stroke_fill=(0, 40, 40, 150))
+    im = Image.alpha_composite(im, shd.filter(ImageFilter.GaussianBlur(2)))
+    ImageDraw.Draw(im).text((tx, ty), title, font=f, anchor='lm', fill=(255, 255, 255, 255), stroke_width=9, stroke_fill=(255, 255, 255, 255))
+    ImageDraw.Draw(im).text((tx, ty), title, font=f, anchor='lm', fill=EVENT_INK, stroke_width=6, stroke_fill=EVENT_INK)
     m = Image.new('L', (W, H), 0)
-    ImageDraw.Draw(m).text((142, 56), title, font=f, anchor='lm', fill=255)
+    ImageDraw.Draw(m).text((tx, ty), title, font=f, anchor='lm', fill=255)
     bb = m.getbbox()
     if bb:
-        im.paste(kept.vgrad((W, H), (255, 255, 255), (206, 246, 240), bb[1], bb[3]), (0, 0), m)
-    ImageDraw.Draw(im).text((144, 106), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
-                            stroke_width=3, stroke_fill=EVENT_INK)
+        im.paste(kept.vgrad((W, H), (255, 255, 255), (178, 240, 236), bb[1], bb[3]), (0, 0), m)
+        hl = Image.new('L', (W, H), 0)
+        ImageDraw.Draw(hl).rectangle([bb[0], bb[1], bb[2], bb[1] + (bb[3] - bb[1]) * .35], fill=90)
+        im.paste(Image.new('RGBA', (W, H), (255, 255, 255, 255)), (0, 0), ImageChops.multiply(m, hl))
+    # subtitle ribbon
+    fs = make_shop_art.font(18)
+    tw = ImageDraw.Draw(im).textlength(sub, font=fs)
+    x0, x1, y0, y1 = 140, 140 + tw + 28, 94, 120
+    rib = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    dr = ImageDraw.Draw(rib)
+    dr.polygon([(x0, y0), (x1, y0), (x1 - 8, (y0 + y1) / 2), (x1, y1), (x0, y1), (x0 + 8, (y0 + y1) / 2)], fill=(10, 86, 88, 235),
+               outline=(255, 255, 255, 255))
+    dr.line([(x0, y0), (x1, y0)], fill=(255, 255, 255, 255), width=2)
+    dr.line([(x0, y1), (x1, y1)], fill=(255, 255, 255, 255), width=2)
+    im = Image.alpha_composite(im, rib)
+    ImageDraw.Draw(im).text((x0 + 14, (y0 + y1) / 2 + 1), sub, font=fs, anchor='lm', fill=(255, 255, 255, 255),
+                            stroke_width=2, stroke_fill=(0, 40, 40, 255))
     im.alpha_composite(sticker(w=92, h=34, angle=-6), (540, 0))
     ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(255, 255, 255, 255), width=3)   # square corners as the cards
     return im
@@ -651,6 +743,8 @@ def main():
                     help='special: the Special tab banners; raid: the Raid Catalog banner and the kept raid cards; '
                          'event (not in all): the Event Catalog banner and the kept event cards')
     ap.add_argument('--raid-index', default=os.path.join(REPO, 'server', 'game_data', 'raids.json'))
+    ap.add_argument('--raid-rigs', default=RAID_RIGS, help='raid boss rigs lwf/character/raid (LWF + textures) for the Raid Catalog banner')
+    ap.add_argument('--catalog-only', action='store_true', help='raid section: only the Raid Catalog banner, not the kept raid cards')
     ap.add_argument('--raid-img', default=os.path.join(REPO, 'server', 'game_data', 'raid_img'),
                     help='the weekly event cards of make_raid_banners.py (run it first); output goes here too')
     ap.add_argument('--event-index', default=os.path.join(REPO, 'server', 'game_data', 'events.json'))
@@ -670,7 +764,7 @@ def main():
     if a.section in ('all', 'raid'):
         if os.path.exists(a.raid_index):
             with open(a.raid_index, encoding='utf-8') as f:
-                rr = build_raid(json.load(f), a.raid_img, a.mode, a.enemies)
+                rr = build_raid(json.load(f), a.raid_img, a.mode, a.raid_rigs, a.catalog_only)
             print('raid banners: %d catalog, %d kept cards, %d weeks without a card -> %s' % (rr['catalog'], rr['kept'], rr['missing'], a.raid_img))
         else:
             warn('%s not found: no Raid Catalog banner' % a.raid_index)

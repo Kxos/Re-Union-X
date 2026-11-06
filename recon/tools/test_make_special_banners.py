@@ -223,8 +223,21 @@ try:
     check(rcat.size == (640, 140), 'Raid Catalog banner 640x140')
     check(sum(gold(p) for p in pixels(rcat.crop((10, 12, 450, 82)))) > 1500, 'RAID CATALOG title in gold lettering')
     check(mean(ImageChops.difference(rcat, cat)) > 8, 'not the Special Catalog banner')
-    check(mean(ImageChops.difference(rcat, m.catalog_banner(None, None, m.RAID_CATALOG_TITLE, m.RAID_CATALOG_SUB, []).convert('RGB'))) > 8,
-          'background made of the weekly cards')
+    # redesign 06-11: red, raid bosses, no weekly cards in it
+    bgp = rcat.getpixel((200, 128))
+    check(bgp[0] > bgp[1] + 60 and bgp[0] > bgp[2] + 60, 'red background %s' % (bgp,))
+    check(not any(p == ((40 * i) % 255, 60, 200 - 20 * i) for i in range(7) for p in pixels(rcat.crop((0, 0, 640, 140)).resize((160, 35)))),
+          'no weekly card in the Raid Catalog banner')
+    if os.path.isdir(m.RAID_RIGS):
+        check(m.raid_catalog_banner().info.get('bosses') == [b[0] for b in m.RAID_BOSSES], 'the raid bosses are drawn')
+        check(mean(ImageChops.difference(rcat, m.raid_catalog_banner(os.path.join(tmp, 'no_rigs')).convert('RGB'))) > 3, 'bosses change the banner')
+    else:
+        print('(raid rigs %s missing: boss check skipped)' % m.RAID_RIGS)
+    rco = os.path.join(tmp, 'raid_catonly')
+    os.makedirs(rco)
+    Image.new('RGB', (640, 140), (1, 2, 3)).save(os.path.join(rco, '8070.png'))
+    check(m.build_raid(rix, rco, 'full', catalog_only=True) == {'catalog': 1, 'kept': 0, 'missing': 0}
+          and not os.path.exists(os.path.join(rco, '8070-kept.png')), 'catalog_only: no kept raid card written')
     check(8000 not in [int(os.path.basename(p)[:-4]) for p in m.raid_cards(rimg)], 'the catalogue banner is no strip of itself')
     check([os.path.basename(p) for p in m.raid_cards(rimg, {8071, 8072})] == ['8070.png', '8073.png', '8074.png', '8075.png', '8076.png'],
           'Japan-only cards (skip) are no strips')
