@@ -30,6 +30,7 @@ sys.argv = _argv
 SMOKE = (251, 255, 271, 285, 1500, 1502, 1504, 1505, 1506, 1510, 2500, 2501, 2502, 2504, 2506, 2507, 2508, 2509, 2510)
 IDX = '2018 WW container name index: same record offsets as %s (I-194 23-10, user-approved)'
 IDX_PENDING = '2018 WW container name index: same record offsets as %s (Events Task 2b, pending user review)'
+IDX_EVENTS = '2018 WW container name index: same record offsets as %s (Events Task 2b, user-approved 06-11)'
 # (family, anim, donor: (family, anim) planned like the generator, or 'container:folder' copied as is, rule, note)
 COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (generic Shadow smoke)') for f in SMOKE] +
           [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX % ('%d/dead (twin)' % t))
@@ -45,11 +46,11 @@ COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (gener
           [(1618, 'dead', (1624, 'dead'), 'whole-same-rig',
             'reconstruction: 1624/1628 dead (same Cy-Bug footprint; I-194 23-10, user-approved, category 3)')] +
           # Events Part 1, Task 2b (6 Nov 2026): event quest enemies with no dead.lwf in the JP dump; same evidence (the
-          # 2018 index puts their dead.lwf on the donor's record), NOT approved yet: label IDX_PENDING until the user
-          # approves the rendered animations (make_jp_enemies.py builds them only for approved event families)
-          [(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX_PENDING % 'enemy/1/dead (generic Shadow smoke)')
+          # 2018 index puts their dead.lwf on the donor's record); approved by the user on the rendered sheets 06-11,
+          # where the copies were declared (label IDX_EVENTS; IDX_PENDING for a future copy not approved yet)
+          [(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX_EVENTS % 'enemy/1/dead (generic Shadow smoke)')
            for f in (226, 1530)] +
-          [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX_PENDING % ('%d/dead (twin)' % t))
+          [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX_EVENTS % ('%d/dead (twin)' % t))
            for f, t in ((1522, 1529), (1566, 1565))])
 
 

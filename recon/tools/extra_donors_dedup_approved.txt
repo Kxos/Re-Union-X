@@ -150,3 +150,15 @@
 1501:knockback
 1501:wait
 2002:wait
+# Events Task 2b, user-approved 06-11 (rendered animations of the event quest families; 2018 WW record rows of
+# extra_donors_dedup.tsv, block «Events Part 1, Task 2b»)
+226
+262
+1025
+1522
+1546
+1553
+1556
+1565
+1566
+1593
