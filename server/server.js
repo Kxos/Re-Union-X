@@ -4552,10 +4552,12 @@ function respondRaidWeb(res, url) {
 }
 // Medal Gallery (I-242, medal-gallery.js; docs/notes/medaglie.md#medal-gallery). GET /web/medals/gallery[?tab=art][&from=catalog]:
 // the page, with the Medals of the save (boosted copies count for their base row). GET /web/medals/img/v<N>/<thumbId>.png (medal
-// picture) and /web/medals/art/v<N>/<artId>.jpg and <artId>-l.jpg (artwork, small / large): files of game_data/medal_img written
-// by recon/tools/make_medal_gallery_images.py (git-ignored, local data); another version or a missing file: 404.
+// picture, -l: large) and /web/medals/art/v<N>/<artId>.jpg and <artId>-l.jpg (artwork, small / large): files of
+// game_data/medal_img; GET /web/medals/bgm/v<N>/<soundId>.ogg (music of a BGM Medal, byte ranges): game_data/medal_bgm. Both
+// written by recon/tools/make_medal_gallery_images.py (git-ignored, local data); another version or a missing file: 404.
 const MEDAL_GALLERY_IMG = process.env.KHUX_MEDAL_GALLERY_IMG || path.join(__dirname, 'game_data', 'medal_img');
-function respondMedalWeb(res, url) {
+const MEDAL_GALLERY_BGM = process.env.KHUX_MEDAL_GALLERY_BGM || path.join(__dirname, 'game_data', 'medal_bgm');
+function respondMedalWeb(res, url, req = { headers: {} }) {
   const p = url.split('?')[0];
   const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
   if (/^\/web\/medals\/gallery$/i.test(p)) {
@@ -4565,11 +4567,20 @@ function respondMedalWeb(res, url) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
     return res.end(b);
   }
-  const file = medalGallery.imageFile(p);
-  if (!file || !fs.existsSync(path.join(MEDAL_GALLERY_IMG, file))) return notFound();
-  const b = fs.readFileSync(path.join(MEDAL_GALLERY_IMG, file));
-  res.writeHead(200, { 'Content-Type': file.endsWith('.png') ? 'image/png' : 'image/jpeg', 'Content-Length': b.length });
-  return res.end(b);
+  const f = medalGallery.mediaFile(p);
+  const file = f && path.join(f.dir === 'bgm' ? MEDAL_GALLERY_BGM : MEDAL_GALLERY_IMG, f.file);
+  if (!file || !fs.existsSync(file)) return notFound();
+  const size = fs.statSync(file).size;
+  // the music: byte ranges (the WebView's media player asks for them to stream and loop)
+  const range = f.dir === 'bgm' && /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || ''));
+  if (range && (range[1] || range[2])) {
+    let start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2])), end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+    if (start >= size || start > end) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); return res.end(); }
+    res.writeHead(206, { 'Content-Type': f.type, 'Content-Length': end - start + 1, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Accept-Ranges': 'bytes' });
+    return fs.createReadStream(file, { start, end }).pipe(res);
+  }
+  res.writeHead(200, { 'Content-Type': f.type, 'Content-Length': size, ...(f.dir === 'bgm' ? { 'Accept-Ranges': 'bytes' } : {}) });
+  return fs.createReadStream(file).pipe(res);
 }
 // POST /web/raid/keep/<evStageId> and /web/raid/unkeep (buttons of the Raid Catalog): routes-raid.js keep / unkeep, JSON {ok, why?}
 function respondRaidPost(res, url) {
@@ -4938,7 +4949,7 @@ function handler(scheme) {
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
       if (kind === 'raidweb') return req.method === 'POST' ? respondRaidPost(res, req.url) : respondRaidWeb(res, req.url);
-      if (kind === 'medalweb') return respondMedalWeb(res, req.url);
+      if (kind === 'medalweb') return respondMedalWeb(res, req.url, req);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
