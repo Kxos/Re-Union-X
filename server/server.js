@@ -4470,23 +4470,40 @@ function raid() {
 // from the master (sphereMasu of the board: rewardSelect = item type, raid-boards.js SEL / PARTS_SEL); unlockQuestOf as the
 // Special catalogue (special.unlockQuest on the story rows of the Shop catalogue, from the row's start).
 const RAID_TICKET_NAMES = ['Draw Ticket', 'Holiday Draw Ticket', 'Spooky Cookie', 'Moogle Points']; // gacha.js TICKET_CURRENCIES order
+// Lookups indexed once per master version (task 3, 06-11): the catalogue asks for every board of every raid (642 boards), and a
+// masterRows() call copies the whole table, so the plain finds took about a second per page. Rebuilt when one of the tables
+// changes on disk (checked at most every 2 s).
+const RAID_BOARD_TABLES = ['sphere', 'sphereMasu', 'medal', 'material', 'title', 'avatarParts', 'petParts'];
+let raidBoardIx = null;
+function raidBoardIndex() {
+  if (raidBoardIx && Date.now() - raidBoardIx.checked < 2000) return raidBoardIx;
+  const stamp = RAID_BOARD_TABLES.map((n) => { try { const s = fs.statSync(path.join(MASTER_DIR, n + '.json')); return `${s.mtimeMs}:${s.size}`; } catch { return '-'; } }).join('|');
+  if (raidBoardIx && raidBoardIx.stamp === stamp) { raidBoardIx.checked = Date.now(); return raidBoardIx; }
+  const by = (table, key) => new Map(masterRows(table).map((r) => [r[key], r]));
+  raidBoardIx = { stamp, checked: Date.now(), sphere: by('sphere', 'sphereBoardId'), masu: by('sphereMasu', 'sphereBoardId'), medal: by('medal', 'medalId'), material: by('material', 'materialId'),
+    title: by('title', 'titleId'), avatarParts: by('avatarParts', 'avatarPartsId'), petParts: by('petParts', 'petPartsId'), items: new Map() };
+  return raidBoardIx;
+}
 function raidBoardItems(sphereBoardId) {
-  const masu = masterRows('sphereMasu').find((r) => r.sphereBoardId === Number(sphereBoardId));
+  const ix = raidBoardIndex(), id = Number(sphereBoardId);
+  if (ix.items.has(id)) return ix.items.get(id).slice();
+  const masu = ix.masu.get(id);
   if (!masu) return [];
-  const byId = (table, key, id) => masterRows(table).find((r) => r[key] === id);
-  const name = (sel, id) => {
-    if (sel === 3) return byId('medal', 'medalId', id)?.name;
-    if (sel === 5) return byId('material', 'materialId', id)?.name;
-    if (sel === 7) return byId('title', 'titleId', id)?.title;
-    if (sel === 19 || sel === 20 || sel === 23) return byId('avatarParts', 'avatarPartsId', id)?.name;
-    if (sel === 33) return byId('petParts', 'petPartsId', id)?.name;
+  const name = (sel, x) => {
+    if (sel === 3) return ix.medal.get(x)?.name;
+    if (sel === 5) return ix.material.get(x)?.name;
+    if (sel === 7) return ix.title.get(x)?.title;
+    if (sel === 19 || sel === 20 || sel === 23) return ix.avatarParts.get(x)?.name;
+    if (sel === 33) return ix.petParts.get(x)?.name;
     if (sel === 2) return 'Jewels';
-    if (sel === 41) return RAID_TICKET_NAMES[id] || RAID_TICKET_NAMES[0];
+    if (sel === 41) return RAID_TICKET_NAMES[x] || RAID_TICKET_NAMES[0];
     return '';
   };
-  return [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? name(sel, masu.rewardId[i]) : '')).filter(Boolean))];
+  const out = [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? name(sel, masu.rewardId[i]) : '')).filter(Boolean))];
+  ix.items.set(id, out);
+  return out.slice();
 }
-const raidBoardName = (sphereBoardId) => masterRows('sphere').find((r) => r.sphereBoardId === Number(sphereBoardId))?.boardName || '';
+const raidBoardName = (sphereBoardId) => raidBoardIndex().sphere.get(Number(sphereBoardId))?.boardName || '';
 // RAID BOARDS filter of the Raid Catalog (user 03-11): a Raid Board is complete when every node is unlocked in player.raidSphere,
 // the rule of the board screen (status 3 of userSphereData), whether it is handed out now or not (its progress is kept for good);
 // a board never handed out or not served by the master is not complete.

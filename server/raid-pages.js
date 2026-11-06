@@ -147,7 +147,7 @@ if(cur.prog!=='all')h+=' '+tag('prog',LAB.prog[cur.prog]);
 if(cur.bd!=='all')h+=' '+tag('bd',LAB.bd[cur.bd]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
-$('sum').innerHTML=h;$('fdot').textContent=f?f:'';
+$('sum').innerHTML=h;if(window.kxImgs)kxImgs();$('fdot').textContent=f?f:'';
 for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
 var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids'+(cur.bd==='done'?' with completed Raid Boards':cur.bd==='todo'?' with Raid Boards to complete':'');none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';}
 // after a keep / remove: the kept row gold, the previous one back to «can be kept», the «Replaces» lines
@@ -192,22 +192,57 @@ const replacesLine = (st, kept) => (st.button === null ? ''
 const PAGE_HEAD = (title, css) => '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
   + `<title>${esc(title)}</title><style>${css}</style></head>`;
 
+// Light catalogue (task 3, 06-11: 366+ KB took long to show in the in-game WebView): the rows are sent packed and built by the
+// page before its filter script runs, so the DOM and the filters are the same as before. Each row's markup becomes a template:
+// its own values (search names, date line, name, evStageId, year) are replaced by markers \u0001<k>, so the rows share a few
+// dozen templates; the search names go through one dictionary. Replacing a value and putting the same value back is
+// lossless whatever else the text holds. Card pictures: data-src, loaded only for the rows shown (kxImgs after every render):
+// the old WebView ignores loading="lazy" and fetched all the cards at once. The details of a raid stay on its own page.
+const PACK_KEYS = ['s', 'd', 'n', 'e', 'y'];
+function packCatalog(packed) {
+  const tpl = [], tplIx = new Map(), dict = [], dictIx = new Map();
+  const word = (w) => { if (!dictIx.has(w)) { dictIx.set(w, dict.length); dict.push(w); } return dictIx.get(w); };
+  const rows = packed.map(({ label, fields, html }) => {
+    let h = html;
+    PACK_KEYS.forEach((k) => { if (fields[k]) h = h.split(fields[k]).join(`\u0001${k}`); });
+    if (!tplIx.has(h)) { tplIx.set(h, tpl.length); tpl.push(h); }
+    return [tplIx.get(h), fields.s ? fields.s.split(' | ').map(word) : [], fields.d, fields.n, fields.e, fields.y, label];
+  });
+  // «</» never closes the script element: written <\/ inside the JSON
+  return JSON.stringify({ t: tpl, w: dict, r: rows }).replace(/<\//g, '<\\/');
+}
+const unpackRow = (d, r) => r[6] + d.t[r[0]].replace(/\u0001([sdney])/g, (x, k) => ({ s: r[1].map((i) => d.w[i]).join(' | '), d: r[2], n: r[3], e: r[4], y: r[5] })[k]);
+// the same expansion as UNPACK_JS, for the tests: the catalogue page with its rows written out
+function expandCatalog(page) {
+  const m = /<script id="kxrows" type="application\/json">([\s\S]*?)<\/script><script>[\s\S]*?<\/script>/.exec(page);
+  if (!m) return page;
+  const d = JSON.parse(m[1]);
+  const html = d.r.map((r) => unpackRow(d, r)).join('');
+  return page.replace(m[0], '').replace(/(<div id="rows" data-defy="[^"]*">)/, (x) => x + html);
+}
+const UNPACK_JS = 'function kxImgs(){var a=document.querySelectorAll("#rows .row"),i,im;for(i=0;i<a.length;i++){if(/ hide/.test(a[i].className))continue;im=a[i].querySelector("img[data-src]");if(im&&!im.getAttribute("src"))im.setAttribute("src",im.getAttribute("data-src"));}}'
+  + '(function(){var d=JSON.parse(document.getElementById("kxrows").textContent),o=[],i,r;for(i=0;i<d.r.length;i++){r=d.r[i];'
+  + 'o.push(r[6]+d.t[r[0]].replace(/\u0001([sdney])/g,function(x,k){if(k==="s"){var s=[],j;for(j=0;j<r[1].length;j++)s.push(d.w[r[1][j]]);return s.join(" | ");}return k==="d"?r[2]:k==="n"?r[3]:k==="e"?r[4]:r[5];}));}'
+  + 'document.getElementById("rows").innerHTML=o.join("");})();';
 function catalogPage(index, ctx = {}) {
   const periods = ctx.periods, rows = calendar.catalogRows(index), kept = keptRow(rows, ctx);
   const curPeriod = ctx.shopFrom ? periodOf(ctx.shopFrom, periods) : null;
   let lastM = '';
-  const html = rows.map((row) => {
+  const packed = [];
+  rows.forEach((row) => {
     const st = statusOf(row, ctx), href = detailHref(row.evStageId), y = row.start.slice(0, 4), m = row.start.slice(0, 7);
     const label = m !== lastM ? `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>` : '';
     lastM = m;
     const tiers = [...new Set(row.entries.map((e) => e.tier))], done = doneOf(row, ctx), bd = boardsOf(row, ctx);
-    return `${label}<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
-      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${esc(searchOf(row, ctx))}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
-      + `<a class="im" href="${href}"><img loading="lazy" width="320" height="70" src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
-      + `<div class="info"><a class="nm" href="${href}">${esc(titleOf(row))}${done ? CROWN : ''}</a><div class="d">${row.jp ? 'Japan only · ' : ''}${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}</div>${st.pill}`
+    const name = esc(titleOf(row)), line = `${row.jp ? 'Japan only · ' : ''}${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}`, search = esc(searchOf(row, ctx));
+    packed.push({ label, fields: { s: search, d: line, n: name, e: String(row.evStageId), y }, html: `<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
+      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${search}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
+      + `<a class="im" href="${href}"><img width="320" height="70" data-src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
+      + `<div class="info"><a class="nm" href="${href}">${name}${done ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
-      + '<div class="mt"></div></div><a class="go" href="' + href + '" aria-label="Details">›</a></div>\n';
-  }).join('');
+      + '<div class="mt"></div></div><a class="go" href="' + href + '" aria-label="Details">›</a></div>\n' });
+  });
+  const data = packCatalog(packed);
   const years = [...new Set(rows.map((r) => r.start.slice(0, 4)))];
   const shopYear = String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
   const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
@@ -225,7 +260,8 @@ function catalogPage(index, ctx = {}) {
     + `<div class="yrs" id="yrs">${yearChip('all', 'All years', rows.length)}${years.map((y) => yearChip(y, y, rows.filter((r) => r.start.startsWith(y)).length)).join('')}</div>`
     + `<div class="sum" id="sum"><span class="n1">${plural(rows.length, 'raid')}</span> · no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
-    + `<div id="rows" data-defy="${defYear}">${html || '<p class="n">No raids.</p>'}</div>`
+    + `<div id="rows" data-defy="${defYear}">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
+    + (packed.length ? `<script id="kxrows" type="application/json">${data}</script><script>${UNPACK_JS}</script>` : '')
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Boss, board or reward name" autocomplete="off"></div>'
@@ -592,4 +628,4 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
 }
 
-module.exports = { catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch };
+module.exports = { expandCatalog, catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch };

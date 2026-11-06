@@ -201,7 +201,7 @@ const tests = {
     } finally { p.raidSphere[A].unlock = keep; }
     assert.strictEqual(done(3999903), false, 'not in the master: never complete');
     assert.strictEqual(done(3999999), false);
-    const html = require('./raid-pages').catalogPage(t.raidIndex(), t.raidPageCtx());
+    const rp = require('./raid-pages'), html = rp.expandCatalog(rp.catalogPage(t.raidIndex(), t.raidPageCtx()));
     assert(/data-boards="done"/.test(html), 'the page gets it');
   },
 };
