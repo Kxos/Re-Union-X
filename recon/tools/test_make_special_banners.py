@@ -264,7 +264,7 @@ try:
             opts[(k, st)] = o.convert('RGB')
             check(o.size == (640, 140), '%s %s size' % (k, st))
             tb = o.info.get('title_box')
-            check(tb is not None and tb[2] <= m.STICKER_XY[0] and tb[0] >= 10, '%s %s title box %s left of the sticker' % (k, st, tb))
+            check(tb is not None and tb[2] <= m.TITLE_MAX_RIGHT and tb[0] >= 10, '%s %s title box %s left of the sticker' % (k, st, tb))
             check(o.convert('RGB').getpixel((1, 70)) == m.FAMILY_GOLD[:3] and o.convert('RGB').getpixel((320, 138)) == m.FAMILY_GOLD[:3],
                   '%s %s gold frame' % (k, st))
             check(sum(gold(p) for p in pixels(o.convert('RGB').crop((20, 30, 300, 75)))) > 1200, '%s %s gold title' % (k, st))
@@ -281,6 +281,28 @@ try:
             pass
     p1, p2 = m.options_sheets(os.path.join(tmp, 'sheets'))
     check(Image.open(p1).size == (660, 9 * 168 + 10) and os.path.exists(p2), 'options sheets')
+    # Raid B variants (user 06-11): gold family look, a lit boss, different from B and from each other
+    rb = {'B': opts[('raid', 'B')]}
+    for v in m.RAID_B_VARIANTS:
+        o = m.raid_option(v)
+        rb[v] = o.convert('RGB')
+        check(o.size == (640, 140) and o.convert('RGB').getpixel((1, 70)) == m.FAMILY_GOLD[:3], 'raid %s size and gold frame' % v)
+        tb = o.info.get('title_box')
+        check(tb is not None and tb[2] <= m.TITLE_MAX_RIGHT, 'raid %s title clear of the sticker %s' % (v, tb))
+        if os.path.isdir(m.RAID_RIGS):
+            check(o.info.get('boss') in ('0013', '0001', '0004'), 'raid %s boss drawn (%s)' % (v, o.info.get('boss')))
+    ks = list(rb)
+    for i, a_ in enumerate(ks):
+        for b_ in ks[i + 1:]:
+            check(mean(ImageChops.difference(rb[a_], rb[b_])) > 8, 'raid %s and %s too alike' % (a_, b_))
+    check(m.parse_styles('raid=B3,special=B,event=A') == {'raid': 'B3', 'special': 'B', 'event': 'A'}, 'parse_styles B3')
+    try:
+        m.parse_styles('special=B1')
+        errors.append('parse_styles accepts special=B1')
+    except ValueError:
+        pass
+    q1, q2 = m.raid_b_sheets(os.path.join(tmp, 'rbsheets'))
+    check(Image.open(q1).size == (660, 5 * 168 + 10) and Image.open(q2).size[0] == 4 * 660 + 20, 'raid B sheets')
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
