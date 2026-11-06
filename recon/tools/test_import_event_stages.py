@@ -70,6 +70,41 @@ try:
     assert os.listdir(os.path.join(out, 'stage')) == []
     rep4 = ies.run(items[:1], files, rooms, set(ids[1:]), rewards, out)
     assert rep4['stages'][0]['status'] == 'skipped' and 'enemies not in the master' in rep4['stages'][0]['why']
+    # enemy swaps (user ruling 06-11): the real ones of server/event_config.json, only the enemy ids change
+    cfg = json.load(open(os.path.join(ies.REPO, 'server', 'event_config.json'), encoding='utf-8'))
+    for key, sw in cfg['mapEnemySwaps'].items():
+        key = int(key)
+        st0, p0 = mapfile.load_stage(files, key)
+        raw0 = [open(files[(key, None)], 'rb').read()] + [open(files[(key, k)], 'rb').read() for k in range(len(p0))]
+        new, done = ies.patch_swaps(raw0, sw)
+        frm, to = sw[0]['from'], sw[0]['to']
+        n_from = sum(1 for p in p0 for e in p['enemies'] if e['enemyId'] == frm)
+        assert n_from and len([d for d in done if d['part'] is not None]) == n_from, (key, done)
+        changed = 0
+        for k, (a, b) in enumerate(zip(raw0, new)):
+            assert len(a) == len(b), 'same size'
+            diff = [i for i in range(len(a)) if a[i] != b[i]]
+            changed += len(diff)
+            if k:
+                pa, pb = mapfile.parse_map(a, k - 1), mapfile.parse_map(b, k - 1)
+                for ea, eb in zip(pa['enemies'], pb['enemies']):
+                    want = to if ea['enemyId'] == frm else ea['enemyId']
+                    assert eb == dict(ea, enemyId=want), (key, ea, eb)
+                assert pa['chests'] == pb['chests'] and pa['teams'] == pb['teams'] and pa['exits'] == pb['exits']
+        assert 0 < changed <= 4 * (len(done)), (key, changed)
+        ids_k = sorted({e['enemyId'] for p in p0 for e in p['enemies']} - {frm} | {to})
+        rooms_k = {p['room'] for p in p0}
+        rw_k = {e['reward'] for p in p0 for e in p['enemies']} | {c['reward'] for p in p0 for c in p['chests']}
+        it = {'stageId': 9, 'key': key, 'name': 'swap', 'enemies': [{'enemyId': i} for i in ids_k]}
+        rep5 = ies.run([it], files, rooms_k, set(ids_k), rw_k, out, {str(key): sw})
+        s5 = rep5['stages'][0]
+        assert s5['status'] == 'imported' and 'differs' not in s5 and s5['swapped'], s5
+        st_name = ies.file_names(key, len(p0))
+        assert open(os.path.join(out, 'stage', st_name[1]), 'rb').read() != open(files[(key, 0)], 'rb').read() or len(p0) > 1
+        assert open(files[(key, None)], 'rb').read() == raw0[0], 'the JP file is never changed'
+    # a swap that finds no record: the stage is left out
+    rep6 = ies.run(items[:1], files, rooms, set(ids), rewards, out, {'740140': [{'from': 123456789, 'to': 1}]})
+    assert rep6['stages'][0]['status'] == 'skipped' and 'finds no record' in rep6['stages'][0]['why'], rep6['stages'][0]
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')

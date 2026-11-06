@@ -8,9 +8,11 @@
         -> event section: server/game_data/event_img/20000.png (Event Catalog banner) and <evStageId>-kept.png (git-ignored)
 
 Event section (Events Part 1, Task 6; run after make_event_banners.py, whose event cards it reads; not part of «all»): the
-Event Catalog banner (server/event_config.json catalogEvStage, 20000) in the same layout, «EVENT CATALOG» over strips of
-original event cards, and for every event of server/game_data/events.json a -kept copy of its card with a gold «KEPT EVENT»
-tab. After a change bump imgVersion in server/event_config.json, then the master revision.
+Event Catalog banner (server/event_config.json catalogEvStage, 20000), its own design (user 06-11: never the Raid Catalog
+layout): cyan -> green background, the game's Event Coin as emblem, a large white «EVENT CATALOG», the subtitle and the
+TRAINING sticker; and for every event of server/game_data/events.json a -kept copy of its card with a gold «KEPT EVENT» tab
+(top left, or top right where event_config.json keptTab says so). After a change bump imgVersion in
+server/event_config.json, then the master revision.
 
 Raid section (raids Part 2, Task 9; run after make_raid_banners.py, whose weekly event cards it reads): the Raid Catalog
 banner (raids.json catalog.evStageId, 8000) in the layout of the Special Catalog banner, «RAID CATALOG» over strips of five
@@ -62,7 +64,7 @@ RAID_CATALOG_EV, RAID_CATALOG_TITLE, RAID_CATALOG_SUB = 8000, 'RAID CATALOG', 'T
 RAID_KEPT_TEXT, RAID_STRIPS = 'KEPT RAID', 5
 # Event Catalog (Events Part 1, Task 6): banner evStage 20000 in game_data/event_img, kept event cards <evStageId>-kept.png
 EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB = 'EVENT CATALOG', 'Tap: Training Grounds · Details: all events'
-EVENT_KEPT_TEXT, EVENT_STRIPS = 'KEPT EVENT', 5
+EVENT_KEPT_TEXT = 'KEPT EVENT'
 # originals cut into the oblique strips of the catalogue banner (reference\special_banners; missing ones are skipped)
 CATALOG_STRIPS = [
     'Special - EXP Medals Power banner KHUX.png',
@@ -148,16 +150,22 @@ def vip_tab_end(im):
     return x if sum(under) >= .7 * len(under) else 0
 
 
-def kept_tab(im, text=KEPT_TEXT):
-    """copy of the banner with the gold «KEPT QUEST» tab (or «KEPT RAID», text) at the top left (RGBA, 640x140)"""
+def kept_tab(im, text=KEPT_TEXT, side='left'):
+    """copy of the banner with the gold «KEPT QUEST» tab (or «KEPT RAID», text) at the top left (RGBA, 640x140); side
+    'right': the same tab mirrored at the top right (event cards whose top-left art it would hide, event_config keptTab)"""
     im = im.convert('RGBA')
     if im.size != (640, 140):
         im = im.resize((640, 140), Image.LANCZOS)
-    return _tab(im, text, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, max(TAB_SOLID, vip_tab_end(im) + 4))
+    if side == 'left':
+        solid = max(TAB_SOLID, vip_tab_end(im) + 4)
+    else:   # as short as the text allows: the right side of the originals holds art too
+        solid = int(ImageDraw.Draw(im).textlength(text, font=make_shop_art.font(18))) + 22
+    return _tab(im, text, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, solid, side=side)
 
 
-def _tab(im, text, hi, lo, dk, solid, size=18):
-    """the top-left tab band of the originals (KEPT QUEST gold, VIP Quest red) over an RGBA 640x140 banner"""
+def _tab(im, text, hi, lo, dk, solid, size=18, side='left'):
+    """the top-left tab band of the originals (KEPT QUEST gold, VIP Quest red) over an RGBA 640x140 banner (side 'right':
+    mirrored, text aligned right)"""
     W, H = 640 * S, 140 * S
     y0, y1, xs, xf = TAB_Y0 * S, TAB_Y1 * S, solid * S, (solid + TAB_FADE) * S
     alpha = Image.new('L', (W, H), 0)
@@ -176,8 +184,11 @@ def _tab(im, text, hi, lo, dk, solid, size=18):
     de.rectangle([0, y0 + S, xf, y0 + 2 * S - 1], fill=(255, 252, 228, 200))  # light upper edge
     edge.putalpha(ImageChops.multiply(edge.getchannel('A'), alpha))
     L = Image.alpha_composite(L, edge)
-    ImageDraw.Draw(L).text((9 * S, (y0 + y1) / 2 + S * .5), text, font=make_shop_art.font(size * S),
-                           fill=(255, 255, 255, 255), anchor='lm', stroke_width=int(2.2 * S), stroke_fill=BROWN)
+    right = side == 'right'
+    if right:
+        L, alpha = L.transpose(Image.FLIP_LEFT_RIGHT), alpha.transpose(Image.FLIP_LEFT_RIGHT)
+    ImageDraw.Draw(L).text((W - 9 * S if right else 9 * S, (y0 + y1) / 2 + S * .5), text, font=make_shop_art.font(size * S),
+                           fill=(255, 255, 255, 255), anchor='rm' if right else 'lm', stroke_width=int(2.2 * S), stroke_fill=BROWN)
     sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     # drop shadow only under the solid part: it fades out much faster than the band (cube of the band alpha), so
     # it never shows through the half-transparent fade as a dark edge (fix round 1)
@@ -515,36 +526,110 @@ def build_raid(index, raid_img, mode, enemies=None):
     return n
 
 
-# ---- Event Catalog (Events Part 1, Task 6) ----
-def event_cards(event_img, catalog_ev):
-    """the event cards of make_event_banners.py in event_img (<evStageId>.png, by id), without 0.png, the catalogue banner
-    and the -kept copies"""
-    if not os.path.isdir(event_img):
-        return []
-    ids = sorted(int(f[:-4]) for f in os.listdir(event_img) if f.endswith('.png') and f[:-4].isdigit()
-                 and int(f[:-4]) not in (0, catalog_ev))
+# ---- Event Catalog (Events Part 1, Task 6; redesigned in fix round 1, user 06-11: clearly apart from the Raid Catalog) ----
+# the Event Coin of the game UI (reward type 15, the coin printed on the event cards): img/incentive/IncentiveIcon_15.png of the
+# local JP 4.3.1 data (private_tools jp_data; never in the repo); missing -> the banner is written without it (WARNING)
+EVENT_COIN = ('img', 'incentive', 'IncentiveIcon_15.png')
+EVENT_TOP, EVENT_BOT = (64, 214, 214), (34, 150, 96)     # cyan -> green of the 3rd Anniversary event cards
+EVENT_INK = (8, 70, 72, 255)                            # dark teal outline of the lettering
+
+
+def event_coin_path():
+    try:
+        import private_tools
+        return private_tools.local_path('jp_data', *EVENT_COIN)
+    except Exception:  # noqa: BLE001 - no local data: no coin
+        return None
+
+
+def game_image(p):
+    """an image of the game data: PNG, or BTF (btf.py) when the file is one"""
+    with open(p, 'rb') as f:
+        data = f.read()
+    if data[:4] == b'\x89BTF':
+        import btf
+        return btf.decode(data).convert('RGBA')
+    return Image.open(p).convert('RGBA')
+
+
+def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG_SUB):
+    """640x140 RGBA of the Event Catalog banner (evStage 20000): no collage, a clean cyan -> green background with soft light
+    rays, the game's Event Coin as emblem on the left, a large white «EVENT CATALOG» with a dark teal outline, the subtitle,
+    the small TRAINING sticker (a tap opens the Training Grounds) and a thin white frame"""
+    W, H = 640, 140
+    im = Image.new('RGBA', (W, H))
+    im.paste(kept.vgrad((W, H), EVENT_TOP, EVENT_BOT, 0, H), (0, 0))
+    rays = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(rays)
+    cx, cy = 70 * S, 70 * S
+    for k in range(14):
+        a0 = math.pi * 2 * k / 14
+        a1 = a0 + math.pi / 28
+        r = 900 * S
+        d.polygon([(cx, cy), (cx + math.cos(a0) * r, cy + math.sin(a0) * r), (cx + math.cos(a1) * r, cy + math.sin(a1) * r)],
+                  fill=(255, 255, 255, 26))
+    im = Image.alpha_composite(im, rays.resize((W, H), Image.LANCZOS))
+    band = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(band).polygon([(250, 0), (330, 0), (230, 140), (150, 140)], fill=(255, 255, 255, 30))
+    im = Image.alpha_composite(im, band.filter(ImageFilter.GaussianBlur(6)))
+    sp = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sp)
+    for x, y, r in ((560, 52, 4), (604, 112, 3), (470, 122, 3), (515, 84, 2), (380, 18, 2), (150, 126, 3)):
+        ds.polygon([(x, y - r * 3), (x + r, y), (x, y + r * 3), (x - r, y)], fill=(255, 255, 255, 200))
+        ds.polygon([(x - r * 3, y), (x, y - r), (x + r * 3, y), (x, y + r)], fill=(255, 255, 255, 200))
+    im = Image.alpha_composite(im, sp)
+    glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(glow).ellipse((14, 14, 126, 126), fill=(255, 255, 255, 150))
+    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(10)))
+    if coin and os.path.exists(coin):
+        im.alpha_composite(game_image(coin).resize((108, 108), Image.LANCZOS), (16, 16))
+    else:
+        warn('Event Coin left out of the Event Catalog banner: %s not found (local JP data)' % (coin or '/'.join(EVENT_COIN)))
+    f = title_font(46)
+    ImageDraw.Draw(im).text((142, 56), title, font=f, anchor='lm', fill=EVENT_INK, stroke_width=6, stroke_fill=EVENT_INK)
+    m = Image.new('L', (W, H), 0)
+    ImageDraw.Draw(m).text((142, 56), title, font=f, anchor='lm', fill=255)
+    bb = m.getbbox()
+    if bb:
+        im.paste(kept.vgrad((W, H), (255, 255, 255), (206, 246, 240), bb[1], bb[3]), (0, 0), m)
+    ImageDraw.Draw(im).text((144, 106), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
+                            stroke_width=3, stroke_fill=EVENT_INK)
+    im.alpha_composite(sticker(w=92, h=34, angle=-6), (540, 0))
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(255, 255, 255, 255), width=3)   # square corners as the cards
+    return im
+
+
+def event_cards(index, event_img):
+    """the event cards of make_event_banners.py for the events of events.json (entries with an evStageId, index order),
+    the ones written only"""
+    ids = []
+    for e in index.get('entries', []):
+        ev = e.get('evStageId')
+        if ev and ev not in ids and os.path.exists(os.path.join(event_img, '%d.png' % ev)):
+            ids.append(ev)
     return [os.path.join(event_img, '%d.png' % i) for i in ids]
 
 
-def build_event(index, catalog_ev, event_img, mode, enemies=None):
-    """writes event_img/<catalog_ev>.png (the Event Catalog banner: strips of EVENT_STRIPS event cards spread over the
-    list, the Training Grounds figures) and <evStageId>-kept.png for every event of the index (its card, else 0.png; none:
-    skipped). Run after make_event_banners.py. Returns the counts catalog / kept / missing."""
+def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
+    """writes event_img/<catalog_ev>.png (the Event Catalog banner, event_catalog_banner; no -kept copy: it is never kept)
+    and <evStageId>-kept.png for every event of the index (its card, else 0.png; none: skipped), the KEPT EVENT tab on the
+    side kept_side {evStageId: 'left'|'right'} names (event_config.json keptTab; default left). Run after
+    make_event_banners.py. Returns the counts catalog / kept / missing."""
     os.makedirs(event_img, exist_ok=True)
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
+    sides = {int(k): v for k, v in (kept_side or {}).items()}
     if catalog_ev:
-        cards = event_cards(event_img, catalog_ev)
-        k = min(EVENT_STRIPS, len(cards))
-        pick = [cards[round(i * (len(cards) - 1) / max(1, k - 1))] for i in range(k)] if k > 1 else cards[:k]
-        im = catalog_banner(None, enemies, EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, pick)
-        mbi.save_png(im, os.path.join(event_img, '%d.png' % catalog_ev), mode)
+        mbi.save_png(event_catalog_banner(coin), os.path.join(event_img, '%d.png' % catalog_ev), mode)
         n['catalog'] += 1
     for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
         src = next((p for p in (os.path.join(event_img, '%d.png' % ev), os.path.join(event_img, '0.png')) if os.path.exists(p)), None)
         if not src:
             n['missing'] += 1
             continue
-        mbi.save_png(kept_tab(Image.open(src), EVENT_KEPT_TEXT), os.path.join(event_img, '%d-kept.png' % ev), mode)
+        side = sides.get(ev, 'left')
+        if side not in ('left', 'right'):
+            raise ValueError('keptTab %d: side %r (left or right)' % (ev, side))
+        mbi.save_png(kept_tab(Image.open(src), EVENT_KEPT_TEXT, side), os.path.join(event_img, '%d-kept.png' % ev), mode)
         n['kept'] += 1
     return n
 
@@ -570,6 +655,7 @@ def main():
                     help='the weekly event cards of make_raid_banners.py (run it first); output goes here too')
     ap.add_argument('--event-index', default=os.path.join(REPO, 'server', 'game_data', 'events.json'))
     ap.add_argument('--event-config', default=os.path.join(REPO, 'server', 'event_config.json'))
+    ap.add_argument('--event-coin', help='Event Coin icon of the Event Catalog banner (default: local JP data img/incentive/IncentiveIcon_15.png)')
     ap.add_argument('--event-img', default=os.path.join(REPO, 'server', 'game_data', 'event_img'),
                     help='the event cards of make_event_banners.py (run it first); output goes here too')
     a = ap.parse_args()
@@ -577,8 +663,8 @@ def main():
         with open(a.event_index, encoding='utf-8') as f:
             eix = json.load(f)
         with open(a.event_config, encoding='utf-8') as f:
-            cat = json.load(f).get('catalogEvStage')
-        er = build_event(eix, cat, a.event_img, a.mode, a.enemies)
+            ecfg = json.load(f)
+        er = build_event(eix, ecfg.get('catalogEvStage'), a.event_img, a.mode, a.event_coin or event_coin_path(), ecfg.get('keptTab'))
         print('event banners: %d catalog, %d kept cards, %d events without a card -> %s' % (er['catalog'], er['kept'], er['missing'], a.event_img))
         return
     if a.section in ('all', 'raid'):

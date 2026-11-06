@@ -74,19 +74,44 @@ try:
     assert missing == [(20003, 'EV-C'), (20004, 'EV-D')], missing
     assert Image.open(os.path.join(out, '20001.png')).size == (640, 140), 'card scaled to 640x140'
     assert meb.build(index, notices, dest, os.path.join(t, 'o2'), {20002})[0] == {20002: '51523_9cbFN5Ie4.png'}
-    # --section event: catalog banner 20000 from the cards, a KEPT EVENT copy of every card
+    # --section event: the Event Catalog banner 20000 (own design) and a KEPT EVENT copy of every card
     assert msb.EVENT_KEPT_TEXT == 'KEPT EVENT' and msb.EVENT_CATALOG_TITLE == 'EVENT CATALOG'
-    Image.new('RGB', (640, 140), (200, 0, 0)).save(os.path.join(out, '20000.png'))   # an old catalog banner: no strip
-    assert [os.path.basename(p) for p in msb.event_cards(out, 20000)] == ['20001.png', '20002.png']
-    n = msb.build_event(index, 20000, out, 'full', enemies=os.path.join(t, 'none'))
+    Image.new('RGB', (640, 140), (200, 0, 0)).save(os.path.join(out, '20000.png'))   # an old catalog banner
+    Image.new('RGB', (640, 140), (0, 0, 200)).save(os.path.join(out, '29999.png'))   # a stray numeric png, no event
+    assert [os.path.basename(p) for p in msb.event_cards(index, out)] == ['20001.png', '20002.png'], 'cards of events.json only'
+    coin = os.path.join(t, 'coin.png')
+    Image.new('RGBA', (86, 86), (200, 200, 230, 255)).save(coin)
+    red = Image.new('RGB', (640, 140), (230, 0, 0))
+    red.save(os.path.join(out, '20002.png'))
+    n = msb.build_event(index, 20000, out, 'full', coin, {'20002': 'right'})
     assert n == {'catalog': 1, 'kept': 2, 'missing': 2}, n
     for fn in ('20000.png', '20001-kept.png', '20002-kept.png'):
         assert Image.open(os.path.join(out, fn)).size == (640, 140), fn
     assert not os.path.exists(os.path.join(out, '20000-kept.png')), 'the catalogue banner is never kept'
-    assert [os.path.basename(p) for p in msb.event_cards(out, 20000)] == ['20001.png', '20002.png'], 'kept copies are no strips'
+    cat = Image.open(os.path.join(out, '20000.png')).convert('RGB')
+    # no collage: no pixel of the (red) event card; cyan/green background (green and blue over red) where nothing is drawn
+    px = [cat.getpixel((x, y)) for x in range(0, 640, 8) for y in range(0, 140, 8) if not (x > 520 and y < 50)]  # without the TRAINING sticker
+    assert not any(r > 180 and g < 60 and b < 60 for r, g, b in px), 'no event card in the catalogue banner'
+    bg = cat.getpixel((620, 125))
+    assert bg[1] > bg[0] + 40 and bg[2] > bg[0], ('cyan/green background', bg)
+    assert cat.getpixel((70, 70)) != msb.event_catalog_banner(None).convert('RGB').getpixel((70, 70)), 'the coin emblem is drawn'
+    # KEPT tab side: 20002 right (keptTab), 20001 left
+    k2 = Image.open(os.path.join(out, '20002-kept.png')).convert('RGB')
+    gold = lambda p: p[0] > 200 and p[1] > 120 and p[2] < 120  # noqa: E731
+    assert gold(k2.getpixel((630, 20))) and not gold(k2.getpixel((10, 20))), (k2.getpixel((630, 20)), k2.getpixel((10, 20)))
+    k1 = Image.open(os.path.join(out, '20001-kept.png')).convert('RGB')
+    assert gold(k1.getpixel((10, 20))) or k1.getpixel((10, 20)) != Image.open(os.path.join(out, '20001.png')).convert('RGB').getpixel((10, 20))
+    try:
+        msb.build_event(index, 0, out, 'full', coin, {'20001': 'middle'})
+        raise AssertionError('a wrong keptTab side must stop')
+    except ValueError:
+        pass
     Image.new('RGB', (640, 140)).save(os.path.join(out, '0.png'))
-    assert msb.build_event(index, 0, out, 'full', enemies=os.path.join(t, 'none')) == {'catalog': 0, 'kept': 4, 'missing': 0}, \
+    assert msb.build_event(index, 0, out, 'full', coin) == {'catalog': 0, 'kept': 4, 'missing': 0}, \
         'no catalog id: no catalogue banner; plate 0.png for the events without a card'
+    # the real config: the Quiz card (20004) has its tab on the right
+    cfg = json.load(open(os.path.join(meb.REPO, 'server', 'event_config.json'), encoding='utf-8'))
+    assert cfg['keptTab'] == {'20004': 'right'}, cfg.get('keptTab')
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_make_event_banners')
