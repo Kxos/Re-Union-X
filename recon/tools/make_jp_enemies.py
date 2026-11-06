@@ -62,6 +62,7 @@ e report.md. make-game-tables.js legge <out>\\files per tenere il displayId orig
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -202,7 +203,40 @@ def listing(p):
             base, r = (m.group(1) + m.group(3), int(m.group(2))) if m else (f, -1)
             if base not in idx or idx[base][0] < r:
                 idx[base] = (r, os.path.join(p, f))
+    # only for the event quest families for now: 8 served families have the same pattern (71 94 95 96 97 140 197 1029
+    # 2502: list in the Task 2b report), to be reviewed with the user before their served files change
+    if os.path.basename(os.path.dirname(os.path.normpath(p))) in STALE_FAMS:
+        for k in stale_plain(p, idx):
+            del idx[k]
     return {k: v[1] for k, v in idx.items()}
+
+
+def stale_plain(p, idx):
+    """Texture names whose only file is the PLAIN (non-revision) one of an OLDER LWF of the same folder (Task 2b user review
+    2, 06-11): when the folder holds <anim>.lwf and a newer <anim>.<rev>.lwf (the one served) and the old LWF declares a
+    name with another size than the new one, the plain file of that name is the old LWF's picture, not the new one's.
+    97 Ringmaster: the plain wait.lwf is the 2016 Shadow placeholder; its plain bitmaps 1-16 (Shadow head, limbs) were
+    served inside the revised Ringmaster wait (Shadow head on the Ringmaster)."""
+    out = set()
+    for base, (r, path) in list(idx.items()):
+        if not base.endswith('.lwf') or r < 0:
+            continue
+        old = os.path.join(p, base)
+        if not os.path.isfile(old):
+            continue
+        do, dn = tex_dims(old) or {}, tex_dims(path) or {}
+        for n, wh in do.items():
+            if n in idx and idx[n][0] < 0 and n in dn and dn[n] != wh:
+                # whose picture is it? the JP files are often stored at another resolution than declared, so the
+                # aspect ratio decides: stale when it matches the old declaration and not the new one
+                sz = img_size(idx[n][1])
+                if not sz or not wh[0] or not wh[1] or not dn[n][0] or not dn[n][1]:
+                    continue
+                ar = math.log(sz[0] / sz[1])
+                d_old, d_new = abs(ar - math.log(wh[0] / wh[1])), abs(ar - math.log(dn[n][0] / dn[n][1]))
+                if d_old < 0.12 and d_old < d_new:
+                    out.add(n)
+    return out
 
 
 _sha = {}
@@ -478,6 +512,7 @@ def event_families(path, include_all=False):
 
 
 NO_B2016 = no_b2016(a.event_families)
+STALE_FAMS = {str(d) for d in event_families(a.event_families, True)}  # stale_plain applies to these (event families)
 
 
 def family_of(i):
