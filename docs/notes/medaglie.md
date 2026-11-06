@@ -1124,3 +1124,56 @@ the JP data (btf_fix converts them like the other JP textures; check the graysca
 Device checks: button on the detail of a flagged 6★ and 7★ (Medal List, deck, draw result), tap -> art in/out, a Medal
 without art still without button, no other visual change from `imageCategory` 2 (unknown whether the client uses it
 elsewhere), memory with several opens.
+
+<a id="full-artwork-search"></a>
+## Full artwork search (2026-11-06)
+
+Question: did the original have full artworks («Inspect») that we lack, e.g. for WW Medals later than the JP 4.3.1 data
+(`SN++ - Illus. KH III ...`, other Illus./Key Art/Stained Glass Medals of 2019-2021)? **Answer: no new artwork found, and
+the evidence says the 55 are the complete set.**
+
+**Medals with an artwork we lack: none.**
+
+| Medal | Source | Resolution | Confidence |
+|---|---|---|---|
+| (none) | - | - | - |
+
+**What was checked.**
+
+- **khuxwiki, every file on the wiki** (MediaWiki `allimages`, all names with «Artwork», «Inspect», «full»): exactly the
+  55 «<medal> (Artwork)» files, all 55 match our 55 by name (sizes and crops listed in the table of the previous section).
+  The text «Inspect» / «fullscreen version of the artwork» is on 46 Medal pages, all of the 55 families; the 9 without the
+  text (SN++ Stained Glass #10-14, Strelitzia, MoM Kairi, Key Art #24, Key Art #18) still have their «(Artwork)» file.
+  No Illus. KH III page mentions Inspect or has an artwork file.
+- **Official WW notices** (2,604 notice texts of the private events archive): the Medal tables mark art Medals with
+  «*Includes artwork.» (or «has a special artwork that you can view from the Medal details page»). Every marked Medal is one
+  of the 55 families or a reissue that serves the family picture: SN++ - Key Art #3 (71025), SN++ - Key Art #8 (74157),
+  SN++ - Axel Art and SN++ - Roxas Art (69857), SN++ - Key Art #20 (73867). This is **official evidence that the four
+  SN++ reissues showed the art** (they are flagged already). No other Medal is marked.
+- **Illus. KH III Medals (9: Sora, Riku, Kairi, Terra, Ventus, Aqua, Lea (Axel), Roxas, Xion; WW No. 1872-1891,
+  released Sept. 2020, not 2019)**: 33 notices list them (69542 Terra Deal, 68886 Sora Deal, ...) in the same
+  «[Maximum STR]» table format that marks Stained Glass #10/#12/#14 «*Includes artwork.» in Nov./Dec. 2020; **none
+  marks an Illus. KH III Medal** (caveat: Strelitzia, which has an art, is also unmarked in the combined notice 69546).
+  The JP 4.3.1 data has all 9 Medal pictures (Medal_S match, mean diff 3.4-4.0 against 13+ for the next candidate: JP ids
+  352517, 351577, 353527, 351587, 352527, 353537, 351597, 352537, 353557) but no `img/art/Art_<id>.png` for any of them,
+  while it has the arts of Medals released around them (Key Art #25 353907, Strelitzia, Stained Glass #10-14, MoM Kairi).
+  **Verdict: in-game full art - no evidence (evidence against).** Their pictures are crops of the KINGDOM HEARTS III box
+  art; a 640x960 crop of the box art would be a reconstruction, not a restored original.
+- **Coverage of the JP 4.3.1 data**: it contains the pictures of the last WW Medals (SN++ - MoM Roxas, MoM Xion, MoM Axel,
+  MoM Aqua, MoM Riku, Illustrated Ansem, all matched), so it reaches the end of service; its `img/art/` (55 + one older
+  revision) is the full set of the period, consistent with the wiki and the notices.
+- **JP 5.0.1 OBB (main.98 + patch.114) and WW 5.0.1 indexes** (322k names each): no `img/art/`, no `MedalArtAnim`
+  (the arts were downloaded content, not packed).
+- **Community sprite sheet «Expanded Artwork»** (5778x5772, 46 tiles of 640x960, kept privately in `reference\`): all 46
+  tiles match one of our 55 arts (mean diff 1.0-4.0, next best above 13); nothing new.
+- **Local donations and dumps** (`Reddit Donators\`, `external\` roboloid/thethiny, `reference\`, `screenshots\`): no
+  `Art_*.png` and no other full artwork outside the JP data. Web searches (reddit, khuxwiki, notices) found no Inspect
+  screenshot of a Medal outside the 55. The Wayback Machine and the notice server refused requests on 06-11, so archived
+  notice images were not rechecked online (the texts are in the private archive).
+
+**khuxwiki artworks matching our 55**: all 55 (25 same picture, 30 other crop/size, per the table of the previous
+section); the wiki has no artwork outside the 55.
+
+**Still open**: which star variants showed the button (per-row flags are not in any data we have; notices mark the 6★ and
+7★ of Stained Glass #1-#6, Key Art #16, Prime - Key Art #17, Roxas Art 7★); no Inspect screenshot of the 30 «candidate»
+Medals flagged as reconstructions on 06-11 (their art is ours by design).
