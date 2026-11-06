@@ -123,11 +123,11 @@ const tests = {
     const d = pages.detailPage(ix, 8022, ctx({ index: ix }));
     // the rule label is not repeated under the callout (06-11): the weekday AP card and its full sentence in the fold remain
     assert(!d.includes('AP and Bonus Time') && /<b>Weekday AP<\/b>/.test(d) && d.includes('<b>weekday AP of a quest that was free</b>') && d.includes('costs 5 AP from Monday to Friday'));
-    // the rule callout (user 06-11, graphics): title, NOT ORIGINAL tag, the two blocks with their icons, the Raid Bosses notice link
-    assert(/<div class="rc"><div class="rch"><img[^>]*raid\.png[^>]*>One raid rule on this server<span class="ng">NOT ORIGINAL<\/span><\/div>/.test(d), 'the rule callout');
+    // the rule inside the one «On this server» box (user 06-11): sub-heading, the two blocks with their icons, the Raid Bosses notice link
+    assert(/<div class="sb">[^]*?<div class="rsh"><img[^>]*raid\.png[^>]*>One raid rule<\/div><div class="rcs">/.test(d) && !d.includes('One raid rule on this server'), 'the rule in the box');
     assert(/<b><img[^>]*weekday\.png[^>]*>Monday – Friday<\/b><span><img[^>]*ap\.png[^>]*>Original AP \(5 AP if it was free\)<\/span><span class="ni">No Bonus Time<\/span>/.test(d), 'weekday block');
     assert(/<div class="rcd we"><b><img[^>]*weekday\.png[^>]*>Saturday – Sunday<\/b><span><img[^>]*ap\.png[^>]*>0 AP<\/span><span><img[^>]*lux\.png[^>]*>Lux of raid bosses doubled<\/span><span><img[^>]*bonus\.png[^>]*>Bonus Time all day<\/span>/.test(d), 'weekend block');
-    assert(d.includes('Every raid, Pacific time.') && d.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>') && /\.rc\{/.test(d), 'foot line, link, CSS');
+    assert(d.includes('Every raid, Pacific time. The original game had its own hours instead.') && d.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>') && /\.rcd\{/.test(d), 'foot line, link, CSS');
     assert(!/open all day|30-minute window|stays open outside/i.test(d.replace(/<li><b>opening hours[^]*?<\/li>/g, '')), 'no hours claim');
   },
   notice_server_box() {
@@ -140,13 +140,23 @@ const tests = {
     const n = pages.noticePage(ix, 8022, doc, ctx({ index: ix }));
     const box = n.slice(n.indexOf('<div class="sb">'));
     assert(/<div class="sb"><div class="rch"><img[^>]*raid\.png[^>]*>On this server<span class="ng">NOT ORIGINAL<\/span><\/div><div class="why [a-z]*"><span class="s /.test(box), 'callout header, status row with its pill');
+    // one box, at the top (user 06-11): right after the title chips, before the original notice; NOT ORIGINAL once; order inside
+    assert(n.indexOf('<div class="sb">') > n.indexOf('<p class="dt">') && n.indexOf('<div class="sb">') < n.indexOf('<h2 class="och">Original notice</h2>') && n.indexOf('<h2 class="och">') < n.indexOf('Raid!'), 'box at the top, then «Original notice»');
+    assert.strictEqual((n.match(/class="sb"/g) || []).length, 1);
+    assert.strictEqual((n.match(/NOT ORIGINAL/g) || []).length, 1, 'NOT ORIGINAL once');
+    assert(!/class="rc"/.test(n) && !n.includes('One raid rule on this server'), 'no separate rule callout');
+    const at = (x) => box.indexOf(x);
+    assert(at('<div class="why') < at('class="sbi"') && at('class="sbi"') < at('class="rsh"') && at('class="rsh"') < at('<details class="rb">') && at('<details class="rb">') < at('class="sbl"'), 'order: status, story line, rule, rebuilt values, links');
+    // «Rebuilt values» closed: own marker, count, tap hint; the default marker hidden
+    assert(/<details class="rb"><summary><span class="rbm">▸<\/span><span class="rbh"><img[^>]*>Rebuilt values<\/span><span class="rbn">9 values<\/span><span class="rbt"><span class="o">tap to open<\/span><span class="c">tap to close<\/span><\/span>/.test(box), 'closed summary bar');
+    assert(!/<details class="rb" open/.test(box) && /details\.rb>summary::-webkit-details-marker\{display:none\}/.test(n) && /details\.rb\[open\] \.rbm\{/.test(n), 'closed, own marker');
     for (const [g, cls] of [['Boss', 'rg'], ['Rewards', 'rg rw'], ['Rules', 'rg ru'], ['Other', 'rg ot']]) assert(new RegExp(`<div class="${cls}"><b><img[^>]*>${g}</b>`).test(box), `group ${g}`);
     assert(/<div class="ri"><img[^>]*tleg\.png[^>]*><b>ATK<\/b><span>Deduced from bosses with original values<\/span><\/div>/.test(box), 'icon, short label, one line');
     assert(box.split('Deduced from bosses with original values').length === 3 && /<b>Lux<\/b>/.test(box) && /<b>Weekday AP<\/b>/.test(box) && /<b>mystery<\/b>/.test(box));
     assert(!/<ul class="pl">/.test(box.replace(/<details class="fold">[^]*?<\/details>/, '')), 'no bullet list outside the fold');
     assert(/<details class="fold"><summary>Why these values\?<\/summary><ul class="pl">/.test(box) && box.includes('deduced from the bosses with original values.'), 'full sentences folded');
-    // the rule callout is on the page: its label is not repeated in the box (nor in the fold)
-    assert((n.match(/One raid rule on this server/g) || []).length === 1);
+    // the rule is in the box: its label is not repeated in the rebuilt values (nor in the fold)
+    assert.strictEqual((n.match(/One raid rule<\/div>/g) || []).length, 1);
     assert(!box.includes('AP and Bonus Time') && !box.includes('One rule for all raids'), 'rule line not duplicated');
     assert(box.includes('<p class="sbl"><a href="/web/raid/raid/8022">This raid in the Raid Catalog ›</a><a href="/web/raid/catalog">Raid Catalog ›</a></p>'), 'pill links');
     assert(/\.sbl a\{display:inline-block/.test(n) && /\.rgs\{display:-webkit-box;display:-webkit-flex;display:flex/.test(n), 'CSS: flex with the old WebView prefixes');
@@ -289,8 +299,13 @@ const tests = {
     assert(/<td>Beginner<\/td><td>Trickmaster<\/td>/.test(d) && /<td>Advanced<\/td><td>Blue Trident Tail<\/td>/.test(d), 'tier table');
     assert(/150,000,000/.test(d), 'HP');
     assert(/Enhancement Boards/.test(d) && /Lux Crystal/.test(d), 'boards and their rewards');
-    // reconstructed values (06-11, graphics): group cards with one short line each, the full sentences (user 04-11) folded
-    const rv = d.slice(d.indexOf('<h2>Reconstructed values</h2>'), d.indexOf('</details>', d.indexOf('<h2>Reconstructed values</h2>')));
+    // the one «On this server» box at the top (user 06-11): status, Keep messages, rule, rebuilt values closed (group cards with one
+    // short line each, the full sentences of user 04-11 folded), links; then the Week table
+    assert(d.indexOf('<div class="sb">') > d.indexOf('<img class="banner"') && d.indexOf('<div class="sb">') < d.indexOf('<h2>Week</h2>') && !d.includes('<h2>Reconstructed values</h2>'), 'box at the top');
+    assert.strictEqual((d.match(/NOT ORIGINAL/g) || []).length, 1, 'NOT ORIGINAL once');
+    assert(d.indexOf('id="pinmsg"') > d.indexOf('<div class="sb">') && d.indexOf('id="pinmsg"') < d.indexOf('<h2>Week</h2>'), 'Keep messages in the box');
+    const rv = d.slice(d.indexOf('<details class="rb">'), d.indexOf('</details>', d.indexOf('<details class="rb">')));
+    assert(/<summary><span class="rbm">▸<\/span><span class="rbh">[^]*?Rebuilt values<\/span><span class="rbn">1 value<\/span>/.test(rv), 'closed bar, count');
     assert(/<div class="rgs"><div class="rg"><b><img[^>]*>Boss<\/b><div class="ri"><img[^>]*><b>ATK<\/b><span>Deduced from bosses with original values<\/span>/.test(rv), 'group cards');
     assert(/<details class="fold"><summary>Why these values\?<\/summary><ul class="pl"><li><b>ATK<\/b>: The boss/.test(rv) && rv.includes('deduced from the bosses with original values.'), 'full sentences folded');
     assert(/details\.fold\{/.test(d) && /\.rgs\{/.test(d), 'CSS of cards and fold on the detail page');
