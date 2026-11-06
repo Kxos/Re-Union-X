@@ -512,9 +512,10 @@ const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#062
   + '.sb .why .s{margin:2px 10px 2px 0}.sbi{color:#b9cfdc;font-size:14px;margin:4px 2px 6px}'
   + '.sbh{color:#fff;font-weight:bold;font-size:15px;margin:8px 2px 4px}.sbh span{color:#b9cfdc;font-weight:normal;font-size:13.5px;margin-left:8px}'
   + '.rgs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
-  + '.rg{-webkit-box-flex:1;-webkit-flex:1 1 260px;flex:1 1 260px;min-width:240px;box-sizing:border-box;margin:0 4px 8px;padding:5px 9px 4px;border-radius:8px;background:#0a4466;border-top:4px solid #d8574a}'
-  + '.rg.rw{border-top-color:#ffcd4a}.rg.ru{border-top-color:#39a7cf}.rg.ot{border-top-color:#8aa3b3}'
-  + '.rg>b{display:block;color:#fff;font-size:15px;margin-bottom:2px}.rg .ic{width:1.35em;height:1.35em}'
+  + '.rg{-webkit-box-flex:1;-webkit-flex:1 1 260px;flex:1 1 260px;min-width:240px;box-sizing:border-box;margin:0 4px 8px;padding:0 9px 4px;border-radius:8px;background:#0a4466;overflow:hidden}'
+  // the group heads (user 06-11: make clear they are categories): a full colour band, capitals, over the column
+  + '.rg>b{display:block;margin:0 -9px 3px;padding:6px 10px 5px;background:#b8423a;color:#fff;font-size:16px;text-transform:uppercase;letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.5)}'
+  + '.rg.rw>b{background:#a87a10}.rg.ru>b{background:#1f7ea6}.rg.ot>b{background:#5b7383}.rg>b .ic{width:1.35em;height:1.35em}.rg .ic{width:1.35em;height:1.35em}'
   + '.ri{padding:3px 0 3px 1.75em;text-indent:-1.75em;border-top:1px solid #1d5878}.ri b{color:#fff;font-size:14.5px}.ri span{display:block;text-indent:0;color:#d9e6ee;font-size:13.5px}'
   + '.sbo{color:#ffb3a8;font-size:14px;margin:2px 2px 6px}.sbo .ic{width:1.3em;height:1.3em}.sb details.fold{border-color:#1d5878;font-size:14px}.sb details.fold li{margin:3px 0}'
   + '.sbl{margin:8px 0 2px}.sbl a{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:16px;padding:3px 14px;margin:4px 8px 0 0;color:#fff;text-decoration:none;font-size:14.5px}';
