@@ -1,0 +1,316 @@
+{
+ "_doc": "Medal Gallery variant groups: cards whose Medal_S pictures are at most threshold apart (mean abs RGB diff, 64x64 on black). Written by recon/tools/make_medal_gallery_groups.py; docs/notes/medaglie.md#medal-gallery.",
+ "threshold": 10.0,
+ "groups": [
+  {
+   "list": "bgm",
+   "ids": [
+    300766,
+    302068
+   ],
+   "names": [
+    "Illustrated Xion",
+    "SN++ - Illustrated Xion"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": "bgm",
+   "ids": [
+    300775,
+    300776,
+    300777
+   ],
+   "names": [
+    "Casual Roxas",
+    "SN - Casual Roxas",
+    "SN+ - Casual Roxas"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": "bgm",
+   "ids": [
+    300893,
+    302079
+   ],
+   "names": [
+    "HD Roxas",
+    "SN++ - HD Roxas"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": "bgm",
+   "ids": [
+    301135,
+    301136,
+    311135
+   ],
+   "names": [
+    "SN - HD Xion [EX]",
+    "SN+ - HD Xion [EX]",
+    "HD Xion [EX]"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": "bgm",
+   "ids": [
+    302033,
+    311133
+   ],
+   "names": [
+    "SN++ - Final Boss Xion",
+    "Final Boss Xion"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 41146,
+   "ids": [
+    301199,
+    302083
+   ],
+   "names": [
+    "Illustrated Marluxia [EX]",
+    "SN++ - Illus. Marluxia"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 42096,
+   "ids": [
+    300861,
+    312045
+   ],
+   "names": [
+    "Key Art #3",
+    "SN++ - Key Art #3"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 43146,
+   "ids": [
+    302060,
+    310765
+   ],
+   "names": [
+    "SN++ - Illustrated Xemnas",
+    "Illustrated Xemnas"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 43186,
+   "ids": [
+    300995,
+    302098
+   ],
+   "names": [
+    "Key Art #8",
+    "SN++ - Key Art #8"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 51126,
+   "ids": [
+    301475,
+    301476,
+    311475
+   ],
+   "names": [
+    "SN - Stained Glass #3",
+    "SN+ - Stained Glass #3",
+    "Stained Glass #3 [EX+]"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 51136,
+   "ids": [
+    301478,
+    301479,
+    301480
+   ],
+   "names": [
+    "Stained Glass #4 [EX+]",
+    "SN - Stained Glass #4",
+    "SN+ - Stained Glass #4"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52016,
+   "ids": [
+    301025,
+    302031
+   ],
+   "names": [
+    "Axel Art [EX]",
+    "SN++ - Axel Art"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52106,
+   "ids": [
+    301483,
+    311483,
+    311485
+   ],
+   "names": [
+    "SN - Stained Glass #5",
+    "Stained Glass #5 [EX+]",
+    "SN+ - Stained Glass #5"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52116,
+   "ids": [
+    301486,
+    301487,
+    301488
+   ],
+   "names": [
+    "Stained Glass #6 [EX+]",
+    "SN - Stained Glass #6",
+    "SN+ - Stained Glass #6"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52197,
+   "ids": [
+    301667,
+    301668
+   ],
+   "names": [
+    "Supernova - HD Terra",
+    "Supernova+ - HD Terra"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52197,
+   "ids": [
+    301669,
+    301670
+   ],
+   "names": [
+    "Supernova - HD Ventus",
+    "Supernova+ - HD Ventus"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52197,
+   "ids": [
+    301671,
+    311673
+   ],
+   "names": [
+    "Supernova - HD Aqua",
+    "Supernova+ - HD Aqua"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 52197,
+   "ids": [
+    301673,
+    311675
+   ],
+   "names": [
+    "Supernova - Terra, Ven, Aqua",
+    "SN+ - Terra, Ven, Aqua"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 53026,
+   "ids": [
+    301116,
+    312033
+   ],
+   "names": [
+    "Roxas Art [EX]",
+    "SN++ - Roxas Art"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 53136,
+   "ids": [
+    43036,
+    300615,
+    300616,
+    300617
+   ],
+   "names": [
+    "Illustrated Aqua",
+    "Illustrated Aqua A",
+    "SN - Illustrated Aqua",
+    "SN+ - Illustrated Aqua"
+   ],
+   "maxDist": 9.57
+  },
+  {
+   "list": 53136,
+   "ids": [
+    301466,
+    301467,
+    301468
+   ],
+   "names": [
+    "Stained Glass #1 [EX+]",
+    "SN - Stained Glass #1",
+    "SN+ - Stained Glass #1"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 53146,
+   "ids": [
+    301470,
+    301471,
+    311473
+   ],
+   "names": [
+    "Stained Glass #2 [EX+]",
+    "SN - Stained Glass #2",
+    "SN+ - Stained Glass #2"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 53197,
+   "ids": [
+    301625,
+    311625
+   ],
+   "names": [
+    "Supernova+ - Key Art #19",
+    "Supernova - Key Art #19"
+   ],
+   "maxDist": 0.0
+  },
+  {
+   "list": 53247,
+   "ids": [
+    301797,
+    301798,
+    302088
+   ],
+   "names": [
+    "Supernova - Key Art #20",
+    "Supernova+ - Key Art #20",
+    "SN++ - Key Art #20"
+   ],
+   "maxDist": 0.0
+  }
+ ]
+}
