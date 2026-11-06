@@ -736,7 +736,10 @@ function niceRange(b) {
   const from = b.start.slice(0, 4) === b.end.slice(0, 4) ? niceDay(b.start).replace(/, \d{4}$/, '') : niceDay(b.start);
   return `${from} – ${niceDay(b.end)}${b.endSource !== 'original' ? ' (end date reconstructed)' : ''}`;
 }
+// link to the Medal Gallery (I-242) under the intro of the Banner Catalog
+const MEDAL_GALLERY_HREF = '/web/medals/gallery?from=catalog', MEDAL_GALLERY_LINK = 'Medal Gallery ›';
 const CATALOG_CSS = 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-width:none;vertical-align:middle;margin:-.15em .25em 0 0;border:0}'
+  + '.mg{margin:2px 0 8px;line-height:1.5}.mg a{display:inline-block;border:1px solid #39a7cf;background:#0d5f86;border-radius:14px;padding:1px 12px;color:#fff;font-weight:bold;text-decoration:none;font-size:15px;margin-right:6px}'
   + '.hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}'
   + '.fbtn,.ok{border:0;color:#fff;background:linear-gradient(#f08a3a,#d4541c);border-radius:18px;padding:5px 16px;font:bold 15px sans-serif;box-shadow:0 2px 0 #8a3510;cursor:pointer;white-space:nowrap}'
   + '.dot{display:inline-block;background:#fff;color:#d4541c;border-radius:10px;padding:0 7px;margin-left:6px;font-size:13px;line-height:1.5}.dot:empty{display:none}'
@@ -868,6 +871,9 @@ function catalogPage(banners, ctx) {
     .replace('__KIND__', JSON.stringify(Object.fromEntries(KIND_OPTS.slice(1))));
   return page('Banner Catalog', `<style>${CATALOG_CSS}</style>`
     + `<p class="n">${n} original banners. Banners unlock as you progress through the Story; in the original game they followed the calendar.</p>`
+    // entry point of the Medal Gallery (I-242, medal-gallery.js): the Banner Catalog is the server's Medal page the player can
+    // reach without a client change (Shop > Banner Catalog > Details); BACK of the gallery comes back here
+    + `<p class="mg"><a href="${MEDAL_GALLERY_HREF}">${MEDAL_GALLERY_LINK}</a> <span class="n">BGM Medals and Full Art Medals, owned or not (an addition of this server)</span></p>`
     + '<div class="gy">GAME YEAR <span>— each year runs from one anniversary (April 7) to the next</span></div>'
     + `<div class="tabs">${tab('all', 'All years', '2016–2021', n)}${GAME_YEARS.map((g, i) => (perYear[i] ? tab(i, g.name, g.sub, perYear[i]) : '')).join('')}</div><div class="tabline"></div>`
     + `<div class="sum" id="sum"><span class="n1">${nb}</span> · all years, no filters</div>`
@@ -884,7 +890,7 @@ function catalogPage(banners, ctx) {
 }
 
 module.exports = {
-  KIND_OPTS, niceRange, PAY_ICON,
+  KIND_OPTS, niceRange, PAY_ICON, MEDAL_GALLERY_HREF,
   KEPT_STYLE, CATALOG_PLATE_STYLE, CATALOG_PAY_TYPE, PAY_ICON_KEYS, page, PIN_JS, esc,
   SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, listedCurrency, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, GAME_YEARS, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,

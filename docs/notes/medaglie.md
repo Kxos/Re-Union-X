@@ -157,6 +157,8 @@ The client loads `PopupNormal_SortButton_ver350` (generated from ver320) and loo
 Textures rebuilt in `make_textures.py` (references
 `reference\medal_list\sort_filter\`). To be compared with the original: «Favorite», «SP Attack Bonus /
 No Bonus» gray, «Imitation», «Special Traits» with 11 icons and «None» twice (ISSUES I-023).
+The conditions are hardcoded in the client, so no new filter can be added here: BGM and Full Art Medals are listed by the
+server page [Medal Gallery](#medal-gallery) (I-242).
 
 «SP Attack Bonus» row (tier): the original ver320 layout has `Filter_Guilt1..9` (8 at the top, 9
 below on the left) with `Logo_01` = `MedalInfo_Guilt<n>.png`; the client looks for
@@ -1177,3 +1179,42 @@ section); the wiki has no artwork outside the 55.
 **Still open**: which star variants showed the button (per-row flags are not in any data we have; notices mark the 6★ and
 7★ of Stained Glass #1-#6, Key Art #16, Prime - Key Art #17, Roxas Art 7★); no Inspect screenshot of the 30 «candidate»
 Medals flagged as reconstructions on 06-11 (their art is ours by design).
+
+<a id="medal-gallery"></a>
+## Medal Gallery (I-242, user request 06-11, not original)
+
+The Sort/Filter popup of the Medal List cannot get new filters (its conditions are hardcoded in the client), so the BGM
+Medals and the Full Art Medals are listed by a **server web page** instead: `GET /web/medals/gallery` (`server/medal-gallery.js`,
+route `medalweb` in `server.js`), served on the http `WEB_BASE` like the other WebView pages (the WebView rejects our TLS
+certificate). Style and behaviour of the Raid / Special catalogues: two tabs, a summary line with removable tags, the Filters
+sheet (FIND by name with `khuxMatch`, OWNED all / owned / not owned, ATTRIBUTE Power / Speed / Magic), green / grey side bar
+by ownership, an empty state; pictures load only for the rows shown (`data-src`), and the cards travel as compact JSON built in
+the page by `kxBuild` (same idea as [raid.md#catalog-light](raid.md#catalog-light)): **28 KB** for the current master.
+
+- **BGM Medals**: base rows with `medal.bgm` (`medal_bgm.json` applied by `make-game-tables.js`, [BGM Medals](#bgm-medals)):
+  **43 cards / 78 rows** (the 36 names of `medal_bgm.json` plus their SN / SN+ / SN++ / Supernova versions, which take the
+  track of their base Medal by user decision; HD King Mickey [EX], without a track, is not listed).
+- **Full Art**: base rows with `imageCategory` 2 (`medal-art.js`, [Full artwork](#full-artwork)), one section per artwork in the
+  order of `ART` (**55**), the Medal that carries the art first: **97 cards / 142 rows**; the **22** cards made only of
+  `CONTAINED` rows carry a **Reconstructed** pill. Tapping the artwork thumbnail opens it larger.
+- One card per Medal **name**: its rows (6★ / 7★) are star chips, green when owned; the picture is the highest star's
+  `thumbId`. Boosted copies (`groupId` = base row) are not cards: owning one counts for its base row
+  (`ownedBases(userMedalList())`, the Medals in the box now, not the Album).
+- **Pictures**: `/web/medals/img/v<N>/<thumbId>.png` (128x128) and `/web/medals/art/v<N>/<artId>.jpg` (160x240) /
+  `<artId>-l.jpg` (480x720), `N` = `IMG_VERSION`; only these names are read (`imageFile`). They are files of
+  `server/game_data/medal_img` (git-ignored) written by `python recon/tools/make_medal_gallery_images.py
+  server\master_data\medal.json server\game_data` from the local `medal_gen` pack (`Medal_S_<thumbId>`, BTF) and the JP
+  4.3.1 reference data (`img/art/Art_<artId>.png`, local path `jp_data`): 210 Medal pictures and 55 artworks, 11 MB. No
+  Square Enix file enters the repo. Without them the page works with empty squares. Run it again after a master
+  regeneration that adds BGM or Art Medals. A play package takes the folder with the rest of `server/` (`make-play-package.ps1`);
+  `test-package-layout.ps1` checks that it is there, so generate it before building a package.
+- **Entry point** (no client change): a «Medal Gallery ›» link under the intro of the Shop's **Banner Catalog** page
+  (`gacha.js` `catalogPage`, Shop > Banner Catalog > Details), the server page about Medals the player already reaches;
+  `?from=catalog` adds a BACK bar to it. Not chosen: Other > Help (its safety rules forbid links), the Notices (text only,
+  also exported to the project site, where a game-server link would be dead), a new banner (would need a new Shop or Event
+  plate). The Notice «Medal Gallery» (INFORMATION, 11/06) explains it as an addition of this server.
+- Tests: `node server/test-medal-gallery.js` (fixture: grouping, boosted ownership, reconstructed pill, escaping, ES5 page
+  scripts, picture names, entry link and Notice; master: Full Art rows = `medal-art.js` rows, 55 sections, BGM rows = `medal.bgm`
+  rows, every `medal_bgm.json` name on a card, page under 45 KB), `python recon/tools/test_make_medal_gallery_images.py`.
+  Checked in a desktop browser (preview server, not the game server): tabs, filters, lazy pictures, artwork viewer. **Bench
+  pending** (in-game WebView).

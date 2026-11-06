@@ -286,6 +286,12 @@ const NOTICES = [
       ...raidJpLines(raidNoticeFacts()),
       '## Raids not here yet',
       ...raidNoticeLines(raidNoticeFacts())] },
+  // Medal Gallery (I-242, user request 06-11): server/medal-gallery.js, link on the Banner Catalog page (gacha.js catalogPage)
+  { date: '11/06', tag: 'INFORMATION', title: 'Medal Gallery',
+    body: ['The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then **Medal Gallery** under the title.',
+      '**BGM Medals** lists the Medals with their own music, which plays in the Medal\'s details and on the Home screen when the Medal is shared. Their Supernova versions play the music of their Medal (**not original**).',
+      '**Full Art** lists the Medals with the **Art** button in their details, under their artwork; tap the artwork to see it larger. Medals marked **Reconstructed** show an artwork that their own picture is part of, although the original game data gave them none (see the Differences from the original game notice).',
+      'Each Medal shows its picture, its stars, its attribute and whether you own it; the **Filters** find Medals by name, owned or not owned and attribute.'] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
   { date: '10/27', tag: 'INFORMATION', title: 'Support Medal Cost',
     body: ['The support Medals (EXP Medals such as Huey, Dewey, Louie and Scrooge, Moogle Medals, Boost Medals such as Chip, Dale and Magic Mirror, Cid, and the Evolve Medals such as Merlin, Flora, Fantasia Mickey and the Blue Fairy) now show **cost 999**, like the Trait Medals.',
