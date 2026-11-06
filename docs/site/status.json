@@ -1,6 +1,6 @@
 {
-  "updated": "27 October 2026",
-  "summary": "Single player works from a new player to the end of the story (quest 979). Multiplayer, events and raids do not exist yet.",
+  "updated": "6 November 2026",
+  "summary": "Single player works from a new player to the end of the story (quest 979), and every worldwide raid of 2016-2021 is back (solo). Multiplayer, events and the Coliseum do not exist yet.",
   "areas": [
     {
       "name": "Startup and home screen",
@@ -161,6 +161,55 @@
       "detail": "The hard version of all 979 story quests: unlocked by story Quest 500, original red screens, higher enemy levels, a fixed Keyblade and a Special Attack condition per quest, Proud Keyblade rewards."
     },
     {
+      "name": "Raid Bosses",
+      "state": "done",
+      "detail": "All 194 worldwide raids of 2016-2021 (424 tiers, 501 Raid Boards), played solo: weekly raids that follow your Story, past raids kept from the Raid Catalog, and the raid bosses that appear in story quests. Every boss has its look again. Each raid has its original banner and a Details page with the original notice.",
+      "done": 194,
+      "total": 194,
+      "unit": "raids",
+      "breakdown": {
+        "title": "What is original and what is not",
+        "parts": [
+          {
+            "tag": "ORIGINAL",
+            "kind": "t-update",
+            "count": 194,
+            "label": "Worldwide raids",
+            "detail": "Every worldwide raid of 2016-2021, with its 424 tiers and 501 Raid Boards, its original banner and its original notice on the Details page."
+          },
+          {
+            "tag": "RESTORED",
+            "kind": "t-event",
+            "count": 45,
+            "label": "Boss models",
+            "detail": "Every raid boss is drawn whole again; some were reconstructed from the surviving art and approved in the running game."
+          },
+          {
+            "tag": "NEW",
+            "kind": "t-campaign",
+            "count": 1,
+            "label": "Raid Catalog",
+            "detail": "Every past raid sorted by game year, with filters; one past raid can be kept in the Events tab."
+          },
+          {
+            "tag": "NOT ORIGINAL",
+            "kind": "t-important",
+            "count": 1,
+            "label": "One raid rule",
+            "detail": "The same rule for every raid: Monday to Friday the original AP; Saturday and Sunday 0 AP, Lux x2 and Bonus Time all day."
+          },
+          {
+            "tag": "REBUILT",
+            "kind": "t-info",
+            "count": "-",
+            "label": "Lost values",
+            "detail": "Values lost in the original data (for example ATK and DEF after 2016, time limits, Raid Coin odds) are rebuilt from the surviving sources and declared on each raid's Details page."
+          }
+        ],
+        "note": "Raid Board cells follow one path: the original grid layout of the boards is not restored. Japan-only raids are not served: this server keeps to the worldwide game. Later additions will come with the events (the event Boosters)."
+      }
+    },
+    {
       "name": "Easy installation",
       "state": "missing",
       "detail": "Today the setup is long and technical. A launcher will make it simple when the work is finished.",
@@ -171,13 +220,6 @@
       "name": "Events",
       "state": "missing",
       "detail": "Event quests, event banners and boosters.",
-      "done": 0,
-      "total": 1
-    },
-    {
-      "name": "Raid Bosses",
-      "state": "missing",
-      "detail": "Raid Boss battles and their rewards.",
       "done": 0,
       "total": 1
     },
