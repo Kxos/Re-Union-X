@@ -78,12 +78,12 @@
    "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Malicious Spider! 12 hours until it escapes · HP 30,000,000"
   },
   "JP-SHR-28": {
-   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
-   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+   "ja": "土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
   },
   "JP-SHR-32": {
-   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
-   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
+   "ja": "土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
   },
   "JP-SHR-35": {
    "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
@@ -516,6 +516,54 @@
   "JP-RAID-26": {
    "ja": "レベル★★★ レイドボスイベント Disney TSUM TSUM ハートレスツム出現!! 毎日12時/22時から1時間 レイドボスボーナスタイム!",
    "en": "Level ★★★ · Raid Boss Event: Disney Tsum Tsum · Heartless Tsum appears!! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-23": {
+   "ja": "レイドボスイベント 獅子舞・緋袴アバターをゲット! 毎日12時/22時から1時間 レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: Get the Shishimai and Scarlet Hakama avatars! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-25": {
+   "ja": "KINGDOM HEARTS 15th ANNIVERSARY レイドボスイベント 『フュリオスホールケーキ』出現! 毎日12時/22時から1時間 レイドボスボーナスタイム!",
+   "en": "Kingdom Hearts 15th Anniversary · Raid Boss Event: «Furious Whole Cake» appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-05-22": {
+   "ja": "レベル★★★ レイドボスイベント 「ギアゴーレム」出現!! 毎日12時/22時から1時間 レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Gear Golem appears!! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-07-17": {
+   "ja": "レベル★★★ レイドボスイベント 「キャプテンアヴァリシャス」出現! 毎日12時/22時から1時間 レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Captain Avaricious (Closehanded Captain) appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-01-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント 12:00~12:29 22:00~22:29 NEW レイド討伐戦 アバターパーツをゲットしよう!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event · 12:00-12:29 and 22:00-22:29 · NEW Raid Battle: Get avatar parts!"
+  },
+  "JP-D-2018-02-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント 12:00~12:29 22:00~22:29 NEW レイド討伐戦 ペットパーツをゲットしよう!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event · 12:00-12:29 and 22:00-22:29 · NEW Raid Battle: Get pet parts!"
+  },
+  "JP-SHR-79": {
+   "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 「フォートレスクラブ亜種」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Fortress Crab Ω! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-83": {
+   "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Blue Trident Tail! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-86": {
+   "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 「フォートレスクラブ亜種」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Fortress Crab Ω! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-91": {
+   "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-95": {
+   "ja": "レベル★★★★★ 超難度レイドボスイベント 逃亡まで60分 パーティーで協力して撃破せよ!",
+   "en": "Level ★★★★★ · Super-Hard Raid Boss Event · 60 minutes until it escapes · Work together as a party to defeat it!"
+  },
+  "JP-SHR-96": {
+   "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 逃亡まで60分 パーティーで協力して撃破せよ!",
+   "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event · 60 minutes until it escapes · Work together as a party to defeat it!"
   }
  }
 }
