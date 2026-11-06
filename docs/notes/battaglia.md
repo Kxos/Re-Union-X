@@ -108,10 +108,12 @@ enemies with power from the Burst level (introduced in 1.40; khux-guides.tumblr.
   (10145/110145); shuffleskill 901/902 (enemyKind 1/2, bonus 0, icons 60/61). Master rev. +1.
 - **Level** (`server/guilt-burst.js`): +`addGuiltBurstLv` (medal row; in the tables 0 ->
   1) at the first guilt of each medal, +`addGuiltBurstLvMax` (0 -> 5) at the first maximum
-  guilt. Here guilt is the tier (`guiltValue`, fixed, no `guiltFactor`): first guilt = first
-  medal (medalId) owned with tier > 0; maximum guilt = first copy at `maxLv` (our choice).
-  A record that never goes down in `player.guiltBurst {first, max}` (the old `player.guiltBurstLv` is no
-  longer used). `isGuilt` = 1 if the level > 0. `KHUX_GUILT_BURST_LV=<n>` fixes the level for
+  guilt. The guilt is the copy's real guilt (`userMedal.guiltFactor`, from the Level Up, [guilt](guilt.md)):
+  first guilt = first copy of a medal with tier (`guiltValue`) > 0 and `guiltFactor` > 0; maximum guilt =
+  first copy with `guiltFactor >= guiltRange(guiltProb, tier).max` (since 2d413ba; the old rule «first copy
+  at `maxLv`» is gone). The key is `groupId || medalId` (a boosted copy and its normal Medal count once).
+  A record that never goes down in `player.guiltBurst {first, max}` (medalIds registered with the old rules
+  stay; the old `player.guiltBurstLv` is no longer used). `isGuilt` = 1 if the level > 0. `KHUX_GUILT_BURST_LV=<n>` fixes the level for
   tests (the save with all medals gives Lv 1908 = power 763.200).
 - **Level popup**: `guiltBurstFirstUserMedalIds`/`guiltBurstMaxUserMedalIds` (in `/stage/clear`, draw, Moogle Shop,
   raid reward) and `guiltBurstFirstLv`/`MaxLv` of the Level Up open `lwf/medal/guilt_bonus/GuiltBonus_BurstLvup`
