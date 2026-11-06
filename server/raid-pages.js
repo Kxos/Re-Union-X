@@ -26,8 +26,10 @@ const TIER_LABEL = { single: 'One tier' };
 const tierLabel = (t) => TIER_LABEL[t] || t;
 // TYPE of a row (family of its census row): [value, label, icon key]
 const typeOf = (row) => (row.jp ? 'jp' : row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
-const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp'], ['jp', 'Japan only']];
-const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced'], ['legendary', 'Legendary'], ['epic', 'Epic'], ['single', 'One tier']];
+const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp'], ['jp', 'Japan only', 'jp']];
+// TIER chips (06-11): our drawn rank marks (special_icons.py): 1 / 2 / 3 stars, a crown, a large star, a «1» (one-tier raid)
+const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner', 'tbeg'], ['intermediate', 'Intermediate', 'tint'], ['advanced', 'Advanced', 'tadv'], ['legendary', 'Legendary', 'tleg'],
+  ['epic', 'Epic', 'tepic'], ['single', 'One tier', 'tone']];
 const SHOW_OPTS = [['all', 'All raids'], ['now', 'In Events now', 'now'], ['can', 'Can be kept now', 'pin'], ['kept', 'Kept', 'pin'], ['later', 'Later in the Story', 'later'],
   ['removed', 'Not restored yet', 'removed']];
 const SHOW_SETS = { now: ['now', 'kept'] };
