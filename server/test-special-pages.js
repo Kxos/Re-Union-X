@@ -25,7 +25,7 @@ const html = pages.catalogPage(index, { period: 4, pinnedKey: 'kb', vip: false, 
 // round 13: the row (quest or campaign) that holds the element id="q<id>"
 function itemOf(h, id) { const s0 = h.indexOf(`id="q${id}"`); if (s0 < 0) return ''; const a = h.lastIndexOf('<div class="row', s0); return h.slice(a, h.indexOf('</div>' + String.fromCharCode(10), s0)); }
 check(!/class="(tl|tp|vr|vc)[ "]/.test(html), 'no timeline or version chips in the list (round 13)');
-check(/Period 4[\s\S]{0,200}Now/.test(html) && (html.match(/>Now</g) || []).length === 1, 'current period marked Now once');
+check(!html.includes('class="now"') && html.includes('data-p="all"><b>All years</b><small>2016–2021</small>') && html.includes('<b>Launch year</b><small>Apr 2016 → 1st 🎂</small>'), 'tabs = the Shop game years, no Now mark (user 06-11)');
 const row = (id) => itemOf(html, id);
 check(row(7105) && !row(7105).includes('data-pin') && row(7105).includes('Reached later in the Story'), 'later: no pin, text');
 check(row(7103).includes('Replaced by N-kb') && !row(7103).includes('data-pin'), 'replaced');
@@ -35,17 +35,17 @@ check(row(7102).includes('Keep in Special') && row(7102).includes('/web/special/
 check(row(7101).includes('/web/special/img/v' + require('./special').SPECIAL_IMG_VERSION + '/7101.png'), 'image');
 // Task 13: tabs, filters sheet, data attributes, half-size banners
 check(html.includes('class="tab on" data-p="all"'), 'All tab default');
-for (const p of PERIODS) check(html.includes('data-p="' + p.n + '"') && html.includes('id="tc' + p.n + '"'), 'tab ' + p.n);
-check(html.includes('id="tc1">3<') && html.includes('id="tcall">8<'), 'tab counts (3 in period 1, 8 total)');
+for (const y of [0, 1, 2, 3, 4]) check(html.includes('data-p="' + y + '"') && html.includes('id="tc' + y + '"'), 'tab ' + y); check(!html.includes('data-p="5"'), 'no tab for a game year without rows');
+check(html.includes('id="tc0">6<') && html.includes('id="tc1">4<') && html.includes('id="tc2">1<') && html.includes('id="tcall">8<'), 'tab counts (6 in the launch year, 8 total)');
 const attr = (id, a) => { const r = row(id), m = new RegExp(a + '="([^"]*)"').exec(r.slice(0, r.indexOf('>') + 1)); return m ? m[1] : null; };
 for (const id of [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108]) check(['data-periods', 'data-type', 'data-show', 'data-search'].every((a) => attr(id, a) !== null), 'row attrs ' + id);
 check(attr(7106, 'data-type').split(' ').includes('vip'), 'VIP');
 check(attr(7102, 'data-search').toLowerCase().includes('huey') && attr(7102, 'data-search').toLowerCase().includes('mythril') && attr(7102, 'data-search').toLowerCase().includes('quest two'), 'search has drop names');
 check(attr(7107, 'data-search') === 'N-cid', 'search plain name (as written)');
-check(attr(7102, 'data-periods') === '1' && attr(7101, 'data-periods') === '2' && attr(7103, 'data-periods') === '1 2', 'data-periods');
+check(attr(7102, 'data-periods') === '0' && attr(7101, 'data-periods') === '0 1' && attr(7103, 'data-periods') === '0 1' && attr(7105, 'data-periods') === '3 4' && attr(7108, 'data-periods') === '0', 'data-periods = game years of the periods (and of a campaign week)');
 check(attr(7107, 'data-type') === 'daily' && attr(7106, 'data-type').split(' ').includes('vip') && attr(7108, 'data-type') === 'camp' && attr(7101, 'data-type') === 'weekday', 'types');
 check(attr(7101, 'data-show') === 'kept' && attr(7102, 'data-show') === 'can' && attr(7103, 'data-show') === 'replaced' && attr(7104, 'data-show') === 'removed' && attr(7105, 'data-show') === 'later' && attr(7106, 'data-show') === 'can' && attr(7108, 'data-show') === 'now', 'shows');
-check(html.includes('id="sum"') && html.includes('>7 quests</span> · 1 campaign · all periods, no filters') && html.includes('id="fbtn"'), 'summary and filters button');
+check(html.includes('id="sum"') && html.includes('>7 quests</span> · 1 campaign · all years, no filters') && html.includes('id="fbtn"'), 'summary and filters button');
 check(html.includes('id="sheet"') && html.includes('data-g="type"') && html.includes('data-g="show"') && html.includes('id="fq"') && html.includes('id="freset"') && html.includes('id="fok"'), 'filters sheet');
 check(html.includes('FIND') && html.includes('TYPE') && html.includes('SHOW') && html.includes('Daily Cid') && html.includes('Later in the Story'), 'sheet groups');
 check(row(7102).includes('width="320"') && row(7102).includes('height="70"') && html.includes('.im{'), 'half-size banner');
@@ -200,7 +200,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check((camps.match(/<div class="row cr /g) || []).length === 2 && camps.includes('width="320" height="70"') && !camps.includes('class="pk"'), 'campaign rows: like the quest rows, no Keep');
   check(camps.includes('Jun 12, 2017 – Jun 18, 2017') && camps.includes('>June 2017</div>') && /class="yc on" data-yr="2019"/.test(camps), 'campaign dates, month labels, the Shop week year selected');
   // tabs / summary
-  check(h.includes('<span class="n1">9 quests</span> · 2 campaigns · all periods, no filters') && h.includes('id="tcall">11<') && h.includes('id="tc4">5<'), `summary and tabs: ${(/<div class="sum"[^>]*>(.*?)<\/div>/.exec(h) || [])[1]} ${(h.match(/id="tc[^"]+">\d+</g) || []).join(' ')}`);
+  check(h.includes('<span class="n1">9 quests</span> · 2 campaigns · all years, no filters') && h.includes('id="tcall">11<') && h.includes('id="tc4">2<'), `summary and tabs: ${(/<div class="sum"[^>]*>(.*?)<\/div>/.exec(h) || [])[1]} ${(h.match(/id="tc[^"]+">\d+</g) || []).join(' ')}`);
   // the quest's details page: versions newest first, their own Keep buttons, day text
   const q = pages.detailPage(ix, 7311, { ...c4, fromCatalog: true });
   check(q && q.includes('<title>Daily Challenge: Cid</title>') && q.includes('<h1>Daily Challenge: Cid</h1>'), 'details: one page for the quest');

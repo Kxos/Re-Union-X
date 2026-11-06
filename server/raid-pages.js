@@ -2,7 +2,7 @@
 // Details button of the Raid Catalog banner (evStage 8000 of make-raid.js) in the Events tab. Pure HTML, no player or master
 // access: server.js passes the index (game_data/raids.json) and the context (routes-raid.js catalogCtx plus the pages' lookups).
 // Same style and rules as the Special Catalog (server/special-pages.js, whose CSS, icons and word-start search are reused):
-// period tabs and year chips, one minimal row per raid week (card, bosses, one date line, ONE status line, at most ONE Keep
+// game-year tabs (the Shop catalogue's, 06-11) and year chips, one minimal row per raid week (card, bosses, one date line, ONE status line, at most ONE Keep
 // button, «›»), a Filters sheet (FIND / TYPE / TIER / SHOW / PROGRESS / RAID BOARDS) with a «Matches:» line, a details page per raid.
 // ctx: {shopFrom, shopTo, current (Set of census ids of the week), kept (census id), periods, unlockQuestOf(row) -> N | null,
 // boardItems(sphereBoardId) -> [item names], boardName(sphereBoardId) -> name, imgVersion, fromCatalog,
@@ -13,7 +13,7 @@ const special = require('./special-pages');
 const calendar = require('./raid-calendar');
 const windows = require('./raid-windows');
 
-const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls } = special;
+const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, khuxMatch, CROWN, PROG_OPTS, progCls, gameYearOf, GAME_YEARS, YEAR_SPAN } = special;
 
 const KEEP_LABEL = `${icon('pin')}Keep in Events`, REMOVE_LABEL = 'Remove from Events';
 const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)',
@@ -226,7 +226,6 @@ const UNPACK_JS = 'function kxImgs(){var a=document.querySelectorAll("#rows .row
   + 'document.getElementById("rows").innerHTML=o.join("");})();';
 function catalogPage(index, ctx = {}) {
   const periods = ctx.periods, rows = calendar.catalogRows(index), kept = keptRow(rows, ctx);
-  const curPeriod = ctx.shopFrom ? periodOf(ctx.shopFrom, periods) : null;
   let lastM = '';
   const packed = [];
   rows.forEach((row) => {
@@ -236,7 +235,7 @@ function catalogPage(index, ctx = {}) {
     const tiers = [...new Set(row.entries.map((e) => e.tier))], done = doneOf(row, ctx), bd = boardsOf(row, ctx);
     const name = esc(titleOf(row)), line = `${row.jp ? 'Japan only · ' : ''}${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}`, search = esc(searchOf(row, ctx));
     packed.push({ label, fields: { s: search, d: line, n: name, e: String(row.evStageId), y }, html: `<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
-      + ` data-periods="${periodOf(row.start, periods)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${search}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
+      + ` data-periods="${gameYearOf(row.start)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${search}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
       + `<a class="im" href="${href}"><img width="320" height="70" data-src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${name}${done ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
@@ -246,17 +245,19 @@ function catalogPage(index, ctx = {}) {
   const years = [...new Set(rows.map((r) => r.start.slice(0, 4)))];
   const shopYear = String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
   const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
-  const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
+  // tabs = the Shop's game years (special-pages.js; user 06-11): a tab only for a year with raids, no «Now» mark
+  const tab = (p, name, sub, n) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="c" id="tc${p}">${n}</span></button>`;
+  const perYear = GAME_YEARS.map((g, i) => rows.filter((r) => gameYearOf(r.start) === i).length);
   const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-  const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
+  const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(GAME_YEARS.map((g, i) => [i, g.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__TIER__', labels(TIER_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__PROG__', labels(PROG_OPTS)).replace('__BD__', JSON.stringify(Object.fromEntries(BOARD_OPTS.slice(1).map((o) => [o[0], `Raid Boards: ${optLabel(o)}`])))).replace('__SHOWSET__', JSON.stringify(SHOW_SETS))
     .replace('__PILL__', JSON.stringify({ kept: PILLS.kept, can: PILLS.can })).replace('__MATCH__', () => MATCH_JS);
   return PAGE_HEAD('Raid Catalog', CSS) + '<body>'
     + '<div class="hdr"><h1>Raid Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
     + '<p class="n">Every raid week of the game, by date. Tap a raid for its bosses, tiers and Raid Boards. A past raid can be kept in the Events tab, one at a time. The Raid Catalog is an addition of this server.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All', rows.length)}${periods.map((p) => tab(p.n, p.name, rows.filter((r) => periodOf(r.start, periods) === p.n).length, p.n === curPeriod)).join('')}</div><div class="tabline"></div>`
+    + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, rows.length)}${GAME_YEARS.map((g, i) => (perYear[i] ? tab(i, g.name, g.sub, perYear[i]) : '')).join('')}</div><div class="tabline"></div>`
     + `<div class="yrs" id="yrs">${yearChip('all', 'All years', rows.length)}${years.map((y) => yearChip(y, y, rows.filter((r) => r.start.startsWith(y)).length)).join('')}</div>`
     + `<div class="sum" id="sum"><span class="n1">${plural(rows.length, 'raid')}</span> · no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
@@ -368,8 +369,8 @@ function detailPage(index, evStageId, ctx = {}) {
   if (!row) return null;
   const st = statusOf(row, ctx), kept = keptRow(rows, ctx), title = titleOf(row), periods = ctx.periods;
   const button = st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(){b.style.display=\'none\';})"')}</div>`;
-  const pName = (periods.find((p) => p.n === periodOf(row.start, periods)) || {}).name || '';
-  const kv = [['Dates', dateRange(row)], ['Type', FAMILY_LABEL[row.family] || row.family], ['Period', pName]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
+  const pName = GAME_YEARS[gameYearOf(row.start)].name;
+  const kv = [['Dates', dateRange(row)], ['Type', FAMILY_LABEL[row.family] || row.family], ['Game year', pName]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
   const tierRows = row.entries.map((e) => `<tr><td>${esc(tierLabel(e.tier))}</td><td>${esc(e.boss || '')}</td><td>${e.level ?? ''}</td>`
     + `<td${e.available ? '' : ' class="r"'}>${e.available ? Number(e.hp || 0).toLocaleString('en-US') : 'Not restored yet'}</td></tr>`).join('');
   const ids = [...new Set(row.entries.flatMap((e) => e.sphereBoardIds || []))];

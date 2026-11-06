@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-240**).
+a new issue takes the number after the last one used (last: **I-241**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,7 @@ Last revision: 5 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-241 | TO VERIFY | **Catalogue tabs differ from the Shop** (user 06-11): the Raid and Special Catalogs used the five Special periods with a «Now» mark; now the Shop Banner Catalog game years (anniversary to anniversary, same names and boundaries, no «Now» mark, as the Shop). Display only: the Special periods still drive unlocks. | [raid](notes/raid.md#catalog-years) | tests 06-11 |
 | I-240 | TO VERIFY | **Raid Catalog slow to open in the WebView** (bench 06-11): the page weighed about 414 KB and loaded all 347 card pictures at once (the WebView ignores lazy loading); the server took about 1 s on board lookups. Now rows packed and built in the page (same DOM, filters and keep unchanged), cards loaded only for the rows shown, lookups indexed: 95 KB. | [raid](notes/raid.md#catalog-light) | tests 06-11 |
 | I-239 | TO VERIFY | **JP raid banners without Details** (user 06-11): the Japan-only raids had no original notice page, so no Details button. Now every JP banner opens a page that gives our translation of the banner text (35 carded rows), our translation of the JP notice facts where the notice is in the evidence (13 rows), else «The original Japanese notice of this raid has not been recovered», and what is known (bosses by day, HP, time limit, level rewards, boards with their label), with the one-AP rule note. Needs make-raid-notices.js + master regeneration. | [raid](notes/raid.md#jp-details) | tests + dry run 06-11 |
 | I-238 | TO VERIFY | **JP raid boards from the evidence, not generic** (user 06-11): the Japan-only raids had the generic Medals/Jewels boards of a similar WW raid (boardStandard). Now (a) original boards where they survive (Christmas 2015 and Mickey & Magic Broom Jan 2016 from the 2017 master, the super-hard standard board), (b) boards reconstructed from the JP wiki summaries, JP board card pictures and the KH2.8 video (jpBoardDeduced), (c) no board otherwise (jpNoBoard, said on the page). Dry run: 96 rows original, 16 reconstructed, 41 none; WW unchanged. Needs master regeneration + resource build (board cards). | [raid](notes/raid.md#jp-boards) | tests + dry run 06-11 |
