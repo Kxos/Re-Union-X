@@ -12,6 +12,8 @@
 // (docs/notes/raid.md «Older WW event raids»).
 // Story raid bosses (Task 11): raids.json `story` {last, bosses, quests, conflicts, unknown} from the census story ranges and the 2016
 // rows and settings of the story bosses, fought on fight stages of their own (storyPlan, buildStory; docs/notes/raid.md «Story raid bosses»).
+// Japan-only raids (I-232): Raid Catalog only (jpStatus, jpTierRows); raid_config.json jpCensus corrects the census JP rows from the
+// later JP research when the census is read (applyJpCensus: weekday bosses, year-end 2016, the two 2018 weekends, JP level drops).
 // One entry per tier row of a census row; every WW row with week data is built (onlyCensusIds of raid_config.json is a filter
 // for tests and benches, absent in the shipped file). Which rows run in the player's week is raid-calendar.js's business: it
 // reads censusId, start and end of the entries. Ids come from server/raid_ids.json (versioned, append-only), because they live in
@@ -491,6 +493,51 @@ function jpStatus(row, census) {
   return {};
 }
 const jpServed = (row, census) => isJpRow(row) && !jpStatus(row, census).why;
+// Corrections to the census JP rows from the later JP research (raid_config.json jpCensus, user decisions 05-11 and 06-11): the
+// private census file stays as it is, the overlay is applied when it is read (buildRaid, --ids). Per census id: family, bosses
+// (in order: the days of a daily rotating row, Monday to Sunday with weekdays), weekdays (the boss of each weekday over the whole
+// row), saturdayOnly (a one-day weekend: open on Saturday only), hp (census data.hp text, e.g. «yes: fixed N»), probableBosses
+// (true or names: the boss is inferred, label jpBossProbable), hpProbable (jpHpProbable), windowLevel (the original reset the boss
+// level after each 30-minute window, jpWindowLevel), levelStep (levels gained per defeat, routes-raid.js), levelDrops
+// ([{level, reward: «N★ Name» or «N★ Name (Boosted)», boss?, probable?}], paid as the notices' level drops). Keys starting with
+// «_» are notes. An id not in the census stops the run.
+const JP_FIX_KEYS = new Set(['family', 'bosses', 'weekdays', 'saturdayOnly', 'hp', 'probableBosses', 'hpProbable', 'windowLevel', 'levelStep', 'levelDrops', 'source']);
+function applyJpCensus(census, overlay) {
+  if (!overlay || !census || !Array.isArray(census.rows)) return census;
+  const ids = new Set(census.rows.map((r) => r.id));
+  for (const [id, fix] of Object.entries(overlay)) {
+    if (id.startsWith('_')) continue;
+    if (!ids.has(id)) throw new Error(`raid: jpCensus: ${id} is not a census row`);
+    const bad = Object.keys(fix).filter((k) => !JP_FIX_KEYS.has(k));
+    if (bad.length) throw new Error(`raid: jpCensus: ${id}: unknown field ${bad.join(', ')}`);
+    if (fix.weekdays && (fix.bosses || []).length !== 7) throw new Error(`raid: jpCensus: ${id}: weekdays needs 7 bosses (Monday to Sunday)`);
+  }
+  return { ...census, rows: census.rows.map((r) => {
+    const fix = overlay[r.id];
+    if (!fix) return r;
+    return { ...r, ...(fix.family ? { family: fix.family } : {}), ...(fix.bosses ? { bosses: [...fix.bosses] } : {}),
+      ...(fix.hp ? { data: { ...(r.data || {}), hp: fix.hp } } : {}), jpFix: fix };
+  }) };
+}
+// Is this boss of a JP row named by the research only as probable (jpCensus probableBosses)?
+const jpBossProbable = (row, boss) => {
+  const p = row.jpFix && row.jpFix.probableBosses;
+  return p === true || (Array.isArray(p) && p.includes(boss));
+};
+// Level drops of a JP row for one boss (jpCensus levelDrops): {drops: [{levels, items}], partial, probable} or null when the row
+// lists none for that boss. A reward with no item in the master is left out (partial), never replaced.
+function jpLevelDrops(row, boss, itemIdx) {
+  const list = ((row.jpFix || {}).levelDrops || []).filter((d) => !d.boss || d.boss === boss);
+  if (!list.length) return null;
+  const out = { drops: [], partial: false, probable: false };
+  for (const d of list) {
+    const hit = raidBoards.matchReward(itemIdx, 'medal', d.reward, 1);
+    if (hit.why) { out.partial = true; continue; }
+    out.drops.push({ levels: [num(d.level)], items: [{ type: hit.sel, id: hit.id, num: 1, name: d.reward }] });
+    if (d.probable) out.probable = true;
+  }
+  return out;
+}
 // Tier rows of a JP row (one tier, quest level from the donor): two bosses «X» and its rare (X Ω, or the rare boss of a 2016
 // raidSetting pairing them: Savage Spider / Venomous Spider) are one quest; other bosses each a quest of their own (slot); the
 // daily rotating raid one boss per day, the last N days of the row (the census start is the Pacific day before the JP Monday).
@@ -501,7 +548,19 @@ function jpTierRows(row, pairs = new Set()) {
   const base = { start: row.start, end, tier: SINGLE, quest_lv: 0, gem_drop: false, event: true, jp: true, map: null, ...(row.end ? {} : { noEnd: true }) };
   const bosses = row.bosses || [];
   let out;
-  if (row.family === 'daily rotating') {
+  const fix = row.jpFix || {};
+  if (fix.weekdays) {
+    // the boss of each weekday (Monday to Sunday) over the whole row: `day` = its first date in the row (key and weekday only)
+    out = bosses.map((boss, i) => {
+      let d = dayMs(row.start);
+      while (new Date(d).getUTCDay() !== (i + 1) % 7) d += DAY;
+      return { ...base, boss, day: isoDay(d) };
+    });
+  } else if (fix.saturdayOnly) {
+    // a one-day weekend raid («Saturday only»): open on Saturday, not on the whole weekend
+    if (new Date(dayMs(row.start)).getUTCDay() !== 6) throw new Error(`raid: jpCensus: ${row.id}: saturdayOnly but ${row.start} is not a Saturday`);
+    out = bosses.map((boss, i) => ({ ...base, boss, day: row.start, ...(bosses.length > 1 ? { slot: i + 1 } : {}) }));
+  } else if (row.family === 'daily rotating') {
     const first = dayMs(end) - (bosses.length - 1) * DAY;
     out = bosses.map((boss, i) => ({ ...base, boss, day: isoDay(first + i * DAY) }));
   } else if (bosses.length === 2 && (bosses[1] === `${bosses[0]} Ω` || pairs.has(`${bosses[0]}|${bosses[1]}`))) {
@@ -773,6 +832,7 @@ function applyLux(rows, lux) {
 
 function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null }) {
   checkRanges(master);
+  census = applyJpCensus(census, config.jpCensus); // corrections of the JP rows (jpCensus), before anything reads the census
   const fixes = parseCorrections((rewards || {}).correctionsMd);
   const weeks = correctedWeeks(values.weeks, fixes.dates);
   const readings = correctedWeeks(values.week_tier_hp, fixes.dates);
@@ -806,7 +866,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   // event raids: the reward research (raid_rewards/b_events/event_raid_rewards.json) by census id, the 2016 reward rows, medals by name
   const eventRows = new Map(((eventRewards || {}).rows || []).filter((r) => r.region === 'WW').map((r) => [r.row_id, r]));
   const reward2016 = new Map((orig2016.raidReward || []).map((r) => [r.raidRewardId, r]));
-  const medalIndex = raidBoards.itemIndex(master).medal;
+  const itemIdx = raidBoards.itemIndex(master), medalIndex = itemIdx.medal;
 
   // The rows of one boss of a tier row: {rows, labels, hp, hpSource, template, own, original} or {why}. original: an event
   // raid with its own 2016 row (census data.hp «yes (2016 row)»): that row as it stands.
@@ -947,12 +1007,15 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (w.event) {
         entry.event = true;
         entry.periods = w.jp ? [[w.start, w.end]] : w.day ? [[row.start, isoDay(dayMs(row.end) - DAY)]] : eventPeriods(row);
-        if (row.family === 'weekend-only' || row.family === 'super-hard weekend') entry.open = 'weekend';
-        else if (row.family === 'daily showdown' || row.family === 'daily rotating') { entry.open = 'day'; entry.day = w.day; } else if (row.family === 'daily') entry.open = 'daily';
+        // a tier row with a day (daily showdown / rotating, a JP weekday rotation, a Saturday-only weekend) opens on that weekday
+        if (w.day) { entry.open = 'day'; entry.day = w.day; } else if (row.family === 'weekend-only' || row.family === 'super-hard weekend') entry.open = 'weekend';
+        else if (row.family === 'daily') entry.open = 'daily';
       }
       // Japan-only raid (I-232): served only in the Raid Catalog (raid-calendar.js never lists it as a raid of the week)
       if (w.jp) {
         Object.assign(entry, { jp: true, region: 'JP', ...(donor ? { questFrom: donor.key } : {}) });
+        // levels gained per defeat stated by the JP notice (jpCensus levelStep: year-end 2016 +10), read by routes-raid.js
+        if (row.jpFix && row.jpFix.levelStep) entry.levelStep = num(row.jpFix.levelStep);
       }
       out.index.entries.push(entry);
 
@@ -988,6 +1051,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         if (w.jp) {
           if (made.partFixed && reconstructed.includes('partHp')) reconstructed.splice(reconstructed.indexOf('partHp'), 1);
           reconstructed.push('jp', 'jpQuest', ...(w.noEnd ? ['jpDates'] : []));
+          // the later JP research (jpCensus): a boss or an HP only probable, the per-window level reset not applied
+          const fix = row.jpFix || {};
+          if (jpBossProbable(row, w.boss)) reconstructed.push('jpBossProbable');
+          if (fix.hpProbable) reconstructed.push('jpHpProbable');
+          if (fix.windowLevel) reconstructed.push('jpWindowLevel');
         }
         // the rare boss of the same quest (Queen Bee Ω beside Queen Bee): its own rows, timer and AP; chance 1 in rareUpTypeArg
         if (w.rare) {
@@ -1011,7 +1079,9 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       // level drops of the notice (review I-3): one raidReward row per level, every slot paid (routes-raid.js), ids past the coin
       // tables of the body (enemyId x 100 + 40 + i)
       if (w.event) {
-        const ld = levelDropsOf(evRow, medalIndex);
+        // a JP row: the level drops of the JP notice mapped to worldwide items (jpCensus levelDrops), when it lists some for this boss
+        const jpLd = w.jp ? jpLevelDrops(row, w.boss, itemIdx) : null;
+        const ld = jpLd || levelDropsOf(evRow, medalIndex);
         const drops = ld.drops.flatMap((d) => d.levels.map((level) => ({ level, items: d.items }))).sort((a, b) => a.level - b.level);
         if (drops.length > 59) throw new Error(`raid: ${entry.key}: ${drops.length} level drops`);
         entry.levelDrops = drops.map((d, i) => {
@@ -1023,6 +1093,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         });
         if (drops.length) reconstructed.push('levelDrops');
         if (ld.partial) reconstructed.push('levelDropsPartial');
+        if (ld.probable) reconstructed.push('jpRewardProbable');
       }
       out.settingRows.push({ raidSettingId: entry.settingId, bossId: entry.enemyId, bossUpTime: entry.upMinutes, useAp: entry.useAp, rareBossId: entry.enemyId, rareBossUpTime: entry.upMinutes,
         rareUseAp: entry.useAp, rareUpType: 3, rareUpTypeArg: 1, rareUpTriggerBossId: entry.enemyId, validUnlockRare: 0, unlockRareBossId: [0, 0, 0], unlockRareNum: [0, 0, 0], ...settingExtra });
@@ -1340,7 +1411,8 @@ function patch(masterDir, opts = {}) {
 // node server/make-raid.js --ids: numbers every WW row and tier row in raid_ids.json
 function writeIdsFile() {
   const src = process.env.KHUX_RAID_SRC || DEFAULT_SRC, dir2016 = process.env.KHUX_RAID_2016 || DEFAULT_2016;
-  const { census, values, rewards, boards, eventRewards } = readSources(src, dir2016);
+  const sources = readSources(src, dir2016), { values, rewards, boards, eventRewards } = sources;
+  const census = applyJpCensus(sources.census, loadConfig().jpCensus);
   // the story keys need the story rows (worlds) and the worlds' backgrounds of the served master (read only)
   const md = path.join(__dirname, 'master_data');
   const plan = storyPlan({ census, orig2016: readSources(src, dir2016).orig2016, master: { stage: readJson(path.join(md, 'stage.json')), world: readJson(path.join(md, 'world.json')) }, config: loadConfig() });
@@ -1374,4 +1446,4 @@ if (require.main === module) {
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { storyPlan, storyKeys, evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { applyJpCensus, storyPlan, storyKeys, evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
