@@ -995,10 +995,23 @@ Medal Details screen and tapping on "Inspect", a fullscreen version of the artwo
 - Picture format: **640x960 PNG, portrait**, the art lying on its side (the device shows it landscape, full screen);
   RGB or RGBA, one grayscale (Orchestra Sora).
 
-**Our state: not implemented, nothing breaks.** `make-game-tables.js` writes `imageCategory` 0 on all 3,552 rows
+**Our state until 6 Nov: not implemented, nothing breaks.** `make-game-tables.js` writes `imageCategory` 0 on all 3,552 rows
 (`artId` = `imageId`), so the button never shows and the dialog cannot open. The WW 5.0.1 OBB and the IPA 4.4.0 have
 `MedalInfo_Button_Art.json` and `But_Art_*` (served) but **no `MedalArtAnim*`, no `Art_Dummy00.png` and no `img/art/`**.
 The JP 4.3.1 data has all of them.
+
+**Staged 6 Nov 2026 (I-237, not yet built or benched).** User decision 05-11: every star of the 55 families and their boosted
+copies. `server/medal-art.js` (run by `make-game-tables.js` after `make-sell-ticket`) sets `imageCategory` 2 and `artId` = the JP art
+id on the 108 family rows of the table below and their 107 boosted copies (`groupId` = family row; Orchestra Sora has none);
+`validSource` is already 1 on all of them. **Left out: the 6 SN++ reissues** whose art is only a guess (312045 Key Art #3,
+302098 Key Art #8, 302031 Axel Art, 312033 Roxas Art, 311945 and 302011 Terra, Ven, Aqua) and their boosted copies; 302088
+SN++ - Key Art #20 is flagged (same album number 1703 as its family, the art is its own Medal's). Files: `originals.tsv` section
+51 (the 55 `img/art/Art_<artId>.png`, JP; 29 MB as BTF after `btf_fix`, all 640x960, grayscale one checked); the armature
+`MedalArtAnim.ExportJson` through `JP_ARM` of `import_jp_coco.py` on the served atlas `ActMapTreasureBoxAnim0` (frame
+`Art_Dummy00.png` merged by `atlas_merge.py`: a new plist would not be loaded), so `MedalArtAnim0.plist/.png` and the loose
+`Art_Dummy00.png` are not shipped. `server/test-medal-art.js` checks that every flagged `artId` has its line (and, with
+`--files <stage_geniles>` after a build, the pictures and the armature in the pack); `test_jp_arm_atlas.py` checks the merged
+atlas. The resource build must be served before the master revision (files first, flags after).
 
 **The Medals with the artwork: 55**, every one found in the JP 4.3.1 data (`img/art/`, 55 files + one older revision of
 352467 with the same bytes), all in the client's format. Ids are the SE ids of the Medal that carries the art (6★, or 7★
