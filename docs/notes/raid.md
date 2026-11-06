@@ -392,8 +392,19 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   matching family, without its exclusive items (`boardStandard`). Card picture of the donor board (`artFrom`, `raid-boards.js`):
   190 new lines in `game_data/raid_board_art.tsv`, which only a resource build imports. The JP avatar parts, titles and level
   drops are not given (list and WW availability in the private file).
-- **Cards.** No JP raid banner was collected: the Events card is the plain plate (`0.png`). Models and list banners are the
-  served ones of each boss.
+- **Cards** (6 November 2026). Original JP raid banners, written by `make_raid_banners.py --jp <list>` (keyed by census id,
+  evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build now leaves `jp`
+  rows alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row
+  evidence in the private `JP_ONLY.md` «JP raid cards». **35 of 148 rows have their own card** (`match` `exact`): 13 raid
+  events (JP-RAID-1 to 11, JP-RAID-22, JP-D-2018-08-06: 10 from the khuxwiki upload of 2016-05-18 of the JP notice images,
+  one of them pixel-identical to notice 15404's; the notice images of 15404 and 24027; the khuxwiki «Monthly Raid Event! 19 JP»
+  banner) and 22 super-hard weekends (the
+  per-boss banners of the JP wiki page 超難度レイドイベント, boss, HP and 12-hour limit printed: JP-SHR-1, JP-SHR-2, the 17
+  Saturday-only 30M weekends; the khuxwiki 150M Red Trident Tail banner for JP-SHR-78/85/92). 56 two-day 30M weekends have
+  only the Saturday-only banner of their boss (it prints 土曜限定): listed as `variant`, written only with `--jp-variants`
+  (not served). The other rows keep the plain plate. The Raid Catalog banner leaves the JP cards out of its strips
+  (`make_special_banners.py`, unchanged picture); its `--section raid` run now also writes the `-kept` copies of the JP rows.
+  Models and list banners are the served ones of each boss.
 - **Notices.** «Raid Bosses»: section «Raids of the Japanese version» (`raidJpLines`), and «Raids not here yet» lists the unnamed
   bosses and the WW twins (`raidNoticeLines`, from `raids.json` `jp`).
 - **Master** (make-raid.js + make-ev-campaign.js on rev 271 data): stage +155, evStage +148, raidSetting +155, raidEnemy +608,

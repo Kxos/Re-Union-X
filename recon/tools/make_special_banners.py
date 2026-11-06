@@ -463,20 +463,22 @@ def build_all(index, src_dir, out_dir, mode, enemies=None, rules=None):
 
 
 # ---- Raid Catalog (raids Part 2, Task 9) ----
-def raid_cards(raid_img):
+def raid_cards(raid_img, skip=()):
     """the weekly event cards of make_raid_banners.py in raid_img (<evStageId>.png, by id), without the plain plate 0.png,
-    the catalogue banner and the -kept copies"""
+    the catalogue banner, the -kept copies and the evStageIds in skip (the Japan-only rows: their cards stay off the
+    catalogue banner, which shows the WW raids)"""
     if not os.path.isdir(raid_img):
         return []
-    ids = sorted(int(f[:-4]) for f in os.listdir(raid_img) if f.endswith('.png') and f[:-4].isdigit() and int(f[:-4]) not in (0, RAID_CATALOG_EV))
+    ids = sorted(int(f[:-4]) for f in os.listdir(raid_img) if f.endswith('.png') and f[:-4].isdigit()
+                 and int(f[:-4]) not in (0, RAID_CATALOG_EV) and int(f[:-4]) not in skip)
     return [os.path.join(raid_img, '%d.png' % i) for i in ids]
 
 
-def raid_catalog_banner(raid_img, enemies=None):
+def raid_catalog_banner(raid_img, enemies=None, skip=()):
     """640x140 RGBA of the Raid Catalog banner (evStage 8000): the Special Catalog banner's layout with «RAID CATALOG», strips
     of RAID_STRIPS original weekly raid cards spread over the calendar, and the same Training Grounds figures (a tap opens
     that quest, make-raid.js)"""
-    cards = raid_cards(raid_img)
+    cards = raid_cards(raid_img, skip)
     n = min(RAID_STRIPS, len(cards))
     pick = [cards[round(i * (len(cards) - 1) / max(1, n - 1))] for i in range(n)] if n > 1 else cards[:n]
     return catalog_banner(None, enemies, RAID_CATALOG_TITLE, RAID_CATALOG_SUB, pick)
@@ -490,7 +492,8 @@ def build_raid(index, raid_img, mode, enemies=None):
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        mbi.save_png(raid_catalog_banner(raid_img, enemies), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
+        jp = {e['evStageId'] for e in index.get('entries', []) if e.get('jp') and e.get('evStageId')}
+        mbi.save_png(raid_catalog_banner(raid_img, enemies, jp), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
         n['catalog'] += 1
     for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
         src = next((p for p in (os.path.join(raid_img, '%d.png' % ev), os.path.join(raid_img, '0.png')) if os.path.exists(p)), None)

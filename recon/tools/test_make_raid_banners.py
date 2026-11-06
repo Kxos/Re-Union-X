@@ -53,7 +53,38 @@ try:
     d4, m4 = mrb.build(idx3, rows, t, out4, by_id={981010: 'sqex/44001_k.png'}, ids={981010})
     assert d4 == {981010: 'sqex/44001_k.png'} and not m4 and sorted(os.listdir(out4)) == ['981010.png'], (d4, m4)
     assert mrb.parse_ids('8001-8003,8070') == {8001, 8002, 8003, 8070}
-    assert Image.open(os.path.join(out4, '981010.png')).mode == 'RGB'
+    with Image.open(os.path.join(out4, '981010.png')) as im4:
+        assert im4.mode == 'RGB'
+    # JP rows: cards by census id from the --jp list, evStageId resolved from the index; never matched by date in build
+    items = [{'censusId': 'JP-A', 'file': 'jp/a.png', 'match': 'exact'},
+             {'censusId': 'JP-B', 'file': 'jp/b.png', 'match': 'variant'},
+             {'censusId': 'JP-GONE', 'file': 'jp/a.png'}]
+    os.makedirs(os.path.join(t, 'jp'))
+    Image.new('RGB', (640, 140), (7, 8, 9)).save(os.path.join(t, 'jp', 'a.png'))
+    Image.new('RGBA', (1280, 280), (9, 9, 9, 255)).save(os.path.join(t, 'jp', 'b.png'))
+    idx5 = {'entries': [{'evStageId': 982001, 'start': '2016-01-17', 'end': '2016-01-24', 'censusId': 'JP-A', 'jp': True},
+                        {'evStageId': 982001, 'start': '2016-01-17', 'end': '2016-01-24', 'censusId': 'JP-A', 'jp': True},
+                        {'evStageId': 982002, 'start': '2016-08-19', 'end': '2016-08-21', 'censusId': 'JP-B', 'jp': True},
+                        {'evStageId': 982003, 'start': '2018-10-15', 'end': '2018-10-21', 'censusId': 'JP-C', 'jp': True},
+                        {'evStageId': 981001, 'start': '2018-10-15', 'end': '2018-10-21', 'censusId': 'A'}]}
+    exact = mrb.jp_items(items)
+    assert sorted(exact) == ['JP-A', 'JP-GONE'], exact
+    assert sorted(mrb.jp_items(items, variants=True)) == ['JP-A', 'JP-B', 'JP-GONE']
+    try:
+        mrb.jp_items(items + [{'censusId': 'JP-A', 'file': 'x.png'}])
+        raise AssertionError('a census id twice must fail')
+    except ValueError:
+        pass
+    out5 = os.path.join(t, 'out5')
+    d5, m5, u5 = mrb.build_jp(idx5, exact, t, out5)
+    assert d5 == {982001: 'jp/a.png'} and m5 == [(982002, 'JP-B'), (982003, 'JP-C')] and u5 == ['JP-GONE'], (d5, m5, u5)
+    assert sorted(os.listdir(out5)) == ['982001.png'], 'only JP rows, no WW card'
+    d6, m6, _ = mrb.build_jp(idx5, mrb.jp_items(items, variants=True), t, out5, ids={982002})
+    assert d6 == {982002: 'jp/b.png'} and not m6, (d6, m6)
+    with Image.open(os.path.join(out5, '982002.png')) as im6:
+        assert im6.size == (640, 140) and im6.mode == 'RGB', 'JP card processed as the WW cards'
+    d7, m7 = mrb.build(idx5, rows, t, os.path.join(t, 'out7'))
+    assert d7 == {981001: 'Event_-_Weekly_Raid_Event_2_banner_KHUX.png'} and not m7, 'the WW build leaves the JP rows alone'
 finally:
     shutil.rmtree(t)
 print('OK: make_raid_banners')
