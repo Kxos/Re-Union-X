@@ -16,9 +16,8 @@
 // every day. Without nowMs no weekend or day entry is listed.
 'use strict';
 
-const PT = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short' });
-const ptWeekday = (ms) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(PT.format(new Date(ms)));
-const weekdayOf = (iso) => new Date(Date.parse(`${iso}T12:00:00Z`)).getUTCDay();
+// Pacific weekdays, day spans and the catalogue row state are shared with event-calendar.js (calendar-util.js)
+const { ptWeekday, weekdayOf, overlap, weekTo, rowState } = require('./calendar-util');
 // Is the entry open on the real clock? Weekend-only: Saturday or Sunday PT; daily showdown: the weekday of its day; else always.
 function openNow(e, nowMs) {
   if (!e || !e.open || e.open === 'daily') return true;
@@ -28,9 +27,6 @@ function openNow(e, nowMs) {
   if (e.open === 'day') return wd === weekdayOf(e.day);
   return false;
 }
-
-const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000) + 1;
-const overlap = (r, from, to) => days(r.start > from ? r.start : from, r.end < to ? r.end : to);
 
 // census rows of the index: {censusId, start, end, evStageId, event, periods}, one per row
 function rowsOf(index) {
@@ -45,7 +41,7 @@ function rowsOf(index) {
 // The census rows that run in the Shop week [shopFrom, shopTo]
 function weekRows(index, { shopFrom, shopTo }) {
   if (!shopFrom) return [];
-  const to = shopTo && shopTo >= shopFrom ? shopTo : shopFrom;
+  const to = weekTo({ shopFrom, shopTo });
   // Japan-only raids (I-232, entries jp: true) are never a raid of the week: the Raid Catalog only (spec Answer 3)
   const all = rowsOf(index).filter((r) => !r.jp);
   const events = all.filter((r) => r.event && r.periods.some(([a, b]) => a <= to && b >= shopFrom));
@@ -95,18 +91,6 @@ function catalogRows(index) {
   return list.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
 }
 
-// State of a catalogue row for the player: ctx {shopFrom, shopTo, current (census ids of the week: Set or array), kept}.
-// removed: no available tier («Not restored yet», whatever the date); now: a raid of the Shop week; kept: the kept one;
-// can: a week before the Shop week, which can be kept; other: dates inside the Shop week but not listed now (a row that lost
-// the week to another, the Weekend-only and Daily rows of Task 10 off their day): reached by the Story, so never «later»;
-// later: starts after the Shop week (also every row before the Story has a Shop week). A kept row counts as kept only while
-// it is a past week (a save kept from a later Story stays inert).
-function rowState(row, { shopFrom, shopTo, current, kept } = {}) {
-  if (!row.available) return 'removed';
-  const cur = current instanceof Set ? current : new Set(current || []);
-  if (cur.has(row.censusId)) return 'now';
-  if (shopFrom && row.end < shopFrom) return kept && kept === row.censusId ? 'kept' : 'can';
-  return shopFrom && row.start <= (shopTo && shopTo >= shopFrom ? shopTo : shopFrom) ? 'other' : 'later';
-}
-
+// rowState (state of a catalogue row for the player: now, kept, can, other, later, removed) lives in calendar-util.js, shared
+// with the Event Catalog; exported here as before.
 module.exports = { raidsForWeek, weekRaids, weekRows, catalogRows, rowState, openNow };
