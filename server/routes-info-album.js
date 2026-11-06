@@ -228,7 +228,7 @@ const NOTICES = [
   // docs/notes/raid.md), decisione dell'utente del 2-11: tutti i boss serviti, i 15 ricostruiti approvati a vista;
   // 0017, 1012, 1016 (49h/49i, render9) approvati il 4-11; 5000 Enraged Arachnid (49j/49k, render10, banner 48c) il 4-11
   // Task 12 (4-11): solo play, values, story and 2016-2018 event raids, counts from raids.json (raidNoticeFacts)
-  { date: '11/04', tag: 'IMPORTANT', title: 'Raid Bosses',
+  { date: '11/06', tag: 'IMPORTANT', title: 'Raid Bosses',
     body: ['The weekly **Raid Bosses** follow your Story like the Shop: each week shows the raids of the matching week of the original game. Their graphics, moves and strength come from the original game files wherever they survive; the parts below are **reconstructed**.',
       'Each Raid Boss has its own level: it rises by 1 for every defeat (some event raids by more, see below), up to **LV 99**, and all levels **reset to LV 1 on the 1st of every month** (00:00 Pacific time), as in the original game. A boss that comes back in a later week starts again at LV 1; a boss already on the field keeps its level until it is defeated or escapes.',
       '## Playing alone',
