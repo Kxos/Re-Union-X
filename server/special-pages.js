@@ -33,7 +33,9 @@ const niceDay = (d) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ''); retur
 // Icons of the chips, pills and Keep button (user 31-10: no emoji): /web/special/icon/<key>.png from
 // server/game_data/special_icons (recon/tools/special_icons.py: original client icons where they exist, the others drawn
 // in the game's style). Only these keys are served. A missing file leaves an empty square of fixed size.
-const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material', 'unlocked', 'done', 'todo', 'bdone', 'btodo'];
+const SPECIAL_ICON_KEYS = ['weekday', 'daily', 'vip', 'mog', 'skill', 'camp', 'lock', 'removed', 'pin', 'replaced', 'later', 'now', 'medal', 'avatar', 'jewel', 'material', 'unlocked', 'done', 'todo', 'bdone', 'btodo',
+  // Raid Catalog (raid-pages.js, 06-11): TYPE «Japan only», the TIER chips, the raid rule callout (AP, Lux, Bonus Time, Raid Coin)
+  'jp', 'tbeg', 'tint', 'tadv', 'tleg', 'tepic', 'tone', 'ap', 'lux', 'bonus', 'raid'];
 const icon = (k) => `<img class="ic" src="/web/special/icon/${k}.png" alt="">`;
 // the crown of a completed row (PROGRESS filter, user 03-11): the client's gold crown of a completed event banner, after the name
 const CROWN = '<img class="ic cw" src="/web/special/icon/done.png" alt="Completed" title="Completed">';

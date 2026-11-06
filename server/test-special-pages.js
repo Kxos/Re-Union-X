@@ -99,7 +99,7 @@ check(!none.includes('Replaces:'), 'no Replaces without a pin');
   check(!/\p{Extended_Pictographic}/u.test(sheet.replace(/<div class="search">[\s\S]*?<\/div>/, '')), 'no emoji in the chips');
   check(!html.includes('📌'), 'no pin emoji in the page');
   check(/\.o\.st-now\.on\{[^}]*#2e9e3e/.test(html) && /\.o\.st-kept\.on\{[^}]*#b8860b/.test(html) && /\.o\.st-can\.on\{[^}]*#1a6fa8/.test(html), 'SHOW chips coloured like the pills');
-  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material,unlocked,done,todo,bdone,btodo', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
+  check((pages.SPECIAL_ICON_KEYS || []).join() === 'weekday,daily,vip,mog,skill,camp,lock,removed,pin,replaced,later,now,medal,avatar,jewel,material,unlocked,done,todo,bdone,btodo,jp,tbeg,tint,tadv,tleg,tepic,tone,ap,lux,bonus,raid', `icon keys ${pages.SPECIAL_ICON_KEYS}`);
   const cls = (id) => (/class="([^"]*)"/.exec(itemOf(html, id)) || [])[1];
   check(cls(7101) === 'row pinned' && cls(7102) === 'row can' && cls(7103) === 'row off' && cls(7104) === 'row off' && cls(7105) === 'row off' && cls(7108) === 'row cr locked', `row classes ${[7101, 7102, 7103, 7104, 7105, 7108].map(cls)}`);
   check(row(7101).includes('class="s s-pinned"') && row(7102).includes('class="s s-can"') && row(7105).includes('class="s s-off"') && row(7108).includes('class="s s-locked"'), 'status pills');

@@ -269,6 +269,27 @@ const tests = {
     assert(/data-show="other"/.test(r) && /This week, not open now/.test(r), 'its own status');
     assert(!/Unlocks at Story Quest/.test(r) && !/class="pk"/.test(r));
   },
+  filter_icons() {
+    // 06-11 (user): every chip of the Filters sheet but «All» carries an icon of the catalogues' set (/web/special/icon/<key>.png),
+    // as the Special Catalog: TYPE, TIER, SHOW, PROGRESS, RAID BOARDS; the keys are served (SPECIAL_ICON_KEYS)
+    const html = catalog(index(), ctx()), keys = special.SPECIAL_ICON_KEYS;
+    const want = { type: { weekly: 'weekday', radiant: 'jewel', event: 'camp', jp: 'jp' },
+      tier: { beginner: 'tbeg', intermediate: 'tint', advanced: 'tadv', legendary: 'tleg', epic: 'tepic', single: 'tone' },
+      show: { now: 'now', can: 'pin', kept: 'pin', later: 'later', removed: 'removed' }, prog: { done: 'done', todo: 'todo' }, bd: { done: 'bdone', todo: 'btodo' } };
+    for (const [g, m] of Object.entries(want)) {
+      const box = (new RegExp(`<div class="opts" data-g="${g}">([\\s\\S]*?)</div>`).exec(html) || [])[1] || '';
+      const chips = box.match(/<button[^>]*data-v="[^"]+">[\s\S]*?<\/button>/g) || [];
+      assert(chips.length === Object.keys(m).length + 1, `${g}: ${chips.length} chips`);
+      for (const c of chips) {
+        const v = /data-v="([^"]+)"/.exec(c)[1], k = (/\/web\/special\/icon\/([a-z]+)\.png/.exec(c) || [])[1];
+        if (v === 'all') { assert(!k, `${g} All: no icon, as the other catalogues`); continue; }
+        assert.strictEqual(k, m[v], `${g} ${v}: icon`);
+        assert(keys.includes(k), `${k} is served`);
+      }
+    }
+    // the summary tag of a chosen chip shows the same icon (LAB of the page script)
+    assert(/"epic":"<img class=\\"ic\\" src=\\"\/web\/special\/icon\/tepic\.png\\"/.test(html), 'TIER tag with its icon');
+  },
   catalog_light() {
     // task 3 (06-11): the rows travel packed (templates + one dictionary) and the page builds them before its filter script; the
     // expansion gives back every row; the card pictures wait in data-src until their row is shown (kxImgs after every render)

@@ -35,6 +35,10 @@ ORIGINAL = {
     # PROGRESS chips and the crown of a completed row (user 03-11): the crowns of the event banners (AdventureTop2_EV_Banner)
     'done': 'img/ui/Complete_icon2.png',                     # gold crown: every objective done
     'todo': 'img/ui/Complete_icon1.png',                     # grey crown: not complete
+    # Raid Catalog (06-11): the raid rule callout of the notice / detail pages (AP medal, Lux star) and its title (Raid Coin)
+    'ap': 'cocostudio/publish/SpIcon_Target_AP.png',         # gold AP medal of the quest targets
+    'lux': 'cocostudio/publish/Gage_LUX_Symbol.png',         # Lux star of the Lux gauge
+    'raid': 'cocostudio/publish/SpherePointIcon_Raid.png',   # Raid Coin (Raid Board points)
 }
 # share of the height kept from the top (full-body pictures too thin at chip size)
 TOP_SHARE = {'mog': 0.58}
@@ -205,8 +209,67 @@ def draw_btodo():
     return c
 
 
+# Raid Catalog filters (06-11): TYPE «Japan only» (a red sun on a white dot, the usual Japan mark) and the TIER chips: a dot in
+# the tier's colour with as many white stars as its rank (Beginner 1 green, Intermediate 2 blue, Advanced 3 orange), Legendary a
+# gold dot with a crown, Epic a purple dot with a large star, «One tier» a teal dot with a «1». Bonus Time (the raid rule
+# callout): a clock on a gold dot. All our own drawings.
+DOT.update({'tbeg': (46, 158, 62), 'tint': (26, 111, 168), 'tadv': (214, 110, 20), 'tleg': (184, 134, 11), 'tepic': (122, 52, 170),
+            'tone': (10, 143, 163), 'bonus': (184, 134, 11)})
+
+
+def _star(d, cx, cy, r, fill=WHITE_GLYPH):
+    import math
+    pts = [(cx + (r if i % 2 == 0 else r * 0.42) * math.sin(i * math.pi / 5), cy - (r if i % 2 == 0 else r * 0.42) * math.cos(i * math.pi / 5)) for i in range(10)]
+    d.polygon(pts, fill=fill)
+
+
+def _stars(key, centres, r):
+    def draw():
+        c, d = dot(DOT[key])
+        for cx, cy in centres:
+            _star(d, cx, cy, r)
+        return c
+    return draw
+
+
+def draw_jp():
+    c = Image.new('RGBA', (BIG, BIG), (0, 0, 0, 0))
+    d = ImageDraw.Draw(c)
+    d.ellipse((4, 4, BIG - 4, BIG - 4), fill=(190, 30, 45, 255))     # red ring
+    d.ellipse((14, 14, BIG - 14, BIG - 14), fill=(255, 255, 255, 255))
+    d.ellipse((60, 60, BIG - 60, BIG - 60), fill=(200, 16, 46, 255))  # the sun
+    return c
+
+
+def draw_tleg():
+    c, d = dot(DOT['tleg'])
+    d.polygon([(48, 132), (48, 64), (74, 96), (96, 52), (118, 96), (144, 64), (144, 132)], fill=WHITE_GLYPH)
+    d.rectangle((48, 136, 144, 148), fill=WHITE_GLYPH)
+    return c
+
+
+def draw_tone():
+    c, d = dot(DOT['tone'])
+    d.rectangle((88, 50, 110, 138), fill=WHITE_GLYPH)              # a «1»
+    d.polygon([(88, 50), (110, 50), (110, 72), (66, 84), (66, 68)], fill=WHITE_GLYPH)
+    d.rectangle((70, 130, 128, 144), fill=WHITE_GLYPH)
+    return c
+
+
+def draw_bonus():
+    c, d = dot(DOT['bonus'])
+    d.ellipse((46, 46, 146, 146), outline=WHITE_GLYPH, width=12)
+    d.line((96, 96, 96, 62), fill=WHITE_GLYPH, width=12)
+    d.line((96, 96, 122, 110), fill=WHITE_GLYPH, width=12)
+    return c
+
+
+DRAWN_RAID = {'jp': draw_jp, 'tbeg': _stars('tbeg', [(96, 98)], 52), 'tint': _stars('tint', [(64, 100), (128, 100)], 34),
+              'tadv': _stars('tadv', [(96, 66), (62, 122), (130, 122)], 30), 'tleg': draw_tleg, 'tepic': _stars('tepic', [(96, 100)], 66),
+              'tone': draw_tone, 'bonus': draw_bonus}
+
 DRAWN = {'weekday': draw_weekday, 'pin': draw_pin, 'replaced': draw_replaced, 'later': draw_later, 'now': draw_now, 'medal': draw_medal, 'unlocked': draw_unlocked,
-         'bdone': draw_bdone, 'btodo': draw_btodo}
+         'bdone': draw_bdone, 'btodo': draw_btodo, **DRAWN_RAID}
 
 
 def main(argv):
