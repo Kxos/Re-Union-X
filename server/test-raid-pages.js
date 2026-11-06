@@ -6,6 +6,7 @@ const assert = require('assert');
 const fs = require('fs'), path = require('path');
 const pages = require('./raid-pages');
 const calendar = require('./raid-calendar');
+const special = require('./special-pages');
 
 const PERIODS = [{ n: 1, name: 'Launch', from: '2016-04-07', to: '2016-09-18' }, { n: 2, name: 'Expansion', from: '2016-09-19', to: '2018-05-24' },
   { n: 3, name: 'Ver 2.6.0', from: '2018-05-25', to: '2020-05-22' }, { n: 4, name: 'Pre-Dark Road', from: '2020-05-23', to: '2020-11-15' },
@@ -142,9 +143,11 @@ const tests = {
     assert(/Enhancement Boards/.test(r), 'boards (search)');
     assert(/src="\/web\/raid\/img\/v3\/8100\.png"/.test(r), 'the week card, versioned URL');
     assert(/href="\/web\/raid\/raid\/8100\?from=catalog"/.test(r), 'details page');
-    // period tabs: All plus the five periods, the Story's period marked Now; year chips of the rows
-    assert.strictEqual(count(html, ' data-p="'), 6);
-    assert(/data-p="3"><b>Ver 2\.6\.0<\/b><span class="now">Now<\/span>/.test(html), 'current period marked');
+    // tabs = the Shop's game years (user 06-11): All years plus one per game year that has raids, no «Now» mark (the Shop has none)
+    const years = new Set(calendar.catalogRows(index()).map((r) => special.gameYearOf(r.start)));
+    assert.strictEqual(count(html, ' data-p="'), 1 + years.size);
+    assert(html.includes('data-p="3"><b>Year 4</b><small>3rd 🎂 → 4th 🎂</small>') && html.includes('data-p="all"><b>All years</b><small>2016–2021</small>'), 'Shop tab names');
+    assert(!html.includes('class="now"'), 'no Now mark');
     for (const y of ['2018', '2019', '2020']) assert(html.includes(`data-yr="${y}"`), `year ${y}`);
     assert(/<title>Raid Catalog<\/title>/.test(html));
     // the Filters sheet: FIND with the word-start rule, TYPE, TIER, SHOW; the «Matches:» line is the page script's

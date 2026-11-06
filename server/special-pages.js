@@ -1,10 +1,30 @@
 // Special tab web pages (WebView, opened from the Details button of the Special Catalog banner). Pure HTML, no
 // player or master access: server.js passes the index and the context (specialCtx).
-// The catalogue follows the Shop's Banner Catalog (server/gacha.js): period tabs, a summary line, a Filters sheet
+// The catalogue follows the Shop's Banner Catalog (server/gacha.js): game-year tabs (the same as the Shop, 06-11), a summary line, a Filters sheet
 // (FIND / TYPE / SHOW), a coloured side bar and a status pill per row, a details page per quest (banner or name).
 // Filtering only toggles a class on the rows (data-* attributes are read once at start).
 'use strict';
 const special = require('./special');
+// Catalogue tabs = the game years of the Shop's Banner Catalog (gacha.js gameYearOf / GAME_YEARS: one anniversary, April 7, to the
+// next; Launch year .. Final months; user 06-11): same names, same boundaries, a tab only for a year with rows, no «Now» mark
+// (the Shop has none). Display grouping only: special.PERIODS (Launch .. Last) still drives the unlocks and the entries' periods.
+const { gameYearOf, GAME_YEARS } = require('./gacha');
+const YEAR_SPAN = '2016–2021';
+// game years a span of days touches (inclusive)
+const yearsBetween = (from, to) => { const out = []; for (let y = gameYearOf(from); y <= gameYearOf(to); y++) out.push(y); return out; };
+// the game years of a Special entry: a campaign week its own dates; a quest the days of its periods, cut by its from / to
+function entryYears(en, periods) {
+  if (en.campaign) return yearsBetween(en.campaign.start, en.campaign.end || en.campaign.start);
+  const out = new Set();
+  for (const n of en.periods || []) {
+    const p = periods.find((x) => x.n === n);
+    if (!p) continue;
+    const from = en.from && en.from > p.from ? en.from : p.from, to = en.to && en.to < p.to ? en.to : p.to;
+    if (from <= to) yearsBetween(from, to).forEach((y) => out.add(y));
+  }
+  return [...out].sort((a, b) => a - b);
+}
+const YEAR_TAB_CSS = '.tab small{display:block;font-size:9px;line-height:1.2}';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -48,7 +68,7 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.fbtn,.ok{border:0;color:#fff;background:linear-gradient(#f08a3a,#d4541c);border-radius:18px;padding:5px 16px;font:bold 15px sans-serif;box-shadow:0 2px 0 #8a3510;cursor:pointer;white-space:nowrap}'
   + '.dot{display:inline-block;background:#fff;color:#d4541c;border-radius:10px;padding:0 7px;margin-left:6px;font-size:13px;line-height:1.5}.dot:empty{display:none}'
   + '.tabs{display:flex;gap:3px;margin-top:8px}.tab{flex:1 1 0;min-width:0;border:0;font-family:inherit;cursor:pointer;text-align:center;background:#0d4a70;border-radius:7px 7px 0 0;padding:4px 1px 3px;line-height:1.15;color:#b9cfdc;letter-spacing:0}'
-  + '.tab b{display:block;font-size:11.5px;color:#fff}.tab .c{display:block;color:#ffa500;font-weight:bold;font-size:12px}'
+  + '.tab b{display:block;font-size:11.5px;color:#fff}.tab .c{display:block;color:#ffa500;font-weight:bold;font-size:12px}' + YEAR_TAB_CSS
   + '.tab .now{display:block;background:#2e9e3e;color:#fff;border-radius:8px;font-size:9px;margin:1px 2px 0}'
   + '.tab.on{background:linear-gradient(#25c4d8,#0a8fa3);color:#e9fbff}.tabline{height:3px;background:#0a8fa3;margin-bottom:8px}'
   + '.sum{background:#06283e;border-radius:6px;padding:6px 10px;margin:0 0 6px;font-size:15px;line-height:1.7}.sum .n1{color:#ffa500;font-weight:bold}'
@@ -302,7 +322,7 @@ const detailHref = (id) => `/web/special/detail/${id}?from=catalog`;
 
 // ES5, no external script (round 13: «minimal» rows). Items = one row per quest (.row) and one per VIP campaign (.row.cr),
 // read once at start: members (data-eid / data-show / data-mcls, one per entry, and their status lines in data-mpill),
-// the periods they have, types, rewards, item names (« | »), versions. A period tab is a filter. A tap on a row (outside
+// the periods they have, types, rewards, item names (« | »), versions. A game-year tab is a filter. A tap on a row (outside
 // its Keep button) opens its details page. khuxRow (PIN_JS, after a pin / unpin) moves the statuses: the new kept entry
 // gold, the old one back to «can be kept»; the row shows its best entry again (khuxRank, the same rank as the server).
 const JS = `(function(){
@@ -351,7 +371,7 @@ $('cc').textContent=yc.all;hide($('camps'),!yc.all);hide($('quests'),!n);
 [].forEach.call(document.querySelectorAll('.tab'),function(t){var p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
 var f=nf(cur),h='<span class="n1">'+plural(n,'quest')+'</span> · '+plural(k,'campaign');
 if(cur.p!=='all')h+=' in <b>'+esc(PN[cur.p])+'</b>';
-if(!f)h+=cur.p==='all'?' · all periods, no filters':' · no filters';
+if(!f)h+=cur.p==='all'?' · all years, no filters':' · no filters';
 else{h+=' match your filters:';
 if(cur.type!=='all')h+=' '+tag('type',LAB.type[cur.type]);
 if(cur.show!=='all')h+=' '+tag('show',LAB.show[cur.show]);
@@ -535,7 +555,7 @@ function catalogPage(index, ctx = {}) {
     const y = f.campaign ? all[0].campaign.start.slice(0, 4) : '', done = doneOf(all);
     return `<div class="row${f.campaign ? ' cr' : ''} ${best.cls}" id="q${f.key}"${y ? ` data-y="${y}"` : ''} data-href="${href}" data-name="${esc(f.title)}" data-eid="${all.map((en) => en.evStageId).join(' ')}"`
       + ` data-show="${all.map((en) => statusFor(en).show).join(' ')}" data-mcls="${all.map((en) => statusFor(en).cls).join(' ')}" data-mpill="${esc(JSON.stringify(all.map((en) => inner(statusFor(en)))))}"`
-      + ` data-periods="${uniq(all.map((en) => en.periods.join(' ')))}" data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${f.versions.length}" data-done="${done ? 1 : 0}">`
+      + ` data-periods="${uniq(all.map((en) => entryYears(en, periods).join(' ')))}" data-type="${uniq(all.map(typesOf))}" data-reward="${uniq(all.map(rewards))}" data-search="${esc(searchOf(all))}" data-nv="${f.versions.length}" data-done="${done ? 1 : 0}">`
       + `${img}<div class="info"><a class="nm" href="${href}">${esc(f.title)}${done ? CROWN : ''}</a>${anchors}${dates}${best.pill}`
       + `${f.campaign ? '' : keepFor(all, ' onclick="return khuxClick(this)"')}<div class="mt"></div></div><a class="go" href="${href}" aria-label="Details">›</a></div>
 `;
@@ -554,13 +574,13 @@ function catalogPage(index, ctx = {}) {
   const shopYear = nowCamp ? nowCamp.list[0].campaign.start.slice(0, 4) : String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
   const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
   const yearsHtml = `<div class="yrs" id="yrs">${yearChip('all', 'All years', camps.length)}${years.map((y) => yearChip(y, y, camps.filter((f) => f.list[0].campaign.start.startsWith(y)).length)).join('')}</div>`;
-  const tab = (p, name, n, now) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b>${now ? '<span class="now">Now</span>' : ''}<span class="c" id="tc${p}">${n}</span></button>`;
+  const tab = (p, name, sub, n) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="c" id="tc${p}">${n}</span></button>`;
   const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
-  const count = (pn) => fams.filter((f) => f.list.some((en) => en.periods.includes(pn))).length;
+  const count = (y) => fams.filter((f) => f.list.some((en) => entryYears(en, periods).includes(y))).length;
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   const pillJs = (k) => ({ cls: PILLS[k][0], html: pillInner(PILLS[k]) });
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
-  const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(periods.map((p) => [p.n, p.name]))))
+  const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(GAME_YEARS.map((g, i) => [i, g.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__SHOWSET__', JSON.stringify(SHOW_SETS)).replace('__REWARD__', labels(REWARD_OPTS)).replace('__PROG__', labels(PROG_OPTS))
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
     .replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
@@ -568,8 +588,8 @@ function catalogPage(index, ctx = {}) {
     + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
     + '<p class="n">Every Special quest of the game. Tap a quest for its versions, days and rewards. Old quests can be kept in Special, one at a time.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All', fams.length)}${periods.map((p) => tab(p.n, p.name, count(p.n), p.n === cur)).join('')}</div><div class="tabline"></div>`
-    + `<div class="sum" id="sum"><span class="n1">${plural(quests.length, 'quest')}</span> · ${plural(camps.length, 'campaign')} · all periods, no filters</div>`
+    + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, fams.length)}${GAME_YEARS.map((g, i) => (count(i) ? tab(i, g.name, g.sub, count(i)) : '')).join('')}</div><div class="tabline"></div>`
+    + `<div class="sum" id="sum"><span class="n1">${plural(quests.length, 'quest')}</span> · ${plural(camps.length, 'campaign')} · all years, no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
     + `<div id="quests">${quests.map(row).join('') || '<p class="n">No quests.</p>'}</div>`
     + `<div class="camps" id="camps" data-defy="${defYear}"><h2>VIP Campaigns (<span id="cc">${camps.length}</span>)</h2><p class="n">Limited VIP campaigns of the original game, by date. Tap one for its weeks and rewards.</p>${yearsHtml}${campRows}</div>`
@@ -666,5 +686,5 @@ function detailPage(index, evStageId, ctx = {}) {
 }
 
 // CSS, DETAIL_CSS, esc, niceDay, monthYear, icon: shared with the Raid Catalog pages (server/raid-pages.js), which follow this style
-module.exports = { SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch,
+module.exports = { gameYearOf, GAME_YEARS, YEAR_SPAN, entryYears, SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch,
   CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, PROG_OPTS, progCls };
