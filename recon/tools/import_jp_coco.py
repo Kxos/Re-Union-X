@@ -571,7 +571,10 @@ JP_ARM = {'Cursor_Anim_Ranking': ('MyPageAnime0', 'Cursor_Anim_Ranking0'),
           'Cursor_Anim_Ranking2': ('MyPageAnime0', 'Cursor_Anim_Ranking0'),
           'Cursor_Anim_Proud': ('ActMapTreasureBoxExAnim0', 'Cursor_Anim_Proud0'),
           # cursore dell'adesivo scelto nella lista della chat (Chat_Stamp_On, I-210): l'ultimo plist libero
-          'Cursor_Anim_Chat': ('ActMapTreasureBoxAnim0', 'Cursor_Anim_Chat0')}
+          'Cursor_Anim_Chat': ('ActMapTreasureBoxAnim0', 'Cursor_Anim_Chat0'),
+          # full artwork «Inspect» of the Medal detail (I-237): the binary creates MedalArtAnim (bone Art_Dummy, frame
+          # Art_Dummy00.png) and puts img/art/Art_<artId>.png on it; absent from WW, its own plist would not load
+          'MedalArtAnim': ('ActMapTreasureBoxAnim0', 'MedalArtAnim0')}
 
 results, writes = [], {}            # writes: nome publish -> ('jp', percorso, dati|None) | ('delete')
 for root, opts in roots:
