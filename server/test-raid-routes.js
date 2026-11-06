@@ -9,6 +9,7 @@ const { RAID_IMG_VERSION } = routesRaid;
 const { isBonusTime, questApAt } = routesRaid;
 const { coinRows } = require('./raid-rewards');
 const evCampaign = require('./make-ev-campaign');
+const windows = require('./raid-windows');
 
 const TUE = Date.parse('2026-10-27T10:00:00Z');
 const STAGE = 980001, ENEMY = 2000010, SPECIAL = 970001;
@@ -413,6 +414,7 @@ const tests = {
       const w = world();
       Object.assign(w.index.entries[0], { censusId, open: 'daily', start: '2017-07-03', end: '2017-07-09', questAp: [1] });
       w.week = { shopFrom: '2017-07-03', shopTo: '2017-07-09' };
+      w.now = Date.parse('2026-10-27T19:30:00Z'); // 12:30 PDT: inside the 12:00 window of the daily raids (I-228)
       w.player.raid = { levels: { 'WW-1/Beginner': level }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': `2017-07-03@${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date(w.now))}` } };
       const boss = w.spawn();
       assert.strictEqual(boss.level, level);
@@ -651,13 +653,135 @@ const tests = {
     const served = path.join(__dirname, 'game_data', 'raids.json');
     if (fs.existsSync(served)) {
       const bad = JSON.parse(fs.readFileSync(served, 'utf8')).entries.filter((x) => Array.isArray(x.questAp) && x.questAp.length)
-        .filter((x) => questApAt(x, WEEK) !== x.questAp[x.questAp.length - 1]).map((x) => `${x.start} ${x.boss} ${x.questAp.join('/')}`);
+        .filter((x) => questApAt(x, WEEK) !== windows.stageUseAp(x)).map((x) => `${x.start} ${x.boss} ${x.questAp.join('/')}`);
+      // (a raid with opening hours: the master row carries the outside price, 90, and WEEK is outside every window)
       assert.deepStrictEqual(bad, [], 'weekday charge = master useAp on every served raid quest');
     }
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-02-11', [0, 5]), t)), [0, 5, 5], 'bonus / other');
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2019-03-01', [5, 90]), t)), [90, 5, 90], 'weekend / weekday, no bonus value');
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2018-10-01', [5]), t)), [5, 5, 5], 'one value');
     assert.deepStrictEqual([BONUS, SAT, WEEK].map((t) => questApAt(e('2018-09-03', [0]), t)), [0, 0, 0]);
+  },
+  raid_windows_rules() {
+    // I-228 (user decision 06-11, mixed): raid_config.json raidWindows, raid-windows.js. Which raids have opening hours
+    const R = (e) => (windows.ruleOf(e) || {}).label || null;
+    assert.deepStrictEqual(['WW-E29805-1', 'WW-E31611-1', 'WW-E33007-1', 'WW-E33888-1', 'WW-E42150-1', 'WW-E35529-1'].map((censusId) => R({ censusId, family: 'daily', start: '2017-07-03' })),
+      ['raidWindow', 'raidWindow', 'raidWindow', 'raidWindow', 'raidWindow', null], 'WW daily raids; 2018-01-08 open all day (notice 35529)');
+    assert.deepStrictEqual([['2017-06-30', true], ['2018-08-02', true], ['2018-08-02', false]].map(([start, jp]) => R({ censusId: 'X', family: 'monthly (30-minute)', start, jp })), ['jpWindow', 'jpWindow', null]);
+    assert.deepStrictEqual([['weekly', '2018-09-10'], ['weekly (pre-series raid event)', '2018-10-01'], ['weekly', '2019-07-08'], ['radiant reward', '2018-12-24'], ['weekly', '2019-07-15'], ['weekly', '2018-09-03']]
+      .map(([family, start]) => R({ censusId: 'W', family, start })), ['weeklyWindow', 'weeklyWindow', 'weeklyWindow', null, null, null], 'weekly 2018-09-10 .. 2019-07-14, Radiant Reward weeks all day');
+    assert.strictEqual(windows.ruleOf({ censusId: 'W', family: 'weekly', start: '2018-10-08', jp: true }), null, 'a JP row is never a WW weekly');
+    // master stage useAp: the outside price for a raid with hours, else the last census value
+    assert.deepStrictEqual([windows.stageUseAp({ censusId: 'WW-E31611-1', questAp: [0] }), windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5, 90] })], [90, 90]);
+    assert.strictEqual(windows.stageUseAp({ censusId: 'WW-1', questAp: [0, 5] }), 5);
+    // hours on the real clock of the zone: PT (DST too) and JST
+    const st = (e, iso) => windows.stateAt(e, Date.parse(iso));
+    const daily = { censusId: 'WW-E29805-1', start: '2017-07-03' };
+    assert.deepStrictEqual(['2026-10-27T19:00:00Z', '2026-10-27T19:59:59Z', '2026-10-27T20:00:00Z', '2026-10-28T02:30:00Z', '2026-12-01T20:30:00Z', '2026-12-01T19:30:00Z']
+      .map((iso) => st(daily, iso).inside), [true, true, false, true, true, false], '12:00-12:59 and 19:00-19:59 PT, PST in December');
+    const nov = { censusId: 'WW-E33888-1', start: '2017-11-06' };
+    assert.deepStrictEqual(['2026-10-31T22:30:00Z', '2026-10-27T22:30:00Z', '2026-11-01T05:30:00Z'].map((iso) => st(nov, iso).inside), [true, false, true], 'four-hour windows on Saturday and Sunday (33888 edit)');
+    const jp = { censusId: 'JP-D-2018-03-02', family: 'monthly (30-minute)', jp: true, start: '2018-03-02' };
+    assert.deepStrictEqual(['2026-10-27T03:10:00Z', '2026-10-27T03:30:00Z', '2026-10-27T13:29:59Z'].map((iso) => [st(jp, iso).inside, st(jp, iso).slot]),
+      [[true, '2026-10-27#0'], [false, null], [true, '2026-10-27#1']], '12:00-12:29 and 22:00-22:29 JST');
+    const wk = { censusId: 'WW-W-2019-03-04', family: 'weekly', start: '2019-03-04' };
+    assert.deepStrictEqual(['2026-10-27T15:30:00Z', '2026-10-27T10:00:00Z', '2026-10-31T10:00:00Z'].map((iso) => st(wk, iso).inside), [true, false, true], 'weekday hours, all day at the weekend');
+  },
+  raid_windows_ap_and_bonus() {
+    const TUE_BONUS = Date.parse('2026-10-27T15:00:00Z'), TUE_NOON = Date.parse('2026-10-27T19:30:00Z'), SAT = Date.parse('2026-10-31T10:00:00Z');
+    // WW daily raid: its census AP in the windows, 90 outside (a bonus hour outside the windows is no Bonus Time)
+    const daily = { censusId: 'WW-E29805-1', family: 'daily', open: 'daily', start: '2017-07-03', questAp: [5] };
+    assert.deepStrictEqual([TUE_NOON, TUE, TUE_BONUS, SAT].map((t) => questApAt(daily, t)), [5, 90, 90, 90]);
+    assert.deepStrictEqual([TUE_NOON, TUE_BONUS].map((t) => routesRaid.bonusAt(daily, t)), [false, false]);
+    const hours = { censusId: 'WW-E42150-1', family: 'daily', open: 'daily', start: '2018-07-09', questAp: [1] };
+    assert.deepStrictEqual([TUE_BONUS, TUE].map((t) => [questApAt(hours, t), routesRaid.bonusAt(hours, t)]), [[1, true], [90, false]], 'Raid Hours = the bonus hours');
+    // weekly 2018-09-10 .. 2019-07-14 (probable): weekdays in the four hours its census AP (5 for the 5 / 90 weeks: notice 49544), 90 outside, weekend all day
+    const w19 = { censusId: 'WW-W-2019-03-04', family: 'weekly', start: '2019-03-04', questAp: [5, 90] };
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt(w19, t)), [5, 90, 5]);
+    const w18 = { censusId: 'WW-W-2018-11-12', family: 'weekly', start: '2018-11-12', questAp: [5] };
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt(w18, t)), [5, 90, 5]);
+    // Radiant Reward weeks keep their rules
+    assert.deepStrictEqual([TUE_BONUS, TUE, SAT].map((t) => questApAt({ censusId: 'R', family: 'radiant reward', start: '2019-02-11', questAp: [0, 5] }, t)), [0, 5, 5]);
+    // June 2020 (notices 66106 / 66114: Bonus Time 24 hours a day): 0 AP and Bonus Time at any hour; not May or July
+    const june = { censusId: 'WW-W-2020-06-08', family: 'weekly', start: '2020-06-08', questAp: [0] };
+    assert.deepStrictEqual([TUE, TUE_BONUS, SAT].map((t) => [questApAt(june, t), routesRaid.bonusAt(june, t)]), [[0, true], [0, true], [0, true]]);
+    assert.deepStrictEqual(['2020-05-25', '2020-07-01'].map((start) => routesRaid.bonusAt({ censusId: 'W', family: 'weekly', start, questAp: [0, 5, 90] }, TUE)), [false, false]);
+    assert.strictEqual(routesRaid.bonusAt({ censusId: 'JP-X', family: 'event', start: '2020-06-08', jp: true }, TUE), false, 'a worldwide notice: never a JP row');
+  },
+  june_2020_bonus_all_day() {
+    // Task 2: from 2020-06-01 12:00 PT to 2020-06-30 23:59 PT raids cost 0 AP and Lux x2 all day: the AP 0 campaign and the
+    // doubled Lux at any hour (TUE = 03:00 PDT, outside the four hours)
+    const w = world();
+    Object.assign(w.index.entries[0], { censusId: 'WW-W-2020-06-08', family: 'weekly', start: '2020-06-08', end: '2020-06-14', questAp: [0] });
+    w.week = { shopFrom: '2020-06-08', shopTo: '2020-06-14' };
+    assert.deepStrictEqual(w.raid.campaignIds(TUE), [98000], 'the AP 0 campaign all day');
+    assert.strictEqual(w.raid.stageAp(STAGE, TUE), 0);
+    w.spawn(); w.call('list'); w.start();
+    assert.strictEqual(w.clearParts([500, 100, 200]).getLux, 100, 'Lux x 2 outside the four hours');
+    assert.strictEqual(w.luxFactor, 2);
+    // the week before: the four hours only
+    const may = world();
+    Object.assign(may.index.entries[0], { censusId: 'WW-W-2020-05-25', family: 'weekly', start: '2020-05-25', end: '2020-05-31', questAp: [0, 5, 90] });
+    may.week = { shopFrom: '2020-05-25', shopTo: '2020-05-31' };
+    assert.deepStrictEqual(may.raid.campaignIds(TUE), []);
+    may.spawn(); may.call('list'); may.start();
+    assert.strictEqual(may.clearParts([500, 100, 200]).getLux, 50);
+  },
+  raid_windows_levels_and_lux() {
+    // a WW daily raid: inside the windows the day's level (notice 29805), outside a counter of its own (<key>~out), no Bonus Time
+    const w = world();
+    Object.assign(w.index.entries[0], { censusId: 'WW-E42150-1', family: 'daily', open: 'daily', start: '2018-07-09', end: '2018-07-15', questAp: [1] });
+    w.week = { shopFrom: '2018-07-09', shopTo: '2018-07-15' };
+    w.now = Date.parse('2026-10-27T21:10:00Z'); // 14:10 PDT: a Raid Hour (and a bonus hour)
+    assert.strictEqual(w.spawn().level, 1);
+    w.call('list'); w.start();
+    assert.strictEqual(w.clearParts([0, 100, 200]).getLux, 100, 'inside: Bonus Time Lux');
+    assert.strictEqual(w.player.raid.levels['WW-1/Beginner'], 2);
+    w.now = Date.parse('2026-10-27T22:10:00Z'); // 15:10 PDT: outside
+    const out = w.spawn();
+    assert.deepStrictEqual([out.level, out.outside, out.levelKey], [1, true, 'WW-1/Beginner~out'], 'outside: its own counter');
+    w.call('list'); w.start();
+    assert.strictEqual(w.clearParts([0, 100, 200]).getLux, 50, 'outside: no Bonus Time');
+    assert.deepStrictEqual([w.player.raid.levels['WW-1/Beginner'], w.player.raid.levels['WW-1/Beginner~out']], [2, 2], 'the window level is untouched');
+    w.now = Date.parse('2026-10-28T03:10:00Z'); // 20:10 PDT: the next Raid Hour of the same Pacific day
+    assert.strictEqual(w.spawn().level, 2, "same day, next window: the day's level");
+    // a boss met outside the hours keeps no Bonus Time when its fight ends in a bonus hour
+    const b = world();
+    Object.assign(b.index.entries[0], { censusId: 'WW-E29805-1', family: 'daily', open: 'daily', start: '2017-07-03', end: '2017-07-09', questAp: [5] });
+    b.week = { shopFrom: '2017-07-03', shopTo: '2017-07-09' };
+    b.now = Date.parse('2026-10-27T21:10:00Z'); // 14:10 PDT: a bonus hour, outside the 12:00 / 19:00 windows
+    b.spawn(); b.call('list'); b.start();
+    assert.strictEqual(b.clearParts([500, 100, 200]).getLux, 50);
+  },
+  jp_monthly_window_levels() {
+    // JP monthly 30-minute raids: 12:00-12:29 / 22:00-22:29 JST; 2017 the level resets after each window, 2018 it carries over
+    // (JP notices 41745, 42600); outside the windows a counter of its own
+    const run = (start) => {
+      const w = world();
+      Object.assign(w.index.entries[0], { censusId: 'JP-T', family: 'monthly (30-minute)', jp: true, start, end: start, questAp: [1], upMinutes: 30 });
+      w.week = { shopFrom: '2019-10-07', shopTo: '2019-10-13' }; // not a raid of the week: the catalogue counter (cat:)
+      const lv = [];
+      const fight = (iso) => { w.now = Date.parse(iso); const boss = w.spawn(); lv.push(boss.level); w.call('list'); w.start(); w.clearParts([0, 100, 200]); return boss; };
+      fight('2026-10-27T03:05:00Z'); fight('2026-10-27T03:20:00Z'); // 12:05, 12:20 JST: one window
+      fight('2026-10-27T13:05:00Z'); // 22:05 JST: the next window
+      const out = fight('2026-10-27T05:00:00Z'); // 14:00 JST: outside
+      fight('2026-10-27T13:20:00Z'); // 22:20 JST: back in the window
+      return { lv, out };
+    };
+    const y17 = run('2017-10-02');
+    assert.deepStrictEqual(y17.lv, [1, 2, 1, 1, 2], '2017: LV 1 at each window, outside its own LV 1');
+    assert.deepStrictEqual([y17.out.outside, y17.out.levelKey], [true, 'cat:WW-1/Beginner~out']);
+    assert.deepStrictEqual(run('2018-03-02').lv, [1, 2, 3, 1, 4], '2018: the level carries over to the next window');
+    const e = { censusId: 'JP-T', family: 'monthly (30-minute)', jp: true, start: '2018-03-02', questAp: [1] };
+    assert.deepStrictEqual([questApAt(e, Date.parse('2026-10-27T03:05:00Z')), questApAt(e, TUE)], [1, 90]);
+  },
+  raid_windows_campaign() {
+    // inside the hours of a raid with opening hours the master shows 90: when every listed quest costs 0, the AP 0 campaign shows it
+    const w = world();
+    Object.assign(w.index.entries[0], { censusId: 'WW-E31611-1', family: 'daily', open: 'daily', start: '2017-09-04', end: '2017-09-10', questAp: [0] });
+    w.week = { shopFrom: '2017-09-04', shopTo: '2017-09-10' };
+    assert.deepStrictEqual([Date.parse('2026-10-27T19:30:00Z'), TUE, Date.parse('2026-10-27T15:00:00Z')].map((t) => w.raid.campaignIds(t)), [[98000], [], []],
+      'inside a window; outside (90 AP), also in a bonus hour');
   },
   stage_ap_only_raid_quests() {
     const w = world();

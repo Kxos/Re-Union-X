@@ -19,13 +19,13 @@
       "probableBosses": true, "levelStep": 10,
       "source": "JP notice 24013 (12/26/2016-1/1/2017): a daily rotating raid, a different boss every day, boss LV +10 per defeat; the bosses are not listed. The lineup is the worldwide «2016 Showdown!» (WW-E23794-1) of the same dates and rewards: probable." },
     "JP-RAID-28": { "weekdays": true, "bosses": ["Assault Dragon", "Queen Bee Ω", "Jewel Princess", "Jack in the Box", "Gummi Hound", "Closehanded Captain", "Gear Golem"],
-      "windowLevel": true, "levelDrops": [{ "boss": "Closehanded Captain", "level": 10, "reward": "6★ Trickmaster (Boosted)", "probable": true }],
+      "levelDrops": [{ "boss": "Closehanded Captain", "level": 10, "reward": "6★ Trickmaster (Boosted)", "probable": true }],
       "source": "JP notice 29893 (July 2017 monthly 30-minute raid): boss by weekday, Monday to Sunday; the Saturday boss at LV 10 drops a status-boosted Trickmaster (bonus not stated: the worldwide boosted copy, +1,000 STR)." },
     "JP-RAID-29": { "weekdays": true, "bosses": ["Lion Headliner", "Circus Crab", "Jewel Sorceress", "Egg Master", "Hocus Pocus", "Adventurer", "Submarine Carp"],
-      "windowLevel": true, "levelDrops": [{ "boss": "Adventurer", "level": 10, "reward": "6★ Twilight Thorn (Boosted)" }],
+      "levelDrops": [{ "boss": "Adventurer", "level": 10, "reward": "6★ Twilight Thorn (Boosted)" }],
       "source": "JP notice 30969 (August 2017): boss by weekday; the Saturday Adventurer at LV 10 drops a status-boosted Twilight Zone (= Twilight Thorn), ATK +1000." },
     "JP-RAID-30": { "weekdays": true, "bosses": ["Gummi Hound", "Gear Golem", "Queen Bee", "Assault Dragon", "Circus Crab", "Crabby Cake", "Jack in the Box"],
-      "probableBosses": ["Crabby Cake"], "windowLevel": true, "levelDrops": [{ "boss": "Crabby Cake", "level": 10, "reward": "6★ Destroyer Behemoth (Boosted)" }],
+      "probableBosses": ["Crabby Cake"], "levelDrops": [{ "boss": "Crabby Cake", "level": 10, "reward": "6★ Destroyer Behemoth (Boosted)" }],
       "source": "JP notice 32002 (September 2017): boss by weekday; Saturday «Furious Whole Cake», read as Crabby Cake (probable); at LV 10 it drops a status-boosted Destroyed Behemoth (= Destroyer Behemoth), ATK +1000." },
     "JP-D-2018-08-04": { "bosses": ["Red Trident Tail"], "saturdayOnly": true, "hp": "yes: fixed 1,500,000,000 (players' reading of 2018-06-23, carried over)", "probableBosses": true, "hpProbable": true,
       "source": "One-day weekend raid (digest: one day only); boss from the 7-boss weekend cycle, which advanced only on weekends that ran (JP notice 41729 of 2018-06-23): probable. HP: the players' reading of the 2018-06-23 weekend (about 1.5 billion), probable." },
@@ -37,6 +37,30 @@
       "source": "White Day 2016: «Prince & Belle WD Ver.» at LV 95; the same medal id as the worldwide Prince & Belle 6★; guaranteed by analogy with the Valentine raid (probable)." },
     "JP-RAID-9": { "levelDrops": [{ "level": 40, "reward": "5★ Magic Broom" }],
       "source": "Easter 2016: Magic Broom guaranteed from Egg Master at LV 40." }
+  },
+  "raidWindows": {
+    "_note": "Opening hours of the raids that had them (I-228, user decision 06-11 «mixed»; raid-windows.js, read by routes-raid.js and make-raid.js). Inside the hours: the raid's original rules (its census quest AP, the Lux and level rules of the time). Outside: open anyway (not original) at outsideAp per quest, no Bonus Time, a boss level of its own. Slots «HH:MM-HH:MM» with both minutes inside, on the real clock of tz (PT or JST); weekendSlots replace slots on Saturday and Sunday, weekendAllDay opens the whole weekend. levelReset «window»: the boss level belongs to one window (back to LV 1 at the next). A rule matches by censusIds, else by family / familyPrefix, jp and the entry's start in [from, to]; the first match wins. The 2018-01-08 Daily Raid Event (WW-E35529-1, notice 35529: «will appear all day») has no rule: all day, as the original.",
+    "outsideAp": 90,
+    "rules": [
+      { "censusIds": ["WW-E29805-1", "WW-E31611-1", "WW-E33007-1"], "tz": "PT", "slots": ["12:00-12:59", "19:00-19:59"], "label": "raidWindow",
+        "source": "Notices 29805, 31611, 33007 (2017-07, 09, 10): «Each day at the following times, the raid boss will appear for only one hour! 12:00 p.m. (PT), 7:00 p.m. (PT)». Proven." },
+      { "censusIds": ["WW-E33888-1"], "tz": "PT", "slots": ["12:00-12:59", "19:00-19:59"], "weekendSlots": ["12:00-15:59", "19:00-22:59"], "label": "raidWindow",
+        "source": "Notice 33888 (2017-11-06): the same two one-hour windows; edited Nov. 10: Saturday 11 and Sunday 12 extended to 12:00-3:59 p.m. and 7:00-10:59 p.m. PT. Proven." },
+      { "censusIds": ["WW-E42150-1"], "tz": "PT", "slots": ["02:00-02:59", "08:00-08:59", "14:00-14:59", "20:00-20:59"], "label": "raidWindow",
+        "source": "Notice 42150 (2018-07-09): four Raid Hours 2:00, 8:00, 14:00, 20:00 PT, one hour each. Proven." },
+      { "family": "monthly (30-minute)", "jp": true, "from": "2017-01-01", "to": "2017-12-31", "tz": "JST", "slots": ["12:00-12:29", "22:00-22:29"], "levelReset": "window", "label": "jpWindow",
+        "source": "JP notices 29893, 30969, 32002 and the JP wiki (2017-07 .. 2017-11): 12:00-12:29 / 22:00-22:29 JST, the boss level resets after each window. December 2017: same year, probable." },
+      { "family": "monthly (30-minute)", "jp": true, "from": "2018-01-01", "to": "2018-12-31", "tz": "JST", "slots": ["12:00-12:29", "22:00-22:29"], "label": "jpWindow",
+        "source": "JP notices 41745 (2018-07) and 42600 (2018-08): 12:00-12:29 / 22:00-22:29 JST, «no level reset, the level carries over to the next window». January to June 2018: same year, probable." },
+      { "familyPrefix": "weekly", "jp": false, "from": "2018-09-10", "to": "2019-07-14", "tz": "PT", "slots": ["02:00-02:59", "08:00-08:59", "14:00-14:59", "20:00-20:59"], "weekendAllDay": true, "label": "weeklyWindow",
+        "source": "Notices 44005 (2018-09-10) .. 54910 (2019-07-08): Monday to Friday the boss is available in the four listed hours, all day on Saturday and Sunday; 49544 (2019-02-01): 5 AP in those hours, 90 AP outside. Probable (players: unavailable outside the hours before 2019-02-01). Radiant Reward weeks (family «radiant reward») are not matched." }
+    ]
+  },
+  "bonusAllDay": {
+    "_note": "Periods with Bonus Time 24 hours a day (raid-windows.js allDayBonus, routes-raid.js): the WW raids whose week starts inside a period are in Bonus Time at any hour (Lux x2, the AP 0 campaign). The original period starts at the weekly raid start, 2020-06-01 12:00 PT: here the week itself is the Shop week of the Story.",
+    "periods": [
+      { "from": "2020-06-01", "to": "2020-06-30", "source": "Notices 66106 (2020-06-01: «Bonus time from Jun. 1, 2020 12:00 p.m. to Jun. 30, 2020 11:59 p.m. (PT)! You can earn double the LUX from raid boss, and 0 AP Cost!»), 66114, 66617, 66626 («Bonus time will go on 24 hours all day until Jun. 30, 11:59 p.m. During bonus time it will be 0 AP cost and double the LUX!»). Proven." }
+    ]
   },
   "story": { "tableLast": 555 },
   "tierQuestLv": {
@@ -132,13 +156,15 @@
     "jpQuest": "No JP quest page survives: the quest plays on the map file of the WW event raid of the same boss nearest in date (else the nearest WW event raid), with its level, AP and world, and the standard Raid Time! objectives (make-raid.js jpDonorOf).",
     "jpDates": "The JP source gives only the start date: the raid is dated one week from it.",
     "jp2016": "HP, ATK, DEF, Lux and rewards are the boss's 2016 worldwide row as it stands (census «yes (2016 row)»): the JP values of this run are not known and may differ (the JP wiki notes it for Hocus Pocus 2015 against 2016).",
-    "jpTimer": "Time limits of the JP wiki: super-hard weekend raids 12 hours, 1 hour from the 2018-05-05 weekend; the monthly «30-minute» raids 30 minutes (the windows themselves, 12:00 and 22:00 JST, are not applied: the raid stays open all day, as the daily raids, I-228).",
+    "jpTimer": "Time limits of the JP wiki: super-hard weekend raids 12 hours, 1 hour from the 2018-05-05 weekend; the monthly «30-minute» raids 30 minutes (their two daily windows, 12:00 and 22:00 JST, are raidWindows: label jpWindow).",
+    "raidWindow": "I-228 (user decision 06-11, mixed): the WW Daily Raid Event boss appeared only in its windows (notices 29805, 31611, 33007, 33888: 12:00 and 19:00 PT, one hour; 33888 edited Nov. 10: 12:00-15:59 and 19:00-22:59 PT on Saturday and Sunday; 42150: the four Raid Hours 2:00, 8:00, 14:00, 20:00 PT). Inside them the quest costs its census AP and the Lux and level rules of the time apply. Outside them the raid stays open (not original) at raidWindows.outsideAp (90 AP per quest, the price of the weekly raids outside their hours from 2019-02-01, notice 49544), with no Bonus Time and a boss level of its own; the master stage useAp is that 90 (shown on the quest top), so inside a window the quest top shows 90 and charges less, unless the AP 0 campaign shows 0.",
+    "jpWindow": "I-228 (user decision 06-11, mixed): the JP monthly 30-minute raids opened 12:00-12:29 and 22:00-22:29 JST (JP notices 29893, 30969, 32002, 41745, 42600). In 2017 the boss level went back to LV 1 after each window (proven July to November 2017; December 2017 follows its year: probable); in 2018 it carried over to the next window (JP notices 41745, 42600, July and August 2018; January to June 2018 follow their year: probable). Outside the windows the raid stays open (not original) at 90 AP per quest, with no Bonus Time and a boss level of its own that never touches the window level (its usual rule: +1 per defeat, LV 1 on the 1st of the month). The boss of the day still follows the Pacific weekday (July to September 2017).",
+    "weeklyWindow": "I-228 (user decision 06-11, mixed; probable): from 2018-09-10 (notice 44005) to the week of 2019-07-08 (54910) the weekly raid boss was available Monday to Friday only in the four Bonus Time hours (2:00, 8:00, 14:00, 20:00 PT) and all day on Saturday and Sunday. Before 2019-02-01 players report it unavailable outside those hours (reddit 2018-09 .. 2019-01, screenshot of 2018-09-11); from 2019-02-01 (49544) the quest cost 5 AP in those hours and 90 AP outside. Here every such week is open outside the hours at 90 AP, with no Bonus Time and a boss level of its own (probable for 2019-02 .. 07, not original before); inside them it costs its census AP (5 from 2019-02-01). Radiant Reward weeks are left all day (a player report: gem weeks open 24/7).",
     "jpBoard": "The JP super-hard weekend board (JP wiki: 13 cells, 40,500 Raid Coins, 6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW Legendary Raid Reward board of WW-E41605-1, which has the same cells, items and total cost (jpBoards.superHard).",
     "jpQuestAp": "Quest AP of a JP row when the JP wiki states it (November 2017 monthly raid: AP 0).",
     "jpCensus": "Corrections of the census JP rows from the later JP research (bosses by weekday of the 2017 monthly raids, the year-end 2016 daily raid, the two 2018 weekends, the JP level drops), applied when the census is read; the census file itself is not edited.",
     "jpBossProbable": "No JP source names this boss directly: it is inferred (jpCensus). Year-end 2016: the worldwide «2016 Showdown!» lineup of the same dates and rewards. September 2017 Saturday: «Furious Whole Cake» read as Crabby Cake. Weekends of 2018-08-04 and 2018-09-01: the 7-boss JP weekend cycle, which advanced only on weekends that ran (JP notice of 2018-06-23).",
     "jpHpProbable": "No HP source for this weekend: the players' reading of the 2018-06-23 weekend raid (about 1.5 billion, fixed at every level) is carried over.",
-    "jpWindowLevel": "The JP notices of the 2017 monthly 30-minute raids reset the boss level at the end of each 30-minute window: not applied (windows: I-228). The level keeps rising by one per defeat and resets on the 1st of the month, as for every raid.",
     "jpRewardProbable": "A level drop of the JP notice is given as the worldwide medal it most probably was (rarity, bonus or guarantee not stated): Mickey & Minnie 6★ (Valentine 2016, LV 95), Prince & Belle 6★ (White Day 2016, LV 95), the boosted Trickmaster 6★ +1,000 STR (July 2017, Saturday LV 10)."
   },
   "boards": {

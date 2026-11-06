@@ -78,18 +78,27 @@ const tests = {
     assert(det.includes('gains a level at every win'), 'the usual level step');
   },
   jp_research_labels() {
-    // jpCensus (06-11): the probable boss / HP / reward and the window level reset are named on the details page; the year-end 2016
+    // jpCensus (06-11): the probable boss / HP / reward and the opening hours (I-228) are named on the details page; the year-end 2016
     // raid's +10 levels per win (entry.levelStep) is in its level line
     const ix = index();
     ix.entries.push(tier('JP-RAID-21', 8350, '2016-12-25', '2017-01-01', 'single', 'Green Trident Tail', { family: 'daily rotating', jp: true, region: 'JP', levelStep: 10,
       reconstructed: ['jp', 'jpQuest', 'jpBossProbable'], boards: [] }),
     tier('JP-D-2018-08-04', 8353, '2018-08-04', '2018-08-04', 'single', 'Red Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpBossProbable', 'jpHpProbable'], boards: [] }),
-    tier('JP-RAID-30', 8352, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true, region: 'JP', reconstructed: ['jp', 'jpWindowLevel', 'jpRewardProbable'], boards: [] }));
+    tier('JP-RAID-30', 8352, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true, region: 'JP', reconstructed: ['jp', 'jpWindow', 'jpRewardProbable'], boards: [] }));
     const c = ctx({ index: ix });
     const ye = pages.detailPage(ix, 8350, c), we = pages.detailPage(ix, 8353, c), mo = pages.detailPage(ix, 8352, c);
     assert(ye.includes('gains 10 levels at every win') && ye.includes('<b>boss (probable)</b>') && ye.includes('2016 Showdown!'), 'year-end 2016');
     assert(we.includes('<b>boss HP (probable)</b>') && we.includes('1.5 billion'), 'weekend 2018');
-    assert(mo.includes('<b>boss level (no reset after each window)</b>') && mo.includes('<b>level reward (probable match)</b>') && mo.includes('gains a level at every win'), 'monthly 2017');
+    assert(mo.includes('<b>opening hours (open outside them at 90 AP)</b>') && mo.includes('12:00-12:29 and 22:00-22:29 Japan time') && mo.includes('in 2018 its level carried over') && !mo.includes('no reset after each window') && mo.includes('<b>level reward (probable match)</b>') && mo.includes('gains a level at every win'), 'monthly 2017');
+  },
+  opening_hours_labels() {
+    // I-228: the WW daily raids and the weekday weekly raids of 2018-09 .. 2019-07 name their hours and the 90 AP outside them
+    const ix = index();
+    ix.entries.push(tier('WW-E29805-1', 8020, '2017-07-03', '2017-07-10', 'single', 'Submarine Carp', { family: 'daily', reconstructed: ['raidWindow'] }),
+      tier('WW-W-2018-11-12', 8021, '2018-11-12', '2018-11-18', 'single', 'Jewel Princess', { reconstructed: ['weeklyWindow'] }));
+    const c = ctx({ index: ix }), d = pages.detailPage(ix, 8020, c), w = pages.detailPage(ix, 8021, c);
+    assert(d.includes('<b>opening hours (open outside them at 90 AP)</b>') && d.includes('12:00 and 19:00 for one hour') && d.includes('not original'), 'daily');
+    assert(w.includes('<b>weekday hours (probable; open outside them at 90 AP)</b>') && w.includes('probable'), 'weekly');
   },
   event_families_typed() {
     // Task 10 review M-5: the event raids of 2016-2018 are Raid Events, with a readable family name, not Weekly

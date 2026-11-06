@@ -45,6 +45,7 @@ const path = require('path');
 const { coinRows, rewardRowId, CONFIG: REWARDS } = require('./raid-rewards');
 const { objectiveCodes } = require('./make-story-oltre');
 const raidBoards = require('./raid-boards');
+const raidWindows = require('./raid-windows');
 const { RAID_IMG_VERSION } = require('./routes-raid'); // same versioned card URL as /stage/event
 
 const STAGE_KIND = 2;
@@ -497,11 +498,10 @@ const jpServed = (row, census) => isJpRow(row) && !jpStatus(row, census).why;
 // private census file stays as it is, the overlay is applied when it is read (buildRaid, --ids). Per census id: family, bosses
 // (in order: the days of a daily rotating row, Monday to Sunday with weekdays), weekdays (the boss of each weekday over the whole
 // row), saturdayOnly (a one-day weekend: open on Saturday only), hp (census data.hp text, e.g. «yes: fixed N»), probableBosses
-// (true or names: the boss is inferred, label jpBossProbable), hpProbable (jpHpProbable), windowLevel (the original reset the boss
-// level after each 30-minute window, jpWindowLevel), levelStep (levels gained per defeat, routes-raid.js), levelDrops
+// (true or names: the boss is inferred, label jpBossProbable), hpProbable (jpHpProbable), levelStep (levels gained per defeat, routes-raid.js), levelDrops
 // ([{level, reward: «N★ Name» or «N★ Name (Boosted)», boss?, probable?}], paid as the notices' level drops). Keys starting with
 // «_» are notes. An id not in the census stops the run.
-const JP_FIX_KEYS = new Set(['family', 'bosses', 'weekdays', 'saturdayOnly', 'hp', 'probableBosses', 'hpProbable', 'windowLevel', 'levelStep', 'levelDrops', 'source']);
+const JP_FIX_KEYS = new Set(['family', 'bosses', 'weekdays', 'saturdayOnly', 'hp', 'probableBosses', 'hpProbable', 'levelStep', 'levelDrops', 'source']);
 function applyJpCensus(census, overlay) {
   if (!overlay || !census || !Array.isArray(census.rows)) return census;
   const ids = new Set(census.rows.map((r) => r.id));
@@ -1051,11 +1051,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         if (w.jp) {
           if (made.partFixed && reconstructed.includes('partHp')) reconstructed.splice(reconstructed.indexOf('partHp'), 1);
           reconstructed.push('jp', 'jpQuest', ...(w.noEnd ? ['jpDates'] : []));
-          // the later JP research (jpCensus): a boss or an HP only probable, the per-window level reset not applied
+          // the later JP research (jpCensus): a boss or an HP only probable (the monthly windows: raidWindows, label jpWindow)
           const fix = row.jpFix || {};
           if (jpBossProbable(row, w.boss)) reconstructed.push('jpBossProbable');
           if (fix.hpProbable) reconstructed.push('jpHpProbable');
-          if (fix.windowLevel) reconstructed.push('jpWindowLevel');
         }
         // the rare boss of the same quest (Queen Bee Ω beside Queen Bee): its own rows, timer and AP; chance 1 in rareUpTypeArg
         if (w.rare) {
@@ -1104,14 +1103,13 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       entry.worldId = stageWorld;
       const ref = refByWorld.get(worldReal) || story[story.length - 1];
       if (!ref) throw new Error('raid: no story rows in the stage table');
-      const questAp = entry.questAp;
       // objectives: the event quest's own, with their rewards; the standard Raid Time! ones when one cannot be served
       let subs = w.event && !w.jp ? eventQuestSubs(evQuest, medalIndex) : null;
       if (w.event && !w.jp && !subs) reconstructed.push('questObjectives');
       subs = subs || questSubs(quest.info, REWARDS.coinType, entry.key);
       // a JP raid reuses the map file of its donor's stage (stageBinId; server.js poiStageId follows it): no new map
       const stage = { ...JSON.parse(JSON.stringify(ref)), stageId: entry.stageId, stageBinId: donor ? donor.stageId : entry.stageId, id: entry.stageId, name: questKey, mapName: map,
-        useAp: questAp[questAp.length - 1], chapterId: Math.floor(entry.stageId / 1000), worldId: stageWorld, onlyDrama: 0, stageKind: STAGE_KIND,
+        useAp: raidWindows.stageUseAp(entry, config), chapterId: Math.floor(entry.stageId / 1000), worldId: stageWorld, onlyDrama: 0, stageKind: STAGE_KIND,
         validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0, disableContinue: 0, addLevel: 0, holdKeyblade: 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, validClearGetItem: 0, clearGetItemType: [], clearGetItemId: [],
         clearGetAssignSkillType: [], clearGetAssignSkillId: [], clearGetAssignSkillLv: [], clearGetItemNum: [], resetSubMission: 0, combinedSubmissionFlag: 0, raidBoss: entry.settingId,
@@ -1232,6 +1230,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []));
     }
   } else for (const e of out.index.entries) e.sphereBoardIds = [];
+  // opening hours (raid_config.json raidWindows, I-228): the rule's label (raidWindow, jpWindow, weeklyWindow)
+  for (const e of out.index.entries) {
+    const win = raidWindows.ruleOf(e, config);
+    if (win && !e.reconstructed.includes(win.label)) e.reconstructed.push(win.label);
+  }
   for (const e of out.index.entries) {
     if (e.why) out.report.why[e.why] = (out.report.why[e.why] || 0) + 1;
     if (e.why === 'template' && !out.report.templateGap.includes(e.boss)) out.report.templateGap.push(e.boss);
