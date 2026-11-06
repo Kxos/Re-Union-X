@@ -75,6 +75,21 @@ const tests = {
     assert(det.includes('<td>Super-Hard Weekend Raid (Japan)</td>') && det.includes('<b>Japan only</b>') && det.includes('Japanese super-hard board'), 'details');
     // its board has no census name (only the served board's own): no «No Raid Boards this week» above the listed board (bench 05-11)
     assert(!det.includes('No Raid Boards this week') && det.includes('<ul class="pl"><li>'), 'board listed without the empty line');
+    assert(det.includes('gains a level at every win'), 'the usual level step');
+  },
+  jp_research_labels() {
+    // jpCensus (06-11): the probable boss / HP / reward and the window level reset are named on the details page; the year-end 2016
+    // raid's +10 levels per win (entry.levelStep) is in its level line
+    const ix = index();
+    ix.entries.push(tier('JP-RAID-21', 8350, '2016-12-25', '2017-01-01', 'single', 'Green Trident Tail', { family: 'daily rotating', jp: true, region: 'JP', levelStep: 10,
+      reconstructed: ['jp', 'jpQuest', 'jpBossProbable'], boards: [] }),
+    tier('JP-D-2018-08-04', 8353, '2018-08-04', '2018-08-04', 'single', 'Red Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpBossProbable', 'jpHpProbable'], boards: [] }),
+    tier('JP-RAID-30', 8352, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true, region: 'JP', reconstructed: ['jp', 'jpWindowLevel', 'jpRewardProbable'], boards: [] }));
+    const c = ctx({ index: ix });
+    const ye = pages.detailPage(ix, 8350, c), we = pages.detailPage(ix, 8353, c), mo = pages.detailPage(ix, 8352, c);
+    assert(ye.includes('gains 10 levels at every win') && ye.includes('<b>boss (probable)</b>') && ye.includes('2016 Showdown!'), 'year-end 2016');
+    assert(we.includes('<b>boss HP (probable)</b>') && we.includes('1.5 billion'), 'weekend 2018');
+    assert(mo.includes('<b>boss level (no reset after each window)</b>') && mo.includes('<b>level reward (probable match)</b>') && mo.includes('gains a level at every win'), 'monthly 2017');
   },
   event_families_typed() {
     // Task 10 review M-5: the event raids of 2016-2018 are Raid Events, with a readable family name, not Weekly

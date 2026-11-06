@@ -253,6 +253,7 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the story raid bosses (Task 11)
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
+  jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpWindowLevel: 'boss level (no reset after each window)', jpRewardProbable: 'level reward (probable match)',
   storyBoss: 'story raid boss (unknown quest)', storyOmega: 'odds of the Ω boss in the story', storyConflict: 'story raid boss (sources disagree)', rareType2: 'odds of the rare boss (rule type)' };
 // One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
 const RECON_TEXT = {
@@ -294,6 +295,10 @@ const RECON_TEXT = {
   jp2016: 'The boss HP, attack, defense and rewards are its 2016 worldwide values: the Japanese values of this raid are not known.',
   jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids); the raid is open all day, not only in its two daily windows.',
   jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
+  jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»; August 4 and September 1, 2018: the next boss of the Japanese weekend cycle).',
+  jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
+  jpWindowLevel: 'In the original the boss went back to LV 1 after each 30-minute window; here its level keeps rising and resets on the 1st of the month.',
+  jpRewardProbable: 'A level reward of the Japanese notice is given as the worldwide Medal it most probably was (its rarity, bonus or guarantee is not stated).',
   storyBoss: 'The raid boss of this story quest is not known: the boss of the nearest quest is used.',
   storyOmega: 'How often the Ω boss appears in this story quest is not known: the boss\'s usual rule from the 2016 data is used.',
   storyConflict: 'The sources name two different raid bosses for this story quest: the community wiki\'s boss is used.',
@@ -301,6 +306,8 @@ const RECON_TEXT = {
 };
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
+// levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
+const stepOf = (row) => Math.max(1, ...row.entries.map((e) => Number(e.levelStep) || 1));
 function detailPage(index, evStageId, ctx = {}) {
   const rows = calendar.catalogRows(index), row = rows.find((r) => r.evStageId === Number(evStageId));
   if (!row) return null;
@@ -331,7 +338,7 @@ function detailPage(index, evStageId, ctx = {}) {
     + (ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
-    + '<p class="n">The boss starts at LV 1 and gains a level at every win, up to LV 99; levels reset on the 1st of every month.</p>'
+    + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win, up to LV 99; levels reset on the 1st of every month.</p>`
     + `<h2>Raid Boards</h2>${boards}${recon}${other}`
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }

@@ -52,7 +52,9 @@ function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirna
     storyQuests: Object.values(story.quests || {}).filter((q) => served.has(q.boss)).length,
     unknown: (story.unknown || []).length, conflicts: (story.conflicts || []).length,
     jp: jp ? { rows: new Set(jpOn.map((e) => e.censusId)).size, off: (jp.notServed || []).length, unnamed: (jp.skipped || []).filter((s) => /not named/.test(s.why)).map((s) => s.start),
-      sameEvents: (jp.skipped || []).filter((s) => /^the same raid as/.test(s.why)).length } : null,
+      sameEvents: (jp.skipped || []).filter((s) => /^the same raid as/.test(s.why)).length,
+      // the census ids served and the dates they span, for the lines of the later JP research (jpCensus of raid_config.json)
+      ids: new Set(jpOn.map((e) => e.censusId)), from: jpOn.map((e) => e.start).sort()[0] || null, to: jpOn.map((e) => e.end || e.start).sort().pop() || null } : null,
   };
 }
 const nameList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a.join(''));
@@ -76,12 +78,27 @@ function raidNoticeLines(f) {
 // 2016-12-25 -> December 25, 2016
 const usDay = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 // Japan-only raids (I-232): served only in the Raid Catalog (not original), and what is reconstructed for them
+const usMonth = (iso) => new Date(`${iso.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 function raidJpLines(f) {
   if (!f || !f.jp || !f.jp.rows) return [];
+  const span = f.jp.from && f.jp.to ? `${usMonth(f.jp.from)} to ${usMonth(f.jp.to)}` : 'October 2015 to September 2018';
   return ['## Raids of the Japanese version',
-    `The **${f.jp.rows}** raids held only in the **Japanese version** of the game (October 2015 to August 2018: raid events, super-hard weekend raids, monthly 30-minute raids and a daily rotating raid) are in the **Raid Catalog**, marked **Japan only** (**not original**: the worldwide game never had them). They never appear in the Events tab by themselves: keep one from the Raid Catalog to play it, like any past raid. A Japanese raid can be kept once your Story has passed its dates.`,
-    'No quest of these raids survives: each one uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives. Their Raid Boards are the generic boards (Medals, Jewels) of a similar worldwide raid; the **super-hard weekend** board is the original Japanese one, which has the same cells, rewards and costs as the worldwide **Legendary Raid Reward** board. The Japanese avatar parts, titles and level rewards of these raids are not given.',
-    'The boss HP is the Japanese one where it is known (the fixed HP of the super-hard weekends, Adventurer and Jewel Princess of 2016), otherwise the 2016 worldwide values of the same boss or the rule of the worldwide raids of the time; attack and defense are deduced like those of the worldwide raids. The super-hard weekend raids keep their Japanese time limit (12 hours, 1 hour from May 2018) and open only on Saturday and Sunday; the monthly 30-minute raids give 30 minutes to defeat the boss but stay open all day (the original opened them twice a day). Each raid lists what is reconstructed on its Raid Catalog page.'];
+    `The **${f.jp.rows}** raids held only in the **Japanese version** of the game (${span}: raid events, super-hard weekend raids, monthly 30-minute raids and daily rotating raids) are in the **Raid Catalog**, marked **Japan only** (**not original**: the worldwide game never had them). They never appear in the Events tab by themselves: keep one from the Raid Catalog to play it, like any past raid. A Japanese raid can be kept once your Story has passed its dates.`,
+    'No quest of these raids survives: each one uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives. Their Raid Boards are the generic boards (Medals, Jewels) of a similar worldwide raid; the **super-hard weekend** board is the original Japanese one, which has the same cells, rewards and costs as the worldwide **Legendary Raid Reward** board. The Japanese avatar parts and titles of their boards are not given (no Japanese board survives cell by cell).',
+    'The boss HP is the Japanese one where it is known (the fixed HP of the super-hard weekends, Adventurer and Jewel Princess of 2016), otherwise the 2016 worldwide values of the same boss or the rule of the worldwide raids of the time; attack and defense are deduced like those of the worldwide raids. The super-hard weekend raids keep their Japanese time limit (12 hours, 1 hour from May 2018) and open only on Saturday and Sunday; the monthly 30-minute raids give 30 minutes to defeat the boss but stay open all day (the original opened them twice a day). Each raid lists what is reconstructed on its Raid Catalog page.',
+    ...raidJpResearchLines(f.jp.ids)];
+}
+// the JP rows corrected by the later research (raid_config.json jpCensus): each line only when its raid is served
+function raidJpResearchLines(ids) {
+  const has = (...list) => list.some((id) => ids && ids.has(id)), out = [];
+  if (has('JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30')) {
+    out.push('The monthly 30-minute raids of **July, August and September 2017** change boss with the real weekday, as their Japanese notices say. In the original the boss went back to LV 1 after each 30-minute window; here its level keeps rising and resets on the 1st of the month (**not original**). The Saturday boss defeated at **LV 10** drops a **boosted** copy of the month\'s Medal to your Presents: Trickmaster (July), Twilight Thorn (August) and Destroyer Behemoth (September), each with 1,000 more Strength; the July bonus is not stated and is the one of the worldwide boosted Trickmaster (**reconstructed**).');
+    if (has('JP-RAID-30')) out.push('The Saturday boss of September 2017, called «Furious Whole Cake» in Japanese, is served as **Crabby Cake** (**probable**: the name is not matched by any source).');
+  }
+  if (has('JP-RAID-21')) out.push('The year-end raid of **December 26, 2016 to January 1, 2017** shows a different boss every day and the boss gains **10 levels** at every defeat, as its Japanese notice says. The notice does not list the bosses: they are the ones of the worldwide **2016 Showdown!** of the same days and rewards (Green Trident Tail, Wicked Spider, Submarine Carp, Fortress Crab, Gummi Hound, Blue Trident Tail, Hocus Pocus; **probable**).');
+  if (has('JP-D-2018-08-04', 'JP-D-2018-09-01')) out.push('The super-hard weekend raids of **August 4** and **September 1, 2018** opened on **Saturday only**, with a 60-minute time limit. No source names their boss or HP: they are **Red Trident Tail** and **Malicious Spider**, the next bosses of the Japanese weekend cycle, with the HP players reported for the weekend of June 23, 2018 (**1.5 billion** at every level; **probable**).');
+  if (has('JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9')) out.push('Level rewards of the Japanese notices that exist in the worldwide game reach your Presents when you defeat the boss at that level: **Magic Broom** (Egg Master, Easter 2016, LV 40), **Mickey & Minnie** 6★ (Valentine 2016, LV 95) and **Prince & Belle** 6★ (White Day 2016, LV 95). The last two are **probable**: the Japanese notice does not state the rarity, or that the reward was certain. Level rewards with no worldwide Medal are not given.');
+  return out;
 }
 // story raid bosses: names (with their rare versions), quests that bring one, last quest, unknown and disputed quests
 function raidStoryLines(f) {
