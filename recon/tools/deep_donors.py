@@ -412,7 +412,8 @@ def family_needs(fams, workdir):
     """as tmp\\deep_scan\\scripts\\need.py: per family and mandatory animation (+ move) that is not complete and has
     its JP LWF: survivors (fill_tex, original sources only) and missing textures, with declared sizes. The versioned tables
     of make_jp_enemies.py, without extra_donors_deep.tsv."""
-    sys.argv = ['make_jp_enemies.py', '--dry', '--deep', '', '--dedup', '', '--out', os.path.join(workdir, 'dry')]
+    # --event-all: the event quest families of event_enemy_families.json (Task 2b) count even before their approval
+    sys.argv = ['make_jp_enemies.py', '--dry', '--deep', '', '--dedup', '', '--event-all', '--out', os.path.join(workdir, 'dry')]
     import make_jp_enemies as M
     if fams is None:
         M.main()

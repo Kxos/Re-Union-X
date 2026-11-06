@@ -113,7 +113,12 @@ function splitObjective(s) {
 // boosted copies have bigger ids)
 function lookups(m) {
   const lower = (s) => String(s).trim().toLowerCase();
-  const enemyId = (name) => (m.enemy || []).filter((e) => lower(e.name) === lower(name)).map((e) => e.enemyId).sort((a, b) => a - b)[0] || 0;
+  // event quest rows (make-event-enemies.js, Task 2b) never answer a name lookup: «Barrier Master» stays 11534, not
+  // the event row 1534
+  const evSrc = m.eventEnemies === undefined ? require('./make-event-enemies').readEventEnemies() : m.eventEnemies;
+  const evIds = new Set(evSrc ? Object.keys(evSrc.enemies).map(Number) : []);
+  const named = (name) => (m.enemy || []).filter((e) => lower(e.name) === lower(name) && !evIds.has(e.enemyId));
+  const enemyId = (name) => named(name).map((e) => e.enemyId).sort((a, b) => a - b)[0] || 0;
   const medalId = (label) => {
     const x = /^(.+?)\s*(\d*)★$/.exec(String(label || '').trim());
     if (!x) return 0;
@@ -131,7 +136,7 @@ function lookups(m) {
   const petPartId = (name) => ((m.petParts || []).find((r) => r.name === String(name).trim()) || {}).petPartsId || 0;
   // map form of an enemy (as enemy_id of gen_story_maps.py): target 1xxxx, others 8xxxx, otherwise the smallest id
   const mapEnemyId = (name, target) => {
-    const ids = (m.enemy || []).filter((e) => lower(e.name) === lower(name)).map((e) => e.enemyId).sort((a, b) => a - b);
+    const ids = named(name).map((e) => e.enemyId).sort((a, b) => a - b);
     return ids.find((i) => (target ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
   };
   return {

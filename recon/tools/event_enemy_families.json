@@ -1,0 +1,170 @@
+{
+ "_doc": "Event quest enemies our master lacks (Events Part 1, Task 2b, 6 Nov 2026): displayId -> name, model (new = every mandatory animation complete in the JP 4.3.1 data with the versioned copy tables; missing = textures or animations still not found, never replaced by another enemy), approved (the user saw the rendered animations). make_jp_enemies.py builds only the approved ones (--event-all: every one, for renders and deep_donors.py).",
+ "families": {
+  "97": {
+   "name": "Ringmaster",
+   "model": "new",
+   "approved": false
+  },
+  "226": {
+   "name": "Wily Bandit",
+   "model": "new",
+   "approved": false
+  },
+  "261": {
+   "name": "Fortress Crab",
+   "model": "new",
+   "approved": false
+  },
+  "262": {
+   "name": "Closehanded Captain",
+   "model": "new",
+   "approved": false
+  },
+  "1025": {
+   "name": "Queen Bee",
+   "model": "new",
+   "approved": false
+  },
+  "1026": {
+   "name": "Queen Bee Ω",
+   "model": "missing",
+   "approved": false
+  },
+  "1027": {
+   "name": "Guard Armor",
+   "model": "new",
+   "approved": false
+  },
+  "1522": {
+   "name": "Iron Giant",
+   "model": "new",
+   "approved": false
+  },
+  "1526": {
+   "name": "Royal Pretender",
+   "model": "new",
+   "approved": false
+  },
+  "1530": {
+   "name": "Ogre",
+   "model": "new",
+   "approved": false
+  },
+  "1546": {
+   "name": "Jewel Sorceress",
+   "model": "new",
+   "approved": false
+  },
+  "1547": {
+   "name": "Assault Dragon",
+   "model": "missing",
+   "approved": false
+  },
+  "1553": {
+   "name": "Pink Agaricus",
+   "model": "new",
+   "approved": false
+  },
+  "1555": {
+   "name": "Titan",
+   "model": "missing",
+   "approved": false
+  },
+  "1556": {
+   "name": "Icy Beast",
+   "model": "new",
+   "approved": false
+  },
+  "1564": {
+   "name": "Ramuh",
+   "model": "missing",
+   "approved": false
+  },
+  "1565": {
+   "name": "Upright Defender",
+   "model": "new",
+   "approved": false
+  },
+  "1566": {
+   "name": "Reversed Defender",
+   "model": "new",
+   "approved": false
+  },
+  "1579": {
+   "name": "Xaldin",
+   "model": "missing",
+   "approved": false
+  },
+  "1580": {
+   "name": "Shiva",
+   "model": "new",
+   "approved": false
+  },
+  "1582": {
+   "name": "Vexen",
+   "model": "missing",
+   "approved": false
+  },
+  "1585": {
+   "name": "Lexaeus",
+   "model": "missing",
+   "approved": false
+  },
+  "1589": {
+   "name": "Zexion",
+   "model": "missing",
+   "approved": false
+  },
+  "1593": {
+   "name": "Sephiroth",
+   "model": "new",
+   "approved": false
+  },
+  "1594": {
+   "name": "Saïx",
+   "model": "missing",
+   "approved": false
+  },
+  "1596": {
+   "name": "Axel",
+   "model": "missing",
+   "approved": false
+  },
+  "1597": {
+   "name": "Demyx",
+   "model": "missing",
+   "approved": false
+  },
+  "1603": {
+   "name": "Luxord",
+   "model": "missing",
+   "approved": false
+  },
+  "1604": {
+   "name": "Marluxia",
+   "model": "missing",
+   "approved": false
+  },
+  "1605": {
+   "name": "Larxene",
+   "model": "missing",
+   "approved": false
+  },
+  "1606": {
+   "name": "Xemnas",
+   "model": "missing",
+   "approved": false
+  },
+  "1607": {
+   "name": "Xigbar",
+   "model": "missing",
+   "approved": false
+  },
+  "2009": {
+   "name": "sEnm_2009",
+   "model": "missing",
+   "approved": false
+  }
+ }
+}

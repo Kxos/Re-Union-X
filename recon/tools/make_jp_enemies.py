@@ -117,6 +117,11 @@ ap.add_argument('--oltre', default=os.path.join(D, 'reference', 'world_schema', 
                 help='nemici delle missioni 526-979 assenti dal master ({missing}): anche le cartelle delle loro famiglie')
 ap.add_argument('--out', default=os.path.join(D, 'enemy_gen'))
 ap.add_argument('--story-only', action='store_true', help='solo i nemici degli stage di storia (--poi)')
+ap.add_argument('--event-families', default=os.path.join(HERE, 'event_enemy_families.json'),
+                help="displayIds of event quest enemies our master lacks (Events Part 1, Task 2b); only the entries "
+                     "with approved true (the user saw the rendered animations) are built; '' = none")
+ap.add_argument('--event-all', action='store_true',
+                help='also the event families not approved yet (renders for the review, deep_donors.py needs)')
 ap.add_argument('--ids', help='solo questi displayId (elenco con virgole), per prove')
 ap.add_argument('--dry', action='store_true', help='solo rapporto, nessuna scrittura in files')
 ap.add_argument('--jobs', type=int, default=0)
@@ -454,6 +459,15 @@ def plan_enemy(d):
     return r, todo
 
 
+def event_families(path, include_all=False):
+    """{displayId: name} of event_enemy_families.json ({"families": {"<displayId>": {name, approved}}}); only the
+    approved ones unless include_all."""
+    if not path or not os.path.exists(path):
+        return {}
+    fam = json.load(open(path, encoding='utf-8')).get('families', {})
+    return {int(k): v.get('name', '') for k, v in fam.items() if include_all or v.get('approved')}
+
+
 def family_of(i):
     """Famiglia grafica di un enemyId: ultime 4 cifre (delle ultime 5 per gli id da 8 cifre in su), come familyOf
     di server/make-enemy-oltre.js."""
@@ -544,6 +558,10 @@ def main():
                  if f not in want and f not in disp.values()}
         story_disp |= set(oltre)
         want = sorted(set(want) | set(oltre))
+    # event quest enemies found in Task 2b (event_enemy_families.json): their rows come from make-event-enemies.js,
+    # which adds a row only when its displayId is drawn, so the folder is built only once the user approved the model
+    events = event_families(a.event_families, a.event_all)
+    want = sorted(set(want) | {d for d in events if d not in served})
     if a.ids:
         want = [int(x) for x in a.ids.split(',') if x]
     results, plan = [], {}

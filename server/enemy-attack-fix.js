@@ -68,7 +68,14 @@ function addMissing(atts, enemies) {
   return added;
 }
 
-const readOrig = (file = ORIG) => JSON.parse(fs.readFileSync(file, 'utf8'));
+// thethiny rows, plus the original rows cited by the event enemies of Task 2b (make-event-enemies.js, private file;
+// a thethiny row wins on the same id)
+const readOrig = (file = ORIG, extra = require('./make-event-enemies').attackRows()) => {
+  const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const have = new Set(rows.map((r) => r.enemyAttackId));
+  for (const r of extra || []) if (!have.has(r.enemyAttackId)) { rows.push(r); have.add(r.enemyAttackId); }
+  return rows;
+};
 
 module.exports = { applyEnemyAttacks, addMissing, servedHitEffects, readOrig };
 
