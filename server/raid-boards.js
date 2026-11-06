@@ -129,7 +129,7 @@ function matchReward(idx, kind, name, qty) {
   return { why: `no item type for the kind ${kind}` };
 }
 
-// Completion reward (index 22): the board's title, else its completion reward (a medal, else a material).
+// Completion reward (index 22): the board's title, else its completion reward (of its `kind` when given, else a medal, else a material).
 function matchCompletion(idx, board) {
   const title = board.title && (board.title.value || board.title);
   if (title) return { name: String(title), ...matchReward(idx, 'title', String(title)) };
@@ -137,6 +137,9 @@ function matchCompletion(idx, board) {
   if (!v) return { name: null, why: 'no completion reward' };
   const name = Array.isArray(v) ? v[1] : String(v);
   const qty = board.completion_qty || 1;
+  // a completion of a stated kind (JP monthly event boards: a Spirit part, «the completion reward of each event board»)
+  const kind = board.completion_reward && board.completion_reward.kind;
+  if (kind) return { name, ...matchReward(idx, kind, name, qty) };
   if (/★/.test(name)) return { name, ...matchReward(idx, 'medal', name, qty) };
   const mat = matchReward(idx, 'material', name, qty);
   return { name, ...(mat.why ? matchReward(idx, 'medal', name, qty) : mat) };
