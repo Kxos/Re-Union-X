@@ -211,5 +211,13 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
     && /Magic Broom/.test(kl) && /Prince & Belle/.test(kl), `righe jpCensus: ${kl}`);
   require('fs').rmSync(dir, { recursive: true, force: true });
 }
+// every inline script of the Notices page must compile, in-game popup and site copy alike (06-11: a missing «;» after the
+// #slug opener broke the whole popup: no notice could be opened)
+for (const web of [false, true]) {
+  const html = n.noticesPage(U(2026, 11, 6, 12), web ? { web: true } : {});
+  for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+    try { new Function(m[1]); } catch (e) { errors.push(`script della pagina Notices (web=${web}) non compila: ${e.message}`); }
+  }
+}
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 console.log('OK: notices');

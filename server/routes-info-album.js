@@ -593,9 +593,9 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + 'for(var k=0;k<' + notices.length + ';k++)document.getElementById("d"+k).style.display=k===i?"block":"none";'
     + (opts.web ? 'history.replaceState(null,"",i<0?location.pathname:"#n"+i);' : '')
     + 'window.scrollTo(0,0)}'
-    + (opts.web ? 'window.addEventListener("load",function(){var m=/^#n([0-9]+)$/.exec(location.hash);if(m)show(+m[1])})' : '')
+    + (opts.web ? 'window.addEventListener("load",function(){var m=/^#n([0-9]+)$/.exec(location.hash);if(m)show(+m[1])});' : '')
     + 'window.addEventListener("load",function(){var h=location.hash.slice(1),k;if(!h||/^n[0-9]+$/.test(h))return;'
-    + 'for(k=0;k<' + notices.length + ';k++)if(document.getElementById("d"+k).getAttribute("data-s")===h){KXH=1;show(k);return}})'
+    + 'for(k=0;k<' + notices.length + ';k++)if(document.getElementById("d"+k).getAttribute("data-s")===h){KXH=1;show(k);return}});'
     // avvisa il server appena disegnata (tempi del popup al primo avvio, server.js noticesshown)
     // tempi delle fasi misurati dalla WebView (risposta, DOM pronto, primo disegno, load), in ms dall'inizio della navigazione
     + (opts.web ? '' : 'window.addEventListener("load",function(){requestAnimationFrame(function(){var t=performance.timing,n=t.navigationStart,'
