@@ -53,7 +53,7 @@ Same row shape as a raid fight stage ([raid.md](raid.md), «Fight stages»), `st
 - **Objective rewards**: `submissionRewardType` / `submissionItemId` / `submissionItemNum` with `validSubmission` 3. Reward types seen: 3 medal, 7, 15 Event Coins, 26, 28 Skip Ticket+, 33 Spirit part, 40. 15 is paid into Raid Coins until the event boards exist ([bacheche.md](bacheche.md)).
 - **First-clear reward**: `validClearGetItem` with `clearGetItemType/Id/Num`: **0 on all 16 pilot events** (19 of 3,852 event-range donor stages have one; `validClearGetSphere`, `validClearGetTitle` never). So a quest event pays only through its objectives.
 - **Drama**: `validBeforeDrama` / `validAfterDrama` set on the Quiz (every stage), the Dark-Winged and New Friend events: the dialogue ids point at drama files (**unverified**: whether our resources have them).
-- **Map**: `stageBinId` 0 on most pilot rows; the quiz sets bins 740260-740262. The client loads the map from the stage or bin id; the donor `mapName` is a placeholder («...»).
+- **Map**: `stageBinId` 0 on most pilot rows; the quiz sets bins 740260-740262. The client loads `mappoi_stg<stageBinId>`, or `mappoi_stg<stageId>` when the bin is 0; the donor `mapName` is a placeholder («...»).
 - **Boss**: `raidBoss` is a `raidSetting` id of the 2016 table (2000 = Behemoth ...). The client does not dereference it from a story or event row ([raid.md](raid.md), audit): our event stages should set 0.
 - Music: `bgmField`, `bgmBattle`, `bgmBoss` ids per world.
 
@@ -81,9 +81,16 @@ Rows (census id, family, period, `evStage` rows, stages, notable fields). All ar
 | EV-0784 | EQ | 04-22..05-01 | 1 / 3 | as the Titan layout |
 
 **Values our master does not have** (all of them, for the 16 events): the `evStage` and `stage` rows themselves; the `raidBoss` settings they name; the
-maps. From the census, the Worldwide 2021 master references 1 map per event (a few 3 to 16), of which the Japan 4.3.1 resources hold only the quiz
-(3 of 3) and the "New Friend" event (15 of 16); the others are missing and have to be found. The stage tables do not name enemies or drops: those come
-from the map files (`mappoi`) and the `enemy` / `reward` tables, so each map must be found with its enemy list (no substitutes, as decided in the design).
+maps in our own WW resources (`stage_gen` holds none of the pilot map keys). The stage tables do not name enemies or drops: those come from the map files
+(`mappoi_stg<key>*.bin`) and the `enemy` / `reward` tables.
+
+**Map presence in the Japan 4.3.1 data** (re-derived 6 Nov; this replaces an earlier claim from the census field `maps_in_jp431`, which counted the single
+value 0 of `stageBinId` and so understated it). Key per stage = `stageBinId`, or the stage id itself when `stageBinId` is 0 (the client loads
+`mappoi_stg<key>`, see [mappe_storia.md](mappe_storia.md)). Stages / keys found in the JP 4.3.1 `stage/` folder / missing: EV-0753 6/6/0, EV-0759 3/3/0,
+EV-0760 10/10/0, EV-0761 3/3/0, EV-0763 10/10/0 (own bins), EV-0764 12/12/0, EV-0765 3/3/0, EV-0771 1/1/0, EV-0772 25/25/0 (15 own bins), EV-0774 5/5/0,
+EV-0775 4/4/0, EV-0776 3/3/0, EV-0777 5/5/0, EV-0781 12/12/0, EV-0783 34/34/0, EV-0784 3/3/0: **120 of 120 pilot stages have a map file**.
+**Unverified**: that each file is the same quest content as the Worldwide event (the donor stage ids equal the JP file keys, but the JP and WW versions of a
+quest can differ in enemies and drops), and that the file loads on the WW client (checked only by name, not opened). Per-stage ids stay in the private notes.
 
 ## Id ranges
 
@@ -99,6 +106,6 @@ Checked on our master (`server/master_data`, 6 Nov 2026):
 1. What `eventType` 1 and 3 do on the tap (board button? plain list?). Plan: serve 1 and check the quest list on the bench; if a raid-style button appears, use a different value.
 2. Whether `parentEventStageId`, `resetFlag`, `validStageWidthId` have any client effect; start with the donor's values.
 3. Daily events as several `evStage` rows: confirm `/stage/event` lists only the day's row (server decision, not client).
-4. Drama ids and maps of each pilot event: found/missing per event goes into the data, not into this note.
+4. Drama ids of each pilot event: found/missing per event goes into the data, not into this note. Maps: the JP files exist for all 120 pilot stages; compare their enemies and drops with the WW quests before serving.
 5. `eventCategory` 4 for High Score rows: confirm the tap opens the High Score mode with a stage row of `disableContinue` 1.
 6. Reward type 15 (Event Coins) stays paid into Raid Coins until the event boards exist.
