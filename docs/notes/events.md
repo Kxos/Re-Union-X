@@ -163,3 +163,32 @@ Checked on our master (`server/master_data`, 6 Nov 2026):
   out of its own generic reward rows. The import report is read from `D:\Progetto_Restauro_KH_UX\stage_gen\event_stages`
   (`KHUX_EVENT_MAPS` overrides it); without it no event quest is served.
 - If `stage_poi.json` is regenerated with `stage_poi.py`, the next master run puts the event keys back (make-events.js).
+
+## Bench of the pilot (Events Part 1, Task 7, 6 November 2026)
+
+Resources **106** (a full version: the 16 approved event enemy families are in the static `enemy_gen` pack, which `-Quick` never rebuilds),
+master **rev 277**, built with `KHUX_EVENT_ENEMIES=1`. The server log shows 106 valid tables (as before) and no `evStage` line.
+Master: +44 event enemy rows; 5 events and 49 quests served.
+Save `events1`: `maxpower` without the story clears above Q850 and without `gacha.rot`, so the first login gives the Shop week
+2019-04-04..04-10. Screenshots are in `D:\Progetto_Restauro_KH_UX\screenshots\`.
+
+- `events1_tab`, `events1_tab2`, `events1_tab3` (Events tab), in this order:
+  - Raid Catalog and Event Catalog: the new full-colour cards display correctly;
+  - the save's kept raid, then the weekly raid;
+  - Countdown, Daily Event and Dark-Winged Warrior, the three pilot events of the week.
+- `events1_details`, `events1_details2`: the Details of an event show «On this server» and the original notice.
+- `events1_quests`: the Dark-Winged Warrior quest list (Powerwild LV 100, AP 5, served quests only).
+- `events1_catalog`, `events1_catalog_event`, `events1_catalog_event2`: the Event Catalog, with its row states, «Not restored yet» rows and
+  «Not served yet» quests with their reasons.
+- `events1_special`: the Special Catalog card.
+- One real week later (`relogin -Save events1 -RealNow 2026-11-10T20:00:00Z`, Shop week 04-11..04-17):
+  - `events1_w2_catalog`: «Past event — can be kept»;
+  - `events1_keep`: Keep;
+  - `events1_kept`: the KEPT EVENT card in the tab.
+
+Open points:
+1. The quest list of an event shows the Raid Boards button (`eventType` 2 of `event_config.json`).
+2. The quest counter says «1/12» on an event with 9 served quests.
+3. The first Dark-Winged quest shows «Complete without having to continue» twice as an objective (to check against the original).
+4. The Details page says «the reasons are with the quests below», but the Details view has no quest table; the catalog page has one.
+5. The Story progress on the Quests menu reads 1% on `events1`.
