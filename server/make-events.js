@@ -20,8 +20,11 @@
 //   key, an Eggcognito target) is skipped with a reason: make-raid / make-special serve it;
 // - short windows (a donor evStage row under shortWindowHours) open for their whole original Pacific day: entry `days`, label wholeDay.
 // Ids come from server/event_ids.json (versioned, append-only, as raid_ids.json): rows {censusId: r}, entries
-// {"<censusId>/+<offset of its donor stage id from the lowest of the record>": n}; evStage = evStageBase + r, stage = stageBase + n. Every record read is numbered, whatever
-// the filter says; a key that disappears keeps its number; a repeated number stops the run.
+// {"<censusId>/+<offset of its donor stage id from the record's anchor>": n}, checks {censusId: {keys, hash}}; evStage = evStageBase + r,
+// stage = stageBase + n. The anchor (a donor stage id per record, frozen at its first numbering) lives in the private sidecar
+// event_anchors.json next to the records (KHUX_EVENT_SRC folder), never in the repo. Every record read is numbered, whatever the
+// filter says; a record that disappears keeps its numbers; a repeated number, a numbered record without anchor or a record whose
+// keys no longer cover its stored ones stops the run.
 // Output (own rows dropped first, the previous run's list is events.json `own`; anything else in our ranges stops the run):
 // stage, evStage; game_data/events.json {entries, reasons, own}; game_data/event_maps.json (stage list for gen_story_maps.py).
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
@@ -31,6 +34,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { evStageRow, storyRefs } = require('./make-raid');
 
 const STAGE_KIND = 2;
@@ -82,34 +86,58 @@ function checkNumbers(map, what, max) {
     seen.set(v, k);
   }
 }
-// Key of a quest in event_ids.json: its offset from the lowest donor stage id of the record («EV-0001/+3»), so the public file
-// holds no donor stage id (docs/notes/events.md: per-stage ids stay private); a quest with no donor stage id: «/w<position>».
-function questKey(rec, q) {
-  const has = (x) => Number.isInteger(x.stageId);
-  if (!has(q)) return `${rec.censusId}/w${(rec.quests || []).indexOf(q) + 1}`;
-  return `${rec.censusId}/+${q.stageId - Math.min(...(rec.quests || []).filter(has).map((x) => x.stageId))}`;
+// Key of a quest in event_ids.json: its offset from the record's ANCHOR, a donor stage id frozen on the record's first numbering
+// in the private sidecar event_anchors.json (next to the records, never in the repo): «EV-0001/+3», «/-2» for a quest below
+// the anchor. The public file holds no donor stage id (docs/notes/events.md: per-stage ids stay private), and a quest added or
+// removed later never shifts the other keys. A quest with no donor stage id: «/w<position>».
+const hasStage = (q) => Number.isInteger(q.stageId);
+function questKey(rec, q, anchor) {
+  if (!hasStage(q)) return `${rec.censusId}/w${(rec.quests || []).indexOf(q) + 1}`;
+  const d = q.stageId - anchor;
+  return `${rec.censusId}/${d < 0 ? '-' : '+'}${Math.abs(d)}`;
 }
-// Copy of ids with a number for every record and quest read (append-only).
-function allocateIds(records, ids, config) {
-  const out = { ...(ids || {}), rows: { ...((ids || {}).rows || {}) }, entries: { ...((ids || {}).entries || {}) } };
+// event_ids.json `checks`: per census row the number of keys and a hash of the sorted keys (offsets only, no donor id)
+const keysHash = (keys) => crypto.createHash('sha256').update([...keys].sort().join('\n')).digest('hex').slice(0, 12);
+// Copy of ids with a number for every record and quest read (append-only), and the anchors with the new records' added.
+// Stops when a numbered record has no anchor (sidecar lost: re-anchoring could hand old numbers to other quests) or when the
+// keys of a numbered record no longer include every stored key (anchor changed, or a quest gone from the record).
+function allocateIds(records, ids, config, anchors = {}) {
+  const out = { ...(ids || {}), rows: { ...((ids || {}).rows || {}) }, entries: { ...((ids || {}).entries || {}) }, checks: { ...((ids || {}).checks || {}) } };
+  const outAnchors = { ...(anchors || {}) };
   const maxRow = config.evStageMax - config.evStageBase, maxEntry = config.stageMax - config.stageBase;
   checkNumbers(out.rows, 'row', maxRow);
   checkNumbers(out.entries, 'entry', maxEntry);
   let nextRow = Math.max(0, ...Object.values(out.rows)) + 1, nextEntry = Math.max(0, ...Object.values(out.entries)) + 1;
   for (const rec of records) {
     if (!rec.censusId) throw new Error('events: a record has no censusId');
+    const prefix = `${rec.censusId}/`;
+    const stored = Object.keys(out.entries).filter((k) => k.startsWith(prefix));
+    const donorIds = (rec.quests || []).filter(hasStage).map((q) => q.stageId);
+    if (!(rec.censusId in outAnchors) && donorIds.length) {
+      if (stored.some((k) => !/\/w\d+$/.test(k))) {
+        throw new Error(`events: ${rec.censusId} has keys in event_ids.json but no anchor in event_anchors.json (the private sidecar next to the records `
+          + 'was lost or moved): restore it; re-anchoring would give old stage ids to other quests');
+      }
+      outAnchors[rec.censusId] = Math.min(...donorIds);
+    }
     if (!(rec.censusId in out.rows)) out.rows[rec.censusId] = nextRow++;
     const keys = new Set();
     for (const q of rec.quests || []) {
-      const key = questKey(rec, q);
+      const key = questKey(rec, q, outAnchors[rec.censusId]);
       if (keys.has(key)) throw new Error(`events: two quests give the key ${key}`);
       keys.add(key);
-      if (!(key in out.entries)) out.entries[key] = nextEntry++;
     }
+    const lost = stored.filter((k) => !keys.has(k));
+    if (lost.length) {
+      throw new Error(`events: ${rec.censusId}: the stored keys ${lost.slice(0, 5).join(', ')}${lost.length > 5 ? ' ...' : ''} are not given by the record any more `
+        + '(anchor in event_anchors.json changed, or a quest removed): check the sidecar and the record before numbering');
+    }
+    for (const key of keys) if (!(key in out.entries)) out.entries[key] = nextEntry++;
+    out.checks[rec.censusId] = { keys: keys.size, hash: keysHash(keys) };
   }
   checkNumbers(out.rows, 'row', maxRow);
   checkNumbers(out.entries, 'entry', maxEntry);
-  return out;
+  return { ids: out, anchors: outAnchors };
 }
 
 function checkRanges(master, config) {
@@ -148,9 +176,9 @@ function firstClearOf(q) {
 
 // records, config (event_config.json), master {stage, evStage, enemy} without our own rows, ids (event_ids.json)
 // -> {evStage, stage, maps, ids, index: {entries, reasons}}
-function buildEvents(records, config, master, ids) {
+function buildEvents(records, config, master, ids, anchors = {}) {
   checkRanges(master, config);
-  const allIds = allocateIds(records, ids, config);
+  const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
   const enemies = new Set((master.enemy || []).map((e) => e.enemyId));
   const refs = storyRefs(master.stage);
   if (!refs.story.length) throw new Error('events: no story rows in the stage table');
@@ -158,8 +186,9 @@ function buildEvents(records, config, master, ids) {
   const byMap = new Map();
   for (const s of master.stage || []) byMap.set(s.stageBinId || s.stageId, s);
   const only = Array.isArray(config.onlyCensusIds) ? new Set(config.onlyCensusIds) : null;
-  const out = { evStage: [], stage: [], maps: [], ids: allIds, index: { entries: [], reasons: {} } };
+  const out = { evStage: [], stage: [], maps: [], ids: allIds, anchors: allAnchors, index: { entries: [], reasons: {} } };
   const used = new Set();
+  const builtMaps = new Map(); // map key -> our stage id built on it in this run
 
   for (const rec of records) {
     if (only && !only.has(rec.censusId)) continue;
@@ -188,7 +217,7 @@ function buildEvents(records, config, master, ids) {
 
     let apMin = null;
     for (const q of rec.quests || []) {
-      const key = questKey(rec, q), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q);
+      const key = questKey(rec, q, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q);
       const qLabels = labelIds(q.label, config.labelPhrases);
       const item = { key, donorStageId: q.stageId, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
@@ -200,6 +229,8 @@ function buildEvents(records, config, master, ids) {
       if (missing.length) { item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
       const clash = byMap.get(mapKey);
       if (clash) { item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
+      if (builtMaps.has(mapKey)) { item.why = `map key ${mapKey} is the map of event stage ${builtMaps.get(mapKey)} too`; continue; }
+      builtMaps.set(mapKey, stageId);
 
       const r = q.restrictions || {}, d = q.drama || {};
       const ref = refs.of(q.worldId);
@@ -254,7 +285,8 @@ function readJson(p, dflt) {
   try { return JSON.parse(text); } catch (e) { throw new Error(`events: ${p} is corrupt: ${e.message}`); }
 }
 const IDS_FILE = path.join(__dirname, 'event_ids.json');
-const IDS_NOTE = 'Append-only: event ids live in saves and in the master. Numbers are written by make-events.js; a key that disappears stays, its number is never reused. rows: evStage = evStageBase + r. entries ("<censusId>/+<offset from the lowest donor stage id of the record>", no donor id): stage = stageBase + n (bases in event_config.json).';
+const IDS_NOTE = 'Append-only: event ids live in saves and in the master. Numbers are written by make-events.js; a key that disappears stays, its number is never reused. rows: evStage = evStageBase + r. entries ("<censusId>/+<offset from the anchor of the record>", no donor id; anchors in the private event_anchors.json next to the records): stage = stageBase + n (bases in event_config.json).';
+const ANCHORS_NAME = 'event_anchors.json';
 const readIds = (file) => readJson(file, { note: IDS_NOTE, rows: {}, entries: {} });
 function writeIds(file, ids) {
   const text = JSON.stringify({ note: IDS_NOTE, ...ids }, null, 1) + '\n';
@@ -265,7 +297,7 @@ function writeIds(file, ids) {
 const loadConfig = () => JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8'));
 
 // Appends the rows to the master tables and writes game_data/events.json and event_maps.json. Returns null (nothing written)
-// with KHUX_EVENTS=0 or without the records. opts: records, config, gameDataDir, idsFile (tests).
+// with KHUX_EVENTS=0 or without the records. opts: records, config, gameDataDir, idsFile, anchorsFile (tests).
 function patch(masterDir, opts = {}) {
   if (process.env.KHUX_EVENTS === '0') { console.log('events: off (KHUX_EVENTS=0)'); return null; }
   let records = opts.records;
@@ -284,13 +316,17 @@ function patch(masterDir, opts = {}) {
   };
   const master = { stage: load('stage'), evStage: load('evStage'), enemy: readJson(path.join(masterDir, 'enemy.json')) };
   const idsFile = opts.idsFile || IDS_FILE;
-  const out = buildEvents(records, opts.config || loadConfig(), master, readIds(idsFile));
+  // the anchors sidecar: next to the records (private), or opts.anchorsFile; records given in opts without a file: game_data
+  const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : path.join(path.dirname(process.env.KHUX_EVENT_SRC), ANCHORS_NAME));
+  const out = buildEvents(records, opts.config || loadConfig(), master, readIds(idsFile), readJson(anchorsFile, {}));
   const added = { stage: out.stage, evStage: out.evStage };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[keyOf[t]])]));
   fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, own }, null, 1));
   fs.writeFileSync(path.join(gameData, 'event_maps.json'), JSON.stringify(out.maps, null, 1));
+  // anchors first (only grow: allocateIds never changes one), so ids are never written with keys whose anchor is not saved
+  if (JSON.stringify(readJson(anchorsFile, {})) !== JSON.stringify(out.anchors)) fs.writeFileSync(anchorsFile, JSON.stringify(out.anchors, null, 1) + '\n');
   writeIds(idsFile, out.ids);
   const e = out.index.entries, qs = e.flatMap((x) => x.quests);
   console.log(`events: ${e.length} entries, ${e.filter((x) => x.available).length} with a served quest; ${qs.filter((q) => q.served).length} of ${qs.length} quests served, `

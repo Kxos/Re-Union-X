@@ -44,16 +44,19 @@ function records() {
     { disableContinue: 1, holdKeyblade: 0, noPartner: 1, hardmodeRequire: 10, hardmodeName: 'Only special attacks', hardmodeComparison: 3, hardmodeNum: 1 } })]),
   record('E-2', [quest(700010, 2, [502], { map: { key: 740260, stageBinId: 740260, status: 'ok' } })])];
 }
-const build = (recs = records(), ids, config = CONFIG, m = master()) => me.buildEvents(recs, config, m, ids);
+const build = (recs = records(), ids, config = CONFIG, m = master(), anchors) => me.buildEvents(recs, config, m, ids, anchors);
 const entry = (out, id) => out.index.entries.find((e) => e.censusId === id);
 
 const tests = {
   ids_stable() {
     const a = build();
-    const b = build(records(), a.ids);
+    const b = build(records(), a.ids, CONFIG, master(), a.anchors);
     assert.deepStrictEqual(b.ids, a.ids, 'same input, same ids');
-    // the versioned ids file holds no donor stage id (offsets from the record's lowest one)
+    // the versioned ids file holds no donor stage id (offsets from the record's anchor, kept apart)
     assert.deepStrictEqual(Object.keys(a.ids.entries), ['E-1/+0', 'E-1/+1', 'E-2/+0']);
+    assert.deepStrictEqual(a.anchors, { 'E-1': 700001, 'E-2': 700010 });
+    assert.ok(!JSON.stringify(a.ids).includes('7000'), 'no donor id in event_ids.json');
+    assert.strictEqual(a.ids.checks['E-1'].keys, 2);
     assert.deepStrictEqual(b.stage.map((s) => s.stageId), a.stage.map((s) => s.stageId));
     assert.deepStrictEqual(a.evStage.map((r) => r.eventStageId), [CONFIG.evStageBase + 1, CONFIG.evStageBase + 2]);
     assert.deepStrictEqual(a.stage.map((s) => s.stageId), [CONFIG.stageBase + 1, CONFIG.stageBase + 2, CONFIG.stageBase + 3]);
@@ -61,7 +64,7 @@ const tests = {
     const recs = records();
     recs.splice(0, 1);
     recs.push(record('E-3', [quest(700020, 1, [501])]));
-    const c = build(recs, a.ids);
+    const c = build(recs, a.ids, CONFIG, master(), a.anchors);
     assert.strictEqual(c.ids.rows['E-1'], a.ids.rows['E-1'], 'removed row keeps its number');
     assert.strictEqual(c.ids.rows['E-3'], 3);
     assert.strictEqual(entry(c, 'E-2').evStageId, CONFIG.evStageBase + 2);
@@ -69,6 +72,51 @@ const tests = {
     assert.deepStrictEqual(entry(c, 'E-3').stageIds, [CONFIG.stageBase + 4]);
     // a repeated number stops the run
     assert.throws(() => build(records(), { rows: { 'E-1': 1, 'E-2': 1 }, entries: {} }), /repeats/);
+  },
+  anchor_frozen() {
+    // a quest added below the lowest donor id (strided ids, as the real records): every old key keeps its number
+    const strided = () => [record('E-1', [quest(700010, 1, [501]), quest(700020, 1, [501]), quest(700030, 1, [501])])];
+    const a = build(strided());
+    const recs = strided();
+    recs[0].quests.unshift(quest(700000, 1, [501]));
+    const b = build(recs, a.ids, CONFIG, master(), a.anchors);
+    for (const [k, v] of Object.entries(a.ids.entries)) assert.strictEqual(b.ids.entries[k], v, k);
+    assert.strictEqual(b.ids.entries['E-1/-10'], 4);
+    assert.deepStrictEqual(b.anchors, a.anchors, 'anchor never moves');
+    assert.deepStrictEqual(entry(b, 'E-1').quests.map((q) => [q.donorStageId, q.stageId]),
+      [[700000, CONFIG.stageBase + 4], [700010, CONFIG.stageBase + 1], [700020, CONFIG.stageBase + 2], [700030, CONFIG.stageBase + 3]]);
+    // a quest gone from a numbered record (or a moved anchor) stops the run instead of renumbering
+    const gone = strided();
+    gone[0].quests.splice(1, 1);
+    assert.throws(() => build(gone, a.ids, CONFIG, master(), a.anchors), /not given by the record/);
+    assert.throws(() => build(strided(), a.ids, CONFIG, master(), { 'E-1': 700020 }), /not given by the record/);
+  },
+  anchor_lost_stops() {
+    const a = build();
+    assert.throws(() => build(records(), a.ids, CONFIG, master(), {}), /no anchor in event_anchors.json/);
+    assert.throws(() => build(records(), a.ids, CONFIG, master(), { 'E-1': 700001 }), /E-2 has keys/);
+    // patch keeps the sidecar apart from the ids file and reads it back
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-events-'));
+    const md = path.join(dir, 'master');
+    fs.mkdirSync(md);
+    for (const [t, rows] of Object.entries(master())) fs.writeFileSync(path.join(md, `${t}.json`), JSON.stringify(rows));
+    const opts = { records: records(), config: CONFIG, gameDataDir: path.join(dir, 'gd'), idsFile: path.join(dir, 'event_ids.json'), anchorsFile: path.join(dir, 'private', 'event_anchors.json') };
+    fs.mkdirSync(path.join(dir, 'private'));
+    me.patch(md, opts);
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(opts.anchorsFile, 'utf8')), { 'E-1': 700001, 'E-2': 700010 });
+    me.patch(md, opts);
+    fs.rmSync(opts.anchorsFile);
+    assert.throws(() => me.patch(md, opts), /no anchor/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
+  same_map_key_built_once() {
+    const recs = records();
+    recs[1].quests.push(quest(700011, 2, [502], { map: { key: 700001, stageBinId: 0, status: 'ok' } }));
+    const out = build(recs);
+    const q = entry(out, 'E-2').quests.find((x) => x.donorStageId === 700011);
+    assert.strictEqual(q.served, false);
+    assert.match(q.why, /map key 700001 is the map of event stage 4000001/);
+    assert.strictEqual(new Set(out.stage.map((s) => s.stageBinId)).size, out.stage.length);
   },
   evstage_row_fits_schema() {
     const many = Array.from({ length: 7 }, (_, i) => quest(710000 + i, 1, [501]));
@@ -132,7 +180,7 @@ const tests = {
     // the ids of a quest not served are kept: it is built under the same number when its enemy lands
     const m = master();
     m.enemy.push({ enemyId: 777 }, { enemyId: 888 }, { enemyId: 999 });
-    const later = build(recs, out.ids, CONFIG, m);
+    const later = build(recs, out.ids, CONFIG, m, out.anchors);
     assert.strictEqual(entry(later, 'E-1').quests.find((x) => x.donorStageId === 700002).stageId, q.stageId);
     assert.strictEqual(entry(later, 'E-2').available, true);
   },
