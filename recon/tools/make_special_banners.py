@@ -294,7 +294,7 @@ def tap_arrow(size=40):
     return L.resize((size, size), Image.LANCZOS)
 
 
-def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, strips=None):
+def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, strips=None, art_only=False):
     """640x140 RGBA of the catalogue banner (evStage 7000; the Raid Catalog's 8000 with its own title, subtitle and strips:
     raid_catalog_banner)"""
     im = Image.new('RGBA', (640, 140), (24, 30, 70, 255))
@@ -340,10 +340,18 @@ def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, 
             if fig is not None:
                 fig = fig.resize((max(1, int(fig.width * h / fig.height)), h), Image.LANCZOS)
                 im.alpha_composite(fig, (x, yb - h))
+    if art_only:   # catalogue options: the art and the tap mark, title / sticker / frame by family_finish
+        return _tap_mark(im)
     gold_text(im, (20, 50), title, make_shop_art.font(40))
     ImageDraw.Draw(im).text((22, 104), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=(20, 16, 40, 255))
     im.alpha_composite(sticker(w=108, h=42), (414, -4))
+    im = _tap_mark(im)
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(236, 196, 84, 255), width=3)   # square corners like the original cards (user 04-11)
+    return im
+
+
+def _tap_mark(im):
     rp = Image.new('RGBA', (640, 140), (0, 0, 0, 0))
     dr = ImageDraw.Draw(rp)
     tx, ty = 572, 98                     # the tap: ripple on the Large Body's belly, arrow coming from the top right
@@ -351,7 +359,6 @@ def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, 
         dr.ellipse((tx - r, ty - r * .7, tx + r, ty + r * .7), outline=(255, 255, 255, a), width=2)
     im = Image.alpha_composite(im, rp)
     im.alpha_composite(tap_arrow(44), (tx + 3, ty - 47))
-    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=(236, 196, 84, 255), width=3)   # square corners like the original cards (user 04-11)
     return im
 
 
@@ -499,7 +506,7 @@ def raid_cards(raid_img, skip=()):
     return [os.path.join(raid_img, '%d.png' % i) for i in ids]
 
 
-def raid_catalog_banner(rigs=None, bosses=None, title=RAID_CATALOG_TITLE, sub=RAID_CATALOG_SUB):
+def raid_catalog_banner(rigs=None, bosses=None, title=RAID_CATALOG_TITLE, sub=RAID_CATALOG_SUB, art_only=False):
     """640x140 RGBA of the Raid Catalog banner (evStage 8000; redesigned 06-11 on the user's request: red, the raid bosses):
     a red background with light rays (the red of the original raid banners), a group of original raid bosses on the right
     (their wait pose drawn from the local raid rigs, RAID_BOSSES; one missing -> left out with a WARNING), the large gold
@@ -544,6 +551,9 @@ def raid_catalog_banner(rigs=None, bosses=None, title=RAID_CATALOG_TITLE, sub=RA
         shadow.putalpha(a)
         im = Image.alpha_composite(im, shadow)
         im = Image.alpha_composite(im, sh)
+    if art_only:
+        im.info['bosses'] = figs
+        return im
     gold_text(im, (20, 50), title, title_font(44), outline=6)
     ImageDraw.Draw(im).text((22, 106), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=(50, 4, 8, 255))
@@ -601,7 +611,7 @@ def game_image(p):
     return Image.open(p).convert('RGBA')
 
 
-def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG_SUB):
+def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG_SUB, art_only=False, dx=0):
     """640x140 RGBA of the Event Catalog banner (evStage 20000; user 06-11: cyan/green, clearly apart from the Raid Catalog,
     then «more beautiful»): a cyan -> green background with light rays and soft bokeh as the original event banners, the
     game's Event Coin three times (a large one in front of two tilted ones) on a glow with sparkles, the large title with
@@ -614,7 +624,7 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
     im.paste(kept.vgrad((W, H), EVENT_TOP, EVENT_BOT, 0, H), (0, 0))
     rays = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(rays)
-    cx, cy = 74 * S, 70 * S
+    cx, cy = (74 + dx) * S, 70 * S
     for k in range(16):
         a0 = math.pi * 2 * k / 16
         a1 = a0 + math.pi / 26
@@ -633,7 +643,7 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
     ImageDraw.Draw(band).polygon([(250, 0), (330, 0), (230, 140), (150, 140)], fill=(255, 255, 255, 26))
     im = Image.alpha_composite(im, band.filter(ImageFilter.GaussianBlur(6)))
     glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(glow).ellipse((4, 4, 150, 136), fill=(255, 255, 230, 170))
+    ImageDraw.Draw(glow).ellipse((4 + dx, 4, 150 + dx, 136), fill=(255, 255, 230, 170))
     im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(14)))
     if coin and os.path.exists(coin):
         c = game_image(coin)
@@ -643,7 +653,7 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
                 ci = Image.alpha_composite(ci, Image.composite(Image.new('RGBA', ci.size, (0, 60, 60, int(255 * shade))),
                                                                Image.new('RGBA', ci.size, (0, 0, 0, 0)), ci.getchannel('A')))
             sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-            sh.alpha_composite(ci, (x, y))
+            sh.alpha_composite(ci, (x + dx, y))
             a = sh.getchannel('A').filter(ImageFilter.GaussianBlur(3)).point(lambda v: v * 110 // 255)
             shadow = Image.new('RGBA', (W, H), (0, 40, 40, 0))
             shadow.putalpha(a)
@@ -657,6 +667,8 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
         ds.polygon([(x, y - r * 3), (x + r, y), (x, y + r * 3), (x - r, y)], fill=(255, 255, 255, 230))
         ds.polygon([(x - r * 3, y), (x, y - r), (x + r * 3, y), (x, y + r)], fill=(255, 255, 255, 230))
     im = Image.alpha_composite(im, sp)
+    if art_only:
+        return im
     # title: drop shadow, white outer rim, dark teal outline, white -> pale cyan fill
     f = title_font(46)
     tx, ty = 150, 54
@@ -726,6 +738,278 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
     return n
 
 
+# ---- Catalogue card options (user 06-11: every catalogue card with the gold frame and the gold title, each design
+# different; options A/B/C per catalogue, chosen later with --catalog-style; nothing here changes a served card) ----
+FAMILY_GOLD = (236, 196, 84, 255)
+STICKER_XY, STICKER_WH = (548, 0), (86, 32)
+TITLE_MAX_RIGHT = STICKER_XY[0] - 12       # the title never runs under the TRAINING sticker
+MEDALS = os.path.join(ROOT, 'medal_gen', 'files', 'img', 'medal')
+
+
+def jp_img(*parts):
+    """a file of the local JP 4.3.1 img/ folder (private_tools jp_data), None without the local data"""
+    try:
+        import private_tools
+        return private_tools.local_path('jp_data', 'img', *parts)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def art(path, size, what):
+    """an original image of the game data fitted in a size x size box, None (WARNING) when it is not there"""
+    if not path or not os.path.exists(path):
+        warn('%s left out of a catalogue option: %s not found' % (what, path))
+        return None
+    im = game_image(path)
+    im.thumbnail((size, size), Image.LANCZOS)
+    return im
+
+
+def tinted(im, rgba):
+    """im with a flat colour laid over its own shape (silhouettes, back-row shading)"""
+    return Image.alpha_composite(im, Image.composite(Image.new('RGBA', im.size, rgba), Image.new('RGBA', im.size, (0, 0, 0, 0)), im.getchannel('A')))
+
+
+def paste_shadowed(im, piece, xy, blur=3, alpha=110, colour=(0, 0, 0)):
+    lay = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    lay.alpha_composite(piece, (int(xy[0]), int(xy[1])))
+    sh = Image.new('RGBA', im.size, colour + (0,))
+    sh.putalpha(lay.getchannel('A').filter(ImageFilter.GaussianBlur(blur)).point(lambda v: v * alpha // 255))
+    return Image.alpha_composite(Image.alpha_composite(im, sh), lay)
+
+
+def background(top, bot, ray=None, centre=(480, 70), n=16, ray_alpha=30):
+    im = Image.new('RGBA', (640, 140))
+    im.paste(kept.vgrad((640, 140), top, bot, 0, 140), (0, 0))
+    if ray:
+        L = Image.new('RGBA', (640 * S, 140 * S), (0, 0, 0, 0))
+        d = ImageDraw.Draw(L)
+        cx, cy = centre[0] * S, centre[1] * S
+        for k in range(n):
+            a0 = math.pi * 2 * k / n
+            a1 = a0 + math.pi / (2 * n)
+            d.polygon([(cx, cy), (cx + math.cos(a0) * 4000, cy + math.sin(a0) * 4000), (cx + math.cos(a1) * 4000, cy + math.sin(a1) * 4000)],
+                      fill=tuple(ray) + (ray_alpha,))
+        im = Image.alpha_composite(im, L.resize((640, 140), Image.LANCZOS))
+    return im
+
+
+def left_shade(im, rgb, strength=150, width=380):
+    dark = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    dd = ImageDraw.Draw(dark)
+    for x in range(im.width):
+        dd.line((x, 0, x, im.height - 1), fill=tuple(rgb) + (max(0, int(strength - strength * x / width)),))
+    return Image.alpha_composite(im, dark)
+
+
+def family_finish(im, title, sub, ink):
+    """the common part of every catalogue card: gold title (the old Raid Catalog lettering) as large as fits left of the
+    TRAINING sticker, the white subtitle, the sticker in the top right corner and the square gold frame.
+    im.info['title_box'] = the title's box (tests: never under the sticker)"""
+    im = im.copy()
+    px = 46
+    while px > 28 and 20 + ImageDraw.Draw(im).textlength(title, font=title_font(px)) + 6 > TITLE_MAX_RIGHT:
+        px -= 1
+    f = title_font(px)
+    m = Image.new('L', im.size, 0)
+    ImageDraw.Draw(m).text((20, 52), title, font=f, anchor='lm', fill=255, stroke_width=6, stroke_fill=255)
+    gold_text(im, (20, 52), title, f, outline=6)
+    ImageDraw.Draw(im).text((22, 108), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
+                            stroke_width=3, stroke_fill=tuple(ink) + (255,))
+    im.alpha_composite(sticker(w=STICKER_WH[0], h=STICKER_WH[1], angle=-6), STICKER_XY)
+    ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=FAMILY_GOLD, width=3)
+    im.info['title_box'] = m.getbbox()
+    return im
+
+
+# Special Catalog
+def special_option(style, src=None, enemies=None):
+    if style == 'A':   # the current design (strips of original Special banners, Training Grounds figures) in the family
+        art_im = catalog_banner(src or os.path.join(ROOT, 'reference', 'special_banners'), enemies or ENEMIES, art_only=True)
+        return family_finish(art_im, CATALOG_TITLE, CATALOG_SUB, (20, 16, 40))
+    if style == 'B':   # violet, the elemental orbs of the Special quests around a Moogle medal
+        im = background((150, 70, 200), (46, 12, 86), ray=(230, 200, 255), centre=(520, 70))
+        glow = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        ImageDraw.Draw(glow).ellipse((440, 0, 600, 140), fill=(255, 230, 255, 140))
+        im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(18)))
+        for i, mid in enumerate((47, 50, 51, 52, 53, 54, 55, 49, 48)):
+            a = math.pi * (0.75 + 1.5 * i / 8)
+            o = art(jp_img('material', 'material_%d.png' % mid), 34, 'orb material_%d' % mid)
+            if o is not None:
+                im = paste_shadowed(im, o, (520 + math.cos(a) * 84 - 17, 70 + math.sin(a) * 52 - 17), alpha=90)
+        med = art(os.path.join(MEDALS, 'Medal_L_90016.png'), 112, 'Moogle medal')
+        if med is not None:
+            im = paste_shadowed(im, med, (520 - med.width / 2, 72 - med.height / 2))
+        return family_finish(left_shade(im, (30, 0, 50)), CATALOG_TITLE, CATALOG_SUB, (40, 10, 60))
+    if style == 'C':   # warm gold-orange, a fan of the medals the Special quests give (Moogle, Huey, Dewey, Louie)
+        im = background((250, 176, 60), (170, 70, 10), ray=(255, 240, 200), centre=(520, 150), n=20, ray_alpha=40)
+        ids = (90011, 90021, 90031, 90041, 90016)
+        for i, mid in enumerate(ids):
+            med = art(os.path.join(MEDALS, 'Medal_L_%d.png' % mid), 80, 'medal %d' % mid)
+            if med is None:
+                continue
+            ang = 24 - 12 * i
+            med = med.rotate(ang, Image.BICUBIC, expand=True)
+            im = paste_shadowed(im, med, (458 + 40 * i - med.width / 2, 88 - med.height / 2 + abs(i - 2) * 7), alpha=120)
+        return family_finish(left_shade(im, (90, 30, 0)), CATALOG_TITLE, CATALOG_SUB, (80, 30, 0))
+    raise ValueError('special style %r' % style)
+
+
+# Raid Catalog
+RAID_PORTRAITS = ['0004', '0013', '1005', '1009']
+
+
+def raid_option(style, rigs=None):
+    rigs = rigs or RAID_RIGS
+    if style == 'A':   # the current red design: rays and a group of raid bosses
+        return family_finish(raid_catalog_banner(rigs, art_only=True), RAID_CATALOG_TITLE, RAID_CATALOG_SUB, (50, 4, 8))
+    if style == 'B':   # black -> dark red, raid board cells, one large boss as a silhouette with a red rim
+        im = background((70, 6, 12), (10, 0, 4))
+        cell_r = art(jp_img('sphere_board', 'Board_0102.png'), 30, 'board cell')
+        cell_g = art(jp_img('sphere_board', 'Board_0002.png'), 30, 'board cell')
+        lay = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        for r in range(5):
+            for c in range(12):
+                cell = cell_g if (r * 3 + c) % 7 == 0 else cell_r
+                if cell is not None:
+                    lay.alpha_composite(cell, (290 + c * 30 + (r % 2) * 15, -6 + r * 30))
+        fade = Image.new('L', im.size, 0)
+        fd = ImageDraw.Draw(fade)
+        for x in range(640):
+            fd.line((x, 0, x, 139), fill=max(0, min(110, int((x - 280) * 0.6))))
+        lay.putalpha(ImageChops.multiply(lay.getchannel('A'), fade))
+        im = Image.alpha_composite(im, lay)
+        f = enemy_figure('0013', rigs, frame=10, size=1600)
+        if f is None:
+            warn('raid boss 0013 left out of Raid option B')
+        else:
+            f = f.resize((int(f.width * 170 / f.height), 170), Image.LANCZOS)
+            sil = tinted(f, (12, 0, 4, 255))
+            rim = Image.new('RGBA', im.size, (0, 0, 0, 0))
+            rim.alpha_composite(f, (int(520 - f.width / 2), 150 - 170))
+            glow = Image.new('RGBA', im.size, (255, 40, 30, 0))
+            glow.putalpha(rim.getchannel('A').filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.GaussianBlur(5)))
+            im = Image.alpha_composite(im, glow)
+            im.alpha_composite(sil, (int(520 - f.width / 2), 150 - 170))
+            # the boss's eyes / heart: the lit original pieces over the silhouette, faint
+            lit = rim.copy()
+            lit.putalpha(rim.getchannel('A').point(lambda v: v * 50 // 255))
+            im = Image.alpha_composite(im, lit)
+        return family_finish(left_shade(im, (0, 0, 0), 120), RAID_CATALOG_TITLE, RAID_CATALOG_SUB, (50, 4, 8))
+    if style == 'C':   # crimson with rays, the raid bosses as round portraits in gold rings
+        im = background((196, 20, 46), (96, 0, 24), ray=(255, 200, 200), centre=(500, 92), ray_alpha=28)
+        for i, mid in enumerate(RAID_PORTRAITS):
+            f = enemy_figure(mid, rigs, frame=10, size=1600)
+            if f is None:
+                warn('raid boss %s left out of Raid option C' % mid)
+                continue
+            side = min(f.width, int(f.height * .72))
+            crop = f.crop(((f.width - side) // 2, 0, (f.width - side) // 2 + side, side)).resize((60, 60), Image.LANCZOS)
+            disc = Image.new('RGBA', (60, 60), (60, 0, 14, 255))
+            disc.alpha_composite(crop)
+            mask = Image.new('L', (60 * S, 60 * S), 0)
+            ImageDraw.Draw(mask).ellipse((0, 0, 60 * S - 1, 60 * S - 1), fill=255)
+            disc.putalpha(mask.resize((60, 60), Image.LANCZOS))
+            ring = Image.new('RGBA', (68 * S, 68 * S), (0, 0, 0, 0))
+            ImageDraw.Draw(ring).ellipse((0, 0, 68 * S - 1, 68 * S - 1), fill=(150, 96, 10, 255))
+            ImageDraw.Draw(ring).ellipse((2 * S, 2 * S, 66 * S - 1, 66 * S - 1), fill=(244, 206, 96, 255))
+            ring = ring.resize((68, 68), Image.LANCZOS)
+            ring.alpha_composite(disc, (4, 4))
+            im = paste_shadowed(im, ring, (438 + 54 * i - 34, 90 - 34 + (8 if i % 2 else 0)), alpha=140)
+        return family_finish(left_shade(im, (60, 0, 10), 120), RAID_CATALOG_TITLE, RAID_CATALOG_SUB, (60, 0, 12))
+    raise ValueError('raid style %r' % style)
+
+
+# Event Catalog
+def event_option(style, coin=None):
+    coin = coin or event_coin_path()
+    if style == 'A':   # the current cyan / green design (rays, bokeh, three Event Coins)
+        return family_finish(event_catalog_banner(coin, art_only=True, dx=432), EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, (8, 70, 72))
+    if style == 'B':   # deep teal, a rain of Event Coins (near ones sharp, far ones small and soft)
+        import random
+        rnd = random.Random(7)
+        im = background((30, 150, 160), (6, 64, 84), ray=(200, 255, 250), centre=(500, -20), ray_alpha=24)
+        c0 = art(coin, 86, 'Event Coin')
+        if c0 is not None:
+            for _ in range(34):
+                size = rnd.choice((16, 20, 24, 30, 38, 48, 58))
+                x, y = (rnd.randint(300, 620), rnd.randint(-20, 130)) if size < 30 else (rnd.randint(430, 600), rnd.randint(-10, 110))
+                ci = c0.resize((size, size), Image.LANCZOS).rotate(rnd.randint(-40, 40), Image.BICUBIC, expand=True)
+                if size < 30:
+                    ci = ci.filter(ImageFilter.GaussianBlur(1.2))
+                    ci.putalpha(ci.getchannel('A').point(lambda v: v * 150 // 255))
+                im = paste_shadowed(im, ci, (x, y), alpha=70 if size >= 30 else 0)
+        return family_finish(left_shade(im, (0, 30, 40), 150), EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, (0, 50, 60))
+    if style == 'C':   # green -> blue with a ribbon across and a calendar page with the Event Coin on one day
+        im = background((70, 200, 150), (30, 100, 180), ray=(255, 255, 255), centre=(540, 70), ray_alpha=22)
+        rib = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        dr = ImageDraw.Draw(rib)
+        dr.polygon([(250, 140), (640, 34), (640, 76), (300, 140)], fill=(255, 255, 255, 60))
+        im = Image.alpha_composite(im, rib)
+        page = Image.new('RGBA', (124 * S, 112 * S), (0, 0, 0, 0))
+        dp = ImageDraw.Draw(page)
+        dp.rounded_rectangle((0, 6 * S, 124 * S - 1, 112 * S - 1), 8 * S, fill=(255, 255, 255, 255))
+        dp.rounded_rectangle((0, 6 * S, 124 * S - 1, 30 * S), 8 * S, fill=(20, 120, 120, 255))
+        dp.rectangle((0, 22 * S, 124 * S - 1, 30 * S), fill=(20, 120, 120, 255))
+        for x in (30, 94):
+            dp.ellipse(((x - 5) * S, 0, (x + 5) * S, 14 * S), fill=(200, 210, 210, 255), outline=(90, 110, 110, 255), width=S)
+        for r in range(3):
+            for c in range(5):
+                x0, y0 = (8 + c * 22) * S, (38 + r * 23) * S
+                dp.rounded_rectangle((x0, y0, x0 + 19 * S, y0 + 19 * S), 3 * S, fill=(214, 240, 236, 255))
+        page = page.resize((124, 112), Image.LANCZOS).rotate(-6, Image.BICUBIC, expand=True)
+        im = paste_shadowed(im, page, (452, 16), alpha=120)
+        c0 = art(coin, 64, 'Event Coin')
+        if c0 is not None:
+            im = paste_shadowed(im, c0, (560, 72), alpha=120)
+            im = paste_shadowed(im, c0.resize((22, 22), Image.LANCZOS), (509, 82), blur=1, alpha=60)
+        return family_finish(left_shade(im, (0, 50, 60), 140), EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, (0, 60, 70))
+    raise ValueError('event style %r' % style)
+
+
+CATALOG_OPTIONS = {'special': special_option, 'raid': raid_option, 'event': event_option}
+
+
+def parse_styles(text):
+    """'special=A,raid=B' -> {'special': 'A', 'raid': 'B'} (styles A, B, C)"""
+    out = {}
+    for part in filter(None, (text or '').split(',')):
+        k, _, v = part.partition('=')
+        if k not in CATALOG_OPTIONS or v not in ('A', 'B', 'C'):
+            raise ValueError('catalog style %r: use special|raid|event=A|B|C' % part)
+        out[k] = v
+    return out
+
+
+def options_sheets(out_dir, combo=(('special', 'B'), ('raid', 'A'), ('event', 'A'))):
+    """catalog_options.png (rows Special A/B/C, Raid A/B/C, Event A/B/C at real size) and catalog_family.png (one
+    combination as the cards follow each other in the Events / Special tab) in out_dir; returns the two paths"""
+    from PIL import ImageFont
+    os.makedirs(out_dir, exist_ok=True)
+    try:
+        f = ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf', 16)
+    except OSError:
+        f = ImageFont.load_default()
+    rows = [(k, s) for k in ('special', 'raid', 'event') for s in 'ABC']
+    sheet = Image.new('RGB', (660, len(rows) * 168 + 10), (36, 36, 44))
+    d = ImageDraw.Draw(sheet)
+    cards = {}
+    for i, (k, s) in enumerate(rows):
+        cards[(k, s)] = CATALOG_OPTIONS[k](s)
+        d.text((10, 10 + i * 168), '%s %s' % (k.capitalize(), s), font=f, fill=(255, 255, 255))
+        sheet.paste(cards[(k, s)].convert('RGB'), (10, 32 + i * 168))
+    p1 = os.path.join(out_dir, 'catalog_options.png')
+    sheet.save(p1)
+    fam = Image.new('RGB', (680, 3 * 152 + 50), (22, 30, 58))
+    d = ImageDraw.Draw(fam)
+    d.text((20, 14), 'family: ' + ', '.join('%s %s' % (k.capitalize(), s) for k, s in combo), font=f, fill=(255, 255, 255))
+    for i, ks in enumerate(combo):
+        fam.paste(cards[ks].convert('RGB'), (20, 44 + i * 152))
+    p2 = os.path.join(out_dir, 'catalog_family.png')
+    fam.save(p2)
+    return p1, p2
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -752,7 +1036,23 @@ def main():
     ap.add_argument('--event-coin', help='Event Coin icon of the Event Catalog banner (default: local JP data img/incentive/IncentiveIcon_15.png)')
     ap.add_argument('--event-img', default=os.path.join(REPO, 'server', 'game_data', 'event_img'),
                     help='the event cards of make_event_banners.py (run it first); output goes here too')
+    ap.add_argument('--catalog-style', help='build only these catalogue cards in the chosen option, e.g. special=B,raid=A,event=C '
+                    '(Catalog options: A/B/C each; 7000 in --out, 8000 in --raid-img, 20000 in --event-img)')
+    ap.add_argument('--options-sheet', help='write catalog_options.png and catalog_family.png (all options) in this folder, nothing else')
     a = ap.parse_args()
+    if a.options_sheet:
+        print('catalog options: %s, %s' % options_sheets(a.options_sheet))
+        return
+    if a.catalog_style:
+        targets = {'special': os.path.join(a.out, '%d.png' % 7000), 'raid': os.path.join(a.raid_img, '%d.png' % RAID_CATALOG_EV)}
+        with open(a.event_config, encoding='utf-8') as f:
+            targets['event'] = os.path.join(a.event_img, '%d.png' % json.load(f)['catalogEvStage'])
+        for k, st in parse_styles(a.catalog_style).items():
+            im = special_option(st, a.src, a.enemies) if k == 'special' else raid_option(st, a.raid_rigs) if k == 'raid' else event_option(st, a.event_coin)
+            os.makedirs(os.path.dirname(targets[k]), exist_ok=True)
+            mbi.save_png(im, targets[k], a.mode)
+            print('catalog %s: option %s -> %s (bump its image version, then the master revision)' % (k, st, targets[k]))
+        return
     if a.section == 'event':
         with open(a.event_index, encoding='utf-8') as f:
             eix = json.load(f)
