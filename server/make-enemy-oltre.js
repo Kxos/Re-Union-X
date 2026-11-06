@@ -432,7 +432,8 @@ function addRows(enemies, src) {
   let events = null;
   if (s.events) {
     const ev = require('./make-event-enemies');
-    events = ev.addRows(enemies, s.events, s.drawn);
+    ev.writeIdList(s.events); // ids for the name lookups of the other generators (Python too)
+    events = ev.addRows(enemies, s.events, s.drawn); // switch KHUX_EVENT_ENEMIES, default off: strip only
     console.log(ev.summary(events));
   }
   console.log(`enemy-oltre: +${res.rows.length} righe (${res.cloned} cloni esatti, ${res.family} cloni di famiglia, `

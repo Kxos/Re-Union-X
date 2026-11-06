@@ -353,6 +353,9 @@ u32 = lambda b, o: struct.unpack_from('<i', b, o)[0]  # noqa: E731
 TX = u32(tmpl, 0x24)
 ARENA = bytes(tmpl[TX + 0x3c:TX + 0x3c + 0x44])
 enemies = json.load(open(CFG['enemies'], encoding='utf-8'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import event_enemy_ids  # noqa: E402  (event quest rows never answer a name lookup, Task 2b)
+enemies = event_enemy_ids.without_event_rows(enemies)
 SHADOW = min(e['enemyId'] for e in enemies if e['name'].lower() == 'shadow' and 10000 <= e['enemyId'] < 20000)
 
 

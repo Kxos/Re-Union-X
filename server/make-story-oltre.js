@@ -195,14 +195,23 @@ function objectiveReward(o, ctx, titleIdx, slot) {
   }
 }
 
+// enemy by name: base id (the smallest), as the original rows («Defeat %s x %d» id 93, 109), then the names learned
+// from the JP stages (oltre525.json learned_enemy_names: JP-only ids, enemy rows of Task 2). Event quest rows
+// (make-event-enemies.js, Task 2b) never answer: «Defeat Ferocious Fins» keeps 11511/11512, not the event row 1512
+function storyEnemyId(enemies, name, learned = {}, eventIds = require('./make-event-enemies').eventIds()) {
+  const n = name.trim().toLowerCase();
+  const ids = (enemies || []).filter((e) => String(e.name).toLowerCase() === n && !eventIds.has(e.enemyId)).map((e) => e.enemyId);
+  const jp = Object.entries(learned || {}).filter(([, v]) => String(v).toLowerCase() === n).map(([k]) => Number(k));
+  return (ids.length ? ids : jp).sort((a, b) => a - b)[0] || 0;
+}
+
 function buildRows(stageRows, sources) {
   const { stage113 = [], wiki = {}, wikiRaw = {}, oltre = { missions: [] }, theater = [], dramas = null,
     enemies = null, titles = [], medals = [], keyblades = [], skills = [], thumbs = null, stagePoi = null, headers = null, bgm = {} } = sources;
   const report = { stopgapObjectives: [], missingRewards: [], enemiesToShadow: 0, droppedDramas: [], overflow: [], wikiObjectives: [],
     branchObjectives: [] };
   const knownEnemies = enemies ? new Set(enemies.map((e) => e.enemyId)) : null;
-  const eventSrc = sources.eventEnemies === undefined ? require('./make-event-enemies').readEventEnemies() : sources.eventEnemies;
-  const eventIds = new Set(eventSrc ? Object.keys(eventSrc.enemies).map(Number) : []);
+  const eventIds = sources.eventIds || require('./make-event-enemies').eventIds();
   const byName = (rows, key, name) => rows.filter((r) => r[key] === name);
   const ctxBase = {
     titleId: (name) => (byName(titles, 'title', name)[0] || {}).titleId || 0,
@@ -216,14 +225,7 @@ function buildRows(stageRows, sources) {
     },
     // nemico per nome: id base (il piu' piccolo) come le righe originali («Defeat %s x %d» id 93, 109)
     // poi i nomi imparati dagli stage JP (oltre525.json learned_enemy_names: id solo JP, righe enemy del Task 2)
-    enemyId: (name) => {
-      const n = name.trim().toLowerCase();
-      // event quest rows (make-event-enemies.js, Task 2b) are never a story objective's enemy: «Defeat Ferocious Fins»
-      // must keep 11511/11512, not the event row 1512
-      const ids = (enemies || []).filter((e) => String(e.name).toLowerCase() === n && !eventIds.has(e.enemyId)).map((e) => e.enemyId);
-      const jp = Object.entries(oltre.learned_enemy_names || {}).filter(([, v]) => String(v).toLowerCase() === n).map(([k]) => Number(k));
-      return (ids.length ? ids : jp).sort((a, b) => a - b)[0] || 0;
-    },
+    enemyId: (name) => storyEnemyId(enemies, name, oltre.learned_enemy_names, eventIds),
   };
   const wikiByNum = new Map(Object.values(wiki).filter((q) => /^Quest \d+:/.test(q.title || '')).map((q) => [num(q.number), q]));
   const missionByNum = new Map((oltre.missions || []).map((m) => [m.q, m]));
@@ -542,4 +544,4 @@ function patch(masterDir, src) {
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
 module.exports = { ROOM_WORLD, WIKI_WORLD, WORLD_THUMB, WORLD_BGM, NEW_WORLDS, thumbForRoom, readThumbs, buildWorldRows, buildRows, objectiveCodes, objectiveReward, wikiLv, readDramas, defaultSources, patch,
-  countStopgaps, Q555_VARIANTS, TROPHY_BY_IMG, readHeaders };
+  countStopgaps, Q555_VARIANTS, TROPHY_BY_IMG, readHeaders, storyEnemyId };

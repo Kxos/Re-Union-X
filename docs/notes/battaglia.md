@@ -610,17 +610,28 @@ look-alike, confidence, quests, evidence), read by both generators:
 Author's rule (6 Nov): an enemy we lack must be found, never replaced; a quest whose enemy is missing is not served.
 For the April 2019 pilot 65 enemy ids (54 names) were missing from our master.
 
-- **Rows and attacks**: `server/make-event-enemies.js`, from a private file outside the repo (`KHUX_EVENT_ENEMIES`,
-  default `private\events\enemies\event_enemies.json`, rows of the donated WW tables). Called by `make-enemy-oltre.js addRows`
-  (so by every `make-game-tables.js` run): a row is added only when its model was found, approved by the user and drawn by the
-  installed resources. Previous event rows go away before the story clones are computed (an event 11537 must never become the
-  5-digit base of story 180911537); name lookups of `make-story-oltre.js` and `make-special.js` ignore them («Defeat Ferocious
-  Fins» keeps 11511/11512). `enemy-attack-fix.js readOrig` adds the event attack rows (a thethiny row wins on the same id).
-  `node server/make-event-enemies.js --report` shows what a regeneration adds; test `server/test-make-event-enemies.js`.
+- **Gate, exactly**: (1) global switch `KHUX_EVENT_ENEMIES` (controller ruling 6 Nov), **default off**: no event enemy row
+  and no event attack row of any kind enters the master; the Task 7 bench turns it on (`KHUX_EVENT_ENEMIES=1` for the
+  `make-game-tables.js` run). (2) With the switch on, a row is added only when its model was found (model != missing), it
+  is `approved` (rows whose displayId we already serve are approved; a new model only after the user saw its rendered
+  animations) and its displayId is drawn by the installed resources. Previous event rows are stripped in every case.
+- **Rows and attacks**: `server/make-event-enemies.js`, from a private file outside the repo (`KHUX_EVENT_ENEMIES_FILE`,
+  default `private\events\enemies\event_enemies.json`, rows of the donated WW tables), called by `make-enemy-oltre.js
+  addRows`. Event rows are stripped before the story clones are computed (an event 11537 must never become the 5-digit base
+  of story 180911537). `enemy-attack-fix.js readOrig` adds the event attack rows only with the switch on (a thethiny row
+  wins on the same id). `node server/make-event-enemies.js --report` shows the switch and what it would add.
+- **Name lookups never answer with an event row**: `eventIds()` / `withoutEventRows()` (ids of the private file, else
+  `server/game_data/event_enemy_ids.json`, written by `make-enemy-oltre.js`; Python `recon/tools/event_enemy_ids.py`),
+  used by `make-story-oltre.js storyEnemyId`, `make-special.js lookups` and training templates, `make-proud.js
+  proudEnemyId`, `gen_story_maps.py`, `gen_tours_v2.py` (e.g. «Werewolf» target stays 1612011505, «Ferocious Fins»
+  stays 11511/11512). Tests `server/test-make-event-enemies.js`, `recon/tools/test_event_enemy_ids.py`.
 - **Models**: `recon/tools/event_enemy_families.json` (displayId, model new/missing, approved). `make_jp_enemies.py` builds
-  only the approved ones (`--event-all` for renders and `deep_donors.py`). New copy rows, all category 2: `extra_donors_deep.tsv`
-  (+407, deep_donors `--fams`), `extra_donors_dedup.tsv` (+972, same record of the 2018 WW container name index),
-  `extra_donors_whole.tsv` (+4 whole `dead`: 226, 1530 = enemy/1 smoke, 1522 = 1529, 1566 = 1565).
+  only the approved ones (`--event-all` for renders and `deep_donors.py`). New copy rows, all category 2, labelled
+  **«Events Task 2b, pending user review»** (never «user-approved» until the user approves): `extra_donors_deep.tsv` +407
+  (deep_donors `--fams`), `extra_donors_dedup.tsv` +973 (same record of the 2018 WW container name index; families in
+  `extra_donors_dedup_pending.txt`, not in the approved allow-list), `extra_donors_whole.tsv` +4 whole `dead` (226, 1530 =
+  enemy/1 generic smoke, 1522 = 1529, 1566 = 1565). On approval: the family moves from the pending list to
+  `extra_donors_dedup_approved.txt`, `approved: true` in `event_enemy_families.json`, the `whole_export.py` label changes.
 - **Result**: 16 new complete families (97 Ringmaster, 226 Wily Bandit, 261 Fortress Crab, 262 Closehanded Captain, 1025 Queen
   Bee, 1027 Guard Armor, 1522 Iron Giant, 1526 Royal Pretender, 1530 Ogre, 1546 Jewel Sorceress, 1553 Pink Agaricus, 1556 Icy
   Beast, 1565 Upright Defender, 1566 Reversed Defender, 1580 Shiva, 1593 Sephiroth), awaiting the user's review of the rendered

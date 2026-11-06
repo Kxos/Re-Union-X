@@ -115,9 +115,8 @@ function lookups(m) {
   const lower = (s) => String(s).trim().toLowerCase();
   // event quest rows (make-event-enemies.js, Task 2b) never answer a name lookup: «Barrier Master» stays 11534, not
   // the event row 1534
-  const evSrc = m.eventEnemies === undefined ? require('./make-event-enemies').readEventEnemies() : m.eventEnemies;
-  const evIds = new Set(evSrc ? Object.keys(evSrc.enemies).map(Number) : []);
-  const named = (name) => (m.enemy || []).filter((e) => lower(e.name) === lower(name) && !evIds.has(e.enemyId));
+  const own = require('./make-event-enemies').withoutEventRows(m.enemy, m.eventIds);
+  const named = (name) => own.filter((e) => lower(e.name) === lower(name));
   const enemyId = (name) => named(name).map((e) => e.enemyId).sort((a, b) => a - b)[0] || 0;
   const medalId = (label) => {
     const x = /^(.+?)\s*(\d*)★$/.exec(String(label || '').trim());
@@ -214,7 +213,8 @@ function subsOf(objectives, rewardsOverride, target, L, report, where) {
 // normal Shadow of the training (TRAINING_SHADOW_ID above): the 8xxxx row, else the smallest id
 function trainingShadowRow(masterRows) {
   const is8 = (e) => (e.enemyId >= 80000 && e.enemyId < 90000 ? 1 : 0);
-  const tpl = (masterRows.enemy || []).filter((e) => e.name === TRAINING.target && !isOwnEnemy(e))
+  const tpl = require('./make-event-enemies').withoutEventRows(masterRows.enemy, masterRows.eventIds)
+    .filter((e) => e.name === TRAINING.target && !isOwnEnemy(e))
     .sort((a, b) => is8(b) - is8(a) || a.enemyId - b.enemyId)[0];
   if (!tpl) throw new Error(`special: no «${TRAINING.target}» enemy row for the training`);
   const row = JSON.parse(JSON.stringify(tpl));
@@ -226,7 +226,8 @@ function trainingShadowRow(masterRows) {
 // training dummy enemy row (DUMMY_* above): the 8xxxx Large Body row, else its smallest id
 function dummyRow(masterRows) {
   const is8 = (e) => (e.enemyId >= 80000 && e.enemyId < 90000 ? 1 : 0);
-  const tpl = (masterRows.enemy || []).filter((e) => e.name === DUMMY_TEMPLATE && !isOwnEnemy(e))
+  const tpl = require('./make-event-enemies').withoutEventRows(masterRows.enemy, masterRows.eventIds)
+    .filter((e) => e.name === DUMMY_TEMPLATE && !isOwnEnemy(e))
     .sort((a, b) => is8(b) - is8(a) || a.enemyId - b.enemyId)[0];
   if (!tpl) throw new Error(`special: no «${DUMMY_TEMPLATE}» enemy row for the training dummy`);
   const row = JSON.parse(JSON.stringify(tpl));
@@ -704,4 +705,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { build, patch, weeksOf, weeklyLabel, runsOf, skillPart, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, TRAINING_SHADOW_ID, TRAINING_TARGET_ID, CP_REWARD_ID, apOf, splitObjective };
+module.exports = { lookups, build, patch, weeksOf, weeklyLabel, runsOf, skillPart, WEEKLY_EV_FIRST, STAGE_KIND, TRAINING_STAGE, CATALOG_EV, DUMMY_ENEMY_ID, DUMMY_HP, TRAINING_SHADOW_ID, TRAINING_TARGET_ID, CP_REWARD_ID, apOf, splitObjective };

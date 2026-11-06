@@ -1,0 +1,27 @@
+# Events Part 1, Task 2b (06-11-2026): event quest families whose 2018 WW record rows were appended by hand to
+# extra_donors_dedup.tsv. Events Task 2b, PENDING USER REVIEW: not approved. An id moves to
+# extra_donors_dedup_approved.txt only when the user approves the family's rendered animations (and its entry in
+# event_enemy_families.json gets approved: true); make_jp_enemies.py never builds a non-approved event family.
+# Read by test_dedup_export.py (rows of these families are allowed only while pending).
+226
+262
+1025
+1026
+1522
+1526
+1546
+1547
+1553
+1555
+1556
+1565
+1566
+1579
+1582
+1585
+1589
+1593
+1594
+1596
+1597
+1603
