@@ -260,6 +260,70 @@
   "JP-D-2018-08-02": {
    "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 ピンツ・オレット アクセサリをゲット!",
    "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get the Pence & Olette accessories!"
+  },
+  "JP-RAID-15": {
+   "ja": "レイドボスイベント「キャプテンアヴァリシャス」出現! 宝箱を壊してレイドコインをゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: Closehanded Captain (JP «Captain Avaricious») appears! Break the treasure chests to get Raid Coins! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-17": {
+   "ja": "1st anniversary レイドボスイベント「ジュエルソーサレス」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "1st anniversary · Raid Boss Event: Defeat Jewel Sorceress! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-19": {
+   "ja": "Halloween レイドボスイベント「ホーカス・ポーカス」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Halloween · Raid Boss Event: Defeat Hocus Pocus! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-06-19": {
+   "ja": "レベル★★★ レイドボスイベント「ジュエルソーサレス」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Defeat Jewel Sorceress! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-08-04": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント パーティーで協力して撃破せよ! 逃亡まで60分",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Team up as a party and defeat it! 60 minutes until it escapes"
+  },
+  "JP-D-2018-09-01": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント パーティーで協力して撃破せよ! 逃亡まで60分",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Team up as a party and defeat it! 60 minutes until it escapes"
+  },
+  "JP-SHR-6": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-13": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-20": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-27": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-34": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-41": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-48": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-55": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-69": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-76": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 30,000,000"
   }
  }
 }
