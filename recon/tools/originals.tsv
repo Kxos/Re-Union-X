@@ -17789,3 +17789,64 @@ lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp	l
 lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
 lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
 lwf/home/200912/200912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	jp	lwf/home/160912/160912_e38393e38383e38388e3839ee38383e3839720342e706e67.png	# RECONSTRUCTED: confetti piece of 160912 (= 190912)
+
+# 51. Medal full artwork «Inspect» (I-237, user decision 05-11; docs/notes/medaglie.md#full-artwork): the 55 JP 4.3.1
+#     pictures img/art/Art_<artId>.png (640x960 portrait) of the Medals that had the art. server/medal-art.js flags their
+#     families (imageCategory 2, artId) and the client loads the picture on tap without checking it: a flagged artId
+#     without its line here crashes (server/test-medal-art.js checks it). The armature MedalArtAnim comes from
+#     import_jp_coco.py (JP_ARM, frame Art_Dummy00.png merged into ActMapTreasureBoxAnim0). Original JP files.
+img/art/Art_21266.png	jp	# Key Art #2
+img/art/Art_21406.png	jp	# Key Art #10
+img/art/Art_21516.png	jp	# The World Ends with You Art
+img/art/Art_21536.png	jp	# Key Art #12
+img/art/Art_21636.png	jp	# Key Art #15
+img/art/Art_21726.png	jp	# Toon Roxas & Pals
+img/art/Art_22346.png	jp	# Key Art #5
+img/art/Art_22446.png	jp	# Key Art #9
+img/art/Art_22606.png	jp	# Key Art #14
+img/art/Art_22716.png	jp	# The World Ends with You Art 3
+img/art/Art_23386.png	jp	# Orchestra Sora
+img/art/Art_23416.png	jp	# Key Art #11
+img/art/Art_23546.png	jp	# Key Art #13
+img/art/Art_23616.png	jp	# Toon Sora & Goofy
+img/art/Art_23656.png	jp	# Key Art #18
+img/art/Art_41146.png	jp	# Key Art #6
+img/art/Art_41226.png	jp	# Key Art "Sky"
+img/art/Art_41396.png	jp	# The World Ends with You Art 2
+img/art/Art_42096.png	jp	# Key Art #3
+img/art/Art_42166.png	jp	# Key Art "Bonds"
+img/art/Art_43086.png	jp	# Key Art #1
+img/art/Art_43106.png	jp	# Key Art #4
+img/art/Art_43146.png	jp	# Key Art #7
+img/art/Art_43186.png	jp	# Key Art #8
+img/art/Art_43206.png	jp	# Key Art "Beginning"
+img/art/Art_43416.png	jp	# Prime - Key Art #17
+img/art/Art_51036.png	jp	# Riku Art [EX]
+img/art/Art_51126.png	jp	# Stained Glass #3 [EX+]
+img/art/Art_51136.png	jp	# Stained Glass #4 [EX+]
+img/art/Art_51167.png	jp	# Stained Glass #7 [EX+]
+img/art/Art_52016.png	jp	# Axel Art [EX]
+img/art/Art_52096.png	jp	# Key Art #16 [EX+]
+img/art/Art_52106.png	jp	# Stained Glass #5 [EX+]
+img/art/Art_52116.png	jp	# Stained Glass #6 [EX+]
+img/art/Art_52167.png	jp	# Stained Glass #9 [EX+]
+img/art/Art_52197.png	jp	# SN+ - Terra, Ven, Aqua
+img/art/Art_53016.png	jp	# Sora Art [EX]
+img/art/Art_53026.png	jp	# Roxas Art [EX]
+img/art/Art_53136.png	jp	# Stained Glass #1 [EX+]
+img/art/Art_53146.png	jp	# Stained Glass #2 [EX+]
+img/art/Art_53187.png	jp	# Stained Glass #8 [EX+]
+img/art/Art_53197.png	jp	# Supernova+ - Key Art #19
+img/art/Art_53247.png	jp	# Supernova+ - Key Art #20
+img/art/Art_351417.png	jp	# SN++ - Key Art #22
+img/art/Art_351617.png	jp	# SN++ - Stained Glass #13
+img/art/Art_352327.png	jp	# Supernova+ - Key Art #21
+img/art/Art_352467.png	jp	# SN++ - Key Art #23
+img/art/Art_352557.png	jp	# SN++ - Stained Glass #11
+img/art/Art_352567.png	jp	# SN++ - Stained Glass #12
+img/art/Art_352577.png	jp	# SN++ - MoM Kairi
+img/art/Art_353497.png	jp	# SN++ - Key Art #24
+img/art/Art_353547.png	jp	# SN++ - Strelitzia
+img/art/Art_353567.png	jp	# SN++ - Stained Glass #10
+img/art/Art_353587.png	jp	# SN++ - Stained Glass #14
+img/art/Art_353907.png	jp	# SN++ - Key Art #25
