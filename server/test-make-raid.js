@@ -305,6 +305,14 @@ const tests = {
     // numbered after every WW row (raid_ids.json append-only)
     assert.ok(Math.min(...jp.map((e) => out.ids.rows[e.censusId])) > Math.max(out.ids.rows['WW-E9-1'], out.ids.rows['WW-E8-1']));
   },
+  jp_raids_off() {
+    // raid_config.json jpRaids.served false (user 06-11): no JP row is served, every one is skipped with the reason; WW rows unchanged
+    const on = build(jpFixture()), off = build(jpFixture((f) => { f.config.jpRaids = { served: false }; }));
+    assert.deepStrictEqual(off.index.entries.filter((e) => e.jp), []);
+    assert.ok(off.index.jp.skipped.some((s) => /not served for now/.test(s.why)));
+    assert.deepStrictEqual(off.index.entries.map((e) => e.key), on.index.entries.filter((e) => !e.jp).map((e) => e.key));
+    assert.strictEqual((REAL_CONFIG.jpRaids || {}).served, false, 'the real config serves worldwide raids only (06-11)');
+  },
   jp_quest_reuses_ww_map() {
     const out = build(jpFixture());
     const qb = jpEntry(out, 'JP-RAID-1/single'), d = jpEntry(out, 'JP-D-2017-08-13/single');
@@ -1732,7 +1740,8 @@ const tests = {
     // ... and the JP boards (user decision 06-11) only the JP-only medals with no worldwide item yet (declared)
     assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E') && !String(u.board).startsWith('JP-')), []);
     assert.deepStrictEqual([...new Set(out.report.boards.unmatched.filter((u) => String(u.board).startsWith('JP-')).map((u) => u.reward))].sort(),
-      ['1★ Sora Santa Ver.', '5★ Minnie VD Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.', 'Booster [Final Form Sora] +5%', 'Happi Coat: Hair Ornament (Female)', 'Maidama (Female)', 'Maidama (Male)']);
+      (REAL_CONFIG.jpRaids || {}).served === false ? [] // no JP row served (jpRaids.served false, user 06-11)
+        : ['1★ Sora Santa Ver.', '5★ Minnie VD Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.', 'Booster [Final Form Sora] +5%', 'Happi Coat: Hair Ornament (Female)', 'Maidama (Female)', 'Maidama (Male)']);
     assert.ok(out.report.boards.unmatched.every((u) => u.reward in REAL_CONFIG.boards.unmatched), 'only declared cells are left off');
     const of130 = new Set(the130.map((r) => r.id));
     const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));
