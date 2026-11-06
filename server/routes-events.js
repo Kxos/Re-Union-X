@@ -7,7 +7,8 @@
 // make-events.js) once per quest, paid here (server.js skips its own payment for event stages); drops on every clear by the
 // usual /stage/clear path (the POI of the quest's map key, server.js poiStageId). Reward type 15 (Event Coins) is not paid in
 // this part (event boards later), never as Raid Coins: the objective counts as done, the coins are only logged.
-//   events (list), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx (Event Catalog, Task 5).
+//   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
+//   pruneKept (Event Catalog, Task 5).
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -54,9 +55,12 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
         pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]));
       }
     }
+    // no stage row (a master not rebuilt yet): nothing paid and nothing recorded, so the first-clear items and the objectives
+    // are paid at the first clear with the row (review of Task 4)
+    if (!row) return true;
     const done = before || [];
     const fresh = [...new Set(cleared)].filter((n) => n >= 1 && n <= 3 && !done.includes(n)).sort((a, b) => a - b);
-    for (const n of row ? fresh : []) pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n));
+    for (const n of fresh) pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n));
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
     return true;
   }
@@ -67,9 +71,20 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   // while it is a past event of the Story (rowState 'kept'), with all its served quests: a short-window one on the real weekday of
   // its days, as the raids kept from the catalogue open on their real days
   const entryOf = (censusId) => entries().find((e) => e.censusId === censusId);
+  // kept: null when the index no longer has that census id (a record dropped): inert here, cleared by pruneKept
   function catalogCtx(realMs = realNow()) {
-    const { shopFrom, shopTo } = storyWeek();
-    return { shopFrom, shopTo, current: new Set(currentEntries(realMs).map((e) => e.censusId)), kept: view().kept || null };
+    const { shopFrom, shopTo } = storyWeek(), kept = view().kept || null;
+    return { shopFrom, shopTo, current: new Set(currentEntries(realMs).map((e) => e.censusId)), kept: kept && entryOf(kept) ? kept : null };
+  }
+  // GET /web/event/catalog: a kept census id the index no longer has is cleared (saved), so the save holds no dead id; listing the
+  // Events tab never writes the save
+  function pruneKept() {
+    const kept = view().kept;
+    if (!kept || entryOf(kept)) return false;
+    state().kept = null;
+    savePlayer();
+    log(`[event] Event Catalog: kept ${kept} is not in the index any more, cleared`);
+    return true;
   }
   function keptEntry(realMs = realNow()) {
     const c = catalogCtx(realMs), e = c.kept && entryOf(c.kept);
@@ -100,7 +115,8 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   }
 
   // /stage/event category 2, after the raids: the kept event (its card with the KEPT tab), then one card per event of the week with
-  // its open served quests. endTime: the end of the real day for a short-window event, else of the real week (as the raids).
+  // its open served quests. endTime: the end of the real day when the entry or one of its open quests has days (a short-window
+  // event or quest; `days: []` is no days), else of the real week (as the raids).
   function events(realMs = realNow()) {
     const cleared = view().cleared || {};
     const stageOf = (q) => {
@@ -108,6 +124,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       return { stageId: q.stageId, useAp: Number(q.ap) || 0, score: st.score, playStatus: st.playStatus, clearMissionIds: [...(cleared[q.stageId] || [])] };
     };
     const objectives = (id) => Math.min(3, (stageRow(id) || {}).validSubmission || 0);
+    const hasDays = (x) => Array.isArray(x.days) && x.days.length > 0;
     const card = (e, quests, kept = false) => {
       const stages = quests.map(stageOf);
       return {
@@ -117,7 +134,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
         bannerUrl: `${webBase}/web/event/img/v${EVENT_IMG_VERSION}/${e.evStageId}${kept ? '-kept' : ''}.png`,
         eventType: EVENT_TYPE,
         status: 1,
-        endTime: serverTimeAt(e.days ? clock.dayEnd(realMs) : clock.weekEnd(realMs)),
+        endTime: serverTimeAt(hasDays(e) || quests.some(hasDays) ? clock.dayEnd(realMs) : clock.weekEnd(realMs)),
         newStageId: 0,
         isLock: 0,
         // crown (as the Special tab): every quest with its objectives 1..min(3, validSubmission) done
@@ -129,7 +146,17 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     return [...(keptList.length ? [card(kept, keptList, true)] : []), ...currentEntries(realMs).map((e) => card(e, calendar.openQuests(e, week, realMs)))];
   }
 
-  return { events, onStageClear, isEventStage, keep, unkeep, catalogCtx };
+  // The Event Catalog banner (index.catalog of make-events.js: eventType 0, Details -> /web/event/catalog, a tap opens its Training
+  // Grounds quest): server.js lists it second in category 2, right after the Raid Catalog banner. None without index.catalog.
+  function catalogEvents() {
+    const cat = (eventIndex() || {}).catalog;
+    if (!cat || !cat.evStageId || !(cat.stageIds || []).length) return [];
+    const stages = cat.stageIds.map((id, i) => { const st = stageState(id); return { stageId: id, useAp: Number((cat.useAp || [])[i]) || 0, score: st.score, playStatus: st.playStatus, clearMissionIds: [] }; });
+    return [{ stages, eventStageId: cat.evStageId, showIcon: 1, bannerUrl: `${webBase}/web/event/img/v${EVENT_IMG_VERSION}/${cat.evStageId}.png`, eventType: 0, status: 1,
+      endTime: serverTimeAt(clock.weekEnd(realNow())), newStageId: 0, isLock: 0, complete: 0 }];
+  }
+
+  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept };
 }
 
 module.exports = routesEvents;

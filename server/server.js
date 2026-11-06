@@ -36,6 +36,7 @@ const infoAlbum = require('./routes-info-album');
 const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
 const routesEvents = require('./routes-events'); // event quest routes (docs/notes/events.md)
 const raidPages = require('./raid-pages'); // Raid Catalog web pages (Task 9)
+const eventPages = require('./event-pages'); // Event Catalog web pages (Events Part 1, Task 5)
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
 const chatRoutes = require('./routes-chat'); // chat del party (I-210)
@@ -171,6 +172,7 @@ function route(url) {
   if (p.startsWith('/web/gacha/')) return 'gachaweb'; // catalogo, dettagli, odds, immagini dei banner
   if (p.startsWith('/web/special/')) return 'specialweb'; // immagini dei banner Special
   if (p.startsWith('/web/raid/')) return 'raidweb'; // raid banners
+  if (p.startsWith('/web/event/')) return 'eventweb'; // Event Catalog, event details and notices, event cards
   if (p.startsWith('/web/medals/')) return 'medalweb'; // Medal Gallery and its pictures (I-242)
   if (p.includes('system/status')) return 'status';
   if (p.includes('system/login')) return 'login';
@@ -1445,6 +1447,18 @@ let raidMemo = null;
 // Event quests (make-events.js, not versioned): the entries listed in the Events tab after the raids (routes-events.js)
 const EVENT_INDEX = process.env.KHUX_EVENT_INDEX || path.join(__dirname, 'game_data', 'events.json');
 let eventMemo = null;
+// original notices of the events (make-event-notices.js, git-ignored SQUARE ENIX text), read at request time as the raid ones
+// (a new file is seen without a restart); absent or broken: null, the notice pages say «not available». Cards: game_data/event_img.
+const EVENT_NOTICES = process.env.KHUX_EVENT_NOTICES || path.join(__dirname, 'game_data', 'event_notices.json');
+const EVENT_IMG = process.env.KHUX_EVENT_IMG || path.join(__dirname, 'game_data', 'event_img');
+let eventNoticesMemo = { mtime: -1, doc: null };
+function eventNotices() {
+  try {
+    const mtime = fs.statSync(EVENT_NOTICES).mtimeMs;
+    if (mtime !== eventNoticesMemo.mtime) eventNoticesMemo = { mtime, doc: JSON.parse(fs.readFileSync(EVENT_NOTICES, 'utf8')) };
+    return eventNoticesMemo.doc;
+  } catch { eventNoticesMemo = { mtime: -1, doc: null }; return null; }
+}
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
 // File del banner con il bollino (generato se manca o se l'originale e' piu' recente); se non riesce, quello normale
@@ -2498,7 +2512,8 @@ function respondStageClear(res, req) {
   if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
-  if (eventStage) eventRoutes().onStageClear(stageId, cleared);
+  // an event error must never turn a quest clear into «200 ERROR :116» (as raid().onStageClear below)
+  if (eventStage) { try { eventRoutes().onStageClear(stageId, cleared); } catch (e) { console.log(`[event] onStageClear ${stageId}: ${e.message}`); } }
   else for (const n of cleared.filter((n) => !before.includes(n))) grantObjectiveReward(stage, n);
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
   if (isSpecialStage(stageId)) specialResetCheck(realNow()); // Daily Cid: segna la settimana in cui il giro e' completo
@@ -4289,8 +4304,12 @@ function respondStageEvent(res, body) {
   if (fs.existsSync(evPath)) {
     try { events = JSON.parse(fs.readFileSync(evPath, 'utf8')); } catch (e) { console.log('[event] event.json non valido:', e.message); }
   }
-  // Events tab: the raids (Raid Catalog banner, kept raid, the week's raids), then the event quests (routes-events.js)
-  if (Number(body?.eventCategory) === 2) events = [...raid().events(), ...eventRoutes().events(), ...events];
+  // Events tab: the Raid Catalog banner, the Event Catalog banner, the kept raid and the week's raids, then the event quests
+  // (routes-events.js). The Raid Catalog banner is the only raid card of eventType 0.
+  if (Number(body?.eventCategory) === 2) {
+    const raids = raid().events(), n = raids.length && raids[0].eventType === 0 ? 1 : 0;
+    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...eventRoutes().events(), ...events];
+  }
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
 // ---------------------------------------------------------------------------
@@ -4601,6 +4620,49 @@ function respondRaidWeb(res, url) {
   const b = fs.readFileSync(file);
   res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
   return res.end(b);
+}
+// Event Catalog pages (event-pages.js, Events Part 1 Task 5): the context of routes-events.js plus the lookups of the pages.
+const eventPageCtx = (fromCatalog = false) => ({ ...eventRoutes().catalogCtx(), imgVersion: routesEvents.EVENT_IMG_VERSION, fromCatalog,
+  unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
+  stageDone: (id) => catalogStageDone(id), hasNotice: (censusId) => !!eventNotices()?.rows?.[censusId] });
+// GET /web/event/catalog (Details of the Event Catalog banner; a kept event the index lost is cleared first), /web/event/event/
+// <evStageId> (details page; ?from=catalog: BACK), /web/event/notice/<evStageId> (Details of an event card: its original
+// notice, ?from=event: BACK; always a page, «not available» without it), /web/event/img/v<N>/<evStageId>[-kept].png (the card;
+// no card of its own: 0.png of game_data/event_img; none: 404).
+function respondEventWeb(res, url) {
+  const p = url.split('?')[0], from = new URLSearchParams(url.split('?')[1] || '').get('from');
+  const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
+  const page = (html) => { const b = Buffer.from(html, 'utf8'); res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
+  if (/^\/web\/event\/catalog$/i.test(p)) {
+    eventRoutes().pruneKept();
+    return page(eventPages.catalogPage(eventIndex(), eventPageCtx()));
+  }
+  const nt = /^\/web\/event\/notice\/([^/]*)$/i.exec(p);
+  if (nt) {
+    let ctx = { from };
+    try { ctx = { ...eventPageCtx(), from }; } catch (e) { console.warn(`event notice page: ${e.message}`); }
+    return page(eventPages.noticePage(eventIndex(), /^\d+$/.test(nt[1]) ? Number(nt[1]) : -1, eventNotices(), ctx));
+  }
+  const det = /^\/web\/event\/event\/(\d+)$/i.exec(p);
+  if (det) {
+    const html = eventPages.detailPage(eventIndex(), Number(det[1]), eventPageCtx(from === 'catalog'));
+    return html ? page(html) : notFound();
+  }
+  const m = /^\/web\/event\/img\/(?:v\d+\/)?(\d+)(-kept)?\.png$/i.exec(p);
+  const names = m ? [...(m[2] ? [`${Number(m[1])}-kept.png`] : []), `${Number(m[1])}.png`, '0.png'] : [];
+  const file = names.map((n) => path.join(EVENT_IMG, n)).find((x) => fs.existsSync(x));
+  if (!file) return notFound();
+  const b = fs.readFileSync(file);
+  res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
+  return res.end(b);
+}
+// POST /web/event/keep/<evStageId> and /web/event/unkeep (buttons of the Event Catalog): routes-events.js keep / unkeep, JSON {ok, why?}
+function respondEventPost(res, url) {
+  const p = url.split('?')[0];
+  const json = (code, o) => { const b = Buffer.from(JSON.stringify(o), 'utf8'); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': b.length }); res.end(b); };
+  const m = /^\/web\/event\/keep\/(\d+)$/i.exec(p);
+  const out = m ? eventRoutes().keep(Number(m[1])) : /^\/web\/event\/unkeep$/i.test(p) ? eventRoutes().unkeep() : { code: 404, body: { ok: false, why: 'unknown route' } };
+  return json(out.code, out.body);
 }
 // Medal Gallery (I-242, medal-gallery.js; docs/notes/medaglie.md#medal-gallery). GET /web/medals/gallery[?tab=art][&from=catalog]:
 // the page, with the Medals of the save (boosted copies count for their base row). GET /web/medals/img/v<N>/<thumbId>.png (medal
@@ -5001,6 +5063,7 @@ function handler(scheme) {
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
       if (kind === 'raidweb') return req.method === 'POST' ? respondRaidPost(res, req.url) : respondRaidWeb(res, req.url);
+      if (kind === 'eventweb') return req.method === 'POST' ? respondEventPost(res, req.url) : respondEventWeb(res, req.url);
       if (kind === 'medalweb') return respondMedalWeb(res, req.url, req);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
@@ -5365,6 +5428,7 @@ module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
   eventRoutes, eventIndex, // server/test-event-routes.js
+  respondEventWeb, respondEventPost, // server/test-event-pages.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, raidPageCtx, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
