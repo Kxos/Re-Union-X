@@ -518,9 +518,12 @@ const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#062
   + '.ri{padding:3px 0 3px 1.75em;text-indent:-1.75em;border-top:1px solid #1d5878}.ri b{color:#fff;font-size:14.5px}.ri span{display:block;text-indent:0;color:#d9e6ee;font-size:13.5px}'
   + '.sbo{color:#ffb3a8;font-size:14px;margin:2px 2px 6px}.sbo .ic{width:1.3em;height:1.3em}.sb details.fold{border-color:#1d5878;font-size:14px}.sb details.fold li{margin:3px 0}'
   + '.sbl{margin:8px 0 2px}.sbl a{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:16px;padding:3px 14px;margin:4px 8px 0 0;color:#fff;text-decoration:none;font-size:14.5px}';
+// the «Why these values?» fold outside the notice pages (NOTICE_CSS has its own)
+const FOLD_CSS = 'details.fold{margin:6px 0;border:1px solid #1d5878;border-radius:6px;padding:2px 10px;font-size:14px}details.fold>summary{cursor:pointer;color:#00d4ed;padding:4px 0}details.fold li{margin:3px 0}';
 // the codes shown in the box: weekRule dropped while the rule callout is on the page
 const srvCodes = (codes) => codes.filter((c) => !(c === 'weekRule' && ruleOn()));
-function reconCards(codes) {
+// head: the «Rebuilt values» line (the notice box); the detail page has its own h2 instead
+function reconCards(codes, head = true) {
   const shown = srvCodes(codes);
   if (!shown.length) return '';
   const cards = RECON_GROUPS.map(([g, name, ic, cls]) => {
@@ -533,7 +536,7 @@ function reconCards(codes) {
     }
     return rows.length ? `<div class="rg${cls}"><b>${icon(ic)}${esc(name)}</b>${rows.join('')}</div>` : '';
   }).join('');
-  return '<p class="sbh">Rebuilt values<span>lost in the original data, rebuilt from the surviving sources</span></p>'
+  return (head ? '<p class="sbh">Rebuilt values<span>lost in the original data, rebuilt from the surviving sources</span></p>' : '')
     + `<div class="rgs">${cards}</div><details class="fold"><summary>Why these values?</summary>${reconList(shown)}</details>`;
 }
 // the box of a notice page: intro = one short line (html)
@@ -574,12 +577,13 @@ function detailPage(index, evStageId, ctx = {}) {
     }).join('')}</ul>` : '');
   // the labels of raids.json in the player's words (index.reasons holds the builder's notes: file names, config keys)
   const codes = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
-  const recon = codes.length ? `<h2>Reconstructed values</h2>${reconList(codes)}`
-    + '<p class="n">The original values are lost: these are rebuilt from the surviving sources, as the Raid Bosses notice explains.</p>' : '';
+  // the same group cards as the «On this server» box of the notice pages (user 06-11, graphics), the full sentences folded
+  const cards = reconCards(codes, false);
+  const recon = cards ? `<h2>Reconstructed values</h2><p class="n">The original values are lost: these are rebuilt from the surviving sources, as the Raid Bosses notice explains.</p>${cards}` : '';
   const others = rows.filter((r) => r !== row && r.bosses.some((b) => row.bosses.includes(b))).sort((a, b) => (a.start < b.start ? 1 : a.start > b.start ? -1 : 0));
   const other = others.length ? `<h2>Other weeks of ${esc(title)}</h2><ul class="ow">${others.map((r) => `<li><a href="${detailHref(r.evStageId)}">${dateRange(r)}</a> · ${esc(titleOf(r))}<br>${statusOf(r, ctx).pill}</li>`).join('')}</ul>` : '';
   const back = ctx.fromCatalog ? `<div class="bar"><a class="back" href="/web/raid/catalog#q${row.evStageId}">BACK<span></span></a></div>` : '';
-  return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS + RULE_CSS) + `<body${back ? ' class="hb"' : ''}>`
+  return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS + RULE_CSS + SRV_CSS + FOLD_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
     + `${st.pill}<div id="pinmsg" class="pinmsg"></div><div class="why ${st.cls}">${st.why}</div>${replacesLine(st, kept)}${button}`
     + (row.jp ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Notice of this raid ›</a></li></ul>`
