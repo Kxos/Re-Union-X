@@ -1,6 +1,7 @@
 """Event cards of the raids (640x140 PNG): the original Weekly Raid Event banner of each raid's week.
 
     python -I recon/tools/make_raid_banners.py --wiki F --banners D [--notices F] [--index F] [--out D]
+    python -I recon/tools/make_raid_banners.py --jp F [--jp-variants] [--index F] [--out D]
         -> server/game_data/raid_img/<evStageId>.png (git-ignored; served at /web/raid/img/<evStageId>.png)
 
 --wiki: wikitext of khuxwiki «Weekly_Raid_Event» (api.php?action=parse&page=Weekly_Raid_Event&prop=wikitext&format=json,
@@ -14,6 +15,13 @@ weeks 2018-09-03 to 10-01). "file" is relative to --banners, dates ISO; they are
 with "evStageId" is bound to that id and never matched by date (the 62 older WW event raids 2016-05 to 2018-09, whose
 one-off, weekend, monthly and daily runs overlap the weekly rows; card = the 640x140 image of the event's own notice).
 --ids A-B,C: write only these evStageIds (e.g. --ids 8001-8062 --out <staging folder> for a review before serving).
+--jp: the Japan-only rows (raids.json entries with jp: true, Raid Catalog only). JSON list [{"censusId", "file", "match",
+"source", "evidence"}] of original JP raid banners (local only, D:\Progetto_Restauro_KH_UX\reference\raid_banners_jp\,
+"file" relative to the list's folder), keyed by census id: the evStageId is looked up in --index at run time, so rows
+added later get their card as soon as the list names them. "match": "exact" (the row's own banner: its notice, or the
+boss / HP / time limit / dates printed on it) or "variant" (an original of the same boss, HP and time limit whose text
+differs from the row, e.g. «土曜限定» on a two-day weekend): written only with --jp-variants. Rows not in the list, or
+not matched, keep 0.png. Without --wiki only the JP cards are written; the WW cards stay as they are.
 """
 import argparse
 import datetime as dt
@@ -71,15 +79,59 @@ def pick(rows, start, end):
     return best
 
 
-def build(index, rows, banners, out, by_id=None, ids=None):
-    """by_id: {evStageId: file} taken before the date rows; ids: only these evStageIds (None: all)"""
+def card(src, dst):
+    """the original banner as a 640x140 RGB PNG (the size of every Events card)"""
     from PIL import Image
+    im = Image.open(src).convert('RGB')
+    if im.size != (640, 140):
+        im = im.resize((640, 140), Image.LANCZOS)
+    im.save(dst, optimize=True)
+
+
+def jp_items(items, variants=False):
+    """{censusId: item} of the --jp list; "variant" items only with variants=True; a census id named twice: error"""
+    out = {}
+    for it in items:
+        if it.get('match', 'exact') == 'variant' and not variants:
+            continue
+        if it['censusId'] in out:
+            raise ValueError('census id twice in the JP list: %s' % it['censusId'])
+        out[it['censusId']] = it
+    return out
+
+
+def build_jp(index, items, banners, out, ids=None):
+    """the cards of the JP rows (entries with jp: true) from items {censusId: item}; returns
+    (done {evStageId: file}, missing [(evStageId, censusId)] of the JP rows without a card, unknown [census ids of the
+    list that no JP row of the index has])"""
+    os.makedirs(out, exist_ok=True)
+    done, missing, seen = {}, [], set()
+    for e in index.get('entries', []):
+        ev, cid = e.get('evStageId'), e.get('censusId')
+        if not e.get('jp') or not ev or ev in done or (ids is not None and ev not in ids):
+            continue
+        seen.add(cid)
+        it = items.get(cid)
+        src = it and os.path.join(banners, it['file'])
+        if not it or not os.path.exists(src):
+            if (ev, cid) not in missing:
+                missing.append((ev, cid))
+            continue
+        card(src, os.path.join(out, '%d.png' % ev))
+        done[ev] = it['file']
+    missing = [m for m in missing if m[0] not in done]
+    return done, missing, sorted(set(items) - seen)
+
+
+def build(index, rows, banners, out, by_id=None, ids=None):
+    """by_id: {evStageId: file} taken before the date rows; ids: only these evStageIds (None: all). JP rows are left to
+    build_jp (their dates overlap the WW weeks)"""
     os.makedirs(out, exist_ok=True)
     done, missing = {}, []
     by_id = by_id or {}
     for e in index.get('entries', []):
         ev = e.get('evStageId')
-        if not ev or ev in done or not e.get('start') or (ids is not None and ev not in ids):
+        if not ev or ev in done or e.get('jp') or not e.get('start') or (ids is not None and ev not in ids):
             continue
         s = dt.date.fromisoformat(e['start'])
         en = dt.date.fromisoformat(e.get('end') or e['start'])
@@ -91,23 +143,36 @@ def build(index, rows, banners, out, by_id=None, ids=None):
         if not os.path.exists(src):
             missing.append((ev, r[0]))
             continue
-        im = Image.open(src).convert('RGB')
-        if im.size != (640, 140):
-            im = im.resize((640, 140), Image.LANCZOS)
-        im.save(os.path.join(out, '%d.png' % ev), optimize=True)
+        card(src, os.path.join(out, '%d.png' % ev))
         done[ev] = r[0]
     return done, missing
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument('--wiki', required=True)
-    ap.add_argument('--banners', required=True)
+    ap.add_argument('--wiki', help='wikitext of khuxwiki Weekly_Raid_Event (WW cards); needs --banners')
+    ap.add_argument('--banners')
+    ap.add_argument('--jp', help='JSON list of the original JP raid banners, by census id (JP rows)')
+    ap.add_argument('--jp-variants', action='store_true', help='also the "variant" items of --jp')
     ap.add_argument('--notices', help='JSON list of raid cards from the official notices (weeks not on the wiki page)')
     ap.add_argument('--ids', help='write only these evStageIds: A-B,C')
     ap.add_argument('--index', default=os.path.join(ROOT, 'server', 'game_data', 'raids.json'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'server', 'game_data', 'raid_img'))
     a = ap.parse_args(argv)
+    if not a.wiki and not a.jp:
+        ap.error('--wiki (with --banners) or --jp is needed')
+    index = json.load(open(a.index, encoding='utf-8'))
+    ids = parse_ids(a.ids) if a.ids else None
+    if a.jp:
+        items = jp_items(json.load(open(a.jp, encoding='utf-8-sig')), a.jp_variants)
+        done, missing, unknown = build_jp(index, items, os.path.dirname(os.path.abspath(a.jp)), a.out, ids)
+        print('raid banners (JP): %d list items, %d JP cards written, %d JP rows without a card (0.png): %s%s' % (
+            len(items), len(done), len(missing), [m[1] for m in missing[:12]],
+            '; not JP rows of the index: %s' % unknown if unknown else ''))
+    if not a.wiki:
+        return
+    if not a.banners:
+        ap.error('--wiki needs --banners')
     w = json.load(open(a.wiki, encoding='utf-8-sig'))
     text = w['parse']['wikitext']['*'] if 'parse' in w else w
     rows, by_id = banner_rows(text), {}
@@ -115,8 +180,7 @@ def main(argv=None):
         items = json.load(open(a.notices, encoding='utf-8-sig'))
         rows += notice_rows(items)
         by_id = notice_by_id(items)
-    done, missing = build(json.load(open(a.index, encoding='utf-8')), rows, a.banners, a.out, by_id,
-                          parse_ids(a.ids) if a.ids else None)
+    done, missing = build(index, rows, a.banners, a.out, by_id, ids)
     print('raid banners: %d banner rows on the page, %d event cards written, %d without a banner (0.png): %s' % (
         len(rows), len(done), len(missing), missing[:12]))
 

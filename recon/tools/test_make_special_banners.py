@@ -226,6 +226,15 @@ try:
     check(mean(ImageChops.difference(rcat, m.catalog_banner(None, None, m.RAID_CATALOG_TITLE, m.RAID_CATALOG_SUB, []).convert('RGB'))) > 8,
           'background made of the weekly cards')
     check(8000 not in [int(os.path.basename(p)[:-4]) for p in m.raid_cards(rimg)], 'the catalogue banner is no strip of itself')
+    check([os.path.basename(p) for p in m.raid_cards(rimg, {8071, 8072})] == ['8070.png', '8073.png', '8074.png', '8075.png', '8076.png'],
+          'Japan-only cards (skip) are no strips')
+    rjp = os.path.join(tmp, 'raid_jp')
+    shutil.copytree(rimg, rjp)
+    Image.new('RGB', (640, 140), (255, 0, 255)).save(os.path.join(rjp, '8202.png'))
+    m.build_raid({**rix, 'entries': rix['entries'] + [{'evStageId': 8202, 'censusId': 'JP-X', 'jp': True}]}, rjp, 'full')
+    check(Image.open(os.path.join(rjp, '8000.png')).convert('RGB').tobytes() == Image.open(os.path.join(rimg, '8000.png')).convert('RGB').tobytes(),
+          'a JP card leaves the Raid Catalog banner unchanged')
+    check(os.path.exists(os.path.join(rjp, '8202-kept.png')), 'a JP card gets its KEPT RAID copy')
     k70 = Image.open(os.path.join(rimg, '8070-kept.png')).convert('RGB')
     check(sum(gold(p) for p in pixels(k70.crop((0, 6, 140, 34)))) > 600, 'KEPT RAID tab top left')
     check(diffbox(k70, Image.open(os.path.join(rimg, '8070.png')).convert('RGB'))[3] <= 40, 'only the tab changes')
