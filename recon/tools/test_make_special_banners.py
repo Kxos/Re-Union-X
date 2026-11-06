@@ -227,6 +227,25 @@ try:
     bgp = ImageStat.Stat(rcat.crop((300, 10, 630, 130))).mean
     check(bgp[0] > bgp[1] + 40 and bgp[0] > bgp[2] + 40, 'red background %s' % (bgp,))
     check(m.CATALOG_CHOICE == {'special': 'B', 'raid': 'B1', 'event': 'A'}, 'the chosen catalogue options (user 06-11)')
+    # idempotent full-colour builds (user 06-11, «lighting dirtied»): the chosen cards rendered twice are identical, saved as
+    # RGB (no 256-colour palette / dithering) with identical bytes
+    for k, st in m.CATALOG_CHOICE.items():
+        c1, c2 = m.CATALOG_OPTIONS[k](st), m.CATALOG_OPTIONS[k](st)
+        check(ImageChops.difference(c1.convert('RGB'), c2.convert('RGB')).getbbox() is None, '%s %s renders identically twice' % (k, st))
+        f1, f2 = os.path.join(tmp, 'idem_%s_1.png' % k), os.path.join(tmp, 'idem_%s_2.png' % k)
+        m.save_catalog(c1, f1)
+        m.save_catalog(m.CATALOG_OPTIONS[k](st), f2)
+        check(open(f1, 'rb').read() == open(f2, 'rb').read(), '%s %s: building twice gives the same file' % (k, st))
+        check(Image.open(f1).mode == 'RGB', '%s card saved in full colour, not a palette' % k)
+    ra = os.path.join(tmp, 'idem_raid')
+    m.build_raid(rix, ra, 'palette', catalog_only=True)
+    b1 = open(os.path.join(ra, '8000.png'), 'rb').read()
+    m.build_raid(rix, ra, 'palette', catalog_only=True)
+    check(open(os.path.join(ra, '8000.png'), 'rb').read() == b1 and Image.open(os.path.join(ra, '8000.png')).mode == 'RGB',
+          'build_raid: catalogue card full colour and identical on a rebuild')
+    gl = m.inner_clip(Image.new('RGBA', (640, 140), (255, 255, 255, 255)))
+    check(gl.getpixel((m.FRAME_INNER[0], 70))[3] < 40 and gl.getpixel((320, 70))[3] == 255 and gl.getpixel((m.FRAME_INNER[0] + 4, 70))[3] < 200,
+          'glows fade before the frame edge, not hard-cut')
     big = Image.new('RGBA', (400, 300), (255, 0, 0, 255))
     fp, fxy, fk = m.fit_inside(big, (500, -40), 3)
     fb = (fxy[0], fxy[1], fxy[0] + fp.width, fxy[1] + fp.height)
