@@ -362,7 +362,7 @@ const RECON_TEXT = {
 // with the link to the «Raid Bosses» notice (/web/notices#raid-bosses opens it, routes-info-album.js). Plain HTML / CSS, ES5-safe.
 const RULE_CSS = '.rc{border:2px solid #ffcd4a;border-radius:10px;background:#06283e;padding:8px 10px 6px;margin:10px 0;line-height:1.45;font-size:15px}'
   + '.rch{color:#ffcd4a;font-weight:bold;font-size:17px;margin:0 0 6px}.rch .ic{width:1.5em;height:1.5em}'
-  + '.ng{display:inline-block;background:#5a6470;border:1px solid #9aa4ae;color:#fff;border-radius:9px;padding:0 7px;margin-left:8px;font-size:11px;font-weight:bold;letter-spacing:.5px;vertical-align:2px;line-height:1.6}'
+  + '.ng{display:inline-block;background:#e8641c;background:-webkit-linear-gradient(top,#ffa13d,#e0521a);background:linear-gradient(#ffa13d,#e0521a);border:1px solid #ffc27a;color:#fff;border-radius:10px;padding:0 9px;margin-left:8px;font-size:11px;font-weight:bold;letter-spacing:.6px;vertical-align:2px;line-height:1.7;text-shadow:0 1px 1px rgba(90,25,0,.55);box-shadow:0 1px 3px rgba(0,0,0,.45)}'
   + '.rcs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
   + '.rcd{-webkit-box-flex:1;-webkit-flex:1 1 140px;flex:1 1 140px;min-width:140px;box-sizing:border-box;margin:0 4px 6px;padding:5px 9px 6px;border-radius:8px;background:#0a4466;border-top:4px solid #39a7cf}'
   + '.rcd.we{background:#0d4a3a;border-top-color:#2e9e3e}.rcd b{display:block;color:#fff;font-size:15px;margin-bottom:3px}'
