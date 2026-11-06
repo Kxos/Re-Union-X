@@ -1236,9 +1236,21 @@ the end, without decoding or re-encoding, into `server/game_data/medal_bgm/<id>.
 reference data (`jp_data/audio`, the same ids; 20 of the 23 served banks came from there, `import_jp_coco.py`, and the other
 two are in the served OBBs). All **23** tracks decode cleanly with ffmpeg (06-11; 37 s to 5 min 35 s, 62 MB). Served as
 `/web/medals/bgm/v<N>/<id>.ogg` (`audio/ogg`, byte ranges: the WebView's media player streams and loops with them) to one
-`<audio loop>` started by the Play button (a tap: the WebView needs a gesture), stopped when the detail closes. The game's own
-music keeps playing underneath (the page cannot stop it). Not checked in the in-game WebView yet; a desktop browser plays the
-files.
+`<audio loop>` started by the Play button (a tap: the WebView needs a gesture), stopped when the detail closes. **Bench 06-11
+(rev 274): it plays and is audible, but over the game's own BGM.**
+**Pausing the game's BGM from the page is not possible (analysis 06-11, client WW 4.3.1, details in the private notes):**
+the in-game WebView is the stock cocos2d-x one. Its Java client loads `http`, `https` and `file` URLs in place and hands any
+other scheme to Android (`ACTION_VIEW`: another app or the browser; that is how the ad tabs of a crash opened); the only route
+from a page to native code is the cocos2d-x «JavaScript interface scheme», which the game never sets (its setter has no
+caller), so no URL reaches the game; no `addJavascriptInterface` object is exposed (the only one is the removed
+`searchBoxJavaBridge_`), and the game registers no `onShouldStartLoading` handler. The APK declares no deep link of its own
+(only the Facebook and custom-tab schemes). Audio focus: no game class requests or listens to Android audio focus; the
+music is the Square Enix `SoundSystem` (AKB banks) in native code, suspended only when the activity pauses, so the WebView's
+`<audio>` taking focus does not stop it (as the bench shows). The Medal detail's own music swap runs inside the native
+detail scene, with no entry point a page can reach. Decision (user rule: never patch the client): no hack; the detail view
+says how to do it by hand, «lower **BGM** in **Other > Settings**, then raise it again» (`MUSIC_HINT`; the BGM slider is in
+the same Settings popup as the notification switches, `OptionDialog_Panel_ver320`), and the Notice says it too. Rejected:
+opening an external app to pause the activity (it leaves the game and pauses the page as well).
 **Track names**: `medal_bgm.json` «tracks» (khuxwiki «Category:BGM_Medals», the sentence «When sharing a ... Medal, the Home
 Screen music changes to ...» of each page, `reference\bgm_medals\bgm_medals.tsv`, 37 names, 22 tracks); an SN / Supernova
 shows the track of its base Medal (the user's 16-10 rule). The 6 Medals of `_incerti` (Roxas Art [EX], Illustrated Roxas,

@@ -24,6 +24,11 @@ const OWN_OPTS = [['all', 'All'], ['own', 'Owned'], ['not', 'Not owned']];
 const ATTR_OPTS = [['all', 'All'], ['p', 'Power'], ['g', 'Speed'], ['m', 'Magic']];
 const RECON_TEXT = 'Reconstructed';
 const UNVERIFIED_TEXT = 'sound match not verified';
+// The page cannot pause the music of the game (user 06-11: «mute it as the Medal detail does»): the client's WebView has no
+// bridge to the game (no JavaScript interface, no URL scheme handled by the game; docs/notes/medaglie.md#medal-gallery-music)
+// and its sound engine does not react to Android audio focus. So the detail view says how to do it by hand: the BGM slider
+// of Other > Settings (OptionDialog). HTML inside a single-quoted page string: no apostrophe.
+const MUSIC_HINT = 'The music of the game keeps playing underneath: the gallery cannot pause it. To hear this track alone, lower <b>BGM</b> in <b>Other &gt; Settings</b>, then raise it again.';
 // previews of the Banner Catalog block: HD Roxas 7★ (BGM Medal) and the artwork of Key Art #1
 const PREVIEW = { thumbId: 300893, artId: 43086 };
 const VARIANT_PREFIX = /^(SN\+{0,2}|Supernova\+?) - /;
@@ -138,7 +143,7 @@ const CSS = SPECIAL_CSS
   + '#det{text-align:center}#det .lg{display:block;width:240px;height:240px;margin:6px auto 4px;max-width:70vw;max-height:70vw}#det h2{color:#fff;font-size:21px;margin:4px 30px 2px}#det h2:before{content:none}'
   + '#det .d{font-size:15px}#det .tk{font-size:17px;margin:10px 0 4px}#det .vl{text-align:left;max-width:440px;margin:12px auto 0;padding:0;list-style:none}#det .vl li{padding:6px 0;border-bottom:1px solid #2f5d78}'
   + '.play{border:2px solid #ffe08a;border-radius:22px;color:#fff;font:bold 17px sans-serif;padding:7px 26px;background:linear-gradient(#e0a020,#a8700a);cursor:pointer;margin:8px 0 2px}.play.on{border-color:#ffb0b0;background:linear-gradient(#ff5a5a,#d81e2e 55%,#9c1020)}'
-  + '#amsg{color:#b9cfdc;font-size:13px;min-height:1.4em}'
+  + '#amsg{color:#b9cfdc;font-size:13px;min-height:1.4em}.mh{color:#b9cfdc;font-size:13px;line-height:1.45;max-width:440px;margin:2px auto 6px}.mh b{color:#fff}'
   + 'body.hb{padding-bottom:90px}.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;background:linear-gradient(rgba(2,24,40,0),rgba(2,24,40,.92) 35%);z-index:4}'
   + '.back{display:inline-block;padding:7px 26px 8px;border-radius:10px;border:2px solid #9fd4ff;color:#fff;text-decoration:none;font:italic bold 20px sans-serif;letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);box-shadow:0 2px 0 #0b2a66,inset 0 1px 0 rgba(255,255,255,.5)}';
 
@@ -241,7 +246,7 @@ function detail(c){var a=KX_AT[c.a]||["",""],h='<img class="lg" src="/web/medals
 +'<div class="d">'+(a[1]?'<span class="'+a[0]+'">'+a[1]+'</span>':'')+(KX_DL[c.d]?' \\u00b7 '+KX_DL[c.d]:'')+'</div><div class="cps">'+kxStars(c.s)
 +'<span class="s s-'+(kxOwn(c)?'own">Owned':'not">Not owned')+'</span>'+(c.r?' <span class="s s-rec">${RECON_TEXT}</span>':'')+'</div>';
 if(c.k>=0)h+='<div class="tk">\\u266a '+kxEsc(kxD.k[c.k])+'</div>'+(c.u?'<div class="n">The sound file matched to this Medal is not verified.</div>':'');
-if(c.b)h+='<button type="button" class="play" id="play" data-b="'+c.b+'">\\u25b6 Play the music</button><div id="amsg"></div>';
+if(c.b)h+='<button type="button" class="play" id="play" data-b="'+c.b+'">\\u25b6 Play the music</button><div id="amsg"></div><p class="mh">${MUSIC_HINT}</p>';
 if(c.v.length){h+='<ul class="vl"><li><b>Variants with the same picture</b></li>';for(var j=0;j<c.v.length;j++)h+='<li>'+kxEsc(c.v[j][0])+' '+kxStars(c.v[j][1])+'<span class="s s-'+(kxVOwn(c.v[j])?'own">Owned':'not">Not owned')+'</span></li>';h+='</ul>';}
 $('dbody').innerHTML=h;$('det').style.display='block';$('det').scrollTop=0;
 var p=$('play');if(p)p.onclick=function(){if(playing){stop();return;}var u='/web/medals/bgm/v'+kxD.v+'/'+attr(p,'data-b')+'.ogg';if(au.getAttribute('src')!==u)au.setAttribute('src',u);
@@ -308,4 +313,4 @@ function galleryPage(medals, ctx = {}) {
 }
 
 module.exports = { IMG_VERSION, PREVIEW, ENTRY_CSS, ENTRY_HREF, entryHtml, mediaFile, imageFile, bgmUrl, galleryModel, galleryPage, expandGallery, pageData,
-  ownedBases, medalImg, artImg, baseOf, khuxMatch, trackLookup, RECON_TEXT, UNVERIFIED_TEXT, BUILD_JS };
+  ownedBases, medalImg, artImg, baseOf, khuxMatch, trackLookup, RECON_TEXT, UNVERIFIED_TEXT, MUSIC_HINT, BUILD_JS };

@@ -177,7 +177,7 @@ The Japanese weekly raids from September 2018 and 4 Japanese raid events of 2018
 
 The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then the **Medal Gallery** box under the title.
 
-**BGM Medals** lists the Medals with their own music, which plays in the Medal's details and on the Home screen when the Medal is shared, with the name of the track. Tap a Medal and then **Play the music** to hear it in the gallery. Their Supernova versions play the music of their Medal (**not original**). Track names come from the community wiki; where the sound file matched to a Medal is not verified, the gallery says so.
+**BGM Medals** lists the Medals with their own music, which plays in the Medal's details and on the Home screen when the Medal is shared, with the name of the track. Tap a Medal and then **Play the music** to hear it in the gallery. The music of the game keeps playing underneath, because the gallery cannot pause it: to hear the track alone, lower **BGM** in **Other > Settings** and raise it again afterwards.Their Supernova versions play the music of their Medal (**not original**). Track names come from the community wiki; where the sound file matched to a Medal is not verified, the gallery says so.
 
 **Full Art** lists the Medals with the **Art** button in their details, under their artwork; tap the artwork to see it larger. Medals marked **Reconstructed** show an artwork that their own picture is part of, although the original game data gave them none (see the Differences from the original game notice).
 
