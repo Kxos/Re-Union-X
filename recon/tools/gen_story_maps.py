@@ -75,6 +75,10 @@ stages = json.load(open(cfg['stages'], encoding='utf-8')) if cfg.get('stages') e
 quests = json.load(open(cfg['quests'], encoding='utf-8')) if cfg.get('quests') else []
 quests = quests if isinstance(quests, list) else list(quests.values())
 enemies = json.load(open(cfg['enemies'], encoding='utf-8'))
+# event quest rows (server/make-event-enemies.js, Task 2b) never answer a name lookup («Werewolf» target stays 1612011505)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import event_enemy_ids  # noqa: E402
+enemies = event_enemy_ids.without_event_rows(enemies)
 rooms = json.load(open(cfg['rooms'], encoding='utf-8-sig'))
 tmpl = open(cfg['template'], 'rb').read()
 out = cfg['out']

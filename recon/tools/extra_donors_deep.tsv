@@ -1860,7 +1860,8 @@ lwf/character/enemy/272/wait/wait_e38393e38383e38388e3839ee38383e3839720372e706e
 lwf/character/enemy/272/wait/wait_e38393e38383e38388e3839ee38383e3839720382e706e67.png	jp431:lwf/character/enemy/230/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031342e706e67.png	content-anchor	27x40
 lwf/character/enemy/272/wait/wait_e38393e38383e38388e3839ee38383e3839720392e706e67.png	jp431:lwf/character/enemy/230/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031352e706e67.png	content-anchor	52x53
 # Events Part 1, Task 2b (6 Nov 2026): deep_donors.py --fams on the 31 incomplete event families of
-# event_enemy_families.json; same rules, 407 rows (completes 261 Fortress Crab and 1027 Guard Armor).
+# event_enemy_families.json; same rules, 407 rows (completes 261 Fortress Crab and 1027 Guard Armor). Events Task 2b,
+# pending user review: used only for event families approved in event_enemy_families.json.
 lwf/character/enemy/1027/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp431:lwf/character/raid/0005/atk1/atk1_28.png	content-anchor	53x81
 lwf/character/enemy/1027/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031342e706e67.png	jp431:lwf/character/raid/0005/atk1/atk1_12.png	content-anchor	51x100
 lwf/character/enemy/1027/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031372e706e67.png	jp431:lwf/character/raid/0005/atk1/atk1_9.png	content-anchor	82x132

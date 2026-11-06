@@ -150,28 +150,3 @@
 1501:knockback
 1501:wait
 2002:wait
-# Events Part 1, Task 2b (06-11-2026): event quest families whose 2018 WW record rows were appended by hand to
-# extra_donors_dedup.tsv; make_jp_enemies.py builds them only once approved in event_enemy_families.json
-# (the user's review of the rendered animations).
-226
-262
-1025
-1026
-1522
-1526
-1546
-1547
-1553
-1555
-1556
-1565
-1566
-1579
-1582
-1585
-1589
-1593
-1594
-1596
-1597
-1603

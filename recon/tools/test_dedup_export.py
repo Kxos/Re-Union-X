@@ -2,6 +2,7 @@
 
     python -I recon/tools/test_dedup_export.py        -> "OK: ..." or "ERRORS (n)", exit 1
 """
+import json
 import os
 import shutil
 import struct
@@ -195,7 +196,15 @@ real_allow = de.parse_allow(open(de.APPROVED, encoding='utf-8'))
 t = xd.load(xd.DEDUP_TABLE, rules={'dedup-order', 'dedup-override', 'dedup-rescale', 'dedup-wwrecord',
                                     'dedup-wwrecord-override'})
 check(len(t) > 4200, 'versioned table rows: %d' % len(t))
-bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4])]
+# Events Task 2b: rows of event families pending the user's review (extra_donors_dedup_pending.txt) are allowed only
+# while pending: never in the approved list, never approved in event_enemy_families.json, never another family
+pending_p = os.path.join(os.path.dirname(de.APPROVED), 'extra_donors_dedup_pending.txt')
+pending = {l.strip() for l in open(pending_p, encoding='utf-8') if l.strip() and not l.startswith('#')}
+evfam = json.load(open(os.path.join(os.path.dirname(de.APPROVED), 'event_enemy_families.json'), encoding='utf-8'))['families']
+check(pending <= set(evfam), 'pending families that are not event families: %s' % sorted(pending - set(evfam)))
+check(not (pending & set(real_allow)), 'pending families in the approved list: %s' % sorted(pending & set(real_allow)))
+check(not [f for f in pending if evfam[f].get('approved')], 'approved event families still pending')
+bad = [k for k in t if not de.allowed(real_allow, k.split('/')[3], k.split('/')[4]) and k.split('/')[3] not in pending]
 check(not bad, 'rows outside the allow-list: %s' % bad[:3])
 under_review = {'1643'}       # not reviewed yet (1609 approved by the third review, 23-10)
 check(not (under_review & set(real_allow)), 'families under review in the allow-list: %s' % (under_review & set(real_allow)))

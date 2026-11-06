@@ -201,10 +201,20 @@ function setSubs(row, subs) {
     submissionSkillLv: pad(([, r]) => (r[0] === 3 ? 1 : 0)), submissionItemNum: pad(([, r]) => r[2]) });
 }
 
+// «Defeat the X»: the id the stage really has, then the smallest with the name; rows = enemy rows WITHOUT the event
+// quest rows (make-event-enemies.js withoutEventRows: they never answer a name lookup)
+function proudEnemyId(rows, name, inMap = new Set()) {
+  const x = name.trim().toLowerCase();
+  const ids = rows.filter((e) => String(e.name).toLowerCase() === x).map((e) => e.enemyId).sort((a, b) => a - b);
+  return ids.find((id) => inMap.has(id)) || ids[0] || 0;
+}
+
 // stageRows: tabella stage (storia kind 1 con id 1-979); proud: parseWiki(); sources: medal, keyblade, title, enemy,
 // stagePoi (nemici della mappa: «Defeat the X» col nemico che c'e' davvero), original (riga 1001010)
 function buildRows(stageRows, proud, sources = {}) {
   const { medals = [], keyblades = [], titles = [], enemies = [], skills = [], stagePoi = {}, original = null, codes = CODES } = sources;
+  let own = null;
+  const ownEnemyRows = () => own || (own = require('./make-event-enemies').withoutEventRows(enemies, sources.eventIds));
   const report = { stopgapObjectives: [], missingRewards: [], unmappedConditions: [], uncodedConditions: [], missingStory: [],
     missingKeyblade: [], noCondition: [] };
   const story = new Map(stageRows.filter((r) => r.stageKind === 1 && r.stageId < 100000 && r.id >= FIRST && r.id <= LAST).map((r) => [r.id, r]));
@@ -246,11 +256,7 @@ function buildRows(stageRows, proud, sources = {}) {
     const inMap = new Set(((stagePoi[st.stageId] || {}).enemies || []).map((e) => e.enemyId));
     const target = st.submissionRequire && st.submissionRequire.indexOf(12) >= 0 ? st.submissionId[st.submissionRequire.indexOf(12)] : 0;
     const ctx = { target, targetName: '', keybladeId: (name) => baseKb.get(name) || 0, skillId: (name) => (skills.find((x) => x.name === name) || {}).skillId || 0, header: null,
-      enemyId: (name) => {
-        const x = name.trim().toLowerCase();
-        const ids = enemies.filter((e) => String(e.name).toLowerCase() === x).map((e) => e.enemyId).sort((a, b) => a - b);
-        return ids.find((id) => inMap.has(id)) || ids[0] || 0;
-      } };
+      enemyId: (name) => proudEnemyId(ownEnemyRows(), name, inMap) };
     const subs = [];
     for (const [i, o] of q.objectives.slice(0, 3).entries()) {
       let c = proudObjective(o.text, ctx);
@@ -317,4 +323,4 @@ function patch(masterDir, src) {
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
 module.exports = { OFFSET, ORIGINAL_ROW, COMBINED_FROM, CODES, conditionText, CONDITION_FORMS, MATERIALS, parseWiki, conditionForm, conditionCodes,
-  wrapName, proudObjective, buildRows, patch, isProud, defaultSources };
+  wrapName, proudObjective, buildRows, patch, isProud, defaultSources, proudEnemyId };

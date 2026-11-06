@@ -111,8 +111,12 @@ check(not set(wh) & (set(ex) | set(dd) | set(rr) | set(rc)), 'whole copies overl
 anims = {}
 for k, v in wh.items():
     anims.setdefault(k.rsplit('/', 1)[0], []).append((k, v))
-# 31 approved 23-10 + 4 dead.lwf of event quest families (Events Part 1 Task 2b, 06-11: 226, 1522, 1530, 1566)
+# 31 approved 23-10 + 4 dead.lwf of event quest families (Events Part 1 Task 2b, 06-11: 226, 1522, 1530, 1566), these
+# labelled «pending user review», never «user-approved», until the user approves the renders
 check(len(anims) == 35, 'whole copies: %d animations (35)' % len(anims))
+pend = {d for d, rows in anims.items() if any('pending user review' in v[3] for _, v in rows)}
+check(pend == {'lwf/character/enemy/%d/dead' % f for f in (226, 1522, 1530, 1566)}, 'pending whole copies: %s' % sorted(pend))
+check(not any('user-approved' in v[3] for d in pend for _, v in anims[d]), 'pending whole copy labelled user-approved')
 for d, rows in anims.items():
     an = d.rsplit('/', 1)[1]
     check(any(k == d + '/' + an + '.lwf' for k, _ in rows), 'whole copy without its LWF: ' + d)

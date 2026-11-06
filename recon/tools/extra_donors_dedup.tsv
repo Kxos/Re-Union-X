@@ -4987,7 +4987,8 @@ lwf/character/enemy/2506/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720343
 # Events Part 1, Task 2b (6 Nov 2026): event quest enemies (event_enemy_families.json), pieces whose name shares a
 # record of the 2018 WW container name index with a local file (identical file; rule dedup-order when it fits the
 # declared size, dedup-wwrecord at its own size when the sharer declares the same size). 973 rows. Appended by hand:
-# keep this block if dedup_export.py rewrites the table. Built only for approved families (make_jp_enemies.py).
+# keep this block if dedup_export.py rewrites the table. Events Task 2b, PENDING USER REVIEW (families in
+# extra_donors_dedup_pending.txt); make_jp_enemies.py builds only event families approved in event_enemy_families.json.
 lwf/character/enemy/1025/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972034322e706e67.png	b2016:lwf/character/raid/0015/atk1/atk1_e38393e38383e38388e3839ee38383e383972036322e706e67.png	dedup-order	46x34	A
 lwf/character/enemy/1025/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034322e706e67.png	b2016:lwf/character/raid/0015/atk1/atk1_e38393e38383e38388e3839ee38383e383972036322e706e67.png	dedup-order	46x34	A
 lwf/character/enemy/1025/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp431:lwf/character/enemy/1025/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972034342e706e67.png	dedup-wwrecord	23x24	A
