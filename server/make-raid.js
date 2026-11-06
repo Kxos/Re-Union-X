@@ -27,7 +27,8 @@
 //   available tier, eventCategory and eventType 2), raidEnemy, raidSetting, raidReward, raidEnemyAttack;
 // - game_data/raids.json: {entries: [...], reasons: {label: why}, own: {...}}, entries in the shape of the plan plus gemDrop,
 //   hp, worldId, level; reasons comes from reconstructedWhy of raid_config.json, one per label in use;
-// - evStage detailUrl /web/raid/notice/<evStageId> when game_data/raid_notices.json (make-raid-notices.js) has the census row;
+// - evStage detailUrl /web/raid/notice/<evStageId> when game_data/raid_notices.json (make-raid-notices.js) has the census row,
+//   and on every Japan-only row (its page: raid-pages.js jpNoticePage);
 // - game_data/raid_maps.json: stage list for recon/tools/gen_story_maps.py (config key "special", as special_maps.json);
 // - Raid Boards (raid-boards.js, from raid_rewards/a_weekly/boards_weekly.json): sphere / sphereArray / sphereMasu rows of type 5,
 //   one set per census row with a raid, ids 3000000 + n (raid_ids.json `boards`); entries carry sphereBoardIds, raids.json `boards`
@@ -1130,8 +1131,9 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         enemies: [[egg(), egg()]], treasures: [], rooms: 1 });
       entry.available = true;
     });
-    // Details of the banner: the raid's original notice (make-raid-notices.js), only when there is one (no dead button)
-    const detailUrl = notices && notices.rows && notices.rows[row.id] ? `${NOTICE_URL}${evStageId}` : '';
+    // Details of the banner: the raid's original notice (make-raid-notices.js), only when there is one (no dead button). A JP
+    // row always has one (task 2, 06-11): its page says whether the JP notice was recovered and gives what is known (jpNoticePage)
+    const detailUrl = isJpRow(row) || (notices && notices.rows && notices.rows[row.id]) ? `${NOTICE_URL}${evStageId}` : '';
     if (stageIds.length) { out.evStageRows.push(evStageRow(evStageId, stageIds, { detailUrl })); withRaid.add(row.id); }
   };
   // WW rows first: the JP rows take their quests from the WW event raids built before them (jpDonorOf)

@@ -1,0 +1,145 @@
+{
+ "_note": "Texts printed on the original JP raid banners (the Events card of each Japan-only raid that has one, list reference/raid_banners_jp/jp_cards.json, local), read by eye on 2026-11-06, with our English translation. Shown on the Details page of the row (raid-pages.js jpNoticePage), marked as our translation of the banner. No image here.",
+ "rows": {
+  "JP-RAID-1": {
+   "ja": "ハロウィーンイベント クエスト攻略で豪華アイテムゲット!",
+   "en": "Halloween Event: Clear quests to get great items!"
+  },
+  "JP-RAID-2": {
+   "ja": "新レイドボス 100%出現!! 本日12時/21時/23時 各1時間限定!",
+   "en": "New Raid Boss: 100% appearance!! Today at 12:00, 21:00 and 23:00, one hour each only!"
+  },
+  "JP-RAID-3": {
+   "ja": "新レイドボス出現クエスト トライデントアンカーでLUXゲット! 0時/12時/21時 各1時間は100%出現&LUX2倍!",
+   "en": "New Raid Boss quest: get Lux from Trident Tail! At 0:00, 12:00 and 21:00, one hour each: 100% appearance & Lux x2!"
+  },
+  "JP-RAID-4": {
+   "ja": "クリスマスイベント ジャックインザボックス出現! レイドボス討伐で限定アバター&メダルをゲット!",
+   "en": "Christmas Event: Jack in the Box appears! Defeat the Raid Boss to get limited avatar parts & Medals!"
+  },
+  "JP-RAID-5": {
+   "ja": "2016新年イベント 限定エネミーを倒してアバターをゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "2016 New Year Event: Defeat limited enemies to get avatar parts! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-6": {
+   "ja": "レイドボードで『ミッキーとほうきの召使い』をゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Get «Mickey & Magic Broom» on the Raid Board! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-7": {
+   "ja": "ハッピーバレンタイン バレンタインエネミー討伐で限定メダルをゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Happy Valentine's Day: Defeat Valentine enemies to get limited Medals! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-8": {
+   "ja": "ハッピーホワイトデー ホワイトデーエネミー討伐で限定メダルをゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Happy White Day: Defeat White Day enemies to get limited Medals! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-9": {
+   "ja": "イースターイベント 後半戦 エッグマスターを討伐せよ!! LV40討伐で『ほうきの召使い』ゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Easter Event, second half: Defeat Egg Master!! Defeat it at LV 40 to get «Magic Broom»! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-10": {
+   "ja": "レイドボスイベント ズートピア アバターをゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: Get Zootopia avatar parts! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-11": {
+   "ja": "クエスト&レイドから限定メダルゲット! こどもの日! 節句イベント 後半戦 毎日12時/17時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Get limited Medals from quests & raids! Children's Day! Seasonal Festival Event, second half. Raid Boss Bonus Time every day for one hour from 12:00, 17:00 and 22:00!"
+  },
+  "JP-RAID-22": {
+   "ja": "レイドボスイベント KH2.8発売記念イベント 2017.1.12発売! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: KH2.8 Release Celebration Event, on sale 2017.1.12! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-08-06": {
+   "ja": "レベル★★★ レイドボスイベント パープルグミハウンド出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Gummi Hound (JP «Purple Gummi Hound») appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-SHR-1": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「フォートレスクラブ亜種」を撃破しよう! 逃亡まで12時間 HP 99,999,990",
+   "en": "Super-Hard Raid Boss Event: Team up with your party! Defeat Fortress Crab Ω! 12 hours until it escapes · HP 99,999,990"
+  },
+  "JP-SHR-2": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「フィアスクイーンビー亜種」を撃破しよう! 逃亡まで12時間 HP 50,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up with your party! Defeat Queen Bee Ω! 12 hours until it escapes · HP 50,000,000"
+  },
+  "JP-SHR-14": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-19": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「マリススパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Malicious Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-24": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-26": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「マリススパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Malicious Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-28": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-32": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-35": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-40": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「マリススパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Malicious Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-45": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-49": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-53": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-57": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Rトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Red Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-60": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-62": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Blue Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-66": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-70": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Wicked Spider! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-74": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 30,000,000",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Defeat Green Trident Tail! 12 hours until it escapes · HP 30,000,000"
+  },
+  "JP-SHR-78": {
+   "ja": "レベル★★★★★★ 超難度レイドボスイベント 「Rトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★★ · Super-Hard Raid Boss Event: Defeat Red Trident Tail! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-85": {
+   "ja": "レベル★★★★★★ 超難度レイドボスイベント 「Rトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★★ · Super-Hard Raid Boss Event: Defeat Red Trident Tail! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-SHR-92": {
+   "ja": "レベル★★★★★★ 超難度レイドボスイベント 「Rトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Level ★★★★★★ · Super-Hard Raid Boss Event: Defeat Red Trident Tail! 12 hours until it escapes · HP 150,000,000"
+  }
+ }
+}

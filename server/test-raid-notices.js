@@ -110,10 +110,45 @@ const tests = {
     if (fs.existsSync(ix) && fs.existsSync(mn.OUT)) {
       const real = JSON.parse(fs.readFileSync(ix, 'utf8')), doc = JSON.parse(fs.readFileSync(mn.OUT, 'utf8'));
       const rows = require('./raid-calendar').catalogRows(real), c = { ...ctx(), boardItems: () => [], boardName: () => '' };
-      const missing = rows.filter((r) => doc.rows && doc.rows[r.censusId]).filter((r) => !note.test(pages.noticePage(real, r.evStageId, doc, c))).map((r) => r.censusId);
+      // the Japan-only rows always have a page (task 2, 06-11)
+      const missing = rows.filter((r) => r.jp || (doc.rows && doc.rows[r.censusId])).filter((r) => !note.test(pages.noticePage(real, r.evStageId, doc, c))).map((r) => r.censusId);
       assert.deepStrictEqual(missing, [], 'notice pages without the rule');
       const noDetail = rows.filter((r) => !note.test(pages.detailPage(real, r.evStageId, c) || '')).map((r) => r.censusId);
       assert.deepStrictEqual(noDetail, [], 'detail pages without the rule');
+    }
+  },
+  jp_notice_pages() {
+    // task 2 (06-11): every Japan-only row has a Details page; it gives our translation of its JP notice when one was recovered,
+    // else says plainly that it was not; the facts we have (bosses by day, HP, time limit, level rewards, boards and their label)
+    // and the one-AP rule note in both cases; the banner text (raid_jp_banners.json) with its Japanese line when the row has a card
+    const note = /one rule for every raid on this server \(not original\)/;
+    const ix = index();
+    ix.entries.push(entry('JP-RAID-4', 8202, '2015-12-18', '2015-12-25', 'Jack in the Box', { family: 'event', jp: true, region: 'JP', hp: 18000, sphereBoardIds: [3000700],
+      levelDrops: [{ level: 30, items: ['5★ Test Medal'] }], reconstructed: ['jp', 'jpBoardOriginal'] }),
+    entry('JP-RAID-12', 8201, '2016-05-22', '2016-05-29', 'Gummi Hound', { family: 'event', jp: true, region: 'JP', reconstructed: ['jp', 'jpNoBoard'] }));
+    const doc = { rows: {}, notices: {}, jp: { 'JP-RAID-4': { noticeId: 15404, date: '2015-12-19', title: 'Raid boss!', lines: ['Fixture line one.'] } } };
+    const c = ctx({ boardName: () => 'M_Santa Sora Outfit 12/18/15', boardItems: () => ['6★ Chip'] });
+    const known = pages.noticePage(ix, 8202, doc, c), lost = pages.noticePage(ix, 8201, doc, c);
+    assert.ok(note.test(known) && note.test(lost), 'rule note on JP pages');
+    assert.ok(known.includes('Original Japanese notice (our translation)') && known.includes('Fixture line one.') && known.includes('JP notice 15404') && !/has not been recovered/.test(known));
+    assert.ok(known.includes('M_Santa Sora Outfit 12/18/15') && known.includes('original Japanese boards') && known.includes('LV 30: 5★ Test Medal') && known.includes('18,000'));
+    assert.ok(lost.includes('The original Japanese notice of this raid has not been recovered.') && lost.includes('none: not known') && lost.includes('No Raid Boards'));
+    // the banner of JP-RAID-4: Japanese line and our translation
+    assert.ok(known.includes('On the banner (our translation)') && known.includes('lang="ja"'), 'banner text');
+    assert.ok(!lost.includes('On the banner'), 'no card, no banner text');
+    // the detail page links to it
+    assert.ok(pages.detailPage(ix, 8201, c).includes('/web/raid/notice/8201?from=raid'));
+  },
+  jp_banner_texts() {
+    // every JP row with its own original card (reference/raid_banners_jp/jp_cards.json «exact», local list) has its banner text
+    const b = require('./raid_jp_banners.json').rows;
+    assert.ok(Object.keys(b).length >= 35, 'the 35 carded rows of 06-11');
+    for (const [id, x] of Object.entries(b)) assert.ok(/^JP-/.test(id) && x.ja && /[぀-ヿ一-鿿]/.test(x.ja) && x.en && !/[぀-ヿ]/.test(x.en.replace(/«[^»]*»/g, '')), id);
+    const list = 'D:/Progetto_Restauro_KH_UX/reference/raid_banners_jp/jp_cards.json';
+    if (fs.existsSync(list)) {
+      const cards = JSON.parse(fs.readFileSync(list, 'utf8'));
+      const missing = (Array.isArray(cards) ? cards : cards.rows).filter((r) => r.match === 'exact' && !b[r.censusId]).map((r) => r.censusId);
+      assert.deepStrictEqual(missing, [], 'carded JP rows without banner text');
     }
   },
   sections_parsed() {

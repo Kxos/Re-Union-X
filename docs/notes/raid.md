@@ -426,6 +426,20 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   (not served). The other rows keep the plain plate. The Raid Catalog banner leaves the JP cards out of its strips
   (`make_special_banners.py`, unchanged picture); its `--section raid` run now also writes the `-kept` copies of the JP rows.
   Models and list banners are the served ones of each boss.
+- <a id="jp-details"></a>**Details pages (task 2, 06-11; tests and dry run, master not regenerated).** No JP raid had a notice page in
+  the WW game, so their banners had no Details button. Now every JP evStage has `detailUrl` `/web/raid/notice/<evStageId>`
+  (`make-raid.js`), and `raid-pages.js` `noticePage` serves a JP row with `jpNoticePage`: banner card, JAPAN ONLY + dates, the
+  one-AP rule note (`ruleNote`, test `rule_note_on_every_notice` covers the JP pages), then (1) the text printed on the original
+  JP banner with its Japanese line and our translation (`server/raid_jp_banners.json`, versioned, no image: the 35 rows with
+  their own card, read by eye; test `jp_banner_texts` checks every carded row of `jp_cards.json` has one); (2) the facts of the
+  JP notice translated by us («Original Japanese notice (our translation)», notice id and date) for the 13 rows whose notice is
+  in the evidence (15404, 15845, 24013, 24027, 25538, 29893, 30969, 32002, 41184, 41745, 42600, and the standing weekend notice
+  40716 for the two 2018 Saturday-only rows, said so), else «The original Japanese notice of this raid has not been recovered»;
+  (3) what is known: dates, type, opening rule, level rule, bosses by day / tier with HP at LV 1 and time limit, level rewards,
+  Raid Boards with their state (original / Japanese super-hard board / reconstructed / none); (4) «On this server». The
+  translations live in the private `raid_census/jp_notice_facts.json`, copied by `make-raid-notices.js` into the git-ignored
+  `game_data/raid_notices.json` as `jp` (`KHUX_RAID_NOTICES_OUT` writes elsewhere for dry runs). The Raid Catalog detail page
+  of a JP row links «Notice of this raid ›». Dry run: Details on 347 of 347 raid banners (153 JP).
 - **Notices.** «Raid Bosses»: section «Raids of the Japanese version» (`raidJpLines`), and «Raids not here yet» lists the unnamed
   bosses and the WW twins (`raidNoticeLines`, from `raids.json` `jp`).
 - **Master** (make-raid.js + make-ev-campaign.js on rev 271 data): stage +155, evStage +148, raidSetting +155, raidEnemy +608,
