@@ -141,8 +141,11 @@ const tests = {
     const box = n.slice(n.indexOf('<div class="sb">'));
     assert(/<div class="sb"><div class="rch"><img[^>]*raid\.png[^>]*>On this server<span class="ng">NOT ORIGINAL<\/span><\/div><div class="why [a-z]*"><span class="s /.test(box), 'callout header, status row with its pill');
     // one box, at the top (user 06-11): right after the title chips, before the original notice; NOT ORIGINAL once; order inside
-    assert(n.indexOf('<div class="sb">') > n.indexOf('<p class="dt">') && n.indexOf('<div class="sb">') < n.indexOf('<h2 class="och">Original notice</h2>') && n.indexOf('<h2 class="och">') < n.indexOf('Raid!'), 'box at the top, then «Original notice»');
+    assert(n.indexOf('<div class="sb">') > n.indexOf('<p class="dt">') && n.indexOf('<div class="sb">') < n.indexOf('<h2 class="och">') && n.indexOf('<h2 class="och">') < n.indexOf('Raid!'), 'box at the top, then «Original notice»');
     assert.strictEqual((n.match(/class="sb"/g) || []).length, 1);
+    // the original notice in its card (user 06-11, style only): header strip with the date chip, the sections inside, text unchanged
+    assert(/<div class="onc"><h2 class="och"><img[^>]*raid\.png[^>]*>Original notice<span class="ocd">Sep 4, 2017<\/span><\/h2><div class="ns raid"><h2>Raid!<\/h2><p>x<\/p><\/div><\/div>/.test(n), 'notice card');
+    assert(/\.onc \.ns tr:nth-child\(even\) td\{/.test(n) && /\.onc ul\.nl li:before\{content:"\\2022"/.test(n), 'zebra rows, gold bullets');
     assert.strictEqual((n.match(/NOT ORIGINAL/g) || []).length, 1, 'NOT ORIGINAL once');
     assert(!/class="rc"/.test(n) && !n.includes('One raid rule on this server'), 'no separate rule callout');
     const at = (x) => box.indexOf(x);

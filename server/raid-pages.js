@@ -526,7 +526,6 @@ const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#062
   + '.rbn{display:inline-block;background:#ffcd4a;color:#06283e;border-radius:10px;padding:0 9px;margin-left:10px;font-size:12.5px;font-weight:bold;line-height:1.7;vertical-align:2px}'
   + '.rbt{float:right;color:#9fd4ff;font-size:13px;margin-top:3px}.rbt .c{display:none}details.rb[open] .rbt .o{display:none}details.rb[open] .rbt .c{display:inline}'
   + '.rbs{display:block;color:#b9cfdc;font-size:13.5px;margin:2px 0 0 1.1em}'
-  + '.och{color:#fff;font-size:18px;margin:16px 0 4px;padding-bottom:4px;border-bottom:2px solid #5d8aa6}.och:before{content:""}'
   + '.sbo{color:#ffb3a8;font-size:14px;margin:2px 2px 6px}.sbo .ic{width:1.3em;height:1.3em}.sb details.fold{border-color:#1d5878;font-size:14px}.sb details.fold li{margin:3px 0}'
   + '.sbl{margin:8px 0 2px}.sbl a{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:16px;padding:3px 14px;margin:4px 8px 0 0;color:#fff;text-decoration:none;font-size:14.5px}';
 // the «Why these values?» fold outside the notice pages (NOTICE_CSS has its own)
@@ -629,6 +628,30 @@ function detailPage(index, evStageId, ctx = {}) {
 // the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid' (opened from the details
 // page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
 const { scrub: scrubNotice, OMIT_LINE: OMIT } = require('./make-raid-notices');
+// «Original notice» card of the raid notice page (user 06-11, style only: every line of the notice stays as it is): a header
+// strip (title, date chip), the event sections without their own frames, gold event bands, underlined ■ heads, cyan ▼ heads,
+// gold bullets, the tables in the original notices' colours (#365e76 head, #043654 rows) with zebra rows and rounded corners,
+// a quieter [Edited …] chip. Scoped to .onc: the Shop notice page (same NOTICE_CSS) is unchanged. Flex-free, old WebView safe.
+const ONC_CSS = '.onc{border:1px solid #2f6f93;border-radius:10px;background:#06283e;margin:16px 0 12px;overflow:hidden}'
+  + '.onc>h2.och{margin:0;padding:8px 14px 7px;color:#fff;font-size:18px;letter-spacing:.03em;background:#0a4466;background:-webkit-linear-gradient(top,#0f5a85,#0a4466);background:linear-gradient(#0f5a85,#0a4466);border-bottom:2px solid #39a7cf}'
+  + '.onc>h2.och:before{content:""}.och .ic{width:1.35em;height:1.35em;margin-right:6px}.och .ocd{display:inline-block;margin-left:10px;padding:0 10px;border:1px solid #ffcd4a;border-radius:12px;color:#ffcd4a;font-size:13px;font-weight:normal;line-height:1.7;vertical-align:2px;letter-spacing:0}'
+  + '.onc .ns{border:0;border-radius:0;background:transparent;margin:0;padding:10px 16px 12px;font-size:16px;line-height:1.65;word-wrap:break-word;overflow-wrap:break-word}.onc .ns+.ns{border-top:1px solid #1d5878}'
+  + '.onc .ns h2{display:block;margin:2px 0 10px;padding:6px 12px;font-size:18px;line-height:1.4;color:#ffcd4a;background:#0d3c5a;border-left:4px solid #ffcd4a;border-radius:0 6px 6px 0}.onc .ns h2:before{content:""}'
+  + '.onc .ns h3{color:#ffcd4a;font-size:16.5px;margin:18px 0 6px;padding-bottom:3px;border-bottom:1px solid #6b5a2a}'
+  + '.onc .ns h4{color:#00d4ed;font-size:15.5px;margin:12px 0 4px;padding-left:8px;border-left:3px solid #00d4ed}'
+  + '.onc .ns p{margin:4px 0 9px;max-width:66em}.onc .ns .tg{font-size:17px;margin:2px 0 10px}'
+  + '.onc .ns .upd{background:transparent;border:1px solid #b8860b;color:#e8c46a;font-size:12.5px;padding:0 9px;margin:2px 0 6px}'
+  + '.onc .ns .nb{padding-left:1em;text-indent:-1em;max-width:70em}.onc .ns a{color:#9fd4ff;text-decoration:underline}'
+  + '.onc ul.nl{list-style:none;margin:4px 0 10px;padding-left:6px}.onc ul.nl li{margin:3px 0;padding-left:1.2em;text-indent:-1.2em}'
+  + '.onc ul.nl li:before{content:"\\2022";display:inline-block;width:1.2em;text-indent:0;color:#ffcd4a;font-weight:bold}'
+  + '.onc .ns table{width:100%;margin:6px 0 14px;border-collapse:separate;border-spacing:0;border:1px solid #5f8aa5;border-radius:8px;font-size:15px}'
+  + '.onc .ns th,.onc .ns td{border:0;border-top:1px solid #2f5d78;padding:6px 10px;text-align:left}.onc .ns tr:first-child>*{border-top:0}'
+  + '.onc .ns th{background:#365e76;color:#fff;font-weight:bold}.onc .ns td{background:#043654}.onc .ns tr:nth-child(even) td{background:#0a4466}'
+  + '.onc .ns td+td,.onc .ns th+td,.onc .ns th+th{border-left:1px solid #2f5d78}'
+  + '.onc .ns tr:first-child>:first-child{border-top-left-radius:7px}.onc .ns tr:first-child>:last-child{border-top-right-radius:7px}'
+  + '.onc .ns tr:last-child>:first-child{border-bottom-left-radius:7px}.onc .ns tr:last-child>:last-child{border-bottom-right-radius:7px}'
+  + '.onc .ns .rw td.q{color:#ffcd4a;font-weight:bold}.onc .ns .rw th:last-child{width:28%}.onc .ns .rw td.q{width:auto}'
+  + '.onc details.fold{background:#0a3a58;border-color:#2f6f93;padding:2px 12px}.onc details.fold>summary{font-weight:bold}';
 const NOTICE_CSS = RULE_CSS + '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
   + '.chip.d{background:#06283e;border-color:#ffcd4a;color:#ffcd4a}'
   + '.ns{border-left:5px solid #5d8aa6;background:#06283e;border-radius:0 8px 8px 0;padding:6px 12px 8px;margin:10px 0;font-size:16px;line-height:1.55;overflow-wrap:break-word}'
@@ -638,7 +661,7 @@ const NOTICE_CSS = RULE_CSS + '.dt{margin:2px 0 10px}.chip{display:inline-block;
   + 'ul.nl{margin:2px 0 8px;padding-left:22px}ul.nl li{margin:2px 0}.ns table{margin:4px 0 10px}.rw td.q{width:28%;color:#ffcd4a;white-space:nowrap}.pd th{width:30%}.bt th{width:50%}'
   + 'details.fold{margin:6px 0;border:1px solid #2f5d78;border-radius:6px;padding:2px 10px}details.fold>summary{cursor:pointer;color:#00d4ed;padding:4px 0}'
   + 'details.oth{margin:10px 0}details.oth>summary{cursor:pointer;color:#b9cfdc;font-size:15px;padding:6px 10px;background:#0a4466;border-radius:6px}details.oth[open]>summary{color:#fff}'
-  + SRV_CSS + 'h2.on{margin-top:20px}.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:18px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
+  + SRV_CSS + ONC_CSS + 'h2.on{margin-top:20px}.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:18px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
   + '.srv a,.na a{color:#9fd4ff}.srv li{margin:4px 0}';
 
 // notice body (lines) -> {sections: [{head (null: the lines before the first heading), lines, raid}]}; bosses: of the week
@@ -760,9 +783,9 @@ function noticePage(index, evStageId, doc, ctx = {}) {
         + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>`
         + srvBox(row, st, { intro: `This server follows your Story, not the calendar: this week (${esc(dateRange(row))}) opens when your Story reaches it.`,
           rule: RULE_NOTICE, links: noticeLinks(row) })
-        + '<h2 class="och">Original notice</h2>'
+        + `<div class="onc"><h2 class="och">${icon('raid')}Original notice</h2>`
         + '<div class="ns raid"><h2>No notice for this week</h2><p>This raid ran in the last weeks of the original game, during the end of service: '
-        + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div>'
+        + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div></div>'
         + `${back}</body></html>`;
     }
     if (row && row.jp) return jpNoticePage(row, doc, ctx, { st, back });
@@ -772,9 +795,9 @@ function noticePage(index, evStageId, doc, ctx = {}) {
       + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
       + srvBox(row, st, { intro: 'Below: the raid part of the original notice, unchanged (other events and top-player lists left out). '
         + `Its dates are the original game's (${esc(dateRange(row))}): here the raid opens when your Story reaches that week.`, rule: RULE_NOTICE, links: noticeLinks(row) })
-      + '<h2 class="och">Original notice</h2>'
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
-      + noticeBody(n.body, row.bosses)
+      + `<div class="onc"><h2 class="och">${icon('raid')}Original notice<span class="ocd">${esc(niceDay(n.date))}</span></h2>`
+      + `${noticeBody(n.body, row.bosses)}</div>`
       + `${back}</body></html>`;
   } catch (e) {
     return noticeMissing(row, ctx);

@@ -103,7 +103,7 @@ const tests = {
     const note = /<div class="sb"><div class="rch">.*?On this server<span class="ng">NOT ORIGINAL<\/span>.*?<div class="rsh">.*?One raid rule<\/div>.*?Monday – Friday.*?Original AP \(5 AP if it was free\).*?No Bonus Time.*?Saturday – Sunday.*?0 AP.*?Lux of raid bosses doubled.*?Bonus Time all day.*?Pacific time/;
     const body = ['★ Defeat the Trickmaster!', '・Raid quests cost 0 AP during Bonus Time (2:00 a.m. - 2:59 a.m. PT).'];
     const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
-    assert.ok(note.test(html) && html.indexOf('One raid rule') < html.indexOf('<h2 class="och">Original notice</h2>') && html.indexOf('<h2 class="och">') < html.indexOf('Defeat the Trickmaster'), 'the note comes before the original text');
+    assert.ok(note.test(html) && html.indexOf('One raid rule') < html.indexOf('<h2 class="och">') && html.indexOf('<h2 class="och">') < html.indexOf('Defeat the Trickmaster'), 'the note comes before the original text');
     assert.ok(html.includes('in the original notice below are those of the original game.') && html.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>'));
     // the link opens the notice: the Notices page carries data-s="raid-bosses" and opens a #<slug> address
     const np = require('./routes-info-album').noticesPage();
@@ -234,7 +234,7 @@ const tests = {
     const one = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body: ['★ Monthly Raid Event!', 'x'] } } }, ctx());
     assert.ok(!/class="oth"/.test(one));
     // the «On this server» box first (user 06-11), with the player-facing labels, not the builder notes
-    assert.ok(at('On this server') < at('Original notice</h2>') && at('Original notice</h2>') < at('Raid text.'));
+    assert.ok(at('On this server') < at('<h2 class="och">') && at('<h2 class="och">') < at('Raid text.'));
     assert.ok(html.includes('ATK') && !html.includes('No ATK of a raid is known'), 'labels, not the reasons of raids.json');
   },
   escapes() {
