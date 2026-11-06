@@ -183,3 +183,5 @@ B0618	pity	3;mode=every	D8, notice 59825: [notice text kept locally]
 B0811	end_pt	2021-06-29	notice 74614 (7★ Deal 2021-02-25 08:00 UTC, available until the end of service); notices 75152, 78463: online service ends 2021-06-29 18:00 PDT (the TSV end 2021-05-30 was the first EOS date, moved on 14 May 2021)
 B0812	end_pt	2021-06-29	notice 74613 (SN++ Deal 2021-02-25 08:00 UTC, available until the end of service); notices 75152, 78463: online service ends 2021-06-29 18:00 PDT (the TSV end 2021-05-30 was the first EOS date, moved on 14 May 2021)
 B0794	skill	72415:all	notice 73873 (About medals with skills: Attack Boost I 1.68421%, Attack Boost All I / Poison / Paralysis / Sleep / Defense Boost I 1.26315%, No Skills 92%; same values as table 72415); B0772 (notice 72831) prints no skill table
+B0087	start_pt	2017-03-14	notice 26296 («3 Days of Skills to Thrill!»: Mar. 14 - 16, 2017; the wiki start 2017-02-14 is wrong; user 06-11)
+B0088	start_pt	2017-03-14	notice 26296 («3 Days of Skills to Thrill!»: Mar. 14 - 16, 2017; the wiki start 2017-02-14 is wrong; user 06-11)
