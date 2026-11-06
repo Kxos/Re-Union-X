@@ -254,6 +254,7 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the story raid bosses (Task 11)
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
+  jpBoardOriginal: 'Raid Boards (original Japanese boards)', jpBoardDeduced: 'Raid Boards (reconstructed)', jpNoBoard: 'Raid Boards (none: not known)',
   jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpRewardProbable: 'level reward (probable match)',
   // the AP / Bonus Time rule (I-228, raid_config.json costRule): weekdayWeekend served, the opening hours of originalWindows kept off
   weekRule: 'AP and Bonus Time (one rule for all raids)', weekdayAp: 'weekday AP of a quest that was free',
@@ -299,6 +300,9 @@ const RECON_TEXT = {
   jp2016: 'The boss HP, attack, defense and rewards are its 2016 worldwide values: the Japanese values of this raid are not known.',
   jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids).',
   jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
+  jpBoardOriginal: 'The Raid Boards are the original Japanese ones (cells, costs and rewards from the game data); a Japanese-only medal that has no worldwide version yet is left out, and the cell positions are ours.',
+  jpBoardDeduced: 'No Japanese board of this raid survives cell by cell: its Raid Boards are reconstructed from what is known (number of cells, total Raid Coins, main rewards and title from the Japanese wiki, the original board pictures), on the model of the original Japanese boards of the same time. The costs of single cells and the filler medals are ours.',
+  jpNoBoard: 'Nothing is known of the Japanese Raid Board of this raid, so it has none here: the raid still gives Raid Coins.',
   jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»; August 4 and September 1, 2018: the next boss of the Japanese weekend cycle).',
   jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
   weekRule: 'One rule for every raid on this server (not original): from Monday to Friday the raid quest costs its original AP and there is no Bonus Time; on Saturday and Sunday (Pacific time) it costs 0 AP and the Lux of the raid boss is doubled, all day. The original game had its own hours instead: Bonus Time four times a day, and some raids open only at set hours.',
@@ -335,7 +339,10 @@ function detailPage(index, evStageId, ctx = {}) {
   const ids = [...new Set(row.entries.flatMap((e) => e.sphereBoardIds || []))];
   const names = [...new Set(row.entries.flatMap((e) => e.boards || []))];
   // a Japan-only raid's boards have no census name, only the served boards' own (listed below): no «no boards» line then
-  const boards = (names.length ? `<p>${names.map(esc).join(', ')}</p>` : ids.length ? '' : '<p class="n">No Raid Boards this week.</p>')
+  // a Japan-only raid with nothing known of its board (label jpNoBoard, user decision 06-11) says why it has none
+  const noBoard = row.entries.some((e) => (e.reconstructed || []).includes('jpNoBoard'))
+    ? '<p class="n">No Raid Boards: the Japanese board of this raid is not known, so none is served.</p>' : '<p class="n">No Raid Boards this week.</p>';
+  const boards = (names.length ? `<p>${names.map(esc).join(', ')}</p>` : ids.length ? '' : noBoard)
     + (ids.length ? `<ul class="pl">${ids.map((id) => {
       const items = [...new Set(ctx.boardItems ? ctx.boardItems(id) : [])], name = ctx.boardName ? ctx.boardName(id) : '';
       return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;

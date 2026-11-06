@@ -76,6 +76,12 @@ const tests = {
     // its board has no census name (only the served board's own): no «No Raid Boards this week» above the listed board (bench 05-11)
     assert(!det.includes('No Raid Boards this week') && det.includes('<ul class="pl"><li>'), 'board listed without the empty line');
     assert(det.includes('gains a level at every win'), 'the usual level step');
+    // user decision 06-11: a JP raid with nothing known of its board has none, and its page says why; a reconstructed one says so
+    ix.entries.push(tier('JP-RAID-3', 8301, '2015-11-13', '2015-11-19', 'single', 'Trident Tail', { family: 'event', jp: true, region: 'JP', reconstructed: ['jp', 'jpNoBoard'], boards: [], sphereBoardIds: [] }),
+      tier('JP-RAID-16', 8302, '2016-09-04', '2016-09-11', 'single', 'Circus Crab', { family: 'event', jp: true, region: 'JP', reconstructed: ['jp', 'jpBoardDeduced'], boards: [] }));
+    const none = pages.detailPage(ix, 8301, c), rec = pages.detailPage(ix, 8302, c);
+    assert(none.includes('No Raid Boards: the Japanese board of this raid is not known') && none.includes('Raid Boards (none: not known)') && !none.includes('No Raid Boards this week'), 'no board line');
+    assert(rec.includes('Raid Boards (reconstructed)') && rec.includes('on the model of the original Japanese boards'), 'reconstructed board line');
   },
   jp_research_labels() {
     // jpCensus (06-11): the probable boss / HP / reward and the opening hours (I-228) are named on the details page; the year-end 2016
