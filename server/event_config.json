@@ -25,6 +25,14 @@
   "noWikiPage": "No khuxwiki page exists for this quest: its values come from the later game data only, without a second source.",
   "wholeDay": "In the original this event was open for a short window (minutes to hours); here it is open for its whole original day.",
   "dramaOff": "The original scenes before or after this quest are not shown yet.",
-  "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update."
- }
+  "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update.",
+  "wwEnemy": "Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops)."
+ },
+ "mapEnemySwapsNote": "User ruling 06-11: where the JP map file names another enemy than the WW quest (khuxwiki), the WW enemy. Keyed by map key (the stage row's stageBinId); from/to are enemy ids of our master (story rows). Read by make-events.js (quest enemies, label wwEnemy) and recon/tools/import_event_stages.py (patches the same ids in the copied map file).",
+ "mapEnemySwaps": {
+  "734970": [{ "from": 126, "to": 99, "names": "Gummi Hammer -> Morning Star (Dark-Winged Warrior - 7/12)" }],
+  "725440": [{ "from": 32, "to": 23, "names": "Bag O' Coal -> Bag O' Jewels (Agrabah Mission #2)" }]
+ },
+ "keptTabNote": "Where the KEPT EVENT tab of make_special_banners.py --section event goes on a card: left (default) or right, by evStageId (the left one hides the art of some originals).",
+ "keptTab": { "20004": "right" }
 }

@@ -111,7 +111,7 @@ Checked on our master (`server/master_data`, 6 Nov 2026):
 6. Reward type 15 (Event Coins) is not paid on event quests until the event boards exist (Task 4; the raids keep paying their own coin
    tables as before).
 7. Event card images: made by Task 6 (see «Cards and maps» below); served once the user approves them.
-8. Event map POI: merged into `stage_poi.json` by Task 6 (see «Cards and maps» below).
+8. Event map POI and reward rows: written by make-events.js in the master run (Task 6, see «Cards and maps» below).
 
 ## Calendar and routes (Events Part 1, Task 4: tests only, bench pending)
 
@@ -137,20 +137,29 @@ Checked on our master (`server/master_data`, 6 Nov 2026):
 ## Cards and maps (Events Part 1, Task 6: files staged, nothing served)
 
 - **Cards**: `recon/tools/make_event_banners.py --fetch` downloads the banner image of each entry's own notice (`noticeIds`; the notice
-  list of `referenceanners
-otices.json`, first image key that is not the shared page header) into a private folder, one request every
+  list of `reference\banners\notices.json`, first image key that is not the shared page header) into a private folder, one request every
   2 s, cached, giving up after two failures; without `--fetch` it writes the 640x140 cards `server/game_data/event_img/<evStageId>.png`.
-  `make_special_banners.py --section event` then writes the Event Catalog banner (`catalogEvStage` 20000, the Raid Catalog layout with
-  strips of event cards) and a «KEPT EVENT» copy of every card. After a change: bump `imgVersion` in `event_config.json`.
-- **Maps** are the original JP 4.3.1 files, not generated: `recon/tools/import_event_stages.py` reads `event_maps.json` (one item per
-  served stage, `key` = the stage row's `stageBinId`), takes `mappoi_stg<key>.bin` + `_NN.bin` (highest JP revision) and copies them
-  byte for byte under the same names (the client loads `mappoi_stg<stageBinId>`: the stage id 4,000,000+n is never in a file name).
-  A stage is left out when its STG or a part is absent, a room is not served, or a map enemy is not in the master; a map whose enemies
-  differ from the quest is flagged, not changed. Output `stage_gen\event_stages\` (`stage\`, `stage_poi_events.json`, `report.json`);
-  `--stage-dir stage_geniles\stage` copies the files into the resource staging, `--poi server/game_data/stage_poi.json` merges the POI
-  (the server reads an event stage's POI by its `stageBinId`). `gen_story_maps.py` is not used for event quests.
-- **Reward rows**: some map reward ids (enemy rows 62xxx, chest rows 1628xx) are not in the master yet. `make-game-tables.js` writes a
-  row for every reward id of `stage_poi.json` on its next run (our generic content when the real row is unknown); the donor contents are
-  in `event_maps.json` `drops`. Until that run, no event quest may be served (the client crashes on a missing reward row).
-- If `stage_poi.json` is regenerated with `stage_poi.py`, merge `stage_gen\event_stages\stage_poi_events.json` back as the imported
-  story stages (`docs/notes/server.md`).
+  `make_special_banners.py --section event` then writes the Event Catalog banner (`catalogEvStage` 20000) and a «KEPT EVENT» copy of
+  every card. The Event Catalog banner has its own design, never the Raid Catalog layout (user, 6 Nov): cyan to green background, the
+  game's Event Coin icon as emblem, a large white «EVENT CATALOG», the subtitle and the small TRAINING sticker. The KEPT tab is at the
+  top left, or at the top right for the cards listed in `event_config.json` `keptTab` (the Quiz card, whose top left holds art).
+  After a change: bump `imgVersion` in `event_config.json`.
+- **Maps** are the original JP 4.3.1 files, not generated: `recon/tools/import_event_stages.py` reads `event_maps.json` (every candidate
+  event stage, served or held back for its map; `key` = the stage row's `stageBinId`), takes `mappoi_stg<key>.bin` + `_NN.bin` (highest
+  JP revision) and copies them under the same names (the client loads `mappoi_stg<stageBinId>`: the stage id 4,000,000+n is never in a
+  file name). A stage is left out when its STG or a part is absent, a room is not served, or a map enemy is not in the master.
+  Output `stage_gen\event_stages\` (`stage\`, `stage_poi_events.json`, `report.json`); `--stage-dir stage_gen\files\stage` copies the
+  files into the resource staging. `gen_story_maps.py` is not used for event quests.
+- **WW enemy on two maps** (user, 6 Nov: «they must have the WW enemy»): `event_config.json` `mapEnemySwaps` names, per map key, an
+  enemy id of the JP map and the WW enemy of our master that replaces it (Dark-Winged Warrior - 7/12: Gummi Hammer -> Morning Star;
+  Agrabah Mission #2: Bag O' Coal -> Bag O' Jewels). The import tool changes only that id in the enemy records of its copy (position,
+  count, level, drop slot and uid stay; the JP files are never changed); make-events.js swaps the same id in the quest and labels it
+  `wwEnemy`. A WW enemy missing from the master leaves the quest unserved (no substitute).
+- **Serving rule** (make-events.js, master run): a quest is served only when the import report says its map is `imported`
+  (else `why: "map not usable: <status>, <reason>"`), and every reward id of its map is in the master or in the record's original drop
+  rows (else `why: "reward rows missing: <ids>"`). make-events.js writes those reward rows with the original contents and odds and
+  merges the POI of the served maps into `server/game_data/stage_poi.json` in the same run, so POI and reward rows land together
+  (`events.json` `own.reward` / `own.poi`; the next run drops them first). `make-game-tables.js` leaves those POI keys and reward ids
+  out of its own generic reward rows. The import report is read from `D:\Progetto_Restauro_KH_UX\stage_gen\event_stages`
+  (`KHUX_EVENT_MAPS` overrides it); without it no event quest is served.
+- If `stage_poi.json` is regenerated with `stage_poi.py`, the next master run puts the event keys back (make-events.js).

@@ -27,7 +27,8 @@
 // keys no longer cover its stored ones stops the run.
 // Output (own rows dropped first, the previous run's list is events.json `own`; anything else in our ranges stops the run):
 // stage, evStage (with the Event Catalog banner catalogEvStage, Task 5); game_data/events.json {entries, reasons, catalog?, own};
-// game_data/event_maps.json (stage list for gen_story_maps.py). An event row has detailUrl /web/event/notice/<evStageId> when its record names a notice.
+// game_data/event_maps.json (every candidate stage, for recon/tools/import_event_stages.py: the original JP maps), reward rows of the
+// served maps (original drops) and their POI merged into game_data/stage_poi.json (map import report: MAPS_DIR, see loadMaps). An event row has detailUrl /web/event/notice/<evStageId> when its record names a notice.
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
 //
 //   node server/make-events.js [master folder]
@@ -43,7 +44,7 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins'];
+const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy'];
 const COIN_TYPE = 15;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -175,19 +176,56 @@ function firstClearOf(q) {
     clearGetAssignSkillId: each(() => 0), clearGetAssignSkillLv: each(() => 1), clearGetItemNum: each((x) => x.num || 1) };
 }
 
-// records, config (event_config.json), master {stage, evStage, enemy} without our own rows, ids (event_ids.json)
-// -> {evStage, stage, maps, ids, index: {entries, reasons}}
-function buildEvents(records, config, master, ids, anchors = {}) {
+// Map enemy swaps (event_config.json mapEnemySwaps {mapKey: [{from, to}]}, user ruling 06-11: the WW enemy where the JP map
+// differs from the WW quest): a copy of the quest with the enemy id replaced in its enemies, targets, objectives on an enemy id
+// and drops, the name from the master; recon/tools/import_event_stages.py patches the same ids in the map file. Label wwEnemy.
+function swapEnemies(q, swaps, names) {
+  if (!swaps || !swaps.length) return null;
+  const to = new Map(swaps.map((w) => [w.from, w.to]));
+  const id = (x) => (to.has(x) ? to.get(x) : x);
+  const c = JSON.parse(JSON.stringify(q));
+  c.enemies = (c.enemies || []).map((e) => (to.has(e.id) ? { ...e, id: id(e.id), name: names.get(id(e.id)) || e.name } : e));
+  c.targets = (c.targets || []).map((t) => (to.has(t.id) ? { ...t, id: id(t.id), name: names.get(id(t.id)) || t.name } : t));
+  c.objectives = (c.objectives || []).map((o) => (o.idType === 1 ? { ...o, id: id(o.id) } : o));
+  if (c.drops) c.drops.enemies = (c.drops.enemies || []).map((d) => ({ ...d, enemy: id(d.enemy) }));
+  return c;
+}
+// reward ids of a map POI (stage_poi.py format)
+const poiRewards = (poi) => [...new Set([...(poi.enemies || []).map((e) => e.reward), ...(poi.chests || []).map((c) => c.reward)])].sort((a, b) => a - b);
+// original drop rows of a quest (record drops: enemies [{rewardId, rows}], chests [{reward, rows}]) -> {rewardId: rows}
+function dropRows(q) {
+  const out = new Map();
+  const add = (id, rows) => {
+    if (!id || !rows || !rows.length) return;
+    const key = JSON.stringify(rows.map((r) => [r.type, r.id || 0, r.num, r.odds]));
+    if (out.has(id) && out.get(id).key !== key) out.set(id, { conflict: true, key });
+    else if (!out.has(id)) out.set(id, { rows, key });
+  };
+  for (const e of (q.drops || {}).enemies || []) add(e.rewardId, e.rows);
+  for (const c of (q.drops || {}).chests || []) add(c.reward, c.rows);
+  return out;
+}
+// a reward row of the master layout (as rewardRow of make-game-tables.js) with the original contents and odds
+const rewardRowOf = (rewardId, rows) => ({ rewardId, validReward: rows.length, display: rows.map(() => 1), type: rows.map((r) => r.type), id: rows.map((r) => r.id || 0),
+  assignSkillType: rows.map(() => 0), assignSkillId: rows.map(() => 0), assignSkillLv: rows.map(() => 0), num: rows.map((r) => r.num), odds: rows.map((r) => r.odds) });
+
+// records, config (event_config.json), master {stage, evStage, enemy, reward?} without our own rows, ids (event_ids.json), anchors,
+// maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}} of import_event_stages.py)
+// -> {evStage, stage, reward, poi, maps, ids, index: {entries, reasons}}
+function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
   checkRanges(master, config);
   const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
   const enemies = new Set((master.enemy || []).map((e) => e.enemyId));
+  const names = new Map((master.enemy || []).map((e) => [e.enemyId, e.name]));
+  const masterRewards = new Set((master.reward || []).map((r) => r.rewardId));
+  const ownRewards = new Map(); // rewardId -> {row, key} written by this run
   const refs = storyRefs(master.stage);
   if (!refs.story.length) throw new Error('events: no story rows in the stage table');
   // map key -> a stage row of the master that loads it (stageBinId, or its own id when the bin is 0)
   const byMap = new Map();
   for (const s of master.stage || []) byMap.set(s.stageBinId || s.stageId, s);
   const only = Array.isArray(config.onlyCensusIds) ? new Set(config.onlyCensusIds) : null;
-  const out = { evStage: [], stage: [], maps: [], ids: allIds, anchors: allAnchors, index: { entries: [], reasons: {} } };
+  const out = { evStage: [], stage: [], reward: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, index: { entries: [], reasons: {} } };
   const used = new Set();
   const builtMaps = new Map(); // map key -> our stage id built on it in this run
 
@@ -217,9 +255,12 @@ function buildEvents(records, config, master, ids, anchors = {}) {
     }).find(Boolean);
 
     let apMin = null;
-    for (const q of rec.quests || []) {
-      const key = questKey(rec, q, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q);
-      const qLabels = labelIds(q.label, config.labelPhrases);
+    for (const q0 of rec.quests || []) {
+      const key = questKey(rec, q0, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q0);
+      const qLabels = labelIds(q0.label, config.labelPhrases);
+      const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(mapKey)], names);
+      if (swapped) qLabels.push('wwEnemy');
+      const q = swapped || q0;
       const item = { key, donorStageId: q.stageId, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
@@ -232,6 +273,31 @@ function buildEvents(records, config, master, ids, anchors = {}) {
       if (clash) { item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
       if (builtMaps.has(mapKey)) { item.why = `map key ${mapKey} is the map of event stage ${builtMaps.get(mapKey)} too`; continue; }
       builtMaps.set(mapKey, stageId);
+      // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
+      const mapItem = { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
+        targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
+        drops: q.drops || null, served: false };
+      out.maps.push(mapItem);
+      let newRewards = [];
+      if (maps) {
+        // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
+        const st = maps.status.get(mapKey);
+        if (!st || st.status !== 'imported') { item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
+        // reward rows of the map's enemies and chests: the master's, or the original rows of the record's drops (written here); else not served
+        const known = dropRows(q), missing = [];
+        for (const r of poiRewards(maps.poi[String(mapKey)] || {})) {
+          if (masterRewards.has(r)) continue;
+          const d = known.get(r);
+          if (!d || d.conflict) { missing.push(r); continue; }
+          const own = ownRewards.get(r);
+          if (own && own.key !== d.key) { missing.push(r); continue; }
+          if (!own) newRewards.push([r, d]);
+        }
+        if (missing.length) { item.why = mapItem.why = `reward rows missing: ${missing.join(', ')}`; continue; }
+        for (const [r, d] of newRewards) { const row = rewardRowOf(r, d.rows); ownRewards.set(r, { row, key: d.key }); out.reward.push(row); }
+        out.poi[String(mapKey)] = maps.poi[String(mapKey)];
+      }
+      mapItem.served = true;
 
       const r = q.restrictions || {}, d = q.drama || {};
       const ref = refs.of(q.worldId);
@@ -243,9 +309,6 @@ function buildEvents(records, config, master, ids, anchors = {}) {
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
         ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });
-      out.maps.push({ stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
-        targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
-        drops: q.drops || null });
       item.served = true; item.status = 'served';
       entry.stageIds.push(stageId);
       apMin = apMin === null ? q.ap : Math.min(apMin, q.ap);
@@ -308,10 +371,21 @@ function writeIds(file, ids) {
   try { old = fs.readFileSync(file, 'utf8'); } catch { /* first run */ }
   if (old === null || old.replace(/\r\n/g, '\n') !== text) fs.writeFileSync(file, text);
 }
+// The map import of recon/tools/import_event_stages.py (private, D:\Progetto_Restauro_KH_UX\stage_gen\event_stages; KHUX_EVENT_MAPS
+// overrides it): report.json (status per map key) and stage_poi_events.json. Absent: every quest is «map not usable».
+const MAPS_DIR = process.env.KHUX_EVENT_MAPS || path.join('D:', path.sep, 'Progetto_Restauro_KH_UX', 'stage_gen', 'event_stages');
+function loadMaps(dir) {
+  const rep = readJson(path.join(dir, 'report.json'), null);
+  if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {} }; }
+  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '' }])), poi: readJson(path.join(dir, 'stage_poi_events.json'), {}) };
+}
 const loadConfig = () => JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8'));
 
 // Appends the rows to the master tables and writes game_data/events.json and event_maps.json. Returns null (nothing written)
-// with KHUX_EVENTS=0 or without the records. opts: records, config, gameDataDir, idsFile, anchorsFile (tests).
+// with KHUX_EVENTS=0 or without the records. opts: records, config, gameDataDir, idsFile, anchorsFile, maps (tests: {status, poi};
+// records given without maps: no map check). Also appends the event reward rows to reward.json and merges the POI of the served
+// event maps into game_data/stage_poi.json (own keys of the previous run dropped first; a key of another stage stops the run), so
+// POI and reward rows land together in the master run (make-game-tables.js skips the reward ids and POI keys listed in `own`).
 function patch(masterDir, opts = {}) {
   if (process.env.KHUX_EVENTS === '0') { console.log('events: off (KHUX_EVENTS=0)'); return null; }
   let records = opts.records;
@@ -323,21 +397,34 @@ function patch(masterDir, opts = {}) {
   }
   const gameData = opts.gameDataDir || path.join(__dirname, 'game_data');
   const prev = readJson(path.join(gameData, 'events.json'), {}).own || {};
-  const keyOf = { stage: 'stageId', evStage: 'eventStageId' };
-  const load = (table) => {
+  const keyOf = { stage: 'stageId', evStage: 'eventStageId', reward: 'rewardId' };
+  const load = (table, dflt) => {
     const mine = new Set(prev[table] || []);
-    return readJson(path.join(masterDir, `${table}.json`)).filter((r) => !mine.has(r[keyOf[table]]));
+    return readJson(path.join(masterDir, `${table}.json`), dflt).filter((r) => !mine.has(r[keyOf[table]]));
   };
-  const master = { stage: load('stage'), evStage: load('evStage'), enemy: readJson(path.join(masterDir, 'enemy.json')) };
+  const hadReward = fs.existsSync(path.join(masterDir, 'reward.json'));
+  const master = { stage: load('stage'), evStage: load('evStage'), reward: load('reward', []), enemy: readJson(path.join(masterDir, 'enemy.json')) };
   const idsFile = opts.idsFile || IDS_FILE;
   // the anchors sidecar: next to the records (private), or opts.anchorsFile; records given in opts without a file: game_data
   const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : path.join(path.dirname(process.env.KHUX_EVENT_SRC), ANCHORS_NAME));
   const config = opts.config || loadConfig();
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}));
-  const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage] };
-  for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
+  const maps = opts.maps !== undefined ? opts.maps : (opts.records ? null : loadMaps(MAPS_DIR));
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps);
+  const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward };
+  const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));
+  if (clashR) throw new Error(`events: reward row ${clashR.rewardId} is in the master already`);
+  for (const [t, rows] of Object.entries(added)) if (t !== 'reward' || hadReward || rows.length) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[keyOf[t]])]));
+  // POI of the served event maps into stage_poi.json (the server reads an event stage's POI by its stageBinId)
+  const poiFile = path.join(gameData, 'stage_poi.json');
+  const poiAll = readJson(poiFile, {});
+  for (const k of prev.poi || []) delete poiAll[k];
+  for (const k of Object.keys(out.poi)) if (k in poiAll) throw new Error(`events: stage_poi.json key ${k} is not ours (map of another stage)`);
+  if ((prev.poi || []).length || Object.keys(out.poi).length) {
+    fs.writeFileSync(poiFile, JSON.stringify(Object.fromEntries(Object.entries({ ...poiAll, ...out.poi }).sort((a, b) => Number(a[0]) - Number(b[0])))));
+  }
+  own.poi = Object.keys(out.poi).sort((a, b) => a - b);
   fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), own }, null, 1));
   fs.writeFileSync(path.join(gameData, 'event_maps.json'), JSON.stringify(out.maps, null, 1));
   // anchors first (only grow: allocateIds never changes one), so ids are never written with keys whose anchor is not saved
@@ -345,7 +432,7 @@ function patch(masterDir, opts = {}) {
   writeIds(idsFile, out.ids);
   const e = out.index.entries, qs = e.flatMap((x) => x.quests);
   console.log(`events: ${e.length} entries, ${e.filter((x) => x.available).length} with a served quest; ${qs.filter((q) => q.served).length} of ${qs.length} quests served, `
-    + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage`);
+    + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage, +${out.reward.length} reward, ${own.poi.length} POI keys`);
   const skipped = e.filter((x) => !x.available).map((x) => `${x.censusId} (${x.why})`);
   if (skipped.length) console.log(`events: no evStage row: ${skipped.join(', ')}`);
   if (!out.catalogEvStage) console.warn(`events: no Event Catalog banner: the Training Grounds stage ${config.catalogStage} is not in the master (make-special first)`);
@@ -354,4 +441,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, allocateIds, labelIds, daysOf, GENERATED_LABELS, NOT_SERVED };
+module.exports = { buildEvents, patch, allocateIds, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };

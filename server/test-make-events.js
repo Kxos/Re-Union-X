@@ -274,6 +274,102 @@ const tests = {
     assert.throws(() => me.patch(md, opts), /not ours/);
     fs.rmSync(dir, { recursive: true, force: true });
   },
+  // Task 6 fix 1: the map import report decides; status missing/skipped or a key not imported -> not served, why «map not usable»
+  map_not_usable_not_served() {
+    const poi = { enemies: [{ uid: 2, enemyId: 501, reward: 1, map: 0 }], chests: [] };
+    const maps = { status: new Map([[700001, { status: 'imported' }], [700002, { status: 'missing', why: 'STG absent' }], [740260, { status: 'skipped', why: 'rooms not served: X' }]]),
+      poi: { 700001: poi } };
+    const m = { ...master(), reward: [{ rewardId: 1 }] };
+    const out = me.buildEvents(records(), CONFIG, m, undefined, undefined, maps);
+    const qs = out.index.entries.flatMap((e) => e.quests);
+    assert.deepStrictEqual(qs.map((q) => q.served), [true, false, false]);
+    assert.strictEqual(qs[1].why, 'map not usable: missing, STG absent');
+    assert.strictEqual(qs[2].why, 'map not usable: skipped, rooms not served: X');
+    assert.deepStrictEqual(out.stage.map((s) => s.stageBinId), [700001]);
+    assert.deepStrictEqual(Object.keys(out.poi), ['700001']);
+    assert.deepStrictEqual(out.maps.map((x) => [x.key, x.served]), [[700001, true], [700002, false], [740260, false]], 'every candidate listed for the import');
+    assert.ok(!entry(out, 'E-2').available, 'no served quest: no evStage row');
+    const none = me.buildEvents(records(), CONFIG, m, undefined, undefined, { status: new Map(), poi: {} });
+    assert.ok(none.index.entries.flatMap((e) => e.quests).every((q) => !q.served && /^map not usable: not imported/.test(q.why)));
+  },
+  reward_rows_from_drops() {
+    const recs = records();
+    const q = recs[0].quests[0];
+    q.drops = { enemies: [{ enemy: 501, rewardId: 62201, rows: [{ type: 3, id: 90011, num: 1, odds: 1000 }, { type: 3, id: 90031, num: 1, odds: 250 }] }, { enemy: 502, rewardId: 1, rows: [] }],
+      chests: [{ reward: 162800, rows: [{ type: 8, id: 0, num: 30000, odds: 100000 }] }] };
+    recs[0].quests[1].drops = { enemies: [], chests: [] };
+    const maps = { status: new Map([[700001, { status: 'imported' }], [700002, { status: 'imported' }], [740260, { status: 'imported' }]]),
+      poi: { 700001: { enemies: [{ uid: 2, enemyId: 501, reward: 62201, map: 0 }, { uid: 3, enemyId: 502, reward: 1, map: 0 }], chests: [{ uid: 4, reward: 162800, kind: 1, map: 0 }] },
+        700002: { enemies: [{ uid: 2, enemyId: 501, reward: 77777, map: 0 }], chests: [] }, 740260: { enemies: [{ uid: 2, enemyId: 502, reward: 1, map: 0 }], chests: [] } } };
+    const out = me.buildEvents(recs, CONFIG, { ...master(), reward: [{ rewardId: 1 }] }, undefined, undefined, maps);
+    const qs = out.index.entries.flatMap((e) => e.quests);
+    assert.deepStrictEqual(qs.map((x) => x.served), [true, false, true]);
+    assert.strictEqual(qs[1].why, 'reward rows missing: 77777', 'a reward row neither in the master nor in the drops: not served');
+    assert.deepStrictEqual(out.reward.map((r) => r.rewardId), [62201, 162800], 'master row 1 reused, original rows written');
+    const r = out.reward[0];
+    assert.deepStrictEqual([r.validReward, r.type, r.id, r.num, r.odds], [2, [3, 3], [90011, 90031], [1, 1], [1000, 250]], 'original contents and odds');
+    assert.deepStrictEqual(out.reward[1].odds, [100000]);
+    // the same reward id with other rows in a later quest: that quest is not served
+    const recs2 = records();
+    recs2[0].quests[0].drops = { enemies: [{ rewardId: 62201, rows: [{ type: 3, id: 90011, num: 1, odds: 1000 }] }], chests: [] };
+    recs2[0].quests[1].drops = { enemies: [], chests: [] };
+    recs2[1].quests[0].drops = { enemies: [{ rewardId: 62201, rows: [{ type: 3, id: 90011, num: 1, odds: 9 }] }], chests: [] };
+    const maps2 = { status: maps.status, poi: { 700001: { enemies: [{ uid: 2, reward: 62201 }], chests: [] }, 700002: { enemies: [{ uid: 2, reward: 1 }], chests: [] },
+      740260: { enemies: [{ uid: 2, reward: 62201 }], chests: [] } } };
+    const out2 = me.buildEvents(recs2, CONFIG, { ...master(), reward: [{ rewardId: 1 }] }, undefined, undefined, maps2);
+    assert.deepStrictEqual(out2.index.entries.flatMap((e) => e.quests).map((x) => x.served), [true, true, false]);
+  },
+  enemy_swap_ww() {
+    const config = { ...CONFIG, mapEnemySwaps: { 700002: [{ from: 502, to: 503 }] } };
+    const m = { ...master(), enemy: [...master().enemy, { enemyId: 503, name: 'Foe WW' }] };
+    const recs = records();
+    recs[0].quests[1].drops = { enemies: [{ enemy: 502, rewardId: 1, rows: [] }], chests: [] };
+    const out = me.buildEvents(recs, config, m);
+    const mp = out.maps.find((x) => x.key === 700002);
+    assert.deepStrictEqual(mp.enemies.map((e) => [e.enemyId, e.name]), [[501, 'Foe 501'], [503, 'Foe WW']]);
+    assert.deepStrictEqual(mp.drops.enemies.map((d) => d.enemy), [503]);
+    const q = entry(out, 'E-1').quests[1];
+    assert.ok(q.served && q.labels.includes('wwEnemy'), JSON.stringify(q));
+    assert.ok(!entry(out, 'E-1').quests[0].labels.includes('wwEnemy'));
+    assert.ok(out.index.reasons.wwEnemy, 'label text');
+    assert.strictEqual(recs[0].quests[1].enemies[1].id, 502, 'the record is not changed');
+    // the WW enemy not in the master: not served, no substitute
+    const out2 = me.buildEvents(records(), config, master());
+    assert.ok(!entry(out2, 'E-1').quests[1].served && /503/.test(entry(out2, 'E-1').quests[1].why));
+    // the real config: both swaps of the user ruling
+    assert.deepStrictEqual(REAL_CONFIG.mapEnemySwaps['734970'].map((w) => [w.from, w.to]), [[126, 99]]);
+    assert.deepStrictEqual(REAL_CONFIG.mapEnemySwaps['725440'].map((w) => [w.from, w.to]), [[32, 23]]);
+  },
+  patch_poi_and_rewards() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-events-'));
+    const md = path.join(dir, 'master'), gd = path.join(dir, 'game_data');
+    fs.mkdirSync(md); fs.mkdirSync(gd);
+    const m = { ...master(), reward: [{ rewardId: 1 }] };
+    for (const [t, rows] of Object.entries(m)) fs.writeFileSync(path.join(md, `${t}.json`), JSON.stringify(rows));
+    fs.writeFileSync(path.join(gd, 'stage_poi.json'), JSON.stringify({ 1010: { chests: [], enemies: [] } }));
+    const recs = records();
+    recs[0].quests[0].drops = { enemies: [{ rewardId: 62201, rows: [{ type: 3, id: 90011, num: 1, odds: 1000 }] }], chests: [] };
+    const maps = { status: new Map([[700001, { status: 'imported' }], [700002, { status: 'imported' }]]),
+      poi: { 700001: { enemies: [{ uid: 2, enemyId: 501, reward: 62201, map: 0 }], chests: [] }, 700002: { enemies: [{ uid: 2, enemyId: 501, reward: 1, map: 0 }], chests: [] } } };
+    const opts = { records: recs, config: CONFIG, gameDataDir: gd, idsFile: path.join(dir, 'event_ids.json'), maps };
+    me.patch(md, opts);
+    me.patch(md, opts);
+    const poi = JSON.parse(fs.readFileSync(path.join(gd, 'stage_poi.json'), 'utf8'));
+    assert.deepStrictEqual(Object.keys(poi), ['1010', '700001', '700002'], 'POI merged, other keys kept');
+    const reward = JSON.parse(fs.readFileSync(path.join(md, 'reward.json'), 'utf8'));
+    assert.deepStrictEqual(reward.map((r) => r.rewardId), [1, 62201], 'second run replaces its own reward rows');
+    const idx = JSON.parse(fs.readFileSync(path.join(gd, 'events.json'), 'utf8'));
+    assert.deepStrictEqual([idx.own.reward, idx.own.poi], [[62201], ['700001', '700002']]);
+    // a run that serves less: its old POI keys go away
+    me.patch(md, { ...opts, maps: { status: new Map([[700001, { status: 'imported' }]]), poi: { 700001: maps.poi['700001'] } } });
+    assert.deepStrictEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(gd, 'stage_poi.json'), 'utf8'))), ['1010', '700001']);
+    // a POI key of another stage stops the run
+    fs.writeFileSync(path.join(gd, 'stage_poi.json'), JSON.stringify({ 1010: {}, 700001: { chests: [], enemies: [] } }));
+    const idx3 = JSON.parse(fs.readFileSync(path.join(gd, 'events.json'), 'utf8'));
+    fs.writeFileSync(path.join(gd, 'events.json'), JSON.stringify({ ...idx3, own: { ...idx3.own, poi: [] } }));
+    assert.throws(() => me.patch(md, opts), /not ours/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
   no_source_writes_nothing() {
     const old = process.env.KHUX_EVENT_SRC;
     delete process.env.KHUX_EVENT_SRC;
