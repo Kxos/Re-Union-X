@@ -121,7 +121,8 @@ const tests = {
     const ix = index();
     ix.entries.push(tier('WW-E31611-1', 8022, '2017-09-04', '2017-09-11', 'single', 'Jewel Sorceress', { family: 'daily', reconstructed: ['weekRule', 'weekdayAp'] }));
     const d = pages.detailPage(ix, 8022, ctx({ index: ix }));
-    assert(d.includes('<b>AP and Bonus Time (one rule for all raids)</b>') && d.includes('<b>weekday AP of a quest that was free</b>') && d.includes('costs 5 AP from Monday to Friday'));
+    // the rule label is not repeated under the callout (06-11): the weekday AP card and its full sentence in the fold remain
+    assert(!d.includes('AP and Bonus Time') && /<b>Weekday AP<\/b>/.test(d) && d.includes('<b>weekday AP of a quest that was free</b>') && d.includes('costs 5 AP from Monday to Friday'));
     // the rule callout (user 06-11, graphics): title, NOT ORIGINAL tag, the two blocks with their icons, the Raid Bosses notice link
     assert(/<div class="rc"><div class="rch"><img[^>]*raid\.png[^>]*>One raid rule on this server<span class="ng">NOT ORIGINAL<\/span><\/div>/.test(d), 'the rule callout');
     assert(/<b><img[^>]*weekday\.png[^>]*>Monday – Friday<\/b><span><img[^>]*ap\.png[^>]*>Original AP \(5 AP if it was free\)<\/span><span class="ni">No Bonus Time<\/span>/.test(d), 'weekday block');
@@ -288,7 +289,11 @@ const tests = {
     assert(/<td>Beginner<\/td><td>Trickmaster<\/td>/.test(d) && /<td>Advanced<\/td><td>Blue Trident Tail<\/td>/.test(d), 'tier table');
     assert(/150,000,000/.test(d), 'HP');
     assert(/Enhancement Boards/.test(d) && /Lux Crystal/.test(d), 'boards and their rewards');
-    assert(d.includes('<h2>Reconstructed values</h2><ul class="pl"><li><b>ATK</b>: The boss') && d.includes('deduced from the bosses with original values.'), 'reconstructed values: one short sentence each (user 04-11)');
+    // reconstructed values (06-11, graphics): group cards with one short line each, the full sentences (user 04-11) folded
+    const rv = d.slice(d.indexOf('<h2>Reconstructed values</h2>'), d.indexOf('</details>', d.indexOf('<h2>Reconstructed values</h2>')));
+    assert(/<div class="rgs"><div class="rg"><b><img[^>]*>Boss<\/b><div class="ri"><img[^>]*><b>ATK<\/b><span>Deduced from bosses with original values<\/span>/.test(rv), 'group cards');
+    assert(/<details class="fold"><summary>Why these values\?<\/summary><ul class="pl"><li><b>ATK<\/b>: The boss/.test(rv) && rv.includes('deduced from the bosses with original values.'), 'full sentences folded');
+    assert(/details\.fold\{/.test(d) && /\.rgs\{/.test(d), 'CSS of cards and fold on the detail page');
     assert(!/No ATK of a raid is known after 2016/.test(d), 'not the builder\'s notes');
     // other weeks of the same bosses, newest first, each a link to its page
     const other = d.slice(d.indexOf('Other weeks'));
