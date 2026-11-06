@@ -378,9 +378,9 @@ const tests = {
   event_level_steps() {
     // I-229: event raids with their own notice rule (EVENT_LEVEL_STEPS): +5 every defeat (23794, 37768), +5 in Bonus Time
     // only (42613, 43551; inferred 38250, 38970, 40165), +2 in Bonus Time for the week of 2018-09-10 (inferred from 44500)
-    const run = (censusId, start, now, from = 1) => {
+    const run = (censusId, start, now, from = 1, extra = {}) => {
       const w = world();
-      Object.assign(w.index.entries[0], { censusId, start, end: start, questAp: [0] });
+      Object.assign(w.index.entries[0], { censusId, start, end: start, questAp: [0], ...extra });
       w.week = { shopFrom: start, shopTo: start };
       w.now = now;
       w.player.raid = { levels: { 'WW-1/Beginner': from }, levelsMonth: w.raid.monthOf(w.now), levelOcc: { 'WW-1/Beginner': start } };
@@ -397,6 +397,9 @@ const tests = {
     assert.strictEqual(run('WW-E38250-1', '2018-03-19', BONUS), 6, 'Queen Bee 2018-03 (inferred)');
     assert.deepStrictEqual([run('WW-W-2018-09-10', '2018-09-10', PLAIN), run('WW-W-2018-09-10', '2018-09-10', BONUS)], [2, 3], '2018-09-10 (inferred +2)');
     assert.strictEqual(run('WW-E41141-1', '2018-06-11', BONUS), 2, 'an event without the rule: +1');
+    // a JP raid whose notice states the step carries it in its entry (make-raid.js jpCensus levelStep): year-end 2016 +10 every defeat
+    assert.deepStrictEqual([run('JP-RAID-21', '2016-12-25', PLAIN, 1, { levelStep: 10 }), run('JP-RAID-21', '2016-12-25', BONUS, 1, { levelStep: 10 })], [11, 11], 'JP year-end 2016: +10 always');
+    assert.strictEqual(run('JP-RAID-21', '2016-12-25', PLAIN, 91, { levelStep: 10 }), 99, 'capped at LV 99');
     // every census id of the rules is a served raid (when built)
     const served = path.join(__dirname, 'game_data', 'raids.json');
     if (fs.existsSync(served)) {

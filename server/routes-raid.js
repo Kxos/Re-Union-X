@@ -211,7 +211,9 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
   // a story boss has no week (occ null): always +1 (review M-5)
   // an event raid with its own notice rule (EVENT_LEVEL_STEPS, I-229) follows it, also as a kept raid of the Raid Catalog
+  // a JP raid whose notice states its step carries it in the entry (make-raid.js jpCensus levelStep: year-end 2016 +10 every defeat)
   const levelStep = (boss, ms, entry) => {
+    if (entry && entry.levelStep) return entry.levelStep;
     const ev = entry && EVENT_LEVEL_STEPS[entry.censusId];
     if (ev) return ev.always || (ev.bonus && isBonusTime(ms) ? ev.bonus : 1);
     return boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && isBonusTime(ms) ? BONUS_LEVEL_STEP : 1;

@@ -349,7 +349,12 @@
   "JP-D-2017-11-13": 346,
   "JP-D-2017-12-02": 347,
   "JP-D-2017-12-11": 348,
-  "JP-D-2018-01-02": 349
+  "JP-D-2018-01-02": 349,
+  "JP-RAID-21": 350,
+  "JP-RAID-29": 351,
+  "JP-RAID-30": 352,
+  "JP-D-2018-08-04": 353,
+  "JP-D-2018-09-01": 354
  },
  "entries": {
   "WW-W-2021-02-22/Beginner+gem": 1,
@@ -979,7 +984,37 @@
   "JP-D-2017-11-13/single": 625,
   "JP-D-2017-12-02/single": 626,
   "JP-D-2017-12-11/single": 627,
-  "JP-D-2018-01-02/single": 628
+  "JP-D-2018-01-02/single": 628,
+  "JP-RAID-21/single@2016-12-26": 629,
+  "JP-RAID-21/single@2016-12-27": 630,
+  "JP-RAID-21/single@2016-12-28": 631,
+  "JP-RAID-21/single@2016-12-29": 632,
+  "JP-RAID-21/single@2016-12-30": 633,
+  "JP-RAID-21/single@2016-12-31": 634,
+  "JP-RAID-21/single@2017-01-01": 635,
+  "JP-RAID-28/single@2017-07-03": 636,
+  "JP-RAID-28/single@2017-07-04": 637,
+  "JP-RAID-28/single@2017-07-05": 638,
+  "JP-RAID-28/single@2017-07-06": 639,
+  "JP-RAID-28/single@2017-06-30": 640,
+  "JP-RAID-28/single@2017-07-01": 641,
+  "JP-RAID-28/single@2017-07-02": 642,
+  "JP-RAID-29/single@2017-08-07": 643,
+  "JP-RAID-29/single@2017-08-08": 644,
+  "JP-RAID-29/single@2017-08-02": 645,
+  "JP-RAID-29/single@2017-08-03": 646,
+  "JP-RAID-29/single@2017-08-04": 647,
+  "JP-RAID-29/single@2017-08-05": 648,
+  "JP-RAID-29/single@2017-08-06": 649,
+  "JP-RAID-30/single@2017-09-04": 650,
+  "JP-RAID-30/single@2017-09-05": 651,
+  "JP-RAID-30/single@2017-09-06": 652,
+  "JP-RAID-30/single@2017-09-07": 653,
+  "JP-RAID-30/single@2017-09-01": 654,
+  "JP-RAID-30/single@2017-09-02": 655,
+  "JP-RAID-30/single@2017-09-03": 656,
+  "JP-D-2018-08-04/single@2018-08-04": 657,
+  "JP-D-2018-09-01/single@2018-09-01": 658
  },
  "boards": {
   "WW-W-2018-09-03/radiant-01": 1,
@@ -1673,6 +1708,13 @@
   "JP-D-2017-12-11/JP-D-2017-12-11:std1-legendary-raid-reward": 689,
   "JP-D-2017-12-11/JP-D-2017-12-11:std2-magic-mirror-special-set": 690,
   "JP-D-2018-01-02/JP-D-2018-01-02:std2-seasoned-wielder-bonus-1": 691,
-  "JP-D-2018-01-02/JP-D-2018-01-02:std3-seasoned-wielder-bonus-2": 692
+  "JP-D-2018-01-02/JP-D-2018-01-02:std3-seasoned-wielder-bonus-2": 692,
+  "JP-RAID-21/JP-RAID-21:std3-seasoned-wielder-bonus": 693,
+  "JP-RAID-29/JP-RAID-29:std3-seasoned-wielder-bonus-1": 694,
+  "JP-RAID-29/JP-RAID-29:std4-seasoned-wielder-bonus-2": 695,
+  "JP-RAID-30/JP-RAID-30:std3-seasoned-wielder-bonus-1": 696,
+  "JP-RAID-30/JP-RAID-30:std4-seasoned-wielder-bonus-2": 697,
+  "JP-D-2018-08-04/JP-D-2018-08-04:std1-legendary-raid-reward": 698,
+  "JP-D-2018-09-01/JP-D-2018-09-01:std1-legendary-raid-reward": 699
  }
 }

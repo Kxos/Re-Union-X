@@ -13,6 +13,31 @@
   "jpTimer": { "super-hard weekend": { "before": 720, "after": 60, "oneHourFrom": "2018-05-05" }, "monthly (30-minute)": { "minutes": 30 } },
   "jpQuestAp": { "JP-RAID-32": 0 },
   "jpBoards": { "superHard": { "donor": "WW-E41605-1", "board": "Legendary Raid Reward", "cells": 13, "coins": 40500 } },
+  "jpCensus": {
+    "_note": "Corrections of the census JP rows from the JP research of 2026-11-05 (user decisions 05-11 and 06-11), applied when the census is read (make-raid.js applyJpCensus); the private census file is not edited. Fields: make-raid.js applyJpCensus. Every probable choice has its label (jpBossProbable, jpHpProbable, jpRewardProbable) and is told in the Raid Bosses notice.",
+    "JP-RAID-21": { "family": "daily rotating", "bosses": ["Green Trident Tail", "Wicked Spider", "Submarine Carp", "Fortress Crab", "Gummi Hound", "Blue Trident Tail", "Hocus Pocus"],
+      "probableBosses": true, "levelStep": 10,
+      "source": "JP notice 24013 (12/26/2016-1/1/2017): a daily rotating raid, a different boss every day, boss LV +10 per defeat; the bosses are not listed. The lineup is the worldwide «2016 Showdown!» (WW-E23794-1) of the same dates and rewards: probable." },
+    "JP-RAID-28": { "weekdays": true, "bosses": ["Assault Dragon", "Queen Bee Ω", "Jewel Princess", "Jack in the Box", "Gummi Hound", "Closehanded Captain", "Gear Golem"],
+      "windowLevel": true, "levelDrops": [{ "boss": "Closehanded Captain", "level": 10, "reward": "6★ Trickmaster (Boosted)", "probable": true }],
+      "source": "JP notice 29893 (July 2017 monthly 30-minute raid): boss by weekday, Monday to Sunday; the Saturday boss at LV 10 drops a status-boosted Trickmaster (bonus not stated: the worldwide boosted copy, +1,000 STR)." },
+    "JP-RAID-29": { "weekdays": true, "bosses": ["Lion Headliner", "Circus Crab", "Jewel Sorceress", "Egg Master", "Hocus Pocus", "Adventurer", "Submarine Carp"],
+      "windowLevel": true, "levelDrops": [{ "boss": "Adventurer", "level": 10, "reward": "6★ Twilight Thorn (Boosted)" }],
+      "source": "JP notice 30969 (August 2017): boss by weekday; the Saturday Adventurer at LV 10 drops a status-boosted Twilight Zone (= Twilight Thorn), ATK +1000." },
+    "JP-RAID-30": { "weekdays": true, "bosses": ["Gummi Hound", "Gear Golem", "Queen Bee", "Assault Dragon", "Circus Crab", "Crabby Cake", "Jack in the Box"],
+      "probableBosses": ["Crabby Cake"], "windowLevel": true, "levelDrops": [{ "boss": "Crabby Cake", "level": 10, "reward": "6★ Destroyer Behemoth (Boosted)" }],
+      "source": "JP notice 32002 (September 2017): boss by weekday; Saturday «Furious Whole Cake», read as Crabby Cake (probable); at LV 10 it drops a status-boosted Destroyed Behemoth (= Destroyer Behemoth), ATK +1000." },
+    "JP-D-2018-08-04": { "bosses": ["Red Trident Tail"], "saturdayOnly": true, "hp": "yes: fixed 1,500,000,000 (players' reading of 2018-06-23, carried over)", "probableBosses": true, "hpProbable": true,
+      "source": "One-day weekend raid (digest: one day only); boss from the 7-boss weekend cycle, which advanced only on weekends that ran (JP notice 41729 of 2018-06-23): probable. HP: the players' reading of the 2018-06-23 weekend (about 1.5 billion), probable." },
+    "JP-D-2018-09-01": { "bosses": ["Malicious Spider"], "saturdayOnly": true, "hp": "yes: fixed 1,500,000,000 (players' reading of 2018-06-23, carried over)", "probableBosses": true, "hpProbable": true,
+      "source": "The last JP weekend raid (24 hours); boss and HP as JP-D-2018-08-04: probable." },
+    "JP-RAID-7": { "levelDrops": [{ "level": 95, "reward": "6★ Mickey & Minnie", "probable": true }],
+      "source": "Valentine 2016: «Mickey & Minnie VD Ver.» guaranteed at LV 95; same art as the worldwide Mickey & Minnie 6★ (the rarity of the drop is not stated: probable)." },
+    "JP-RAID-8": { "levelDrops": [{ "level": 95, "reward": "6★ Prince & Belle", "probable": true }],
+      "source": "White Day 2016: «Prince & Belle WD Ver.» at LV 95; the same medal id as the worldwide Prince & Belle 6★; guaranteed by analogy with the Valentine raid (probable)." },
+    "JP-RAID-9": { "levelDrops": [{ "level": 40, "reward": "5★ Magic Broom" }],
+      "source": "Easter 2016: Magic Broom guaranteed from Egg Master at LV 40." }
+  },
   "story": { "tableLast": 555 },
   "tierQuestLv": {
     "single": 25,
@@ -109,7 +134,12 @@
     "jp2016": "HP, ATK, DEF, Lux and rewards are the boss's 2016 worldwide row as it stands (census «yes (2016 row)»): the JP values of this run are not known and may differ (the JP wiki notes it for Hocus Pocus 2015 against 2016).",
     "jpTimer": "Time limits of the JP wiki: super-hard weekend raids 12 hours, 1 hour from the 2018-05-05 weekend; the monthly «30-minute» raids 30 minutes (the windows themselves, 12:00 and 22:00 JST, are not applied: the raid stays open all day, as the daily raids, I-228).",
     "jpBoard": "The JP super-hard weekend board (JP wiki: 13 cells, 40,500 Raid Coins, 6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW Legendary Raid Reward board of WW-E41605-1, which has the same cells, items and total cost (jpBoards.superHard).",
-    "jpQuestAp": "Quest AP of a JP row when the JP wiki states it (November 2017 monthly raid: AP 0)."
+    "jpQuestAp": "Quest AP of a JP row when the JP wiki states it (November 2017 monthly raid: AP 0).",
+    "jpCensus": "Corrections of the census JP rows from the later JP research (bosses by weekday of the 2017 monthly raids, the year-end 2016 daily raid, the two 2018 weekends, the JP level drops), applied when the census is read; the census file itself is not edited.",
+    "jpBossProbable": "No JP source names this boss directly: it is inferred (jpCensus). Year-end 2016: the worldwide «2016 Showdown!» lineup of the same dates and rewards. September 2017 Saturday: «Furious Whole Cake» read as Crabby Cake. Weekends of 2018-08-04 and 2018-09-01: the 7-boss JP weekend cycle, which advanced only on weekends that ran (JP notice of 2018-06-23).",
+    "jpHpProbable": "No HP source for this weekend: the players' reading of the 2018-06-23 weekend raid (about 1.5 billion, fixed at every level) is carried over.",
+    "jpWindowLevel": "The JP notices of the 2017 monthly 30-minute raids reset the boss level at the end of each 30-minute window: not applied (windows: I-228). The level keeps rising by one per defeat and resets on the 1st of the month, as for every raid.",
+    "jpRewardProbable": "A level drop of the JP notice is given as the worldwide medal it most probably was (rarity, bonus or guarantee not stated): Mickey & Minnie 6★ (Valentine 2016, LV 95), Prince & Belle 6★ (White Day 2016, LV 95), the boosted Trickmaster 6★ +1,000 STR (July 2017, Saturday LV 10)."
   },
   "boards": {
     "background": 5,
@@ -316,7 +346,8 @@
     },
     "boostedMedals": [
       {"name": "Trickmaster", "rare": 6, "str": 1000, "def": 0, "source": "notice 33888 (Nov 2017 Daily Raid Event): Boosted Trickmaster: 1,000 more base Strength; khuxwiki Trickmaster (Medal)"},
-      {"name": "Destroyer Behemoth", "rare": 6, "str": 1000, "def": 0, "source": "notice 34680 (Dec 2017 Monthly Raid Event): one boosted copy; khuxwiki Destroyer Behemoth: 1,000 more base strength; JP digest: atk +1000"}
+      {"name": "Destroyer Behemoth", "rare": 6, "str": 1000, "def": 0, "source": "notice 34680 (Dec 2017 Monthly Raid Event): one boosted copy; khuxwiki Destroyer Behemoth: 1,000 more base strength; JP digest: atk +1000"},
+      {"name": "Twilight Thorn", "rare": 6, "str": 1000, "def": 0, "source": "JP notice 30969 (Aug 2017 monthly 30-minute raid): the Saturday Adventurer at LV 10 drops a status-boosted Twilight Zone (= Twilight Thorn), ATK +1000 (JP-RAID-29 level drop, jpCensus)"}
     ],
     "unmatched": {
       "Booster [HD Vanitas (EX+)] +5%": "Event Boosters are not built yet (they come with the events, I-166): the cell is left off."
