@@ -48,6 +48,7 @@ const petDraw = require('./pet-draw');
 const petDrawPages = require('./pet-draw-pages');
 const medalBoost = require('./medal-boost');
 const specialPages = require('./special-pages'); // pagine web Special (catalogo)
+const medalGallery = require('./medal-gallery'); // Medal Gallery web page (I-242): BGM Medals and Full Art
 const special = require('./special'); // scheda Special di Quests: periodi, lucchetti, fissaggio
 // Pet / 6° slot (server/pet.js): KHUX_PET=1, default spento
 const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_ENABLED } = require('./pet');
@@ -168,6 +169,7 @@ function route(url) {
   if (p.startsWith('/web/gacha/')) return 'gachaweb'; // catalogo, dettagli, odds, immagini dei banner
   if (p.startsWith('/web/special/')) return 'specialweb'; // immagini dei banner Special
   if (p.startsWith('/web/raid/')) return 'raidweb'; // raid banners
+  if (p.startsWith('/web/medals/')) return 'medalweb'; // Medal Gallery and its pictures (I-242)
   if (p.includes('system/status')) return 'status';
   if (p.includes('system/login')) return 'login';
   if (p.includes('system/coppa')) return 'coppa';
@@ -4548,6 +4550,27 @@ function respondRaidWeb(res, url) {
   res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': b.length });
   return res.end(b);
 }
+// Medal Gallery (I-242, medal-gallery.js; docs/notes/medaglie.md#medal-gallery). GET /web/medals/gallery[?tab=art][&from=catalog]:
+// the page, with the Medals of the save (boosted copies count for their base row). GET /web/medals/img/v<N>/<thumbId>.png (medal
+// picture) and /web/medals/art/v<N>/<artId>.jpg and <artId>-l.jpg (artwork, small / large): files of game_data/medal_img written
+// by recon/tools/make_medal_gallery_images.py (git-ignored, local data); another version or a missing file: 404.
+const MEDAL_GALLERY_IMG = process.env.KHUX_MEDAL_GALLERY_IMG || path.join(__dirname, 'game_data', 'medal_img');
+function respondMedalWeb(res, url) {
+  const p = url.split('?')[0];
+  const notFound = () => { const b = Buffer.from('not found', 'utf8'); res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length }); return res.end(b); };
+  if (/^\/web\/medals\/gallery$/i.test(p)) {
+    const q = new URLSearchParams(url.split('?')[1] || ''), medals = masterRows('medal');
+    const html = medalGallery.galleryPage(medals, { owned: medalGallery.ownedBases(userMedalList(), medals), tab: q.get('tab'), fromCatalog: q.get('from') === 'catalog' });
+    const b = Buffer.from(html, 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': b.length });
+    return res.end(b);
+  }
+  const file = medalGallery.imageFile(p);
+  if (!file || !fs.existsSync(path.join(MEDAL_GALLERY_IMG, file))) return notFound();
+  const b = fs.readFileSync(path.join(MEDAL_GALLERY_IMG, file));
+  res.writeHead(200, { 'Content-Type': file.endsWith('.png') ? 'image/png' : 'image/jpeg', 'Content-Length': b.length });
+  return res.end(b);
+}
 // POST /web/raid/keep/<evStageId> and /web/raid/unkeep (buttons of the Raid Catalog): routes-raid.js keep / unkeep, JSON {ok, why?}
 function respondRaidPost(res, url) {
   const p = url.split('?')[0];
@@ -4915,6 +4938,7 @@ function handler(scheme) {
       if (kind === 'gachaweb') return req.method === 'POST' ? respondGachaPost(res, req.url) : respondGachaWeb(res, req.url);
       if (kind === 'specialweb') return req.method === 'POST' ? respondSpecialPost(res, req.url) : respondSpecialWeb(res, req.url);
       if (kind === 'raidweb') return req.method === 'POST' ? respondRaidPost(res, req.url) : respondRaidWeb(res, req.url);
+      if (kind === 'medalweb') return respondMedalWeb(res, req.url);
       // tempi del popup Notices (segnalazione dell'utente 19-10: a volte resta vuoto a lungo al primo avvio): la
       // pagina chiama /web/notices/shown appena disegnata; il log dice quanto e' passato dalla richiesta
       if (kind === 'noticesshown') {
