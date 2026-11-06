@@ -513,7 +513,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   the 17 Saturday-only 30M weekends; khuxwiki 150M Red Trident Tail banner for JP-SHR-78/85/92). 56 two-day 30M weekends have
   only the Saturday-only banner of their boss (it prints 土曜限定): the 10 Blue Trident Tail ones use its two-day banner (notice
   20289: boss, HP and limit printed, no date), the other 46 stay `variant`, written only with `--jp-variants` (not served):
-  from 2016-09-10 the weekend raid had a standing notice without a banner. `hold` items (the notice banner shows another
+  from 2016-08-13 the weekend raid had a standing notice without a banner (only 8/20/2016 had its own). `hold` items (the notice banner shows another
   boss than the served row) are never written; the three found were resolved by correcting the rows' bosses from the
   notices. The other rows keep the plain plate. Each card has its banner text and our
   translation in `server/raid_jp_banners.json` (Details page). The Raid Catalog banner leaves the JP cards out of its strips
