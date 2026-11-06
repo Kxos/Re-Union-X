@@ -1,13 +1,14 @@
 """Reads archived SQUARE ENIX BRIDGE notices from the Wayback Machine in a given order and logs their heading, game and images.
 
-    python -I recon/tools/sqex_notice_sweep.py CDX ORDER OUTDIR LOG
+    python -I recon/tools/sqex_notice_sweep.py CDX ORDER OUTDIR LOG [DELAY]
 
 CDX: lines «<notice id> <Wayback timestamp>» (the archived copies of cache.sqex-bridge.jp/guest/information/<id>);
 ORDER: notice ids separated by blanks, the order to read them in (ids not in CDX are skipped); OUTDIR: where the HTML
 copies go (untrusted downloads, local only, e.g. D:\\Progetto_Restauro_KH_UX\\tmp\\jp_banners\\notices); LOG: one line per id,
 «id|date|heading / game|image keys» (keys of cache.sqex-bridge.jp/img/<key> without the site's own two icons; the first
-one is the notice banner). Ids already in LOG are skipped, so a stopped run resumes. One request at a time; after
-connection failures it waits (30 s more each time, at most 10 min) and stops after 12 in a row (Wayback rate block).
+one is the notice banner). Ids already in LOG are skipped, so a stopped run resumes. One request at a time, DELAY
+seconds apart (default 5: Wayback blocks faster readers for hours); after a connection failure it waits 3 minutes more
+each time (at most 30 min) and stops after 12 in a row (Wayback rate block).
 Used for the JP raid cards (docs/notes/raid.md «Japan-only raids», Cards).
 """
 import html
@@ -32,7 +33,8 @@ def parse(t):
     return (date.group(0) if date else ''), (title + ' / ' + game).replace('|', '/'), keys
 
 
-def main(cdx, order_file, outdir, log):
+def main(cdx, order_file, outdir, log, delay=5.0):
+    delay = float(delay)
     ts = {}
     for line in open(cdx):
         p = line.split()
@@ -54,26 +56,25 @@ def main(cdx, order_file, outdir, log):
                     data = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'restoration-research/1.0'}), timeout=60).read()
                     open(fn, 'wb').write(data)
                     fails = 0
+                    time.sleep(delay)
                 except urllib.error.HTTPError as e:
                     L.write('%d|ERR %s||\n' % (i, e.code))
                     L.flush()
-                    if e.code == 429:
-                        time.sleep(120)
+                    time.sleep(600 if e.code == 429 else delay)
                     continue
                 except Exception as e:  # connection refused / timeout: Wayback rate block
                     fails += 1
                     print('fail', i, e, flush=True)
                     if fails >= 12:
                         sys.exit('stopped: %d connection failures in a row' % fails)
-                    time.sleep(min(600, 30 * fails))
+                    time.sleep(min(1800, 180 * fails))
                     continue
             date, title, keys = parse(open(fn, encoding='utf-8', errors='replace').read())
             L.write('%d|%s|%s|%s\n' % (i, date, title, ','.join(keys)))
             L.flush()
-            time.sleep(0.5)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 5:
+    if len(sys.argv) not in (5, 6):
         sys.exit(__doc__)
     main(*sys.argv[1:])

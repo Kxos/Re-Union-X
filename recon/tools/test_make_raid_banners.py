@@ -58,7 +58,8 @@ try:
     # JP rows: cards by census id from the --jp list, evStageId resolved from the index; never matched by date in build
     items = [{'censusId': 'JP-A', 'file': 'jp/a.png', 'match': 'exact'},
              {'censusId': 'JP-B', 'file': 'jp/b.png', 'match': 'variant'},
-             {'censusId': 'JP-GONE', 'file': 'jp/a.png'}]
+             {'censusId': 'JP-GONE', 'file': 'jp/a.png'},
+             {'censusId': 'JP-HELD', 'file': 'jp/a.png', 'match': 'hold'}]
     os.makedirs(os.path.join(t, 'jp'))
     Image.new('RGB', (640, 140), (7, 8, 9)).save(os.path.join(t, 'jp', 'a.png'))
     Image.new('RGBA', (1280, 280), (9, 9, 9, 255)).save(os.path.join(t, 'jp', 'b.png'))

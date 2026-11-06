@@ -445,17 +445,21 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     with the same main reward for the 5-Mirror bonus boards and the Magic Broom Set (said in the evidence); 23 boards have no
     card (`boardNoArt`). `game_data/raid_board_art.tsv` changes: needs a resource build.
 - **Cards** (6 November 2026). Original JP raid banners, written by `make_raid_banners.py --jp <list>` (keyed by census id,
-  evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build now leaves `jp`
-  rows alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row
-  evidence in the private `JP_ONLY.md` «JP raid cards». **35 of 148 rows have their own card** (`match` `exact`): 13 raid
-  events (JP-RAID-1 to 11, JP-RAID-22, JP-D-2018-08-06: 10 from the khuxwiki upload of 2016-05-18 of the JP notice images,
-  one of them pixel-identical to notice 15404's; the notice images of 15404 and 24027; the khuxwiki «Monthly Raid Event! 19 JP»
-  banner) and 22 super-hard weekends (the
-  per-boss banners of the JP wiki page 超難度レイドイベント, boss, HP and 12-hour limit printed: JP-SHR-1, JP-SHR-2, the 17
-  Saturday-only 30M weekends; the khuxwiki 150M Red Trident Tail banner for JP-SHR-78/85/92). 56 two-day 30M weekends have
-  only the Saturday-only banner of their boss (it prints 土曜限定): listed as `variant`, written only with `--jp-variants`
-  (not served). The other rows keep the plain plate. The Raid Catalog banner leaves the JP cards out of its strips
-  (`make_special_banners.py`, unchanged picture); its `--section raid` run now also writes the `-kept` copies of the JP rows.
+  evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build leaves `jp` rows
+  alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row
+  evidence in the private `JP_ONLY.md` «JP raid cards». **65 of 153 rows have their own card** (`match` `exact`): 26 raid
+  events, 12 of 14 monthly 30-minute raids, both daily rotating raids, 25 super-hard weekends. Sources: the JP notice banners
+  (first image of the notice, `cache.sqex-bridge.jp/img/<key>`), from Wayback copies (slow sweep with
+  `recon/tools/sqex_notice_sweep.py`) and from the live notices saved by the live-notice research (`notices_live\`); the
+  khuxwiki upload of 2016-05-18 of the 2015-16 JP notice images (one pixel-identical to notice 15404's) and its «JP banner»
+  files; the per-boss banners of the JP wiki page 超難度レイドイベント (boss, HP and 12-hour limit printed: JP-SHR-1, JP-SHR-2,
+  the 17 Saturday-only 30M weekends; khuxwiki 150M Red Trident Tail banner for JP-SHR-78/85/92). 56 two-day 30M weekends have
+  only the Saturday-only banner of their boss (it prints 土曜限定): `variant`, written only with `--jp-variants` (not served)
+  until their own two-day banner is found (one notice found so far, 20289, its image not archived). 3 rows are `hold`, never
+  written: their own notice banner shows another boss than the served row (JP-D-2017-06-19 Jewel Sorceress, JP-D-2018-08-04
+  Gear Golem, JP-D-2018-09-01 Scourge Spider). The other rows keep the plain plate. Each card has its banner text and our
+  translation in `server/raid_jp_banners.json` (Details page). The Raid Catalog banner leaves the JP cards out of its strips
+  (`make_special_banners.py`, unchanged picture); its `--section raid` run also writes the `-kept` copies of the JP rows.
   Models and list banners are the served ones of each boss.
 - <a id="jp-details"></a>**Details pages (task 2, 06-11; tests and dry run, master not regenerated).** No JP raid had a notice page in
   the WW game, so their banners had no Details button. Now every JP evStage has `detailUrl` `/web/raid/notice/<evStageId>`

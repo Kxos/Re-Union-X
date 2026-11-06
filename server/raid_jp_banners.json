@@ -140,6 +140,126 @@
   "JP-SHR-92": {
    "ja": "レベル★★★★★★ 超難度レイドボスイベント 「Rトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
    "en": "Level ★★★★★★ · Super-Hard Raid Boss Event: Defeat Red Trident Tail! 12 hours until it escapes · HP 150,000,000"
+  },
+  "JP-RAID-28": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:30 22:00～22:30 レイドボスLv5撃破ごとにコイン大量ゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:30 and 22:00-22:30. Get lots of coins for every Raid Boss defeated at LV 5 or higher!"
+  },
+  "JP-RAID-12": {
+   "ja": "超巨大レイド レイドボスイベント「パープルグミハウンド」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Giant Raid · Raid Boss Event: Defeat Gummi Hound (JP «Purple Gummi Hound»)! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-13": {
+   "ja": "レイドボスイベント「フォートレスクラブ」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: Defeat Fortress Crab! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-14": {
+   "ja": "レイドボスイベント「フィアスクイーンビー」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Raid Boss Event: Defeat Queen Bee (JP «Fierce Queen Bee»)! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-16": {
+   "ja": "1st anniversary レイドボスイベント「サーカスフォートレス」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "1st anniversary · Raid Boss Event: Defeat Circus Crab (JP «Circus Fortress»)! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-SHR-3": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 50,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 50,000,000"
+  },
+  "JP-SHR-4": {
+   "ja": "超難度レイドボスイベント パーティーで大協力!「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 50,000,000",
+   "en": "Super-Hard Raid Boss Event: Team up as a party! Defeat Green Trident Tail (JP «G Trident Anchor»)! 12 hours until it escapes · HP 50,000,000"
+  },
+  "JP-RAID-21": {
+   "ja": "2016年総決戦!! 日替わりレイドボスイベント 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "2016 Showdown!! Daily Rotating Raid Boss Event. Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-RAID-27": {
+   "ja": "レベル★★★ 日替わりレイドボスイベント",
+   "en": "Level ★★★ · Daily Rotating Raid Boss Event"
+  },
+  "JP-RAID-29": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 レイドボスLv5以降撃破でコイン大量ゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get lots of coins by defeating Raid Bosses from LV 5 up!"
+  },
+  "JP-RAID-30": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 レイドボスLv5以降撃破でコイン大量ゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get lots of coins by defeating Raid Bosses from LV 5 up!"
+  },
+  "JP-RAID-31": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント NEW レイド討伐戦 12:00～12:29 22:00～22:29 ネコスター【レインボー】をゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: NEW Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get the Rainbow Kitstar (JP «Cat Star [Rainbow]»)!"
+  },
+  "JP-RAID-32": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント NEW レイド討伐戦 12:00～12:29 22:00～22:29 イヌスター【レインボー】をゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: NEW Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get the Rainbow Pupstar (JP «Dog Star [Rainbow]»)!"
+  },
+  "JP-D-2017-08-13": {
+   "ja": "レベル★★★ レイドボスイベント「フォートレスクラブ」出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Fortress Crab appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-09-04": {
+   "ja": "レベル★★★ 2nd anniversary レイドボスイベント「ラウドネスマーチ」出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · 2nd anniversary · Raid Boss Event: Loudmouth Parade (JP «Loudness March») appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-09-18": {
+   "ja": "レベル★★★ 2nd anniversary レイドボスイベント『フュリオスホールケーキ』出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · 2nd anniversary · Raid Boss Event: Crabby Cake (JP «Furious Whole Cake») appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-11-13": {
+   "ja": "レベル★★★ 「キャプテンアヴァリシャス」レイドボスイベント 出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Closehanded Captain (JP «Captain Avaricious») appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2017-12-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント NEW レイド討伐戦 12:00～12:29 22:00～22:29 トナスター【グリーン】をゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: NEW Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get the Green Reindeer Star (JP «Tonastar [Green]»)!"
+  },
+  "JP-D-2017-12-11": {
+   "ja": "レベル★★★ レイドボスイベント レイドボス討伐でキャンドルハットゲット! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Defeat the Raid Boss to get the Candle Hat! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-01-15": {
+   "ja": "レベル★★★ レイドボスイベント シシダンスヘッドライナー出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Lion Headliner (JP «Lion Dance Headliner») appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-02-12": {
+   "ja": "レベル★★★ レイドボスイベント ギアゴーレム出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Gear Golem appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-03-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント NEW レイド討伐戦 12:00～12:29 22:00～22:29 ペットパーツをゲットしよう!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: NEW Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get pet parts!"
+  },
+  "JP-D-2018-04-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント NEW レイド討伐戦 12:00～12:29 22:00～22:29 アバターパーツをゲットしよう!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: NEW Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get avatar parts!"
+  },
+  "JP-D-2018-04-09": {
+   "ja": "レベル★★★ レイドボスイベント「ジュエルソーサレス」を撃破しよう! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Defeat Jewel Sorceress! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-05-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 ペットパーツをゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get pet parts!"
+  },
+  "JP-D-2018-06-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 アバターパーツをゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get avatar parts!"
+  },
+  "JP-D-2018-06-09": {
+   "ja": "レベル★★★★★★ 土曜限定 超難度レイドイベント パーティーで協力して撃破せよ! 逃亡まで60分",
+   "en": "Level ★★★★★★ · Saturday only: Super-Hard Raid Event. Team up as a party and defeat it! 60 minutes until it escapes"
+  },
+  "JP-D-2018-07-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 ペットパーツをゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get pet parts!"
+  },
+  "JP-D-2018-07-09": {
+   "ja": "レベル★★★ レイドボスイベント アドベンチャラー出現! 毎日12時/22時から1時間レイドボスボーナスタイム!",
+   "en": "Level ★★★ · Raid Boss Event: Adventurer appears! Raid Boss Bonus Time every day for one hour from 12:00 and 22:00!"
+  },
+  "JP-D-2018-08-02": {
+   "ja": "レベル★★★ 30分限定!! レイドボスイベント レイド討伐戦 12:00～12:29 22:00～22:29 ピンツ・オレット アクセサリをゲット!",
+   "en": "Level ★★★ · 30 minutes only!! Raid Boss Event: Raid Subjugation Battle. 12:00-12:29 and 22:00-22:29. Get the Pence & Olette accessories!"
   }
  }
 }
