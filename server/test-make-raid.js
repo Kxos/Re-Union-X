@@ -517,8 +517,8 @@ const tests = {
     const ids = Object.keys(fix).filter((k) => !k.startsWith('_'));
     assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-05-22', 'JP-D-2017-06-19', 'JP-D-2017-07-17', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
       'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01',
-      'JP-RAID-1', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24',
-      'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+      'JP-RAID-1', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-18', 'JP-RAID-19', 'JP-RAID-20', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24',
+      'JP-RAID-26', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
     // round 3 (06-11): the 2015-2016 raid events start on the JP Monday of the wiki copies of their notices (Gap research 10 §3)
     assert.deepStrictEqual(['JP-RAID-1', 'JP-RAID-7', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20'].map((id) => fix[id].start),
       ['2015-10-19', '2016-02-08', '2016-04-11', '2016-05-02', '2016-06-13', '2016-09-05', '2016-09-19', '2016-10-17', '2016-11-21']);
@@ -532,8 +532,12 @@ const tests = {
     assert.strictEqual(shr.length, 96, 'every super-hard weekend 2016-2018');
     for (const id of shr) assert.ok(new Date(`${fix[id].start}T12:00:00Z`).getUTCDay() === 6 && /\d{5}|土曜限定/.test(fix[id].source), id);
     assert.ok(/24640/.test(fix['JP-SHR-28'].source) && fix['JP-SHR-28'].start === '2017-01-21', 'notice 24640');
-    // the first 60-minute weekend is the JP Saturday 2018-05-12 (JP-SHR-96); JP-SHR-95 (2018-05-05) keeps 12 hours
-    assert.deepStrictEqual([fix['JP-SHR-95'].start, fix['JP-SHR-96'].start, REAL_CONFIG.jpTimer['super-hard weekend'].oneHourFrom], ['2018-05-05', '2018-05-12', '2018-05-12']);
+    // round 4 (06-11, Gap research 9): the first 60-minute weekend is the JP Saturday 2018-05-05 (JP-SHR-95; digest 5/4/2018, reddit 8gzyzv)
+    assert.deepStrictEqual([fix['JP-SHR-95'].start, fix['JP-SHR-96'].start, REAL_CONFIG.jpTimer['super-hard weekend'].oneHourFrom], ['2018-05-05', '2018-05-12', '2018-05-05']);
+    assert.ok(/60 minutes/.test(fix['JP-SHR-95'].source), 'JP-SHR-95 says 60 minutes');
+    // round 4: JP-RAID-18 = the Clarice avatar event 11/14-11/24/2016 (its notice in a video), JP-RAID-26 from the JP Monday of its notice
+    assert.deepStrictEqual([fix['JP-RAID-18'].start, fix['JP-RAID-18'].end, fix['JP-RAID-26'].start], ['2016-11-14', '2016-11-24', '2017-04-17']);
+    for (const id of ['JP-RAID-18', 'JP-RAID-26']) assert.ok(/YouTube \w+/.test(fix[id].source) && /Gap research 9/.test(fix[id].source), id);
     // round 2 notices 28549, 30537: 3 hours, +1 / +5; JP-RAID-3: the wiki copy of its notice, Saturday-Sunday 11/14-15/2015
     for (const id of ['JP-D-2017-05-22', 'JP-D-2017-07-17']) assert.ok(fix[id].upMinutes === 180 && fix[id].bonusLevelStep === 5, id);
     assert.deepStrictEqual([fix['JP-RAID-3'].start, fix['JP-RAID-3'].end], ['2015-11-14', '2015-11-15']);
@@ -1691,7 +1695,7 @@ const tests = {
     // ... and the JP boards (user decision 06-11) only the JP-only medals with no worldwide item yet (declared)
     assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E') && !String(u.board).startsWith('JP-')), []);
     assert.deepStrictEqual([...new Set(out.report.boards.unmatched.filter((u) => String(u.board).startsWith('JP-')).map((u) => u.reward))].sort(),
-      ['1★ Sora Santa Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.']);
+      ['1★ Sora Santa Ver.', '5★ Minnie VD Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.', 'Happi Coat: Hair Ornament (Female)']);
     assert.ok(out.report.boards.unmatched.every((u) => u.reward in REAL_CONFIG.boards.unmatched), 'only declared cells are left off');
     const of130 = new Set(the130.map((r) => r.id));
     const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));

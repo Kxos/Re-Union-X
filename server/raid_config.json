@@ -10,7 +10,7 @@
     "capFrom": "2018-10-07"
   },
   "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
-  "jpTimer": { "_note": "oneHourFrom of the super-hard weekends is a JP Saturday (the rows start on the JP Saturday since 06-11): 2018-05-12 = JP-SHR-96, the first 60-minute weekend of the census; JP-SHR-95 (2018-05-05) keeps 12 hours.", "super-hard weekend": { "before": 720, "after": 60, "oneHourFrom": "2018-05-12" }, "monthly (30-minute)": { "minutes": 30 } },
+  "jpTimer": { "_note": "oneHourFrom of the super-hard weekends is a JP Saturday (the rows start on the JP Saturday since 06-11): 2018-05-05 = JP-SHR-95, the first 60-minute weekend (khux-guides digest of 5/4/2018 and reddit r/KHUx 8gzyzv «[5/5 ~ 5/6] ... only lasts 60 minutes», JP_ONLY.md Gap research 9; was 2018-05-12 until 06-11 round 4).", "super-hard weekend": { "before": 720, "after": 60, "oneHourFrom": "2018-05-05" }, "monthly (30-minute)": { "minutes": 30 } },
   "jpQuestAp": { "JP-RAID-32": 0 },
   "jpBoards": { "superHard": { "donor": "WW-E41605-1", "board": "Legendary Raid Reward", "cells": 13, "coins": 40500 } },
   "jpCensus": {
@@ -36,7 +36,9 @@
     "JP-RAID-14": { "start": "2016-07-18", "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 19605 (live): 7/18 (Mon) 0:00 - 7/24 (Sun) 23:59; LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»); board «Hibiscus hair ornament» + Magic Mirror «and more»." },
     "JP-RAID-15": { "start": "2016-08-15", "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 20078 (live): 8/15 (Mon) 0:00 - 8/21 (Sun) 23:59 (the census row starts 8/14); LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»); board «Pine headband» + Magic Mirror «and more»." },
     "JP-RAID-22": { "start": "2017-01-09", "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 24027: 1/9 (Mon) 0:00 - 1/15 (Sun) 23:59; LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»)." },
+    "JP-RAID-18": { "start": "2016-11-14", "end": "2016-11-24", "source": "JP notice of 11/14/2016 «「クラリス」アバターパーツを手に入れよう！» shown in-game in YouTube qyY21gzvecA (Lightkeeper L, 11/14), banner «限定アバタークエスト クラリスアバターをゲットしよう!», period 11/14 (Mon) 0:00 - 11/24 (Thu) 23:59: the Clarice avatar quest event in which the Adventurer raid appeared (JP_ONLY.md Gap research 9 §4). The census row had 2016-10-13 - 10-24, one month early; the JP wiki has no Adventurer raid in October 2016 (Gap research 10)." },
     "JP-RAID-24": { "start": "2017-02-20", "upMinutes": 180, "source": "JP notice 25538: 2/20 (Mon) 0:00 - 2/26 (Sun) 23:59; LV +1 at every defeat (no Bonus Time step stated); time limit 3 hours." },
+    "JP-RAID-26": { "start": "2017-04-17", "source": "JP notice of the Heartless Tsum raid as shown in YouTube c7pTiCoASPE (MrShadowlink, 4/16/2017, browser view of the notice): period 4/17 (Mon) 0:00 - 4/23 (Sun) 23:59 (JP_ONLY.md Gap research 9); the census row starts on the Pacific day before." },
     "JP-RAID-27": { "start": "2017-10-16", "levelStep": 5, "upMinutes": 180, "source": "JP notice 33250 (live): 10/16 (Mon) 0:00 - 10/22 (Sun) 23:59 (the census row starts 10/15); a different boss each day, Monday to Sunday Trickmaster, Jewel Sorceress, Assault Dragon, Purple Gummi Hound, ヴィシャススパイダー (= Savage Spider), Adventurer, Gear Golem (as the census row); LV +5 at every defeat; time limit 3 hours." },
     "JP-D-2017-06-19": { "bosses": ["Jewel Sorceress"], "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 29434 (live): 6/19 (Mon) - 6/25 (Sun), raid boss «ジュエルソーサレス» (Jewel Sorceress), not Jewel Princess as the census row; board «てるてるイヤリング» (teru-teru earrings); LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»)." },
     "JP-D-2017-08-13": { "start": "2017-08-14", "end": "2017-08-20", "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 31403 (live): 8/14 (Mon) 0:00 - 8/20 (Sun) 23:59 (the census row has 8/13 and no end); LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»)." },
@@ -143,7 +145,7 @@
     "JP-SHR-92": { "start": "2018-04-14", "source": "Standing JP notice 20079 (2016-08-13): every weekend Saturday 0:00 - Sunday 23:59, time limit 12 hours; not the Pacific Friday of the census row." },
     "JP-SHR-93": { "start": "2018-04-21", "source": "Standing JP notice 20079 (2016-08-13): every weekend Saturday 0:00 - Sunday 23:59, time limit 12 hours; not the Pacific Friday of the census row." },
     "JP-SHR-94": { "start": "2018-04-28", "source": "Standing JP notice 20079 (2016-08-13): every weekend Saturday 0:00 - Sunday 23:59, time limit 12 hours; not the Pacific Friday of the census row." },
-    "JP-SHR-95": { "start": "2018-05-05", "source": "Standing JP notice 20079 (2016-08-13): every weekend Saturday 0:00 - Sunday 23:59, time limit 12 hours; not the Pacific Friday of the census row." },
+    "JP-SHR-95": { "start": "2018-05-05", "source": "Standing JP notice 20079 (2016-08-13): every weekend Saturday 0:00 - Sunday 23:59; not the Pacific Friday of the census row. Time limit 60 minutes, not 12 hours, from this weekend (khux-guides digest of 5/4/2018, reddit r/KHUx 8gzyzv; jpTimer oneHourFrom)." },
     "JP-SHR-96": { "start": "2018-05-12", "source": "A Saturday-only weekend (JP wiki banner 土曜限定): Saturday, not the Pacific Friday of the census row." },
     "JP-D-2017-05-22": { "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 28549 (live): 5/22 (Mon) 0:00 - 5/28 (Sun) 23:59, new raid «ギアゴーレム» (Gear Golem), Goofy screen-debut event; board «騎士の盾» (knight's shield); LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»)." },
     "JP-D-2017-07-17": { "upMinutes": 180, "bonusLevelStep": 5, "source": "JP notice 30537 (live): 7/17 (Mon) 0:00 - 7/23 (Sun) 23:59, raid «キャプテンアヴァリシャス» (Closehanded Captain); board «海賊バンダナ(ボーダー)» (striped pirate bandana); LV +1 at every defeat, +5 in Bonus Time; time limit 3 hours («討伐制限時間は3時間»)." },
@@ -514,7 +516,9 @@
       "Booster [HD Vanitas (EX+)] +5%": "Event Boosters are not built yet (they come with the events, I-166): the cell is left off.",
       "1★ Sora Santa Ver.": "JP-only medal (JP id 23111, Christmas 2015 boards): no worldwide item; the JP-only medals are not built yet (I-232 open point 1), so the cell is left off.",
       "5★ Sora & Riku KH3D Ver.": "JP-only medal (JP ids 22395-22397, KH2.8 boards of January 2017): no worldwide item; the cell is left off until the JP-only medals are built.",
-      "5★ Necho Cat": "JP-only medal (JP ids 22135-22137, Cat Day boards of February 2017): no worldwide item; the cell is left off until the JP-only medals are built."
+      "5★ Necho Cat": "JP-only medal (JP ids 22135-22137, Cat Day boards of February 2017): no worldwide item; the cell is left off until the JP-only medals are built.",
+      "5★ Minnie VD Ver.": "JP-only medal (JP id 23125, own art; Valentine 2016 board of JP-RAID-7): no worldwide item (the ★6 23126 has the art of WW Sweetheart Minnie, the ★5 has not); the cell is left off until the JP-only medals are built.",
+      "Happi Coat: Hair Ornament (Female)": "JP-only avatar part (L_法被【雅】 hair decoration, New Year 2016 board of JP-RAID-5): the WW Happi Coat has no female head part; the cell is left off."
     },
     "reconstructedTexture": ["Starlight Ears", "Dazzling Disco"],
     "aliases": {
