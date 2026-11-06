@@ -584,6 +584,18 @@ Original rule (official notices 2019-2020): raid event quests cost 0 AP in the d
   `rule_note_on_every_notice` (`test-raid-notices.js`) renders every served notice and detail page when the files exist.
   Notice «Raid Bosses»: section «Raid AP and Bonus Time» (replaces «Raid hours»); the gauge, Lux, level-step, kept-raid and JP
   lines point to it.
+- <a id="rule-callout"></a>**Rule callout (graphics, user 06-11, tests only).** The rule line of the detail page and the note of
+  the notice pages are one callout (`raid-pages.js` `ruleBox`, `RULE_CSS`): a gold-framed box titled «One raid rule on this
+  server» (Raid Coin icon) with a grey «NOT ORIGINAL» tag, two side-by-side blocks (they stack on a narrow screen) «Monday –
+  Friday»: original AP (5 AP if it was free), no Bonus Time; «Saturday – Sunday»: 0 AP, Lux of raid bosses doubled, Bonus Time
+  all day; a foot line «Every raid, Pacific time.» plus, on a notice page, «the AP costs, Bonus Time hours and opening times in
+  the notice below are those of the original game» (detail page: «the original game had its own hours instead») and the link
+  «Raid Bosses» notice › (`/web/notices#raid-bosses`). Icons of the catalogues' set: `weekday`, `bonus` (drawn clock) and the
+  client's AP medal `ap`, Lux star `lux`, Raid Coin `raid` (`special_icons.py`, local files only). The Notices page
+  (`routes-info-album.js` `noticesPage`) now opens a notice from `#<slug of its title>` (`data-s`), and that notice's BACK goes
+  back to the linking page. The Notices renderer has no styled callout (only `##` sections and `**bold**`), so the «Raid AP
+  and Bonus Time» section of the «Raid Bosses» notice is unchanged. Tests: `rule_note_on_every_notice` (callout on every served
+  notice and detail page), `weekday_weekend_labels`.
 - **Dry run** (copy, `D:/Progetto_Restauro_KH_UX/tmp/raidwin_dry`): only `stage.json` changes, 149 rows `useAp` 0 -> 5; raids.json
   only by the labels (and the old `jpWindowLevel` gone from 21 JP tiers). **Needs:** master regeneration + revision bump,
   `export-notices.js` for docs/NOTICES.md; bench: a weekday raid quest (original AP shown and charged, no balloon, Lux x1), a

@@ -562,7 +562,10 @@ function noticesPage(realMs = Date.now(), opts = {}) {
   const rows = notices.map((n, i) => `<a class="row" href="#n${i}" onclick="show(${i});return false">`
     + `<span class="d">${esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
     + `<span class="x">${esc(n.title)}</span><span class="a"></span></a>`).join('');
-  const details = notices.map((n, i) => `<div class="det" id="d${i}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+  // #<slug of the title> in the address opens that notice (e.g. /web/notices#raid-bosses from the raid notice pages, raid-pages.js
+  // ruleBox); its BACK then goes back to the page that linked it
+  const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const details = notices.map((n, i) => `<div class="det" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
     + `<span class="d">${esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body)}`
     + '<div class="bar"><a class="back" href="#" onclick="show(-1);return false">BACK<span></span></a></div></div>').join('');
   return '<!doctype html><html><head><meta charset="utf-8">'
@@ -586,11 +589,13 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + 'font:italic bold 20px sans-serif;letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);'
     + 'box-shadow:0 2px 0 #0b2a66,inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 2px #0a2a6a}.back span{display:inline-block;margin-left:12px;width:14px;height:9px;border:3px solid #fff;border-left:0;border-radius:0 8px 8px 0;vertical-align:1px;position:relative}.back span:after{content:"";position:absolute;left:-7px;bottom:-8px;border-style:solid;border-width:6px 9px 6px 0;border-color:transparent #fff transparent transparent}</style>'
     + (opts.web ? WEB_CSS : '')
-    + '<script>function show(i){document.getElementById("list").style.display=i<0?"block":"none";'
+    + '<script>var KXH=0;function show(i){if(i<0&&KXH&&history.length>1){KXH=0;history.back();return}document.getElementById("list").style.display=i<0?"block":"none";'
     + 'for(var k=0;k<' + notices.length + ';k++)document.getElementById("d"+k).style.display=k===i?"block":"none";'
     + (opts.web ? 'history.replaceState(null,"",i<0?location.pathname:"#n"+i);' : '')
     + 'window.scrollTo(0,0)}'
     + (opts.web ? 'window.addEventListener("load",function(){var m=/^#n([0-9]+)$/.exec(location.hash);if(m)show(+m[1])})' : '')
+    + 'window.addEventListener("load",function(){var h=location.hash.slice(1),k;if(!h||/^n[0-9]+$/.test(h))return;'
+    + 'for(k=0;k<' + notices.length + ';k++)if(document.getElementById("d"+k).getAttribute("data-s")===h){KXH=1;show(k);return}})'
     // avvisa il server appena disegnata (tempi del popup al primo avvio, server.js noticesshown)
     // tempi delle fasi misurati dalla WebView (risposta, DOM pronto, primo disegno, load), in ms dall'inizio della navigazione
     + (opts.web ? '' : 'window.addEventListener("load",function(){requestAnimationFrame(function(){var t=performance.timing,n=t.navigationStart,'
