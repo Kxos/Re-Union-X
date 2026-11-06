@@ -20,7 +20,8 @@ one-off, weekend, monthly and daily runs overlap the weekly rows; card = the 640
 "file" relative to the list's folder), keyed by census id: the evStageId is looked up in --index at run time, so rows
 added later get their card as soon as the list names them. "match": "exact" (the row's own banner: its notice, or the
 boss / HP / time limit / dates printed on it) or "variant" (an original of the same boss, HP and time limit whose text
-differs from the row, e.g. «土曜限定» on a two-day weekend): written only with --jp-variants. Rows not in the list, or
+differs from the row, e.g. «土曜限定» on a two-day weekend): written only with --jp-variants; any other "match" (e.g. "hold":
+the row's own notice banner, but it shows another boss than the served row) is never written. Rows not in the list, or
 not matched, keep 0.png. Without --wiki only the JP cards are written; the WW cards stay as they are.
 """
 import argparse
@@ -89,10 +90,12 @@ def card(src, dst):
 
 
 def jp_items(items, variants=False):
-    """{censusId: item} of the --jp list; "variant" items only with variants=True; a census id named twice: error"""
+    """{censusId: item} of the --jp list: the "exact" items, the "variant" ones only with variants=True, no other match;
+    a census id named twice: error"""
     out = {}
     for it in items:
-        if it.get('match', 'exact') == 'variant' and not variants:
+        m = it.get('match', 'exact')
+        if m != 'exact' and not (variants and m == 'variant'):
             continue
         if it['censusId'] in out:
             raise ValueError('census id twice in the JP list: %s' % it['censusId'])

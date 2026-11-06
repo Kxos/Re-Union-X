@@ -130,7 +130,7 @@ const tests = {
     const ix = index();
     ix.entries.push(entry('JP-RAID-4', 8202, '2015-12-18', '2015-12-25', 'Jack in the Box', { family: 'event', jp: true, region: 'JP', hp: 18000, sphereBoardIds: [3000700],
       levelDrops: [{ level: 30, items: ['5★ Test Medal'] }], reconstructed: ['jp', 'jpBoardOriginal'] }),
-    entry('JP-RAID-12', 8201, '2016-05-22', '2016-05-29', 'Gummi Hound', { family: 'event', jp: true, region: 'JP', reconstructed: ['jp', 'jpNoBoard'] }));
+    entry('JP-RAID-99', 8201, '2016-05-22', '2016-05-29', 'Gummi Hound', { family: 'event', jp: true, region: 'JP', reconstructed: ['jp', 'jpNoBoard'] }));
     const doc = { rows: {}, notices: {}, jp: { 'JP-RAID-4': { noticeId: 15404, date: '2015-12-19', title: 'Raid boss!', lines: ['Fixture line one.'] } } };
     const c = ctx({ boardName: () => 'M_Santa Sora Outfit 12/18/15', boardItems: () => ['6★ Chip'] });
     const known = pages.noticePage(ix, 8202, doc, c), lost = pages.noticePage(ix, 8201, doc, c);
