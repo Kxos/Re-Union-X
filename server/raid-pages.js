@@ -431,21 +431,21 @@ const RULE_CSS = '.rc{border:2px solid #ffcd4a;border-radius:10px;background:#06
   + '.rcd span{display:block;color:#d9e6ee;font-size:14px;padding:1px 0 1px 1.7em;text-indent:-1.7em}.rcd span .ic{width:1.35em;height:1.35em}.rcd span.ni{text-indent:0}'
   + '.rcf{color:#b9cfdc;font-size:13.5px;margin:2px 2px 0}.rcf a{color:#9fd4ff}';
 const RULE_LINK = '<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>';
-const ruleBox = (foot) => '<div class="rc">'
-  + `<div class="rch">${icon('raid')}One raid rule on this server<span class="ng">NOT ORIGINAL</span></div>`
+// the rule part of the «On this server» box (user 06-11: one box at the top of the page): sub-heading, the two day cards, the foot line
+const ruleBox = (foot) => `<div class="rsh">${icon('raid')}One raid rule</div>`
   + '<div class="rcs">'
   + `<div class="rcd"><b>${icon('weekday')}Monday – Friday</b><span>${icon('ap')}Original AP (5 AP if it was free)</span><span class="ni">No Bonus Time</span></div>`
   + `<div class="rcd we"><b>${icon('weekday')}Saturday – Sunday</b><span>${icon('ap')}0 AP</span><span>${icon('lux')}Lux of raid bosses doubled</span><span>${icon('bonus')}Bonus Time all day</span></div>`
-  + `</div><p class="rcf">Every raid, Pacific time. ${foot} See the ${RULE_LINK}</p></div>`;
+  + `</div><p class="rcf">Every raid, Pacific time. ${foot} See the ${RULE_LINK}</p>`;
 const ruleOn = () => windows.costRule() === windows.WEEKDAY_WEEKEND;
-const ruleNote = () => (ruleOn() ? ruleBox('The AP costs, Bonus Time hours and opening times in the notice below are those of the original game.') : '');
-const ruleLine = () => (ruleOn() ? ruleBox('The original game had its own hours instead.') : '');
+const RULE_NOTICE = 'The AP costs, Bonus Time hours and opening times in the original notice below are those of the original game.';
+const RULE_DETAIL = 'The original game had its own hours instead.';
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
-// «On this server» box of the notice pages (user 06-11, graphics: the bullet wall was hard to read in the game popup): the
+// «On this server» box at the top of the notice and detail pages (user 06-11, graphics: the bullet wall was hard to read in the game popup): the
 // callout style (.rc of RULE_CSS: icon, gold title, NOT ORIGINAL tag), the status as one compact row, the rebuilt values in
 // group cards (Boss / Rewards / Rules), each an icon, a short bold label and one short line (RECON_SHORT; the full sentences
 // of RECON_TEXT stay one tap away in a folded block), the tiers not restored, the two links as pill buttons. The «AP and
-// Bonus Time» label is left out while the rule callout is on the page (ruleOn: ruleNote() shows it at the top). Plain HTML / CSS.
+// Bonus Time» label is left out while the rule is served (ruleOn: the rule is a part of the same box). Plain HTML / CSS.
 // code -> [group, short label, one short line, icon key]
 const RECON_SHORT = {
   atk: ['boss', 'ATK', 'Deduced from bosses with original values', 'tleg'],
@@ -510,25 +510,34 @@ const RECON_GROUPS = [['boss', 'Boss', 'tleg', ''], ['rewards', 'Rewards', 'raid
 const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#06283e;padding:8px 10px 8px;margin:18px 0 10px;line-height:1.45;font-size:15px}'
   + '.sb .why{margin:2px 0 6px;padding:4px 10px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:center;-webkit-align-items:center;align-items:center}'
   + '.sb .why .s{margin:2px 10px 2px 0}.sbi{color:#b9cfdc;font-size:14px;margin:4px 2px 6px}'
-  // the «Rebuilt values» head (user 06-11: it must read as a heading): gold title with an icon over a thin rule, the subtitle on its own line
-  + '.sbh{margin:12px 2px 8px;padding:0 0 5px;border-bottom:2px solid #ffcd4a}.sbh b{display:block;color:#ffcd4a;font-size:17px;letter-spacing:.03em}'
-  + '.sbh b .ic{width:1.3em;height:1.3em;margin-right:6px}.sbh span{display:block;color:#b9cfdc;font-weight:normal;font-size:13.5px;margin:1px 0 0 2px}'
   + '.rgs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
   + '.rg{-webkit-box-flex:1;-webkit-flex:1 1 260px;flex:1 1 260px;min-width:240px;box-sizing:border-box;margin:0 4px 8px;padding:0 9px 4px;border-radius:8px;background:#0a4466;overflow:hidden}'
   // the group heads (user 06-11: make clear they are categories): a full colour band, capitals, over the column
   + '.rg>b{display:block;margin:0 -9px 3px;padding:6px 10px 5px;background:#b8423a;color:#fff;font-size:16px;text-transform:uppercase;letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.5)}'
   + '.rg.rw>b{background:#a87a10}.rg.ru>b{background:#1f7ea6}.rg.ot>b{background:#5b7383}.rg>b .ic{width:1.35em;height:1.35em}.rg .ic{width:1.35em;height:1.35em}'
   + '.ri{padding:3px 0 3px 1.75em;text-indent:-1.75em;border-top:1px solid #1d5878}.ri b{color:#fff;font-size:14.5px}.ri span{display:block;text-indent:0;color:#d9e6ee;font-size:13.5px}'
+  + '.rsh{color:#ffcd4a;font-weight:bold;font-size:15.5px;margin:10px 2px 5px;letter-spacing:.03em}.rsh .ic{width:1.35em;height:1.35em;margin-right:4px}'
+  // «Rebuilt values» closed (user 06-11): the summary is a tappable bar in the gold-heading style, own ▸ marker (turns when open),
+  // count chip and tap hint; the default marker hidden (display:block for current Chrome, ::-webkit-details-marker for old WebViews)
+  + 'details.rb{margin:12px 0 6px}details.rb>summary{display:block;list-style:none;cursor:pointer;padding:7px 10px 6px;background:#0a4466;border:1px solid #2f6f93;border-bottom:2px solid #ffcd4a;border-radius:8px;outline:0}'
+  + 'details.rb>summary::-webkit-details-marker{display:none}details.rb[open]>summary{border-radius:8px 8px 0 0;margin-bottom:8px}'
+  + '.rbm{display:inline-block;color:#ffcd4a;font-size:19px;line-height:1;width:1em;text-align:center;-webkit-transition:-webkit-transform .15s;transition:transform .15s}details.rb[open] .rbm{-webkit-transform:rotate(90deg);transform:rotate(90deg)}'
+  + '.rbh{color:#ffcd4a;font-weight:bold;font-size:17px;letter-spacing:.03em}.rbh .ic{width:1.3em;height:1.3em;margin-right:6px}'
+  + '.rbn{display:inline-block;background:#ffcd4a;color:#06283e;border-radius:10px;padding:0 9px;margin-left:10px;font-size:12.5px;font-weight:bold;line-height:1.7;vertical-align:2px}'
+  + '.rbt{float:right;color:#9fd4ff;font-size:13px;margin-top:3px}.rbt .c{display:none}details.rb[open] .rbt .o{display:none}details.rb[open] .rbt .c{display:inline}'
+  + '.rbs{display:block;color:#b9cfdc;font-size:13.5px;margin:2px 0 0 1.1em}'
+  + '.och{color:#fff;font-size:18px;margin:16px 0 4px;padding-bottom:4px;border-bottom:2px solid #5d8aa6}.och:before{content:""}'
   + '.sbo{color:#ffb3a8;font-size:14px;margin:2px 2px 6px}.sbo .ic{width:1.3em;height:1.3em}.sb details.fold{border-color:#1d5878;font-size:14px}.sb details.fold li{margin:3px 0}'
   + '.sbl{margin:8px 0 2px}.sbl a{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:16px;padding:3px 14px;margin:4px 8px 0 0;color:#fff;text-decoration:none;font-size:14.5px}';
 // the «Why these values?» fold outside the notice pages (NOTICE_CSS has its own)
 const FOLD_CSS = 'details.fold{margin:6px 0;border:1px solid #1d5878;border-radius:6px;padding:2px 10px;font-size:14px}details.fold>summary{cursor:pointer;color:#00d4ed;padding:4px 0}details.fold li{margin:3px 0}';
 // the codes shown in the box: weekRule dropped while the rule callout is on the page
 const srvCodes = (codes) => codes.filter((c) => !(c === 'weekRule' && ruleOn()));
-// head: the «Rebuilt values» line (the notice box); the detail page has its own h2 instead
-function reconCards(codes, head = true) {
+// the «Rebuilt values» part of the box, closed (user 06-11): the summary bar (count of the cards' lines), then the cards and the fold
+function reconCards(codes) {
   const shown = srvCodes(codes);
   if (!shown.length) return '';
+  let count = 0;
   const cards = RECON_GROUPS.map(([g, name, ic, cls]) => {
     const rows = [], seen = new Set();
     for (const c of shown.filter((x) => (RECON_SHORT[x] ? RECON_SHORT[x][0] : 'other') === g)) {
@@ -537,21 +546,30 @@ function reconCards(codes, head = true) {
       seen.add(`${label}|${line}`);
       rows.push(`<div class="ri">${icon(k)}<b>${esc(label)}</b><span>${esc(line)}</span></div>`);
     }
+    count += rows.length;
     return rows.length ? `<div class="rg${cls}"><b>${icon(ic)}${esc(name)}</b>${rows.join('')}</div>` : '';
   }).join('');
-  return (head ? `<p class="sbh"><b>${icon('replaced')}Rebuilt values</b><span>These values are lost in the original game data: this server rebuilt them from the surviving sources.</span></p>` : '')
-    + `<div class="rgs">${cards}</div><details class="fold"><summary>Why these values?</summary>${reconList(shown)}</details>`;
+  return `<details class="rb"><summary><span class="rbm">▸</span><span class="rbh">${icon('replaced')}Rebuilt values</span>`
+    + `<span class="rbn">${count} value${count === 1 ? '' : 's'}</span><span class="rbt"><span class="o">tap to open</span><span class="c">tap to close</span></span>`
+    + '<span class="rbs">These values are lost in the original game data: this server rebuilt them from the surviving sources.</span></summary>'
+    + `<div class="rgs">${cards}</div><details class="fold"><summary>Why these values?</summary>${reconList(shown)}</details></details>`;
 }
-// the box of a notice page: intro = one short line (html)
-function srvBox(row, st, intro) {
+// The one «On this server» box at the top of the notice and detail pages (user 06-11): title + NOT ORIGINAL once, the status row,
+// the Story / dates line, «One raid rule» (only while the rule is served), «Rebuilt values» (closed), the tiers not restored,
+// the pill links. o: {intro (html), rule (foot line of the rule), after (html under the status row: the detail page's Keep
+// button and messages), links ([[href, text]])}
+function srvBox(row, st, o) {
   const codes = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
   const off = row.entries.filter((e) => !e.available);
   return '<div class="sb">'
     + `<div class="rch">${icon('raid')}On this server<span class="ng">NOT ORIGINAL</span></div>`
-    + `<div class="why ${st.cls}">${st.pill}<span>${st.why}</span></div><p class="sbi">${intro}</p>${reconCards(codes)}`
+    + `<div class="why ${st.cls}">${st.pill}<span>${st.why}</span></div>${o.after || ''}<p class="sbi">${o.intro}</p>`
+    + (ruleOn() ? ruleBox(o.rule) : '')
+    + reconCards(codes)
     + (off.length ? `<p class="sbo">${icon('lock')}Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')} (graphics or data incomplete in the surviving game files).</p>` : '')
-    + `<p class="sbl"><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a><a href="/web/raid/catalog">Raid Catalog ›</a></p></div>`;
+    + `<p class="sbl">${o.links.map(([h, t]) => `<a href="${h}">${esc(t)}</a>`).join('')}</p></div>`;
 }
+const noticeLinks = (row) => [[`/web/raid/raid/${row.evStageId}`, 'This raid in the Raid Catalog ›'], ['/web/raid/catalog', 'Raid Catalog ›']];
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 // levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
 const stepOf = (row) => Math.max(1, ...row.entries.map((e) => Number(e.levelStep) || 1));
@@ -580,22 +598,20 @@ function detailPage(index, evStageId, ctx = {}) {
     }).join('')}</ul>` : '');
   // the labels of raids.json in the player's words (index.reasons holds the builder's notes: file names, config keys)
   const codes = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
-  // the same group cards as the «On this server» box of the notice pages (user 06-11, graphics), the full sentences folded
-  const cards = reconCards(codes, false);
-  const recon = cards ? `<h2>Reconstructed values</h2><p class="n">The original values are lost: these are rebuilt from the surviving sources, as the Raid Bosses notice explains.</p>${cards}` : '';
   const others = rows.filter((r) => r !== row && r.bosses.some((b) => row.bosses.includes(b))).sort((a, b) => (a.start < b.start ? 1 : a.start > b.start ? -1 : 0));
   const other = others.length ? `<h2>Other weeks of ${esc(title)}</h2><ul class="ow">${others.map((r) => `<li><a href="${detailHref(r.evStageId)}">${dateRange(r)}</a> · ${esc(titleOf(r))}<br>${statusOf(r, ctx).pill}</li>`).join('')}</ul>` : '';
   const back = ctx.fromCatalog ? `<div class="bar"><a class="back" href="/web/raid/catalog#q${row.evStageId}">BACK<span></span></a></div>` : '';
+  const notice = row.jp ? 'Notice of this raid ›' : ctx.hasNotice && ctx.hasNotice(row.censusId) ? 'Original notice of this raid ›' : '';
+  // the «On this server» box first (user 06-11), with the Keep button and its messages under the status row
+  const box = srvBox(row, st, { after: `<div id="pinmsg" class="pinmsg"></div>${replacesLine(st, kept)}${button}`,
+    intro: `This server follows your Story, not the calendar: this week of the original game (${esc(dateRange(row))}) opens when your Story reaches it.`,
+    rule: RULE_DETAIL, links: [...(notice ? [[`/web/raid/notice/${row.evStageId}?from=raid`, notice]] : []), ['/web/raid/catalog', 'Raid Catalog ›']] });
   return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS + RULE_CSS + SRV_CSS + FOLD_CSS) + `<body${back ? ' class="hb"' : ''}>`
-    + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
-    + `${st.pill}<div id="pinmsg" class="pinmsg"></div><div class="why ${st.cls}">${st.why}</div>${replacesLine(st, kept)}${button}`
-    + (row.jp ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Notice of this raid ›</a></li></ul>`
-      : ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
+    + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">${box}`
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
-    + ruleLine()
     + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win${bonusStepText(row)}, up to LV 99; levels reset on the 1st of every month.</p>`
-    + `<h2>Raid Boards</h2>${boards}${recon}${other}`
+    + `<h2>Raid Boards</h2>${boards}${other}`
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }
 
@@ -741,10 +757,12 @@ function noticePage(index, evStageId, doc, ctx = {}) {
       const title = titleOf(row);
       return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
         + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
-        + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
+        + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>`
+        + srvBox(row, st, { intro: `This server follows your Story, not the calendar: this week (${esc(dateRange(row))}) opens when your Story reaches it.`,
+          rule: RULE_NOTICE, links: noticeLinks(row) })
+        + '<h2 class="och">Original notice</h2>'
         + '<div class="ns raid"><h2>No notice for this week</h2><p>This raid ran in the last weeks of the original game, during the end of service: '
         + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div>'
-        + srvBox(row, st, `This server follows your Story, not the calendar: this week (${esc(dateRange(row))}) opens when your Story reaches it.`)
         + `${back}</body></html>`;
     }
     if (row && row.jp) return jpNoticePage(row, doc, ctx, { st, back });
@@ -752,11 +770,11 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
       + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
-      + ruleNote()
+      + srvBox(row, st, { intro: 'Below: the raid part of the original notice, unchanged (other events and top-player lists left out). '
+        + `Its dates are the original game's (${esc(dateRange(row))}): here the raid opens when your Story reaches that week.`, rule: RULE_NOTICE, links: noticeLinks(row) })
+      + '<h2 class="och">Original notice</h2>'
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
       + noticeBody(n.body, row.bosses)
-      + srvBox(row, st, 'Above: the raid part of the original notice, unchanged (other events and top-player lists left out). '
-        + `Its dates are the original game's (${esc(dateRange(row))}): here the raid opens when your Story reaches that week.`)
       + `${back}</body></html>`;
   } catch (e) {
     return noticeMissing(row, ctx);
@@ -807,7 +825,9 @@ function jpNoticePage(row, doc, ctx, { st, back }) {
     ['Level', `LV 1, +${stepOf(row)} at every win${bonusStepOf(row) && stepOf(row) === 1 ? ` (+${bonusStepOf(row)} in Bonus Time)` : ''}, up to LV 99`], ['Raid Boards', state]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
   return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
-    + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">JAPAN ONLY</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
+    + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">JAPAN ONLY</span><span class="chip d">${esc(dateRange(row))}</span></p>`
+    + srvBox(row, st, { intro: `Held only in the Japanese version: here it is played only from the Raid Catalog, once your Story has passed its dates (${esc(dateRange(row))}).`,
+      rule: 'The AP costs, Bonus Time hours and opening times below are those of the original game.', links: noticeLinks(row) })
     + (JP_BANNERS[row.censusId] ? '<div class="ns"><h2>On the banner (our translation)</h2>'
       + `<p lang="ja" class="nb">${esc(JP_BANNERS[row.censusId].ja)}</p><p>${esc(JP_BANNERS[row.censusId].en)}</p>`
       // a banner rebuilt by this server (raid_jp_banners.json `reconstructed`, the two-day 150M weekends of 2018) says so instead
@@ -818,7 +838,6 @@ function jpNoticePage(row, doc, ctx, { st, back }) {
     + `<table class="tt"><tr><th>Day / tier</th><th>Boss</th><th>HP at LV 1</th><th>Time limit</th></tr>${bossRows}</table>`
     + (drops.length ? `<h3>Level rewards</h3><ul class="nl">${drops.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '')
     + `<h3>Raid Boards</h3>${boards}${shared}</div>`
-    + srvBox(row, st, `Held only in the Japanese version: here it is played only from the Raid Catalog, once your Story has passed its dates (${esc(dateRange(row))}).`)
     + `${back}</body></html>`;
 }
 

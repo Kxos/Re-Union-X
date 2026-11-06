@@ -99,11 +99,12 @@ const tests = {
     // that one rule applies here to all raids (weekday original AP, weekend 0 AP and Lux x2, not original)
     // the callout (graphics, user 06-11): title + NOT ORIGINAL tag, Monday – Friday original AP (5 if free) / no Bonus Time,
     // Saturday – Sunday 0 AP / Lux doubled / Bonus Time all day, Pacific time
-    const note = /<div class="rc">.*?One raid rule on this server<span class="ng">NOT ORIGINAL<\/span>.*?Monday – Friday.*?Original AP \(5 AP if it was free\).*?No Bonus Time.*?Saturday – Sunday.*?0 AP.*?Lux of raid bosses doubled.*?Bonus Time all day.*?Pacific time/;
+    // one box at the top (user 06-11): «On this server» + NOT ORIGINAL, then the «One raid rule» part
+    const note = /<div class="sb"><div class="rch">.*?On this server<span class="ng">NOT ORIGINAL<\/span>.*?<div class="rsh">.*?One raid rule<\/div>.*?Monday – Friday.*?Original AP \(5 AP if it was free\).*?No Bonus Time.*?Saturday – Sunday.*?0 AP.*?Lux of raid bosses doubled.*?Bonus Time all day.*?Pacific time/;
     const body = ['★ Defeat the Trickmaster!', '・Raid quests cost 0 AP during Bonus Time (2:00 a.m. - 2:59 a.m. PT).'];
     const html = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body } } }, ctx());
-    assert.ok(note.test(html) && html.indexOf('One raid rule on this server') < html.indexOf('Defeat the Trickmaster'), 'the note comes before the original text');
-    assert.ok(html.includes('in the notice below are those of the original game.') && html.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>'));
+    assert.ok(note.test(html) && html.indexOf('One raid rule') < html.indexOf('<h2 class="och">Original notice</h2>') && html.indexOf('<h2 class="och">') < html.indexOf('Defeat the Trickmaster'), 'the note comes before the original text');
+    assert.ok(html.includes('in the original notice below are those of the original game.') && html.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>'));
     // the link opens the notice: the Notices page carries data-s="raid-bosses" and opens a #<slug> address
     const np = require('./routes-info-album').noticesPage();
     assert.ok(np.includes('data-s="raid-bosses"') && np.includes('getAttribute("data-s")===h'), 'Notices page opens #raid-bosses');
@@ -126,7 +127,7 @@ const tests = {
     // task 2 (06-11): every Japan-only row has a Details page; it gives our translation of its JP notice when one was recovered,
     // else says plainly that it was not; the facts we have (bosses by day, HP, time limit, level rewards, boards and their label)
     // and the one-AP rule note in both cases; the banner text (raid_jp_banners.json) with its Japanese line when the row has a card
-    const note = /One raid rule on this server<span class="ng">NOT ORIGINAL/;
+    const note = /On this server<span class="ng">NOT ORIGINAL<\/span>.*?One raid rule<\/div>/;
     const ix = index();
     ix.entries.push(entry('JP-RAID-4', 8202, '2015-12-18', '2015-12-25', 'Jack in the Box', { family: 'event', jp: true, region: 'JP', hp: 18000, sphereBoardIds: [3000700],
       levelDrops: [{ level: 30, items: ['5★ Test Medal'] }], reconstructed: ['jp', 'jpBoardOriginal'] }),
@@ -232,8 +233,8 @@ const tests = {
     assert.deepStrictEqual(text.sections.map((s) => s.raid), [false, true, false]);
     const one = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2019-10-07', body: ['★ Monthly Raid Event!', 'x'] } } }, ctx());
     assert.ok(!/class="oth"/.test(one));
-    // the «On this server» box last, with the player-facing labels, not the builder notes
-    assert.ok(at('On this server') > at('Raid text.'));
+    // the «On this server» box first (user 06-11), with the player-facing labels, not the builder notes
+    assert.ok(at('On this server') < at('Original notice</h2>') && at('Original notice</h2>') < at('Raid text.'));
     assert.ok(html.includes('ATK') && !html.includes('No ATK of a raid is known'), 'labels, not the reasons of raids.json');
   },
   escapes() {
