@@ -356,8 +356,8 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     Magic Broom 5★ at LV 40 (Easter 2016); JP-RAID-7 Mickey & Minnie 6★ at LV 95 (Valentine 2016: guaranteed, same art; rarity
     not stated) and JP-RAID-8 Prince & Belle 6★ 21156 at LV 95 (White Day 2016: same id; guarantee by analogy): `jpRewardProbable`.
     A reward with no item is left off (`levelDropsPartial`).
-  - **Not served, why:** JP board rewards (avatar parts, titles such as the WW 12012-12137 rows, Rainbow Kitstar / Pupstar parts,
-    Frog Caps, Meow Wow Snuggly, Disco parts): only board summaries survive, no cell list, and no board cell is invented; the
+  - **Not served, why:** JP board rewards of the rows whose board is not known (Rainbow Kitstar / Pupstar parts, Frog Caps,
+    Hibiscus, Pineapple Headband, Clarice parts; the boards of 06-11 serve the others, see [Boards](#jp-boards)); the
     Valentine / White Day LV 15+ rare drops (Sweetheart Minnie, Sweetheart Beast) and the October 2017 daily drops: chance drops
     with no odds; Young Kairi at LV 99 (Children's Day 2016): rarity and guarantee not stated.
   - **Dry run** (copy of `master_data` + `make-boosted-medals.js`, `D:/Progetto_Restauro_KH_UX/tmp/raidjp_dry, local`): 347 census rows, 608 of 608 tier rows, no WW
@@ -383,14 +383,36 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
 - **Timer** (`jpTimer`, `raid_config.json`): super-hard weekends 12 h, 1 h from 2018-05-05; monthly 30-minute raids 30 minutes
   (their two daily windows are not served: [Raid hours](#raid-hours)). Super-hard weekends open on Saturday and Sunday only
   (`open: 'weekend'`), the daily rotating raid on its weekday (`open: 'day'`).
-- **Boards.** No JP board survives cell by cell. Super-hard weekends: the JP standard board (13 cells, 40,500 Raid Coins,
-  6★ Moogle x3, Huey & Dewey & Louie x8, Magic Broom x2, completion 6★ Moogle) is the WW **Legendary Raid Reward** board of
-  WW-E41605-1, the same cells, items and total (`jpBoards.superHard`, label `jpBoard`; `boardSet` when the census only infers
-  it, from 2017-05-26); the first five weekends had other small boards: `boardStandard`. Other rows: the generic boards (no
-  title, no gender, Medals and Jewels only: the JP «Advanced bonus» = WW «Seasoned Wielder Bonus») of the nearest WW row of the
-  matching family, without its exclusive items (`boardStandard`). Card picture of the donor board (`artFrom`, `raid-boards.js`):
-  190 new lines in `game_data/raid_board_art.tsv`, which only a resource build imports. The JP avatar parts, titles and level
-  drops are not given (list and WW availability in the private file).
+- <a id="jp-boards"></a>**Boards (user decision 06-11, replaces the generic `boardStandard` boards of 05-11; tests and dry run,
+  master not regenerated).** Per JP row, in `make-raid.js` `eventBoardDoc`:
+  - **(a) original.** The shared 2017 master (thethiny, `sphereMasu` 4400001-4400007) still carries JP board rows:
+    Christmas 2015 (JP-RAID-4: M_/L_ Santa Sora Outfit 19 cells / 500 each, two bonus boards 2,000 / 3,400, completion Santa
+    ★5 = WW 5★ Christmas Sora) and January 2016 (JP-RAID-6: Mickey & Magic Broom 5,300, 5 Magic Brooms + 1 Fantasia Mickey B,
+    title Peppy; its bonus board 5,300, completion 6★ Dewey). Label `jpBoardOriginal`. 4400001 (18 cells, 1,410, Cid, title
+    True) is not tied to any raid by a source: not served. The super-hard standard board (13 cells, 40,500 Raid Coins, 6★
+    Moogle x3, HDL x8, Magic Broom x2, completion 6★ Moogle) stays the WW **Legendary Raid Reward** board of WW-E41605-1
+    (`jpBoards.superHard`, label `jpBoard`, `boardSet` when the census only infers it, from 2017-05-26).
+  - **(b) reconstructed** (label `jpBoardDeduced`): only when the evidence gives the cell count **and** the total coins (JP
+    wiki board summary, KH2.8 boards read from a video), or a WW twin board (JP-RAID-10 Zootopia = the WW Zootopia boards:
+    same titles, same snugglies). Costs: the cost curve of a proven JP board of the period (Christmas 2015 avatar board,
+    January 2016 boards, KH2.8 set 1) resampled to the stated cell count and scaled to the stated total; main rewards on the
+    dearest cells, the summary's fillers (HDL, Moogle, Chip / Dale / Cid) on the others; titles = the WW title rows in JP order
+    (probable). JP-only medals without a WW item (Sora Santa Ver. ★1, Sora & Riku KH3D Ver., Necho Cat) are declared in
+    `boards.unmatched` and left off (`boardCells`).
+  - **(c) none** (label `jpNoBoard`): every other JP row, including summaries without cell count or total; the detail page says
+    «No Raid Boards: the Japanese board of this raid is not known».
+  - Coverage (dry run 06-11): raid events 2 original / 12 reconstructed / 24 none; daily rotating 1 / 1 (JP-RAID-21
+    reconstructed, JP-RAID-27 none); super-hard weekends 94 original (standard board) / 3 reconstructed (JP-SHR-1, 3, 4) / 2
+    none (JP-SHR-2, 5); monthly 30-minute 14 none. 141 JP boards (94 standard + 47 own). WW rows unchanged.
+  - The per-row board list is private (`raid_rewards/e_jp/jp_boards.json`, written by `make_jp_boards.js` from the 2017 master,
+    the WW master and the evidence; read by `readSources` as `eventRewards.jpBoards`); evidence per board in the private
+    `JP_ONLY.md` «JP raid boards (06-11)». Board keys `<censusId>:jp<n>-<name>`, new numbers appended in `raid_ids.json`
+    (700-746); the old `std` keys stay numbered, unused.
+  - Card pictures: the JP 4.3.1 client has the original JP board cards (`img/sphere_incentive/Board Raid/24000xx.png`): own
+    card for 16 boards (`board.art`, `raid-boards.js`; Christmas bonus 2 shows the bonus 1 card, its file 2400005 is absent), the
+    WW Zootopia cards for JP-RAID-10 (`artFrom`), for 6 boards the card of a board
+    with the same main reward for the 5-Mirror bonus boards and the Magic Broom Set (said in the evidence); 23 boards have no
+    card (`boardNoArt`). `game_data/raid_board_art.tsv` changes: needs a resource build.
 - **Cards** (6 November 2026). Original JP raid banners, written by `make_raid_banners.py --jp <list>` (keyed by census id,
   evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build now leaves `jp`
   rows alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row

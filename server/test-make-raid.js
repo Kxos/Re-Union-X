@@ -355,7 +355,7 @@ const tests = {
     // knots 1, 10, 20, 30, 99 of the one-tier rows: the wiki's levels, linear between them (LV 30 between 20 and 50)
     assert.deepStrictEqual(knotsOf(body, 'hp'), [60000, 550181, 1094827, Math.round(1094827 + (2728767 - 1094827) / 3), 5397535]);
   },
-  jp_boards_stand_in() {
+  jp_boards_rule() {
     const out = build(jpFixture((f) => {
       const cells = (rewards) => rewards.map((reward, i) => ({ n: i + 1, cost: 100 * (i + 1), type: 'medal', reward, qty: 1 }));
       const board = (name, rewards, extra = {}) => ({ board: name, cells: cells(rewards), completion_reward: '6★ Moogle', ...extra });
@@ -370,14 +370,29 @@ const tests = {
       f.boards = { boards: [], weeks: [] };
       f.master.medal = ['Chip', 'Dale', 'Moogle'].flatMap((n, i) => [5, 6].map((rare) => ({ medalId: 100 + 10 * i + rare, name: n, rare })));
       f.master.avatarParts = [];
+      // the private JP board list (user decision 06-11): JP-RAID-1 has a reconstructed board with its own JP card picture,
+      // JP-RAID-27 an original one whose only cell is a JP-only medal (left off: no board), the other JP rows nothing
+      f.eventRewards.jpBoards = { rows: {
+        'JP-RAID-1': { status: 'deduced', boards: [{ name: 'Test Set', cells: [{ cost: 50, kind: 'medal', reward: '6★ Chip' }, { cost: 150, kind: 'medal', reward: '5★ Dale' }], completion_reward: { value: '6★ Moogle' }, art: { jp: 'img/sphere_incentive/Board Raid/2400011.png' } }] },
+        'JP-RAID-27': { status: 'original', boards: [{ name: 'Only JP', cells: [{ cost: 10, kind: 'medal', reward: '1★ Sora Santa Ver.' }], completion_reward: { value: '6★ Moogle' } }] } } };
+      f.config.boards.unmatched = { '1★ Sora Santa Ver.': 'JP-only medal' };
     }));
     const boardsOf = (key) => jpEntry(out, key).sphereBoardIds.map((id) => out.sphereRows.find((r) => r.sphereBoardId === id).boardName);
-    // a JP event: only the generic board of the nearest WW one-off event, never its avatar board
-    assert.deepStrictEqual(boardsOf('JP-RAID-1/single'), ['Seasoned Wielder Bonus 4/10/16']);
-    assert.ok(jpEntry(out, 'JP-RAID-1/single').reconstructed.includes('boardStandard'));
-    // its donor's screenshot card: the art line names the donor's file, not a JP key (no such file: build stopped, 05-11)
-    const jpArt = rb.artLines(out.boardArt).split('\n').find((l) => l.startsWith(`img/sphere_incentive/${jpEntry(out, 'JP-RAID-1/single').sphereBoardIds[0]}.png`));
-    assert.strictEqual(jpArt.split('\t').slice(1).join('\t'), 'loc\t=img/sphere_incentive_ww/WW-E9-1_ev2-seasoned-wielder-bonus-both.png');
+    // (b) a reconstructed board: its cells as listed, label jpBoardDeduced, never the generic stand-in of a WW raid
+    assert.deepStrictEqual(boardsOf('JP-RAID-1/single'), ['Test Set 4/10/16']);
+    const e1 = jpEntry(out, 'JP-RAID-1/single');
+    assert.ok(e1.reconstructed.includes('jpBoardDeduced') && !e1.reconstructed.includes('boardStandard') && !e1.reconstructed.includes('jpNoBoard'));
+    const masu = out.masuRows.find((m) => m.masuId === e1.sphereBoardIds[0]);
+    assert.deepStrictEqual(masu.spherePoint.slice(0, 3), [50, 150, 0]);
+    // its own JP card picture
+    const jpArt = rb.artLines(out.boardArt).split('\n').find((l) => l.startsWith(`img/sphere_incentive/${e1.sphereBoardIds[0]}.png`));
+    assert.strictEqual(jpArt.split('\t').slice(1).join('\t'), 'jp\timg/sphere_incentive/Board Raid/2400011.png');
+    // (c) nothing known: no board at all, label jpNoBoard; a board whose every cell is left off: the same
+    for (const key of ['JP-D-2017-08-13/single', 'JP-RAID-27/single@2017-10-21']) {
+      const e = jpEntry(out, key);
+      assert.deepStrictEqual(e.sphereBoardIds, [], key);
+      assert.ok(e.reconstructed.includes('jpNoBoard') && !e.reconstructed.includes('boardStandard'), key);
+    }
     // super-hard weekends: the WW board equal to the JP one; its card picture (artFrom); inferred after the wiki's dates
     for (const key of ['JP-SHR-1/single', 'JP-SHR-2/single']) {
       const e = jpEntry(out, key);
@@ -1598,7 +1613,10 @@ const tests = {
     }
     // nothing leaves a Weekly board cell off (seasonal Draw Tickets, Spirit parts, the reconstructed Sora & Moogle B included);
     // the event boards leave off only the declared Boosted medals and the Booster (Task 10)
-    assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E')), []);
+    // ... and the JP boards (user decision 06-11) only the JP-only medals with no worldwide item yet (declared)
+    assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E') && !String(u.board).startsWith('JP-')), []);
+    assert.deepStrictEqual([...new Set(out.report.boards.unmatched.filter((u) => String(u.board).startsWith('JP-')).map((u) => u.reward))].sort(),
+      ['1★ Sora Santa Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.']);
     assert.ok(out.report.boards.unmatched.every((u) => u.reward in REAL_CONFIG.boards.unmatched), 'only declared cells are left off');
     const of130 = new Set(the130.map((r) => r.id));
     const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));

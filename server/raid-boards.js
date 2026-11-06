@@ -286,7 +286,8 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       const boardName = `${String(r.board.name)} ${weekDate}`.slice(0, 128);
       // artFrom: a board standing in for an unknown one (Japan-only raids, make-raid.js) shows its donor board's card picture
       // (board = the key whose picture is used: a screenshot card is a file named by that key, artLines)
-      const ownArt = artOf(r.board.id), art = ownArt || (r.board.artFrom ? artOf(r.board.artFrom) : null);
+      // board.art: a JP board's own card picture named by the private JP board list ({jp: <JP 4.3.1 file>}, make-raid.js)
+      const ownArt = artOf(r.board.id) || (r.board.art ? r.board.art : null), art = ownArt || (r.board.artFrom ? artOf(r.board.artFrom) : null);
       if (!art) labels.add('boardNoArt');
       else if (art.screenshot) labels.add('boardArt');
       if (art) out.art.push({ sphereBoardId: id, board: ownArt ? r.board.id : r.board.artFrom, ...art });

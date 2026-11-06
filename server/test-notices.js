@@ -199,7 +199,7 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(/## Raids of the Japanese version/.test(jl) && /\*\*2\*\* raids held only in the \*\*Japanese version\*\*/.test(jl) && /marked \*\*Japan only\*\*/.test(jl) && /not original/.test(jl)
     && /December 25, 2016/.test(jl) && /1 Japanese raid event of 2018/.test(jl) && !/not here yet/.test(jl), `righe dei raid giapponesi: ${jl}`);
   check(n.raidJpLines(facts).length === 0 && /not here yet/.test(n.raidNoticeLines(facts).join(' ')), 'senza raid giapponesi: la riga «not here yet»');
-  check(!/July, August and September 2017|2016 Showdown|August 4|Magic Broom/.test(jl), 'senza le righe jpCensus quando quei raid non sono serviti');
+  check(!/July, August and September 2017|2016 Showdown|August 4|\*\*Magic Broom\*\* \(Egg Master/.test(jl),'senza le righe jpCensus quando quei raid non sono serviti');
   // jpCensus (06-11): the lines of the later JP research, each only when its raid is served; the span follows the served dates
   const h = require('path').join(dir, 'raids-jp2.json');
   const jpE = (censusId, start, end) => ({ boss: 'J', available: true, jp: true, censusId, start, end });

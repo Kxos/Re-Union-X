@@ -304,37 +304,45 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
     }
     weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs });
   }
-  // Japan-only rows (I-232): no JP board survives with its cells and costs (the JP wiki lists cells, total coins and main rewards
-  // only), so the generic boards of the nearest WW row of the matching family (JP_FAMILIES), else of any event family, without
-  // that event's exclusive items (boardStandard, as a WW row with no known board), with the card picture of the donor board
-  // (artFrom, raid-boards.js). Generic: no title, no gender, every cell a Medal or Jewels (the JP «Advanced bonus» boards are the
-  // WW «Seasoned Wielder Bonus» ones), never a WW event's avatar boards, which the JP raid did not have. The super-hard weekends
-  // (jpCfg.superHard) get the WW board whose 13 cells, items and 40,500 coins equal the JP «超難度レイド 討伐報酬» board (JP wiki,
-  // 2016-08-20 to 2017-05; «the usual weekend raid board» of the digests after it, census inferred_board): label jpBoard, plus
-  // boardSet when inferred; the first super-hard weekends had other small boards (5 or 4 cells), not itemised: boardStandard.
+  // Japan-only rows (I-232). The super-hard weekends (jpCfg.superHard) whose board is the JP «超難度レイド 討伐報酬» board (JP
+  // wiki, 2016-08-20 to 2017-05; «the usual weekend raid board» of the digests after it, census inferred_board) get the WW board
+  // whose 13 cells, items and 40,500 coins equal it (Legendary Raid Reward, with its card picture: artFrom): label jpBoard, plus
+  // boardSet when inferred. The JP boards of the private jp_boards.json come first (below); every other JP row has no board.
   const jpRows = new Map(((eventRewards || {}).rows || []).filter((r) => r.region === 'JP').map((r) => [r.row_id, r]));
   const exclusive = (r) => new Set(Object.keys((byId.get(r.id) || {}).exclusive_items || {}));
   const generic = (b, drop = new Set()) => !b.title && (!b.gender || b.gender === 'both') && (b.cells || []).length && b.cells.every((c) => /★|Jewel/i.test(String(c.reward)))
     && b.cells.some((c) => !drop.has(c.reward));
-  const ok = (r) => (byId.get(r.id)?.boards || []).some((b) => generic(b, exclusive(r)));
   const digits = (s) => Number(String(s || '').replace(/[^\d]/g, '')) || 0;
-  const jpBoard = new Set();
+  // User decision 06-11 (replaces the generic boardStandard boards of the JP rows): per JP row (a) its original boards (the JP
+  // board rows of the shared 2017 master, jpOriginal; the super-hard standard board = WW Legendary Raid Reward, jpBoard), (b)
+  // boards reconstructed from the row's evidence (private raid_rewards/e_jp/jp_boards.json, built by make_jp_boards.js:
+  // jpDeduced), (c) else no board at all (jpNone, label jpNoBoard).
+  const jpBoard = new Set(), jpOriginal = new Set(), jpDeduced = new Set(), jpNone = new Set();
   const sh = (jpCfg || {}).superHard || null;
+  const specs = ((eventRewards || {}).jpBoards || {}).rows || {};
   for (const row of ((census || {}).rows || []).filter((r) => jpServed(r, census))) {
-    const byDate = (a, c) => Math.abs(dayMs(a.start) - dayMs(row.start)) - Math.abs(dayMs(c.start) - dayMs(row.start));
+    const spec = specs[row.id];
+    if (spec) {
+      (spec.status === 'original' ? jpOriginal : jpDeduced).add(row.id);
+      const refs = spec.boards.map((b, i) => {
+        const id = `${row.id}:jp${i + 1}-${slug(b.name)}`;
+        boards.push({ id, name: b.name, cells: b.cells.map((c, k) => ({ n: k + 1, cost: c.cost, kind: c.kind, reward: c.reward, qty: c.qty || 1 })),
+          completion_reward: b.completion_reward || null, completion_qty: 1, title: b.title || null, ...(b.art ? { art: b.art } : {}), ...(b.artFrom ? { artFrom: b.artFrom } : {}) });
+        return { board: id, confidence: '' };
+      });
+      weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs });
+      continue;
+    }
     let donorRow, pick = null, confidence = '';
-    if (sh && row.family === 'super-hard weekend') {
+    const jr = jpRows.get(row.id) || {};
+    const own = sh && (jr.boards_summary || []).some((b) => digits(b.cells) === sh.cells && digits(b.coins) === sh.coins);
+    if (sh && row.family === 'super-hard weekend' && (own || jr.inferred_board)) {
       donorRow = rows.find((r) => r.id === sh.donor);
       pick = (b) => b.board === sh.board;
-      const jr = jpRows.get(row.id) || {};
-      const own = (jr.boards_summary || []).some((b) => digits(b.cells) === sh.cells && digits(b.coins) === sh.coins);
-      if (own) jpBoard.add(row.id);
-      else if (jr.inferred_board) { jpBoard.add(row.id); confidence = 'inferred (census inferred_board)'; } else standard.add(row.id);
-    } else {
-      donorRow = rows.filter((r) => r.family === JP_FAMILIES[row.family] && ok(r)).sort(byDate)[0] || rows.filter(ok).sort(byDate)[0];
-      standard.add(row.id);
-    }
-    if (!donorRow) { standard.delete(row.id); continue; }
+      jpBoard.add(row.id);
+      if (!own) confidence = 'inferred (census inferred_board)';
+    } else { jpNone.add(row.id); continue; }
+    if (!donorRow) { jpBoard.delete(row.id); jpNone.add(row.id); continue; }
     const donor = byId.get(donorRow.id), drop = exclusive(donorRow);
     const refs = [];
     donor.boards.forEach((b, i) => {
@@ -345,7 +353,7 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
     });
     weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs, donor: donorRow.id });
   }
-  return { boards, weeks, gendered, standard, jpBoard };
+  return { boards, weeks, gendered, standard, jpBoard, jpOriginal, jpDeduced, jpNone };
 }
 const boardDocOf = (boards, census, eventRewards, jpCfg = null) => {
   const ev = eventBoardDoc(census, eventRewards, jpCfg);
@@ -473,8 +481,8 @@ const correctedFrom = (values, rewards) => correctedWeeks(values.weeks, parseCor
 
 // ---- Japan-only raids (I-232; docs/notes/raid.md «Japan-only raids») ----
 // The census JP rows (JP 2015-10 to 2019-05). Served only in the Raid Catalog (entries jp: true, never a raid of the week: spec
-// Answer 3), as event raids of one tier. JP_FAMILIES: JP family -> the WW family whose Raid Boards stand in for the unknown JP
-// boards (boardStandard). A JP row is not served when it is the same raid as a WW row (the weekly raids from September 2018 ran
+// Answer 3), as event raids of one tier. JP_FAMILIES: the JP families served (JP family -> the nearest WW family;
+// Raid Boards: eventBoardDoc, user decision 06-11). A JP row is not served when it is the same raid as a WW row (the weekly raids from September 2018 ran
 // in both versions; a 2018 event of the same boss starting the same day), when its boss is not named, or when it is not a raid
 // event (the regular-boss lure weeks, as in WW).
 const JP_FAMILIES = { event: 'one-off event', 'super-hard weekend': 'weekend-only', 'monthly (30-minute)': 'monthly', 'daily rotating': 'daily showdown' };
@@ -1227,7 +1235,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     out.report.boards = { ...b.report, count: b.sphereRows.length };
     for (const e of out.index.entries) {
       e.sphereBoardIds = b.byCensus[e.censusId] || [];
-      if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []));
+      if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []),
+        ...(ev.jpOriginal.has(e.censusId) ? ['jpBoardOriginal'] : []), ...(ev.jpDeduced.has(e.censusId) ? ['jpBoardDeduced'] : []));
+      // a JP row with nothing known of its board, or whose built boards lost every cell: no board, and the page says so
+      if (e.jp && !e.sphereBoardIds.length) e.reconstructed.push('jpNoBoard');
     }
   } else for (const e of out.index.entries) e.sphereBoardIds = [];
   // AP and Bonus Time rule (raid_config.json costRule, I-228): weekdayWeekend (served) labels every raid weekRule and a tier whose
@@ -1333,7 +1344,9 @@ function readSources(src, dir2016) {
   return { census: JSON.parse(fs.readFileSync(path.join(src, 'raid_census', 'raid_census.json'), 'utf8')), values,
     rewards: { correctionsMd: fs.readFileSync(path.join(src, 'raid_rewards', 'CORRECTIONS.md'), 'utf8') },
     boards: JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'a_weekly', 'boards_weekly.json'), 'utf8')),
-    eventRewards: JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'b_events', 'event_raid_rewards.json'), 'utf8')),
+    eventRewards: { ...JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'b_events', 'event_raid_rewards.json'), 'utf8')),
+      // the Raid Boards of the JP rows (user decision 06-11): original / reconstructed, built by raid_rewards/e_jp/make_jp_boards.js
+      jpBoards: fs.existsSync(path.join(src, 'raid_rewards', 'e_jp', 'jp_boards.json')) ? JSON.parse(fs.readFileSync(path.join(src, 'raid_rewards', 'e_jp', 'jp_boards.json'), 'utf8')) : null },
     orig2016: { raidEnemy: rowsOf(path.join(dir2016, 'raidEnemy.json')), raidEnemyAttack: rowsOf(path.join(dir2016, 'raidEnemyAttack.json')),
       raidSetting: rowsOf(path.join(dir2016, 'raidSetting.json')), raidReward: rowsOf(path.join(dir2016, 'raidReward.json')) } };
 }
