@@ -14,7 +14,7 @@ foreach ($p in 'Play.bat', 'README.txt', 'data\guest\node.tar', 'data\guest\lice
     'data\server\game_data\special_icons', 'data\server\special_periods.json',
     'data\server\game_data\raids.json', 'data\server\game_data\raid_models.json', 'data\server\game_data\raid_maps.json',
     'data\server\game_data\raid_notices.json', 'data\server\game_data\raid_img', 'data\server\raid_config.json',
-    'data\server\campaign_gifts.json', 'data\server\game_data\medal_img',
+    'data\server\campaign_gifts.json', 'data\server\game_data\medal_img', 'data\server\game_data\medal_bgm',
     'data\server\certs\ca.crt', 'data\recon\out\master_types_ww431.json', 'data\recon\out\api_responses_ww431.json',
     'data\game\khux-4.3.1.apk', 'data\start-save.json', 'data\package.env', 'data\package.json') {
     Check (Test-Path (Join-Path $Package $p)) "missing $p"
