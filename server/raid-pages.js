@@ -510,7 +510,9 @@ const RECON_GROUPS = [['boss', 'Boss', 'tleg', ''], ['rewards', 'Rewards', 'raid
 const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#06283e;padding:8px 10px 8px;margin:18px 0 10px;line-height:1.45;font-size:15px}'
   + '.sb .why{margin:2px 0 6px;padding:4px 10px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:center;-webkit-align-items:center;align-items:center}'
   + '.sb .why .s{margin:2px 10px 2px 0}.sbi{color:#b9cfdc;font-size:14px;margin:4px 2px 6px}'
-  + '.sbh{color:#fff;font-weight:bold;font-size:15px;margin:8px 2px 4px}.sbh span{color:#b9cfdc;font-weight:normal;font-size:13.5px;margin-left:8px}'
+  // the «Rebuilt values» head (user 06-11: it must read as a heading): gold title with an icon over a thin rule, the subtitle on its own line
+  + '.sbh{margin:12px 2px 8px;padding:0 0 5px;border-bottom:2px solid #ffcd4a}.sbh b{display:block;color:#ffcd4a;font-size:17px;letter-spacing:.03em}'
+  + '.sbh b .ic{width:1.3em;height:1.3em;margin-right:6px}.sbh span{display:block;color:#b9cfdc;font-weight:normal;font-size:13.5px;margin:1px 0 0 2px}'
   + '.rgs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
   + '.rg{-webkit-box-flex:1;-webkit-flex:1 1 260px;flex:1 1 260px;min-width:240px;box-sizing:border-box;margin:0 4px 8px;padding:0 9px 4px;border-radius:8px;background:#0a4466;overflow:hidden}'
   // the group heads (user 06-11: make clear they are categories): a full colour band, capitals, over the column
@@ -537,7 +539,7 @@ function reconCards(codes, head = true) {
     }
     return rows.length ? `<div class="rg${cls}"><b>${icon(ic)}${esc(name)}</b>${rows.join('')}</div>` : '';
   }).join('');
-  return (head ? '<p class="sbh">Rebuilt values<span>lost in the original data, rebuilt from the surviving sources</span></p>' : '')
+  return (head ? `<p class="sbh"><b>${icon('replaced')}Rebuilt values</b><span>These values are lost in the original game data: this server rebuilt them from the surviving sources.</span></p>` : '')
     + `<div class="rgs">${cards}</div><details class="fold"><summary>Why these values?</summary>${reconList(shown)}</details>`;
 }
 // the box of a notice page: intro = one short line (html)
