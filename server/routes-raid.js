@@ -59,17 +59,20 @@ const isBonusTime = (ms) => BONUS_HOURS.has(ptNow(ms).hour);
 // cost and double the LUX», 2020). The server doubles what the client reports: no Lux campaign (evCampaign type 10) is
 // served, so the client does not double it itself (docs/notes/raid.md «Lux»).
 const BONUS_LUX = 2;
-// Bonus Time of a raid entry (raid-windows.js, I-228 and June 2020): the four hours, or all day in a bonusAllDay period (June 2020,
-// notices 66106 / 66114: «Bonus time will go on 24 hours all day»); never outside the opening hours of a raid that had them
-// (raidWindows: the original boss was not there, so it had no Bonus Time). No entry (a story boss): the four hours.
-function bonusAt(entry, ms) {
-  if (entry && windows.allDayBonus(entry)) return true;
-  const w = entry ? windows.stateAt(entry, ms) : null;
+// Bonus Time of a raid entry (raid-windows.js costRule, I-228). weekdayWeekend (served, not original): all day on Saturday and
+// Sunday (Pacific), never from Monday to Friday, for every raid and the story raid bosses (no entry); a bonusAllDay period (June
+// 2020, notices 66106 / 66114: «Bonus time will go on 24 hours all day») keeps its weekdays too. originalWindows: the four hours,
+// all day in a bonusAllDay period, never outside the opening hours of a raid that had them (the original boss was not there).
+// cfg: the rules of raid_config.json (raid-windows.js DEFAULT; tests pass their own)
+function bonusAt(entry, ms, cfg = windows.DEFAULT) {
+  if (entry && windows.allDayBonus(entry, cfg)) return true;
+  if (windows.costRule(cfg) === windows.WEEKDAY_WEEKEND) return ptNow(ms).weekend;
+  const w = entry ? windows.stateAt(entry, ms, cfg) : null;
   if (w && !w.inside) return false;
   return isBonusTime(ms);
 }
 // Lux factor of a fight's end: the boss's entry (a boss met outside its raid's opening hours has no Bonus Time, boss.outside)
-const luxFactorOf = (boss, entry, ms) => (boss && boss.outside ? 1 : bonusAt(entry, ms) ? BONUS_LUX : 1);
+const luxFactorOf = (boss, entry, ms, cfg) => (boss && boss.outside ? 1 : bonusAt(entry, ms, cfg) ? BONUS_LUX : 1);
 
 // AP of a raid quest at this moment. From 2019-07-15 the rule 0 / 5 / 90, except the weeks whose census «ap» is «0 / 5»
 // (Radiant Reward Raid Events: «Outside of the above times, the raid quest will cost 5 AP», notices 56463, 58020, 70818)
@@ -77,11 +80,15 @@ const luxFactorOf = (boss, entry, ms) => (boss && boss.outside ? 1 : bonusAt(ent
 // master row's useAp (make-raid.js: the last census value), so the quest top and the charge agree. Earlier the week's own
 // «ap»: 3 values bonus / weekend / weekday, «0 / 5» bonus / the rest, «5 / 90» weekend / weekday (no bonus value: those
 // weeks read as weekday in bonus time).
-// A raid with opening hours (raid-windows.js, I-228): inside them its census AP (the first value: 5 in the hours of the 5 / 90 weeks
-// of 2019, notice 49544), outside them raidWindows.outsideAp (90), whatever the day.
+// That is the rule originalWindows; with it, a raid with opening hours (raid-windows.js, I-228): inside them its census AP (the
+// first value: 5 in the hours of the 5 / 90 weeks of 2019, notice 49544), outside them raidWindows.outsideAp (90), whatever the day.
+// The rule served, weekdayWeekend (user decision 06-11, not original): 0 on Saturday and Sunday (Pacific), else the original AP of
+// the tier = the master stage useAp (the last census value, raid-windows.js stageUseAp), so the quest top always shows the weekday
+// charge; a tier whose census AP is 0 stays 0 on weekdays too (as the original 0 AP weeks).
 const ownApWeek = (a) => (a.length === 2 && a[0] === 0) || (a.length === 1 && a[0] === 0);
-function questApAt(entry, ms) {
-  const w = windows.stateAt(entry, ms);
+function questApAt(entry, ms, cfg = windows.DEFAULT) {
+  if (windows.costRule(cfg) === windows.WEEKDAY_WEEKEND) return ptNow(ms).weekend ? 0 : Number(windows.stageUseAp(entry, cfg)) || 0;
+  const w = windows.stateAt(entry, ms, cfg);
   if (w) return w.inside ? Number((entry.questAp || [])[0]) || 0 : w.outsideAp;
   const { weekend } = ptNow(ms), bonus = isBonusTime(ms), a = entry.questAp || [];
   if (String(entry.start) >= AP_RULE_FROM && !ownApWeek(a)) return bonus ? AP_RULE.bonus : weekend ? AP_RULE.weekend : AP_RULE.weekday;
@@ -108,7 +115,7 @@ const damageOf = (parts) => parts.reduce((sum, p) => sum + (usableCount(p.damage
 
 function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smokeKey = () => null, ap0Force = () => null, realNow, serverTime, serverTimeAt, userPointData, userDetailData, stageResumptionData, inventoryBlocks,
   inventorySnapshot, send, ret, clock, apNow, changeAp, raidUser, supportUsers, guiltLists, battlePoints, onDefeat = () => {}, beginBattle, grantItem, addPresent, medalCount, medalCap,
-  stageState, webBase, rng = Math.random, log = console.log }) {
+  stageState, webBase, rng = Math.random, log = console.log, rules = windows.DEFAULT }) {
   // Boss levels reset to LV 1 at the start of every month (original rule, notice 17888), and a boss that comes back in a later week starts at LV 1 again (notice 74823): the real-clock month of the server
   // (clock.monthIndex, 1st 00:00 PST = 08:00 UTC, as Spirit Training). A boss alive keeps its level; levelsMonth is the month
   // the stored levels belong to.
@@ -233,7 +240,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // a boss met outside its raid's opening hours (boss.outside, raid-windows.js) has no Bonus Time
   const levelStep = (boss, ms, entry) => {
     if (entry && entry.levelStep) return entry.levelStep;
-    const bonus = !boss.outside && (entry ? bonusAt(entry, ms) : isBonusTime(ms));
+    const bonus = !boss.outside && (entry ? bonusAt(entry, ms, rules) : bonusAt(null, ms, rules));
     const ev = entry && EVENT_LEVEL_STEPS[entry.censusId];
     if (ev) return ev.always || (ev.bonus && bonus ? ev.bonus : 1);
     return boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && bonus ? BONUS_LEVEL_STEP : 1;
@@ -275,7 +282,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     if (boss?.fighting === 'late') {
       boss.fighting = false;
       raidTimeStatus = fight.RAID_TIME_ESCAPED;
-      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorOf(boss, entryOfKey(boss.key), nowMs));
+      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorOf(boss, entryOfKey(boss.key), nowMs, rules));
       savePlayer();
     } else if (boss?.fighting) {
       boss.fighting = false;
@@ -283,7 +290,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
       boss.damage = (boss.damage || 0) + damageOf(parts);
       const out = fight.clearFight(boss, parts, nowMs);
       raidTimeStatus = out.raidTimeStatus;
-      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorOf(boss, entryOfKey(boss.key), nowMs));
+      getLux = battlePoints(body?.getPoint, body?.burst, luxFactorOf(boss, entryOfKey(boss.key), nowMs, rules));
       if (out.victory) bossDefeated(r, boss, out.allPoints, nowMs);
       savePlayer();
     } else log(`[raid] clear with no fight running (boss ${boss?.raidId ?? 'none'}): nothing changes`);
@@ -357,7 +364,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     // a raid with opening hours (raid-windows.js, I-228): outside them the boss has a level counter of its own (<key>~out, the usual
     // rules), so playing outside the hours never moves the level of the windows; inside, a levelReset «window» raid (JP monthly
     // 2017) has one occurrence per window, the others their usual one (the week, or the Pacific day of a daily raid)
-    const win = windows.stateAt(entry, nowMs), outside = !!win && !win.inside;
+    const win = windows.stateAt(entry, nowMs, rules), outside = !!win && !win.inside;
     const lk = (catalog ? `${CATALOG_LEVEL_PREFIX}${entry.key}` : entry.key) + (outside ? OUTSIDE_LEVEL_SUFFIX : '');
     const occ = win && win.inside && win.rule.levelReset === 'window' ? `${entry.start}@${win.slot}` : occOf(entry, nowMs);
     const level = (r.levelOcc || {})[lk] === occ ? r.levels[lk] || FIRST_LEVEL : FIRST_LEVEL; // a level belongs to one occurrence (week, or day of a daily raid) of the entry
@@ -400,7 +407,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     if (fb && (!f.rare || fb.rare)) {
       if (spawn(r, storyEntry(fb, f.stageId, f.rare ? 1 : null), nowMs)) { log(`[raid] story quest ${sq.n}: target raid ${f.name}`); return; }
     }
-    if (r.points < (isBonusTime(nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
+    if (r.points < (bonusAt(null, nowMs, rules) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
     const b = sq.stageId && storyBoss(sq.boss);
     if (!b) { log(`[raid] story quest ${sq.n}: ${sq.boss} is not served, the counter (${r.points}) is held`); return; }
     if (spawn(r, storyEntry(b, sq.stageId, sq.every), nowMs)) r.points = 0;
@@ -419,7 +426,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     if (!Number.isFinite(points) || points <= 0) return;
     const r = state(), nowMs = realNow();
     r.points += points;
-    if (r.boss || r.points < (bonusAt(entry, nowMs) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
+    if (r.boss || r.points < (bonusAt(entry, nowMs, rules) ? SPAWN_POINTS_BONUS : SPAWN_POINTS)) return;
     // a quest that is not a raid of the week (the kept raid, or one kept until a moment ago): the catalogue counter, so it never
     // reads or moves the level the live week of that entry left (review b597b99)
     // A raid of the week closed by the clock a moment ago (a weekend quest cleared after Sunday 23:59 PT, a showdown boss after
@@ -498,7 +505,7 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     const raidEvents = (list, opts) => {
       const byEvent = new Map();
       for (const e of list) byEvent.set(e.evStageId, [...(byEvent.get(e.evStageId) || []), e]);
-      return [...byEvent].map(([id, tiers]) => event(id, tiers.map((e) => stageOf(e.stageId, questApAt(e, realMs))), opts));
+      return [...byEvent].map(([id, tiers]) => event(id, tiers.map((e) => stageOf(e.stageId, questApAt(e, realMs, rules))), opts));
     };
     const cat = raidIndex().catalog;
     const banner = cat && cat.evStageId && (cat.stageIds || []).length
@@ -517,15 +524,15 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
     // the hours of a raid with opening hours the quest top shows the master 90 (raid-windows.js stageUseAp): when every listed quest
     // then costs 0, the campaign shows that 0 too.
     const listed = [...currentEntries(realMs), ...keptEntries(realMs)];
-    const lowered = (e) => bonusAt(e, realMs) || !!(windows.stateAt(e, realMs) || {}).inside;
-    const on = !!ap0Force() || (listed.length > 0 && listed.every((e) => questApAt(e, realMs) === 0) && listed.some(lowered));
+    const lowered = (e) => bonusAt(e, realMs, rules) || !!(windows.stateAt(e, realMs, rules) || {}).inside;
+    const on = !!ap0Force() || (listed.length > 0 && listed.every((e) => questApAt(e, realMs, rules) === 0) && listed.some(lowered));
     return on ? raidAp0Ids(masterRows('evCampaign')) : [];
   }
 
   // AP of a raid quest now, or null for any other stage (the master row applies)
   function stageAp(stageId, realMs = realNow()) {
     const entry = entryOfStage(stageId);
-    return entry ? questApAt(entry, realMs) : null;
+    return entry ? questApAt(entry, realMs, rules) : null;
   }
 
   return { list, start, clear, reward, member, notice, onStageClear, events, stageAp, campaignIds, boardIds, monthOf, keep, unkeep, catalogCtx };

@@ -1,5 +1,11 @@
-// Raid opening hours and the all-day Bonus Time (I-228, user decision 06-11 «mixed»; docs/notes/raid.md «Raid hours»). Pure, rules
-// in raid_config.json (raidWindows, bonusAllDay), read here and by make-raid.js (labels, master stage useAp):
+// Raid AP and Bonus Time rule (I-228; docs/notes/raid.md «Raid hours»). Pure, rules in raid_config.json (costRule, raidWindows,
+// bonusAllDay), read here and by make-raid.js (labels, master stage useAp). costRule picks one of two rules:
+// - «weekdayWeekend» (user decision 06-11, the rule served, NOT original, no exceptions): every raid quest, WW and JP, costs its
+//   original AP (the master stage useAp: the last census value; weekdayZeroAp when that is 0, since an original 0 AP came from a
+//   free week or campaign that this rule does not keep) from Monday to Friday, with no Bonus Time at any hour; on Saturday and
+//   Sunday (Pacific) it costs 0 AP with Bonus Time all day (Lux x2, spawn gauge 6,000, the Bonus Time level steps). The opening
+//   hours and the all-day Bonus Time periods below are off.
+// - «originalWindows» (06-11 «mixed», kept switched off so it can come back):
 // - a raid with opening hours (raidWindows.rules: the WW Daily Raid Events of 2017-2018, the JP monthly 30-minute raids, the WW
 //   weekday weekly raids of 2018-09-10 .. 2019-07-14) follows its original rules inside its hours (its own quest AP, the Lux and
 //   level rules of the time) and stays open outside them (ours, not original) at raidWindows.outsideAp per quest, with no Bonus Time
@@ -10,8 +16,16 @@
 'use strict';
 
 const DEFAULT = (() => {
-  try { const c = require('./raid_config.json'); return { raidWindows: c.raidWindows || null, bonusAllDay: c.bonusAllDay || null }; } catch { return {}; }
+  try { const c = require('./raid_config.json'); return { costRule: c.costRule, weekdayZeroAp: c.weekdayZeroAp, raidWindows: c.raidWindows || null, bonusAllDay: c.bonusAllDay || null }; } catch { return {}; }
 })();
+const WEEKDAY_WEEKEND = 'weekdayWeekend', ORIGINAL_WINDOWS = 'originalWindows';
+// the cost rule in force (default weekdayWeekend); anything else stops the server rather than serving a rule nobody chose
+function costRule(cfg = DEFAULT) {
+  const r = (cfg && cfg.costRule) || WEEKDAY_WEEKEND;
+  if (r !== WEEKDAY_WEEKEND && r !== ORIGINAL_WINDOWS) throw new Error(`raid: unknown costRule ${r} (raid_config.json)`);
+  return r;
+}
+const windowsOn = (cfg) => costRule(cfg) === ORIGINAL_WINDOWS;
 const TZ = { PT: 'America/Los_Angeles', JST: 'Asia/Tokyo' };
 const fmts = new Map();
 // {date: YYYY-MM-DD, minute: minute of the day, weekend} on the real clock of the zone
@@ -50,6 +64,7 @@ function ruleOf(entry, cfg = DEFAULT) {
 // The entry's window state at real time ms: null (no opening hours: the raid's usual rules) or {rule, inside, slot (the window's
 // key, YYYY-MM-DD#n in the rule's zone, or YYYY-MM-DD for a weekend open all day; null outside), outsideAp, label}
 function stateAt(entry, ms, cfg = DEFAULT) {
+  if (!windowsOn(cfg)) return null; // weekdayWeekend: no opening hours
   const rule = ruleOf(entry, cfg);
   if (!rule) return null;
   const at = local(ms, rule.tz || 'PT');
@@ -62,17 +77,36 @@ function stateAt(entry, ms, cfg = DEFAULT) {
 
 // AP written in the master stage row (the quest top shows it, not the useAp of /stage/event: I-236): the outside price for a raid
 // with opening hours (the higher one, as the 0 / 5 / 90 weeks show 90), else the last census value
+// (weekdayWeekend: the weekday price, the last census value, or weekdayZeroAp when that is 0)
 function stageUseAp(entry, cfg = DEFAULT) {
   const a = (entry && entry.questAp) || [];
-  return ruleOf(entry, cfg) ? Number(cfg.raidWindows.outsideAp) : a[a.length - 1];
+  if (windowsOn(cfg)) return ruleOf(entry, cfg) ? Number(cfg.raidWindows.outsideAp) : a[a.length - 1];
+  return zeroAp(entry, cfg) ? zeroApValue(cfg) : a[a.length - 1];
+}
+// weekdayWeekend: a tier whose original AP is 0 (it pays weekdayZeroAp on weekdays, label weekdayAp)
+function zeroAp(entry, cfg = DEFAULT) {
+  const a = (entry && entry.questAp) || [];
+  if (windowsOn(cfg) || !a.length || Number(a[a.length - 1]) !== 0) return false;
+  zeroApValue(cfg);
+  return true;
+}
+// weekdayZeroAp of cfg, else of raid_config.json (a test config without it)
+function zeroApValue(cfg) {
+  const v = Number(cfg && cfg.weekdayZeroAp !== undefined ? cfg.weekdayZeroAp : DEFAULT.weekdayZeroAp);
+  if (!(v > 0)) throw new Error('raid: weekdayZeroAp missing in raid_config.json (costRule weekdayWeekend)');
+  return v;
 }
 
 // The all-day Bonus Time period of the entry's week, or null (bonusAllDay: [{from, to}], the census start inside; Japan-only raids
 // never: the period is a worldwide notice's)
+// (weekdayWeekend: none, the weekends are free and the weekdays have no Bonus Time for every raid)
 function allDayBonus(entry, cfg = DEFAULT) {
-  if (!entry || entry.jp || !entry.start) return null;
+  if (!windowsOn(cfg) || !entry || entry.jp || !entry.start) return null;
   const s = String(entry.start);
   return ((cfg && cfg.bonusAllDay && cfg.bonusAllDay.periods) || []).find((p) => s >= p.from && s <= p.to) || null;
 }
 
-module.exports = { ruleOf, stateAt, stageUseAp, allDayBonus, local, DEFAULT };
+// The opening-hours label of an entry for the Raid Catalog (originalWindows only), or null
+const windowLabel = (entry, cfg = DEFAULT) => (windowsOn(cfg) ? (ruleOf(entry, cfg) || {}).label || null : null);
+
+module.exports = { ruleOf, stateAt, stageUseAp, zeroAp, allDayBonus, local, costRule, windowsOn, windowLabel, WEEKDAY_WEEKEND, ORIGINAL_WINDOWS, DEFAULT };

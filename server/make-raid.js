@@ -1230,10 +1230,11 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []));
     }
   } else for (const e of out.index.entries) e.sphereBoardIds = [];
-  // opening hours (raid_config.json raidWindows, I-228): the rule's label (raidWindow, jpWindow, weeklyWindow)
+  // AP and Bonus Time rule (raid_config.json costRule, I-228): weekdayWeekend (served) labels every raid weekRule and a tier whose
+  // original AP is 0 weekdayAp; originalWindows the opening-hours rule's label (raidWindow, jpWindow, weeklyWindow)
   for (const e of out.index.entries) {
-    const win = raidWindows.ruleOf(e, config);
-    if (win && !e.reconstructed.includes(win.label)) e.reconstructed.push(win.label);
+    const labels = raidWindows.windowsOn(config) ? [raidWindows.windowLabel(e, config)] : ['weekRule', raidWindows.zeroAp(e, config) ? 'weekdayAp' : null];
+    for (const l of labels) if (l && !e.reconstructed.includes(l)) e.reconstructed.push(l);
   }
   for (const e of out.index.entries) {
     if (e.why) out.report.why[e.why] = (out.report.why[e.why] || 0) + 1;
