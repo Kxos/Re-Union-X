@@ -41,7 +41,7 @@ const CATALOG_LEVEL_PREFIX = 'cat:'; // levels of the kept raids' bosses (Raid C
 const OUTSIDE_LEVEL_SUFFIX = '~out'; // levels of the bosses met outside their raid's opening hours (raid-windows.js, I-228)
 // Version segment of the raid event card URL (/web/raid/img/v<N>/<evStageId>.png): the client caches banner images by URL, so
 // bump RAID_IMG_VERSION whenever recon/tools/make_raid_banners.py output changes (as SPECIAL_IMG_VERSION in special.js).
-const RAID_IMG_VERSION = 5; // 5: 35 original JP raid cards + JP kept cards (06-11); 4: square gold frame on the Raid Catalog banner (user 04-11); 3: the 62 older event raids get their original notice/wiki cards (user approved 04-11); 1: weekly event cards from the archived original banners (render8, 3 Nov); 2: the 5 weeks
+const RAID_IMG_VERSION = 6; // 6: 141 JP cards (community, live notice host, Wayback, 06-11); 5: 35 original JP raid cards + JP kept cards (06-11); 4: square gold frame on the Raid Catalog banner (user 04-11); 3: the 62 older event raids get their original notice/wiki cards (user approved 04-11); 1: weekly event cards from the archived original banners (render8, 3 Nov); 2: the 5 weeks
 // 2018-09-03..10-01 from the official notices (no more plain cards)
 const NO_RAID = 5; // raidTimeStatus «No available Raid Boss»: a clear with no fight running (texts read, not run on the bench)
 
