@@ -436,6 +436,23 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
       JP-RAID-11 bonus 2400012, JP-RAID-13 2400017 / 2400018 (JP 4.3.1 files), JP-RAID-10 bonus the wiki card `board_raid1604_03`
       (new wiki card: `raid_board_wikicards.py` writes it at the next resource build), JP-RAID-20 as before; JP-RAID-5, 7, 8, 18,
       JP-SHR-5 none (`boardNoArt`). `raid_board_art.tsv` changes: needs a resource build.
+    - **Round 5 (06-11, Gap research 12: original notices and banners of the live host, private `JP_ONLY.md`).** JP-RAID-23 is
+      **Circus Fortress (Circus Crab)**, not Lion Headliner: notice 24641 names only «the event raid boss», its banner shows the
+      art of the notice 20600 banner (JP-RAID-16); the second quest, Adventurer (digest of 1/23/2017 «rare Adventurer»), is not in the
+      notice: `jpBossProbable`. JP-RAID-23 from the Monday **2017-01-23**, JP-RAID-25 from **2017-03-13** (26469); both and JP-RAID-20
+      (22600) 3 hours, +1 / +5 in Bonus Time. HP: the event rule follows the boss and date (no HP in the notices). Every «Saturday
+      only» super-hard weekend (22 rows: the 土曜限定 banners and the own notices 24640, 25537, 36190, 36817, 37932, 38870, 40266) gets
+      `saturdayOnly`: open on its Saturday only (`open: 'day'`), as JP-D-2018-08-04 / 09-01; before, `open: 'weekend'` let them be
+      played on Sunday too. Their tier keys become `<id>/single@<Saturday>` (22 new entry ids 659-680 in `raid_ids.json`; the old
+      `<id>/single` keys stay numbered, unused). The 150M weekends start with JP-SHR-78 (2018-01-06): notices 36190 / 36817 / 37932
+      «parameters adjusted from the Saturday 1/6/2018 appearance», as served. JP-RAID-18: its notice 22596 (11/14-11/24/2016) is an
+      Event Coin avatar event that names no raid boss (the Adventurer raid stays from the JP wiki). JP-FAMRAID-1 / 2 (notices 22155,
+      23091, «お馴染みのレイドボス» weeks of 2016-11-07 and 12-05): Behemoth, Darkside, Guard Armor, Trickmaster, **Savage Spider** (not
+      Trident Tail), from the Monday; still not served (regular-boss lure weeks, the same weeks as WW-LUX-201611 / 201612). JP
+      Details facts: 122 rows (+ 22596, 22600, 24641, 26469, 35862, 25537, 36190, 36817, 37932, 38870, 40266). Dry run
+      (`D:/Progetto_Restauro_KH_UX/tmp/raidjp_gr12_dry`, HEAD config vs working copy): no WW entry changed, 25 JP rows changed
+      (JP-RAID-20, 23, 25 and the 22 Saturday-only weekends), 608 of 608 tier rows available; JP-RAID-23 quest 1 now on the donor
+      quest of Circus Crab. **Needs** a master regeneration + revision bump and a resource build (14 new / replaced cards).
     - Dry run (`D:/Progetto_Restauro_KH_UX/tmp/raidjp_notice_dry`, local, HEAD config vs working copy): 608 of 608 tier rows,
       no WW entry changed, no key or id added (`raid_ids.json` unchanged), master row counts unchanged; 58 JP tier rows changed (dates, timers, steps, the
       three bosses with their donor quest); the event-rule HP of the rows whose start moved changes by about 1 % (date scale).
@@ -535,8 +552,12 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
 - **Cards** (6 November 2026). Original JP raid banners, written by `make_raid_banners.py --jp <list>` (keyed by census id,
   evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build leaves `jp` rows
   alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row
-  evidence in the private `JP_ONLY.md` «JP raid cards» (and «JP raid cards round 4»). **129 of 153 rows have their own card** (`match` `exact`): 33 of 38 raid
-  events, 12 of 14 monthly 30-minute raids, both daily rotating raids, 82 of 99 super-hard weekends. Sources: the JP notice banners
+  evidence in the private `JP_ONLY.md` «JP raid cards» (and «JP raid cards round 4», «Gap research 12»). **141 of 153 rows have their own card** (`match` `exact`): 37 of 38 raid
+  events (not JP-RAID-18), 14 of 14 monthly 30-minute raids, both daily rotating raids, 88 of 99 super-hard weekends (not JP-SHR-9, `hold`, and the ten
+  two-day 150M weekends JP-SHR-80 .. 94, whose banners were in-game only). Since Gap research 12 (06-11) 14 more cards are **original 640x140 files**
+  of the official notice host: JP-RAID-23 (notice 24641), JP-RAID-25 (26469), JP-D-2017-05-22 (28549), JP-D-2017-07-17 (30537), JP-D-2018-01-02
+  (35862), JP-D-2018-02-02 (key cited by reddit 7ujbx1, notice not found), JP-SHR-79 (36190), 83 (36817), 86 (37932, same key as 36190), 91 (38870),
+  95 (key cited by reddit 8gzyzv, notice not found), 96 (40266), and JP-SHR-28 (24640) / JP-SHR-32 (25537) replace their wikiwiki copies. Sources: the JP notice banners
   (first image of the notice, `cache.sqex-bridge.jp/img/<key>`), from Wayback copies (slow sweep with
   `recon/tools/sqex_notice_sweep.py`) and from the live notices saved by the live-notice research (`notices_live\`); the
   khuxwiki upload of 2016-05-18 of the 2015-16 JP notice images (one pixel-identical to notice 15404's) and its «JP banner»

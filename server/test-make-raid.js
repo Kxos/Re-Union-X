@@ -516,9 +516,9 @@ const tests = {
     const fix = REAL_CONFIG.jpCensus;
     const ids = Object.keys(fix).filter((k) => !k.startsWith('_'));
     assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-05-22', 'JP-D-2017-06-19', 'JP-D-2017-07-17', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
-      'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01',
-      'JP-RAID-1', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-18', 'JP-RAID-19', 'JP-RAID-20', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24',
-      'JP-RAID-26', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+      'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01', 'JP-FAMRAID-1', 'JP-FAMRAID-2',
+      'JP-RAID-1', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-18', 'JP-RAID-19', 'JP-RAID-20', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-23', 'JP-RAID-24',
+      'JP-RAID-25', 'JP-RAID-26', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
     // round 3 (06-11): the 2015-2016 raid events start on the JP Monday of the wiki copies of their notices (Gap research 10 §3)
     assert.deepStrictEqual(['JP-RAID-1', 'JP-RAID-7', 'JP-RAID-10', 'JP-RAID-11', 'JP-RAID-13', 'JP-RAID-16', 'JP-RAID-17', 'JP-RAID-19', 'JP-RAID-20'].map((id) => fix[id].start),
       ['2015-10-19', '2016-02-08', '2016-04-11', '2016-05-02', '2016-06-13', '2016-09-05', '2016-09-19', '2016-10-17', '2016-11-21']);
@@ -554,6 +554,18 @@ const tests = {
     // the 2018 Saturday-only weekends: bosses named by their own notices (43217 Gear Golem, 44270 Bane Spider = Scourge Spider), HP still probable
     assert.deepStrictEqual([fix['JP-D-2018-08-04'].bosses, fix['JP-D-2018-09-01'].bosses], [['Gear Golem'], ['Scourge Spider']]);
     for (const id of ['JP-D-2018-08-04', 'JP-D-2018-09-01']) assert.ok(fix[id].saturdayOnly && !('probableBosses' in fix[id]) && fix[id].hpProbable && /fixed 1,500,000,000/.test(fix[id].hp), id);
+    // Gap research 12 (06-11, original notices of the live host): JP-RAID-23 is Circus Fortress (24641 banner art, the rare Adventurer
+    // of the digest stays probable) from the Monday 1/23; JP-RAID-25 from the Monday 3/13 (26469); JP-RAID-20 3 hours, +1 / +5 (22600)
+    assert.deepStrictEqual([fix['JP-RAID-23'].start, fix['JP-RAID-23'].bosses, fix['JP-RAID-23'].probableBosses, fix['JP-RAID-25'].start],
+      ['2017-01-23', ['Circus Crab', 'Adventurer'], ['Adventurer'], '2017-03-13']);
+    for (const id of ['JP-RAID-20', 'JP-RAID-23', 'JP-RAID-25']) assert.ok(fix[id].upMinutes === 180 && fix[id].bonusLevelStep === 5 && /notice \d{5}/.test(fix[id].source), id);
+    // every «Saturday only» super-hard weekend (own notice or 土曜限定 banner) is open on its Saturday only, not the whole weekend
+    const satOnly = shr.filter((id) => fix[id].saturdayOnly);
+    assert.deepStrictEqual(satOnly.map((id) => +id.slice(7)).sort((x, y) => x - y), [14, 19, 24, 26, 28, 32, 35, 40, 45, 49, 53, 57, 60, 62, 66, 70, 74, 79, 83, 86, 91, 96]);
+    for (const id of shr) assert.strictEqual(!!fix[id].saturdayOnly, /Saturday.only/.test(fix[id].source), id);
+    for (const [id, n] of [['JP-SHR-32', 25537], ['JP-SHR-79', 36190], ['JP-SHR-83', 36817], ['JP-SHR-86', 37932], ['JP-SHR-91', 38870], ['JP-SHR-96', 40266]]) assert.ok(fix[id].source.includes(`JP notice ${n}`), id);
+    // the familiar-raid lure weeks (notices 22155, 23091): Vicious Spider = Savage Spider, not Trident Tail; still not served (lure weeks)
+    for (const id of ['JP-FAMRAID-1', 'JP-FAMRAID-2']) assert.ok(fix[id].bosses.includes('Savage Spider') && !fix[id].bosses.includes('Trident Tail'), id);
   },
   old_hp_2016() {
     // a 2016 event raid with its own 2016 row keeps that row: knots, HP, ATK, DEF, Lux and reward rows
