@@ -256,6 +256,31 @@ try:
     check(m.kept_tab(Image.new('RGB', (640, 140)), m.RAID_KEPT_TEXT).size == (640, 140) and m.RAID_KEPT_TEXT == 'KEPT RAID', 'raid tab text')
     empty = os.path.join(tmp, 'raid_none')
     check(m.build_raid({'entries': [{'evStageId': 8070}]}, empty, 'full') == {'catalog': 0, 'kept': 0, 'missing': 1}, 'no card, no index catalog')
+    # Catalog options (user 06-11): every option 640x140, gold frame, gold title left of the TRAINING sticker, all different
+    opts = {}
+    for k in ('special', 'raid', 'event'):
+        for st in 'ABC':
+            o = m.CATALOG_OPTIONS[k](st)
+            opts[(k, st)] = o.convert('RGB')
+            check(o.size == (640, 140), '%s %s size' % (k, st))
+            tb = o.info.get('title_box')
+            check(tb is not None and tb[2] <= m.STICKER_XY[0] and tb[0] >= 10, '%s %s title box %s left of the sticker' % (k, st, tb))
+            check(o.convert('RGB').getpixel((1, 70)) == m.FAMILY_GOLD[:3] and o.convert('RGB').getpixel((320, 138)) == m.FAMILY_GOLD[:3],
+                  '%s %s gold frame' % (k, st))
+            check(sum(gold(p) for p in pixels(o.convert('RGB').crop((20, 30, 300, 75)))) > 1200, '%s %s gold title' % (k, st))
+    keys = list(opts)
+    for i, a_ in enumerate(keys):
+        for b_ in keys[i + 1:]:
+            check(mean(ImageChops.difference(opts[a_], opts[b_])) > 12, 'options %s and %s too alike' % (a_, b_))
+    check(m.parse_styles('special=B,event=C') == {'special': 'B', 'event': 'C'}, 'parse_styles')
+    for bad in ('raid=D', 'shop=A'):
+        try:
+            m.parse_styles(bad)
+            errors.append('parse_styles accepts %s' % bad)
+        except ValueError:
+            pass
+    p1, p2 = m.options_sheets(os.path.join(tmp, 'sheets'))
+    check(Image.open(p1).size == (660, 9 * 168 + 10) and os.path.exists(p2), 'options sheets')
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
