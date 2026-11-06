@@ -373,7 +373,7 @@ function defaultSources() {
   const names = readJson(path.join(path.dirname(MISSING_PATH), 'oltre525.json'), {}).learned_enemy_names || {};
   for (const [k, v] of Object.entries(missing)) if (!v.name && names[k]) v.name = names[k];
   return { missing, proposal: readRequired(PROPOSAL_PATH, 'proposta di clone'), stats: readJson(STATS_PATH, {}),
-    hp: readJson(HP_PATH, {}).ids || {} };
+    hp: readJson(HP_PATH, {}).ids || {}, events: require('./make-event-enemies').readEventEnemies() };
 }
 
 // righe di un giro precedente (gli id dell'elenco non sono mai nel master originale): via, si rigenerano
@@ -391,6 +391,9 @@ function addRows(enemies, src) {
   if (!s.details) s.details = readDetails();
   if (!s.flavors) s.flavors = wikiFlavors();
   strip(enemies, s.missing);
+  // event rows of a previous run (make-event-enemies.js) go away BEFORE cloning: they must never become a clone base
+  // (e.g. event 11537 would be the 5-digit base of story 180911537); added again below
+  if (s.events) require('./make-event-enemies').strip(enemies, s.events);
   // master rows: the extra HP point of a previous run goes away before cloning (I-206)
   let hpReset = 0;
   for (const e of enemies) if (isRestoredPoint(e)) { dropRestoredPoint(e); hpReset++; }
@@ -424,11 +427,19 @@ function addRows(enemies, src) {
     console.log(`enemy-oltre: descrizioni dei cloni di famiglia: della base (stesso nome) ${g.filter((v) => v.flavor === 'base').length}, `
       + `khuxwiki ${g.filter((v) => v.flavor === 'wiki').length}, neutre ${g.filter((v) => v.flavor === 'generic').length}`);
   }
+  // event quest enemies found in Task 2b (make-event-enemies.js): only with the default sources (s.events), never in
+  // the tests' fake sources; same `drawn` gate as the graphics choice
+  let events = null;
+  if (s.events) {
+    const ev = require('./make-event-enemies');
+    events = ev.addRows(enemies, s.events, s.drawn);
+    console.log(ev.summary(events));
+  }
   console.log(`enemy-oltre: +${res.rows.length} righe (${res.cloned} cloni esatti, ${res.family} cloni di famiglia, `
     + `${res.allies} alleati, ${res.fromStats} da fonte); ${res.uncovered.length} senza base, fuori; alleati del master ${alliesBase}`);
   return { added: res.rows.length, cloned: res.cloned, family: res.family, allies: res.allies, alliesBase,
     hpApplied: hpRep.applied, hpSkipped: hpRep.skipped, hpReset,
-    fromStats: res.fromStats, sources: res.sources, uncovered: res.uncovered };
+    fromStats: res.fromStats, sources: res.sources, uncovered: res.uncovered, events };
 }
 
 // solo le descrizioni (I-204) su un master gia' costruito, senza rigenerare le righe (abilita', comparsa e obiettivi

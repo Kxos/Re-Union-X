@@ -111,7 +111,8 @@ check(not set(wh) & (set(ex) | set(dd) | set(rr) | set(rc)), 'whole copies overl
 anims = {}
 for k, v in wh.items():
     anims.setdefault(k.rsplit('/', 1)[0], []).append((k, v))
-check(len(anims) == 31, 'whole copies: %d animations (31 approved)' % len(anims))
+# 31 approved 23-10 + 4 dead.lwf of event quest families (Events Part 1 Task 2b, 06-11: 226, 1522, 1530, 1566)
+check(len(anims) == 35, 'whole copies: %d animations (35)' % len(anims))
 for d, rows in anims.items():
     an = d.rsplit('/', 1)[1]
     check(any(k == d + '/' + an + '.lwf' for k, _ in rows), 'whole copy without its LWF: ' + d)

@@ -42,7 +42,13 @@ COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (gener
             'reconstruction: 1577 dead (same Gearbit rig and placement; I-194 23-10, user-approved, category 3)')
            for f in (1576, 1578)] +
           [(1618, 'dead', (1624, 'dead'), 'whole-same-rig',
-            'reconstruction: 1624/1628 dead (same Cy-Bug footprint; I-194 23-10, user-approved, category 3)')])
+            'reconstruction: 1624/1628 dead (same Cy-Bug footprint; I-194 23-10, user-approved, category 3)')] +
+          # Events Part 1, Task 2b (6 Nov 2026): event quest enemies with no dead.lwf in the JP dump; same rule, the
+          # 2018 index puts their dead.lwf on the donor's record (models reviewed by the user on rendered animations)
+          [(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (generic Shadow smoke); Task 2b')
+           for f in (226, 1530)] +
+          [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX % ('%d/dead (twin); Task 2b' % t))
+           for f, t in ((1522, 1529), (1566, 1565))])
 
 
 def to_box(p):
