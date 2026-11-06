@@ -339,7 +339,11 @@ def catalog_banner(src_dir, enemies=None, title=CATALOG_TITLE, sub=CATALOG_SUB, 
             fig = enemy_figure(eid, enemies)
             if fig is not None:
                 fig = fig.resize((max(1, int(fig.width * h / fig.height)), h), Image.LANCZOS)
-                im.alpha_composite(fig, (x, yb - h))
+                if art_only:
+                    fig, (x, y0), _ = fit_inside(fig, (x, yb - h), 1)
+                    im.alpha_composite(fig, (x, y0))
+                else:
+                    im.alpha_composite(fig, (x, yb - h))
     if art_only:   # catalogue options: the art and the tap mark, title / sticker / frame by family_finish
         return _tap_mark(im)
     gold_text(im, (20, 50), title, make_shop_art.font(40))
@@ -545,7 +549,10 @@ def raid_catalog_banner(rigs=None, bosses=None, title=RAID_CATALOG_TITLE, sub=RA
                                                          Image.new('RGBA', f.size, (0, 0, 0, 0)), f.getchannel('A')))
         figs.append(mid)
         sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-        sh.alpha_composite(f, (int(x - f.width / 2), yb - h))
+        pos = (int(x - f.width / 2), yb - h)
+        if art_only:
+            f, pos, _ = fit_inside(f, pos, 9)
+        sh.alpha_composite(f, pos)
         a = sh.getchannel('A').filter(ImageFilter.GaussianBlur(4)).point(lambda v: v * 120 // 255)
         shadow = Image.new('RGBA', (W, H), (20, 0, 0, 0))
         shadow.putalpha(a)
@@ -653,7 +660,10 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
                 ci = Image.alpha_composite(ci, Image.composite(Image.new('RGBA', ci.size, (0, 60, 60, int(255 * shade))),
                                                                Image.new('RGBA', ci.size, (0, 0, 0, 0)), ci.getchannel('A')))
             sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-            sh.alpha_composite(ci, (x + dx, y))
+            pos = (x + dx, y)
+            if art_only:
+                ci, pos, _ = fit_inside(ci, pos, 7)
+            sh.alpha_composite(ci, pos)
             a = sh.getchannel('A').filter(ImageFilter.GaussianBlur(3)).point(lambda v: v * 110 // 255)
             shadow = Image.new('RGBA', (W, H), (0, 40, 40, 0))
             shadow.putalpha(a)
@@ -787,7 +797,42 @@ def tinted(im, rgba):
     return Image.alpha_composite(im, Image.composite(Image.new('RGBA', im.size, rgba), Image.new('RGBA', im.size, (0, 0, 0, 0)), im.getchannel('A')))
 
 
+# art pieces placed on the card since the last family_finish (their boxes: tests, user 06-11 «nothing out of the frame»)
+_ART_BOXES = []
+
+
+def fit_inside(piece, xy, margin=2):
+    """(piece, (x, y), scale): the piece moved, and scaled down when it is larger, so that its visible pixels (and a
+    shadow / glow reach of margin px) lie inside the gold frame's inner rectangle FRAME_INNER; records its box"""
+    bb = piece.getbbox()
+    if not bb:
+        return piece, (int(xy[0]), int(xy[1])), 1.0
+    x0, y0, x1, y1 = FRAME_INNER[0] + margin, FRAME_INNER[1] + margin, FRAME_INNER[2] - margin, FRAME_INNER[3] - margin
+    k = min(1.0, (x1 - x0) / (bb[2] - bb[0]), (y1 - y0) / (bb[3] - bb[1]))
+    if k < 1:
+        cx, cy = xy[0] + (bb[0] + bb[2]) / 2, xy[1] + (bb[1] + bb[3]) / 2
+        piece = piece.resize((max(1, int(piece.width * k)), max(1, int(piece.height * k))), Image.LANCZOS)
+        bb = piece.getbbox()
+        xy = (cx - (bb[0] + bb[2]) / 2, cy - (bb[1] + bb[3]) / 2)
+    x = min(max(xy[0], x0 - bb[0]), x1 - bb[2])
+    y = min(max(xy[1], y0 - bb[1]), y1 - bb[3])
+    x, y = int(math.floor(x)), int(math.floor(y))
+    x = min(max(x, x0 - bb[0]), x1 - bb[2])
+    y = min(max(y, y0 - bb[1]), y1 - bb[3])
+    _ART_BOXES.append((x + bb[0], y + bb[1], x + bb[2], y + bb[3]))
+    return piece, (x, y), k
+
+
+def inner_clip(layer):
+    """a full-card layer (glow) cut to the frame's inner rectangle"""
+    m = Image.new('L', layer.size, 0)
+    ImageDraw.Draw(m).rectangle((FRAME_INNER[0], FRAME_INNER[1], FRAME_INNER[2] - 1, FRAME_INNER[3] - 1), fill=255)
+    layer.putalpha(ImageChops.multiply(layer.getchannel('A'), m))
+    return layer
+
+
 def paste_shadowed(im, piece, xy, blur=3, alpha=110, colour=(0, 0, 0)):
+    piece, xy, _ = fit_inside(piece, xy, blur + 2 if alpha else 1)
     lay = Image.new('RGBA', im.size, (0, 0, 0, 0))
     lay.alpha_composite(piece, (int(xy[0]), int(xy[1])))
     sh = Image.new('RGBA', im.size, colour + (0,))
@@ -838,11 +883,14 @@ def family_finish(im, title, sub, ink):
     im.info['sticker_box'] = sbox
     ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=FAMILY_GOLD, width=3)
     im.info['title_box'] = m.getbbox()
+    im.info['pieces'] = list(_ART_BOXES)
+    _ART_BOXES.clear()
     return im
 
 
 # Special Catalog
 def special_option(style, src=None, enemies=None):
+    _ART_BOXES.clear()
     if style == 'A':   # the current design (strips of original Special banners, Training Grounds figures) in the family
         art_im = catalog_banner(src or os.path.join(ROOT, 'reference', 'special_banners'), enemies or ENEMIES, art_only=True)
         return family_finish(art_im, CATALOG_TITLE, CATALOG_SUB, (20, 16, 40))
@@ -879,6 +927,7 @@ RAID_PORTRAITS = ['0004', '0013', '1005', '1009']
 
 
 def raid_option(style, rigs=None):
+    _ART_BOXES.clear()
     rigs = rigs or RAID_RIGS
     if style in RAID_B_VARIANTS:
         return raid_b_variant(style, rigs)
@@ -905,13 +954,14 @@ def raid_option(style, rigs=None):
             warn('raid boss 0013 left out of Raid option B')
         else:
             f = f.resize((int(f.width * 170 / f.height), 170), Image.LANCZOS)
+            f, bpos, _ = fit_inside(f, (int(520 - f.width / 2), 150 - 170), 6)
             sil = tinted(f, (12, 0, 4, 255))
             rim = Image.new('RGBA', im.size, (0, 0, 0, 0))
-            rim.alpha_composite(f, (int(520 - f.width / 2), 150 - 170))
+            rim.alpha_composite(f, bpos)
             glow = Image.new('RGBA', im.size, (255, 40, 30, 0))
             glow.putalpha(rim.getchannel('A').filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.GaussianBlur(5)))
             im = Image.alpha_composite(im, glow)
-            im.alpha_composite(sil, (int(520 - f.width / 2), 150 - 170))
+            im.alpha_composite(sil, bpos)
             # the boss's eyes / heart: the lit original pieces over the silhouette, faint
             lit = rim.copy()
             lit.putalpha(rim.getchannel('A').point(lambda v: v * 50 // 255))
@@ -943,6 +993,7 @@ def raid_option(style, rigs=None):
 
 # Event Catalog
 def event_option(style, coin=None):
+    _ART_BOXES.clear()
     coin = coin or event_coin_path()
     if style == 'A':   # the current cyan / green design (rays, bokeh, three Event Coins)
         return family_finish(event_catalog_banner(coin, art_only=True, dx=432), EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, (8, 70, 72))
@@ -1120,9 +1171,13 @@ def raid_b_variant(style, rigs=None):
     lit, glow = lit_boss(boss, rigs, h)
     if lit is not None:
         pos = (int(x - lit.width / 2), int(yb - lit.height + 16))
+        lit, pos, k = fit_inside(lit, pos, 6)       # the boss whole inside the frame (user 06-11)
+        _ART_BOXES.pop()                            # recorded again by paste_shadowed below
+        if k < 1:
+            glow = glow.resize(lit.size, Image.LANCZOS)
         g = Image.new('RGBA', im.size, (0, 0, 0, 0))
         g.alpha_composite(glow, pos)
-        im = Image.alpha_composite(im, g)
+        im = Image.alpha_composite(im, inner_clip(g))
         im = paste_shadowed(im, lit, pos, blur=4, alpha=120)
         im.info['boss'] = boss
     if style in ('B3', 'B4'):
