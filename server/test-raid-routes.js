@@ -1503,12 +1503,12 @@ function wiring() {
   }
   assert.strictEqual(t.route('/web/raid/catalog'), 'raidweb');
   {
-    const cat = web('/web/raid/catalog?session=1');
+    const cat0 = web('/web/raid/catalog?session=1'), cat = { code: cat0.code, body: Buffer.from(require('./raid-pages').expandCatalog(cat0.body.toString())) }; // packed rows (task 3)
     assert.strictEqual(cat.code, 200);
     assert(/<title>Raid Catalog<\/title>/.test(cat.body.toString()) && cat.body.toString().includes('id="q8999"'), 'catalogue page');
     assert(/In Events this week/.test(cat.body.toString()), 'the fixture row is the current week');
     // PROGRESS filter (user 03-11): the row is completed once its quest has its objectives done in the save (clearMissions)
-    const doneAttr = () => (/id="q8999"[^>]*data-done="([01])"/.exec(web('/web/raid/catalog').body.toString()) || [])[1];
+    const doneAttr = () => (/id="q8999"[^>]*data-done="([01])"/.exec(require('./raid-pages').expandCatalog(web('/web/raid/catalog').body.toString())) || [])[1];
     const keepCm = p.clearMissions[FAKE];
     p.clearMissions[FAKE] = [1, 2];
     assert.strictEqual(doneAttr(), '0', 'one objective missing: incomplete');

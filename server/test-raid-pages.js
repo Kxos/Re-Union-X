@@ -3,6 +3,7 @@
 //   node server/test-raid-pages.js
 'use strict';
 const assert = require('assert');
+const fs = require('fs'), path = require('path');
 const pages = require('./raid-pages');
 const calendar = require('./raid-calendar');
 
@@ -32,6 +33,8 @@ function ctx(extra = {}) {
     imgVersion: 3, ...extra };
 }
 // the HTML of one catalogue row (from its opening div to the next row)
+// the catalogue page with its packed rows written out (task 3, 06-11: the page builds them in the browser)
+const catalog = (...a) => pages.expandCatalog(pages.catalogPage(...a));
 function rowOf(html, evStageId) {
   const i = html.indexOf(`id="q${evStageId}"`);
   assert(i >= 0, `row q${evStageId} present`);
@@ -66,7 +69,7 @@ const tests = {
     // I-232: a Japan-only raid is typed jp (TYPE «Japan only»), marked on its row, named by its JP family, and can be kept once past
     const ix = index();
     ix.entries.push(tier('JP-SHR-6', 8300, '2016-08-19', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpQuest', 'jpBoard'], boards: [] }));
-    const c = ctx({ index: ix }), html = pages.catalogPage(ix, c);
+    const c = ctx({ index: ix }), html = catalog(ix, c);
     const row = rowOf(html, 8300);
     assert(row.includes('data-type="jp"') && row.includes('Japan only · '), row);
     assert(html.includes('data-v="jp"'), 'TYPE filter has Japan only');
@@ -120,14 +123,14 @@ const tests = {
     const ix = index();
     ix.entries.push(tier('WW-E22111-1', 8013, '2016-11-05', '2016-11-07', 'single', 'Closehanded Captain', { family: 'weekend-only' }),
       tier('WW-E22563-1', 8014, '2016-11-21', '2016-11-28', 'single', 'Wicked Spider', { family: 'monthly' }));
-    const html = pages.catalogPage(ix, ctx({ index: ix }));
+    const html = catalog(ix, ctx({ index: ix }));
     for (const id of [8013, 8014]) assert(rowOf(html, id).includes('data-type="event"'), `row ${id} is a Raid Event`);
     assert(rowOf(html, 8100).includes('data-type="weekly"'));
     assert(pages.detailPage(ix, 8013, ctx({ index: ix })).includes('<td>Weekend Raid</td>'));
     assert(pages.detailPage(ix, 8014, ctx({ index: ix })).includes('<td>Monthly Raid</td>'));
   },
   lists_every_row() {
-    const html = pages.catalogPage(index(), ctx());
+    const html = catalog(index(), ctx());
     for (const id of [8071, 8100, 8101, 8150, 8180]) assert.strictEqual(count(html, `id="q${id}"`), 1, `row ${id} once`);
     assert.strictEqual(count(html, '<div class="row'), 5, 'one row per census row, not per tier');
     const r = rowOf(html, 8100);
@@ -157,7 +160,7 @@ const tests = {
   progress_completed_incomplete() {
     const ix = index();
     ix.entries.forEach((t, i) => { t.stageId = 990000 + i; }); // 8071 | 8100 Beginner, Advanced, Epic (not restored) | 8101 | 8150 (not restored) | 8180
-    const page = (done) => pages.catalogPage(ix, ctx({ index: ix, stageDone: (sid) => done.includes(sid) }));
+    const page = (done) => catalog(ix, ctx({ index: ix, stageDone: (sid) => done.includes(sid) }));
     const dn = (html, id) => (/data-done="([01])"/.exec(rowOf(html, id)) || [])[1];
     const html = page([990000, 990001, 990004, 990005, 990006]);
     assert.strictEqual(dn(html, 8071), '1', 'one tier, done');
@@ -170,7 +173,7 @@ const tests = {
     assert(rowOf(html, 8071).includes(crown) && !rowOf(html, 8100).includes(crown) && !rowOf(html, 8150).includes(crown), 'crown on completed rows only');
     assert.strictEqual(count(rowOf(html, 8071), 'class="s s-'), 1, 'still one status line');
     assert(/data-g="prog"/.test(html) && /PROGRESS/.test(html) && /data-v="done"><img[^>]*done\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*todo\.png[^>]*>Incomplete</.test(html), 'PROGRESS chips');
-    const none = pages.catalogPage(index(), ctx());
+    const none = catalog(index(), ctx());
     assert(!/data-done="1"/.test(none) && !rowOf(none, 8071).includes(crown), 'no lookup: nothing completed');
   },
   // RAID BOARDS filter (user 03-11, ours): a raid's boards are completed when every Raid Board of its playable tiers is complete
@@ -180,7 +183,7 @@ const tests = {
     ix.entries[2].sphereBoardIds = [3008100, 3008200];
     ix.entries[3].sphereBoardIds = [3009100];
     ix.entries[4].sphereBoardIds = [];
-    const page = (done) => pages.catalogPage(ix, ctx({ index: ix, boardDone: (id) => done.includes(id) }));
+    const page = (done) => catalog(ix, ctx({ index: ix, boardDone: (id) => done.includes(id) }));
     const bd = (html, id) => (/data-boards="(\w+)"/.exec(rowOf(html, id)) || [])[1];
     const html = page([3008071, 3008100, 3008180]);
     assert.strictEqual(bd(html, 8071), 'done');
@@ -189,14 +192,14 @@ const tests = {
     assert.strictEqual(bd(html, 8101), 'none', 'no board: neither');
     assert.strictEqual(bd(html, 8150), 'none', 'not restored, no board');
     assert.strictEqual(bd(html, 8180), 'done');
-    assert.strictEqual(bd(pages.catalogPage(ix, ctx({ index: ix })), 8071), 'todo', 'no lookup: nothing completed');
+    assert.strictEqual(bd(catalog(ix, ctx({ index: ix })), 8071), 'todo', 'no lookup: nothing completed');
     assert(/<h4>RAID BOARDS<\/h4><div class="opts" data-g="bd">/.test(html), 'RAID BOARDS group');
     assert(/data-v="done"><img[^>]*bdone\.png[^>]*>Completed</.test(html) && /data-v="todo"><img[^>]*btodo\.png[^>]*>Not completed</.test(html), 'chips with the board icons (completed board with a check, partly lit board), not padlocks');
     assert(html.includes('Raid Boards: '), 'summary tag label');
     assert.strictEqual(count(rowOf(html, 8071), 'class="s s-'), 1, 'still one status line');
   },
   one_status_line_at_most_one_button() {
-    const html = pages.catalogPage(index(), ctx({ kept: 'WW-W-2018-09-03' }));
+    const html = catalog(index(), ctx({ kept: 'WW-W-2018-09-03' }));
     for (const id of [8071, 8100, 8101, 8150, 8180]) {
       const r = rowOf(html, id);
       assert.strictEqual(count(r, 'class="s s-'), 1, `row ${id}: one status line`);
@@ -210,7 +213,7 @@ const tests = {
     assert(/class="row [^"]*\bpinned\b/.test(rowOf(html, 8071)) && /class="row [^"]*\bnow\b/.test(rowOf(html, 8101)) && /class="row [^"]*\bcan\b/.test(rowOf(html, 8100)), 'coloured side bars');
   },
   not_restored_row() {
-    const html = pages.catalogPage(index(), ctx());
+    const html = catalog(index(), ctx());
     const r = rowOf(html, 8150);
     assert(/Not restored yet/.test(r));
     assert(!/class="pk"/.test(r), 'no Keep button');
@@ -223,9 +226,9 @@ const tests = {
     assert(/class="pk"/.test(p));
   },
   later_locked() {
-    const html = pages.catalogPage(index(), ctx());
+    const html = catalog(index(), ctx());
     const r = rowOf(html, 8180);
-    assert(/Unlocks at Story Quest 612/.test(rowOf(pages.catalogPage(index(), ctx({ unlockQuestOf: () => 612 })), 8180)));
+    assert(/Unlocks at Story Quest 612/.test(rowOf(catalog(index(), ctx({ unlockQuestOf: () => 612 })), 8180)));
     assert(/Not reached in this version of the Story/.test(r), 'no Story quest reaches it');
     assert(!/class="pk"/.test(r), 'cannot be kept');
     const d = pages.detailPage(index(), 8180, ctx({ unlockQuestOf: () => 612 }));
@@ -258,20 +261,34 @@ const tests = {
     // review b597b99: a row of the Shop week that is not listed now (Task 10 weekend / daily rows): neither later nor keepable
     const ix = index();
     ix.entries.push(tier('WW-D-2019-10-19', 8110, '2019-10-19', '2019-10-20', 'Beginner', 'Darkside'));
-    const html = pages.catalogPage(ix, ctx({ index: ix }));
+    const html = catalog(ix, ctx({ index: ix }));
     const r = rowOf(html, 8110);
     assert(/data-show="other"/.test(r) && /This week, not open now/.test(r), 'its own status');
     assert(!/Unlocks at Story Quest/.test(r) && !/class="pk"/.test(r));
   },
+  catalog_light() {
+    // task 3 (06-11): the rows travel packed (templates + one dictionary) and the page builds them before its filter script; the
+    // expansion gives back every row; the card pictures wait in data-src until their row is shown (kxImgs after every render)
+    const ix = index(), raw = pages.catalogPage(ix, ctx({ index: ix })), full = pages.expandCatalog(raw);
+    assert(!raw.includes('<div class="row') && raw.includes('<script id="kxrows" type="application/json">') && raw.includes('kxImgs();'), 'packed');
+    assert(full.includes('id="q8100"') && full.includes('data-src="/web/raid/img/v3/8100.png"') && !/<img[^>]* src="\/web\/raid\/img\//.test(full), 'expanded, cards deferred');
+    assert(!/<\/(?!script>)/.test((/<script id="kxrows"[^>]*>([\s\S]*?)<\/script>/.exec(raw) || [])[1] || ''), 'no </ inside the packed rows');
+    const real = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(real)) {
+      const rix = JSON.parse(fs.readFileSync(real, 'utf8')), page = pages.catalogPage(rix, ctx({ index: rix }));
+      console.log(`  (real catalogue: ${Buffer.byteLength(page)} bytes packed, ${Buffer.byteLength(pages.expandCatalog(page))} written out)`);
+      assert(Buffer.byteLength(page) < 160 * 1024, 'the real catalogue stays light');
+    }
+  },
   html_escape() {
-    const html = pages.catalogPage(index(), ctx());
+    const html = catalog(index(), ctx());
     const r = rowOf(html, 8180);
     assert(r.includes("Tom &amp; Jerry's Ω &lt;Boss&gt;"), 'name intact, escaped');
     assert(!r.includes('<Boss>'), 'no raw tag');
     assert(r.includes('Moogle &amp; Co. Board'));
     const ix = index();
     ix.entries.push(tier('WW-Q', 8190, '2021-01-04', '2021-01-10', 'Odd"Tier<x>', 'Q'));
-    const q = rowOf(pages.catalogPage(ix, ctx({ index: ix })), 8190);
+    const q = rowOf(catalog(ix, ctx({ index: ix })), 8190);
     assert(q.includes('data-tier="odd&quot;tier&lt;x&gt;"') && q.includes('Odd&quot;Tier&lt;x&gt;'), 'tier values escaped');
     const d = pages.detailPage(index(), 8180, ctx());
     assert(d.includes("<h1>Tom &amp; Jerry's Ω &lt;Boss&gt;</h1>"));
