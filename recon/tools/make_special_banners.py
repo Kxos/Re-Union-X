@@ -475,7 +475,7 @@ def build_all(index, src_dir, out_dir, mode, enemies=None, rules=None):
     camps = (rules or {}).get('campaigns') or {}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        mbi.save_png(catalog_banner(src_dir, enemies), os.path.join(out_dir, '%d.png' % cat['evStageId']), mode)
+        mbi.save_png(special_option(CATALOG_CHOICE['special'], src_dir, enemies), os.path.join(out_dir, '%d.png' % cat['evStageId']), mode)
         n['catalog'] += 1
     for e in index.get('entries', []):
         p = os.path.join(src_dir, e['banner']) if e.get('banner') else None
@@ -571,7 +571,7 @@ def build_raid(index, raid_img, mode, rigs=None, catalog_only=False):
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        mbi.save_png(raid_catalog_banner(rigs), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
+        mbi.save_png(raid_option(CATALOG_CHOICE['raid'], rigs), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
         n['catalog'] += 1
     if catalog_only:
         return n
@@ -723,7 +723,7 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     sides = {int(k): v for k, v in (kept_side or {}).items()}
     if catalog_ev:
-        mbi.save_png(event_catalog_banner(coin), os.path.join(event_img, '%d.png' % catalog_ev), mode)
+        mbi.save_png(event_option(CATALOG_CHOICE['event'], coin), os.path.join(event_img, '%d.png' % catalog_ev), mode)
         n['catalog'] += 1
     for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
         src = next((p for p in (os.path.join(event_img, '%d.png' % ev), os.path.join(event_img, '0.png')) if os.path.exists(p)), None)
@@ -740,9 +740,26 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
 
 # ---- Catalogue card options (user 06-11: every catalogue card with the gold frame and the gold title, each design
 # different; options A/B/C per catalogue, chosen later with --catalog-style; nothing here changes a served card) ----
+# the options the user chose (06-11): what the normal builds (build_all / build_raid / build_event) write for 7000 / 8000 /
+# 20000. After a change: bump SPECIAL_IMG_VERSION (server/special.js), RAID_IMG_VERSION (server/routes-raid.js), imgVersion
+# (server/event_config.json), then the master run
+CATALOG_CHOICE = {'special': 'B', 'raid': 'B1', 'event': 'A'}
 FAMILY_GOLD = (236, 196, 84, 255)
-STICKER_XY, STICKER_WH = (560, -2), (78, 30)
-TITLE_MAX_RIGHT = STICKER_XY[0] - 30       # the title keeps clear of the TRAINING sticker (its burst reaches left of its box)
+STICKER_WH = (78, 30)
+FRAME_INNER = (4, 4, 635, 135)             # inside the 3 px gold frame drawn at (1, 1, 638, 138)
+STICKER_MARGIN = 4                         # the TRAINING sticker sits this far inside the frame's inner edge (user 06-11)
+
+
+def family_sticker():
+    """(sticker image, (x, y) of its top-left, box of its opaque pixels on the card): top right, fully inside the frame"""
+    st = sticker(w=STICKER_WH[0], h=STICKER_WH[1], angle=-6)
+    bb = st.getbbox()
+    x = FRAME_INNER[2] - STICKER_MARGIN - bb[2]
+    y = FRAME_INNER[1] + STICKER_MARGIN - bb[1]
+    return st, (x, y), (x + bb[0], y + bb[1], x + bb[2], y + bb[3])
+
+
+TITLE_MAX_RIGHT = family_sticker()[2][0] - 24   # the title keeps clear of the TRAINING sticker
 MEDALS = os.path.join(ROOT, 'medal_gen', 'files', 'img', 'medal')
 
 
@@ -816,7 +833,9 @@ def family_finish(im, title, sub, ink):
     gold_text(im, (20, 52), title, f, outline=6)
     ImageDraw.Draw(im).text((22, 108), sub, font=make_shop_art.font(19), anchor='lm', fill=(255, 255, 255, 255),
                             stroke_width=3, stroke_fill=tuple(ink) + (255,))
-    im.alpha_composite(sticker(w=STICKER_WH[0], h=STICKER_WH[1], angle=-6), STICKER_XY)
+    st, xy, sbox = family_sticker()
+    im.alpha_composite(st, xy)
+    im.info['sticker_box'] = sbox
     ImageDraw.Draw(im).rectangle((1, 1, 638, 138), outline=FAMILY_GOLD, width=3)
     im.info['title_box'] = m.getbbox()
     return im

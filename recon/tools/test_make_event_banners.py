@@ -7,7 +7,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from PIL import Image  # noqa: E402
+from PIL import Image, ImageChops  # noqa: E402
 import make_event_banners as meb  # noqa: E402
 import make_special_banners as msb  # noqa: E402
 
@@ -94,7 +94,8 @@ try:
     assert not any(r > 180 and g < 60 and b < 60 for r, g, b in px), 'no event card in the catalogue banner'
     bg = cat.getpixel((620, 125))
     assert bg[1] > bg[0] + 40 and bg[2] > bg[0], ('cyan/green background', bg)
-    assert cat.getpixel((70, 70)) != msb.event_catalog_banner(None).convert('RGB').getpixel((70, 70)), 'the coin emblem is drawn'
+    nocoin = msb.event_option('A', os.path.join(t, 'no_coin.png')).convert('RGB')
+    assert ImageChops.difference(cat.crop((440, 10, 620, 130)), nocoin.crop((440, 10, 620, 130))).getbbox(), 'the coin emblem is drawn'
     # KEPT tab side: 20002 right (keptTab), 20001 left
     k2 = Image.open(os.path.join(out, '20002-kept.png')).convert('RGB')
     gold = lambda p: p[0] > 200 and p[1] > 120 and p[2] < 120  # noqa: E731

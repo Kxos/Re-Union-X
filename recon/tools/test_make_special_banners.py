@@ -224,8 +224,9 @@ try:
     check(sum(gold(p) for p in pixels(rcat.crop((10, 12, 450, 82)))) > 1500, 'RAID CATALOG title in gold lettering')
     check(mean(ImageChops.difference(rcat, cat)) > 8, 'not the Special Catalog banner')
     # redesign 06-11: red, raid bosses, no weekly cards in it
-    bgp = rcat.getpixel((200, 128))
-    check(bgp[0] > bgp[1] + 60 and bgp[0] > bgp[2] + 60, 'red background %s' % (bgp,))
+    bgp = ImageStat.Stat(rcat.crop((300, 10, 630, 130))).mean
+    check(bgp[0] > bgp[1] + 40 and bgp[0] > bgp[2] + 40, 'red background %s' % (bgp,))
+    check(m.CATALOG_CHOICE == {'special': 'B', 'raid': 'B1', 'event': 'A'}, 'the chosen catalogue options (user 06-11)')
     check(not any(p == ((40 * i) % 255, 60, 200 - 20 * i) for i in range(7) for p in pixels(rcat.crop((0, 0, 640, 140)).resize((160, 35)))),
           'no weekly card in the Raid Catalog banner')
     if os.path.isdir(m.RAID_RIGS):
@@ -265,6 +266,10 @@ try:
             check(o.size == (640, 140), '%s %s size' % (k, st))
             tb = o.info.get('title_box')
             check(tb is not None and tb[2] <= m.TITLE_MAX_RIGHT and tb[0] >= 10, '%s %s title box %s left of the sticker' % (k, st, tb))
+            sb, fi = o.info.get('sticker_box'), m.FRAME_INNER
+            check(sb is not None and fi[0] <= sb[0] and fi[1] <= sb[1] and sb[2] <= fi[2] and sb[3] <= fi[3],
+                  '%s %s TRAINING mark %s inside the frame %s' % (k, st, sb, fi))
+            check(sb is not None and tb is not None and tb[2] < sb[0], '%s %s title %s clear of the mark %s' % (k, st, tb, sb))
             check(o.convert('RGB').getpixel((1, 70)) == m.FAMILY_GOLD[:3] and o.convert('RGB').getpixel((320, 138)) == m.FAMILY_GOLD[:3],
                   '%s %s gold frame' % (k, st))
             check(sum(gold(p) for p in pixels(o.convert('RGB').crop((20, 30, 300, 75)))) > 1200, '%s %s gold title' % (k, st))
@@ -289,6 +294,9 @@ try:
         check(o.size == (640, 140) and o.convert('RGB').getpixel((1, 70)) == m.FAMILY_GOLD[:3], 'raid %s size and gold frame' % v)
         tb = o.info.get('title_box')
         check(tb is not None and tb[2] <= m.TITLE_MAX_RIGHT, 'raid %s title clear of the sticker %s' % (v, tb))
+        sb, fi = o.info.get('sticker_box'), m.FRAME_INNER
+        check(sb is not None and fi[0] <= sb[0] and fi[1] <= sb[1] and sb[2] <= fi[2] and sb[3] <= fi[3] and tb[2] < sb[0],
+              'raid %s TRAINING mark %s inside the frame, clear of the title' % (v, sb))
         if os.path.isdir(m.RAID_RIGS):
             check(o.info.get('boss') in ('0013', '0001', '0004'), 'raid %s boss drawn (%s)' % (v, o.info.get('boss')))
     ks = list(rb)
