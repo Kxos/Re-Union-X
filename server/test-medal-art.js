@@ -16,7 +16,7 @@ assert.strictEqual(new Set(ART.map((a) => a[0])).size, 55, 'art ids unique');
 const allRows = ART.flatMap((a) => a[2]);
 assert.strictEqual(new Set(allRows).size, allRows.length, 'a row belongs to one family only');
 for (const id of REISSUES) assert.ok(allRows.includes(id), `reissue ${id} is a listed family row`);
-assert.strictEqual(familyArt().size, allRows.length - REISSUES.size);
+assert.strictEqual(familyArt().size, allRows.length, 'reissues flagged too (user 06-11)');
 
 // unit: family row, boosted copy, reissue + its copy, unrelated row
 const rows = [
@@ -28,12 +28,12 @@ const rows = [
 ];
 const r = applyMedalArt(rows);
 assert.deepStrictEqual(rows.map((m) => [m.imageCategory, m.artId]),
-  [[2, 21266], [2, 21266], [0, 302044], [0, 302044], [0, 11012]]);
-assert.strictEqual(r.rows, 1);
-assert.strictEqual(r.boosted, 1);
+  [[2, 21266], [2, 21266], [2, 42096], [2, 42096], [0, 11012]]);
+assert.strictEqual(r.rows, 2);
+assert.strictEqual(r.boosted, 2);
 assert.ok(r.missing.includes(300779), 'family rows absent from the master are reported');
 applyMedalArt(rows);
-assert.deepStrictEqual(rows.map((m) => m.imageCategory), [2, 2, 0, 0, 0], 'idempotent');
+assert.deepStrictEqual(rows.map((m) => m.imageCategory), [2, 2, 2, 2, 0], 'idempotent');
 
 // every art id staged by a single-destination line of originals.tsv (section 51), and nothing else under img/art/
 const tsv = fs.readFileSync(path.join(ROOT, 'recon', 'tools', 'originals.tsv'), 'utf8').split(/\r?\n/)
@@ -59,7 +59,6 @@ if (fs.existsSync(file)) {
     flagged++;
     assert.ok(staged.has(m.artId), `medal ${m.medalId} flagged with artId ${m.artId}, not staged`);
     assert.ok(m.validSource, `medal ${m.medalId} flagged but validSource 0`);
-    assert.ok(!REISSUES.has(m.medalId) && !REISSUES.has(m.groupId), `reissue ${m.medalId} flagged`);
   }
   assert.ok(!medals.some((x) => x.imageCategory && x.imageCategory !== 2), 'no other imageCategory');
 }
@@ -74,5 +73,5 @@ if (fi > 0) {
   assert.ok(fs.existsSync(path.join(dir, 'cocostudio', 'publish', 'MedalArtAnim.ExportJson')), 'MedalArtAnim.ExportJson in the pack');
   packed = `; pack ${dir}: 55 pictures + MedalArtAnim present`;
 }
-console.log(`OK: 55 art ids staged, ${familyArt().size} family rows, ${REISSUES.size} reissues left out; ` +
+console.log(`OK: 55 art ids staged, ${familyArt().size} family rows, ${REISSUES.size} reissues included (reconstructed); ` +
   `master: ${flagged} rows flagged${flagged ? '' : ' (master not regenerated yet)'}${packed}`);
