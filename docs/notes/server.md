@@ -237,7 +237,7 @@ Stage POIs (chests and enemies, `server/game_data/stage_poi.json`, read by the s
 the original quests 1-525 and 526-979 (457 stages, Task 6 of 21-10) are left without drops or chests:
 
 ```powershell
-node -e "const fs=require('fs'),f='server/game_data/stage_poi.json',p=JSON.parse(fs.readFileSync(f,'utf8'));for(const x of ['D:/Progetto_Restauro_KH_UX/stage_gen/orig_stages/stage_poi_orig.json','D:/Progetto_Restauro_KH_UX/stage_gen/orig_stages_oltre/stage_poi_oltre.json'])Object.assign(p,JSON.parse(fs.readFileSync(x,'utf8')));fs.writeFileSync(f,JSON.stringify(p))"
+node -e "const fs=require('fs'),f='server/game_data/stage_poi.json',p=JSON.parse(fs.readFileSync(f,'utf8'));for(const x of ['D:/Progetto_Restauro_KH_UX/stage_gen/orig_stages/stage_poi_orig.json','D:/Progetto_Restauro_KH_UX/stage_gen/orig_stages_oltre/stage_poi_oltre.json','D:/Progetto_Restauro_KH_UX/stage_gen/event_stages/stage_poi_events.json'])Object.assign(p,JSON.parse(fs.readFileSync(x,'utf8')));fs.writeFileSync(f,JSON.stringify(p))"
 $env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'
 $env:KHUX_STAGE_POI_EXTRA='D:\Progetto_Restauro_KH_UX\stage_gen\orig_stages\stage_poi_orig.json;D:\Progetto_Restauro_KH_UX\stage_gen\orig_stages_oltre\stage_poi_oltre.json'
 node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # then check-stage-data.js: 0 errors
