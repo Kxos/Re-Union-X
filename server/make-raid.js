@@ -319,6 +319,10 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
   // boards reconstructed from the row's evidence (private raid_rewards/e_jp/jp_boards.json, built by make_jp_boards.js:
   // jpDeduced), (c) else no board at all (jpNone, label jpNoBoard).
   const jpBoard = new Set(), jpOriginal = new Set(), jpDeduced = new Set(), jpNone = new Set(), jpProbable = new Set();
+  // round 5 (user decision 06-11): boards rebuilt on a worldwide board of the same kind and time (spec board `shape: 'ww'`, label
+  // jpBoardWwShape), and the JP rewards a worldwide raid board also gives, replaced by a filler (board `subs`, label jpBoardShared;
+  // census id -> [{board, cell, from, to, ww}], shown on the Details page)
+  const jpWwShape = new Set(), jpSubs = new Map();
   const sh = (jpCfg || {}).superHard || null;
   const specs = ((eventRewards || {}).jpBoards || {}).rows || {};
   for (const row of ((census || {}).rows || []).filter((r) => jpServed(r, census))) {
@@ -330,7 +334,14 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
       const refs = spec.boards.map((b, i) => {
         const id = `${row.id}:jp${i + 1}-${slug(b.name)}`;
         boards.push({ id, name: b.name, cells: b.cells.map((c, k) => ({ n: k + 1, cost: c.cost, kind: c.kind, reward: c.reward, qty: c.qty || 1 })),
-          completion_reward: b.completion_reward || null, completion_qty: 1, title: b.title || null, ...(b.art ? { art: b.art } : {}), ...(b.artFrom ? { artFrom: b.artFrom } : {}) });
+          completion_reward: b.completion_reward || null, completion_qty: b.completion_qty || 1, title: b.title || null, ...(b.art ? { art: b.art } : {}), ...(b.artFrom ? { artFrom: b.artFrom } : {}) });
+        if (b.shape === 'ww') jpWwShape.add(row.id);
+        for (const x of b.subs || []) {
+          if (!jpSubs.has(row.id)) jpSubs.set(row.id, []);
+          // the worldwide raids that give it, by boss and start date (the census ids are not for players)
+          const ww = String(x.ww || '').split(/,\s*/).filter(Boolean).map((id) => { const w = ((census || {}).rows || []).find((r) => r.id === id); return w ? `${(w.bosses || []).join(' / ')} raid of ${w.start}` : id; }).join('; ');
+          jpSubs.get(row.id).push({ board: b.name, cell: x.cell, from: x.from, to: x.to, ww });
+        }
         return { board: id, confidence: '' };
       });
       weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs });
@@ -356,7 +367,7 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
     });
     weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs, donor: donorRow.id });
   }
-  return { boards, weeks, gendered, standard, jpBoard, jpOriginal, jpDeduced, jpNone, jpProbable };
+  return { boards, weeks, gendered, standard, jpBoard, jpOriginal, jpDeduced, jpNone, jpProbable, jpWwShape, jpSubs };
 }
 const boardDocOf = (boards, census, eventRewards, jpCfg = null) => {
   const ev = eventBoardDoc(census, eventRewards, jpCfg);
@@ -1259,7 +1270,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
       e.sphereBoardIds = b.byCensus[e.censusId] || [];
       if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []),
         ...(ev.jpOriginal.has(e.censusId) ? ['jpBoardOriginal'] : []), ...(ev.jpDeduced.has(e.censusId) ? ['jpBoardDeduced'] : []),
-        ...(ev.jpProbable && ev.jpProbable.has(e.censusId) ? ['jpBoardProbable'] : []));
+        ...(ev.jpProbable && ev.jpProbable.has(e.censusId) ? ['jpBoardProbable'] : []), ...(ev.jpWwShape && ev.jpWwShape.has(e.censusId) ? ['jpBoardWwShape'] : []),
+        ...(ev.jpSubs && ev.jpSubs.has(e.censusId) ? ['jpBoardShared'] : []));
+      // the JP rewards a worldwide board also gives, replaced (user rule 06-11): listed on the Details page
+      if (e.sphereBoardIds.length && ev.jpSubs && ev.jpSubs.has(e.censusId)) e.boardSubs = ev.jpSubs.get(e.censusId);
       // a JP row with nothing known of its board, or whose built boards lost every cell: no board, and the page says so
       if (e.jp && !e.sphereBoardIds.length) e.reconstructed.push('jpNoBoard');
     }

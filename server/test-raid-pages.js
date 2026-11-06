@@ -87,6 +87,19 @@ const tests = {
     assert(none.includes('No Raid Boards: the Japanese board of this raid is not known') && none.includes('Raid Boards (none: not known)') && !none.includes('No Raid Boards this week'), 'no board line');
     assert(rec.includes('Raid Boards (reconstructed)') && rec.includes('on the model of the original Japanese boards'), 'reconstructed board line');
   },
+  jp_reconstructed_banner_note() {
+    // a JP banner rebuilt by this server (raid_jp_banners.json `reconstructed`, 06a7f9e) says so in the banner box of its Details
+    // page, instead of «The Japanese text printed on the original banner»; an original banner keeps that line
+    const b = require('./raid_jp_banners.json').rows;
+    const ix = index();
+    ix.entries.push(tier('JP-SHR-80', 8360, '2018-01-19', '2018-01-21', 'single', 'Scourge Spider', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp'], boards: [], sphereBoardIds: [] }),
+      tier('JP-SHR-79', 8361, '2018-01-12', '2018-01-13', 'single', 'Fortress Crab Ω', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp'], boards: [], sphereBoardIds: [] }));
+    const c = ctx({ index: ix }), doc = { rows: {}, notices: {}, jp: {} };
+    const rec = pages.noticePage(ix, 8360, doc, c), orig = pages.noticePage(ix, 8361, doc, c);
+    assert(b['JP-SHR-80'] && b['JP-SHR-80'].reconstructed && !b['JP-SHR-79'].reconstructed, 'fixture rows of raid_jp_banners.json');
+    assert(rec.includes('Reconstructed banner:') && !rec.includes('The Japanese text printed on the original banner'), 'reconstructed banner note');
+    assert(orig.includes('The Japanese text printed on the original banner') && !orig.includes('Reconstructed banner:'), 'original banner note');
+  },
   jp_research_labels() {
     // jpCensus (06-11): the probable boss / HP / reward and the opening hours (I-228) are named on the details page; the year-end 2016
     // raid's +10 levels per win (entry.levelStep) is in its level line

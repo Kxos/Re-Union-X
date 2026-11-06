@@ -402,6 +402,31 @@ const tests = {
     }
     assert.ok(jpEntry(out, 'JP-SHR-2/single').reconstructed.includes('boardSet') && !jpEntry(out, 'JP-SHR-1/single').reconstructed.includes('boardSet'));
   },
+  jp_boards_round5() {
+    // round 5 (user decision 06-11): a board rebuilt on a worldwide model (shape 'ww': label jpBoardWwShape), a reward a worldwide
+    // board also gives replaced (subs: label jpBoardShared, entry boardSubs named by the worldwide raid's boss and date), a Spirit
+    // part as completion reward (completion_reward.kind) with its qty, and a proposed card picture (artPending) not served
+    const out = build(jpFixture((f) => {
+      f.boards = { boards: [], weeks: [] };
+      f.master.medal = ['Chip', 'Dale', 'Moogle', 'Magic Mirror'].flatMap((n, i) => [5, 6].map((rare) => ({ medalId: 100 + 10 * i + rare, name: n, rare })));
+      f.master.avatarParts = [];
+      f.master.petParts = [{ petPartsId: 304003, name: 'Rainbow Kitstar Head' }];
+      f.config.boards = {};
+      f.eventRewards.jpBoards = { rows: {
+        'JP-RAID-1': { status: 'deduced', boards: [{ name: 'Kitstar Head', shape: 'ww', cells: [{ cost: 20, kind: 'medal', reward: '6★ Chip' }, { cost: 50, kind: 'medal', reward: '6★ Magic Mirror' }],
+          completion_reward: { value: 'Rainbow Kitstar Head', kind: 'pet' }, artPending: { jp: 'img/sphere_incentive/2300116.png' },
+          subs: [{ cell: 2, from: '6★ Trickmaster', to: '6★ Magic Mirror', ww: 'WW-E9-1' }] }] } } };
+    }));
+    const e = jpEntry(out, 'JP-RAID-1/single');
+    assert.ok(['jpBoardDeduced', 'jpBoardWwShape', 'jpBoardShared', 'boardNoArt'].every((l) => e.reconstructed.includes(l)), e.reconstructed.join());
+    assert.strictEqual(e.boardSubs.length, 1);
+    assert.deepStrictEqual({ ...e.boardSubs[0], ww: undefined }, { board: 'Kitstar Head', cell: 2, from: '6★ Trickmaster', to: '6★ Magic Mirror', ww: undefined });
+    assert.ok(/ raid of \d{4}-\d{2}-\d{2}$/.test(e.boardSubs[0].ww), e.boardSubs[0].ww);
+    const masu = out.masuRows.find((m) => m.masuId === e.sphereBoardIds[0]);
+    assert.deepStrictEqual([masu.rewardSelect[22], masu.rewardId[22]], [33, 304003]);
+    assert.ok(!out.boardArt.some((a) => a.sphereBoardId === e.sphereBoardIds[0]), 'a proposed card is not served');
+    for (const l of ['jpBoardWwShape', 'jpBoardShared']) assert.ok(REAL_CONFIG.reconstructedWhy[l], l);
+  },
   jp_board_probable_and_wiki_card() {
     // round 2 (06-11): an original board whose tie to the raid is probable (JP-RAID-3 = 4400001: label jpBoardProbable) and a
     // board card known only from the JP wiki (art.wiki: a loc line named by the board key, label boardArtWiki)
@@ -1707,7 +1732,7 @@ const tests = {
     // ... and the JP boards (user decision 06-11) only the JP-only medals with no worldwide item yet (declared)
     assert.deepStrictEqual(out.report.boards.unmatched.filter((u) => !String(u.board).startsWith('WW-E') && !String(u.board).startsWith('JP-')), []);
     assert.deepStrictEqual([...new Set(out.report.boards.unmatched.filter((u) => String(u.board).startsWith('JP-')).map((u) => u.reward))].sort(),
-      ['1★ Sora Santa Ver.', '5★ Minnie VD Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.', 'Happi Coat: Hair Ornament (Female)']);
+      ['1★ Sora Santa Ver.', '5★ Minnie VD Ver.', '5★ Necho Cat', '5★ Sora & Riku KH3D Ver.', 'Booster [Final Form Sora] +5%', 'Happi Coat: Hair Ornament (Female)', 'Maidama (Female)', 'Maidama (Male)']);
     assert.ok(out.report.boards.unmatched.every((u) => u.reward in REAL_CONFIG.boards.unmatched), 'only declared cells are left off');
     const of130 = new Set(the130.map((r) => r.id));
     const avail130 = new Set(on.filter((e) => of130.has(e.censusId)).map((e) => e.censusId));

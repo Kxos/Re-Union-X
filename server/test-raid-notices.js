@@ -148,6 +148,15 @@ const tests = {
     const step = pages.noticePage(ix, 8203, doc, c);
     assert.ok(step.includes('LV 1, +1 at every win (+5 in Bonus Time), up to LV 99') && step.includes('3 hours'), 'level step and time limit of the notice');
     assert.ok(pages.detailPage(ix, 8203, c).includes('gains a level at every win (5 levels in Bonus Time)'), 'catalog detail level line');
+    // round 5 (06-11): a board on a worldwide model, and the rewards a worldwide raid board also gives, listed as replaced
+    ix.entries.push(entry('JP-D-2017-06-19', 8204, '2017-06-19', '2017-06-25', 'Jewel Sorceress', { family: 'event', jp: true, region: 'JP', sphereBoardIds: [3000801],
+      reconstructed: ['jp', 'jpBoardDeduced', 'jpBoardWwShape', 'jpBoardShared'],
+      boardSubs: [{ board: 'M_Sunny Day Earrings', cell: 13, from: 'Sunny Day Earrings (Male)', to: '6★ Magic Mirror', ww: 'Submarine Carp raid of 2017-06-19' }] }));
+    const shared = pages.noticePage(ix, 8204, doc, c);
+    assert.ok(shared.includes('cells and costs on a worldwide board of the same time') && shared.includes('rewards shared with a worldwide raid replaced'), 'board state');
+    assert.ok(shared.includes('Rewards kept for the worldwide raids') && shared.includes('M_Sunny Day Earrings, cell 13: Sunny Day Earrings (Male) → 6★ Magic Mirror')
+      && shared.includes('Submarine Carp raid of 2017-06-19'), 'substitution listed');
+    assert.ok(!step.includes('Rewards kept for the worldwide raids'), 'no list without substitutions');
   },
   jp_banner_texts() {
     // every JP row with its own original card (reference/raid_banners_jp/jp_cards.json «exact», local list) has its banner text

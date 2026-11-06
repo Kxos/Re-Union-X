@@ -294,6 +294,7 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
   jpBoardOriginal: 'Raid Boards (original Japanese boards)', jpBoardProbable: 'Raid Board (original, tie to this raid probable)', jpBoardDeduced: 'Raid Boards (reconstructed)', jpNoBoard: 'Raid Boards (none: not known)',
+  jpBoardWwShape: 'Raid Boards (on a worldwide model)', jpBoardShared: 'Raid Board rewards (shared with a worldwide raid)',
   jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpRewardProbable: 'level reward (probable match)',
   // the AP / Bonus Time rule (I-228, raid_config.json costRule): weekdayWeekend served, the opening hours of originalWindows kept off
   weekRule: 'AP and Bonus Time (one rule for all raids)', weekdayAp: 'weekday AP of a quest that was free',
@@ -344,6 +345,8 @@ const RECON_TEXT = {
   jpBoardProbable: 'This original Japanese board survives in the game data, but no source ties it to this raid directly: it is the only board of November 2015, and its title True (真・) is the one the Japanese wiki gives for the Cid cells of the November 2015 raid board (probable).',
   jpBoardDeduced: 'No Japanese board of this raid survives cell by cell: its Raid Boards are reconstructed from what is known (number of cells, total Raid Coins, main rewards and title from the Japanese wiki, the original board pictures), on the model of the original Japanese boards of the same time. The costs of single cells and the filler medals are ours.',
   jpNoBoard: 'Nothing is known of the Japanese Raid Board of this raid, so it has none here: the raid still gives Raid Coins.',
+  jpBoardWwShape: 'The Japanese board of this raid is known only by its rewards (its notice, banner and original board pictures): its cells, costs and filler Medals are copied from the worldwide Raid Board of the same kind and time, with the Japanese rewards in the place of the worldwide ones; the Japanese titles are the worldwide titles they most probably were.',
+  jpBoardShared: 'A reward of this Japanese board that a worldwide raid board also gives (avatar part, title, Spirit part or collection Medal) stays in the worldwide raid: here that cell gives a 6★ Medal, Jewels or a material of the same cost instead, so no Raid Coins are spent on something you may already own. The changes are listed with the Raid Boards.',
   jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»).',
   jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
   weekRule: 'One rule for every raid on this server (not original): from Monday to Friday the raid quest costs its original AP and there is no Bonus Time; on Saturday and Sunday (Pacific time) it costs 0 AP and the Lux of the raid boss is doubled, all day. The original game had its own hours instead: Bonus Time four times a day, and some raids open only at set hours.',
@@ -609,7 +612,8 @@ const JP_BANNERS = (() => { try { return require('./raid_jp_banners.json').rows 
 const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const minutesText = (m) => (!m ? '' : m % 60 ? `${m} minutes` : m === 60 ? '1 hour' : `${m / 60} hours`);
 const JP_BOARD_STATE = [['jpBoardOriginal', 'original Japanese boards'], ['jpBoardProbable', 'its tie to this raid is probable'], ['jpBoard', 'the Japanese super-hard board (= worldwide Legendary Raid Reward)'],
-  ['jpBoardDeduced', 'reconstructed from the surviving evidence'], ['jpNoBoard', 'none: not known']];
+  ['jpBoardDeduced', 'reconstructed from the surviving evidence'], ['jpBoardWwShape', 'cells and costs on a worldwide board of the same time'],
+  ['jpBoardShared', 'rewards shared with a worldwide raid replaced'], ['jpNoBoard', 'none: not known']];
 function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
   const title = titleOf(row), facts = doc && doc.jp ? doc.jp[row.censusId] : null;
   const codes = new Set(row.entries.flatMap((e) => e.reconstructed || []));
@@ -634,6 +638,10 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     const items = [...new Set(ctx.boardItems ? ctx.boardItems(id) : [])], name = ctx.boardName ? ctx.boardName(id) : '';
     return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;
   }).join('')}</ul>` : '<p class="n">No Raid Boards: the Japanese board of this raid is not known, so none is served.</p>';
+  // rewards a worldwide raid board also gives, replaced on this board (user rule 06-11, make-raid.js boardSubs)
+  const subs = [...new Map(play.flatMap((e) => e.boardSubs || []).map((x) => [`${x.board}|${x.cell}`, x])).values()];
+  const shared = subs.length ? '<h3>Rewards kept for the worldwide raids</h3><p class="nb">These Japanese rewards are also on a worldwide Raid Board, so here they are replaced:</p>'
+    + `<ul class="nl">${subs.map((x) => `<li>${esc(x.board)}${typeof x.cell === 'number' ? `, cell ${x.cell}` : x.cell === 'title' ? ', title' : ', completion'}: ${esc(x.from)} → ${esc(x.to)} <span class="dr">(worldwide: ${esc(x.ww)})</span></li>`).join('')}</ul>` : '';
   const kv = [['Dates', `${dateRange(row)} (Japanese version only)`], ['Type', FAMILY_LABEL[row.family] || row.family], ['Open', open],
     ['Level', `LV 1, +${stepOf(row)} at every win${bonusStepOf(row) && stepOf(row) === 1 ? ` (+${bonusStepOf(row)} in Bonus Time)` : ''}, up to LV 99`], ['Raid Boards', state]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
   return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
@@ -641,12 +649,14 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">JAPAN ONLY</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
     + (JP_BANNERS[row.censusId] ? '<div class="ns"><h2>On the banner (our translation)</h2>'
       + `<p lang="ja" class="nb">${esc(JP_BANNERS[row.censusId].ja)}</p><p>${esc(JP_BANNERS[row.censusId].en)}</p>`
-      + '<p class="nb">The Japanese text printed on the original banner of this raid, translated by this server.</p></div>' : '')
+      // a banner rebuilt by this server (raid_jp_banners.json `reconstructed`, the two-day 150M weekends of 2018) says so instead
+      + (JP_BANNERS[row.censusId].reconstructed ? `<p class="nb">${esc(JP_BANNERS[row.censusId].reconstructed)}</p></div>`
+        : '<p class="nb">The Japanese text printed on the original banner of this raid, translated by this server.</p></div>') : '')
     + notice
     + `<div class="ns"><h2>What is known of this raid</h2><table class="kv">${kv}</table>`
     + `<table class="tt"><tr><th>Day / tier</th><th>Boss</th><th>HP at LV 1</th><th>Time limit</th></tr>${bossRows}</table>`
     + (drops.length ? `<h3>Level rewards</h3><ul class="nl">${drops.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '')
-    + `<h3>Raid Boards</h3>${boards}</div>`
+    + `<h3>Raid Boards</h3>${boards}${shared}</div>`
     + '<div class="srv"><h2>On this server</h2><p>This raid was held only in the Japanese version of the game: here it is played only from the Raid Catalog, '
     + `once your Story has passed its dates (${esc(dateRange(row))}).</p>`
     + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;

@@ -528,6 +528,42 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     rotating 1 / 1 (JP-RAID-21 reconstructed, JP-RAID-27 none); super-hard weekends 94 original (standard board) / 4
     reconstructed (JP-SHR-1, 3, 4, 5) / 1 none (JP-SHR-2); monthly 30-minute 14 none. 155 JP boards (94 standard + 61 own; 47
     before round 4). WW rows unchanged.
+  - **Round 5 (user decision 06-11 evening): every JP row gets a board, reconstructed.** The 34 rows without one get boards
+    built by the same private generator (`make_jp_boards.js`, block «Round 5»), label `jpBoardDeduced`, plus
+    `jpBoardWwShape` when the structure comes from a worldwide board. Sources per row: its JP notice (items), banner, the JP
+    wiki titles (称号 page: the 2017-2018 titles are the WW title rows 12141-12211 in JP order, probable), the JP 4.3.1 card
+    pictures (raid boards `2400xxx`, event boards `2300xxx`, identified by eye: every 2017-2018 event comes as M card, L card,
+    5-Mirror card; every monthly raid as its item cards, a Broom card, a Mirror card). **Structure:** 2015-2016 rows on the
+    proven JP boards of their time (JP-RAID-1 Halloween 2015 = the Christmas 2015 avatar boards with the WW «Halloween»
+    parts slot by slot, Event Coin boards like JP-RAID-5; JP-RAID-9 Easter egg boards on the Valentine 2016 board; JP-RAID-14
+    on the JP-RAID-13 costs scaled to the wiki's 3,000; JP-SHR-2 one board on the JP-SHR-1 shape with both Hibiscus Leis;
+    JP-RAID-15 on the JP-RAID-20 / JP-RAID-16 costs; JP-RAID-18 its L_ board = the M_ board, its 6-cell bonus 4,200 by rule);
+    2017-2018 raid events copy the WW monthly event raid of the same or nearest week (M_ / L_ avatar boards 13 / 1,400 in
+    2017, the single 19-cell board per gender in 2018, and its Seasoned Wielder Bonus 1 with 5 Mirrors on the dearest cells);
+    JP-RAID-27 and the monthly 30-minute raids copy the WW timed-window raids (Magic Broom / Magic Mirror boards of
+    WW-E42150-1, 6 / 3,100; the WW medal boards of Trickmaster, Twilight Thorn, Destroyer Behemoth; pet-part boards on «Jewels
+    & Things» of WW-E33888-1, 5 / 140, with the part as **completion reward** as notice 32684 says (`completion_reward.kind`,
+    `raid-boards.js` matchCompletion); avatar boards on «Falling Snow» of WW-E35529-1, 18 / 420). The WW board's own unique
+    cells take the JP rewards, dearest first; a unique cell left over takes the nearest-cost filler of that WW row. New
+    unmatched cells (left off): `Maidama (Male/Female)` (no WW part), `Booster [Final Form Sora] +5%` (event boosters,
+    I-166). **JP-RAID-2** (Savage Spider 2015-10-31) ran before the first raid board (2015-11-14) and after the Halloween
+    boards: no board existed, so it stays `jpNoBoard`; a proposal is kept in the private list under `held`, not served.
+  - **Shared unique rewards (user rule 06-11, all JP boards):** a unique reward (avatar part, title, Spirit part, collection
+    medal: anything but Chip, Dale, Cid, Moogle, Huey / Dewey / Louie, Magic Mirror / Broom, Fantasia Mickey A / B, Jewels,
+    materials) that a served WW raid board also gives (raids.json WW entries -> master `sphereMasu`) stays in the WW raid; on
+    the JP board the cell, title or completion takes a 6★ medal / Jewels / material of the WW event board nearest in date at
+    the same cost slot (the cell's rank among the board's costs mapped onto that board). Recorded per board (`subs`), carried
+    by make-raid to the entries (`boardSubs`, the WW raid named by boss and date; label `jpBoardShared`) and listed on the JP
+    Details page («Rewards kept for the worldwide raids»). 81 replacements: the Zootopia snugglies and titles (JP-RAID-10),
+    Young Riku (11), party hat / glasses (17), Disco parts and titles (21), Tsum balloons (26), Mr. (8), True (3), Clarice
+    parts (18), Halloween / Ghost titles (1), Pineapple Headband (15), Sunny Day Earrings, Mug Cap, Tote Bag, Minnie Visor,
+    Balloon Snowman, Trickmaster, Twilight Thorn, Destroyer Behemoth.
+  - **Card pictures of round 5: proposed only** (`artPending`, ignored by make-raid: label `boardNoArt` until approved); the
+    review page `D:\Progetto_Restauro_KH_UX\tmp\jp_boards_recon\index.html` shows each row's banner, boards and card; the
+    approved board keys go into the private `approved_art.json`, which turns them into `art`. Coverage (dry run 06-11 round 5,
+    `tmp\jp_boards_recon\dry`): every JP row but JP-RAID-2 has boards; 122 new boards (ids 762-883); 608 / 608 tier rows, no
+    WW entry changed, `raid_board_art.tsv` unchanged. **Needs** a master regeneration + revision bump (no resource build until
+    cards are approved).
   - The per-row board list is private (`raid_rewards/e_jp/jp_boards.json`, written by `make_jp_boards.js` from the 2017 master,
     the WW master and the evidence; read by `readSources` as `eventRewards.jpBoards`); evidence per board in the private
     `JP_ONLY.md` «JP raid boards (06-11)» and «JP raid boards round 4». Board keys `<censusId>:jp<n>-<name>`, new numbers appended in `raid_ids.json`
