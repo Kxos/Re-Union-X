@@ -218,6 +218,25 @@ const tests = {
     const daily = build([record('E-D', [quest(700060, 1, [501])], { evStage: [donorEv({ startTime: '2019-04-01 07:00:00', endTime: '2019-04-02 06:59:59' })] })]);
     assert.strictEqual(entry(daily, 'E-D').days, undefined);
   },
+  // Event Catalog banner (Task 5): evStage catalogEvStage of the config, the Training Grounds quest of the Special Catalog, Details ->
+  // /web/event/catalog, as the Raid Catalog banner; only when that stage row is in the master; never a record's id
+  catalog_banner() {
+    const m = master();
+    m.stage.push({ ...storyRow(0, 1), stageId: 970000, id: 970000, stageKind: 2, useAp: 0 });
+    const out = build(records(), undefined, CONFIG, m);
+    assert.strictEqual(CONFIG.catalogEvStage, 20000);
+    const row = out.catalogEvStage;
+    assert.deepStrictEqual([row.eventStageId, row.eventCategory, row.eventType, row.stageId, row.detailUrl], [20000, 2, 0, [970000], '/web/event/catalog']);
+    assert.ok(row.bannerUrl.endsWith('/web/event/img/v1/20000.png'), row.bannerUrl);
+    assert.deepStrictEqual(out.index.catalog, { evStageId: 20000, stageIds: [970000], useAp: [0] });
+    assert.ok(!out.evStage.some((r) => r.eventStageId === 20000), 'apart from the event rows');
+    assert.ok(Object.values(out.ids.rows).every((r) => CONFIG.evStageBase + r !== 20000), 'no record numbered on it');
+    const none = build();
+    assert.strictEqual(none.catalogEvStage, null, 'no Training Grounds row: no banner');
+    assert.strictEqual(none.index.catalog, undefined);
+    // event rows: Details -> their notice page when the record has a notice
+    assert.ok(out.evStage.every((r) => r.detailUrl === `/web/event/notice/${r.eventStageId}`));
+  },
   only_census_ids_filter() {
     const out = build(records(), undefined, { ...CONFIG, onlyCensusIds: ['E-2'] });
     assert.deepStrictEqual(out.index.entries.map((e) => e.censusId), ['E-2']);
@@ -239,6 +258,17 @@ const tests = {
     const idx = JSON.parse(fs.readFileSync(path.join(gd, 'events.json'), 'utf8'));
     assert.deepStrictEqual(idx.own.evStage, [CONFIG.evStageBase + 1, CONFIG.evStageBase + 2]);
     assert.strictEqual(JSON.parse(fs.readFileSync(path.join(gd, 'event_maps.json'), 'utf8')).length, 3);
+    // with the Training Grounds row: the catalogue banner is written, kept among our own rows and replaced by the next run
+    const m2 = master();
+    m2.stage.push({ ...storyRow(0, 1), stageId: 970000, id: 970000, stageKind: 2, useAp: 0 });
+    fs.writeFileSync(path.join(md, 'stage.json'), JSON.stringify([...stage.filter((r) => r.stageId < CONFIG.stageBase), m2.stage[m2.stage.length - 1]]));
+    me.patch(md, opts);
+    me.patch(md, opts);
+    const ev2 = JSON.parse(fs.readFileSync(path.join(md, 'evStage.json'), 'utf8'));
+    assert.deepStrictEqual(ev2.map((r) => r.eventStageId).filter((x) => x >= CONFIG.evStageBase), [20000, CONFIG.evStageBase + 1, CONFIG.evStageBase + 2]);
+    const idx2 = JSON.parse(fs.readFileSync(path.join(gd, 'events.json'), 'utf8'));
+    assert.deepStrictEqual(idx2.catalog, { evStageId: 20000, stageIds: [970000], useAp: [0] });
+    fs.writeFileSync(path.join(md, 'evStage.json'), JSON.stringify(ev));
     // a row in our range that is not ours stops the run
     fs.writeFileSync(path.join(md, 'evStage.json'), JSON.stringify([...ev, { eventStageId: CONFIG.evStageBase + 50 }]));
     assert.throws(() => me.patch(md, opts), /not ours/);

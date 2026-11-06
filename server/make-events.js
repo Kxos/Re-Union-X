@@ -26,7 +26,8 @@
 // filter says; a record that disappears keeps its numbers; a repeated number, a numbered record without anchor or a record whose
 // keys no longer cover its stored ones stops the run.
 // Output (own rows dropped first, the previous run's list is events.json `own`; anything else in our ranges stops the run):
-// stage, evStage; game_data/events.json {entries, reasons, own}; game_data/event_maps.json (stage list for gen_story_maps.py).
+// stage, evStage (with the Event Catalog banner catalogEvStage, Task 5); game_data/events.json {entries, reasons, catalog?, own};
+// game_data/event_maps.json (stage list for gen_story_maps.py). An event row has detailUrl /web/event/notice/<evStageId> when its record names a notice.
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
 //
 //   node server/make-events.js [master folder]
@@ -255,7 +256,8 @@ function buildEvents(records, config, master, ids, anchors = {}) {
     if (raidish) entry.why = `raid or Special ${raidish}: served by make-raid / make-special`;
     else if (!entry.stageIds.length) entry.why = `no quest served yet (${entry.quests.length} ${NOT_SERVED})`;
     else {
-      const row = evStageRow(evStageId, entry.stageIds, { eventType: config.eventType });
+      // Details of the card: the original notice of the event (event-pages.js noticePage; «not available» without its text)
+      const row = evStageRow(evStageId, entry.stageIds, { eventType: config.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${evStageId}` : '' });
       row.eventCategory = config.eventCategory;
       row.bannerUrl = entry.banner;
       out.evStage.push(row);
@@ -266,6 +268,18 @@ function buildEvents(records, config, master, ids, anchors = {}) {
     entry.label = entry.labels.length ? 'reconstructed' : 'original';
     entry.labels.forEach((l) => used.add(l));
     out.index.entries.push(entry);
+  }
+  // Event Catalog banner (Task 5): as the Raid Catalog banner of make-raid.js (CATALOG_EV), an evStage holding the Training
+  // Grounds of the Special Catalog (our own quest, no Lux, no drops: a tap always opens the banner's quest list), eventType 0,
+  // Details -> the catalogue. Kept apart from the event rows; emitted only when that stage row is in the master.
+  const training = (master.stage || []).find((r) => r.stageId === config.catalogStage);
+  out.catalogEvStage = null;
+  if (training && config.catalogEvStage) {
+    const row = evStageRow(config.catalogEvStage, [config.catalogStage], { eventType: 0, detailUrl: config.catalogUrl });
+    row.eventCategory = config.eventCategory;
+    row.bannerUrl = `/web/event/img/v${config.imgVersion}/${config.catalogEvStage}.png`;
+    out.catalogEvStage = row;
+    out.index.catalog = { evStageId: config.catalogEvStage, stageIds: [config.catalogStage], useAp: [Number(training.useAp) || 0] };
   }
   for (const l of [...used].sort()) {
     const why = (config.reconstructedWhy || {})[l];
@@ -318,12 +332,13 @@ function patch(masterDir, opts = {}) {
   const idsFile = opts.idsFile || IDS_FILE;
   // the anchors sidecar: next to the records (private), or opts.anchorsFile; records given in opts without a file: game_data
   const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : path.join(path.dirname(process.env.KHUX_EVENT_SRC), ANCHORS_NAME));
-  const out = buildEvents(records, opts.config || loadConfig(), master, readIds(idsFile), readJson(anchorsFile, {}));
-  const added = { stage: out.stage, evStage: out.evStage };
+  const config = opts.config || loadConfig();
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}));
+  const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage] };
   for (const [t, rows] of Object.entries(added)) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[keyOf[t]])]));
-  fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), own }, null, 1));
   fs.writeFileSync(path.join(gameData, 'event_maps.json'), JSON.stringify(out.maps, null, 1));
   // anchors first (only grow: allocateIds never changes one), so ids are never written with keys whose anchor is not saved
   if (JSON.stringify(readJson(anchorsFile, {})) !== JSON.stringify(out.anchors)) fs.writeFileSync(anchorsFile, JSON.stringify(out.anchors, null, 1) + '\n');
@@ -333,6 +348,7 @@ function patch(masterDir, opts = {}) {
     + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage`);
   const skipped = e.filter((x) => !x.available).map((x) => `${x.censusId} (${x.why})`);
   if (skipped.length) console.log(`events: no evStage row: ${skipped.join(', ')}`);
+  if (!out.catalogEvStage) console.warn(`events: no Event Catalog banner: the Training Grounds stage ${config.catalogStage} is not in the master (make-special first)`);
   return out;
 }
 

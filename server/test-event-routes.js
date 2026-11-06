@@ -99,6 +99,41 @@ const tests = {
     assert.strictEqual(w.ev.events()[1].complete, 1, 'S3 has one objective');
     assert.strictEqual(w.ev.events()[0].complete, 0);
   },
+  // a missing stage row on the first clear (master not yet rebuilt): nothing recorded, so the first-clear reward is paid once
+  // the row is there (review of Task 4)
+  missing_row_keeps_first_clear() {
+    const w = world();
+    w.tables.stage = w.tables.stage.filter((r) => r.stageId !== S2);
+    w.ev.onStageClear(S2, [1]);
+    assert.deepStrictEqual(w.grants, [], 'no row: no reward');
+    assert.strictEqual((w.player.events.cleared || {})[S2], undefined, 'no row: nothing written');
+    w.tables.stage.push(stageRow(S2));
+    w.ev.onStageClear(S2, [1]);
+    assert.deepStrictEqual(w.grants, [{ type: 4, id: 0, num: 100 }], 'first clear paid once the row exists');
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1]);
+    assert.deepStrictEqual(w.player.events.cleared[S2], [1]);
+  },
+  // endTime: the end of the real day when the entry or one of its open quests has days; `days: []` is no days (review of Task 4)
+  end_time_days() {
+    const ix = INDEX();
+    ix.entries[1].days = [];
+    ix.entries[0].quests[1].days = ['2019-04-09'];
+    const w = world({ index: ix });
+    const list = w.ev.events();
+    assert.strictEqual(list.find((e) => e.eventStageId === 29902).endTime, fmt(TUE + 7000), 'days: [] -> end of the week');
+    assert.strictEqual(list.find((e) => e.eventStageId === 29901).endTime, fmt(TUE + 1000), 'a quest with days -> end of the day');
+  },
+  // the Event Catalog banner (index.catalog of make-events.js): its Training Grounds quest, eventType 0, Details -> catalogue
+  catalog_banner() {
+    const ix = INDEX();
+    ix.catalog = { evStageId: 20000, stageIds: [970000], useAp: [0] };
+    const w = world({ index: ix });
+    const [b] = w.ev.catalogEvents();
+    assert.deepStrictEqual([b.eventStageId, b.eventType, b.stages.map((s) => s.stageId)], [20000, 0, [970000]]);
+    assert.strictEqual(b.bannerUrl, `http://x/web/event/img/v${EVENT_IMG_VERSION}/20000.png`);
+    assert.deepStrictEqual(world().ev.catalogEvents(), [], 'no catalog in the index: no banner');
+    assert.ok(!w.ev.events().some((e) => e.eventStageId === 20000), 'not among the event cards');
+  },
   // keep a past event (Task 5's catalogue buttons): listed first with the KEPT banner; only a past one; unkeep
   keep_unkeep() {
     const w = world();
@@ -136,7 +171,7 @@ function wiring() {
     entries: [{ key: 'K/Beginner', censusId: 'K', available: true, stageId: FAKE, evStageId: 8999, enemyId: 2999990, modelId: 7, tier: 'Beginner', upMinutes: 20, useAp: 10,
       questAp: [0, 5, 90], start: '2015-01-01', end: '2099-12-31' }], reasons: {} }));
   fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ '0007': { fight: true, start: true, escape: true, put_down: true } }));
-  fs.writeFileSync(process.env.KHUX_EVENT_INDEX, JSON.stringify({ entries: [{ censusId: 'E-1', evStageId: 29901, start: '2015-01-01', end: '2099-12-31', stageIds: [S1], available: true,
+  fs.writeFileSync(process.env.KHUX_EVENT_INDEX, JSON.stringify({ catalog: { evStageId: 20000, stageIds: [970000], useAp: [0] }, entries: [{ censusId: 'E-1', evStageId: 29901, start: '2015-01-01', end: '2099-12-31', stageIds: [S1], available: true,
     quests: [quest(S1)] }], reasons: {} }));
   // the event quest's stage row, appended to the master stage table as read (the map key 1010: the Prologue's POI, for the drops)
   const readFile = fs.readFileSync;
@@ -154,10 +189,10 @@ function wiring() {
     const call = (fn, ...a) => { let b = null; quiet(() => fn({ writeHead() {}, end(x) { b = JSON.parse(x.toString('utf8')); } }, ...a)); return b; };
     const p = t.player;
     call(t.respondUserCreate, { name: 'Prova', unionId: 1 });
-    // events_after_raids: Raid Catalog banner, (kept raid), the week's raids, then the events
+    // events_after_raids: Raid Catalog banner, Event Catalog banner (second), (kept raid), the week's raids, then the events
     const ev = call(t.respondStageEvent, { eventCategory: 2 }).events;
-    assert.deepStrictEqual(ev.map((e) => [e.eventStageId, e.eventType]), [[8000, 0], [8999, 2], [29901, 2]]);
-    assert.strictEqual(ev[2].bannerUrl, `${t.WEB_BASE}/web/event/img/v${EVENT_IMG_VERSION}/29901.png`);
+    assert.deepStrictEqual(ev.map((e) => [e.eventStageId, e.eventType]), [[8000, 0], [20000, 0], [8999, 2], [29901, 2]]);
+    assert.strictEqual(ev[3].bannerUrl, `${t.WEB_BASE}/web/event/img/v${EVENT_IMG_VERSION}/29901.png`);
     console.log('ok events_after_raids');
     // drops: the event quest reads the POI of its map key (stageBinId), as the client loads mappoi_stg<stageBinId>
     assert.strictEqual(t.poiStageId(S1), 1010);
@@ -174,7 +209,7 @@ function wiring() {
     call(t.respondStageStart, { stageId: S1, userKeybladeId: 0 });
     call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 0 } });
     assert.deepStrictEqual([p.freeStone, p.money, p.raidSpherePoint || 0], [stone + 10, money + 100, coins], 'objectives_once: second clear pays nothing');
-    assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events[2].stages[0].clearMissionIds, [1, 2, 3]);
+    assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events[3].stages[0].clearMissionIds, [1, 2, 3]);
     console.log('ok wiring_stage_clear');
   } finally {
     fs.readFileSync = readFile;
