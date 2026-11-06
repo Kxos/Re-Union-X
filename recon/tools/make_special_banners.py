@@ -479,7 +479,7 @@ def build_all(index, src_dir, out_dir, mode, enemies=None, rules=None):
     camps = (rules or {}).get('campaigns') or {}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        mbi.save_png(special_option(CATALOG_CHOICE['special'], src_dir, enemies), os.path.join(out_dir, '%d.png' % cat['evStageId']), mode)
+        save_catalog(special_option(CATALOG_CHOICE['special'], src_dir, enemies), os.path.join(out_dir, '%d.png' % cat['evStageId']))
         n['catalog'] += 1
     for e in index.get('entries', []):
         p = os.path.join(src_dir, e['banner']) if e.get('banner') else None
@@ -578,7 +578,7 @@ def build_raid(index, raid_img, mode, rigs=None, catalog_only=False):
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     cat = index.get('catalog') or {}
     if cat.get('evStageId'):
-        mbi.save_png(raid_option(CATALOG_CHOICE['raid'], rigs), os.path.join(raid_img, '%d.png' % cat['evStageId']), mode)
+        save_catalog(raid_option(CATALOG_CHOICE['raid'], rigs), os.path.join(raid_img, '%d.png' % cat['evStageId']))
         n['catalog'] += 1
     if catalog_only:
         return n
@@ -733,7 +733,7 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
     n = {'catalog': 0, 'kept': 0, 'missing': 0}
     sides = {int(k): v for k, v in (kept_side or {}).items()}
     if catalog_ev:
-        mbi.save_png(event_option(CATALOG_CHOICE['event'], coin), os.path.join(event_img, '%d.png' % catalog_ev), mode)
+        save_catalog(event_option(CATALOG_CHOICE['event'], coin), os.path.join(event_img, '%d.png' % catalog_ev))
         n['catalog'] += 1
     for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
         src = next((p for p in (os.path.join(event_img, '%d.png' % ev), os.path.join(event_img, '0.png')) if os.path.exists(p)), None)
@@ -823,12 +823,20 @@ def fit_inside(piece, xy, margin=2):
     return piece, (x, y), k
 
 
-def inner_clip(layer):
-    """a full-card layer (glow) cut to the frame's inner rectangle"""
+def inner_clip(layer, feather=6):
+    """a full-card layer (glow) faded out smoothly before the frame's inner edge (no hard cut)"""
     m = Image.new('L', layer.size, 0)
-    ImageDraw.Draw(m).rectangle((FRAME_INNER[0], FRAME_INNER[1], FRAME_INNER[2] - 1, FRAME_INNER[3] - 1), fill=255)
+    ImageDraw.Draw(m).rectangle((FRAME_INNER[0] + feather, FRAME_INNER[1] + feather, FRAME_INNER[2] - 1 - feather, FRAME_INNER[3] - 1 - feather), fill=255)
+    m = m.filter(ImageFilter.GaussianBlur(feather / 2))
     layer.putalpha(ImageChops.multiply(layer.getchannel('A'), m))
     return layer
+
+
+def save_catalog(im, path):
+    """a catalogue card as a full-colour RGB PNG: the 256-colour palette with dithering of the other cards (save_png
+    'palette') turned the soft glows and rays into grainy bands (user 06-11, «lighting dirtied»); deterministic"""
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    im.convert('RGB').save(path, optimize=True)
 
 
 def paste_shadowed(im, piece, xy, blur=3, alpha=110, colour=(0, 0, 0)):
@@ -1171,10 +1179,13 @@ def raid_b_variant(style, rigs=None):
     lit, glow = lit_boss(boss, rigs, h)
     if lit is not None:
         pos = (int(x - lit.width / 2), int(yb - lit.height + 16))
-        lit, pos, k = fit_inside(lit, pos, 6)       # the boss whole inside the frame (user 06-11)
+        _, _, k = fit_inside(lit, pos, 6)           # the boss whole inside the frame (user 06-11)
         _ART_BOXES.pop()                            # recorded again by paste_shadowed below
-        if k < 1:
-            glow = glow.resize(lit.size, Image.LANCZOS)
+        if k < 1:                                   # drawn again at the fitted height: rim light and glow stay crisp
+            lit, glow = lit_boss(boss, rigs, int(h * k) - 2)
+            pos = (int(x - lit.width / 2), int(yb - lit.height + 16))
+        lit, pos, _ = fit_inside(lit, pos, 6)
+        _ART_BOXES.pop()
         g = Image.new('RGBA', im.size, (0, 0, 0, 0))
         g.alpha_composite(glow, pos)
         im = Image.alpha_composite(im, inner_clip(g))
@@ -1306,7 +1317,7 @@ def main():
         for k, st in parse_styles(a.catalog_style).items():
             im = special_option(st, a.src, a.enemies) if k == 'special' else raid_option(st, a.raid_rigs) if k == 'raid' else event_option(st, a.event_coin)
             os.makedirs(os.path.dirname(targets[k]), exist_ok=True)
-            mbi.save_png(im, targets[k], a.mode)
+            save_catalog(im, targets[k])
             print('catalog %s: option %s -> %s (bump its image version, then the master revision)' % (k, st, targets[k]))
         return
     if a.section == 'event':
