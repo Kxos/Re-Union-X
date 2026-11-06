@@ -7,10 +7,12 @@
 // (section «Medal full artwork») and the armature by import_jp_coco.py (JP_ARM). This patch only sets the flags.
 //
 // User decision 05-11: every star of the 55 families and their boosted copies (rows whose groupId is a family row).
-// The family rows are the ones of the notes' table (matched by Medal icon to the JP art ids). The SN++ reissues of older
-// families (REISSUES) get their family's art too (user decision 06-11): their own Medal picture differs and the art is only
-// a guess (notes, «not proven»), so they are RECONSTRUCTED and declared in the Notices; to be checked on the bench.
-// Which star variants carried the button in the original is not proven either.
+// The family rows are the ones of the notes' table (matched by Medal icon to the JP art ids). User rule 06-11: the art is an
+// extension of the Medal's own picture, so a row is flagged only if its own Medal picture is part of the art. Checked 06-11
+// by SIFT + RANSAC of every row's served Medal_L against the 55 arts (evidence in tmp/art_match of the work folder):
+// all rows below match their art; the SN++ reissues in REISSUES serve the same picture as their family's 7* (and Roboloid's
+// database gives them that picture), so they keep the family art. NO_ART: rows of a family whose own picture is not in
+// any of the 55 arts (never flagged). Which star variants carried the button in the original is not proven.
 //
 // Applied by make-game-tables.js after every generator that adds medal rows. On its own (then raise the master revision):
 //   node server/medal-art.js [master folder]
@@ -55,7 +57,7 @@ const ART = [
   [52106, 'Stained Glass #5 [EX+]', [301481, 311483, 301483, 311485]],
   [52116, 'Stained Glass #6 [EX+]', [301485, 301486, 301487, 301488]],
   [52167, 'Stained Glass #9 [EX+]', [301605]],
-  [52197, 'SN+ - Terra, Ven, Aqua', [301673, 311675, 311945, 302011]],
+  [52197, 'SN+ - Terra, Ven, Aqua', [301673, 311675]],
   [53016, 'Sora Art [EX]', [301060, 301061]],
   [53026, 'Roxas Art [EX]', [301115, 301116, 312033]],
   [53136, 'Stained Glass #1 [EX+]', [301465, 301466, 301467, 301468]],
@@ -76,11 +78,16 @@ const ART = [
   [353587, 'SN++ - Stained Glass #14', [302069]],
   [353907, 'SN++ - Key Art #25', [302007]],
 ];
-// SN++ reissues of older families (own Medal picture, art only hypothesised): flagged with the family art (reconstructed)
-const REISSUES = new Set([312045, 302098, 302031, 312033, 311945, 302011]);
+// SN++ reissues of older families with the same Medal picture as the family's 7* (picture inside the art, 06-11)
+const REISSUES = new Set([312045, 302098, 302031, 312033]);
+// Family rows with their own picture, not part of any of the 55 arts (06-11): no Art button
+const NO_ART = new Map([
+  [311945, 'SN++ - Terra, Ven, Aqua (own picture, not in Art_52197)'],
+  [302011, 'SN++ - Terra, Ven, Aqua (own picture, not in Art_52197)'],
+]);
 const IMAGE_CATEGORY_ART = 2;
 
-// medalId -> JP art id for the family rows (reissues included)
+// medalId -> JP art id for the family rows (reissues included, NO_ART excluded)
 function familyArt() {
   const m = new Map();
   for (const [art, , rows] of ART) for (const id of rows) m.set(id, art);
@@ -88,14 +95,22 @@ function familyArt() {
 }
 
 // Sets imageCategory 2 and artId on the family rows and their boosted copies (groupId = family row).
-// -> { rows, boosted, missing: [family ids absent], noSource: [ids with validSource 0] }
+// NO_ART rows (and copies) flagged by an older patch go back to imageCategory 0, artId = imageId.
+// -> { rows, boosted, cleared, missing: [family ids absent], noSource: [ids with validSource 0] }
 function applyMedalArt(medals) {
   const fam = familyArt();
-  const out = { rows: 0, boosted: 0, missing: [], noSource: [] };
+  const out = { rows: 0, boosted: 0, cleared: 0, missing: [], noSource: [] };
   const seen = new Set();
   for (const m of medals) {
+    const base = m.groupId && m.groupId !== m.medalId ? m.groupId : m.medalId;
+    if (NO_ART.has(base) && m.imageCategory === IMAGE_CATEGORY_ART) {   // a master patched before 06-11
+      m.imageCategory = 0;
+      m.artId = m.imageId;
+      out.cleared++;
+      continue;
+    }
     const own = fam.get(m.medalId);
-    const art = own || (m.groupId && m.groupId !== m.medalId ? fam.get(m.groupId) : undefined);
+    const art = own || (base !== m.medalId ? fam.get(base) : undefined);
     if (!art) continue;
     m.imageCategory = IMAGE_CATEGORY_ART;
     m.artId = art;
@@ -112,7 +127,9 @@ function patch(masterDir) {
   const r = applyMedalArt(medals);
   fs.writeFileSync(file, JSON.stringify(medals));
   console.log(`medal art (Inspect, I-237): imageCategory 2 on ${r.rows} family rows + ${r.boosted} boosted copies, ` +
-    `${ART.length} art ids, ${REISSUES.size} of them SN++ reissues (reconstructed)` +
+    `${ART.length} art ids (${REISSUES.size} SN++ reissues with the family picture; ${NO_ART.size} rows without art: ` +
+    `${[...NO_ART.keys()].join(' ')})` +
+    (r.cleared ? `; ${r.cleared} NO_ART rows unflagged` : '') +
     (r.missing.length ? `; family rows MISSING from the master: ${r.missing.join(' ')}` : '') +
     (r.noSource.length ? `; validSource 0 (no button): ${r.noSource.join(' ')}` : ''));
   return r;
@@ -120,4 +137,4 @@ function patch(masterDir) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { ART, REISSUES, IMAGE_CATEGORY_ART, familyArt, applyMedalArt, patch };
+module.exports = { ART, REISSUES, NO_ART, IMAGE_CATEGORY_ART, familyArt, applyMedalArt, patch };
