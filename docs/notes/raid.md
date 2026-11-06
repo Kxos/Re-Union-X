@@ -317,17 +317,54 @@ User goal: every original raid, no exclusions. The census has 185 JP rows (2015-
 **only in the Raid Catalog**, marked **Japan only**, never as a raid of the week. The full per-row list (dates, HP, donors,
 rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
 
-- **Which rows** (`make-raid.js` `jpStatus`). Served: 148 rows, 155 tiers, all available: 38 raid events (2015-10 to 2018-08;
-  JP-RAID-23 has two bosses, two quests), 97 super-hard weekends (2016-06 to 2018-06), 12 monthly 30-minute raids (2017-06 to
-  2018-08), the daily rotating raid of October 2017 (7 bosses, one per day). Not served (37, `raids.json` `jp.skipped`):
-  25 weekly rows from September 2018 (the JP weekly raids were the WW ones, same dates), 4 events of 2018 with a WW row of the
-  same boss starting the same day, 3 regular-boss lure weeks (not raid events, as in WW), 5 rows whose boss no source names
-  (December 2016, August and September 2017 monthly raids, two 2018 weekends).
+- **Which rows** (`make-raid.js` `jpStatus`). Served since 6 November 2026 (with `jpCensus`, below): 153 rows, 184 tiers, all
+  available (dry run): 37 raid events (2015-10 to 2018-08; JP-RAID-23 has two bosses, two quests), 99 super-hard weekends
+  (2016-06 to 2018-09-01), 14 monthly 30-minute raids (2017-06 to 2018-08; July to September 2017 one boss per weekday), two
+  daily rotating raids (year-end 2016, October 2017: 7 bosses, one per day). Not served (32, `raids.json` `jp.skipped`): 25
+  weekly rows from September 2018 (the JP weekly raids were the WW ones, same dates), 4 events of 2018 with a WW row of the
+  same boss starting the same day, 3 regular-boss lure weeks (not raid events, as in WW). Before 6 November: 148 rows, 155
+  tiers, and 5 rows not served because no source named their boss.
 - **The two 2018 weekends** (research 5 November 2026, facts only). JP weekend raid bosses followed one 7-boss cycle (Malicious
   Spider, Blue Trident Tail, Wicked Spider, Red Trident Tail, Fortress Crab Ω, Scourge Spider, Green Trident Tail) on every dated
   weekend 2016-10 to 2018-06; a JP notice of 2018-06-23 (Scourge Spider after the empty 6/16) shows the cycle skips weekends with
   no raid (6/16 and 6/30 had none). Hence **probable**, not proven: 2018-08-04 Red Trident Tail, 2018-09-01 Malicious Spider.
-  2018-09-01 was the last JP weekend raid. No HP source (players read about 1.5 billion from 2018-06-23). Still not served.
+  2018-09-01 was the last JP weekend raid. No HP source (players read about 1.5 billion from 2018-06-23). Served as probable
+  since 6 November 2026 (`jpCensus`, below).
+- <a id="jp-census"></a>**Later JP research served (`jpCensus`, user decisions 05-11 and 06-11, tests and dry run, master not
+  regenerated).** `raid_config.json` `jpCensus` corrects the census JP rows when the census is read (`make-raid.js`
+  `applyJpCensus`, in `buildRaid` and `--ids`); the private census file is not edited, an id that is not a census row or an
+  unknown field stops the run. Per row:
+  - **JP-RAID-28 / 29 / 30** (monthly 30-minute raids of July, August, September 2017, JP notices): `weekdays` = 7 bosses Monday to
+    Sunday (July: Assault Dragon, Queen Bee Ω, Jewel Princess, Jack in the Box, Gummi Hound, Closehanded Captain, Gear Golem;
+    August: Lion Headliner, Circus Crab, Jewel Sorceress, Egg Master, Hocus Pocus, Adventurer, Submarine Carp; September: Gummi
+    Hound, Gear Golem, Queen Bee, Assault Dragon, Circus Crab, Crabby Cake, Jack in the Box). One tier per boss, key
+    `<id>/single@<first date of that weekday in the row>`, `open: 'day'` (`raid-calendar.js` `openNow`: the real Pacific weekday);
+    30 minutes (`jpTimer`). The old key `JP-RAID-28/single` stays numbered in `raid_ids.json` (append-only), unused. Level: the
+    original reset the boss to LV 1 after each 30-minute window: not applied (I-228), label `jpWindowLevel`. Saturday boss at
+    LV 10: a level drop of the boosted copy (+1,000 STR, `boards.boostedMedals`): Trickmaster 1301180 (July: bonus not stated,
+    label `jpRewardProbable`), Twilight Thorn (August: new boosted row made by `make-boosted-medals.js` from the new
+    `boostedMedals` entry, id 1301200), Destroyer Behemoth 1301235 (September). September's «Furious Whole Cake» = Crabby Cake:
+    `jpBossProbable`.
+  - **JP-RAID-21** (year-end 2016, JP notice): family `daily rotating`, the WW «2016 Showdown!» lineup of the same days (Green
+    Trident Tail, Wicked Spider, Submarine Carp, Fortress Crab, Gummi Hound, Blue Trident Tail, Hocus Pocus), all
+    `jpBossProbable`; `levelStep` 10 = `entry.levelStep`, read first by `routes-raid.js` `levelStep` (+10 per defeat, cap LV 99).
+  - **JP-D-2018-08-04 / 09-01**: Red Trident Tail / Malicious Spider, `saturdayOnly` (tier `day` = the Saturday, `open: 'day'`),
+    60 minutes (`jpTimer` after 2018-05-05), HP fixed 1,500,000,000 at every level (`hp` = census text «yes: fixed ...»),
+    labels `jpBossProbable`, `jpHpProbable`; board: the JP super-hard board (`jpBoard` + `boardSet`, census `inferred_board`).
+  - **JP level drops** (`levelDrops`, resolved by `raid-boards.js` `matchReward`, paid as the WW notices' level drops): JP-RAID-9
+    Magic Broom 5★ at LV 40 (Easter 2016); JP-RAID-7 Mickey & Minnie 6★ at LV 95 (Valentine 2016: guaranteed, same art; rarity
+    not stated) and JP-RAID-8 Prince & Belle 6★ 21156 at LV 95 (White Day 2016: same id; guarantee by analogy): `jpRewardProbable`.
+    A reward with no item is left off (`levelDropsPartial`).
+  - **Not served, why:** JP board rewards (avatar parts, titles such as the WW 12012-12137 rows, Rainbow Kitstar / Pupstar parts,
+    Frog Caps, Meow Wow Snuggly, Disco parts): only board summaries survive, no cell list, and no board cell is invented; the
+    Valentine / White Day LV 15+ rare drops (Sweetheart Minnie, Sweetheart Beast) and the October 2017 daily drops: chance drops
+    with no odds; Young Kairi at LV 99 (Children's Day 2016): rarity and guarantee not stated; the 2017 monthly windows and the
+    per-window level reset (I-228).
+  - **Dry run** (copy of `master_data` + `make-boosted-medals.js`, `D:/Progetto_Restauro_KH_UX/tmp/raidjp_dry, local`): 347 census rows, 608 of 608 tier rows, no WW
+    entry changed, only JP-RAID-7/8/9 changed among the JP entries already served (their level drops); `raid_ids.json`: rows
+    350-354, entries 629-658, boards 693-699. **Needs** a master regeneration (`make-game-tables.js`, also for the boosted
+    Twilight Thorn row) + revision bump, and a resource build for the 7 new board cards (`raid_board_art.tsv`, card pictures of
+    the donor boards); `export-notices.js` after the regeneration for docs/NOTICES.md.
 - **Ids.** `raid_ids.json`: the JP rows are numbered after every WW row (append-only): rows 202-349, entries 470-628.
 - **Calendar.** Entries carry `jp: true`, `region: 'JP'`. `raid-calendar.js` `weekRows` drops them, `catalogRows` keeps them
   (`row.jp`), so a JP raid is played only when kept (`rowState` `can` once the Story has passed its dates). Raid Catalog:
@@ -364,7 +401,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   raidReward +1,920, sphere / sphereArray / sphereMasu +190, evCampaign +31 (AP 0 rows over the new stages); no WW raid row
   changed; about +1.6 MB. Needs a master revision bump.
 
-### Japan-only raids: research on the open gaps (5 November 2026, research only, nothing served yet)
+### Japan-only raids: research on the open gaps (5 November 2026; served in part on 6 November, see [jpCensus](#jp-census))
 
 Sourced from the original JP notices (read from web archives), JP community digests, the JP wiki board pages and the JP 4.3.1
 client images, against the WW master. Details, sources and confidence per item in the private `JP_ONLY.md`.
