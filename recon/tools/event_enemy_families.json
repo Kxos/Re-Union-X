@@ -5,7 +5,9 @@
    "name": "Ringmaster",
    "model": "new",
    "approved": false,
-   "review": "to be reviewed again (user 06-11)"
+   "review": "to be reviewed again (user 06-11)",
+   "no_b2016": true,
+   "no_b2016_why": "the 2016 package folder 97 is a Shadow placeholder (no 2016 master row uses displayId 97); JP 4.3.1 revised it into the Ringmaster (wait/atk1_o/knockback/move .00182xxx revisions)"
   },
   "226": {
    "name": "Wily Bandit",

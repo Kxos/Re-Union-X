@@ -329,7 +329,9 @@ def plan_anim(root_rel, anim, jp_all):
     categoria (regola dell'utente, extra_donors.py): 1 file diretti, 2 copie originali, 3 ricostruite, 4 ricolorate;
     la peggiore fra le texture."""
     jp = jp_all.get(anim) or {}
-    b = listing(os.path.join(a.b2016, *root_rel.split('/'), anim))
+    # families whose 2016 folder is ANOTHER creature (event_enemy_families.json no_b2016, e.g. 97: the 2016 package
+    # holds a Shadow placeholder under displayId 97, JP revised it into the Ringmaster): the 2016 files are never used
+    b = {} if root_rel in NO_B2016 else listing(os.path.join(a.b2016, *root_rel.split('/'), anim))
     lw = anim + '.lwf'
     jl, bl = jp.get(lw), b.get(lw)
     pre = '%s/%s/%s/' % (ENEMY, root_rel, anim)
@@ -459,6 +461,13 @@ def plan_enemy(d):
     return r, todo
 
 
+def no_b2016(path):
+    """displayIds (str) of event_enemy_families.json with no_b2016 true: their 2016 package folder is another creature."""
+    if not path or not os.path.exists(path):
+        return set()
+    return {k for k, v in json.load(open(path, encoding='utf-8')).get('families', {}).items() if v.get('no_b2016')}
+
+
 def event_families(path, include_all=False):
     """{displayId: name} of event_enemy_families.json ({"families": {"<displayId>": {name, approved}}}); only the
     approved ones unless include_all."""
@@ -466,6 +475,9 @@ def event_families(path, include_all=False):
         return {}
     fam = json.load(open(path, encoding='utf-8')).get('families', {})
     return {int(k): v.get('name', '') for k, v in fam.items() if include_all or v.get('approved')}
+
+
+NO_B2016 = no_b2016(a.event_families)
 
 
 def family_of(i):
