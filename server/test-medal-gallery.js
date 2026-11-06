@@ -73,6 +73,8 @@ const tests = {
     const page = g.galleryPage(fixture(), OPTS);
     assert(page.includes('<audio id="au" preload="none" loop></audio>') && page.includes('id="det"') && page.includes("'/web/medals/bgm/v'+kxD.v+'/'"), 'detail view and player');
     assert(page.includes('-l.png" alt=""><h2>'), 'large picture in the detail');
+    // no bridge to pause the game music (docs/notes/medaglie.md#medal-gallery-music): the detail says how to lower it by hand
+    assert(page.includes(`<p class="mh">${g.MUSIC_HINT}</p>`) && /Other &gt; Settings/.test(g.MUSIC_HINT) && !g.MUSIC_HINT.includes("'"), 'music hint');
   },
   page_renders() {
     const page = g.galleryPage(fixture(), { tab: 'art', fromCatalog: true, ...OPTS });
