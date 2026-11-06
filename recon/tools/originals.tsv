@@ -3129,7 +3129,7 @@ cocostudio/publish/Result_Clear_Raid.png	b16
 
 # 49. Raid models (I-221, Raids Part 2 Task 1): the 29 bosses the pack carries (raid_models.txt; 0007 is in section 48);
 #     45 with the reconstructed bosses of 49d (2 Nov).
-#     9102 and 9103 have no start demo (not in the 2016 package, JP images missing): the server never sends raidStatus 4 for them.
+#     9102 and 9103: start demo added in 49l (6 Nov 2026, JP LWF + twin-slot copies).
 #     JP first, then the 2016 English package, which wins where it has the file (the JP data lacks most images).
 lwf/character/raid/0001/atk1/	jp
 lwf/character/raid/0001/atk2/	jp
@@ -17736,6 +17736,41 @@ lwf/raid/demo/escape_5000/escape_5000_e38393e38383e38388e3839ee38383e3839720312e
 lwf/raid/demo/put_down_5000/put_down_5000.lwf	loc	=lwf/raid/demo/put_down_5000/put_down_5000.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
 lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720332e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720332e706e67.png	# English subtitle, 2016 package
 lwf/raid/demo/put_down_5000/put_down_5000_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/put_down_0007/put_down_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+
+# 49l. Start demos of Wicked Spider 9102 and Malicious Spider 9103 (6 Nov 2026, docs/notes/raid.md «Boss texture audit»): the JP
+#      4.3.1 start LWFs (69 of 78 / 68 of 78 textures in the JP extraction, which keeps one copy of identical files) and the
+#      missing slots ビットマップ 44-52 (9102) / 43-52 (9103), each copied from its twin slot of the same LWF with the same
+#      declared size (53-61, 64): category 2 copies, not original files; the independent recovery rules of 1 Nov chose a
+#      pixel-identical image for all 19 (checked again 6 Nov), as the served start_9101 does. Then the English subtitle as
+#      49g (raid_demo_english.py --models 9102,9103, --loc). With start true in raid_models.json the server sends raidStatus 4.
+#      Served only by a full version (raid_gen is static).
+lwf/raid/demo/start_9102/	jp
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035342e706e67.png	# twin slot 54 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034352e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035352e706e67.png	# twin slot 55 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034362e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035362e706e67.png	# twin slot 56 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035372e706e67.png	# twin slot 57 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035382e706e67.png	# twin slot 58 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972034392e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035392e706e67.png	# twin slot 59 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972036302e706e67.png	# twin slot 60 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035312e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972036312e706e67.png	# twin slot 61 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972035322e706e67.png	jp	lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e383972036342e706e67.png	# twin slot 64 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/	jp
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034332e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035332e706e67.png	# twin slot 53 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035342e706e67.png	# twin slot 54 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034352e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035352e706e67.png	# twin slot 55 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034362e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035362e706e67.png	# twin slot 56 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035372e706e67.png	# twin slot 57 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035382e706e67.png	# twin slot 58 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972034392e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035392e706e67.png	# twin slot 59 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036302e706e67.png	# twin slot 60 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035312e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036312e706e67.png	# twin slot 61 (same declared size), category 2 copy
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972035322e706e67.png	jp	lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e383972036342e706e67.png	# twin slot 64 (same declared size), category 2 copy
+lwf/raid/demo/start_9102/start_9102.lwf	loc	=lwf/raid/demo/start_9102/start_9102.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_9102/start_9102_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_9103/start_9103.lwf	loc	=lwf/raid/demo/start_9103/start_9103.lwf	# JP demo with the English subtitle (declared size of 2 textures, centred)
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e3839720322e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720322e706e67.png	# English subtitle, 2016 package
+lwf/raid/demo/start_9103/start_9103_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b16	lwf/raid/demo/start_0007/start_0007_e38393e38383e38388e3839ee38383e3839720312e706e67.png	# English subtitle, 2016 package
 
 # Raid AP 0 (docs/notes/raid.md «AP 0 campaign»): blue AP plate shown at AP 0 with the Cursor_Anim_AP glow; absent from WW
 img/ui/World_Stage_AP2.png	b16,jp

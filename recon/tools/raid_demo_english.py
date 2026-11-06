@@ -10,6 +10,7 @@ cannot take a wider image under its declared size, so the copy written here chan
 declared size (texture table) and the fragment (w, h, and x, y shifted by half the growth, so the subtitle keeps its
 centre). Nothing else in the LWF changes. The PNGs are the 2016 English files, served under the JP texture names.
 The patched LWFs live outside the repo (generated, like enemy_gen_src); originals.tsv reads them with the `loc` source.
+start_9102 / start_9103 are patched too since 6 Nov 2026 (their missing slots are twin-slot copies, originals.tsv 49l).
 """
 import argparse
 import os
@@ -22,7 +23,6 @@ sys.path.insert(0, HERE)
 import lwf_rig  # noqa: E402
 
 KINDS = {'start': ((328, 41), (657, 48)), 'escape': ((504, 40), (688, 48)), 'put_down': ((416, 41), (774, 48))}
-NO_START = {'9102', '9103'}      # not served: no start images in any source (raid.md, models)
 REV = re.compile(r'^(.*)\.(\d{8})(\.[^.]+)$')
 
 
@@ -72,8 +72,6 @@ def run(jp, b16, out, models):
     lines = []
     for m in models:
         for kind, (jp_wh, en_wh) in KINDS.items():
-            if kind == 'start' and m in NO_START:
-                continue
             demo = '%s_%s' % (kind, m)
             folder = os.path.join(jp, 'lwf', 'raid', 'demo', demo)
             if not os.path.isdir(folder):
