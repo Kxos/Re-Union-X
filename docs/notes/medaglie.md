@@ -1181,40 +1181,82 @@ section); the wiki has no artwork outside the 55.
 Medals flagged as reconstructions on 06-11 (their art is ours by design).
 
 <a id="medal-gallery"></a>
-## Medal Gallery (I-242, user request 06-11, not original)
+## Medal Gallery (I-242, user requests 06-11, not original)
 
 The Sort/Filter popup of the Medal List cannot get new filters (its conditions are hardcoded in the client), so the BGM
 Medals and the Full Art Medals are listed by a **server web page** instead: `GET /web/medals/gallery` (`server/medal-gallery.js`,
 route `medalweb` in `server.js`), served on the http `WEB_BASE` like the other WebView pages (the WebView rejects our TLS
 certificate). Style and behaviour of the Raid / Special catalogues: two tabs, a summary line with removable tags, the Filters
-sheet (FIND by name with `khuxMatch`, OWNED all / owned / not owned, ATTRIBUTE Power / Speed / Magic), green / grey side bar
-by ownership, an empty state; pictures load only for the rows shown (`data-src`), and the cards travel as compact JSON built in
-the page by `kxBuild` (same idea as [raid.md#catalog-light](raid.md#catalog-light)): **28 KB** for the current master.
+sheet (FIND by name with `khuxMatch`, variant names included; OWNED all / owned / not owned; ATTRIBUTE Power / Speed / Magic),
+cards with a green / grey side bar by ownership, an empty state; pictures load only for the rows shown (`data-src`), and the
+cards travel as compact JSON built in the page by `kxBuild` (same idea as [raid.md#catalog-light](raid.md#catalog-light)):
+**39 KB** for the current master (test budget 60 KB). First version benched 06-11 (rev 274); the second round (below) is not.
 
 - **BGM Medals**: base rows with `medal.bgm` (`medal_bgm.json` applied by `make-game-tables.js`, [BGM Medals](#bgm-medals)):
-  **43 cards / 78 rows** (the 36 names of `medal_bgm.json` plus their SN / SN+ / SN++ / Supernova versions, which take the
-  track of their base Medal by user decision; HD King Mickey [EX], without a track, is not listed).
+  43 names / 78 rows, shown as **36 cards** after the variant groups. HD King Mickey [EX], without a track, is not listed.
 - **Full Art**: base rows with `imageCategory` 2 (`medal-art.js`, [Full artwork](#full-artwork)), one section per artwork in the
-  order of `ART` (**55**), the Medal that carries the art first: **97 cards / 142 rows**; the **22** cards made only of
-  `CONTAINED` rows carry a **Reconstructed** pill. Tapping the artwork thumbnail opens it larger.
+  order of `ART` (**55**), the Medal that carries the art first: 97 names / 142 rows shown as **69 cards**; the **14** cards made
+  only of `CONTAINED` rows carry a **Reconstructed** pill (a group never mixes reconstructed and original cards: tested).
 - One card per Medal **name**: its rows (6★ / 7★) are star chips, green when owned; the picture is the highest star's
-  `thumbId`. Boosted copies (`groupId` = base row) are not cards: owning one counts for its base row
-  (`ownedBases(userMedalList())`, the Medals in the box now, not the Album).
-- **Pictures**: `/web/medals/img/v<N>/<thumbId>.png` (128x128) and `/web/medals/art/v<N>/<artId>.jpg` (160x240) /
-  `<artId>-l.jpg` (480x720), `N` = `IMG_VERSION`; only these names are read (`imageFile`). They are files of
-  `server/game_data/medal_img` (git-ignored) written by `python recon/tools/make_medal_gallery_images.py
-  server\master_data\medal.json server\game_data` from the local `medal_gen` pack (`Medal_S_<thumbId>`, BTF) and the JP
-  4.3.1 reference data (`img/art/Art_<artId>.png`, local path `jp_data`): 210 Medal pictures and 55 artworks, 11 MB. No
-  Square Enix file enters the repo. Without them the page works with empty squares. Run it again after a master
-  regeneration that adds BGM or Art Medals. A play package takes the folder with the rest of `server/` (`make-play-package.ps1`);
-  `test-package-layout.ps1` checks that it is there, so generate it before building a package.
-- **Entry point** (no client change): a «Medal Gallery ›» link under the intro of the Shop's **Banner Catalog** page
-  (`gacha.js` `catalogPage`, Shop > Banner Catalog > Details), the server page about Medals the player already reaches;
-  `?from=catalog` adds a BACK bar to it. Not chosen: Other > Help (its safety rules forbid links), the Notices (text only,
-  also exported to the project site, where a game-server link would be dead), a new banner (would need a new Shop or Event
-  plate). The Notice «Medal Gallery» (INFORMATION, 11/06) explains it as an addition of this server.
-- Tests: `node server/test-medal-gallery.js` (fixture: grouping, boosted ownership, reconstructed pill, escaping, ES5 page
-  scripts, picture names, entry link and Notice; master: Full Art rows = `medal-art.js` rows, 55 sections, BGM rows = `medal.bgm`
-  rows, every `medal_bgm.json` name on a card, page under 45 KB), `python recon/tools/test_make_medal_gallery_images.py`.
-  Checked in a desktop browser (preview server, not the game server): tabs, filters, lazy pictures, artwork viewer. **Bench
-  pending** (in-game WebView).
+  `thumbId` (96 px on BGM cards, 76 px on Full Art cards). Boosted copies (`groupId` = base row) are not cards: owning one
+  counts for its base row (`ownedBases(userMedalList())`, the Medals in the box now, not the Album).
+- **Detail view** (tap a card; the native Medal detail cannot be opened from a WebView): large picture (`<thumbId>-l.png`,
+  320 px from Medal_L), name, attribute, stars, owned, the track name and **Play the music** for a Medal with `bgm` (also in
+  the Full Art tab), the list of variants with stars and owned state.
+- **Entry point** (no client change): a «Medal Gallery» block above the GAME YEAR tabs of the Shop's **Banner Catalog** page
+  (`gacha.js` `catalogPage`, Shop > Banner Catalog > Details): title, a short line, two previews (HD Roxas 7★ and the artwork
+  of Key Art #1, `PREVIEW`), an «Open ›» button, the whole block is the link (`medal-gallery.js` `entryHtml` / `ENTRY_CSS`,
+  required lazily by `gacha.js`: a load-time require would be circular through `special-pages.js`). `?from=catalog` adds a BACK
+  bar to it. Not chosen: Other > Help (its safety rules forbid links), the Notices (text only, also exported to the project
+  site, where a game-server link would be dead), a new banner (would need a new Shop or Event plate). The Notice «Medal
+  Gallery» (INFORMATION, 11/06) explains it as an addition of this server.
+
+<a id="medal-gallery-variants"></a>
+**Variants (user 06-11): Medals with practically the same picture are shown once.** Decided by the pictures, not the names:
+`python recon/tools/make_medal_gallery_groups.py server\master_data\medal.json` compares every card with the other cards of
+the same list (the BGM tab; one Full Art section) on the client's `Medal_S_<thumbId>` of the local `medal_gen` pack (64x64 on
+black, mean absolute RGB difference 0-255) and joins those at most **10** apart. Measured on rev 274: identical pictures 0.00;
+the same art in the 6★ and the 7★ frame 9.57 (Illustrated Aqua / Illustrated Aqua A); the closest different pictures 12.11
+(Illustrated Marluxia [EX] / SN++ - Illustrated Zexion) and 12.64 (Illustrated Xion / Illustrated Xion [EX]). Output
+`server/medal_gallery_groups.json` (in the repo: ids, names, distances; no picture). The card shown is the one without an
+SN / Supernova prefix, else the first in the album; the others are the «Variants:» line (name, stars, green when owned), and
+owning a variant makes the card owned. Run the tool again after a master regeneration that adds BGM or Art Medals
+(`test-medal-gallery.js` fails when a group no longer matches the cards). The **24 groups** (06-11):
+  - BGM: Illustrated Xion + SN++; Casual Roxas + SN + SN+; HD Roxas + SN++; HD Xion [EX] + SN + SN+; Final Boss Xion + SN++.
+    Not joined: Sephiroth [EX] / [EX+] / Supernova - Sephiroth (40.6 and 43.8 apart: different pictures).
+  - Full Art: Illustrated Marluxia [EX] + SN++ - Illus. Marluxia; Key Art #3 + SN++; Illustrated Xemnas + SN++; Key Art #8 +
+    SN++; Axel Art [EX] + SN++; Roxas Art [EX] + SN++; Stained Glass #1, #2, #3, #4, #5, #6 [EX+] + their SN and SN+; Supernova
+    / Supernova+ HD Terra, HD Ventus, HD Aqua (three groups); Supernova - Terra, Ven, Aqua + SN+; Supernova / Supernova+ Key
+    Art #19; Supernova / Supernova+ / SN++ Key Art #20; Illustrated Aqua + Illustrated Aqua A + SN + SN+ (9.57, frame only).
+
+<a id="medal-gallery-music"></a>
+**Music (user 06-11).** `medal.bgm` is the sound id; `audio/<id>.akb` is an SQEX AKB v2 bank whose sound is a plain **Ogg
+Vorbis** stream (header 204 bytes on 501006007). `make_medal_gallery_images.py` cuts each bank from its first «OggS» page to
+the end, without decoding or re-encoding, into `server/game_data/medal_bgm/<id>.ogg` (git-ignored), from the JP 4.3.1
+reference data (`jp_data/audio`, the same ids; 20 of the 23 served banks came from there, `import_jp_coco.py`, and the other
+two are in the served OBBs). All **23** tracks decode cleanly with ffmpeg (06-11; 37 s to 5 min 35 s, 62 MB). Served as
+`/web/medals/bgm/v<N>/<id>.ogg` (`audio/ogg`, byte ranges: the WebView's media player streams and loops with them) to one
+`<audio loop>` started by the Play button (a tap: the WebView needs a gesture), stopped when the detail closes. The game's own
+music keeps playing underneath (the page cannot stop it). Not checked in the in-game WebView yet; a desktop browser plays the
+files.
+**Track names**: `medal_bgm.json` «tracks» (khuxwiki «Category:BGM_Medals», the sentence «When sharing a ... Medal, the Home
+Screen music changes to ...» of each page, `reference\bgm_medals\bgm_medals.tsv`, 37 names, 22 tracks); an SN / Supernova
+shows the track of its base Medal (the user's 16-10 rule). The 6 Medals of `_incerti` (Roxas Art [EX], Illustrated Roxas,
+HD Xion [EX], Illustrated Xion [EX], Illustrated KH II Sora & Riku [EX], HD Vanitas [EX+]) show «sound match not verified»:
+the wiki names their track, but the sound id we gave them was matched by its neighbours, not by ear. No name is invented.
+
+- **Files**: `/web/medals/img/v<N>/<thumbId>.png` (128 px) and `<thumbId>-l.png` (320 px), `/web/medals/art/v<N>/<artId>.jpg`
+  (160x240) / `<artId>-l.jpg` (480x720), `/web/medals/bgm/v<N>/<id>.ogg`, `N` = `IMG_VERSION`; only these names are read
+  (`mediaFile`). Written by `python recon/tools/make_medal_gallery_images.py server\master_data\medal.json server\game_data`
+  from the local `medal_gen` pack (Medal_S / Medal_L, BTF) and the JP 4.3.1 reference data (`img/art`, `audio`; local path
+  `jp_data`): 210 Medal pictures (+ large), 55 artworks, 23 tracks; `medal_img` 36 MB, `medal_bgm` 62 MB. No Square Enix
+  file enters the repo. Without them the page works with empty squares and «Music not available». Run it again after a
+  master regeneration that adds BGM or Art Medals. A play package takes both folders with the rest of `server/`
+  (`make-play-package.ps1`); `test-package-layout.ps1` checks that they are there, so generate them before building one.
+- Tests: `node server/test-medal-gallery.js` (fixture: grouping by name and picture, variants and their ownership, track names
+  and «not verified», detail view and player, boosted ownership, reconstructed pill, escaping, ES5 page scripts, file names,
+  entry block above the GAME YEAR tabs and Notice; master: Full Art rows = `medal-art.js` rows, 55 sections, BGM rows =
+  `medal.bgm` rows, every `medal_bgm.json` name on a card with a track, every variant group applied, previews present, page
+  under 60 KB), `python recon/tools/test_make_medal_gallery_images.py` (pictures, Ogg cut, groups). Checked in a desktop
+  browser with a preview server (not the game server): tabs, filters, variants, detail view, entry block. **Bench pending**
+  for the second round (in-game WebView, music).
