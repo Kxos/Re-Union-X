@@ -24,9 +24,15 @@ const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward 
 const EVENT_FAMILIES = new Set(['one-off event', 'weekend-only', 'monthly', 'daily', 'daily showdown']);
 const TIER_LABEL = { single: 'One tier' };
 const tierLabel = (t) => TIER_LABEL[t] || t;
-// TYPE of a row (family of its census row): [value, label, icon key]
-const typeOf = (row) => (row.jp ? 'jp' : row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
-const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp'], ['jp', 'Japan only', 'jp']];
+// Two sections (user 06-11): Worldwide and Japan only, each with its own year tabs, year chips and Filters; a row's section
+// is data-sec. TYPE of a row (family of its census row): [value, label, icon key]; the TYPE / TIER chips without a row in the
+// current section are hidden (data-sec of the chip). A Japan-only row is typed by its JP family.
+const JP_TYPE = { event: 'jpev', 'super-hard weekend': 'jpshw', 'monthly (30-minute)': 'jpmo', 'daily rotating': 'jpday' };
+const secOf = (row) => (row.jp ? 'jp' : 'ww');
+const typeOf = (row) => (row.jp ? JP_TYPE[row.family] || 'jpev' : row.family === 'radiant reward' ? 'radiant' : /^weekly \(/.test(row.family) || EVENT_FAMILIES.has(row.family) ? 'event' : 'weekly');
+const TYPE_OPTS = [['all', 'All'], ['weekly', 'Weekly', 'weekday'], ['radiant', 'Radiant Reward', 'jewel'], ['event', 'Raid Events', 'camp'],
+  ['jpev', 'Raid Events', 'camp'], ['jpshw', 'Super-Hard Weekends', 'raid'], ['jpmo', 'Monthly 30-Minute', 'bonus'], ['jpday', 'Daily Rotating', 'daily']];
+const SECTIONS = [['ww', 'Worldwide', 'raid'], ['jp', 'Japan only', 'jp']];
 // TIER chips (06-11): our drawn rank marks (special_icons.py): 1 / 2 / 3 stars, a crown, a large star, a «1» (one-tier raid)
 const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner', 'tbeg'], ['intermediate', 'Intermediate', 'tint'], ['advanced', 'Advanced', 'tadv'], ['legendary', 'Legendary', 'tleg'],
   ['epic', 'Epic', 'tepic'], ['single', 'One tier', 'tone']];
@@ -53,6 +59,14 @@ const BOARD_OPTS = [['all', 'All'], ['done', 'Completed', 'bdone'], ['todo', 'No
 const boardCls = (v) => (v === 'all' ? '' : ` bd-${v}`);
 // chips chosen: Completed blue (the open padlock), Not completed grey
 const CSS = SPECIAL_CSS + '.o.bd-done.on{background:#2e9e3e;border-color:#6fd47f}.o.bd-todo.on{background:#5a6470;border-color:#9aa4ae}';
+// the two section tabs (Worldwide / Japan only, user 06-11): big gold-lit buttons above the year tabs; the Japan only intro box
+// (.rc of the rule callout, RULE_CSS) with one line per rule; the Keep button of a Japan-only row stands out (the only way to play it)
+const SEC_CSS = '.secs{display:flex;gap:6px;margin:8px 0 6px}'
+  + '.sec{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid #39a7cf;border-radius:12px;background:#0a4466;color:#d9e6ee;font:bold 16px sans-serif;padding:7px 6px;cursor:pointer;box-shadow:0 2px 0 #02202f;letter-spacing:.3px}'
+  + '.sec .ic{width:1.5em;height:1.5em}.sec .sn{background:#043654;color:#ffa500;border-radius:10px;padding:0 8px;font-size:13px;line-height:1.6}'
+  + '.sec.on{background:linear-gradient(#ffd866,#e0a020 60%,#a8700a);border-color:#ffe08a;color:#fff;text-shadow:0 1px 1px rgba(90,50,0,.7);box-shadow:0 2px 0 #6a4500}.sec.on .sn{background:#fff;color:#a8700a;text-shadow:none}'
+  + '.rcl span{display:block;color:#d9e6ee;font-size:14.5px;padding:2px 0 2px 1.8em;text-indent:-1.8em}.rcl span .ic{width:1.35em;height:1.35em}.rcl b{color:#fff}'
+  + '.pk.jk{font-size:15px;padding:5px 18px;box-shadow:0 0 0 3px rgba(255,205,74,.3),0 2px 0 #6a4500}';
 
 const pill = (c, k, text) => `<span class="s s-${c}">${k ? icon(k) : ''}${text}</span>`;
 // the pills the page script writes after a keep / remove: [row class, html]
@@ -89,7 +103,7 @@ function statusOf(row, ctx) {
   const why = q === undefined || q === null ? 'Its week comes later in the Story: it opens when your Story reaches it.' : `Its week comes later in the Story: it opens when you reach Story Quest ${q}.`;
   return { show: 'later', cls: 'off', pill: pill('off', 'later', text), button: null, why };
 }
-const keepButton = (id, on, extra = '') => `<a href="#" class="pk" data-id="${id}" data-on="${on}" data-pin="${on === 1 ? `/web/raid/keep/${id}` : '/web/raid/unkeep'}"${extra}>${on === 1 ? KEEP_LABEL : REMOVE_LABEL}</a>`;
+const keepButton = (id, on, extra = '', cls = '') => `<a href="#" class="pk${cls}" data-id="${id}" data-on="${on}" data-pin="${on === 1 ? `/web/raid/keep/${id}` : '/web/raid/unkeep'}"${extra}>${on === 1 ? KEEP_LABEL : REMOVE_LABEL}</a>`;
 
 // keep / remove (XHR POST, as the Special catalogue): the element carries data-pin (URL) and data-on (1 keep, 0 remove)
 const KEEP_JS = `var KX_KEEP=${JSON.stringify(KEEP_LABEL)},KX_REMOVE=${JSON.stringify(REMOVE_LABEL)};`
@@ -107,14 +121,17 @@ __MATCH__
 function $(id){return document.getElementById(id);}
 function attr(el,a){return el&&el.getAttribute?el.getAttribute(a):null;}
 function q(el,s){return el.querySelector(s);}
-var rows=[].map.call(document.querySelectorAll('.row'),function(el){return {el:el,id:attr(el,'data-eid'),st:attr(el,'data-show'),p:attr(el,'data-periods'),y:attr(el,'data-y'),
+var rows=[].map.call(document.querySelectorAll('.row'),function(el){return {el:el,id:attr(el,'data-eid'),st:attr(el,'data-show'),p:attr(el,'data-periods'),y:attr(el,'data-y'),sec:attr(el,'data-sec'),
 t:attr(el,'data-type'),dn:attr(el,'data-done')==='1',bd:attr(el,'data-boards'),tr:' '+attr(el,'data-tier')+' ',ns:(attr(el,'data-search')||'').split(' | '),mt:q(el,'.mt')};});
 var mls=[].map.call(document.querySelectorAll('.ml'),function(el){return el;});
 var ycs=[].map.call(document.querySelectorAll('.yc'),function(el){return {el:el,y:attr(el,'data-yr'),n:q(el,'.yn')};});
-var cur={p:'all',type:'all',tier:'all',show:'all',prog:'all',bd:'all',q:''},dr=null,yr=attr($('rows'),'data-defy')||'all';
-function copy(s){return {p:s.p,type:s.type,tier:s.tier,show:s.show,prog:s.prog,bd:s.bd,q:s.q};}
+// one state per section (its own tab, year and filters): switching section keeps the other's
+function blank(sec){return {sec:sec,p:'all',type:'all',tier:'all',show:'all',prog:'all',bd:'all',q:''};}
+var cur=blank('ww'),dr=null,yr=attr($('rows'),'data-defy')||'all',keep={jp:blank('jp')},keepY={jp:attr($('rows'),'data-defy-jp')||'all'};
+function copy(s){return {sec:s.sec,p:s.p,type:s.type,tier:s.tier,show:s.show,prog:s.prog,bd:s.bd,q:s.q};}
 function hits(r,qq,max){var o=[],i;for(i=0;i<r.ns.length&&o.length<max;i++)if(khuxMatch(qq,r.ns[i]))o.push(r.ns[i]);return o;}
 function match(r,s,anyPeriod){
+if(r.sec!==s.sec)return false;
 if(!anyPeriod&&s.p!=='all'&&r.p!==s.p)return false;
 if(s.type!=='all'&&r.t!==s.type)return false;
 if(s.tier!=='all'&&r.tr.indexOf(' '+s.tier+' ')<0)return false;
@@ -136,7 +153,7 @@ if(cur.q)yr=ys.length===1?ys[0]:'all';else if(yr!=='all'&&!yc[yr])yr=ys.length==
 for(i=0;i<ycs.length;i++){ycs[i].n.textContent=yc[ycs[i].y]||0;ycs[i].el.className='yc'+(ycs[i].y===yr?' on':'')+(ycs[i].y!=='all'&&!yc[ycs[i].y]?' hide':'');}
 c.all=0;for(i=0;i<rows.length;i++){r=rows[i];if(match(r,cur,true)){c.all++;c[r.p]=(c[r.p]||0)+1;}on=match(r,cur)&&(yr==='all'||r.y===yr);hide(r.el,!on);if(on)n++;}
 for(i=0;i<mls.length;i++){var e=mls[i].nextSibling,vis=false;while(e&&!/\\bml\\b/.test(e.className||'')){if(e.className&&e.className.indexOf(' hide')<0)vis=true;e=e.nextSibling;}hide(mls[i],!vis);}
-[].forEach.call(document.querySelectorAll('.tab'),function(t){p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'');$('tc'+p).textContent=c[p]||0;});
+[].forEach.call(document.querySelectorAll('.tab'),function(t){p=attr(t,'data-p');t.className='tab'+(p===cur.p?' on':'')+(attr(t,'data-n'+cur.sec)==='0'?' hide':'');$('tc'+p).textContent=c[p]||0;});
 var f=nf(cur),h='<span class="n1">'+plural(n,'raid')+'</span>';
 if(cur.p!=='all')h+=' in <b>'+esc(PN[cur.p])+'</b>';
 if(yr!=='all')h+=' · '+esc(yr);
@@ -151,7 +168,15 @@ if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;if(window.kxImgs)kxImgs();$('fdot').textContent=f?f:'';
 for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
-var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids'+(cur.bd==='done'?' with completed Raid Boards':cur.bd==='todo'?' with Raid Boards to complete':'');none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';}
+var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids'+(cur.bd==='done'?' with completed Raid Boards':cur.bd==='todo'?' with Raid Boards to complete':'');none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';mark();}
+// the section and year in the address (#jp.2017): the WebView's own back key comes back to them, not only the BACK button
+function mark(){var hh='#'+cur.sec+(yr!=='all'?'.'+yr:'');if(location.hash===hh||!history.replaceState)return;try{history.replaceState(null,'',hh);}catch(e){}}
+function setSec(s){if(s===cur.sec||(s!=='ww'&&s!=='jp'))return;keep[cur.sec]=cur;keepY[cur.sec]=yr;cur=keep[s]||blank(s);yr=keepY[s]||'all';
+[].forEach.call(document.querySelectorAll('.sec'),function(b){b.className='sec'+(attr(b,'data-sec')===s?' on':'');});
+hide($('jpi'),s!=='jp');var sp=$('span');if(sp)sp.textContent=attr(sp,'data-'+s)||'';render();}
+// the chips (and a whole group) without a raid in the section are hidden: TYPE has its own chips per section, TIER one only in Japan only
+function secChips(){[].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var n=0;[].forEach.call(box.children,function(o){var ss=attr(o,'data-sec'),h=ss!==null&&(' '+ss+' ').indexOf(' '+cur.sec+' ')<0;hide(o,h);if(!h&&attr(o,'data-v')!=='all')n++;});
+var hd=box.previousSibling;hide(box,n<2);if(hd&&hd.tagName==='H4')hide(hd,n<2);});}
 // after a keep / remove: the kept row gold, the previous one back to «can be kept», the «Replaces» lines
 function setRow(r,st){var pc=PILL[st];r.st=st;r.el.setAttribute('data-show',st);r.el.className='row '+pc[0]+(/ hide/.test(r.el.className)?' hide':'');var s=q(r.el,'.s');if(s){s.className='s s-'+pc[0];s.innerHTML=pc[1];}
 var b=q(r.el,'.pk');if(b)kxSet(b,r.id,st==='kept');}
@@ -160,7 +185,7 @@ for(i=0;i<rows.length;i++){var x=q(rows[i].el,'.rp');if(x){x.textContent=name?'R
 [].forEach.call(rows,function(r){r.el.onclick=function(e){var t=e.target;while(t&&t!==r.el){if(t.tagName==='A')return;t=t.parentNode;}location.href=attr(r.el,'data-href');};});
 function sync(){[].forEach.call(document.querySelectorAll('.sheet .opts'),function(box){var g=attr(box,'data-g');[].forEach.call(box.children,function(o){o.className=o.className.replace(/ on/g,'')+(attr(o,'data-v')===dr[g]?' on':'');});});
 $('fok').textContent='Show '+plural(count(dr),'result');}
-function openF(){dr=copy(cur);$('fq').value=dr.q;if(document.body.className.indexOf('fo')<0)document.body.className+=' fo';sync();}
+function openF(){dr=copy(cur);secChips();$('fq').value=dr.q;if(document.body.className.indexOf('fo')<0)document.body.className+=' fo';sync();}
 function closeF(){dr=null;document.body.className=document.body.className.replace(/ ?fo/g,'');}
 $('fbtn').onclick=openF;$('fx').onclick=closeF;$('dim').onclick=closeF;
 $('fq').oninput=function(){dr.q=this.value.replace(/\\s+/g,' ').replace(/^ | $/g,'');sync();};
@@ -172,9 +197,14 @@ $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x')
 if(x==='type'||x==='all')cur.type='all';if(x==='tier'||x==='all')cur.tier='all';if(x==='show'||x==='all')cur.show='all';if(x==='prog'||x==='all')cur.prog='all';if(x==='bd'||x==='all')cur.bd='all';if(x==='q'||x==='all')cur.q='';render();};
 $('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
+$('secs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-sec'))t=t.parentNode;var s=attr(t,'data-sec');if(s)setSec(s);};
+var hs=location.hash.slice(1);
 render();
-// BACK from a details page: #q<id> selects its year, then scrolls to it
-var h=location.hash&&document.getElementById(location.hash.slice(1));if(h){if(attr(h,'data-y')){yr=attr(h,'data-y');render();}if(h.scrollIntoView)h.scrollIntoView();}
+// BACK from a details page: #q<id> selects its section and year, then scrolls to it; #jp.2017 (mark, the WebView's back key)
+// the section and year. hs is read before the first render, which writes the address
+var h=hs&&document.getElementById(hs),m=/^(ww|jp)(?:\\.(\\d+))?$/.exec(hs);
+if(h&&attr(h,'data-sec')){setSec(attr(h,'data-sec'));if(attr(h,'data-y')){yr=attr(h,'data-y');render();}if(h.scrollIntoView)h.scrollIntoView();}
+else if(m){setSec(m[1]);if(m[2]){yr=m[2];render();}}
 })();`;
 
 // item names of a row for FIND («Matches:»): bosses, tiers, type, board names, board rewards, without repeats (case aside)
@@ -207,24 +237,26 @@ function packCatalog(packed) {
   const rows = packed.map(({ label, fields, html }) => {
     let h = html;
     PACK_KEYS.forEach((k) => { if (fields[k]) h = h.split(fields[k]).join(`\u0001${k}`); });
+    // the TYPE of the row (06-11: one per JP family) only inside its attribute, so the rows of all types share their templates
+    if (fields.t) h = h.split(`data-type="${fields.t}"`).join('data-type="\u0001t"');
     if (!tplIx.has(h)) { tplIx.set(h, tpl.length); tpl.push(h); }
-    return [tplIx.get(h), fields.s ? fields.s.split(' | ').map(word) : [], fields.d, fields.n, fields.e, fields.y, label];
+    return [tplIx.get(h), fields.s ? fields.s.split(' | ').map(word) : [], fields.d, fields.n, fields.e, fields.y, label, fields.t];
   });
   // «</» never closes the script element: written <\/ inside the JSON
   return JSON.stringify({ t: tpl, w: dict, r: rows }).replace(/<\//g, '<\\/');
 }
-const unpackRow = (d, r) => r[6] + d.t[r[0]].replace(/\u0001([sdney])/g, (x, k) => ({ s: r[1].map((i) => d.w[i]).join(' | '), d: r[2], n: r[3], e: r[4], y: r[5] })[k]);
+const unpackRow = (d, r) => r[6] + d.t[r[0]].replace(/\u0001([sdneyt])/g, (x, k) => ({ s: r[1].map((i) => d.w[i]).join(' | '), d: r[2], n: r[3], e: r[4], y: r[5], t: r[7] })[k]);
 // the same expansion as UNPACK_JS, for the tests: the catalogue page with its rows written out
 function expandCatalog(page) {
   const m = /<script id="kxrows" type="application\/json">([\s\S]*?)<\/script><script>[\s\S]*?<\/script>/.exec(page);
   if (!m) return page;
   const d = JSON.parse(m[1]);
   const html = d.r.map((r) => unpackRow(d, r)).join('');
-  return page.replace(m[0], '').replace(/(<div id="rows" data-defy="[^"]*">)/, (x) => x + html);
+  return page.replace(m[0], '').replace(/(<div id="rows"[^>]*>)/, (x) => x + html);
 }
 const UNPACK_JS = 'function kxImgs(){var a=document.querySelectorAll("#rows .row"),i,im;for(i=0;i<a.length;i++){if(/ hide/.test(a[i].className))continue;im=a[i].querySelector("img[data-src]");if(im&&!im.getAttribute("src"))im.setAttribute("src",im.getAttribute("data-src"));}}'
   + '(function(){var d=JSON.parse(document.getElementById("kxrows").textContent),o=[],i,r;for(i=0;i<d.r.length;i++){r=d.r[i];'
-  + 'o.push(r[6]+d.t[r[0]].replace(/\u0001([sdney])/g,function(x,k){if(k==="s"){var s=[],j;for(j=0;j<r[1].length;j++)s.push(d.w[r[1][j]]);return s.join(" | ");}return k==="d"?r[2]:k==="n"?r[3]:k==="e"?r[4]:r[5];}));}'
+  + 'o.push(r[6]+d.t[r[0]].replace(/\u0001([sdneyt])/g,function(x,k){if(k==="s"){var s=[],j;for(j=0;j<r[1].length;j++)s.push(d.w[r[1][j]]);return s.join(" | ");}return k==="d"?r[2]:k==="n"?r[3]:k==="e"?r[4]:k==="t"?r[7]:r[5];}));}'
   + 'document.getElementById("rows").innerHTML=o.join("");})();';
 function catalogPage(index, ctx = {}) {
   const periods = ctx.periods, rows = calendar.catalogRows(index), kept = keptRow(rows, ctx);
@@ -235,46 +267,70 @@ function catalogPage(index, ctx = {}) {
     const label = m !== lastM ? `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>` : '';
     lastM = m;
     const tiers = [...new Set(row.entries.map((e) => e.tier))], done = doneOf(row, ctx), bd = boardsOf(row, ctx);
-    const name = esc(titleOf(row)), line = `${row.jp ? 'Japan only · ' : ''}${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}`, search = esc(searchOf(row, ctx));
-    packed.push({ label, fields: { s: search, d: line, n: name, e: String(row.evStageId), y }, html: `<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}"`
+    const name = esc(titleOf(row)), line = `${dateRange(row)} · ${tiers.map((t) => esc(tierLabel(t))).join(' · ')}`, search = esc(searchOf(row, ctx));
+    packed.push({ label, fields: { s: search, d: line, n: name, e: String(row.evStageId), y, t: typeOf(row) }, html: `<div class="row ${st.cls}" id="q${row.evStageId}" data-y="${y}" data-href="${href}" data-name="${esc(titleOf(row))}" data-eid="${row.evStageId}" data-show="${st.show}" data-sec="${secOf(row)}"`
       + ` data-periods="${gameYearOf(row.start)}" data-type="${typeOf(row)}" data-tier="${esc(tiers.map((t) => t.toLowerCase()).join(' '))}" data-search="${search}" data-done="${done ? 1 : 0}" data-boards="${bd}">`
       + `<a class="im" href="${href}"><img width="320" height="70" data-src="${imgOf(ctx, row.evStageId)}" alt=""></a>`
       + `<div class="info"><a class="nm" href="${href}">${name}${done ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
-      + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
+      + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(row.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"', row.jp ? ' jk' : '')}</div>`}`
       + '<div class="mt"></div></div><a class="go" href="' + href + '" aria-label="Details">›</a></div>\n' });
   });
   const data = packCatalog(packed);
   const years = [...new Set(rows.map((r) => r.start.slice(0, 4)))];
-  const shopYear = String(ctx.shopFrom || '').slice(0, 4), defYear = years.includes(shopYear) ? shopYear : 'all';
-  const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
-  // tabs = the Shop's game years (special-pages.js; user 06-11): a tab only for a year with raids, no «Now» mark
-  const tab = (p, name, sub, n) => `<button type="button" class="tab${p === 'all' ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="c" id="tc${p}">${n}</span></button>`;
-  const perYear = GAME_YEARS.map((g, i) => rows.filter((r) => gameYearOf(r.start) === i).length);
-  const opts = (list, cls = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}">${optLabel(o)}</button>`).join('');
+  // the two sections (user 06-11): the page opens on Worldwide; each section has its default year (the Shop year when it has raids)
+  const bySec = { ww: rows.filter((r) => !r.jp), jp: rows.filter((r) => r.jp) }, ww = bySec.ww;
+  const yearsOf = (list) => [...new Set(list.map((r) => r.start.slice(0, 4)))];
+  const shopYear = String(ctx.shopFrom || '').slice(0, 4), defOf = (list) => (yearsOf(list).includes(shopYear) ? shopYear : 'all');
+  const defYear = defOf(ww);
+  // the span under «All years»: the game's (YEAR_SPAN) for Worldwide, the years of its raids for Japan only (2015–2018)
+  const spanOf = (list) => { const y = yearsOf(list); return y.length ? (y.length > 1 ? `${y[0]}–${y[y.length - 1]}` : y[0]) : YEAR_SPAN; };
+  const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}${y !== 'all' && !n ? ' hide' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
+  // tabs = the Shop's game years (special-pages.js; user 06-11): a tab only for a year with raids, no «Now» mark; data-nww / data-njp:
+  // the raids of the section in that year (a tab without any is hidden in that section)
+  const perYearOf = (list) => GAME_YEARS.map((g, i) => list.filter((r) => gameYearOf(r.start) === i).length);
+  const perYear = perYearOf(rows), perSec = { ww: perYearOf(ww), jp: perYearOf(bySec.jp) };
+  const tab = (p, name, sub, n, nww, njp, subAttr = '') => `<button type="button" class="tab${p === 'all' ? ' on' : ''}${nww ? '' : ' hide'}" data-p="${p}" data-nww="${nww}" data-njp="${njp}"><b>${esc(name)}</b>`
+    + `<small${subAttr}>${esc(sub)}</small><span class="c" id="tc${p}">${n}</span></button>`;
+  // TYPE / TIER chips: data-sec = the sections that have a raid of that value (secChips of the page script hides the others)
+  const tiersOf = (r) => r.entries.map((e) => String(e.tier).toLowerCase());
+  const has = { type: (v, list) => list.some((r) => typeOf(r) === v), tier: (v, list) => list.some((r) => tiersOf(r).includes(v)) };
+  const secAttr = (g) => (v) => (v === 'all' || !has[g] ? '' : ` data-sec="${SECTIONS.map(([k]) => k).filter((k) => has[g](v, bySec[k])).join(' ')}"`);
+  const opts = (list, cls = () => '', sa = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}"${sa(o[0])}>${optLabel(o)}</button>`).join('');
+  const secTab = ([k, name, ic]) => `<button type="button" class="sec${k === 'ww' ? ' on' : ''}" data-sec="${k}">${icon(ic)}<span>${esc(name)}</span><span class="sn">${bySec[k].length}</span></button>`;
+  // the Japan only intro (user 06-11), in the style of the rule callout (.rc): one short line per rule, with the catalogues' icons
+  const jpIntro = `<div class="rc rcl hide" id="jpi"><div class="rch">${icon('jp')}Raids of the Japanese version<span class="ng">NOT ORIGINAL</span></div>`
+    + `<span>${icon('jp')}These raids were held <b>only in the Japanese version</b> of the game.</span>`
+    + `<span>${icon('pin')}They never appear in Events by themselves: to play one, <b>keep it here</b> (Keep in Events).</span>`
+    + `<span>${icon('lock')}Like every raid, each one unlocks when your Story reaches its dates.</span>`
+    + `<span>${icon('replaced')}<b>One kept raid for both sections</b>: keeping a Japanese raid releases the kept worldwide raid, and the other way round.</span>`
+    + `<span>${icon('bdone')}Reconstructed banners and Raid Boards are marked on their pages; the translations are ours.</span>`
+    + `<p class="rcf">See the ${RULE_LINK}</p></div>`;
   const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(GAME_YEARS.map((g, i) => [i, g.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__TIER__', labels(TIER_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__PROG__', labels(PROG_OPTS)).replace('__BD__', JSON.stringify(Object.fromEntries(BOARD_OPTS.slice(1).map((o) => [o[0], `Raid Boards: ${optLabel(o)}`])))).replace('__SHOWSET__', JSON.stringify(SHOW_SETS))
     .replace('__PILL__', JSON.stringify({ kept: PILLS.kept, can: PILLS.can })).replace('__MATCH__', () => MATCH_JS);
-  return PAGE_HEAD('Raid Catalog', CSS) + '<body>'
+  return PAGE_HEAD('Raid Catalog', CSS + RULE_CSS + SEC_CSS) + '<body>'
     + '<div class="hdr"><h1>Raid Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
-    + '<p class="n">Every raid week of the game, by date. Tap a raid for its bosses, tiers and Raid Boards. A past raid can be kept in the Events tab, one at a time. The Raid Catalog is an addition of this server.</p>'
-    + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, rows.length)}${GAME_YEARS.map((g, i) => (perYear[i] ? tab(i, g.name, g.sub, perYear[i]) : '')).join('')}</div><div class="tabline"></div>`
-    + `<div class="yrs" id="yrs">${yearChip('all', 'All years', rows.length)}${years.map((y) => yearChip(y, y, rows.filter((r) => r.start.startsWith(y)).length)).join('')}</div>`
-    + `<div class="sum" id="sum"><span class="n1">${plural(rows.length, 'raid')}</span> · no filters</div>`
+    + '<p class="n">Every raid week of the game, by date. Tap a raid for its bosses, tiers and Raid Boards. Two sections: <b>Worldwide</b> and <b>Japan only</b>. A past raid can be kept in the Events tab, one at a time. The Raid Catalog is an addition of this server.</p>'
+    + `<div class="secs" id="secs">${SECTIONS.map(secTab).join('')}</div>${jpIntro}`
+    + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, ww.length, ww.length, bySec.jp.length, ` id="span" data-ww="${YEAR_SPAN}" data-jp="${spanOf(bySec.jp)}"`)}`
+    + `${GAME_YEARS.map((g, i) => (perYear[i] ? tab(i, g.name, g.sub, perSec.ww[i], perSec.ww[i], perSec.jp[i]) : '')).join('')}</div><div class="tabline"></div>`
+    + `<div class="yrs" id="yrs">${yearChip('all', 'All years', ww.length)}${years.map((y) => yearChip(y, y, ww.filter((r) => r.start.startsWith(y)).length)).join('')}</div>`
+    + `<div class="sum" id="sum"><span class="n1">${plural(ww.length, 'raid')}</span> · no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
-    + `<div id="rows" data-defy="${defYear}">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
+    + `<div id="rows" data-defy="${defYear}" data-defy-jp="${defOf(bySec.jp)}">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
     + (packed.length ? `<script id="kxrows" type="application/json">${data}</script><script>${UNPACK_JS}</script>` : '')
     + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Boss, board or reward name" autocomplete="off"></div>'
     + '<div class="hint">Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Mythril).</div>'
-    + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS)}</div>`
-    + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS)}</div>`
+    + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS, undefined, secAttr('type'))}</div>`
+    + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS, undefined, secAttr('tier'))}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`
     + `<h4>PROGRESS</h4><div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`
     + `<h4>RAID BOARDS</h4><div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`
-    + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(rows.length, 'result')}</button></div></div>`
+    + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(ww.length, 'result')}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${js}</script></body></html>`;
 }
 

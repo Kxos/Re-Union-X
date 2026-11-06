@@ -67,13 +67,14 @@ const tests = {
     assert.strictEqual(calendar.rowState(rows[0], { ...c, shopFrom: '', shopTo: '' }), 'later', 'no story week yet: every raid is later');
   },
   jp_rows_typed_and_marked() {
-    // I-232: a Japan-only raid is typed jp (TYPE «Japan only»), marked on its row, named by its JP family, and can be kept once past
+    // I-232: a Japan-only raid sits in the Japan only section (user 06-11: a section, not a TYPE chip), typed by its JP family,
+    // named by its JP family, and can be kept once past
     const ix = index();
     ix.entries.push(tier('JP-SHR-6', 8300, '2016-08-19', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpQuest', 'jpBoard'], boards: [] }));
     const c = ctx({ index: ix }), html = catalog(ix, c);
     const row = rowOf(html, 8300);
-    assert(row.includes('data-type="jp"') && row.includes('Japan only · '), row);
-    assert(html.includes('data-v="jp"'), 'TYPE filter has Japan only');
+    assert(row.includes('data-sec="jp"') && row.includes('data-type="jpshw"') && !row.includes('Japan only'), row);
+    assert(!html.includes('data-v="jp"') && html.includes('data-v="jpshw" data-sec="jp"'), 'no Japan only TYPE chip: the JP families, shown only in the JP section');
     assert.strictEqual(calendar.rowState(calendar.catalogRows(ix).find((r) => r.censusId === 'JP-SHR-6'), c), 'can');
     const det = pages.detailPage(ix, 8300, c);
     assert(det.includes('<td>Super-Hard Weekend Raid (Japan)</td>') && det.includes('<b>Japan only</b>') && det.includes('Japanese super-hard board'), 'details');
@@ -164,7 +165,7 @@ const tests = {
     // tabs = the Shop's game years (user 06-11): All years plus one per game year that has raids, no «Now» mark (the Shop has none)
     const years = new Set(calendar.catalogRows(index()).map((r) => special.gameYearOf(r.start)));
     assert.strictEqual(count(html, ' data-p="'), 1 + years.size);
-    assert(html.includes('data-p="3"><b>Year 4</b><small>3rd 🎂 → 4th 🎂</small>') && html.includes('data-p="all"><b>All years</b><small>2016–2021</small>'), 'Shop tab names');
+    assert(html.includes('data-p="3" data-nww="2" data-njp="0"><b>Year 4</b><small>3rd 🎂 → 4th 🎂</small>') && html.includes('data-p="all" data-nww="5" data-njp="0"><b>All years</b><small id="span" data-ww="2016–2021" data-jp="2016–2021">2016–2021</small>'), 'Shop tab names');
     assert(!html.includes('class="now"'), 'no Now mark');
     for (const y of ['2018', '2019', '2020']) assert(html.includes(`data-yr="${y}"`), `year ${y}`);
     assert(/<title>Raid Catalog<\/title>/.test(html));
@@ -291,12 +292,12 @@ const tests = {
     // 06-11 (user): every chip of the Filters sheet but «All» carries an icon of the catalogues' set (/web/special/icon/<key>.png),
     // as the Special Catalog: TYPE, TIER, SHOW, PROGRESS, RAID BOARDS; the keys are served (SPECIAL_ICON_KEYS)
     const html = catalog(index(), ctx()), keys = special.SPECIAL_ICON_KEYS;
-    const want = { type: { weekly: 'weekday', radiant: 'jewel', event: 'camp', jp: 'jp' },
+    const want = { type: { weekly: 'weekday', radiant: 'jewel', event: 'camp', jpev: 'camp', jpshw: 'raid', jpmo: 'bonus', jpday: 'daily' },
       tier: { beginner: 'tbeg', intermediate: 'tint', advanced: 'tadv', legendary: 'tleg', epic: 'tepic', single: 'tone' },
       show: { now: 'now', can: 'pin', kept: 'pin', later: 'later', removed: 'removed' }, prog: { done: 'done', todo: 'todo' }, bd: { done: 'bdone', todo: 'btodo' } };
     for (const [g, m] of Object.entries(want)) {
       const box = (new RegExp(`<div class="opts" data-g="${g}">([\\s\\S]*?)</div>`).exec(html) || [])[1] || '';
-      const chips = box.match(/<button[^>]*data-v="[^"]+">[\s\S]*?<\/button>/g) || [];
+      const chips = box.match(/<button[^>]*data-v="[^"]+"[^>]*>[\s\S]*?<\/button>/g) || [];
       assert(chips.length === Object.keys(m).length + 1, `${g}: ${chips.length} chips`);
       for (const c of chips) {
         const v = /data-v="([^"]+)"/.exec(c)[1], k = (/\/web\/special\/icon\/([a-z]+)\.png/.exec(c) || [])[1];
@@ -307,6 +308,54 @@ const tests = {
     }
     // the summary tag of a chosen chip shows the same icon (LAB of the page script)
     assert(/"epic":"<img class=\\"ic\\" src=\\"\/web\/special\/icon\/tepic\.png\\"/.test(html), 'TIER tag with its icon');
+  },
+  two_sections() {
+    // user 06-11: two big tabs above the year tabs, Worldwide (opened first) and Japan only, each with its own counts, year tabs,
+    // default year and Filters; the Japan only section opens with an intro box; its rows carry no «Japan only» label and a Keep
+    // button that stands out (pk jk); the kept raid is one for both sections
+    const ix = index();
+    ix.entries.push(tier('JP-SHR-6', 8300, '2016-08-19', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', boards: [] }),
+      tier('JP-RAID-30', 8301, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true, region: 'JP', boards: [] }));
+    const c = ctx({ index: ix }), html = catalog(ix, c);
+    const secs = (/<div class="secs" id="secs">([\s\S]*?)<\/div>/.exec(html) || [])[1] || '';
+    assert(/<button type="button" class="sec on" data-sec="ww">[\s\S]*?Worldwide<\/span><span class="sn">5<\/span>/.test(secs), `Worldwide first, on, 5 raids: ${secs}`);
+    assert(/<button type="button" class="sec" data-sec="jp">[\s\S]*?Japan only<\/span><span class="sn">2<\/span>/.test(secs), 'Japan only, 2 raids');
+    assert(html.indexOf('id="secs"') < html.indexOf('id="tabs"'), 'the sections above the year tabs');
+    // opened on Worldwide: the counts of the summary, «Show N results», «All years» and the year chips are the worldwide ones
+    assert(html.includes('<span class="n1">5 raids</span>') && html.includes('id="fok">Show 5 results') && html.includes('data-yr="all">All years <span class="yn">5</span>'), 'worldwide counts');
+    assert(/class="yc hide" data-yr="2016">2016 <span class="yn">0<\/span>/.test(html), 'a year with only Japanese raids hidden on Worldwide');
+    assert(/data-p="0" data-nww="0" data-njp="1"/.test(html) && /class="tab hide" data-p="0"/.test(html), 'a game year with only Japanese raids: its tab hidden on Worldwide');
+    assert(/<div id="rows" data-defy="2019" data-defy-jp="all">/.test(html), 'default years per section (the Shop year when the section has raids in it)');
+    assert(/data-defy-jp="2016"/.test(catalog(ix, ctx({ index: ix, shopFrom: '2016-09-01', shopTo: '2016-09-07' }))), 'JP default year = the Shop year');
+    assert(/id="span" data-ww="2016–2021" data-jp="2016–2017"/.test(html), 'the span under All years per section');
+    // the Japan only intro: hidden on Worldwide, one line per rule
+    const intro = (/<div class="rc rcl hide" id="jpi">([\s\S]*?)<\/p><\/div>/.exec(html) || [])[1] || '';
+    assert(intro.includes('NOT ORIGINAL') && intro.includes('only in the Japanese version') && intro.includes('never appear in Events by themselves') && intro.includes('keep it here')
+      && intro.includes('unlocks when your Story reaches its dates') && intro.includes('One kept raid for both sections') && intro.includes('releases the kept worldwide raid')
+      && intro.includes('translations are ours') && intro.includes('/web/notices#raid-bosses'), `JP intro: ${intro}`);
+    // rows: their section, no «Japan only» label, the JP Keep button marked
+    for (const id of [8300, 8301]) assert(rowOf(html, id).includes('data-sec="jp"') && !rowOf(html, id).includes('Japan only'), `JP row ${id}`);
+    for (const id of [8071, 8100, 8180]) assert(rowOf(html, id).includes('data-sec="ww"'), `WW row ${id}`);
+    assert(rowOf(html, 8300).includes('class="pk jk" data-id="8300" data-on="1"') && rowOf(html, 8071).includes('class="pk" data-id="8071"'), 'Keep on JP rows marked');
+    // TYPE chips per section, TIER: only One tier has Japanese raids
+    assert(/data-v="weekly" data-sec="ww"/.test(html) && /data-v="jpmo" data-sec="jp"/.test(html) && /data-v="jpday" data-sec=""/.test(html), 'TYPE chips by section');
+    assert(/data-v="single" data-sec="ww jp"/.test(html) && /data-v="beginner" data-sec="ww"/.test(html), 'TIER chips by section');
+    // one kept raid for both: a kept JP raid shows as «Replaces» over the worldwide Keep buttons, and the other way round
+    const kj = catalog(ix, ctx({ index: ix, kept: 'JP-SHR-6' }));
+    assert(rowOf(kj, 8300).includes('data-show="kept"') && rowOf(kj, 8071).includes('Replaces: Blue Trident Tail'), 'kept JP raid replaced by a WW keep');
+    const kw = catalog(ix, ctx({ index: ix, kept: 'WW-W-2018-09-03' }));
+    assert(rowOf(kw, 8300).includes('Replaces: Merry-Go-Rowdy') && rowOf(kw, 8300).includes('class="pk jk"'), 'kept WW raid replaced by a JP keep');
+    // the page scripts compile (the JSON of the packed rows aside)
+    for (const m of pages.catalogPage(ix, c).matchAll(/<script>([\s\S]*?)<\/script>/g)) new Function(m[1]); // eslint-disable-line no-new-func
+    const real = path.join(__dirname, 'game_data', 'raids.json');
+    if (fs.existsSync(real)) {
+      const rix = JSON.parse(fs.readFileSync(real, 'utf8')), rows = calendar.catalogRows(rix), page = catalog(rix, ctx({ index: rix }));
+      const n = (s) => Number((new RegExp(`data-sec="${s}">[\\s\\S]*?<span class="sn">(\\d+)<`).exec(page) || [])[1]);
+      assert.strictEqual(n('ww') + n('jp'), rows.length);
+      assert.strictEqual(n('jp'), rows.filter((r) => r.jp).length);
+      assert.strictEqual(count(page, 'data-sec="jp" data-periods'), n('jp'));
+      console.log(`  (real catalogue: Worldwide ${n('ww')}, Japan only ${n('jp')})`);
+    }
   },
   catalog_light() {
     // task 3 (06-11): the rows travel packed (templates + one dictionary) and the page builds them before its filter script; the

@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-243**).
+a new issue takes the number after the last one used (last: **I-244**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -17,6 +17,7 @@ Last revision: 6 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-244 | TO VERIFY | **Raid Catalog: Japan only as a section** (user 06-11): two big tabs Worldwide (194, default) / Japan only (153) above the year tabs, each with its own year tabs, counts and Filters (TYPE chips per section, TIER hidden in Japan only); the «Japan only» TYPE chip and row label removed; Japan only intro box (rules, one kept raid for both sections); JP Keep button larger; `#<sec>.<year>` address for the back key; «Raid Bosses» notice heading «Worldwide and Japan only». Keep logic unchanged. | [raid](notes/raid.md#catalog-sections) | tests 06-11 |
 | I-243 | ON HOLD | **JP raids that repeat a WW raid** (user 06-11): once the JP raid census is complete (cards, dates, boards), compare every JP row with the WW raids and drop the JP rows that are the same raid moved to another date (same boss, HP, board and rewards; e.g. the Zootopia raid ran in both JP and WW). Serve only raids that never ran in WW, so no raid is offered twice. Until then all 153 JP rows stay served. | [raid](notes/raid.md) | — |
 | I-241 | TO VERIFY | **Catalogue tabs differ from the Shop** (user 06-11): the Raid and Special Catalogs used the five Special periods with a «Now» mark; now the Shop Banner Catalog game years (anniversary to anniversary, same names and boundaries, no «Now» mark, as the Shop). Display only: the Special periods still drive unlocks. | [raid](notes/raid.md#catalog-years) | tests 06-11 |
 | I-240 | TO VERIFY | **Raid Catalog slow to open in the WebView** (bench 06-11): the page weighed about 414 KB and loaded all 347 card pictures at once (the WebView ignores lazy loading); the server took about 1 s on board lookups. Now rows packed and built in the page (same DOM, filters and keep unchanged), cards loaded only for the rows shown, lookups indexed: 95 KB. | [raid](notes/raid.md#catalog-light) | tests 06-11 |
