@@ -9,7 +9,7 @@
  "stageMax": 4009999,
  "eventCategory": 2,
  "eventType": 2,
- "imgVersion": 2,
+ "imgVersion": 3,
  "shortWindowHours": 12,
  "onlyCensusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
  "labelPhrases": {
