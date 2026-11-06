@@ -204,10 +204,12 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const h = require('path').join(dir, 'raids-jp2.json');
   const jpE = (censusId, start, end) => ({ boss: 'J', available: true, jp: true, censusId, start, end });
   require('fs').writeFileSync(h, JSON.stringify({ entries: [{ boss: 'A', available: true }, jpE('JP-RAID-1', '2015-10-18', '2015-10-31'), jpE('JP-RAID-21', '2016-12-25', '2017-01-01'),
-    jpE('JP-RAID-30', '2017-09-01', '2017-09-30'), jpE('JP-D-2018-09-01', '2018-09-01', '2018-09-01'), jpE('JP-RAID-9', '2016-03-27', '2016-04-03')], jp: { notServed: [], skipped: [] } }));
+    jpE('JP-RAID-30', '2017-09-01', '2017-09-30'), jpE('JP-D-2018-09-01', '2018-09-01', '2018-09-01'), jpE('JP-RAID-9', '2016-03-27', '2016-04-03'),
+    jpE('JP-RAID-15', '2016-08-15', '2016-08-21')], jp: { notServed: [], skipped: [] } }));
   const kl = n.raidJpLines(n.raidNoticeFacts(h)).join(' ');
   check(/October 2015 to September 2018/.test(kl) && /July, August and September 2017/.test(kl) && /like every raid here, are open all day/.test(kl) && !/two daily windows in Japan time/.test(kl) && /Destroyer Behemoth/.test(kl)
-    && /Crabby Cake\*\* \(\*\*probable\*\*/.test(kl) && /2016 Showdown!/.test(kl) && /10 levels/.test(kl) && /Saturday only/.test(kl) && /Malicious Spider/.test(kl) && /1\.5 billion/.test(kl)
+    && /Crabby Cake\*\* \(\*\*probable\*\*/.test(kl) && /2016 Showdown!/.test(kl) && /10 levels/.test(kl) && /Saturday only/.test(kl) && /\*\*Gear Golem\*\* and \*\*Scourge Spider\*\*/.test(kl) && !/Malicious Spider|Red Trident Tail|weekend cycle/.test(kl) && /1\.5 billion/.test(kl)
+    && /\*\*3 hours\*\*/.test(kl) && /\*\*5 levels\*\* in Bonus Time/.test(kl) && /Jewel Sorceress/.test(kl) && /August 15, 2016, not August 14/.test(kl)
     && /Magic Broom/.test(kl) && /Prince & Belle/.test(kl), `righe jpCensus: ${kl}`);
   require('fs').rmSync(dir, { recursive: true, force: true });
 }

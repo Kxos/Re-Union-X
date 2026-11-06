@@ -458,6 +458,13 @@ function levelDropsOf(evRow, medals) {
 function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
   const s = setting2016Of(settings, orig, w, rareBody), labels = [];
   let up, ap;
+  // a JP row whose own notice states the time limit (jpCensus upMinutes: «討伐制限時間は3時間»): original, no label for it
+  const noticeUp = w.jp && row.jpFix && row.jpFix.upMinutes;
+  if (noticeUp) {
+    up = num(noticeUp);
+    if (s) ap = s.ap; else { ap = config.useAp; labels.push('useAp'); }
+    return { up, ap, labels, setting: s };
+  }
   // JP rules of the JP wiki (raid_config.json jpTimer): super-hard weekends 12 h, 1 h from 2018-05-05; the monthly raids' 30 minutes
   const jp = w.jp ? (config.jpTimer || {})[row.family] : null;
   if (jp) {
@@ -507,10 +514,15 @@ const jpServed = (row, census) => isJpRow(row) && !jpStatus(row, census).why;
 // private census file stays as it is, the overlay is applied when it is read (buildRaid, --ids). Per census id: family, bosses
 // (in order: the days of a daily rotating row, Monday to Sunday with weekdays), weekdays (the boss of each weekday over the whole
 // row), saturdayOnly (a one-day weekend: open on Saturday only), hp (census data.hp text, e.g. «yes: fixed N»), probableBosses
-// (true or names: the boss is inferred, label jpBossProbable), hpProbable (jpHpProbable), levelStep (levels gained per defeat, routes-raid.js), levelDrops
+// (true or names: the boss is inferred, label jpBossProbable), hpProbable (jpHpProbable), levelStep (levels gained at every defeat,
+// routes-raid.js), bonusLevelStep (levels gained by a defeat in Bonus Time, +1 outside it: «+1, +5 in Bonus Time» of the JP
+// notices), upMinutes (the time limit the JP notice states, e.g. 180 for «討伐制限時間は3時間»), start / end (the JP dates of the
+// notice, YYYY-MM-DD: the census gives some rows as the Pacific days before the JP ones), levelDrops
 // ([{level, reward: «N★ Name» or «N★ Name (Boosted)», boss?, probable?}], paid as the notices' level drops). Keys starting with
 // «_» are notes. An id not in the census stops the run.
-const JP_FIX_KEYS = new Set(['family', 'bosses', 'weekdays', 'saturdayOnly', 'hp', 'probableBosses', 'hpProbable', 'levelStep', 'levelDrops', 'source']);
+const JP_FIX_KEYS = new Set(['family', 'bosses', 'weekdays', 'saturdayOnly', 'hp', 'probableBosses', 'hpProbable', 'levelStep', 'bonusLevelStep', 'upMinutes',
+  'start', 'end', 'levelDrops', 'source']);
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 function applyJpCensus(census, overlay) {
   if (!overlay || !census || !Array.isArray(census.rows)) return census;
   const ids = new Set(census.rows.map((r) => r.id));
@@ -520,11 +532,15 @@ function applyJpCensus(census, overlay) {
     const bad = Object.keys(fix).filter((k) => !JP_FIX_KEYS.has(k));
     if (bad.length) throw new Error(`raid: jpCensus: ${id}: unknown field ${bad.join(', ')}`);
     if (fix.weekdays && (fix.bosses || []).length !== 7) throw new Error(`raid: jpCensus: ${id}: weekdays needs 7 bosses (Monday to Sunday)`);
+    for (const k of ['start', 'end']) if (k in fix && !ISO_DAY.test(String(fix[k]))) throw new Error(`raid: jpCensus: ${id}: ${k} is not a YYYY-MM-DD day`);
+    for (const k of ['upMinutes', 'levelStep', 'bonusLevelStep']) if (k in fix && !(Number.isInteger(fix[k]) && fix[k] > 0)) throw new Error(`raid: jpCensus: ${id}: ${k} is not a positive integer`);
   }
   return { ...census, rows: census.rows.map((r) => {
     const fix = overlay[r.id];
     if (!fix) return r;
-    return { ...r, ...(fix.family ? { family: fix.family } : {}), ...(fix.bosses ? { bosses: [...fix.bosses] } : {}),
+    const start = fix.start || r.start, end = fix.end || r.end;
+    if (start && end && end < start) throw new Error(`raid: jpCensus: ${r.id}: end ${end} before start ${start}`);
+    return { ...r, start, end, ...(fix.family ? { family: fix.family } : {}), ...(fix.bosses ? { bosses: [...fix.bosses] } : {}),
       ...(fix.hp ? { data: { ...(r.data || {}), hp: fix.hp } } : {}), jpFix: fix };
   }) };
 }
@@ -1025,6 +1041,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
         Object.assign(entry, { jp: true, region: 'JP', ...(donor ? { questFrom: donor.key } : {}) });
         // levels gained per defeat stated by the JP notice (jpCensus levelStep: year-end 2016 +10), read by routes-raid.js
         if (row.jpFix && row.jpFix.levelStep) entry.levelStep = num(row.jpFix.levelStep);
+        // «+1 at every defeat, +5 in Bonus Time» (jpCensus bonusLevelStep), read by routes-raid.js levelStep
+        if (row.jpFix && row.jpFix.bonusLevelStep) entry.bonusLevelStep = num(row.jpFix.bonusLevelStep);
       }
       out.index.entries.push(entry);
 

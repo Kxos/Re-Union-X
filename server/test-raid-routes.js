@@ -406,6 +406,11 @@ const tests = {
     // a JP raid whose notice states the step carries it in its entry (make-raid.js jpCensus levelStep): year-end 2016 +10 every defeat
     assert.deepStrictEqual([run('JP-RAID-21', '2016-12-25', PLAIN, 1, { levelStep: 10 }), run('JP-RAID-21', '2016-12-25', BONUS, 1, { levelStep: 10 })], [11, 11], 'JP year-end 2016: +10 always');
     assert.strictEqual(run('JP-RAID-21', '2016-12-25', PLAIN, 91, { levelStep: 10 }), 99, 'capped at LV 99');
+    // the JP raid events of 2016-2018 (jpCensus bonusLevelStep, live notices 19605 .. 43221): +1 at every defeat, +5 in Bonus Time
+    assert.deepStrictEqual([run('JP-D-2018-02-12', '2018-02-12', PLAIN, 1, { bonusLevelStep: 5 }), run('JP-D-2018-02-12', '2018-02-12', BONUS, 1, { bonusLevelStep: 5 })], [2, 6], 'JP raid events: +5 in Bonus Time only');
+    assert.strictEqual(run('JP-D-2018-02-12', '2018-02-12', BONUS, 97, { bonusLevelStep: 5 }), 99, 'capped at LV 99');
+    // the October 2017 daily rotating raid (notice 33250): +5 at every defeat
+    assert.deepStrictEqual([run('JP-RAID-27', '2017-10-16', PLAIN, 1, { levelStep: 5 }), run('JP-RAID-27', '2017-10-16', BONUS, 1, { levelStep: 5 })], [6, 6], 'JP daily rotating 2017-10: +5 always');
     // every census id of the rules is a served raid (when built)
     const served = path.join(__dirname, 'game_data', 'raids.json');
     if (fs.existsSync(served)) {

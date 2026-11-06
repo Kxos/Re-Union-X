@@ -466,15 +466,58 @@ const tests = {
       f.config.jpCensus = { 'JP-D-2018-08-05': { saturdayOnly: true } };
     })), /not a Saturday/);
   },
+  jp_census_notice_fields() {
+    // the live JP notice sweep (06-11): a row's JP dates (the census gives some as the Pacific days before), the notice's time
+    // limit (upMinutes, original: no upMinutes label) and level steps (bonusLevelStep: +1, +5 in Bonus Time; levelStep: always)
+    const out = build(jpFixture((f) => {
+      f.config.jpCensus = {
+        'JP-SHR-1': { start: '2016-08-13' },
+        'JP-D-2017-08-13': { start: '2017-08-14', end: '2017-08-20', upMinutes: 180, bonusLevelStep: 5 },
+        'JP-RAID-27': { start: '2017-10-16', levelStep: 5, upMinutes: 180 },
+      };
+    }));
+    const shr = jpEntry(out, 'JP-SHR-1/single');
+    assert.deepStrictEqual([shr.start, shr.end, shr.periods, shr.open, shr.upMinutes], ['2016-08-13', '2016-08-14', [['2016-08-13', '2016-08-14']], 'weekend', 720], 'Saturday 0:00 - Sunday 23:59, 12 hours kept');
+    const d = jpEntry(out, 'JP-D-2017-08-13/single');
+    assert.deepStrictEqual([d.start, d.end, d.periods, d.upMinutes, d.bonusLevelStep, d.levelStep], ['2017-08-14', '2017-08-20', [['2017-08-14', '2017-08-20']], 180, 5, undefined]);
+    assert.ok(!d.reconstructed.includes('jpDates') && !d.reconstructed.includes('upMinutes') && !d.reconstructed.includes('jpTimer') && !d.reconstructed.includes('setting2016'), d.reconstructed.join());
+    assert.strictEqual(out.settingRows.find((s) => s.raidSettingId === d.settingId).bossUpTime, 180, 'the master raidSetting carries the 3 hours');
+    // the daily rotating days follow the end (keys unchanged), every day +5 and 3 hours
+    const dr = out.index.entries.filter((e) => e.censusId === 'JP-RAID-27');
+    assert.deepStrictEqual(dr.map((e) => [e.key, e.start, e.levelStep, e.upMinutes]), [['JP-RAID-27/single@2017-10-21', '2017-10-16', 5, 180], ['JP-RAID-27/single@2017-10-22', '2017-10-16', 5, 180]]);
+    // bad values stop the run
+    const base = { rows: [{ id: 'JP-X', start: '2016-08-12', end: '2016-08-14', bosses: [] }] };
+    assert.deepStrictEqual(['start', 'end'].map((k) => mr.applyJpCensus(base, { 'JP-X': { start: '2016-08-13' } }).rows[0][k]), ['2016-08-13', '2016-08-14']);
+    assert.strictEqual(base.rows[0].start, '2016-08-12', 'the census object is not edited');
+    assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { start: '8/13/2016' } }), /not a YYYY-MM-DD day/);
+    assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { start: '2016-08-15' } }), /before start/);
+    assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { upMinutes: '180' } }), /positive integer/);
+    assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { bonusLevelStep: 0 } }), /positive integer/);
+  },
   jp_census_real_config() {
     // the shipped overlay: every id is a census row (checked by the real build) and the rows the users decided are in it
     const fix = REAL_CONFIG.jpCensus;
-    assert.deepStrictEqual(Object.keys(fix).filter((k) => !k.startsWith('_')).sort(), ['JP-D-2018-08-04', 'JP-D-2018-09-01', 'JP-RAID-21', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+    const ids = Object.keys(fix).filter((k) => !k.startsWith('_'));
+    assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-06-19', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
+      'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01',
+      'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+    // live JP notices (06-11): the 2016 super-hard weekends start on the JP Saturday (18958, 19740, 19871, 19875, 20289; standing 20079)
+    const shr = ids.filter((k) => /^JP-SHR-/.test(k));
+    assert.strictEqual(shr.length, 25, 'every 2016 super-hard weekend');
+    for (const id of shr) assert.ok(fix[id].start < '2017' && new Date(`${fix[id].start}T12:00:00Z`).getUTCDay() === 6 && /\d{5}|土曜限定/.test(fix[id].source), id);
+    // the raid events whose notice says «3 hours, +1 per defeat, +5 in Bonus Time»
+    for (const id of ['JP-RAID-14', 'JP-RAID-15', 'JP-RAID-22', 'JP-D-2017-06-19', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
+      'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-06']) assert.ok(fix[id].upMinutes === 180 && fix[id].bonusLevelStep === 5 && /JP notice \d+/.test(fix[id].source), id);
+    assert.ok(fix['JP-RAID-24'].upMinutes === 180 && !fix['JP-RAID-24'].bonusLevelStep, 'notice 25538 states no Bonus Time step');
+    assert.deepStrictEqual([fix['JP-RAID-27'].start, fix['JP-RAID-27'].levelStep, fix['JP-RAID-27'].upMinutes], ['2017-10-16', 5, 180], 'notice 33250');
+    assert.deepStrictEqual([fix['JP-RAID-15'].start, fix['JP-D-2017-06-19'].bosses], ['2016-08-15', ['Jewel Sorceress']], 'notices 20078, 29434');
     assert.deepStrictEqual(fix['JP-RAID-28'].bosses, ['Assault Dragon', 'Queen Bee Ω', 'Jewel Princess', 'Jack in the Box', 'Gummi Hound', 'Closehanded Captain', 'Gear Golem']);
     assert.deepStrictEqual(fix['JP-RAID-30'].probableBosses, ['Crabby Cake']);
     for (const id of ['JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30']) assert.ok(fix[id].weekdays && !('windowLevel' in fix[id]) && fix[id].levelDrops.length === 1 && fix[id].levelDrops[0].level === 10, id);
     assert.ok(REAL_CONFIG.boards.boostedMedals.some((m) => m.name === 'Twilight Thorn' && m.str === 1000 && m.def === 0), 'the boosted Twilight Thorn row the August 2017 drop needs');
-    for (const id of ['JP-D-2018-08-04', 'JP-D-2018-09-01']) assert.ok(fix[id].saturdayOnly && fix[id].probableBosses === true && fix[id].hpProbable && /fixed 1,500,000,000/.test(fix[id].hp), id);
+    // the 2018 Saturday-only weekends: bosses named by their own notices (43217 Gear Golem, 44270 Bane Spider = Scourge Spider), HP still probable
+    assert.deepStrictEqual([fix['JP-D-2018-08-04'].bosses, fix['JP-D-2018-09-01'].bosses], [['Gear Golem'], ['Scourge Spider']]);
+    for (const id of ['JP-D-2018-08-04', 'JP-D-2018-09-01']) assert.ok(fix[id].saturdayOnly && !('probableBosses' in fix[id]) && fix[id].hpProbable && /fixed 1,500,000,000/.test(fix[id].hp), id);
   },
   old_hp_2016() {
     // a 2016 event raid with its own 2016 row keeps that row: knots, HP, ATK, DEF, Lux and reward rows

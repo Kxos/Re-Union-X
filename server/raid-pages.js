@@ -342,7 +342,7 @@ const RECON_TEXT = {
   jpBoardOriginal: 'The Raid Boards are the original Japanese ones (cells, costs and rewards from the game data); a Japanese-only medal that has no worldwide version yet is left out, and the cell positions are ours.',
   jpBoardDeduced: 'No Japanese board of this raid survives cell by cell: its Raid Boards are reconstructed from what is known (number of cells, total Raid Coins, main rewards and title from the Japanese wiki, the original board pictures), on the model of the original Japanese boards of the same time. The costs of single cells and the filler medals are ours.',
   jpNoBoard: 'Nothing is known of the Japanese Raid Board of this raid, so it has none here: the raid still gives Raid Coins.',
-  jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»; August 4 and September 1, 2018: the next boss of the Japanese weekend cycle).',
+  jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»).',
   jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
   weekRule: 'One rule for every raid on this server (not original): from Monday to Friday the raid quest costs its original AP and there is no Bonus Time; on Saturday and Sunday (Pacific time) it costs 0 AP and the Lux of the raid boss is doubled, all day. The original game had its own hours instead: Bonus Time four times a day, and some raids open only at set hours.',
   weekdayAp: 'The original quest cost 0 AP (a free week or an AP 0 campaign of the time): with the rule of this server it costs 5 AP from Monday to Friday and 0 AP on Saturday and Sunday.',
@@ -382,6 +382,9 @@ const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RE
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 // levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
 const stepOf = (row) => Math.max(1, ...row.entries.map((e) => Number(e.levelStep) || 1));
+// «+N in Bonus Time» of a JP raid's own notice (make-raid.js entry.bonusLevelStep: +5 for the JP raid events of 2016-2018), 0 when none
+const bonusStepOf = (row) => Math.max(0, ...row.entries.map((e) => Number(e.bonusLevelStep) || 0));
+const bonusStepText = (row) => (bonusStepOf(row) && stepOf(row) === 1 ? ` (${bonusStepOf(row)} levels in Bonus Time)` : '');
 function detailPage(index, evStageId, ctx = {}) {
   const rows = calendar.catalogRows(index), row = rows.find((r) => r.evStageId === Number(evStageId));
   if (!row) return null;
@@ -417,7 +420,7 @@ function detailPage(index, evStageId, ctx = {}) {
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
     + ruleLine()
-    + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win, up to LV 99; levels reset on the 1st of every month.</p>`
+    + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win${bonusStepText(row)}, up to LV 99; levels reset on the 1st of every month.</p>`
     + `<h2>Raid Boards</h2>${boards}${recon}${other}`
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }
@@ -630,7 +633,7 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;
   }).join('')}</ul>` : '<p class="n">No Raid Boards: the Japanese board of this raid is not known, so none is served.</p>';
   const kv = [['Dates', `${dateRange(row)} (Japanese version only)`], ['Type', FAMILY_LABEL[row.family] || row.family], ['Open', open],
-    ['Level', `LV 1, +${stepOf(row)} at every win, up to LV 99`], ['Raid Boards', state]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
+    ['Level', `LV 1, +${stepOf(row)} at every win${bonusStepOf(row) && stepOf(row) === 1 ? ` (+${bonusStepOf(row)} in Bonus Time)` : ''}, up to LV 99`], ['Raid Boards', state]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
   return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
     + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">JAPAN ONLY</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
