@@ -271,7 +271,7 @@ const jpRow = (id, family, start, end, bosses, extra = {}) => ({ id, family, reg
 const JP_ROWS = () => [
   jpRow('JP-RAID-1', 'event', '2016-04-10', '2016-04-24', ['Queen Bee', 'Queen Bee Ω'], { data: { hp: 'yes (2016 row)' } }),
   jpRow('JP-SHR-1', 'super-hard weekend', '2016-08-12', '2016-08-14', ['Gummi Hound'], { data: { hp: 'yes: fixed 30,000,000 (JP wiki, all levels)' } }),
-  jpRow('JP-SHR-2', 'super-hard weekend', '2018-05-11', '2018-05-12', ['Gummi Hound'], { data: { hp: 'yes: fixed 150,000,000 (JP wiki, all levels)' } }),
+  jpRow('JP-SHR-2', 'super-hard weekend', '2018-05-12', '2018-05-12', ['Gummi Hound'], { data: { hp: 'yes: fixed 150,000,000 (JP wiki, all levels)' } }),
   jpRow('JP-D-2017-08-13', 'event', '2017-08-13', null, ['Trickmaster']),
   jpRow('JP-D-2018-09-03', 'weekly', '2018-09-03', '2018-09-09', ['Trickmaster']),
   jpRow('JP-TWIN-1', 'event', '2016-06-06', '2016-06-12', ['Queen Bee']),
@@ -402,6 +402,23 @@ const tests = {
     }
     assert.ok(jpEntry(out, 'JP-SHR-2/single').reconstructed.includes('boardSet') && !jpEntry(out, 'JP-SHR-1/single').reconstructed.includes('boardSet'));
   },
+  jp_board_probable_and_wiki_card() {
+    // round 2 (06-11): an original board whose tie to the raid is probable (JP-RAID-3 = 4400001: label jpBoardProbable) and a
+    // board card known only from the JP wiki (art.wiki: a loc line named by the board key, label boardArtWiki)
+    const out = build(jpFixture((f) => {
+      f.boards = { boards: [], weeks: [] };
+      f.master.medal = ['Chip', 'Dale', 'Moogle'].flatMap((n, i) => [5, 6].map((rare) => ({ medalId: 100 + 10 * i + rare, name: n, rare })));
+      f.master.avatarParts = [];
+      f.config.boards = {};
+      f.eventRewards.jpBoards = { rows: {
+        'JP-RAID-1': { status: 'original', probable: true, boards: [{ name: 'Test Set', cells: [{ cost: 50, kind: 'medal', reward: '6★ Chip' }], completion_reward: { value: '6★ Moogle' }, art: { wiki: 'board_raid1610_01.png' } }] } } };
+    }));
+    const e = jpEntry(out, 'JP-RAID-1/single');
+    assert.ok(['jpBoardOriginal', 'jpBoardProbable', 'boardArtWiki'].every((l) => e.reconstructed.includes(l)) && !e.reconstructed.includes('boardNoArt'), e.reconstructed.join());
+    const line = rb.artLines(out.boardArt).split('\n').find((l) => l.startsWith(`img/sphere_incentive/${e.sphereBoardIds[0]}.png`));
+    assert.strictEqual(line.split('\t').slice(1).join('\t'), 'loc\t=img/sphere_incentive_ww/JP-RAID-1_jp1-test-set.png');
+    for (const l of ['jpBoardProbable', 'boardArtWiki']) assert.ok(REAL_CONFIG.reconstructedWhy[l], l);
+  },
   jp_census_overlay() {
     // the later JP research (raid_config.json jpCensus, user 05-11 / 06-11): rows the census leaves without a boss get one, the
     // 2017 monthly raids rotate by weekday, the 2018 one-day weekends open on Saturday only with a probable HP, JP level drops
@@ -498,13 +515,20 @@ const tests = {
     // the shipped overlay: every id is a census row (checked by the real build) and the rows the users decided are in it
     const fix = REAL_CONFIG.jpCensus;
     const ids = Object.keys(fix).filter((k) => !k.startsWith('_'));
-    assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-06-19', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
+    assert.deepStrictEqual(ids.filter((k) => !/^JP-SHR-/.test(k)).sort(), ['JP-D-2017-05-22', 'JP-D-2017-06-19', 'JP-D-2017-07-17', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
       'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-04', 'JP-D-2018-08-06', 'JP-D-2018-09-01',
-      'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
-    // live JP notices (06-11): the 2016 super-hard weekends start on the JP Saturday (18958, 19740, 19871, 19875, 20289; standing 20079)
+      'JP-RAID-14', 'JP-RAID-15', 'JP-RAID-21', 'JP-RAID-22', 'JP-RAID-24', 'JP-RAID-27', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-3', 'JP-RAID-30', 'JP-RAID-4', 'JP-RAID-6', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
+    // live JP notices (06-11): every super-hard weekend starts on the JP Saturday (18958, 19740, 19871, 19875, 20289, 24640;
+    // standing 20079; the Saturday-only ones of the JP wiki banners 土曜限定), not on the Pacific Friday of the census
     const shr = ids.filter((k) => /^JP-SHR-/.test(k));
-    assert.strictEqual(shr.length, 25, 'every 2016 super-hard weekend');
-    for (const id of shr) assert.ok(fix[id].start < '2017' && new Date(`${fix[id].start}T12:00:00Z`).getUTCDay() === 6 && /\d{5}|土曜限定/.test(fix[id].source), id);
+    assert.strictEqual(shr.length, 96, 'every super-hard weekend 2016-2018');
+    for (const id of shr) assert.ok(new Date(`${fix[id].start}T12:00:00Z`).getUTCDay() === 6 && /\d{5}|土曜限定/.test(fix[id].source), id);
+    assert.ok(/24640/.test(fix['JP-SHR-28'].source) && fix['JP-SHR-28'].start === '2017-01-21', 'notice 24640');
+    // the first 60-minute weekend is the JP Saturday 2018-05-12 (JP-SHR-96); JP-SHR-95 (2018-05-05) keeps 12 hours
+    assert.deepStrictEqual([fix['JP-SHR-95'].start, fix['JP-SHR-96'].start, REAL_CONFIG.jpTimer['super-hard weekend'].oneHourFrom], ['2018-05-05', '2018-05-12', '2018-05-12']);
+    // round 2 notices 28549, 30537: 3 hours, +1 / +5; JP-RAID-3: the wiki copy of its notice, Saturday-Sunday 11/14-15/2015
+    for (const id of ['JP-D-2017-05-22', 'JP-D-2017-07-17']) assert.ok(fix[id].upMinutes === 180 && fix[id].bonusLevelStep === 5, id);
+    assert.deepStrictEqual([fix['JP-RAID-3'].start, fix['JP-RAID-3'].end], ['2015-11-14', '2015-11-15']);
     // the raid events whose notice says «3 hours, +1 per defeat, +5 in Bonus Time»
     for (const id of ['JP-RAID-14', 'JP-RAID-15', 'JP-RAID-22', 'JP-D-2017-06-19', 'JP-D-2017-08-13', 'JP-D-2017-09-04', 'JP-D-2017-09-18', 'JP-D-2017-11-13', 'JP-D-2017-12-11',
       'JP-D-2018-01-15', 'JP-D-2018-02-12', 'JP-D-2018-04-09', 'JP-D-2018-07-09', 'JP-D-2018-08-06']) assert.ok(fix[id].upMinutes === 180 && fix[id].bonusLevelStep === 5 && /JP notice \d+/.test(fix[id].source), id);

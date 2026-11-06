@@ -406,8 +406,16 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
       (31403; label `jpDates` gone); the 25 super-hard weekends of 2016 start on Saturday (18958, 19740, 19871, 19875, 20289;
       standing 20079 for the others; the three Saturday-only ones of the JP wiki banners, JP-SHR-14/19/24, are Saturday to
       Saturday). Keys unchanged (the daily rotating days count from the end). Not moved: JP-RAID-28 / 30 (their weekday keys
-      carry the first date of each weekday) and the 2017-2018 super-hard weekends (no notice in this sweep).
+      carry the first date of each weekday) and the 2017-2018 super-hard weekends (no notice in this sweep; moved in round 2).
     - Boards stay as they are: no notice gives a cell list or a coin total.
+    - **Round 2 (user 06-11).** All 96 super-hard weekends start on the JP Saturday (2017-2018 rows: standing notice 20079 of
+      2016-08-13, every weekend Saturday 0:00 - Sunday 23:59; JP-SHR-28 its own notice 24640, Saturday only 1/21/2017; the
+      Saturday-only rows of the JP wiki banners 土曜限定 stay Saturday to Saturday; the 2018 Saturday-only rows JP-D-2018-06-09 /
+      08-04 / 09-01 were already Saturdays, notice 40716 covers 2018-05-26 on). `jpTimer` 1 hour now from the JP Saturday
+      **2018-05-12** (JP-SHR-96), so JP-SHR-95 (2018-05-05) keeps 12 hours as before. JP-D-2017-05-22 (28549) and
+      JP-D-2017-07-17 (30537): 3 hours, +1 / +5 in Bonus Time. JP-RAID-3: 2015-11-14 - 11-15 (Saturday-Sunday, the JP wiki /
+      GAMY copy of its notice; label `jpDates` gone) and the board below. Dry run against round 1: 91 JP tier rows changed (72 dates,
+      the rest labels / boards / two timers), no WW row, no HP; one new board id (747, JP-RAID-3).
     - Dry run (`D:/Progetto_Restauro_KH_UX/tmp/raidjp_notice_dry`, local, HEAD config vs working copy): 608 of 608 tier rows,
       no WW entry changed, no key or id added (`raid_ids.json` unchanged), master row counts unchanged; 58 JP tier rows changed (dates, timers, steps, the
       three bosses with their donor quest); the event-rule HP of the rows whose start moved changes by about 1 % (date scale).
@@ -439,7 +447,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   77,777, all levels), Jewel Princess 2016-11 (by level, linear between the wiki's levels). Rows with census «yes (2016 row)»:
   the WW 2016 row as it stands, rewards included (`jp2016`). Others: the `eventHp` rule of the WW event raids. No 2016 floor
   under a JP wiki HP. ATK / DEF as the WW raids of the time.
-- **Timer** (`jpTimer`, `raid_config.json`): super-hard weekends 12 h, 1 h from 2018-05-05; monthly 30-minute raids 30 minutes
+- **Timer** (`jpTimer`, `raid_config.json`): super-hard weekends 12 h, 1 h from 2018-05-05 (JP Saturday 2018-05-12 since the rows start on the JP Saturday, 06-11 round 2); monthly 30-minute raids 30 minutes
   (their two daily windows are not served: [Raid hours](#raid-hours)). Super-hard weekends open on Saturday and Sunday only
   (`open: 'weekend'`), the daily rotating raid on its weekday (`open: 'day'`).
 - <a id="jp-boards"></a>**Boards (user decision 06-11, replaces the generic `boardStandard` boards of 05-11; tests and dry run,
@@ -448,7 +456,10 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     Christmas 2015 (JP-RAID-4: M_/L_ Santa Sora Outfit 19 cells / 500 each, two bonus boards 2,000 / 3,400, completion Santa
     ★5 = WW 5★ Christmas Sora) and January 2016 (JP-RAID-6: Mickey & Magic Broom 5,300, 5 Magic Brooms + 1 Fantasia Mickey B,
     title Peppy; its bonus board 5,300, completion 6★ Dewey). Label `jpBoardOriginal`. 4400001 (18 cells, 1,410, Cid, title
-    True) is not tied to any raid by a source: not served. The super-hard standard board (13 cells, 40,500 Raid Coins, 6★
+    True, card 2400001) is served since 06-11 round 2 as the board of **JP-RAID-3** (Trident Tail, November 2015), label
+    `jpBoardProbable` too (private list `probable: true`): the raid board debuted with that raid (coins from Trident Anchor,
+    which dropped Cid), it is the only board of the month, and the JP wiki 称号 page gives the title 真・ (= True) as unlocked
+    by the Cid cells of the «2015年11月レイドイベント» board (JP_ONLY.md Gap research 10). The super-hard standard board (13 cells, 40,500 Raid Coins, 6★
     Moogle x3, HDL x8, Magic Broom x2, completion 6★ Moogle) stays the WW **Legendary Raid Reward** board of WW-E41605-1
     (`jpBoards.superHard`, label `jpBoard`, `boardSet` when the census only infers it, from 2017-05-26).
   - **(b) reconstructed** (label `jpBoardDeduced`): only when the evidence gives the cell count **and** the total coins (JP
@@ -472,6 +483,18 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     WW Zootopia cards for JP-RAID-10 (`artFrom`), for 6 boards the card of a board
     with the same main reward for the 5-Mirror bonus boards and the Magic Broom Set (said in the evidence); 23 boards have no
     card (`boardNoArt`). `game_data/raid_board_art.tsv` changes: needs a resource build.
+  - **Wiki cards (06-11 round 2).** The JP wiki レイドボード page shows the original card of every board up to 2017-05
+    (`reference\raid_banners_jp\jp_fansites\wikiwiki_boardcards`, 179-359 px, untrusted fan upload, local only; Gap research
+    10). Matched against the JP 4.3.1 files on the picture's own pixels (alpha > 200, 102 px, mean difference 3-6 of 255 for
+    a match, 40+ otherwise): the 5-Mirror bonus card `board_raid1609_05` is **2400111** (= 2400117), so the bonus boards of
+    JP-RAID-17, 19, 20, 21, 23, 25 and 26 now show 2400111 (2400039, used before, is another picture); no JP file has
+    `1605_03` (JP-RAID-12, both boards, was 2400019 / none), `1608_03` (JP-RAID-16 bonus, was 2400035), `1610`-`1612`,
+    `1701_01`-`08`, `1702_01`-`03`, `1703`, `1704`. Those 24 boards get the wiki card (`art: {wiki}` in the private list,
+    label `boardArtWiki`): `recon/tools/raid_board_wikicards.py` scales it to 306 x 306 (Lanczos) with the corner alpha of
+    Board_0005, like the screenshot cards, into `--loc` `img/sphere_incentive_ww/<board key>.png`; `raid_board_art.tsv`
+    names it as a `loc` line. Every JP board now has a card (0 `boardNoArt`). JP-RAID-15's three wiki cards are not used:
+    the raid has no board (no cell count with a total). The 2017-2018 client cards 2400109+ (probable matches) are not used:
+    those JP-D rows have no board either.
 - **Cards** (6 November 2026). Original JP raid banners, written by `make_raid_banners.py --jp <list>` (keyed by census id,
   evStageId looked up in `raids.json` at run time; same 640x140 processing as the WW cards; the WW build leaves `jp` rows
   alone). The list and the files are local only (`reference\raid_banners_jp\jp_cards.json`, untrusted downloads); per-row
@@ -502,7 +525,8 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   rows on their own notices 43217 / 44270, the 2016 super-hard weekends 18958, 19740, 19871, 19875, 20289 and the standing
   notice 20079 for 17 more (not the three Saturday-only ones), the raid events 19605, 20078, 29434, 31403, 32004, 32423, 34128,
   34933, 36192, 36820, 38872, 42191, 43221, the daily rotating raid 33250 and the monthly raids 32684, 33627, 34923, 37931,
-  38866, 39851, 40928 with their bosses, main board items and completion pet parts; dry run of `make-raid-notices.js` with
+  38866, 39851, 40928 with their bosses, main board items and completion pet parts; round 2: **59 rows**, + 28549
+  (JP-D-2017-05-22), 30537 (JP-D-2017-07-17), 24640 (JP-SHR-28); dry run of `make-raid-notices.js` with
   `KHUX_RAID_NOTICES_OUT`), else «The original Japanese notice of this raid has not been recovered»;
   (3) what is known: dates, type, opening rule, level rule, bosses by day / tier with HP at LV 1 and time limit, level rewards,
   Raid Boards with their state (original / Japanese super-hard board / reconstructed / none); (4) «On this server». The

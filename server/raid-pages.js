@@ -285,7 +285,7 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   lux: 'Lux', moves: 'moves', hp: 'boss HP (from the tier tables)', hp_step: 'the week of an HP change', atk_curve: 'ATK below the level cap',
   attribute: 'attribute (from the boss colour)', background: 'fight background', boardAlias: 'a Raid Board reward name', boardPath: 'the order of the Raid Board cells',
   boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week',
-  boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)',
+  boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)', boardArtWiki: 'a Raid Board card picture (from the Japanese wiki)',
   // the labels of the event raids (Task 10)
   rareOdds: 'odds of the rare boss', boardGender: 'both gender boards open', weekendTimer: 'weekend time limit', questObjectives: 'quest objectives',
   levelDrops: 'level drops', levelDropsPartial: 'level rewards (in part)', boardStandard: 'Raid Board (from a similar raid)', eventCoins: 'Raid Coin rewards',
@@ -293,7 +293,7 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the story raid bosses (Task 11)
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
-  jpBoardOriginal: 'Raid Boards (original Japanese boards)', jpBoardDeduced: 'Raid Boards (reconstructed)', jpNoBoard: 'Raid Boards (none: not known)',
+  jpBoardOriginal: 'Raid Boards (original Japanese boards)', jpBoardProbable: 'Raid Board (original, tie to this raid probable)', jpBoardDeduced: 'Raid Boards (reconstructed)', jpNoBoard: 'Raid Boards (none: not known)',
   jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpRewardProbable: 'level reward (probable match)',
   // the AP / Bonus Time rule (I-228, raid_config.json costRule): weekdayWeekend served, the opening hours of originalWindows kept off
   weekRule: 'AP and Bonus Time (one rule for all raids)', weekdayAp: 'weekday AP of a quest that was free',
@@ -321,6 +321,7 @@ const RECON_TEXT = {
   boardSet: 'Which Raid Boards ran this week comes from the community lists.',
   boardArt: 'A Raid Board card picture is cut from a screenshot of the original game.',
   boardNoArt: 'A Raid Board card picture is missing.',
+  boardArtWiki: 'A Raid Board card picture is the original card as shown on the Japanese fan wiki, enlarged: the picture file itself is not in the surviving game data.',
   rareOdds: 'How often the rare boss appears is deduced from the 2016 data.',
   boardGender: 'Both the male and the female board are open (the original showed only your gender\'s).',
   weekendTimer: 'The weekend time limit comes from the rule of the time (3 hours, 1 hour from May 2018).',
@@ -340,6 +341,7 @@ const RECON_TEXT = {
   jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids).',
   jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
   jpBoardOriginal: 'The Raid Boards are the original Japanese ones (cells, costs and rewards from the game data); a Japanese-only medal that has no worldwide version yet is left out, and the cell positions are ours.',
+  jpBoardProbable: 'This original Japanese board survives in the game data, but no source ties it to this raid directly: it is the only board of November 2015, and its title True (真・) is the one the Japanese wiki gives for the Cid cells of the November 2015 raid board (probable).',
   jpBoardDeduced: 'No Japanese board of this raid survives cell by cell: its Raid Boards are reconstructed from what is known (number of cells, total Raid Coins, main rewards and title from the Japanese wiki, the original board pictures), on the model of the original Japanese boards of the same time. The costs of single cells and the filler medals are ours.',
   jpNoBoard: 'Nothing is known of the Japanese Raid Board of this raid, so it has none here: the raid still gives Raid Coins.',
   jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»).',
@@ -606,7 +608,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
 const JP_BANNERS = (() => { try { return require('./raid_jp_banners.json').rows || {}; } catch { return {}; } })();
 const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const minutesText = (m) => (!m ? '' : m % 60 ? `${m} minutes` : m === 60 ? '1 hour' : `${m / 60} hours`);
-const JP_BOARD_STATE = [['jpBoardOriginal', 'original Japanese boards'], ['jpBoard', 'the Japanese super-hard board (= worldwide Legendary Raid Reward)'],
+const JP_BOARD_STATE = [['jpBoardOriginal', 'original Japanese boards'], ['jpBoardProbable', 'its tie to this raid is probable'], ['jpBoard', 'the Japanese super-hard board (= worldwide Legendary Raid Reward)'],
   ['jpBoardDeduced', 'reconstructed from the surviving evidence'], ['jpNoBoard', 'none: not known']];
 function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
   const title = titleOf(row), facts = doc && doc.jp ? doc.jp[row.censusId] : null;
