@@ -1,0 +1,812 @@
+# Banner Catalog row -> original WW notice (SQUARE ENIX BRIDGE id). Read by server/make-shop-notices.js. Ids only: the notice
+# texts are private (git-ignored game_data/shop_notices.json). alt = other notices that also name the banner; confidence of
+# the match (high: name and date, medium: one of the two, low: related notice); note = where the match comes from, or what
+# was searched when no notice was found. docs/notes/shop.md#original-notices
+rowId	noticeId	alt	confidence	note
+B0001	19382		low	06-11: no notice of the launch-day standing deal; the Update 1.1.0 notes (Jul 7, 2016) speak of the Daily Deals and Small Deals that never expire
+B0002				06-11: launch week deal (Apr 7-14, 2016); no WW notice names it: local archive (2,604 notices), live ids 17000-17599 (17300-17599 on 19-10), Wayback captures of the launch-week ids (other games)
+B0003				06-11: launch week deal (Apr 7-14, 2016); no WW notice names it: local archive (2,604 notices), live ids 17000-17599 (17300-17599 on 19-10), Wayback captures of the launch-week ids (other games)
+B0004				06-11: launch week deal (Apr 7-14, 2016); no WW notice names it: local archive (2,604 notices), live ids 17000-17599 (17300-17599 on 19-10), Wayback captures of the launch-week ids (other games)
+B0005	17552		medium	notice audit 17-10
+B0006	17552		medium	notice audit 17-10
+B0007	17628		high	notice audit 17-10
+B0008	17886		high	notice audit 17-10
+B0009	17892		high	D8 search 19-10: the Zootopia avatar-board campaign (two boards unlocked for 3,000 Jewels each), not a medal draw
+B0010	17978		medium	notice audit 17-10
+B0011	18097		medium	notice audit 17-10
+B0012	18277		high	notice audit 17-10
+B0013	18277		high	notice audit 17-10
+B0014	18277		high	notice audit 17-10
+B0015	18469		high	notice audit 17-10
+B0016	18628		high	notice audit 17-10
+B0017	18628		high	notice audit 17-10
+B0018	18785		high	notice audit 17-10
+B0019	18892	18941	high	notice audit 17-10
+B0020	18941		high	notice audit 17-10
+B0021	18941	18892	high	notice audit 17-10
+B0022	19084	18892	medium	notice audit 17-10
+B0023	19084		high	notice audit 17-10
+B0024	19084		high	notice audit 17-10
+B0025	19287		high	notice audit 17-10
+B0026	19287		high	notice audit 17-10
+B0027	19382		medium	notice audit 17-10
+B0028	19415	19382	high	notice audit 17-10
+B0029	19415		high	notice audit 17-10
+B0030	19415	19382	high	notice audit 17-10
+B0031	19536		high	notice audit 17-10
+B0032	19536		high	notice audit 17-10
+B0033	19724		high	notice audit 17-10
+B0034	19882		high	notice audit 17-10
+B0035	19882		high	notice audit 17-10
+B0036	19884		high	notice audit 17-10
+B0037	19884	19883,19882	high	notice audit 17-10
+B0038	20029		high	notice audit 17-10
+B0039	20205		high	notice audit 17-10
+B0040	20205		high	notice audit 17-10
+B0041	20315		high	notice audit 17-10
+B0042	20419		high	notice audit 17-10
+B0043	20538		high	notice audit 17-10
+B0044	20642		high	notice audit 17-10
+B0045	20745		medium	notice audit 17-10
+B0046	20865		high	notice audit 17-10
+B0047	20865		high	notice audit 17-10
+B0048	21054		high	notice audit 17-10
+B0049	21095		high	notice audit 17-10
+B0050	21281		high	notice audit 17-10
+B0051	21433		high	notice audit 17-10
+B0052	21433		high	notice audit 17-10
+B0053	21676		high	notice audit 17-10
+B0054	21770		high	notice audit 17-10
+B0055	21821	21908	high	notice audit 17-10
+B0056	21908	21821	high	notice audit 17-10
+B0057	22011		high	notice audit 17-10
+B0058	22102		high	notice audit 17-10
+B0059	22102		high	notice audit 17-10
+B0060	22102		high	notice audit 17-10
+B0061	22110		high	notice audit 17-10
+B0062	22114		high	notice audit 17-10
+B0063	22556		high	notice audit 17-10
+B0064	22561		high	notice audit 17-10
+B0065	22562		high	notice audit 17-10
+B0066	23113		high	notice audit 17-10
+B0067	23118		high	notice audit 17-10
+B0068	23538		high	notice audit 17-10
+B0069	23543		high	notice audit 17-10
+B0070	23790		high	notice audit 17-10
+B0071	23792		high	notice audit 17-10
+B0072	23797		high	notice audit 17-10
+B0073	23797		high	notice audit 17-10
+B0074	23797		high	notice audit 17-10
+B0075	23797		high	notice audit 17-10
+B0076	23797		high	notice audit 17-10
+B0077				06-11: no WW notice names it: local archive (Jan 2017 batch 23795-23811, none on Jan 7), live ids 23750-24100 and 24549-24654, Wayback captures of the 23xxx ids (other games)
+B0078	23805		high	notice audit 17-10
+B0079	24587		high	notice audit 17-10
+B0080	24591		high	notice audit 17-10
+B0081	24591		high	notice audit 17-10
+B0082	24593		high	notice audit 17-10
+B0083	24597		high	notice audit 17-10
+B0084	24843		high	notice audit 17-10
+B0085	24850		high	notice audit 17-10
+B0086	25357	36858	high	notice audit 17-10
+B0087	26296		medium	06-11: «3 Days of Skills to Thrill!» names the Scrooge skill of this banner and its end (Mar 16, 2017); it starts Mar 14, the wiki says Feb 14
+B0088	26296		medium	06-11: «3 Days of Skills to Thrill!» names the Scrooge skill of this banner and its end (Mar 16, 2017); it starts Mar 14, the wiki says Feb 14
+B0089	25362	25363	high	notice audit 17-10
+B0090	25829		high	notice audit 17-10
+B0091	25829		high	notice audit 17-10
+B0092	25829		high	notice audit 17-10
+B0093	25829		high	notice audit 17-10
+B0094	25834		high	notice audit 17-10
+B0095	25834		high	notice audit 17-10
+B0096	25834		high	notice audit 17-10
+B0097	25834		high	notice audit 17-10
+B0098	25834		high	notice audit 17-10
+B0099	26290		high	notice audit 17-10
+B0100	26296		high	notice audit 17-10
+B0101	26297		high	notice audit 17-10
+B0102	26835		high	notice audit 17-10
+B0103	26835		high	notice audit 17-10
+B0104	26840		high	notice audit 17-10
+B0105	27136	27134	medium	notice audit 17-10
+B0106	27134		high	notice audit 17-10
+B0107	27136		medium	notice audit 17-10
+B0108	27136	27134	medium	notice audit 17-10
+B0109	27143		high	notice audit 17-10
+B0110	27750		high	notice audit 17-10
+B0111	27755		high	notice audit 17-10
+B0112	27755		high	notice audit 17-10
+B0113	27755		high	notice audit 17-10
+B0114	27755		high	notice audit 17-10
+B0115	27755		high	notice audit 17-10
+B0116	27757	27758	high	notice audit 17-10
+B0117	27756	27757	high	notice audit 17-10
+B0118	27763		high	notice audit 17-10
+B0119	28240		high	notice audit 17-10
+B0120	28243		high	notice audit 17-10
+B0121	28250		high	notice audit 17-10
+B0122	28250		high	notice audit 17-10
+B0123	28250		high	notice audit 17-10
+B0124	28250		high	notice audit 17-10
+B0125	28251		high	notice audit 17-10
+B0126	28251		high	notice audit 17-10
+B0127	28944		high	notice audit 17-10
+B0128	29012		high	notice audit 17-10
+B0129	28945		high	notice audit 17-10
+B0130	28950		high	notice audit 17-10
+B0131	29394		high	notice audit 17-10
+B0132	29402		high	notice audit 17-10
+B0133	29404		high	notice audit 17-10
+B0134	29404		high	notice audit 17-10
+B0135	29404		high	notice audit 17-10
+B0136	29404		high	notice audit 17-10
+B0137	29404		high	notice audit 17-10
+B0138	29792		high	notice audit 17-10
+B0139	29799		high	notice audit 17-10
+B0140	30115		high	notice audit 17-10
+B0141	30123		high	notice audit 17-10
+B0142	30125		high	notice audit 17-10
+B0143	30125		high	notice audit 17-10
+B0144	30125		high	notice audit 17-10
+B0145	30703		high	notice audit 17-10
+B0146	30707		high	notice audit 17-10
+B0147	30708		high	notice audit 17-10
+B0148	30708		high	notice audit 17-10
+B0149	30708		high	notice audit 17-10
+B0150	30708		high	notice audit 17-10
+B0151	30708		high	notice audit 17-10
+B0152	30935		high	notice audit 17-10
+B0153	31346		high	notice audit 17-10
+B0154	31346		low	notice audit 17-10
+B0155	31346		high	notice audit 17-10
+B0156	31349	31348	high	notice audit 17-10
+B0157	31354		high	notice audit 17-10
+B0158	31413		high	notice audit 17-10
+B0159	31600		high	notice audit 17-10
+B0160	31604		high	notice audit 17-10
+B0161	31604		high	notice audit 17-10
+B0162	31604		high	notice audit 17-10
+B0163	31607		high	notice audit 17-10
+B0164	31613		high	notice audit 17-10
+B0165	32022	32530	high	notice audit 17-10
+B0166	32026		high	notice audit 17-10
+B0167	32530		high	notice audit 17-10
+B0168	32032		high	notice audit 17-10
+B0169	32037		high	notice audit 17-10
+B0170	32512		high	notice audit 17-10
+B0171	32525		high	notice audit 17-10
+B0172	32525		high	notice audit 17-10
+B0173	32525		high	notice audit 17-10
+B0174	32525		high	notice audit 17-10
+B0175	32525		high	notice audit 17-10
+B0176	32518		high	notice audit 17-10
+B0177	32524		high	notice audit 17-10
+B0178	32524		high	notice audit 17-10
+B0179	32524		high	notice audit 17-10
+B0180	33003		low	notice audit 17-10
+B0181	33003		high	notice audit 17-10
+B0182	33005		high	notice audit 17-10
+B0183	33012		high	notice audit 17-10
+B0184	33505		high	notice audit 17-10
+B0185	33499		high	notice audit 17-10
+B0186	33499		high	notice audit 17-10
+B0187	33499		high	notice audit 17-10
+B0188	33499		high	notice audit 17-10
+B0189	33499		high	notice audit 17-10
+B0190	33593		high	notice audit 17-10
+B0191	33510		high	notice audit 17-10
+B0192	33510		high	notice audit 17-10
+B0193	33510		high	notice audit 17-10
+B0194	33831		high	notice audit 17-10
+B0195	33883		high	notice audit 17-10
+B0196	33891		high	notice audit 17-10
+B0198	34215		high	notice audit 17-10
+B0199	34475	34215,34471	high	notice audit 17-10
+B0200	34475	34215,34471	high	notice audit 17-10
+B0201	34475	34215,34471	high	notice audit 17-10
+B0202	34475	34215,34471	high	notice audit 17-10
+B0203	34475	34215,34471	high	notice audit 17-10
+B0204	34471		high	notice audit 17-10
+B0205	34475	34471	high	notice audit 17-10
+B0207	34669		high	notice audit 17-10
+B0208	34675		high	notice audit 17-10
+B0209	34682		high	notice audit 17-10
+B0210	34682		high	notice audit 17-10
+B0211	34682		high	notice audit 17-10
+B0212	35138		high	notice audit 17-10
+B0213	35143		high	notice audit 17-10
+B0214	35143		high	notice audit 17-10
+B0215	35143		high	notice audit 17-10
+B0216	35143		high	notice audit 17-10
+B0217	35143		high	notice audit 17-10
+B0218	35145		high	notice audit 17-10
+B0219	35148		medium	notice audit 17-10
+B0220	35148		high	notice audit 17-10
+B0221	35513		high	notice audit 17-10
+B0222	35517		high	notice audit 17-10
+B0223	35521		high	notice audit 17-10
+B0224	35521		high	notice audit 17-10
+B0225	35521		high	notice audit 17-10
+B0226	35521		high	notice audit 17-10
+B0227	35521		high	notice audit 17-10
+B0228	35521	35517	high	notice audit 17-10
+B0229	35525		high	notice audit 17-10
+B0230	35531		high	notice audit 17-10
+B0231	36360		high	notice audit 17-10
+B0232	36367		high	notice audit 17-10
+B0233	36367		high	notice audit 17-10
+B0234	36367		high	notice audit 17-10
+B0235	36375		high	notice audit 17-10
+B0236	36375		high	notice audit 17-10
+B0237	36851	36849	high	notice audit 17-10
+B0238	36857		high	notice audit 17-10
+B0239	36858		high	notice audit 17-10
+B0240	36864		high	notice audit 17-10
+B0241	37207	36864	high	notice audit 17-10
+B0242	37207	37210,36864	high	notice audit 17-10
+B0243	37210		high	notice audit 17-10
+B0244	37216		high	notice audit 17-10
+B0245	37217		high	notice audit 17-10
+B0246	37655		high	notice audit 17-10
+B0247	37220		high	notice audit 17-10
+B0248	37221		high	notice audit 17-10
+B0249	37221		high	notice audit 17-10
+B0250	37221		high	notice audit 17-10
+B0251	37221		high	notice audit 17-10
+B0252	37221		high	notice audit 17-10
+B0253	37221		high	notice audit 17-10
+B0254	37221		high	notice audit 17-10
+B0255	37765		high	notice audit 17-10
+B0256	37770		high	notice audit 17-10
+B0257	37769		high	notice audit 17-10
+B0258	37773		high	notice audit 17-10
+B0259	38128		high	notice audit 17-10
+B0260	38247		high	notice audit 17-10
+B0261	38247		high	notice audit 17-10
+B0262	38249		high	notice audit 17-10
+B0263	38249		high	notice audit 17-10
+B0264	38253		high	notice audit 17-10
+B0265	38255		high	notice audit 17-10
+B0266	38255	38258	high	notice audit 17-10
+B0267	38258		high	notice audit 17-10
+B0268	38259	38262	high	notice audit 17-10
+B0269	38647		high	notice audit 17-10
+B0270	38656	38660	high	notice audit 17-10
+B0271	38660	38656	high	notice audit 17-10
+B0272	38663		medium	notice audit 17-10
+B0273	38662		high	notice audit 17-10
+B0274	38663		high	notice audit 17-10
+B0275	38666	38880	high	notice audit 17-10
+B0276	38666	38880	high	notice audit 17-10
+B0277	38880		high	notice audit 17-10
+B0278	39163	39396	high	notice audit 17-10
+B0279	39396	39163	high	notice audit 17-10
+B0280	39395	39394,39396,39163	high	notice audit 17-10
+B0281	39398	38969	high	notice audit 17-10
+B0282	38969	39398	high	notice audit 17-10
+B0283	39164	39400	high	notice audit 17-10
+B0284	39400	39164	high	notice audit 17-10
+B0285	39400		high	notice audit 17-10
+B0286	39401		high	notice audit 17-10
+B0287	39404		high	notice audit 17-10
+B0288	39402	38972,39404	high	notice audit 17-10
+B0289	39402		high	notice audit 17-10
+B0290	38972	39166,39402,39404	high	notice audit 17-10
+B0291	38972	39166,39402,39404	high	notice audit 17-10
+B0292	39166	38972	high	notice audit 17-10
+B0293	39877		high	notice audit 17-10
+B0294	39877		high	notice audit 17-10
+B0295	39877		high	notice audit 17-10
+B0296	39877		high	notice audit 17-10
+B0297	39863	39861	high	notice audit 17-10
+B0298	39861	39863	high	notice audit 17-10
+B0299	39879		high	notice audit 17-10
+B0300	39879		high	notice audit 17-10
+B0301	40163		high	notice audit 17-10
+B0302	40163		high	notice audit 17-10
+B0303	40172	40173	high	notice audit 17-10
+B0304	40169		high	notice audit 17-10
+B0305	40318		high	notice audit 17-10
+B0306	40734	40737	high	notice audit 17-10
+B0307	40734	40737	high	notice audit 17-10
+B0308	40734	40737	high	notice audit 17-10
+B0309	40755		medium	notice audit 17-10
+B0310	40734		high	notice audit 17-10
+B0311	40755		medium	notice audit 17-10
+B0312	40755		medium	notice audit 17-10
+B0313	40725		high	notice audit 17-10
+B0314	40735		high	notice audit 17-10
+B0315	40735		high	notice audit 17-10
+B0316	40735		high	notice audit 17-10
+B0317	40735		high	notice audit 17-10
+B0318	40735		high	notice audit 17-10
+B0319	40736		high	notice audit 17-10
+B0320	40933		high	notice audit 17-10
+B0321	41136		high	notice audit 17-10
+B0322	41139		high	notice audit 17-10
+B0323	41139		high	notice audit 17-10
+B0324	41144	41145	high	notice audit 17-10
+B0325	41146		high	notice audit 17-10
+B0326	41149		high	notice audit 17-10
+B0327	41368		high	notice audit 17-10
+B0328	41368		high	notice audit 17-10
+B0329	41368		high	notice audit 17-10
+B0330	41368		high	notice audit 17-10
+B0331	41368		high	notice audit 17-10
+B0332	41368		high	notice audit 17-10
+B0333	41619		high	notice audit 17-10
+B0334	41615		high	notice audit 17-10
+B0335	41615		high	notice audit 17-10
+B0336	41615		high	notice audit 17-10
+B0337	41615		high	notice audit 17-10
+B0338	41615		high	notice audit 17-10
+B0339	41617		high	notice audit 17-10
+B0340	41617	41618	high	notice audit 17-10
+B0341	41618	41664	high	notice audit 17-10
+B0342	41618	41664	high	notice audit 17-10
+B0343	41616		high	notice audit 17-10
+B0344	42144		high	notice audit 17-10
+B0345	42144		high	notice audit 17-10
+B0346	42144		high	notice audit 17-10
+B0347	42146		high	notice audit 17-10
+B0348	42149		high	notice audit 17-10
+B0349	42152		high	notice audit 17-10
+B0350	42152		high	notice audit 17-10
+B0351	42152		high	notice audit 17-10
+B0352	42154	42153	high	notice audit 17-10
+B0353	42156		high	notice audit 17-10
+B0354	42606		high	notice audit 17-10
+B0355	42606		high	notice audit 17-10
+B0356	42610	42609	high	notice audit 17-10
+B0357	42609	42610	high	notice audit 17-10
+B0358	42611		high	notice audit 17-10
+B0359	42611		high	notice audit 17-10
+B0360	42617		high	notice audit 17-10
+B0361	42619		high	notice audit 17-10
+B0362	42621		high	notice audit 17-10
+B0363	42621		high	notice audit 17-10
+B0364	43023		high	notice audit 17-10
+B0365	43026		high	notice audit 17-10
+B0366	43030		high	notice audit 17-10
+B0367	43030		high	notice audit 17-10
+B0368	43030		high	notice audit 17-10
+B0369	43031		high	notice audit 17-10
+B0370	43464		high	notice audit 17-10
+B0371	43044	43036	high	notice audit 17-10
+B0372	43047		high	notice audit 17-10
+B0373	43549		high	notice audit 17-10
+B0374	43561		high	notice audit 17-10
+B0375	43555		high	notice audit 17-10
+B0376	43558		high	notice audit 17-10
+B0377	43560	43923	high	notice audit 17-10
+B0378	43560		high	notice audit 17-10
+B0379	43923		high	notice audit 17-10
+B0380	43923		high	notice audit 17-10
+B0381	43564		high	notice audit 17-10
+B0382	43568	44152	high	notice audit 17-10
+B0383	43568		high	notice audit 17-10
+B0384	44152	43568	high	notice audit 17-10
+B0385	44153		high	notice audit 17-10
+B0386	44217		high	notice audit 17-10
+B0387	44216		high	notice audit 17-10
+B0388	44216		high	notice audit 17-10
+B0389	44492	44009,44495	high	notice audit 17-10
+B0390	44495		high	notice audit 17-10
+B0391	44495		high	notice audit 17-10
+B0392	40755	44008	high	06-11: the Ticket Draw notice updated on Sep 14, 2018 (Silver Ticket pool changed that day, the start of this banner); also in 44008
+B0393	44683		high	notice audit 17-10
+B0394	44511		high	notice audit 17-10
+B0395	44917		high	notice audit 17-10
+B0396	44919		high	notice audit 17-10
+B0397	44925		high	notice audit 17-10
+B0398	45645	45646	high	notice audit 17-10
+B0399	45649	45648	high	notice audit 17-10
+B0400	45655		high	notice audit 17-10
+B0401	45658		high	notice audit 17-10
+B0402	45999	46000	high	notice audit 17-10
+B0403	46000	45999	high	notice audit 17-10
+B0404	46002	46000,45999	high	notice audit 17-10
+B0405	46002	46000,45999	high	notice audit 17-10
+B0406	46002	46000,45999	high	notice audit 17-10
+B0407	46002	46000,45999	high	notice audit 17-10
+B0408	46002	46000,45999	high	notice audit 17-10
+B0409	46002	46000,45999	high	notice audit 17-10
+B0410	46002	46000,45999	high	notice audit 17-10
+B0411	46003		high	notice audit 17-10
+B0412	46010		high	notice audit 17-10
+B0413	46013		high	notice audit 17-10
+B0414	46656		high	notice audit 17-10
+B0415	46657	46647	high	notice audit 17-10
+B0416	46655		high	notice audit 17-10
+B0417	46654		high	notice audit 17-10
+B0418	46658		high	notice audit 17-10
+B0419	47129	47199,47126	high	notice audit 17-10
+B0420	47129	47199,47126	high	notice audit 17-10
+B0421	47129	47199,47126	high	notice audit 17-10
+B0422	47129	47199,47126	high	notice audit 17-10
+B0423	47129	47199,47126	high	notice audit 17-10
+B0424	47129	47199,47126,47127	high	notice audit 17-10
+B0425	47128	47199,47127,47126,47129	high	notice audit 17-10
+B0426	47126	47199,47129,47128,47127	high	notice audit 17-10
+B0427	47127	47199,47128,47126,47129	high	notice audit 17-10
+B0428	47813		high	notice audit 17-10
+B0429	47813		high	notice audit 17-10
+B0430	47814		high	notice audit 17-10
+B0431	47814		high	notice audit 17-10
+B0432	47817	47825	high	notice audit 17-10
+B0433	47819		high	notice audit 17-10
+B0434	47819		high	notice audit 17-10
+B0435	48299		high	notice audit 17-10
+B0436	48299		high	notice audit 17-10
+B0437	48301		high	notice audit 17-10
+B0438	48300		high	notice audit 17-10
+B0439	48300		high	notice audit 17-10
+B0440	48303		high	notice audit 17-10
+B0441	48303		high	notice audit 17-10
+B0442	48236		high	notice audit 17-10
+B0443	48236		high	notice audit 17-10
+B0444	48236		high	notice audit 17-10
+B0445	48292		high	notice audit 17-10
+B0446	48292		high	notice audit 17-10
+B0447	48293		high	notice audit 17-10
+B0448	48294	48941	high	notice audit 17-10
+B0449	48297	48294	high	notice audit 17-10
+B0450	48297		high	notice audit 17-10
+B0451	49366		high	notice audit 17-10
+B0452	48298		high	notice audit 17-10
+B0453	48298		high	notice audit 17-10
+B0454	49367	48298,48942	high	notice audit 17-10
+B0455	49643		high	notice audit 17-10
+B0456	49644		high	notice audit 17-10
+B0457	49647		high	notice audit 17-10
+B0458	49647		high	notice audit 17-10
+B0459	49648		high	notice audit 17-10
+B0460	49649		high	notice audit 17-10
+B0461	50104		high	notice audit 17-10
+B0462	50105	50106	high	notice audit 17-10
+B0463	50107	50021	high	notice audit 17-10
+B0464	50108		high	notice audit 17-10
+B0465	50109		high	notice audit 17-10
+B0466	50643		high	notice audit 17-10
+B0467	50643		high	notice audit 17-10
+B0468	50644		high	notice audit 17-10
+B0469	50644		high	notice audit 17-10
+B0470	50644		high	notice audit 17-10
+B0471	50644		high	notice audit 17-10
+B0472	50645		high	notice audit 17-10
+B0473	50645		high	notice audit 17-10
+B0474	50646		high	notice audit 17-10
+B0475	50646		high	notice audit 17-10
+B0476	51113		high	notice audit 17-10
+B0477	51113		high	notice audit 17-10
+B0478	51112		high	notice audit 17-10
+B0479	51114	51109	high	notice audit 17-10
+B0480	51140		high	notice audit 17-10
+B0481	51116		high	notice audit 17-10
+B0482	51116		high	notice audit 17-10
+B0483	51529		high	notice audit 17-10
+B0484	51529		high	notice audit 17-10
+B0485	51530		low	notice audit 17-10
+B0486	51530		low	notice audit 17-10
+B0487	51530		high	notice audit 17-10
+B0488	51531		high	notice audit 17-10
+B0489	51531		high	notice audit 17-10
+B0490	51532	51533	high	notice audit 17-10
+B0491	51532	51533	high	notice audit 17-10
+B0492	51533	51532,51527,51522	high	notice audit 17-10
+B0493	52166		high	notice audit 17-10
+B0494	52166		high	notice audit 17-10
+B0495	52166		high	notice audit 17-10
+B0496	52165		high	notice audit 17-10
+B0497	52165		high	notice audit 17-10
+B0498	52167		high	notice audit 17-10
+B0499	52167		high	notice audit 17-10
+B0500	52345		high	notice audit 17-10
+B0501	52658		high	notice audit 17-10
+B0502	52657	52658	high	notice audit 17-10
+B0503	52657	52658	high	notice audit 17-10
+B0504	52657	52658	high	notice audit 17-10
+B0505	52707		high	notice audit 17-10
+B0506	52707		high	notice audit 17-10
+B0508	52654	52655	high	notice audit 17-10
+B0509	52654	52655	high	notice audit 17-10
+B0510	52655	52654	high	notice audit 17-10
+B0511	52656		high	notice audit 17-10
+B0512	53280		high	notice audit 17-10
+B0513	53280		high	notice audit 17-10
+B0514	53506		high	notice audit 17-10
+B0515	53506		high	notice audit 17-10
+B0516	53511	52842	high	notice audit 17-10
+B0517	53711		high	notice audit 17-10
+B0518	53711		high	notice audit 17-10
+B0519	53712		high	notice audit 17-10
+B0520	53712		high	notice audit 17-10
+B0521	53774		high	notice audit 17-10
+B0522	53774		high	notice audit 17-10
+B0523	53775	53778,53776	high	notice audit 17-10
+B0524	53775	53776	high	notice audit 17-10
+B0525	53776	53775,53778	high	notice audit 17-10
+B0526	53777	53778	high	notice audit 17-10
+B0527	54257		high	notice audit 17-10
+B0528	54328	54325	high	notice audit 17-10
+B0529	54325	54328	high	notice audit 17-10
+B0530	54329	54330	high	notice audit 17-10
+B0531	54335		high	notice audit 17-10
+B0532	54337		high	notice audit 17-10
+B0533	54337		high	notice audit 17-10
+B0534	54342		high	notice audit 17-10
+B0535	54342		high	notice audit 17-10
+B0536	54348		high	notice audit 17-10
+B0537	54348		high	notice audit 17-10
+B0538	54893		high	notice audit 17-10
+B0539	54893		high	notice audit 17-10
+B0540	54900	54902,54901	high	notice audit 17-10
+B0541	54900	54901	high	notice audit 17-10
+B0542	54901	54900,54902	high	notice audit 17-10
+B0543	54903	54902	high	notice audit 17-10
+B0544	55230		high	notice audit 17-10
+B0545	55231	55625,55421,54902	high	notice audit 17-10
+B0546	55471	55472	high	notice audit 17-10
+B0547	55472	55471	high	notice audit 17-10
+B0548	55474	54902	high	notice audit 17-10
+B0549	55473		high	notice audit 17-10
+B0550	55474		high	notice audit 17-10
+B0551	55815	55814	high	notice audit 17-10
+B0552	55815	55814	high	notice audit 17-10
+B0553	55814	55815	high	notice audit 17-10
+B0554	55814	55815	high	notice audit 17-10
+B0555	55816		high	notice audit 17-10
+B0556	55952	55951	high	notice audit 17-10
+B0557	55951	55952	high	notice audit 17-10
+B0558	55952	55951	high	notice audit 17-10
+B0559	55954	55956,55955,55957	high	notice audit 17-10
+B0560	55955	55956,55954,55957	high	notice audit 17-10
+B0561	55956	55955,55954,55957	high	notice audit 17-10
+B0562	55957	55956,55955,55954	high	notice audit 17-10
+B0563	55958	55961	high	notice audit 17-10
+B0564	55959	55890	high	notice audit 17-10
+B0565	55960	55961,55958,55956,55955,55954,55952,55951	high	notice audit 17-10
+B0566	56512	56513,56511	high	notice audit 17-10
+B0567	56511	56513,56512	high	notice audit 17-10
+B0568	56513	56512,56511	high	notice audit 17-10
+B0569	56514	56459	high	notice audit 17-10
+B0570	56515		high	notice audit 17-10
+B0571	56515		high	notice audit 17-10
+B0572	56516	55961,56515,55958	high	06-11: notice «Supernova Deal! (08/19)» (name and date; the audit had a board-deal notice)
+B0573	56835	56834	high	notice audit 17-10
+B0574	56837	56836	high	notice audit 17-10
+B0575	56837	56836	high	notice audit 17-10
+B0576	56836	56837	high	notice audit 17-10
+B0577	57071		low	D8 search 19-10: the Login Appreciation notice gave the Draw Tickets of this draw (expiring with it on Sep 30, 2019); no notice of the draw itself
+B0578	57071		low	D8 search 19-10: the Login Appreciation notice gave the Draw Tickets of this draw (expiring with it on Sep 30, 2019); no notice of the draw itself
+B0579	56838	56839	high	notice audit 17-10
+B0580	56838	56839	high	notice audit 17-10
+B0581	56838	56839	high	notice audit 17-10
+B0582	56838	56839	high	notice audit 17-10
+B0583	56838	56839	high	notice audit 17-10
+B0584	56838	56839	high	notice audit 17-10
+B0585	56839	57269	high	notice audit 17-10
+B0586	57593		high	D8 search 19-10
+B0587	57593		high	D8 search 19-10
+B0588	57593		high	D8 search 19-10
+B0589	57596	57438	high	notice audit 17-10
+B0590	57597		high	D8 search 19-10
+B0591	57597		high	D8 search 19-10
+B0592	57444	56838	high	notice audit 17-10
+B0593	58027	58028	high	notice audit 17-10
+B0594	58028	58027,58024,58029	high	notice audit 17-10
+B0595	58028	58027	high	notice audit 17-10
+B0596	58320		high	D8 search 19-10
+B0597	58320		high	D8 search 19-10
+B0598	58320		high	D8 search 19-10
+B0599	58321		high	notice audit 17-10
+B0600	58321		high	notice audit 17-10
+B0601	58321		high	notice audit 17-10
+B0602	58405		high	notice audit 17-10
+B0603	58405		high	notice audit 17-10
+B0604	58199		high	notice audit 17-10
+B0605	58199	58321	high	notice audit 17-10
+B0606	58789		high	D8 search 19-10
+B0607	58789		high	D8 search 19-10
+B0608	58789		high	D8 search 19-10
+B0609	58406		high	D8 search 19-10
+B0610	58406		high	D8 search 19-10
+B0611	58408		high	notice audit 17-10
+B0612	58407		high	notice audit 17-10
+B0613	59270		high	notice audit 17-10
+B0614	59531		high	notice audit 17-10
+B0615	59531		high	notice audit 17-10
+B0616	59824		high	notice audit 17-10
+B0617	59824		high	notice audit 17-10
+B0618	59825		high	D8 search 19-10
+B0619	59978		high	notice audit 17-10
+B0620	59978		high	notice audit 17-10
+B0621	60077		high	notice audit 17-10
+B0622	60492		high	notice audit 17-10
+B0623	60743		high	notice audit 17-10
+B0624	60742		high	notice audit 17-10
+B0625	60744		high	D8 search 19-10
+B0626	61038		high	D8 search 19-10
+B0627	61039		high	D8 search 19-10
+B0628	61326		high	notice audit 17-10
+B0629	61327		high	notice audit 17-10
+B0630	61509		high	notice audit 17-10
+B0631	61949	61510	high	notice audit 17-10
+B0632	61510	61949	high	notice audit 17-10
+B0633	61510	61949	high	notice audit 17-10
+B0634	61510	61949	high	notice audit 17-10
+B0635	61950		high	D8 search 19-10
+B0636	62190		high	D8 search 19-10
+B0637	62458		high	notice audit 17-10
+B0638	62458	62682	high	notice audit 17-10
+B0639	62950	61949,62981	medium	notice audit 17-10
+B0640	62981		high	notice audit 17-10
+B0641	62981		high	notice audit 17-10
+B0642	62981		high	notice audit 17-10
+B0643	63136		high	notice audit 17-10
+B0644	63323		high	notice audit 17-10
+B0645	63324	63407	high	notice audit 17-10
+B0646	63619		high	notice audit 17-10
+B0647	64143		high	notice audit 17-10
+B0648	64339		high	notice audit 17-10
+B0649	64509		high	notice audit 17-10
+B0650	64510		high	notice audit 17-10
+B0651	64837	64990	high	notice audit 17-10
+B0652	65014		high	notice audit 17-10
+B0653	65015	65014	high	notice audit 17-10
+B0654	65015	65014	high	notice audit 17-10
+B0655	65015	65014	high	notice audit 17-10
+B0656	65130	65131,65132	high	notice audit 17-10
+B0657	65131	65130,65132	high	notice audit 17-10
+B0658	65132	65131,65130	high	notice audit 17-10
+B0659	65379		high	notice audit 17-10
+B0660	65509	65381	high	notice audit 17-10
+B0661	65381		high	notice audit 17-10
+B0662	65383	65382	high	notice audit 17-10
+B0663	65383	65382,65381	high	notice audit 17-10
+B0664	65510		high	notice audit 17-10
+B0665	65831	65830	high	notice audit 17-10
+B0666	65830	65831	high	notice audit 17-10
+B0667	65833		high	notice audit 17-10
+B0668	65832		high	notice audit 17-10
+B0669	66041	66043,66042	high	notice audit 17-10
+B0670	66042	66043	high	notice audit 17-10
+B0671	66043	66042	high	notice audit 17-10
+B0672	66045		high	notice audit 17-10
+B0673	66474	66473	high	notice audit 17-10
+B0674	66473	66474	high	notice audit 17-10
+B0675	66479		high	notice audit 17-10
+B0676	66505		high	notice audit 17-10
+B0677	66506		high	notice audit 17-10
+B0678	66507	66508	high	notice audit 17-10
+B0679	66507		high	notice audit 17-10
+B0680	66851		high	notice audit 17-10
+B0681	66852		high	notice audit 17-10
+B0682	66856		high	notice audit 17-10
+B0683	66862	66863	high	notice audit 17-10
+B0684	66863	66862	high	notice audit 17-10
+B0685	66866		high	notice audit 17-10
+B0686	67511	67512	high	notice audit 17-10
+B0687	67512	67511	high	notice audit 17-10
+B0688	67514	67515	high	notice audit 17-10
+B0689	67515	67514	high	notice audit 17-10
+B0690	67725		high	notice audit 17-10
+B0691	67924		high	notice audit 17-10
+B0692	68107		high	notice audit 17-10
+B0693	68108		high	notice audit 17-10
+B0694	68109		high	notice audit 17-10
+B0695	68370		high	notice audit 17-10
+B0696	68371		high	notice audit 17-10
+B0697	68560		high	notice audit 17-10
+B0698	68587	68563	high	notice audit 17-10
+B0699	68563		high	notice audit 17-10
+B0700	68562		high	notice audit 17-10
+B0701	68795		high	notice audit 17-10
+B0702	68798		high	notice audit 17-10
+B0703	68799		high	notice audit 17-10
+B0704	68888	68887,68886	high	notice audit 17-10
+B0705	68887	68888,68886	high	notice audit 17-10
+B0706	68886	68888,68887	high	notice audit 17-10
+B0707	68896	69291	high	notice audit 17-10
+B0708	69291		high	notice audit 17-10
+B0709	69291		high	notice audit 17-10
+B0710	69291		high	notice audit 17-10
+B0711	68898	68897	high	notice audit 17-10
+B0712	68898	68897	high	notice audit 17-10
+B0713	69301	69300,69299,69298,69297	high	notice audit 17-10
+B0714	69298	69300,69299,69297	high	notice audit 17-10
+B0715	69297	69300,69299,69298	high	notice audit 17-10
+B0716	69299	69300,69298,69297	high	notice audit 17-10
+B0717	69300	69299,69298,69297	high	notice audit 17-10
+B0718	69543	69544,69542,69546	high	notice audit 17-10
+B0719	69542	69544,69543,69546	high	notice audit 17-10
+B0720	69544	69543,69542,69546	high	notice audit 17-10
+B0721	69545		high	notice audit 17-10
+B0722	69547	69549,69548	high	notice audit 17-10
+B0723	69548	69549,69547	high	notice audit 17-10
+B0724	69549	69548,69547	high	notice audit 17-10
+B0725	69550		high	notice audit 17-10
+B0726	69551		high	notice audit 17-10
+B0727	70064		high	notice audit 17-10
+B0728	70067		high	notice audit 17-10
+B0729	70431	70069	high	notice audit 17-10
+B0730	70304	70068,70069	high	notice audit 17-10
+B0731	70071	70070,70073,70277,70278	high	notice audit 17-10
+B0732	70071	70070,70069	high	notice audit 17-10
+B0733	70069		high	notice audit 17-10
+B0734	70068		high	notice audit 17-10
+B0735	70303		high	notice audit 17-10
+B0736	70579	70578,70577	high	notice audit 17-10
+B0737	70579		high	notice audit 17-10
+B0738	70577	70383	high	notice audit 17-10
+B0739	70578		high	notice audit 17-10
+B0740	70743	70583,70742	high	notice audit 17-10
+B0741	70908	70907,70906,70905	high	notice audit 17-10
+B0742	70907		high	notice audit 17-10
+B0743	70905	71029,70906	high	notice audit 17-10
+B0744	70906	71029,70905	high	notice audit 17-10
+B0745	70910	70909,70853	high	notice audit 17-10
+B0746	70910	70909,70906,70905	high	notice audit 17-10
+B0747	71252		high	notice audit 17-10
+B0748	71413	71253	high	notice audit 17-10
+B0749	71253		high	notice audit 17-10
+B0750	71416	71655	high	notice audit 17-10
+B0751	71655		high	notice audit 17-10
+B0752	71738	71461,71739	high	notice audit 17-10
+B0753	71740		high	notice audit 17-10
+B0754	71848	71849,71742	high	notice audit 17-10
+B0755	71850	71851	high	notice audit 17-10
+B0756	71851	71850	high	notice audit 17-10
+B0757	71853	71852	high	notice audit 17-10
+B0758	72012	71855,71854,71998,71860	high	notice audit 17-10
+B0759	71855	71854,71852	high	notice audit 17-10
+B0760	71852		high	notice audit 17-10
+B0761	71856		high	notice audit 17-10
+B0762	72413	72412	high	notice audit 17-10
+B0763	72412	72414	high	notice audit 17-10
+B0764	72414	72412	high	notice audit 17-10
+B0765	72415		high	notice audit 17-10
+B0766	72702	72701	high	notice audit 17-10
+B0767	72701	72702	high	notice audit 17-10
+B0768	72704		high	notice audit 17-10
+B0769	72829	72830,72828	high	notice audit 17-10
+B0770	72828	72830,72829	high	notice audit 17-10
+B0771	72830	72829,72828	high	notice audit 17-10
+B0772	72831		high	notice audit 17-10
+B0773	72832	72829	high	06-11: notice «Once A Day Free Deal!» of the start day (the audit ranked a 12/28 notice first)
+B0774	72833	72834,72710	high	notice audit 17-10
+B0776	72835		high	notice audit 17-10
+B0777	72836		high	notice audit 17-10
+B0778	72837		high	notice audit 17-10
+B0779	72840	72841	high	notice audit 17-10
+B0780	72841		high	notice audit 17-10
+B0781	72842		high	notice audit 17-10
+B0782	73702	72842	high	notice audit 17-10
+B0783	73697	73736,73695	high	notice audit 17-10
+B0784	73736	73695	high	notice audit 17-10
+B0785	73736	73695	high	notice audit 17-10
+B0786	73699	73698	high	notice audit 17-10
+B0787	73699	73698,73736,73695	high	notice audit 17-10
+B0788	73700		high	notice audit 17-10
+B0789	73862		high	notice audit 17-10
+B0790	73865	73864	high	notice audit 17-10
+B0791	73864		high	notice audit 17-10
+B0792	73868		high	notice audit 17-10
+B0793	73871	73868	high	notice audit 17-10
+B0794	73873	73874,73872	high	notice audit 17-10
+B0795	73877	73873,73872	high	notice audit 17-10
+B0796	73872	73873	high	notice audit 17-10
+B0797	73879	74458	high	notice audit 17-10
+B0798	74458		high	notice audit 17-10
+B0799	74460	74459	high	notice audit 17-10
+B0800	74462	74461,74163,74153	high	notice audit 17-10
+B0801	74462	74461,74459	high	notice audit 17-10
+B0802	74459		high	notice audit 17-10
+B0803	74464	74607	high	notice audit 17-10
+B0804	74607		high	notice audit 17-10
+B0805	74609	74608	high	notice audit 17-10
+B0806	74608		high	notice audit 17-10
+B0807	74610	74611	high	notice audit 17-10
+B0808	74611		high	notice audit 17-10
+B0809	74612		high	notice audit 17-10
+B0811	74614		high	notice audit 17-10
+B0812	74613		high	notice audit 17-10

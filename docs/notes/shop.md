@@ -1012,3 +1012,51 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   Client hooks seen in the plate function (FUN_00a1509c) and not used: the `ImageButton_LockMask` node and FUN_00a18fac
   (a flag + id of the plate row checked against a list of the player: an open condition that greys the button, master
   data), both would need a master change; the list state is enough.
+
+<a id="original-notices"></a>
+## Original notices behind the Details (06-11, user's request)
+
+Before 06-11 the Details page of a banner (`/web/gacha/detail/<id>`) showed only what this server reconstructs (dates,
+price, rates, Medals, «Deal Details»): no banner showed the text of its original notice, and the 24 `INCOMPLETE` rows
+(the example of the user: B0009 «Zootopia Medals & Avatars are Here!») showed almost nothing. Now every banner's Details
+has an **«Original notice»** part, built the same way as the raid notices ([raid](raid.md), `make-raid-notices.js`):
+
+- `server/shop_notice_map.tsv` (versioned, ids only): banner rowId -> WW notice id, `alt` (other notices that name the
+  banner), `confidence` (high: name and date; medium: one of the two; low: a related notice, said on the page) and `note`
+  (where the match comes from, or what was searched when nothing was found). Built from the reviewed notice audit of 17-10
+  (`tmp\sp2b\notice_audit\mapping.tsv`, evidence order = primary first), the D8 matches of 19-10
+  (`reference\banners\notices_recovered_d8_matches.tsv`) and the finds of 06-11 (below).
+- `node server/make-shop-notices.js` reads the map and the private texts (`KHUX_RAID_SRC`
+  `raid_census\work\notice_text.json`, the 2,604 WW notices; for notices not there, `KHUX_SHOP_NOTICES_EXTRA`, default
+  `reference\shop_notices_extra\notice_text_extra.json`) and writes the git-ignored `server/game_data/shop_notices.json`
+  (SQUARE ENIX text, never committed). Read at request time (`server.js shopNotices`, like `raidNotices`): no master
+  revision; a server restart only for the new code.
+- `server/shop-notice-pages.js`: `detailSection` (title and date of the notice, «Read the original notice ›», «Also in: …»
+  for the alt notices; a low-confidence match says that the notice is related, not the deal's own) inserted by
+  `gacha.detailPage` (`ctx.noticeSection`) after «Deal Details»; `noticePage` = `GET /web/gacha/notice/<drawMedalTypeId>
+  [?n=<alt id>][&from=catalog]`: the whole notice laid out by `raid-pages.js noticeBlocks` (every sentence unchanged, page
+  boilerplate removed), an «On this server» box and BACK to the Details. No notice for the banner: the Details say plainly
+  «The original notice of this banner has not been recovered», with what we know (the wiki text of the banner, marked as
+  such, and whether the banner art is the original). Without the generated file the part is not shown.
+- Tests: `node server/test-shop-notices.js` (fixtures; real data when the private sources and the catalogue exist; the
+  generated file is git-ignored and no notice text is in the versioned files).
+- **Result 06-11**: before, 0 of 807 banners showed their original notice; now **803** (628 notices: 778 high, 18
+  medium, 7 low = related notice). Finds and fixes of 06-11: B0392 Silver Ticket Draw -> 40755 (the Ticket Draw notice
+  updated on Sep 14, 2018, the day this banner starts; also 44008); B0087/B0088 Skills to Thrill -> 26296 «3 Days of
+  Skills to Thrill!» (names their Scrooge skills and the end, Mar 16, 2017, but runs **Mar 14-16**: the wiki start Feb 14
+  looks wrong; catalogue dates left unchanged, to decide); B0572 -> 56516 «Supernova Deal! (08/19)» and B0773 -> 72832
+  «Once A Day Free Deal!» (the audit had ranked other notices first); B0001 DAILY DEAL! -> 19382 (low: the Update 1.1.0
+  notes on the standing Daily/Small Deals); B0009 Zootopia -> 17892 (the avatar-board campaign, not a draw); B0577/B0578
+  Ticket Draw -> 57071 (low: the notice of their Draw Tickets).
+- **Still without a notice (4)**: B0002-B0004 (launch week, Apr 7-14, 2016) and B0077 «Big Deal!!» (Jan 7-11, 2017).
+  Searched: the 2,604 archived WW texts and the D8 recoveries; live `cache.sqex-bridge.jp/api/information/detail/<id>?lang=en`
+  (sequential, 1.2 s) on ids 17000-17414, 23812-24100, 24549-24654, 25300-25420, 44010-44150, 57040-57110 (only
+  already-known KHUX notices; log `reference\shop_notices_extra\probe_log.tsv`); Wayback CDX of
+  `cache.sqex-bridge.jp/guest/information/17*` and `23*` and samples of the archived-only ids of those days (all other
+  games: ids are shared by every bridge game). The KHUX ids of January 2017 are the batch 23795-23811, none dated Jan 7.
+- Downloads (untrusted, parsed only, local): `reference\shop_notices_extra\` (`raw\`, `wayback\`, CDX lists,
+  `notice_text_extra.json`); scripts in `tmp\shopnotices` (`fetch.py`, `html2text.py`, `buildmap.py` + `fix.json`
+  that write `server/shop_notice_map.tsv`).
+- **To serve**: `node server/make-shop-notices.js` (already run 06-11 on this machine), then restart the server (new
+  routes in `server.js`). No master change. Bench: Details of B0009, B0392, B0002 and an INCOMPLETE row; «Read the
+  original notice ›» and BACK, from the Catalog and from a Shop plate.

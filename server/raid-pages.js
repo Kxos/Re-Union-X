@@ -647,4 +647,4 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
 }
 
-module.exports = { expandCatalog, catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch };
+module.exports = { expandCatalog, catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch, noticeBlocks, NOTICE_CSS }; // noticeBlocks, NOTICE_CSS: also the Shop notices (shop-notice-pages.js)
