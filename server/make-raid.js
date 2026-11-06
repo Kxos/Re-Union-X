@@ -872,6 +872,14 @@ function applyLux(rows, lux) {
   }
 }
 
+// Story rows a new fight stage copies (raids, make-events.js): the last story row up to quest 525 of each world; `of(w)` falls
+// back to the last story row when the world has none.
+function storyRefs(stages) {
+  const story = (stages || []).filter((r) => r.stageKind === 1 && r.stageId < 100000).sort((a, b) => a.id - b.id);
+  const byWorld = new Map(story.filter((r) => r.id <= 525).map((r) => [r.worldId, r]));
+  return { story, byWorld, of: (w) => byWorld.get(w) || story[story.length - 1] };
+}
+
 function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null }) {
   checkRanges(master);
   census = applyJpCensus(census, config.jpCensus); // corrections of the JP rows (jpCensus), before anything reads the census
@@ -885,8 +893,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   if (!(master.raidEnemy || []).length || !(master.raidEnemyAttack || []).length) throw new Error('raid: no served raidEnemy / raidEnemyAttack row to blank');
   const blankEnemy = blank(master.raidEnemy[0]), blankAttack = blank(master.raidEnemyAttack[0]);
   const haveAttack = new Set(master.raidEnemyAttack.map((r) => r.raidEnemyAttackId));
-  const story = (master.stage || []).filter((r) => r.stageKind === 1 && r.stageId < 100000).sort((a, b) => a.id - b.id);
-  const refByWorld = new Map(story.filter((r) => r.id <= 525).map((r) => [r.worldId, r]));
+  const { story, byWorld: refByWorld } = storyRefs(master.stage);
   const worldBg = new Map((master.world || []).map((w) => [w.worldId, w.raidBackground]));
   const broken = config.brokenBackgrounds || [], fallbackWorld = config.backgroundFallbackWorld || 1;
   if (broken.includes(worldBg.get(fallbackWorld))) throw new Error(`raid: fallback world ${fallbackWorld} has a broken background`);
@@ -1505,4 +1512,4 @@ if (require.main === module) {
   else patch(process.argv[2] || path.join(__dirname, 'master_data'));
 }
 
-module.exports = { applyJpCensus, storyPlan, storyKeys, evStageRow, EVSTAGE_MAX_STAGES, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
+module.exports = { applyJpCensus, storyPlan, storyKeys, evStageRow, EVSTAGE_MAX_STAGES, storyRefs, buildRaid, applyLux, atLevel, eventPeriods, eventTierRows, EVENT_FAMILIES, patch, allocateIds, deduceStats, readSources, parseCorrections, parsePartHp, tierHp, stepDate, DEFAULT_SRC, DEFAULT_2016 };
