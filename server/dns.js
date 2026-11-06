@@ -101,6 +101,8 @@ function buildNxdomain(buf, q) {
 // WebView aspetta. Con NXDOMAIN il tentativo fallisce subito; i font restano quelli in cache.
 const BLOCK = ['fonts.gstatic.com'];
 
+const NO_HIJACK = (process.env.KHUX_NO_HIJACK ?? 'cache.sqex-bridge.jp').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+
 /**
  * @param {object} opts
  * @param {string} opts.ip        indirizzo verso cui dirottare
@@ -114,6 +116,9 @@ function startDns({ ip, hijack, upstream = '1.1.1.1', port = 53, logFile, block 
 
   const shouldHijack = (name) => {
     const n = name.toLowerCase();
+    // Never hijacked (user 06-11): the official notice archive, read by the research scripts with TLS verification;
+    // the game client never requests it (requests.ndjson: only curl). KHUX_NO_HIJACK overrides the list.
+    if (NO_HIJACK.some((d) => n === d || n.endsWith('.' + d))) return false;
     return hijack.some((d) => n === d || n.endsWith('.' + d));
   };
 
