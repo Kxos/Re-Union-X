@@ -196,7 +196,7 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const jf = n.raidNoticeFacts(g);
   check(jf && jf.tiers === 1 && jf.jp && jf.jp.rows === 2 && jf.jp.unnamed.join() === '2016-12-25' && jf.jp.sameEvents === 1, `raid giapponesi: ${JSON.stringify(jf)}`);
   const jl = [...n.raidJpLines(jf), ...n.raidNoticeLines(jf)].join(' ');
-  check(/## Raids of the Japanese version/.test(jl) && /\*\*2\*\* raids held only in the \*\*Japanese version\*\*/.test(jl) && /marked \*\*Japan only\*\*/.test(jl) && /not original/.test(jl)
+  check(/## Raids of the Japanese version/.test(jl) && /\*\*2\*\* raids held only in the \*\*Japanese version\*\*/.test(jl) && /in its own \*\*Japan only\*\* section/.test(jl) && /## Worldwide and Japan only/.test(jl) && /\*\*one for both sections\*\*: keeping a Japanese raid releases the kept worldwide raid/.test(jl) && /not original/.test(jl)
     && /December 25, 2016/.test(jl) && /1 Japanese raid event of 2018/.test(jl) && !/not here yet/.test(jl), `righe dei raid giapponesi: ${jl}`);
   check(n.raidJpLines(facts).length === 0 && /not here yet/.test(n.raidNoticeLines(facts).join(' ')), 'senza raid giapponesi: la riga «not here yet»');
   check(!/July, August and September 2017|2016 Showdown|August 4|\*\*Magic Broom\*\* \(Egg Master/.test(jl),'senza le righe jpCensus quando quei raid non sono serviti');

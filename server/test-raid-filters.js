@@ -25,9 +25,10 @@ function probe() {
       var prefix = function (q, name) { var ws = words(name); return words(q).every(function (w) { return ws.some(function (x) { return x.indexOf(w) === 0; }); }); };
       var shown = function (el) { while (el && el.nodeType === 1) { if (getComputedStyle(el).display === 'none') return false; el = el.parentNode; } return true; };
       var R = [].map.call(document.querySelectorAll('.row'), function (r) {
-        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), dn: A(r, 'data-done'), bd: A(r, 'data-boards'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y') };
+        return { el: r, p: A(r, 'data-periods'), t: A(r, 'data-type'), tr: A(r, 'data-tier').split(' '), st: A(r, 'data-show'), dn: A(r, 'data-done'), bd: A(r, 'data-boards'), ns: (A(r, 'data-search') || '').split(' | '), y: A(r, 'data-y'), sec: A(r, 'data-sec') };
       });
       var matches = function (r, f, anyPeriod) {
+        if (r.sec !== f.sec) return false;
         if (!anyPeriod && f.p !== 'all' && r.p !== f.p) return false;
         if (f.type !== 'all' && r.t !== f.type) return false;
         if (f.tier !== 'all' && r.tr.indexOf(f.tier) < 0) return false;
@@ -38,7 +39,8 @@ function probe() {
       };
       var chip = function (g, v) { return document.querySelector('.opts[data-g="' + g + '"] [data-v="' + v + '"]'); };
       var check = function (name, f, year, act, after) {
-        var d = document.querySelector('.yc[data-yr="' + A($('rows'), 'data-defy') + '"]'); if (d) d.click();
+        document.querySelector('.sec[data-sec="' + f.sec + '"]').click();
+        var d = document.querySelector('.yc[data-yr="' + A($('rows'), f.sec === 'jp' ? 'data-defy-jp' : 'data-defy') + '"]'); if (d) d.click();
         $('fbtn').click(); $('freset').click();
         chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click(); chip('prog', f.prog).click(); chip('bd', f.bd).click();
         $('fq').value = f.q; $('fq').oninput(); $('fok').click();
@@ -81,12 +83,18 @@ function probe() {
         if (f.q) R.forEach(function (r) { var mt = r.el.querySelector('.mt'); if (shown(r.el) && !/^Matches: /.test(mt.textContent)) err.push('no Matches line on ' + A(r.el, 'data-name')); });
         if (err.length) { out.fail++; out.failed.push({ name: name + ' [' + year + ']', err: err.slice(0, 4) }); } else out.pass++;
       };
-      var base = { p: 'all', type: 'all', tier: 'all', show: 'all', prog: 'all', bd: 'all', q: '' };
+      var base = { sec: 'ww', p: 'all', type: 'all', tier: 'all', show: 'all', prog: 'all', bd: 'all', q: '' };
       var w = function (o) { var f = {}, k; for (k in base) f[k] = base[k]; for (k in o) f[k] = o[k]; return f; };
-      var cases = [['no filters', w({})]];
-      [].forEach.call(document.querySelectorAll('.tab'), function (t) { if (A(t, 'data-p') !== 'all') cases.push(['tab ' + A(t, 'data-p'), w({ p: A(t, 'data-p') })]); });
-      ['type', 'tier', 'show', 'prog', 'bd'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all') { var x = {}; x[g] = v; cases.push([g + ' ' + v, w(x)]); } }); });
-      ['trick', 'blue tri', 'sora', 'mythril', 'zzzz'].forEach(function (q) { cases.push(['find «' + q + '»', w({ q: q })]); });
+      // both sections (user 06-11): the tabs and chips of each section (a chip's data-sec, a tab's data-n<sec>)
+      var cases = [], inSec = function (el, sc) { var ss = A(el, 'data-sec'); return ss === null || (' ' + ss + ' ').indexOf(' ' + sc + ' ') >= 0; };
+      ['ww', 'jp'].forEach(function (sc) {
+        var ws = function (o) { var f = w(o); f.sec = sc; return f; };
+        cases.push([sc + ' no filters', ws({})]);
+        [].forEach.call(document.querySelectorAll('.tab'), function (t) { if (A(t, 'data-p') !== 'all' && A(t, 'data-n' + sc) !== '0') cases.push([sc + ' tab ' + A(t, 'data-p'), ws({ p: A(t, 'data-p') })]); });
+        ['type', 'tier', 'show', 'prog', 'bd'].forEach(function (g) { [].forEach.call(document.querySelectorAll('.opts[data-g="' + g + '"] .o'), function (o) { var v = A(o, 'data-v'); if (v !== 'all' && inSec(o, sc)) { var x = {}; x[g] = v; cases.push([sc + ' ' + g + ' ' + v, ws(x)]); } }); });
+        ['trick', 'blue tri', 'sora', 'mythril', 'crab', 'zzzz'].forEach(function (q) { cases.push([sc + ' find «' + q + '»', ws({ q: q })]); });
+      });
+      cases.push(['jp show can + find «crab»', w({ sec: 'jp', show: 'can', q: 'crab' })]);
       cases.push(['show can + tier advanced', w({ show: 'can', tier: 'advanced' })]);
       cases.push(['type radiant + tab 3', w({ type: 'radiant', p: '3' })]);
       cases.push(['find «trick» + show now', w({ q: 'trick', show: 'now' })]);
@@ -101,14 +109,36 @@ function probe() {
       // a «×» on the Raid Boards tag clears that filter only
       cases.push(['bd tag ×', w({ bd: 'todo', prog: 'done' }), function () { var x = document.querySelector('#sum [data-x="bd"]'); if (!x) return 'no × on the Raid Boards tag'; x.click(); return null; }, w({ prog: 'done' })]);
       cases.forEach(function (c) { ['default', 'all'].forEach(function (y) { try { check(c[0], c[1], y, c[2], c[3]); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
+      // the sections keep their own filters and year; the intro box shows only in Japan only; the address names the section
+      (function () {
+        var serr = [], sec = function (x) { document.querySelector('.sec[data-sec="' + x + '"]').click(); };
+        sec('ww'); $('fbtn').click(); $('freset').click(); $('fok').click(); document.querySelector('.yc[data-yr="all"]').click();
+        sec('jp'); $('fbtn').click(); $('freset').click(); chip('show', 'can').click(); $('fok').click();
+        if (!shown($('jpi'))) serr.push('JP intro hidden in Japan only');
+        if (!/^#jp/.test(location.hash)) serr.push('address without the section: ' + location.hash);
+        if (!/Can be kept/.test($('sum').textContent)) serr.push('JP filter not applied');
+        sec('ww');
+        if (shown($('jpi'))) serr.push('JP intro shown on Worldwide');
+        if (/Can be kept/.test($('sum').textContent)) serr.push('the JP filter leaked into Worldwide');
+        if (A(document.querySelector('.yc.on'), 'data-yr') !== 'all') serr.push('Worldwide year not kept');
+        if (!/^#ww/.test(location.hash)) serr.push('address not back to ww: ' + location.hash);
+        sec('jp');
+        if (!/Can be kept/.test($('sum').textContent)) serr.push('JP filter lost after a round trip');
+        if (document.querySelector('.row[data-sec="jp"] .s') && document.querySelector('.row[data-sec="ww"]:not(.hide)')) serr.push('a worldwide row shown in Japan only');
+        $('fbtn').click(); $('freset').click(); $('fok').click(); sec('ww');
+        if (serr.length) { out.fail++; out.failed.push({ name: 'sections', err: serr }); } else out.pass++;
+      })();
       // keep / remove through the page script (the XHR answered 200): bars, status lines, buttons, «Replaces»
       var byId = function (id) { return document.getElementById('q' + id); };
       var can = R.filter(function (r) { return r.st === 'can'; }).map(function (r) { return A(r.el, 'data-eid'); });
       var kept = R.filter(function (r) { return r.st === 'kept'; }).map(function (r) { return A(r.el, 'data-eid'); });
       if (can.length && kept.length) {
+        // one kept raid for both sections (user 06-11): keep a raid of the other section when there is one; the «Replaces» line
+        // is checked in the section of the raid kept before
+        var kerr = [], k0 = kept[0], ks = A(byId(k0), 'data-sec'), cx = can.filter(function (id) { return A(byId(id), 'data-sec') !== ks; }), c0 = cx.length ? cx[0] : can[0];
+        document.querySelector('.sec[data-sec="' + ks + '"]').click();
         $('fbtn').click(); $('freset').click(); $('fok').click();
         document.querySelector('.tab[data-p="all"]').click(); document.querySelector('.yc[data-yr="all"]').click();
-        var kerr = [], k0 = kept[0], c0 = can[0];
         window.kxRow(c0, true);
         if (A(byId(c0), 'data-show') !== 'kept' || !/(^| )pinned( |$)/.test(byId(c0).className) || !/Kept in the raid list/.test(byId(c0).querySelector('.s').textContent)) kerr.push('kept row not gold');
         if (A(byId(c0).querySelector('.pk'), 'data-on') !== '0') kerr.push('kept row without Remove');
@@ -152,10 +182,40 @@ const fx = { entries: [
   tier('D', 8101, '2019-10-14', '2019-10-20', 'Beginner', 'Trickmaster'), tier('D', 8101, '2019-10-14', '2019-10-20', 'Epic', 'Darkside'),
   tier('E', 8102, '2019-11-04', '2019-11-10', 'Advanced', 'Behemoth', { available: false }),
   tier('F', 8150, '2020-06-01', '2020-06-07', 'Legendary', 'Darkside'), tier('G', 8180, '2020-12-07', '2020-12-13', 'Epic', 'Red Trident Tail'),
+  // the Japan only section (user 06-11)
+  tier('J1', 8300, '2016-08-20', '2016-08-21', 'single', 'Blue Trident Tail', { family: 'super-hard weekend', jp: true }),
+  tier('J2', 8301, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true }),
+  tier('J3', 8302, '2021-01-01', '2021-01-07', 'single', 'Circus Crab', { family: 'event', jp: true }),
 ] };
 const ctxFor = (index, week, kept) => ({ ...week, current: new Set(calendar.weekRows(index, week).map((r) => r.censusId)), kept, periods: PERIODS,
   unlockQuestOf: () => 900, stageDone: (sid) => sid % 3 !== 1, boardDone: (id) => id % 4 !== 0, boardItems: (id) => (id % 2 ? ['Sora & Moogle B'] : ['Mythril Shard']), imgVersion: 1 });
 run(fx, ctxFor(fx, { shopFrom: '2019-10-17', shopTo: '2019-10-23' }, 'A'), 'fixture');
+// BACK (user 06-11): the details page's BACK opens /web/raid/catalog#q<id>, the WebView's back key the address the page wrote
+// (#<section>.<year>): the page opens on that section and year, the row shown
+function hashProbe() {
+  window.addEventListener('load', function () {
+    var on = function (s) { var e = document.querySelector(s + '.on'); return e ? e.getAttribute(s === '.sec' ? 'data-sec' : 'data-yr') : null; };
+    var r = document.getElementById('q8301'), j = document.getElementById('jpi');
+    var pre = document.createElement('pre'); pre.id = 'probe';
+    pre.textContent = JSON.stringify({ sec: on('.sec'), yr: on('.yc'), row: !!r && getComputedStyle(r).display !== 'none', intro: getComputedStyle(j).display !== 'none', hash: location.hash });
+    document.body.appendChild(pre);
+  });
+}
+function runHash(hash, want) {
+  const file = path.join(os.tmpdir(), `khux-raid-hash-${process.pid}.html`);
+  fs.writeFileSync(file, pages.catalogPage(fx, ctxFor(fx, { shopFrom: '2019-10-17', shopTo: '2019-10-23' }, 'A')).replace('</body>', `<script>(${hashProbe.toString()})();</script></body>`));
+  try {
+    const out = cp.execFileSync(EDGE, ['--headless=new', '--disable-gpu', '--dump-dom', `file:///${file.replace(/\\/g, '/')}${hash}`], { encoding: 'utf8', timeout: 60000, stdio: ['ignore', 'pipe', 'ignore'] });
+    const m = /<pre id="probe">([^<]*)<\/pre>/.exec(out), got = m && JSON.parse(m[1].replace(/&quot;/g, '"'));
+    const bad = !got ? ['no result'] : Object.keys(want).filter((k) => got[k] !== want[k]).map((k) => `${k}: ${got[k]} (want ${want[k]})`);
+    if (bad.length) errors.push(`hash ${hash}: ${bad.join(', ')}`); else console.log(`  hash ${hash}: ok`);
+  } catch (e) { errors.push(`hash ${hash}: Edge failed (${e.message.split('\n')[0]})`); }
+  try { fs.unlinkSync(file); } catch { /* gone */ }
+}
+runHash('#q8301', { sec: 'jp', yr: '2017', row: true, intro: true, hash: '#jp.2017' });
+runHash('#jp.2016', { sec: 'jp', yr: '2016', row: false, intro: true, hash: '#jp.2016' });
+runHash('#q8100', { sec: 'ww', yr: '2019', intro: false, hash: '#ww.2019' });
+runHash('', { sec: 'ww', yr: '2019', intro: false });
 let real = null; try { real = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'raids.json'), 'utf8')); } catch { /* no local index */ }
 if (real) {
   const week = { shopFrom: '2019-10-17', shopTo: '2019-10-23' };

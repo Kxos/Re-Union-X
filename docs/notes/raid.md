@@ -328,6 +328,28 @@ otices.json`): #44001 Merry-Go-Rowdy (8071), #44005 Closehanded Captain (8072), 
   unchanged; Edge matrix `test-raid-filters.js` passes). Page about 101.7 KB -> 102.5 KB (real index). Test `filter_icons` in
   `test-raid-pages.js`. To see it: run `python -I recon/tools/special_icons.py` once on the serving machine (new keys) and restart the
   server (the key list is read at start), then log in again.
+- <a id="catalog-sections"></a>**Two sections: Worldwide and Japan only (I-244, user 06-11, tests only).** The Japan only raids are a
+  SECTION, not a filter: two big tabs above the year tabs (`.secs`, gold when on, icons `raid` / `jp`, the section's total count),
+  Worldwide (194 rows today) first and open by default, Japan only (153). Each row carries `data-sec` (`ww` / `jp`); the page script
+  keeps one state per section (game-year tab, year chip, all filters) and `match` requires the row's section, so the counts of the
+  tabs, year chips, summary and «Show N results» are the section's. Game-year tabs carry `data-nww` / `data-njp` (a tab with no raid
+  in the section is hidden; the «All years» span is 2016–2021 / 2015–2018); default years `data-defy` / `data-defy-jp` (the Shop
+  year when the section has raids in it, else All years). TYPE chips per section (`data-sec` of the chip, `secChips` hides the
+  others, and a group with fewer than two chips, so TIER disappears in Japan only, where every raid is one tier): Worldwide Weekly /
+  Radiant Reward / Raid Events; Japan only Raid Events `camp` / Super-Hard Weekends `raid` / Monthly 30-Minute `bonus` / Daily
+  Rotating `daily` (`data-type` `jpev` / `jpshw` / `jpmo` / `jpday`). The old TYPE chip «Japan only» and the row prefix
+  «Japan only ·» are gone. The Japan only section opens with an intro box (`#jpi`, the `.rc` callout of the AP rule with the
+  NOT ORIGINAL badge): only in the Japanese version; never in Events by themselves, keep it here; unlocks with the Story like every
+  raid; one kept raid for both sections; reconstructed banners / boards marked, translations ours; link to the «Raid Bosses»
+  notice. The Keep button of a JP row is larger with a gold halo (`.pk.jk`). Keep logic unchanged (`player.raid.kept`, one census id;
+  `kxRow` moves the gold bar and the «Replaces» lines across both sections). Address: the page writes `#<sec>.<year>`
+  (`history.replaceState`, e.g. `#jp.2017`) so the WebView's back key returns to the section and year; the BACK button's `#q<id>`
+  opens the row's section and year. Packing: the row's `data-type` is a packed field (`t`), so the JP families share templates:
+  real page 99.9 KB -> 104.9 KB. Notice «Raid Bosses»: new heading «Worldwide and Japan only» (two sections, one kept raid for
+  both, marks and translations). Tests: `two_sections` and the updated `jp_rows_typed_and_marked` / `filter_icons` /
+  `lists_every_row` in `test-raid-pages.js`; `test-raid-filters.js` runs the Edge matrix in both sections, a section round trip
+  (filters and year kept, intro only in Japan only, address), a keep across sections and four address loads (`#q<id>` JP and WW,
+  `#jp.2016`, none); `test-notices.js` checks the new heading.
 - **Raid Catalog filters: RAID BOARDS (user, 3 November 2026, ours).** Beside PROGRESS (objectives of the playable tiers, crown rule), the Filters sheet has a RAID BOARDS group: All / Completed / Not completed (our board icons `bdone` / `btodo`: a lit 3x3 board with a check, a partly lit one), with its tag in the summary line («Raid Boards: …», ×), «Clear all», the counts of «Show N results» and the empty state («No raids with completed Raid Boards / with Raid Boards to complete …»). A raid's boards are **completed** when every `sphereBoardId` of its available tiers is complete in the save: every node of the board's grid (`sphereNodes`) in `player.raidSphere[id].unlock`, the rule of the board screen (`status` 3 of `userSphereData`). The progress is kept for good when the board closes, and a kept raid uses its week's boards, so the filter reads the same progress live, kept or removed. A board never handed out, or not served by the master, is not complete. A raid with no board on its available tiers (3 weeks today: 2018-09-10, 09-17, 10-01, plus the rows not restored) is neither: it shows only under All. Server: `raidBoardDoneLookup` in `server.js` (`ctx.boardDone`); page: `data-boards` = `done` / `todo` / `none` per row.
 - **Coverage, 2 November 2026** (`raid_models.json` with 29 models, templates below): 93 census rows with an available tier, 243 of 344 tier rows. The other 101 tier rows (16 bosses) are `graphics`. After the weak-point check (master revision 234): 87 census rows, 230 tier rows; 13 more are `parts` (Queen Bee, Queen Bee Ω, Lion Headliner). Along the story, 104 of the 150 Shop weeks from 2018-08-30 list a raid; the other 46 have a row with no available tier. The one-day Gear Golem event of 2020-11-01 has no week data and is not built.
 - **Templates** (`modelTemplates`, inferred from the LWFs, medium-high confidence): Scourge, Wicked and Malicious Spider (9101-9103) use row `5000` Enraged Arachnid. The three share one rig, and `5000` is the 2016 recolour that already reused Savage Spider's moves. Egg Master (1008) uses `0007` Trickmaster: identical frame counts in all five fight animations, 2 parts. The spiders keep the attribute of their colour (`bossAttributes`: red Power, green Speed, blue Magic, as the census reads it), labelled `attribute`; Egg Master keeps Trickmaster's.
