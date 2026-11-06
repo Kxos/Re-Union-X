@@ -107,7 +107,11 @@ const tests = {
     ix.entries.push(tier('WW-E31611-1', 8022, '2017-09-04', '2017-09-11', 'single', 'Jewel Sorceress', { family: 'daily', reconstructed: ['weekRule', 'weekdayAp'] }));
     const d = pages.detailPage(ix, 8022, ctx({ index: ix }));
     assert(d.includes('<b>AP and Bonus Time (one rule for all raids)</b>') && d.includes('<b>weekday AP of a quest that was free</b>') && d.includes('costs 5 AP from Monday to Friday'));
-    assert(d.includes('AP and Bonus Time: one rule for every raid on this server (not original)'), 'the rule line');
+    // the rule callout (user 06-11, graphics): title, NOT ORIGINAL tag, the two blocks with their icons, the Raid Bosses notice link
+    assert(/<div class="rc"><div class="rch"><img[^>]*raid\.png[^>]*>One raid rule on this server<span class="ng">NOT ORIGINAL<\/span><\/div>/.test(d), 'the rule callout');
+    assert(/<b><img[^>]*weekday\.png[^>]*>Monday – Friday<\/b><span><img[^>]*ap\.png[^>]*>Original AP \(5 AP if it was free\)<\/span><span class="ni">No Bonus Time<\/span>/.test(d), 'weekday block');
+    assert(/<div class="rcd we"><b><img[^>]*weekday\.png[^>]*>Saturday – Sunday<\/b><span><img[^>]*ap\.png[^>]*>0 AP<\/span><span><img[^>]*lux\.png[^>]*>Lux of raid bosses doubled<\/span><span><img[^>]*bonus\.png[^>]*>Bonus Time all day<\/span>/.test(d), 'weekend block');
+    assert(d.includes('Every raid, Pacific time.') && d.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>') && /\.rc\{/.test(d), 'foot line, link, CSS');
     assert(!/open all day|30-minute window|stays open outside/i.test(d.replace(/<li><b>opening hours[^]*?<\/li>/g, '')), 'no hours claim');
   },
   opening_hours_labels() {

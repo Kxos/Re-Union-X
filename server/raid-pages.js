@@ -355,13 +355,29 @@ const RECON_TEXT = {
   storyConflict: 'The sources name two different raid bosses for this story quest: the community wiki\'s boss is used.',
   rareType2: 'The rule for the rare boss of this boss is not fully understood: it is read like the usual one-in-N chance.',
 };
-// The AP / Bonus Time rule of this server (I-228, raid-windows.js costRule weekdayWeekend; user 06-11): one line on the detail page,
-// and a note at the top of every original notice page, whose AP costs, Bonus Time hours and opening times are the original game's
-const RULE_LINE = 'AP and Bonus Time: one rule for every raid on this server (not original). From Monday to Friday each raid quest costs its original AP '
-  + '(5 AP if it was free) and there is no Bonus Time; on Saturday and Sunday (Pacific time) raid quests cost 0 AP and the Lux of raid bosses is doubled, all day.';
-const RULE_NOTE = `${RULE_LINE} The AP costs, Bonus Time hours and opening times in the notice below are those of the original game: see the «Raid Bosses» notice.`;
+// The AP / Bonus Time rule of this server (I-228, raid-windows.js costRule weekdayWeekend; user 06-11): a callout on the detail page
+// and at the top of every original notice page, whose AP costs, Bonus Time hours and opening times are the original game's.
+// Callout (user 06-11, graphics): a gold-framed box with a title (Raid Coin icon) and a «NOT ORIGINAL» tag, two side-by-side blocks
+// Monday – Friday / Saturday – Sunday with the catalogues' icons (calendar, AP medal, Lux star, Bonus Time clock), and a foot line
+// with the link to the «Raid Bosses» notice (/web/notices#raid-bosses opens it, routes-info-album.js). Plain HTML / CSS, ES5-safe.
+const RULE_CSS = '.rc{border:2px solid #ffcd4a;border-radius:10px;background:#06283e;padding:8px 10px 6px;margin:10px 0;line-height:1.45;font-size:15px}'
+  + '.rch{color:#ffcd4a;font-weight:bold;font-size:17px;margin:0 0 6px}.rch .ic{width:1.5em;height:1.5em}'
+  + '.ng{display:inline-block;background:#5a6470;border:1px solid #9aa4ae;color:#fff;border-radius:9px;padding:0 7px;margin-left:8px;font-size:11px;font-weight:bold;letter-spacing:.5px;vertical-align:2px;line-height:1.6}'
+  + '.rcs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
+  + '.rcd{-webkit-box-flex:1;-webkit-flex:1 1 140px;flex:1 1 140px;min-width:140px;box-sizing:border-box;margin:0 4px 6px;padding:5px 9px 6px;border-radius:8px;background:#0a4466;border-top:4px solid #39a7cf}'
+  + '.rcd.we{background:#0d4a3a;border-top-color:#2e9e3e}.rcd b{display:block;color:#fff;font-size:15px;margin-bottom:3px}'
+  + '.rcd span{display:block;color:#d9e6ee;font-size:14px;padding:1px 0 1px 1.7em;text-indent:-1.7em}.rcd span .ic{width:1.35em;height:1.35em}.rcd span.ni{text-indent:0}'
+  + '.rcf{color:#b9cfdc;font-size:13.5px;margin:2px 2px 0}.rcf a{color:#9fd4ff}';
+const RULE_LINK = '<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>';
+const ruleBox = (foot) => '<div class="rc">'
+  + `<div class="rch">${icon('raid')}One raid rule on this server<span class="ng">NOT ORIGINAL</span></div>`
+  + '<div class="rcs">'
+  + `<div class="rcd"><b>${icon('weekday')}Monday – Friday</b><span>${icon('ap')}Original AP (5 AP if it was free)</span><span class="ni">No Bonus Time</span></div>`
+  + `<div class="rcd we"><b>${icon('weekday')}Saturday – Sunday</b><span>${icon('ap')}0 AP</span><span>${icon('lux')}Lux of raid bosses doubled</span><span>${icon('bonus')}Bonus Time all day</span></div>`
+  + `</div><p class="rcf">Every raid, Pacific time. ${foot} See the ${RULE_LINK}</p></div>`;
 const ruleOn = () => windows.costRule() === windows.WEEKDAY_WEEKEND;
-const ruleNote = () => (ruleOn() ? `<div class="why rule" style="border-color:#ffcd4a">${esc(RULE_NOTE)}</div>` : '');
+const ruleNote = () => (ruleOn() ? ruleBox('The AP costs, Bonus Time hours and opening times in the notice below are those of the original game.') : '');
+const ruleLine = () => (ruleOn() ? ruleBox('The original game had its own hours instead.') : '');
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 // levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
@@ -393,14 +409,14 @@ function detailPage(index, evStageId, ctx = {}) {
   const others = rows.filter((r) => r !== row && r.bosses.some((b) => row.bosses.includes(b))).sort((a, b) => (a.start < b.start ? 1 : a.start > b.start ? -1 : 0));
   const other = others.length ? `<h2>Other weeks of ${esc(title)}</h2><ul class="ow">${others.map((r) => `<li><a href="${detailHref(r.evStageId)}">${dateRange(r)}</a> · ${esc(titleOf(r))}<br>${statusOf(r, ctx).pill}</li>`).join('')}</ul>` : '';
   const back = ctx.fromCatalog ? `<div class="bar"><a class="back" href="/web/raid/catalog#q${row.evStageId}">BACK<span></span></a></div>` : '';
-  return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
+  return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS + RULE_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
     + `${st.pill}<div id="pinmsg" class="pinmsg"></div><div class="why ${st.cls}">${st.why}</div>${replacesLine(st, kept)}${button}`
     + (row.jp ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Notice of this raid ›</a></li></ul>`
       : ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
-    + (ruleOn() ? `<p class="n">${esc(RULE_LINE)}</p>` : '')
+    + ruleLine()
     + `<p class="n">The boss starts at LV 1 and gains ${stepOf(row) > 1 ? `${stepOf(row)} levels` : 'a level'} at every win, up to LV 99; levels reset on the 1st of every month.</p>`
     + `<h2>Raid Boards</h2>${boards}${recon}${other}`
     + `<p class="n">The Raid Catalog is an addition of this server: in the original game a raid was played only in its own week.</p>${back}<script>${KEEP_JS}</script></body></html>`;
@@ -420,7 +436,7 @@ function detailPage(index, evStageId, ctx = {}) {
 // the tiers not restored, links to the raid's details and the Raid Catalog. ctx.from === 'raid' (opened from the details
 // page): BACK bar. No notice for the id (no file, unknown id): a friendly page, never an error.
 const { scrub: scrubNotice, OMIT_LINE: OMIT } = require('./make-raid-notices');
-const NOTICE_CSS = '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
+const NOTICE_CSS = RULE_CSS + '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
   + '.chip.d{background:#06283e;border-color:#ffcd4a;color:#ffcd4a}'
   + '.ns{border-left:5px solid #5d8aa6;background:#06283e;border-radius:0 8px 8px 0;padding:6px 12px 8px;margin:10px 0;font-size:16px;line-height:1.55;overflow-wrap:break-word}'
   + '.ns.raid{border-left-color:#ffcd4a}.ns h2{margin:4px 0 4px}.ns.raid h2{color:#ffcd4a}.ns h3{font-size:16px;margin:12px 0 2px}.ns h4{color:#00d4ed;font-size:15px;margin:10px 0 2px}'
