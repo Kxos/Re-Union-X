@@ -253,7 +253,9 @@ const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', u
   // the labels of the story raid bosses (Task 11)
   // the labels of the Japan-only raids (I-232)
   jp: 'Japan only', jpQuest: 'quest (from a worldwide raid)', jpDates: 'end date', jp2016: 'boss values (worldwide 2016)', jpTimer: 'time limit (Japanese rules)', jpBoard: 'Raid Board (Japanese super-hard board)',
-  jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpWindowLevel: 'boss level (no reset after each window)', jpRewardProbable: 'level reward (probable match)',
+  jpBossProbable: 'boss (probable)', jpHpProbable: 'boss HP (probable)', jpRewardProbable: 'level reward (probable match)',
+  // opening hours (I-228, raid_config.json raidWindows)
+  raidWindow: 'opening hours (open outside them at 90 AP)', jpWindow: 'opening hours (open outside them at 90 AP)', weeklyWindow: 'weekday hours (probable; open outside them at 90 AP)',
   storyBoss: 'story raid boss (unknown quest)', storyOmega: 'odds of the Ω boss in the story', storyConflict: 'story raid boss (sources disagree)', rareType2: 'odds of the rare boss (rule type)' };
 // One short sentence per reconstructed value, for the player (user 04-11): what is not original and where the value comes from.
 const RECON_TEXT = {
@@ -293,11 +295,13 @@ const RECON_TEXT = {
   jpQuest: 'No quest of the Japanese raid survives: it uses the map, level and AP of a worldwide raid of the same boss (or of the same time) and the standard Raid objectives.',
   jpDates: 'Only the start date is known: the raid lasts one week from it.',
   jp2016: 'The boss HP, attack, defense and rewards are its 2016 worldwide values: the Japanese values of this raid are not known.',
-  jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids); the raid is open all day, not only in its two daily windows.',
+  jpTimer: 'The time limit follows the Japanese rules of the time (12 hours, 1 hour from May 2018, for the super-hard weekends; 30 minutes for the monthly raids).',
   jpBoard: 'The Raid Board is the Japanese super-hard board: the same cells, rewards and costs as the worldwide Legendary Raid Reward board.',
   jpBossProbable: 'No surviving Japanese source names this boss: it is the probable one (December 2016: the bosses of the worldwide 2016 Showdown! of the same days; September 2017: Crabby Cake for the Japanese «Furious Whole Cake»; August 4 and September 1, 2018: the next boss of the Japanese weekend cycle).',
   jpHpProbable: 'No HP of this weekend survives: it uses the HP players reported for the weekend of June 23, 2018 (about 1.5 billion at every level).',
-  jpWindowLevel: 'In the original the boss went back to LV 1 after each 30-minute window; here its level keeps rising and resets on the 1st of the month.',
+  raidWindow: 'In the original the boss appeared only at set hours (Pacific time): 12:00 and 19:00 for one hour (four hours on the weekend of November 11-12, 2017), or 2:00, 8:00, 14:00 and 20:00 in July 2018. In those hours the raid follows its original rules. Outside them it stays open here (not original): each quest costs 90 AP, there is no Bonus Time, and the boss has a level of its own that does not change the level of the set hours.',
+  jpWindow: 'In the original the raid opened twice a day for 30 minutes, 12:00-12:29 and 22:00-22:29 Japan time. In 2017 the boss went back to LV 1 after each window; in 2018 its level carried over to the next window (the months the Japanese notices do not cover follow their year: probable). Outside the windows the raid stays open here (not original): each quest costs 90 AP, there is no Bonus Time, and the boss has a level of its own that does not change the level of the windows.',
+  weeklyWindow: 'From Monday to Friday this weekly raid boss came only in the four Bonus Time hours (2:00, 8:00, 14:00 and 20:00 Pacific time), and all day on Saturday and Sunday. Outside those hours it stays open here at 90 AP per quest, with no Bonus Time and a level of its own: the notices of February to July 2019 charged 90 AP outside the hours; before February 2019 players say the boss was not there at all (probable: no notice says so).',
   jpRewardProbable: 'A level reward of the Japanese notice is given as the worldwide Medal it most probably was (its rarity, bonus or guarantee is not stated).',
   storyBoss: 'The raid boss of this story quest is not known: the boss of the nearest quest is used.',
   storyOmega: 'How often the Ω boss appears in this story quest is not known: the boss\'s usual rule from the 2016 data is used.',

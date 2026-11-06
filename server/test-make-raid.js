@@ -400,10 +400,11 @@ const tests = {
       f.config.jpCensus = {
         _note: 'notes are skipped',
         'JP-RAID-21': { family: 'daily rotating', bosses: ['Trickmaster', 'Queen Bee'], probableBosses: true, levelStep: 10 },
-        'JP-RAID-29': { weekdays: true, bosses: WEEK, windowLevel: true, levelDrops: [{ boss: 'Trickmaster', level: 10, reward: '6★ Trickmaster (Boosted)', probable: true }] },
+        'JP-RAID-29': { weekdays: true, bosses: WEEK, levelDrops: [{ boss: 'Trickmaster', level: 10, reward: '6★ Trickmaster (Boosted)', probable: true }] },
         'JP-D-2018-08-04': { bosses: ['Gummi Hound'], saturdayOnly: true, hp: 'yes: fixed 1,500,000,000 (carried over)', probableBosses: true, hpProbable: true },
         'JP-RAID-1': { levelDrops: [{ level: 40, reward: '5★ Magic Broom' }, { level: 95, reward: '6★ No Such Medal' }] },
       };
+      f.config.raidWindows = REAL_CONFIG.raidWindows; // I-228: the 2017 monthly 30-minute raids have opening hours
       census = f.census;
     }));
     assert.deepStrictEqual(census.rows.find((r) => r.id === 'JP-RAID-21').bosses, [], 'the census rows are not edited');
@@ -412,11 +413,13 @@ const tests = {
     const ye = out.index.entries.filter((e) => e.censusId === 'JP-RAID-21');
     assert.deepStrictEqual(ye.map((e) => [e.key, e.open, e.day, e.levelStep]), [['JP-RAID-21/single@2016-12-31', 'day', '2016-12-31', 10], ['JP-RAID-21/single@2017-01-01', 'day', '2017-01-01', 10]]);
     assert.ok(ye.every((e) => e.available && e.reconstructed.includes('jpBossProbable')), JSON.stringify(ye.map((e) => [e.why, e.reconstructed])));
-    // monthly by weekday: 7 tiers, each open on its weekday (e.day is its first date in the row), the level-reset note, Saturday's drop
+    // monthly by weekday: 7 tiers, each open on its weekday (e.day is its first date in the row), the opening hours (jpWindow, I-228:
+    // the master quest shows the outside price, 90), Saturday's drop
     const mo = out.index.entries.filter((e) => e.censusId === 'JP-RAID-29');
     assert.deepStrictEqual(mo.map((e) => [e.boss, new Date(`${e.day}T12:00:00Z`).getUTCDay()]), WEEK.map((b, i) => [b, (i + 1) % 7]));
     assert.deepStrictEqual(mo.map((e) => e.day), ['2017-08-07', '2017-08-08', '2017-08-02', '2017-08-03', '2017-08-04', '2017-08-05', '2017-08-06']);
-    assert.ok(mo.every((e) => e.available && e.open === 'day' && e.upMinutes === 30 && e.reconstructed.includes('jpWindowLevel') && !e.reconstructed.includes('jpBossProbable')));
+    assert.ok(mo.every((e) => e.available && e.open === 'day' && e.upMinutes === 30 && e.reconstructed.includes('jpWindow') && !e.reconstructed.includes('jpWindowLevel') && !e.reconstructed.includes('jpBossProbable')));
+    assert.ok(mo.every((e) => out.stageRows.find((s) => s.stageId === e.stageId).useAp === 90), 'master useAp: the outside price');
     const sat = mo.find((e) => e.day === '2017-08-05');
     assert.deepStrictEqual(sat.levelDrops.map((d) => [d.level, d.items]), [[10, ['6★ Trickmaster (Boosted)']]]);
     const drop = out.rewardRows.find((r) => r.raidRewardId === sat.levelDrops[0].rewardId);
@@ -428,16 +431,18 @@ const tests = {
     assert.deepStrictEqual([we.boss, we.open, we.day, we.upMinutes, we.hp, we.hpSource], ['Gummi Hound', 'day', '2018-08-04', 60, 1500000000, 'jp']);
     assert.ok(knotsOf(enemyOf(out, we.enemyId), 'hp').every((h) => h === 1500000000));
     assert.ok(['jpBossProbable', 'jpHpProbable', 'jpTimer'].every((l) => we.reconstructed.includes(l)), we.reconstructed.join());
+    assert.ok(!we.reconstructed.includes('jpWindow') && out.stageRows.find((s) => s.stageId === we.stageId).useAp === we.questAp[we.questAp.length - 1], 'no opening hours: the census AP');
     // a JP level drop with an item is paid; one with no item in the master is left off (levelDropsPartial), never replaced
     const qb = jpEntry(out, 'JP-RAID-1/single');
     assert.deepStrictEqual(qb.levelDrops.map((d) => [d.level, d.items]), [[40, ['5★ Magic Broom']]]);
     assert.ok(qb.reconstructed.includes('levelDropsPartial') && !qb.reconstructed.includes('jpRewardProbable'));
     // every label has its reason
-    for (const l of ['jpBossProbable', 'jpHpProbable', 'jpWindowLevel', 'jpRewardProbable']) assert.ok(out.index.reasons[l], l);
+    for (const l of ['jpBossProbable', 'jpHpProbable', 'jpWindow', 'jpRewardProbable']) assert.ok(out.index.reasons[l], l);
     // the overlay refuses an unknown row, an unknown field and a weekday rotation that is not 7 bosses
     const base = { rows: [{ id: 'JP-X', bosses: [] }] };
     assert.throws(() => mr.applyJpCensus(base, { 'JP-Y': { bosses: ['A'] } }), /not a census row/);
     assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { boss: 'A' } }), /unknown field/);
+    assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { windowLevel: true } }), /unknown field/, 'the old per-window note: raidWindows now');
     assert.throws(() => mr.applyJpCensus(base, { 'JP-X': { weekdays: true, bosses: ['A'] } }), /7 bosses/);
     assert.throws(() => build(jpFixture((f) => {
       f.census.rows.push(jpRow('JP-D-2018-08-05', 'super-hard weekend', '2018-08-05', '2018-08-05', ['Gummi Hound']));
@@ -451,7 +456,7 @@ const tests = {
     assert.deepStrictEqual(Object.keys(fix).filter((k) => !k.startsWith('_')).sort(), ['JP-D-2018-08-04', 'JP-D-2018-09-01', 'JP-RAID-21', 'JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30', 'JP-RAID-7', 'JP-RAID-8', 'JP-RAID-9']);
     assert.deepStrictEqual(fix['JP-RAID-28'].bosses, ['Assault Dragon', 'Queen Bee Ω', 'Jewel Princess', 'Jack in the Box', 'Gummi Hound', 'Closehanded Captain', 'Gear Golem']);
     assert.deepStrictEqual(fix['JP-RAID-30'].probableBosses, ['Crabby Cake']);
-    for (const id of ['JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30']) assert.ok(fix[id].weekdays && fix[id].windowLevel && fix[id].levelDrops.length === 1 && fix[id].levelDrops[0].level === 10, id);
+    for (const id of ['JP-RAID-28', 'JP-RAID-29', 'JP-RAID-30']) assert.ok(fix[id].weekdays && !('windowLevel' in fix[id]) && fix[id].levelDrops.length === 1 && fix[id].levelDrops[0].level === 10, id);
     assert.ok(REAL_CONFIG.boards.boostedMedals.some((m) => m.name === 'Twilight Thorn' && m.str === 1000 && m.def === 0), 'the boosted Twilight Thorn row the August 2017 drop needs');
     for (const id of ['JP-D-2018-08-04', 'JP-D-2018-09-01']) assert.ok(fix[id].saturdayOnly && fix[id].probableBosses === true && fix[id].hpProbable && /fixed 1,500,000,000/.test(fix[id].hp), id);
   },
@@ -657,6 +662,19 @@ const tests = {
     assert.deepStrictEqual([daily.open, daily.periods], ['daily', [['2017-07-03', '2017-07-09']]]);
     // review M-1: one-off and monthly rows end on the Pacific day before their Monday 07:00Z end too
     assert.deepStrictEqual(mr.eventPeriods(eventRow('WW-E12-1', 'monthly', '2016-11-21', '2016-11-28', ['Trickmaster'])), [['2016-11-21', '2016-11-27']]);
+  },
+  raid_windows_labels() {
+    // I-228: a raid with opening hours (raid_config.json raidWindows) carries the rule's label with its reason, and its master quest the
+    // outside price (90, shown on the quest top); a daily raid without hours (notice 35529: all day) keeps its census AP
+    const out = build(eventFixture([eventRow('WW-E29805-1', 'daily', '2017-07-03', '2017-07-10', ['Trickmaster']), eventRow('WW-E35529-1', 'daily', '2018-01-08', '2018-01-15', ['Trickmaster'])],
+      {}, (f) => { f.config.raidWindows = REAL_CONFIG.raidWindows; }));
+    const [jul, jan] = out.index.entries;
+    const ap = (e) => out.stageRows.find((s) => s.stageId === e.stageId).useAp;
+    assert.deepStrictEqual([jul.reconstructed.includes('raidWindow'), ap(jul)], [true, 90]);
+    assert.deepStrictEqual([jan.reconstructed.includes('raidWindow'), ap(jan)], [false, jan.questAp[jan.questAp.length - 1]]);
+    assert.ok(/I-228/.test(out.index.reasons.raidWindow));
+    for (const l of ['raidWindow', 'jpWindow', 'weeklyWindow']) assert.ok(REAL_CONFIG.reconstructedWhy[l], l);
+    assert.ok(!REAL_CONFIG.reconstructedWhy.jpWindowLevel, 'the old label is gone');
   },
   unknown_rewards_standard() {
     // a raid with no known board gets the standard board of its family (the nearest row of the same family that has one),
