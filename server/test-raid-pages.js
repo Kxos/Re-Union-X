@@ -93,12 +93,13 @@ const tests = {
     const ix = index();
     ix.entries.push(tier('JP-RAID-21', 8350, '2016-12-25', '2017-01-01', 'single', 'Green Trident Tail', { family: 'daily rotating', jp: true, region: 'JP', levelStep: 10,
       reconstructed: ['jp', 'jpQuest', 'jpBossProbable'], boards: [] }),
-    tier('JP-D-2018-08-04', 8353, '2018-08-04', '2018-08-04', 'single', 'Red Trident Tail', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpBossProbable', 'jpHpProbable'], boards: [] }),
+    tier('JP-D-2018-08-04', 8353, '2018-08-04', '2018-08-04', 'single', 'Gear Golem', { family: 'super-hard weekend', jp: true, region: 'JP', reconstructed: ['jp', 'jpHpProbable'], boards: [] }),
     tier('JP-RAID-30', 8352, '2017-09-01', '2017-09-30', 'single', 'Crabby Cake', { family: 'monthly (30-minute)', jp: true, region: 'JP', reconstructed: ['jp', 'jpWindow', 'jpRewardProbable'], boards: [] }));
     const c = ctx({ index: ix });
     const ye = pages.detailPage(ix, 8350, c), we = pages.detailPage(ix, 8353, c), mo = pages.detailPage(ix, 8352, c);
     assert(ye.includes('gains 10 levels at every win') && ye.includes('<b>boss (probable)</b>') && ye.includes('2016 Showdown!'), 'year-end 2016');
     assert(we.includes('<b>boss HP (probable)</b>') && we.includes('1.5 billion'), 'weekend 2018');
+    assert(!/next boss of the Japanese weekend cycle/.test(we), 'the 2018 weekends are named by their own notices (43217, 44270): no cycle guess in the label');
     assert(mo.includes('<b>opening hours (open outside them at 90 AP)</b>') && mo.includes('12:00-12:29 and 22:00-22:29 Japan time') && mo.includes('in 2018 its level carried over') && !mo.includes('no reset after each window') && mo.includes('<b>level reward (probable match)</b>') && mo.includes('gains a level at every win'), 'monthly 2017');
   },
   weekday_weekend_labels() {

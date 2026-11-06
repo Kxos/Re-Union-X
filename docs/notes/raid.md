@@ -361,7 +361,10 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   weekend 2016-10 to 2018-06; a JP notice of 2018-06-23 (Scourge Spider after the empty 6/16) shows the cycle skips weekends with
   no raid (6/16 and 6/30 had none). Hence **probable**, not proven: 2018-08-04 Red Trident Tail, 2018-09-01 Malicious Spider.
   2018-09-01 was the last JP weekend raid. No HP source (players read about 1.5 billion from 2018-06-23). Served as probable
-  since 6 November 2026 (`jpCensus`, below).
+  since 6 November 2026 (`jpCensus`, below). **Refuted the same day** by their own JP notices (live sweep): 43217 names
+  **Gear Golem** for 2018-08-04 (banner: 逃亡まで60分), 44270 **Bane Spider = Scourge Spider** for 2018-09-01, so the cycle did
+  not hold in summer 2018 (42189: 2018-07-07 Blue Trident Tail, a weekend with no census row). Served with these bosses since
+  then (see the live-notice bullet of [jpCensus](#jp-census)); the HP stays probable.
 - <a id="jp-census"></a>**Later JP research served (`jpCensus`, user decisions 05-11 and 06-11, tests and dry run, master not
   regenerated).** `raid_config.json` `jpCensus` corrects the census JP rows when the census is read (`make-raid.js`
   `applyJpCensus`, in `buildRaid` and `--ids`); the private census file is not edited, an id that is not a census row or an
@@ -380,9 +383,34 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   - **JP-RAID-21** (year-end 2016, JP notice): family `daily rotating`, the WW «2016 Showdown!» lineup of the same days (Green
     Trident Tail, Wicked Spider, Submarine Carp, Fortress Crab, Gummi Hound, Blue Trident Tail, Hocus Pocus), all
     `jpBossProbable`; `levelStep` 10 = `entry.levelStep`, read first by `routes-raid.js` `levelStep` (+10 per defeat, cap LV 99).
-  - **JP-D-2018-08-04 / 09-01**: Red Trident Tail / Malicious Spider, `saturdayOnly` (tier `day` = the Saturday, `open: 'day'`),
-    60 minutes (`jpTimer` after 2018-05-05), HP fixed 1,500,000,000 at every level (`hp` = census text «yes: fixed ...»),
-    labels `jpBossProbable`, `jpHpProbable`; board: the JP super-hard board (`jpBoard` + `boardSet`, census `inferred_board`).
+  - **JP-D-2018-08-04 / 09-01**: Gear Golem / Scourge Spider (their own notices 43217 / 44270, since the live sweep of 6
+    November; first served as the probable Red Trident Tail / Malicious Spider), `saturdayOnly` (tier `day` = the Saturday,
+    `open: 'day'`), 60 minutes (`jpTimer` after 2018-05-05; the 43217 banner prints 60 minutes), HP fixed 1,500,000,000 at every
+    level (`hp` = census text «yes: fixed ...»), label `jpHpProbable` (no `jpBossProbable` any more); board: the JP super-hard
+    board (`jpBoard` + `boardSet`, census `inferred_board`). Raid Board until Sunday 12:59 in the original (notice only).
+  - **Live JP notice sweep (6 November 2026, PROVEN facts; private `JP_ONLY.md` «Gap research 8»; tests and dry run, master not
+    regenerated).** New overlay fields (`applyJpCensus`): `start` / `end` (the notice's JP days: the census gives several JP rows
+    as the Pacific days before), `upMinutes` (the notice's time limit, original: no `upMinutes` / `setting2016` label; written to
+    `raidSetting.bossUpTime`), `bonusLevelStep` (`entry.bonusLevelStep`: «+1 at every defeat, +5 in Bonus Time», read by
+    `routes-raid.js` `levelStep`; Bonus Time is the one-AP rule's Saturday and Sunday). Bad values stop the run. Per row:
+    - 3 hours, +1 / +5 in Bonus Time: JP-RAID-14 (19605), JP-RAID-15 (20078), JP-RAID-22 (24027), JP-D-2017-06-19 (29434),
+      JP-D-2017-08-13 (31403), JP-D-2017-09-04 (32004), JP-D-2017-09-18 (32423), JP-D-2017-11-13 (34128), JP-D-2017-12-11 (34933),
+      JP-D-2018-01-15 (36192), JP-D-2018-02-12 (36820), JP-D-2018-04-09 (38872), JP-D-2018-07-09 (42191), JP-D-2018-08-06 (43221);
+      JP-RAID-24 (25538) 3 hours, +1 (no Bonus Time step stated). Before: 10 or 20 minutes (ours or the boss's 2016 setting).
+      Not covered (no notice): JP-D-2017-05-22, JP-D-2017-07-17 keep their timer.
+    - JP-RAID-27 (33250): 10/16-10/22 (not from 10/15), `levelStep` 5, 3 hours; its Friday «ヴィシャススパイダー» is Savage Spider
+      (`raid_bosses.md`), as the census row already had.
+    - JP-D-2017-06-19 (29434): **Jewel Sorceress**, not Jewel Princess (board «てるてるイヤリング», not served: no cell list).
+    - Dates: JP-RAID-15 from 8/15 (20078), JP-RAID-14 7/18 (19605), JP-RAID-4 12/19/2015 (15404), JP-RAID-6 1/18/2016 (15845),
+      JP-RAID-21 12/26/2016 (24013), JP-RAID-22 1/9/2017 (24027), JP-RAID-24 2/20/2017 (25538), JP-D-2017-08-13 8/14-8/20/2017
+      (31403; label `jpDates` gone); the 25 super-hard weekends of 2016 start on Saturday (18958, 19740, 19871, 19875, 20289;
+      standing 20079 for the others; the three Saturday-only ones of the JP wiki banners, JP-SHR-14/19/24, are Saturday to
+      Saturday). Keys unchanged (the daily rotating days count from the end). Not moved: JP-RAID-28 / 30 (their weekday keys
+      carry the first date of each weekday) and the 2017-2018 super-hard weekends (no notice in this sweep).
+    - Boards stay as they are: no notice gives a cell list or a coin total.
+    - Dry run (`D:/Progetto_Restauro_KH_UX/tmp/raidjp_notice_dry`, local, HEAD config vs working copy): 608 of 608 tier rows,
+      no WW entry changed, no key or id added (`raid_ids.json` unchanged), master row counts unchanged; 58 JP tier rows changed (dates, timers, steps, the
+      three bosses with their donor quest); the event-rule HP of the rows whose start moved changes by about 1 % (date scale).
   - **JP level drops** (`levelDrops`, resolved by `raid-boards.js` `matchReward`, paid as the WW notices' level drops): JP-RAID-9
     Magic Broom 5★ at LV 40 (Easter 2016); JP-RAID-7 Mickey & Minnie 6★ at LV 95 (Valentine 2016: guaranteed, same art; rarity
     not stated) and JP-RAID-8 Prince & Belle 6★ 21156 at LV 95 (White Day 2016: same id; guarantee by analogy): `jpRewardProbable`.
@@ -469,7 +497,12 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   their own card, read by eye; test `jp_banner_texts` checks every carded row of `jp_cards.json` has one); (2) the facts of the
   JP notice translated by us («Original Japanese notice (our translation)», notice id and date) for the 13 rows whose notice is
   in the evidence (15404, 15845, 24013, 24027, 25538, 29893, 30969, 32002, 41184, 41745, 42600, and the standing weekend notice
-  40716 for the two 2018 Saturday-only rows, said so), else «The original Japanese notice of this raid has not been recovered»;
+  40716 for the two 2018 Saturday-only rows, said so; since the live sweep of 6 November **56 rows**: the two 2018 Saturday-only
+  rows on their own notices 43217 / 44270, the 2016 super-hard weekends 18958, 19740, 19871, 19875, 20289 and the standing
+  notice 20079 for 17 more (not the three Saturday-only ones), the raid events 19605, 20078, 29434, 31403, 32004, 32423, 34128,
+  34933, 36192, 36820, 38872, 42191, 43221, the daily rotating raid 33250 and the monthly raids 32684, 33627, 34923, 37931,
+  38866, 39851, 40928 with their bosses, main board items and completion pet parts; dry run of `make-raid-notices.js` with
+  `KHUX_RAID_NOTICES_OUT`), else «The original Japanese notice of this raid has not been recovered»;
   (3) what is known: dates, type, opening rule, level rule, bosses by day / tier with HP at LV 1 and time limit, level rewards,
   Raid Boards with their state (original / Japanese super-hard board / reconstructed / none); (4) «On this server». The
   translations live in the private `raid_census/jp_notice_facts.json`, copied by `make-raid-notices.js` into the git-ignored

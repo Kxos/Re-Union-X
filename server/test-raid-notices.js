@@ -143,6 +143,11 @@ const tests = {
     assert.ok(!lost.includes('On the banner'), 'no card, no banner text');
     // the detail page links to it
     assert.ok(pages.detailPage(ix, 8201, c).includes('/web/raid/notice/8201?from=raid'));
+    // live JP notices (06-11, jpCensus): a raid event's «+1 at every defeat, +5 in Bonus Time» and its 3-hour limit
+    ix.entries.push(entry('JP-D-2018-02-12', 8203, '2018-02-12', '2018-02-18', 'Gear Golem', { family: 'event', jp: true, region: 'JP', upMinutes: 180, bonusLevelStep: 5, reconstructed: ['jp', 'jpNoBoard'] }));
+    const step = pages.noticePage(ix, 8203, doc, c);
+    assert.ok(step.includes('LV 1, +1 at every win (+5 in Bonus Time), up to LV 99') && step.includes('3 hours'), 'level step and time limit of the notice');
+    assert.ok(pages.detailPage(ix, 8203, c).includes('gains a level at every win (5 levels in Bonus Time)'), 'catalog detail level line');
   },
   jp_banner_texts() {
     // every JP row with its own original card (reference/raid_banners_jp/jp_cards.json «exact», local list) has its banner text

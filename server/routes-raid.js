@@ -236,11 +236,14 @@ function routesRaid({ player, savePlayer, masterRows, raidIndex, storyWeek, smok
   // level step of a win: +2 in bonus time for the weeks of BONUS_LEVEL_FROM..TO, else +1
   // a story boss has no week (occ null): always +1 (review M-5)
   // an event raid with its own notice rule (EVENT_LEVEL_STEPS, I-229) follows it, also as a kept raid of the Raid Catalog
-  // a JP raid whose notice states its step carries it in the entry (make-raid.js jpCensus levelStep: year-end 2016 +10 every defeat)
+  // a JP raid whose notice states its step carries it in the entry (make-raid.js jpCensus levelStep: year-end 2016 +10 every defeat,
+  // October 2017 daily rotating +5; bonusLevelStep: the JP raid events' +5 in Bonus Time)
   // a boss met outside its raid's opening hours (boss.outside, raid-windows.js) has no Bonus Time
   const levelStep = (boss, ms, entry) => {
     if (entry && entry.levelStep) return entry.levelStep;
     const bonus = !boss.outside && (entry ? bonusAt(entry, ms, rules) : bonusAt(null, ms, rules));
+    // a JP raid whose notice says «+1 at every defeat, +5 in Bonus Time» (make-raid.js jpCensus bonusLevelStep)
+    if (entry && entry.bonusLevelStep) return bonus ? entry.bonusLevelStep : 1;
     const ev = entry && EVENT_LEVEL_STEPS[entry.censusId];
     if (ev) return ev.always || (ev.bonus && bonus ? ev.bonus : 1);
     return boss.occ && String(boss.occ) >= BONUS_LEVEL_FROM && String(boss.occ) < BONUS_LEVEL_TO && bonus ? BONUS_LEVEL_STEP : 1;
