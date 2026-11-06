@@ -6,7 +6,9 @@
 // - raid_census/work/notice_text.json: {notice id: plain text of the SQUARE ENIX BRIDGE notice page}.
 // Writes server/game_data/raid_notices.json (git-ignored: the notice text is SQUARE ENIX's, it never goes in the public repo):
 //   {note, rows: {censusId: {noticeId, how, confidence, checks, alt?, note?}}, notices: {noticeId: {title, date, time, category,
-//   body: [lines]}}, unmatched: [censusId], scrubbed: [noticeId of the notices whose player ranking was removed]}
+//   body: [lines]}}, unmatched: [censusId], scrubbed: [noticeId of the notices whose player ranking was removed],
+//   jp: {censusId: {noticeId, date, title, lines, standing?}} (Japan-only raids: our translation of their JP notice facts, from
+//   the private raid_census/jp_notice_facts.json)}. KHUX_RAID_NOTICES_OUT writes elsewhere (dry runs).
 // The notice text is kept as it is (lines trimmed, empty lines dropped), less the player rankings and the page boilerplate
 // (scrub() below): the page lays it out without changing a sentence.
 // Matching a census row to its notice:
@@ -27,7 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const OUT = path.join(__dirname, 'game_data', 'raid_notices.json');
+const OUT = process.env.KHUX_RAID_NOTICES_OUT || path.join(__dirname, 'game_data', 'raid_notices.json');
 const DEFAULT_SRC = 'D:\\Progetto_Restauro_KH_UX\\private\\events\\sources';
 const EOS = { from: '2021-03-01', noticeId: 74823, mark: /Weekly Raid Event/,
   note: 'This week had no notice of its own: this is the notice that announced the Weekly Raid Events until the end of service.' };
@@ -157,7 +159,12 @@ function build({ census, noticeText }) {
 
 function buildFrom(src) {
   const read = (...p) => JSON.parse(fs.readFileSync(path.join(src, 'raid_census', ...p), 'utf8'));
-  return build({ census: read('raid_census.json'), noticeText: read('work', 'notice_text.json') });
+  const doc = build({ census: read('raid_census.json'), noticeText: read('work', 'notice_text.json') });
+  // Japan-only raids: the facts of their original JP notices, translated by us (private raid_census/jp_notice_facts.json;
+  // shown marked as our translation on the Details page of the JP rows, raid-pages.js jpNoticePage)
+  const jp = path.join(src, 'raid_census', 'jp_notice_facts.json');
+  if (fs.existsSync(jp)) doc.jp = JSON.parse(fs.readFileSync(jp, 'utf8')).rows || {};
+  return doc;
 }
 
 // one line per census row, for review (written outside the repo)

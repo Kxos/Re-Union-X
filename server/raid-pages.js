@@ -357,7 +357,8 @@ function detailPage(index, evStageId, ctx = {}) {
   return PAGE_HEAD(title, CSS + DETAIL_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
     + `${st.pill}<div id="pinmsg" class="pinmsg"></div><div class="why ${st.cls}">${st.why}</div>${replacesLine(st, kept)}${button}`
-    + (ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
+    + (row.jp ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Notice of this raid ›</a></li></ul>`
+      : ctx.hasNotice && ctx.hasNotice(row.censusId) ? `<ul class="ow"><li><a href="/web/raid/notice/${row.evStageId}?from=raid">Original notice of this raid ›</a></li></ul>` : '')
     + `<h2>Week</h2><table class="kv">${kv}</table>`
     + `<h2>Tiers</h2><table class="tt"><tr><th>Tier</th><th>Boss</th><th>Quest LV</th><th>Boss HP</th></tr>${tierRows}</table>`
     + (ruleOn() ? `<p class="n">${esc(RULE_LINE)}</p>` : '')
@@ -520,6 +521,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
         + 'opens when your Story reaches it.</p>'
         + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
     }
+    if (row && row.jp) return jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links });
     if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
@@ -535,6 +537,59 @@ function noticePage(index, evStageId, doc, ctx = {}) {
   } catch (e) {
     return noticeMissing(row, ctx);
   }
+}
+
+// Details page of a Japan-only raid (task 2, 06-11): no original JP notice page exists for its banner, so the page says plainly
+// whether the JP notice was recovered and gives what is known. doc.jp[censusId] (make-raid-notices.js, from the private
+// jp_notice_facts.json): the facts of the JP notice translated by us, shown marked as our translation; else «not recovered».
+// Then the facts this server has: dates, bosses per day, HP, time limit, level rule, level rewards, Raid Boards with their
+// label (original / reconstructed / Japanese super-hard board / none), the one-AP-rule note, and the «On this server» box.
+// the texts printed on the original JP banners (server/raid_jp_banners.json, read by eye, our translation; user 06-11)
+const JP_BANNERS = (() => { try { return require('./raid_jp_banners.json').rows || {}; } catch { return {}; } })();
+const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const minutesText = (m) => (!m ? '' : m % 60 ? `${m} minutes` : m === 60 ? '1 hour' : `${m / 60} hours`);
+const JP_BOARD_STATE = [['jpBoardOriginal', 'original Japanese boards'], ['jpBoard', 'the Japanese super-hard board (= worldwide Legendary Raid Reward)'],
+  ['jpBoardDeduced', 'reconstructed from the surviving evidence'], ['jpNoBoard', 'none: not known']];
+function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
+  const title = titleOf(row), facts = doc && doc.jp ? doc.jp[row.censusId] : null;
+  const codes = new Set(row.entries.flatMap((e) => e.reconstructed || []));
+  const notice = facts && Array.isArray(facts.lines)
+    ? `<div class="ns raid"><h2>Original Japanese notice (our translation)</h2>`
+      + `<p class="dt"><span class="chip">JP notice ${esc(facts.noticeId)}</span><span class="chip d">${esc(niceDay(facts.date))}</span></p>`
+      + `<p class="tg">«${esc(facts.title)}»</p><ul class="nl">${facts.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>`
+      + `<p class="nb">Translated by this server from the original Japanese notice${facts.standing ? ' (the standing notice of these raids, not one of this weekend)' : ''}: `
+      + 'the facts are those of the notice, the wording is ours. Times are Japan time.</p></div>'
+    : '<div class="ns raid"><h2>Notice not recovered</h2><p>The original Japanese notice of this raid has not been recovered.</p>'
+      + '<p class="nb">Below is what is known of this raid from the other surviving sources.</p></div>';
+  const play = row.entries.filter((e) => e.available);
+  const bossRows = (play.length ? play : row.entries).map((e) => {
+    const when = e.day ? (e.open === 'day' && row.entries.length > 1 ? `${WEEKDAY[new Date(`${e.day}T12:00:00Z`).getUTCDay()]}s` : niceDay(e.day)) : tierLabel(e.tier);
+    return `<tr><td>${esc(when)}</td><td>${esc(e.boss || '')}</td><td>${e.available ? Number(e.hp || 0).toLocaleString('en-US') : 'Not restored yet'}</td><td>${esc(minutesText(e.upMinutes))}</td></tr>`;
+  }).join('');
+  const open = play.some((e) => e.open === 'weekend') ? 'Saturday and Sunday only' : play.some((e) => e.open === 'day') ? 'each boss on its own day' : 'every day of its dates';
+  const drops = [...new Set(play.flatMap((e) => (e.levelDrops || []).map((d) => `LV ${d.level}: ${(d.items || []).join(', ')}`)))];
+  const state = JP_BOARD_STATE.filter(([c]) => codes.has(c)).map(([, l]) => l).join('; ') || 'none';
+  const ids = [...new Set(play.flatMap((e) => e.sphereBoardIds || []))];
+  const boards = ids.length ? `<ul class="pl">${ids.map((id) => {
+    const items = [...new Set(ctx.boardItems ? ctx.boardItems(id) : [])], name = ctx.boardName ? ctx.boardName(id) : '';
+    return `<li>${name ? `<b>${esc(name)}</b>: ` : ''}<span class="dr">${items.map(esc).join(', ') || '—'}</span></li>`;
+  }).join('')}</ul>` : '<p class="n">No Raid Boards: the Japanese board of this raid is not known, so none is served.</p>';
+  const kv = [['Dates', `${dateRange(row)} (Japanese version only)`], ['Type', FAMILY_LABEL[row.family] || row.family], ['Open', open],
+    ['Level', `LV 1, +${stepOf(row)} at every win, up to LV 99`], ['Raid Boards', state]].map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
+  return PAGE_HEAD(title, CSS + DETAIL_CSS + NOTICE_CSS + RAID_DETAIL_CSS) + `<body${back ? ' class="hb"' : ''}>`
+    + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
+    + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">JAPAN ONLY</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
+    + (JP_BANNERS[row.censusId] ? '<div class="ns"><h2>On the banner (our translation)</h2>'
+      + `<p lang="ja" class="nb">${esc(JP_BANNERS[row.censusId].ja)}</p><p>${esc(JP_BANNERS[row.censusId].en)}</p>`
+      + '<p class="nb">The Japanese text printed on the original banner of this raid, translated by this server.</p></div>' : '')
+    + notice
+    + `<div class="ns"><h2>What is known of this raid</h2><table class="kv">${kv}</table>`
+    + `<table class="tt"><tr><th>Day / tier</th><th>Boss</th><th>HP at LV 1</th><th>Time limit</th></tr>${bossRows}</table>`
+    + (drops.length ? `<h3>Level rewards</h3><ul class="nl">${drops.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '')
+    + `<h3>Raid Boards</h3>${boards}</div>`
+    + '<div class="srv"><h2>On this server</h2><p>This raid was held only in the Japanese version of the game: here it is played only from the Raid Catalog, '
+    + `once your Story has passed its dates (${esc(dateRange(row))}).</p>`
+    + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
 }
 
 module.exports = { catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch };
