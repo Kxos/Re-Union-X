@@ -564,6 +564,56 @@
   "JP-SHR-96": {
    "ja": "レベル★★★★★ 土曜限定 超難度レイドイベント 逃亡まで60分 パーティーで協力して撃破せよ!",
    "en": "Level ★★★★★ · Saturday only: Super-Hard Raid Event · 60 minutes until it escapes · Work together as a party to defeat it!"
+  },
+  "JP-SHR-80": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-87": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-94": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「ベインスパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Scourge Spider (JP «Bane Spider»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-81": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Green Trident Tail (JP «G Trident Anchor»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-88": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「Gトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Green Trident Tail (JP «G Trident Anchor»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-82": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「マリススパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Malicious Spider (JP «Malice Spider»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-89": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「マリススパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Malicious Spider (JP «Malice Spider»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-84": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「ウィキッドスパイダー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Wicked Spider! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-90": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「Bトライデントアンカー」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Blue Trident Tail (JP «B Trident Anchor»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
+  },
+  "JP-SHR-93": {
+   "ja": "超難度レイドボスイベント パーティーで大協力! 「フォートレスクラブ亜種」を撃破しよう! 逃亡まで12時間 HP 150,000,000",
+   "en": "Super-Hard Raid Boss Event · Team up as a party! Defeat Fortress Crab Ω (JP «Fortress Crab variant»)! 12 hours until it escapes · HP 150,000,000",
+   "reconstructed": "Reconstructed banner: no original banner of this two-day weekend is known. Made by this server from the two-day 30,000,000 HP banner of the same boss, with the HP block of the original two-day 150,000,000 HP banner of Red Trident Tail."
   }
  }
 }
