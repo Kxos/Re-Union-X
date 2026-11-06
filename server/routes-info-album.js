@@ -286,11 +286,12 @@ const NOTICES = [
       ...raidJpLines(raidNoticeFacts()),
       '## Raids not here yet',
       ...raidNoticeLines(raidNoticeFacts())] },
-  // Medal Gallery (I-242, user request 06-11): server/medal-gallery.js, link on the Banner Catalog page (gacha.js catalogPage)
+  // Medal Gallery (I-242, user requests 06-11): server/medal-gallery.js, block on the Banner Catalog page (gacha.js catalogPage)
   { date: '11/06', tag: 'INFORMATION', title: 'Medal Gallery',
-    body: ['The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then **Medal Gallery** under the title.',
-      '**BGM Medals** lists the Medals with their own music, which plays in the Medal\'s details and on the Home screen when the Medal is shared. Their Supernova versions play the music of their Medal (**not original**).',
+    body: ['The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then the **Medal Gallery** box under the title.',
+      '**BGM Medals** lists the Medals with their own music, which plays in the Medal\'s details and on the Home screen when the Medal is shared, with the name of the track. Tap a Medal and then **Play the music** to hear it in the gallery. Their Supernova versions play the music of their Medal (**not original**). Track names come from the community wiki; where the sound file matched to a Medal is not verified, the gallery says so.',
       '**Full Art** lists the Medals with the **Art** button in their details, under their artwork; tap the artwork to see it larger. Medals marked **Reconstructed** show an artwork that their own picture is part of, although the original game data gave them none (see the Differences from the original game notice).',
+      'Medals with practically the same picture (for example the SN, SN+ and SN++ versions of a Medal) are shown once, with the others on a **Variants** line.',
       'Each Medal shows its picture, its stars, its attribute and whether you own it; the **Filters** find Medals by name, owned or not owned and attribute.'] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
   { date: '10/27', tag: 'INFORMATION', title: 'Support Medal Cost',
