@@ -59,7 +59,8 @@ function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirna
 }
 const nameList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a.join(''));
 function raidNoticeLines(f) {
-  const jp = 'The raids held only in the **Japanese version** are not here yet: they will come later in the Raid Catalog, in its Japan only section, once enough of their data is known.';
+  // no Japan-only raid served (raid_config.json jpRaids.served false, user decision 06-11: worldwide content only for now)
+  const jp = 'For now this server serves **only the worldwide raids**. The raids held only in the **Japanese version** of the game are not here: what is known of them is kept aside for a later decision.';
   if (!f) return [jp];
   const out = [];
   if (f.off) out.push(`**${f.off}** of the ${f.tiers} raid tiers of the worldwide game are marked **Not restored yet**: the graphics or data of their boss are incomplete in the surviving game files. The Raid Catalog lists them, and they come back as soon as their boss is recovered.`);

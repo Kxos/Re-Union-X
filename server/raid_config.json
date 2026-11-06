@@ -10,6 +10,7 @@
     "capFrom": "2018-10-07"
   },
   "weekendUpMinutes": { "before": 180, "after": 60, "oneHourFrom": "2018-05-05" },
+  "jpRaids": { "_note": "User decision 06-11 (evening): only worldwide content for now. false = no Japan-only raid is served (make-raid.js jpOff); the JP data below stays for a later decision.", "served": false },
   "jpTimer": { "_note": "oneHourFrom of the super-hard weekends is a JP Saturday (the rows start on the JP Saturday since 06-11): 2018-05-05 = JP-SHR-95, the first 60-minute weekend (khux-guides digest of 5/4/2018 and reddit r/KHUx 8gzyzv «[5/5 ~ 5/6] ... only lasts 60 minutes», JP_ONLY.md Gap research 9; was 2018-05-12 until 06-11 round 4).", "super-hard weekend": { "before": 720, "after": 60, "oneHourFrom": "2018-05-05" }, "monthly (30-minute)": { "minutes": 30 } },
   "jpQuestAp": { "JP-RAID-32": 0 },
   "jpBoards": { "superHard": { "donor": "WW-E41605-1", "board": "Legendary Raid Reward", "cells": 13, "coins": 40500 } },

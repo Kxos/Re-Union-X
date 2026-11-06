@@ -509,8 +509,12 @@ const correctedFrom = (values, rewards) => correctedWeeks(values.weeks, parseCor
 const JP_FAMILIES = { event: 'one-off event', 'super-hard weekend': 'weekend-only', 'monthly (30-minute)': 'monthly', 'daily rotating': 'daily showdown' };
 const JP_SAME_AS_WW = new Set(['weekly', 'weekly (date-coded enemy row)']);
 const isJpRow = (row) => String(row.id).startsWith('JP-');
+// raid_config.json jpRaids.served false (user decision 06-11, evening): worldwide content only for now, no Japan-only raid is served;
+// the JP data (census overlay, cards, boards, notice facts) stays as it is for a later decision (buildRaid marks the rows jpOff).
+const JP_OFF_WHY = 'Japan-only raids are not served for now (raid_config.json jpRaids.served false, user decision 06-11: worldwide content only)';
 // {why} when the JP row is not served, else {}. A WW row of the same boss starting within a day (same family kind: event)
 function jpStatus(row, census) {
+  if (row.jpOff) return { why: JP_OFF_WHY };
   if (NOT_RAID_EVENT[row.family]) return { why: NOT_RAID_EVENT[row.family] };
   if (JP_SAME_AS_WW.has(row.family)) return { why: 'the same weekly raid as the worldwide one (from September 2018 both versions ran the same weekly raids)' };
   if (!JP_FAMILIES[row.family]) return { why: `family «${row.family}» not understood` };
@@ -871,6 +875,7 @@ function applyLux(rows, lux) {
 function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null }) {
   checkRanges(master);
   census = applyJpCensus(census, config.jpCensus); // corrections of the JP rows (jpCensus), before anything reads the census
+  if (config.jpRaids && config.jpRaids.served === false) census = { ...census, rows: (census.rows || []).map((r) => (isJpRow(r) ? { ...r, jpOff: true } : r)) };
   const fixes = parseCorrections((rewards || {}).correctionsMd);
   const weeks = correctedWeeks(values.weeks, fixes.dates);
   const readings = correctedWeeks(values.week_tier_hp, fixes.dates);
