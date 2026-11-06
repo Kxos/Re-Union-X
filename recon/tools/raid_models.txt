@@ -1,5 +1,5 @@
 # Raid boss models the resource pack carries (I-221). One id per line; check_raid_models.py checks these.
-# 0001-0016, 1000-1010 complete in the 2016 package; 9102, 9103 without start demo; 9101 fight from 2016, demos with inferred
+# 0001-0016, 1000-1010 complete in the 2016 package; 9102, 9103 start demo from JP + twin-slot copies (49l, 6 Nov); 9101 fight from 2016, demos with inferred
 # copies (originals.tsv 49c); weekly-era spider LWFs with the Spinneret target (49e). 0018-0028, 0030-0032, 1011 reconstructed
 # (originals.tsv 49d, user decision 2 Nov). 0017, 1012, 1016 reconstructed (originals.tsv 49h, render9, user decision
 # 4 Nov). 5000 Enraged Arachnid: 2016 fight, JP demos with copies (originals.tsv 49j, render10, user decision
