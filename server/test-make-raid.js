@@ -1824,6 +1824,16 @@ const tests = {
     assert.deepStrictEqual(again.ids, a.ids, 'idempotent');
     assert.deepStrictEqual(again.index.story, a.index.story);
   },
+  board_art_jp_files_exist() {
+    // build-resources 06-11 stopped on JP cards named under Board Raid/ that live only in img/sphere_incentive/: every `jp` source
+    // of the served card list must be a file of the JP 4.3.1 data (skipped without the list or the folder; KHUX_JP_DATA overrides)
+    const list = path.join(__dirname, 'game_data', 'raid_board_art.tsv');
+    let jp = process.env.KHUX_JP_DATA;
+    if (!jp) { try { jp = require('child_process').execFileSync('python', ['-I', path.join(__dirname, '..', 'recon', 'tools', 'private_tools.py'), 'path', 'jp_data'], { encoding: 'utf8' }).trim(); } catch { jp = null; } }
+    if (!fs.existsSync(list) || !jp || !fs.existsSync(jp)) { console.log('  (skipped: no card list or no JP data folder)'); return; }
+    const missing = fs.readFileSync(list, 'utf8').split(/\r?\n/).map((l) => l.split('\t')).filter((c) => c[1] === 'jp' && !fs.existsSync(path.join(jp, c[2]))).map((c) => `${c[0]} <- ${c[2]}`);
+    assert.deepStrictEqual(missing, [], 'jp card sources missing from the JP data');
+  },
   real_census_week() {
     const real = realInputs();
     if (!real) return;

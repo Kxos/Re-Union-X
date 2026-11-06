@@ -428,7 +428,7 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
     the WW master and the evidence; read by `readSources` as `eventRewards.jpBoards`); evidence per board in the private
     `JP_ONLY.md` «JP raid boards (06-11)». Board keys `<censusId>:jp<n>-<name>`, new numbers appended in `raid_ids.json`
     (700-746); the old `std` keys stay numbered, unused.
-  - Card pictures: the JP 4.3.1 client has the original JP board cards (`img/sphere_incentive/Board Raid/24000xx.png`): own
+  - Card pictures: the JP 4.3.1 client has the original JP board cards (`img/sphere_incentive/24000xx.png`; only some are also under `Board Raid/`, so the list names the top-level file: the 06-11 build stopped on 9 cards named under `Board Raid/`, test `board_art_jp_files_exist`): own
     card for 16 boards (`board.art`, `raid-boards.js`; Christmas bonus 2 shows the bonus 1 card, its file 2400005 is absent), the
     WW Zootopia cards for JP-RAID-10 (`artFrom`), for 6 boards the card of a board
     with the same main reward for the 5-Mirror bonus boards and the Magic Broom Set (said in the evidence); 23 boards have no
