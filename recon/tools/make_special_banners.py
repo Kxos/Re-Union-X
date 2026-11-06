@@ -1,9 +1,16 @@
 """Banners of the Special tab (640x140 PNG) and their -kept copies (spec 2026-10-30-special-tab-design.md 4, 10).
 
     python -I recon/tools/make_special_banners.py [--index F] [--rules F] [--src D] [--out D] [--enemies D]
-        [--mode palette|full] [--section all|special|raid] [--raid-index F] [--raid-img D]
+        [--mode palette|full] [--section all|special|raid|event] [--raid-index F] [--raid-img D]
+        [--event-index F] [--event-config F] [--event-img D]
         -> server/game_data/special_img/<evStageId>.png and <evStageId>-kept.png (git-ignored)
         -> raid section: server/game_data/raid_img/8000.png (Raid Catalog banner) and <evStageId>-kept.png (git-ignored)
+        -> event section: server/game_data/event_img/20000.png (Event Catalog banner) and <evStageId>-kept.png (git-ignored)
+
+Event section (Events Part 1, Task 6; run after make_event_banners.py, whose event cards it reads; not part of «all»): the
+Event Catalog banner (server/event_config.json catalogEvStage, 20000) in the same layout, «EVENT CATALOG» over strips of
+original event cards, and for every event of server/game_data/events.json a -kept copy of its card with a gold «KEPT EVENT»
+tab. After a change bump imgVersion in server/event_config.json, then the master revision.
 
 Raid section (raids Part 2, Task 9; run after make_raid_banners.py, whose weekly event cards it reads): the Raid Catalog
 banner (raids.json catalog.evStageId, 8000) in the layout of the Special Catalog banner, «RAID CATALOG» over strips of five
@@ -53,6 +60,9 @@ CATALOG_TITLE, CATALOG_SUB = 'SPECIAL CATALOG', 'Tap: Training Grounds · Detail
 # Raid Catalog (raids Part 2, Task 9): banner evStage 8000 in game_data/raid_img, kept raid cards <evStageId>-kept.png
 RAID_CATALOG_EV, RAID_CATALOG_TITLE, RAID_CATALOG_SUB = 8000, 'RAID CATALOG', 'Tap: Training Grounds · Details: all raids'
 RAID_KEPT_TEXT, RAID_STRIPS = 'KEPT RAID', 5
+# Event Catalog (Events Part 1, Task 6): banner evStage 20000 in game_data/event_img, kept event cards <evStageId>-kept.png
+EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB = 'EVENT CATALOG', 'Tap: Training Grounds · Details: all events'
+EVENT_KEPT_TEXT, EVENT_STRIPS = 'KEPT EVENT', 5
 # originals cut into the oblique strips of the catalogue banner (reference\special_banners; missing ones are skipped)
 CATALOG_STRIPS = [
     'Special - EXP Medals Power banner KHUX.png',
@@ -505,6 +515,40 @@ def build_raid(index, raid_img, mode, enemies=None):
     return n
 
 
+# ---- Event Catalog (Events Part 1, Task 6) ----
+def event_cards(event_img, catalog_ev):
+    """the event cards of make_event_banners.py in event_img (<evStageId>.png, by id), without 0.png, the catalogue banner
+    and the -kept copies"""
+    if not os.path.isdir(event_img):
+        return []
+    ids = sorted(int(f[:-4]) for f in os.listdir(event_img) if f.endswith('.png') and f[:-4].isdigit()
+                 and int(f[:-4]) not in (0, catalog_ev))
+    return [os.path.join(event_img, '%d.png' % i) for i in ids]
+
+
+def build_event(index, catalog_ev, event_img, mode, enemies=None):
+    """writes event_img/<catalog_ev>.png (the Event Catalog banner: strips of EVENT_STRIPS event cards spread over the
+    list, the Training Grounds figures) and <evStageId>-kept.png for every event of the index (its card, else 0.png; none:
+    skipped). Run after make_event_banners.py. Returns the counts catalog / kept / missing."""
+    os.makedirs(event_img, exist_ok=True)
+    n = {'catalog': 0, 'kept': 0, 'missing': 0}
+    if catalog_ev:
+        cards = event_cards(event_img, catalog_ev)
+        k = min(EVENT_STRIPS, len(cards))
+        pick = [cards[round(i * (len(cards) - 1) / max(1, k - 1))] for i in range(k)] if k > 1 else cards[:k]
+        im = catalog_banner(None, enemies, EVENT_CATALOG_TITLE, EVENT_CATALOG_SUB, pick)
+        mbi.save_png(im, os.path.join(event_img, '%d.png' % catalog_ev), mode)
+        n['catalog'] += 1
+    for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
+        src = next((p for p in (os.path.join(event_img, '%d.png' % ev), os.path.join(event_img, '0.png')) if os.path.exists(p)), None)
+        if not src:
+            n['missing'] += 1
+            continue
+        mbi.save_png(kept_tab(Image.open(src), EVENT_KEPT_TEXT), os.path.join(event_img, '%d-kept.png' % ev), mode)
+        n['kept'] += 1
+    return n
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -518,12 +562,25 @@ def main():
     ap.add_argument('--rules', default=os.path.join(REPO, 'server', 'special_periods.json'),
                     help='campaigns[key].reconstruct: banners rebuilt from local sources (originals lost)')
     ap.add_argument('--mode', choices=['palette', 'full'], default='palette')
-    ap.add_argument('--section', choices=['all', 'special', 'raid'], default='all',
-                    help='special: the Special tab banners; raid: the Raid Catalog banner and the kept raid cards')
+    ap.add_argument('--section', choices=['all', 'special', 'raid', 'event'], default='all',
+                    help='special: the Special tab banners; raid: the Raid Catalog banner and the kept raid cards; '
+                         'event (not in all): the Event Catalog banner and the kept event cards')
     ap.add_argument('--raid-index', default=os.path.join(REPO, 'server', 'game_data', 'raids.json'))
     ap.add_argument('--raid-img', default=os.path.join(REPO, 'server', 'game_data', 'raid_img'),
                     help='the weekly event cards of make_raid_banners.py (run it first); output goes here too')
+    ap.add_argument('--event-index', default=os.path.join(REPO, 'server', 'game_data', 'events.json'))
+    ap.add_argument('--event-config', default=os.path.join(REPO, 'server', 'event_config.json'))
+    ap.add_argument('--event-img', default=os.path.join(REPO, 'server', 'game_data', 'event_img'),
+                    help='the event cards of make_event_banners.py (run it first); output goes here too')
     a = ap.parse_args()
+    if a.section == 'event':
+        with open(a.event_index, encoding='utf-8') as f:
+            eix = json.load(f)
+        with open(a.event_config, encoding='utf-8') as f:
+            cat = json.load(f).get('catalogEvStage')
+        er = build_event(eix, cat, a.event_img, a.mode, a.enemies)
+        print('event banners: %d catalog, %d kept cards, %d events without a card -> %s' % (er['catalog'], er['kept'], er['missing'], a.event_img))
+        return
     if a.section in ('all', 'raid'):
         if os.path.exists(a.raid_index):
             with open(a.raid_index, encoding='utf-8') as f:
