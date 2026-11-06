@@ -4,8 +4,8 @@
   "97": {
    "name": "Ringmaster",
    "model": "new",
-   "approved": false,
-   "review": "to be reviewed again (user 06-11)",
+   "approved": true,
+   "review": "user-approved 06-11 (redone sheets, review 2)",
    "no_b2016": true,
    "no_b2016_why": "the 2016 package folder 97 is a Shadow placeholder (no 2016 master row uses displayId 97); JP 4.3.1 revised it into the Ringmaster (wait/atk1_o/knockback/move .00182xxx revisions)"
   },
@@ -53,8 +53,8 @@
   "1526": {
    "name": "Royal Pretender",
    "model": "new",
-   "approved": false,
-   "review": "to be reviewed again (user 06-11)"
+   "approved": true,
+   "review": "user-approved 06-11 (redone sheets, review 2)"
   },
   "1530": {
    "name": "Ogre",
@@ -87,8 +87,8 @@
   "1556": {
    "name": "Icy Beast",
    "model": "new",
-   "approved": false,
-   "review": "approved 06-11, back to review 06-11 (review 2): 5 slots served another image, now the identical file of the 2018 record"
+   "approved": true,
+   "review": "user-approved 06-11 (redone sheets, review 2)"
   },
   "1564": {
    "name": "Ramuh",
