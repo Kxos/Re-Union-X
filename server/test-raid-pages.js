@@ -129,6 +129,30 @@ const tests = {
     assert(d.includes('Every raid, Pacific time.') && d.includes('<a href="/web/notices#raid-bosses">«Raid Bosses» notice ›</a>') && /\.rc\{/.test(d), 'foot line, link, CSS');
     assert(!/open all day|30-minute window|stays open outside/i.test(d.replace(/<li><b>opening hours[^]*?<\/li>/g, '')), 'no hours claim');
   },
+  notice_server_box() {
+    // «On this server» box of the notice pages (user 06-11, graphics): callout header, compact status row, grouped cards of short
+    // lines (no bullet wall), the full sentences folded, the rule label not repeated under the rule callout, two pill links
+    const ix = index();
+    ix.entries.push(tier('WW-E31611-1', 8022, '2017-09-04', '2017-09-11', 'single', 'Jewel Sorceress',
+      { family: 'daily', reconstructed: ['atk', 'def', 'lux', 'coinOdds', 'boardPath', 'upMinutes', 'useAp', 'weekRule', 'weekdayAp', 'mystery'] }));
+    const doc = { rows: { 'WW-E31611-1': { noticeId: 9 } }, notices: { 9: { title: 'Raid', date: '2017-09-04', body: ['★ Raid!', 'x'] } } };
+    const n = pages.noticePage(ix, 8022, doc, ctx({ index: ix }));
+    const box = n.slice(n.indexOf('<div class="sb">'));
+    assert(/<div class="sb"><div class="rch"><img[^>]*raid\.png[^>]*>On this server<span class="ng">NOT ORIGINAL<\/span><\/div><div class="why [a-z]*"><span class="s /.test(box), 'callout header, status row with its pill');
+    for (const [g, cls] of [['Boss', 'rg'], ['Rewards', 'rg rw'], ['Rules', 'rg ru'], ['Other', 'rg ot']]) assert(new RegExp(`<div class="${cls}"><b><img[^>]*>${g}</b>`).test(box), `group ${g}`);
+    assert(/<div class="ri"><img[^>]*tleg\.png[^>]*><b>ATK<\/b><span>Deduced from bosses with original values<\/span><\/div>/.test(box), 'icon, short label, one line');
+    assert(box.split('Deduced from bosses with original values').length === 3 && /<b>Lux<\/b>/.test(box) && /<b>Weekday AP<\/b>/.test(box) && /<b>mystery<\/b>/.test(box));
+    assert(!/<ul class="pl">/.test(box.replace(/<details class="fold">[^]*?<\/details>/, '')), 'no bullet list outside the fold');
+    assert(/<details class="fold"><summary>Why these values\?<\/summary><ul class="pl">/.test(box) && box.includes('deduced from the bosses with original values.'), 'full sentences folded');
+    // the rule callout is on the page: its label is not repeated in the box (nor in the fold)
+    assert((n.match(/One raid rule on this server/g) || []).length === 1);
+    assert(!box.includes('AP and Bonus Time') && !box.includes('One rule for all raids'), 'rule line not duplicated');
+    assert(box.includes('<p class="sbl"><a href="/web/raid/raid/8022">This raid in the Raid Catalog ›</a><a href="/web/raid/catalog">Raid Catalog ›</a></p>'), 'pill links');
+    assert(/\.sbl a\{display:inline-block/.test(n) && /\.rgs\{display:-webkit-box;display:-webkit-flex;display:flex/.test(n), 'CSS: flex with the old WebView prefixes');
+    // a tier not restored is named in the box
+    const o = pages.noticePage(index(), 8100, { rows: { 'WW-W-2019-10-07': { noticeId: 9 } }, notices: doc.notices }, ctx());
+    assert(/<p class="sbo"><img[^>]*lock\.png[^>]*>Not restored yet: Epic \(Blue Trident Tail\)/.test(o));
+  },
   opening_hours_labels() {
     // I-228: the WW daily raids and the weekday weekly raids of 2018-09 .. 2019-07 name their hours and the 90 AP outside them
     const ix = index();

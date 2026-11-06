@@ -441,6 +441,111 @@ const ruleOn = () => windows.costRule() === windows.WEEKDAY_WEEKEND;
 const ruleNote = () => (ruleOn() ? ruleBox('The AP costs, Bonus Time hours and opening times in the notice below are those of the original game.') : '');
 const ruleLine = () => (ruleOn() ? ruleBox('The original game had its own hours instead.') : '');
 const reconList = (codes) => `<ul class="pl">${codes.map((c) => `<li><b>${esc(RECON_LABEL[c] || c)}</b>: ${esc(RECON_TEXT[c] || 'rebuilt from the surviving sources.')}</li>`).join('')}</ul>`;
+// «On this server» box of the notice pages (user 06-11, graphics: the bullet wall was hard to read in the game popup): the
+// callout style (.rc of RULE_CSS: icon, gold title, NOT ORIGINAL tag), the status as one compact row, the rebuilt values in
+// group cards (Boss / Rewards / Rules), each an icon, a short bold label and one short line (RECON_SHORT; the full sentences
+// of RECON_TEXT stay one tap away in a folded block), the tiers not restored, the two links as pill buttons. The «AP and
+// Bonus Time» label is left out while the rule callout is on the page (ruleOn: ruleNote() shows it at the top). Plain HTML / CSS.
+// code -> [group, short label, one short line, icon key]
+const RECON_SHORT = {
+  atk: ['boss', 'ATK', 'Deduced from bosses with original values', 'tleg'],
+  def: ['boss', 'DEF', 'Deduced from bosses with original values', 'tleg'],
+  partHp: ['boss', 'Weak point HP', 'A share of the boss HP, as in 2016', 'tleg'],
+  hp: ['boss', 'Boss HP', 'From the tier HP tables of the time', 'tleg'],
+  hp_step: ['boss', 'HP change week', 'Middle of the known range', 'weekday'],
+  atk_curve: ['boss', 'ATK below the level cap', 'Grows like the 2016 bosses', 'tleg'],
+  attribute: ['boss', 'Attribute', 'Deduced from the boss colour', 'tleg'],
+  moves: ['boss', 'Moves', 'The attacks of a similar boss', 'tleg'],
+  background: ['boss', 'Fight background', 'The world closest to the original map', 'tleg'],
+  rareOdds: ['boss', 'Rare boss odds', 'Deduced from the 2016 data', 'tleg'],
+  rareType2: ['boss', 'Rare boss odds', 'Read as a one-in-N chance', 'tleg'],
+  eventHp: ['boss', 'Boss HP', 'Scaled from 2016 up to the 2018 HP', 'tleg'],
+  hpTier: ['boss', 'HP of the tiers', 'Deduced: no reading of the tiers', 'tleg'],
+  storyBoss: ['boss', 'Story raid boss', 'The boss of the nearest quest', 'tleg'],
+  storyOmega: ['boss', 'Ω boss odds', 'The usual rule of the 2016 data', 'tleg'],
+  storyConflict: ['boss', 'Story raid boss', 'Sources disagree: the wiki\'s boss', 'tleg'],
+  jp2016: ['boss', 'Boss values', 'Its 2016 worldwide values', 'tleg'],
+  jpBossProbable: ['boss', 'Boss', 'Probable: no source names it', 'tleg'],
+  jpHpProbable: ['boss', 'Boss HP', 'Probable: from the June 23, 2018 weekend', 'tleg'],
+  lux: ['rewards', 'Lux', 'Calculated from the boss HP', 'lux'],
+  coinOdds: ['rewards', 'Raid Coin odds', 'From the community tables', 'raid'],
+  eventCoins: ['rewards', 'Raid Coin rewards', 'The standard Raid Coin table', 'raid'],
+  levelDrops: ['rewards', 'Level rewards', 'To your Present Box at that level', 'medal'],
+  levelDropsPartial: ['rewards', 'Level rewards', 'Some left out: item or amount unknown', 'medal'],
+  jpRewardProbable: ['rewards', 'Level reward', 'The worldwide Medal it most probably was', 'medal'],
+  boardAlias: ['rewards', 'Board reward names', 'Matched to their items by name', 'btodo'],
+  boardPath: ['rewards', 'Board cell order', 'One path: original layout not restored yet', 'btodo'],
+  boardSet: ['rewards', 'Boards of the week', 'From the community lists', 'btodo'],
+  boardTexture: ['rewards', 'Spirit part picture', 'Rebuilt from the original files', 'btodo'],
+  boardCost: ['rewards', 'Board cell cost', 'A typo of the source corrected', 'btodo'],
+  boardArt: ['rewards', 'Board card picture', 'Cut from a screenshot of the game', 'btodo'],
+  boardNoArt: ['rewards', 'Board card picture', 'Missing', 'btodo'],
+  boardArtWiki: ['rewards', 'Board card picture', 'From the Japanese fan wiki, enlarged', 'btodo'],
+  boardGender: ['rewards', 'Gender boards', 'Both open (the original: yours only)', 'btodo'],
+  boardStandard: ['rewards', 'Raid Boards', 'Of a similar raid, no exclusive medals', 'btodo'],
+  boardCells: ['rewards', 'Board cells', 'Some left out: reward unknown', 'btodo'],
+  jpBoard: ['rewards', 'Raid Board', 'The Japanese super-hard board', 'btodo'],
+  jpBoardOriginal: ['rewards', 'Raid Boards', 'Original Japanese; cell positions ours', 'btodo'],
+  jpBoardProbable: ['rewards', 'Raid Board', 'Original; tie to this raid probable', 'btodo'],
+  jpBoardDeduced: ['rewards', 'Raid Boards', 'Rebuilt from what is known; costs ours', 'btodo'],
+  jpNoBoard: ['rewards', 'Raid Boards', 'None: nothing known of the board', 'btodo'],
+  jpBoardWwShape: ['rewards', 'Raid Boards', 'Japanese rewards on a worldwide layout', 'btodo'],
+  jpBoardShared: ['rewards', 'Shared rewards', 'Replaced: they stay in the worldwide raid', 'btodo'],
+  upMinutes: ['rules', 'Time limit', 'From videos and posts of the time', 'bonus'],
+  useAp: ['rules', 'AP of a further attempt', 'From the rules of the time', 'ap'],
+  weekendTimer: ['rules', 'Weekend time limit', '3 hours; 1 hour from May 2018', 'bonus'],
+  setting2016: ['rules', 'Time limit and AP', 'The 2016 data of the same boss', 'bonus'],
+  questObjectives: ['rules', 'Quest objectives', 'Standard Raid objectives in part', 'weekday'],
+  weekRule: ['rules', 'AP and Bonus Time', 'One rule for all raids', 'ap'],
+  weekdayAp: ['rules', 'Weekday AP', 'Was free: 5 AP Mon–Fri, 0 AP weekends', 'ap'],
+  raidWindow: ['rules', 'Opening hours', 'Original set hours; outside them 90 AP', 'bonus'],
+  jpWindow: ['rules', 'Opening hours', 'Two 30-minute windows; outside them 90 AP', 'bonus'],
+  weeklyWindow: ['rules', 'Weekday hours', 'Bonus Time hours (probable); else 90 AP', 'bonus'],
+  jp: ['rules', 'Japan only', 'Played only from the Raid Catalog', 'jp'],
+  jpQuest: ['rules', 'Quest', 'Map, level and AP of a worldwide raid', 'weekday'],
+  jpDates: ['rules', 'End date', 'One week from the known start', 'weekday'],
+  jpTimer: ['rules', 'Time limit', 'The Japanese rules of the time', 'bonus'],
+};
+const RECON_GROUPS = [['boss', 'Boss', 'tleg', ''], ['rewards', 'Rewards', 'raid', ' rw'], ['rules', 'Rules', 'weekday', ' ru'], ['other', 'Other', 'replaced', ' ot']];
+const SRV_CSS = '.sb{border:2px solid #ffcd4a;border-radius:10px;background:#06283e;padding:8px 10px 8px;margin:18px 0 10px;line-height:1.45;font-size:15px}'
+  + '.sb .why{margin:2px 0 6px;padding:4px 10px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:center;-webkit-align-items:center;align-items:center}'
+  + '.sb .why .s{margin:2px 10px 2px 0}.sbi{color:#b9cfdc;font-size:14px;margin:4px 2px 6px}'
+  + '.sbh{color:#fff;font-weight:bold;font-size:15px;margin:8px 2px 4px}.sbh span{color:#b9cfdc;font-weight:normal;font-size:13.5px;margin-left:8px}'
+  + '.rgs{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}'
+  + '.rg{-webkit-box-flex:1;-webkit-flex:1 1 260px;flex:1 1 260px;min-width:240px;box-sizing:border-box;margin:0 4px 8px;padding:5px 9px 4px;border-radius:8px;background:#0a4466;border-top:4px solid #d8574a}'
+  + '.rg.rw{border-top-color:#ffcd4a}.rg.ru{border-top-color:#39a7cf}.rg.ot{border-top-color:#8aa3b3}'
+  + '.rg>b{display:block;color:#fff;font-size:15px;margin-bottom:2px}.rg .ic{width:1.35em;height:1.35em}'
+  + '.ri{padding:3px 0 3px 1.75em;text-indent:-1.75em;border-top:1px solid #1d5878}.ri b{color:#fff;font-size:14.5px}.ri span{display:block;text-indent:0;color:#d9e6ee;font-size:13.5px}'
+  + '.sbo{color:#ffb3a8;font-size:14px;margin:2px 2px 6px}.sbo .ic{width:1.3em;height:1.3em}.sb details.fold{border-color:#1d5878;font-size:14px}.sb details.fold li{margin:3px 0}'
+  + '.sbl{margin:8px 0 2px}.sbl a{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:16px;padding:3px 14px;margin:4px 8px 0 0;color:#fff;text-decoration:none;font-size:14.5px}';
+// the codes shown in the box: weekRule dropped while the rule callout is on the page
+const srvCodes = (codes) => codes.filter((c) => !(c === 'weekRule' && ruleOn()));
+function reconCards(codes) {
+  const shown = srvCodes(codes);
+  if (!shown.length) return '';
+  const cards = RECON_GROUPS.map(([g, name, ic, cls]) => {
+    const rows = [], seen = new Set();
+    for (const c of shown.filter((x) => (RECON_SHORT[x] ? RECON_SHORT[x][0] : 'other') === g)) {
+      const [, label, line, k] = RECON_SHORT[c] || [g, RECON_LABEL[c] || c, 'Rebuilt from the surviving sources', ic];
+      if (seen.has(`${label}|${line}`)) continue;
+      seen.add(`${label}|${line}`);
+      rows.push(`<div class="ri">${icon(k)}<b>${esc(label)}</b><span>${esc(line)}</span></div>`);
+    }
+    return rows.length ? `<div class="rg${cls}"><b>${icon(ic)}${esc(name)}</b>${rows.join('')}</div>` : '';
+  }).join('');
+  return '<p class="sbh">Rebuilt values<span>lost in the original data, rebuilt from the surviving sources</span></p>'
+    + `<div class="rgs">${cards}</div><details class="fold"><summary>Why these values?</summary>${reconList(shown)}</details>`;
+}
+// the box of a notice page: intro = one short line (html)
+function srvBox(row, st, intro) {
+  const codes = [...new Set(row.entries.flatMap((e) => e.reconstructed || []))];
+  const off = row.entries.filter((e) => !e.available);
+  return '<div class="sb">'
+    + `<div class="rch">${icon('raid')}On this server<span class="ng">NOT ORIGINAL</span></div>`
+    + `<div class="why ${st.cls}">${st.pill}<span>${st.why}</span></div><p class="sbi">${intro}</p>${reconCards(codes)}`
+    + (off.length ? `<p class="sbo">${icon('lock')}Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')} (graphics or data incomplete in the surviving game files).</p>` : '')
+    + `<p class="sbl"><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a><a href="/web/raid/catalog">Raid Catalog ›</a></p></div>`;
+}
 const RAID_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(4){white-space:nowrap}.tt td.r{color:#ffcd4a}ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}';
 // levels gained per win stated by the raid's own notice (make-raid.js entry.levelStep: the Japanese year-end raid of 2016, +10)
 const stepOf = (row) => Math.max(1, ...row.entries.map((e) => Number(e.levelStep) || 1));
@@ -510,7 +615,7 @@ const NOTICE_CSS = RULE_CSS + '.dt{margin:2px 0 10px}.chip{display:inline-block;
   + 'ul.nl{margin:2px 0 8px;padding-left:22px}ul.nl li{margin:2px 0}.ns table{margin:4px 0 10px}.rw td.q{width:28%;color:#ffcd4a;white-space:nowrap}.pd th{width:30%}.bt th{width:50%}'
   + 'details.fold{margin:6px 0;border:1px solid #2f5d78;border-radius:6px;padding:2px 10px}details.fold>summary{cursor:pointer;color:#00d4ed;padding:4px 0}'
   + 'details.oth{margin:10px 0}details.oth>summary{cursor:pointer;color:#b9cfdc;font-size:15px;padding:6px 10px;background:#0a4466;border-radius:6px}details.oth[open]>summary{color:#fff}'
-  + 'h2.on{margin-top:20px}.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:18px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
+  + SRV_CSS + 'h2.on{margin-top:20px}.srv{border:2px solid #ffcd4a;border-radius:8px;background:#0a4466;padding:4px 12px 10px;margin:18px 0}.srv h2{color:#ffcd4a;margin-top:6px}.srv h2:before{content:""}'
   + '.srv a,.na a{color:#9fd4ff}.srv li{margin:4px 0}';
 
 // notice body (lines) -> {sections: [{head (null: the lines before the first heading), lines, raid}]}; bosses: of the week
@@ -623,12 +728,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     const hit = row && doc && doc.rows ? doc.rows[row.censusId] : null;
     const n = hit && doc.notices ? doc.notices[hit.noticeId] : null;
     const st = row && statusOf(row, ctx);
-    const codes = row ? [...new Set(row.entries.flatMap((e) => e.reconstructed || []))] : [];
-    const recon = codes.length ? `<p>Some values of this raid are lost and were rebuilt from the surviving sources:</p>${reconList(codes)}` : '';
-    const off = row ? row.entries.filter((e) => !e.available) : [];
-    const offLine = off.length ? `<p>Not restored yet: ${off.map((e) => esc(`${tierLabel(e.tier)} (${e.boss || ''})`)).join(', ')}. Its graphics or data are incomplete in the surviving game files.</p>` : '';
     const back = row && ctx.from === 'raid' ? `<div class="bar"><a class="back" href="/web/raid/raid/${row.evStageId}?from=catalog">BACK<span></span></a></div>` : '';
-    const links = row ? `<ul class="ow"><li><a href="/web/raid/raid/${row.evStageId}">This raid in the Raid Catalog ›</a></li><li><a href="/web/raid/catalog">Raid Catalog ›</a></li></ul>` : '';
     // end-of-service weeks (from 2021-03-01, make-raid-notices.js eos): no notice of their own existed (user 04-11)
     if (hit && hit.eos) {
       const title = titleOf(row);
@@ -637,11 +737,10 @@ function noticePage(index, evStageId, doc, ctx = {}) {
         + `<h1>${esc(title)}</h1><p class="dt"><span class="chip">EVENT</span><span class="chip d">${esc(dateRange(row))}</span></p>${ruleNote()}`
         + '<div class="ns raid"><h2>No notice for this week</h2><p>This raid ran in the last weeks of the original game, during the end of service: '
         + 'no specific notice was published for it. The end of service itself is announced in the game.</p></div>'
-        + `<div class="srv"><h2>On this server</h2><p>This server follows your Story instead of the calendar: this week of the original game (${esc(dateRange(row))}) `
-        + 'opens when your Story reaches it.</p>'
-        + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
+        + srvBox(row, st, `This server follows your Story, not the calendar: this week (${esc(dateRange(row))}) opens when your Story reaches it.`)
+        + `${back}</body></html>`;
     }
-    if (row && row.jp) return jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links });
+    if (row && row.jp) return jpNoticePage(row, doc, ctx, { st, back });
     if (!n || !Array.isArray(n.body)) return noticeMissing(row, ctx);
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
       + `<img class="banner" width="640" height="140" src="${imgOf(ctx, row.evStageId)}" alt="">`
@@ -649,11 +748,9 @@ function noticePage(index, evStageId, doc, ctx = {}) {
       + ruleNote()
       + (hit.note ? `<div class="why off">${esc(hit.note)}</div>` : '')
       + noticeBody(n.body, row.bosses)
-      + '<div class="srv"><h2>On this server</h2>'
-      + '<p>The text above is the raid part of the original notice, unchanged (other events of the same notice and the lists of top players are left out). This server follows your Story instead of the calendar: the dates in the notice '
-      + `are those of the original game (${esc(dateRange(row))}); the raid opens when your Story reaches that week.</p>`
-      + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}`
-      + `${links}</div>${back}</body></html>`;
+      + srvBox(row, st, 'Above: the raid part of the original notice, unchanged (other events and top-player lists left out). '
+        + `Its dates are the original game's (${esc(dateRange(row))}): here the raid opens when your Story reaches that week.`)
+      + `${back}</body></html>`;
   } catch (e) {
     return noticeMissing(row, ctx);
   }
@@ -671,7 +768,7 @@ const minutesText = (m) => (!m ? '' : m % 60 ? `${m} minutes` : m === 60 ? '1 ho
 const JP_BOARD_STATE = [['jpBoardOriginal', 'original Japanese boards'], ['jpBoardProbable', 'its tie to this raid is probable'], ['jpBoard', 'the Japanese super-hard board (= worldwide Legendary Raid Reward)'],
   ['jpBoardDeduced', 'reconstructed from the surviving evidence'], ['jpBoardWwShape', 'cells and costs on a worldwide board of the same time'],
   ['jpBoardShared', 'rewards shared with a worldwide raid replaced'], ['jpNoBoard', 'none: not known']];
-function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
+function jpNoticePage(row, doc, ctx, { st, back }) {
   const title = titleOf(row), facts = doc && doc.jp ? doc.jp[row.censusId] : null;
   const codes = new Set(row.entries.flatMap((e) => e.reconstructed || []));
   const notice = facts && Array.isArray(facts.lines)
@@ -714,9 +811,8 @@ function jpNoticePage(row, doc, ctx, { st, recon, offLine, back, links }) {
     + `<table class="tt"><tr><th>Day / tier</th><th>Boss</th><th>HP at LV 1</th><th>Time limit</th></tr>${bossRows}</table>`
     + (drops.length ? `<h3>Level rewards</h3><ul class="nl">${drops.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '')
     + `<h3>Raid Boards</h3>${boards}${shared}</div>`
-    + '<div class="srv"><h2>On this server</h2><p>This raid was held only in the Japanese version of the game: here it is played only from the Raid Catalog, '
-    + `once your Story has passed its dates (${esc(dateRange(row))}).</p>`
-    + `${st.pill}<div class="why ${st.cls}">${st.why}</div>${recon}${offLine}${links}</div>${back}</body></html>`;
+    + srvBox(row, st, `Held only in the Japanese version: here it is played only from the Raid Catalog, once your Story has passed its dates (${esc(dateRange(row))}).`)
+    + `${back}</body></html>`;
 }
 
 module.exports = { expandCatalog, catalogPage, detailPage, noticePage, parseNotice, statusOf, khuxMatch, noticeBlocks, NOTICE_CSS }; // noticeBlocks, NOTICE_CSS: also the Shop notices (shop-notice-pages.js)
