@@ -41,6 +41,7 @@ const chatRoutes = require('./routes-chat'); // chat del party (I-210)
 const medalSkill = require('./medal-skill');
 const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
+const shopNoticePages = require('./shop-notice-pages'); // original notices of the Shop banners (Details)
 const homePlaza = require('./home-plaza');
 const campaignGifts = require('./campaign-gifts'); // conditional Present campaigns (I-234)
 const gachaSeasons = require('./gacha-seasons');
@@ -1426,6 +1427,17 @@ function raidNotices() {
     return raidNoticesMemo.doc;
   } catch { raidNoticesMemo = { mtime: -1, doc: null }; return null; }
 }
+// original notices of the Shop banners (make-shop-notices.js, git-ignored SQUARE ENIX text), read at request time like the raid
+// ones; absent or broken: null, the Details pages show no «Original notice» part
+const SHOP_NOTICES = process.env.KHUX_SHOP_NOTICES || path.join(__dirname, 'game_data', 'shop_notices.json');
+let shopNoticesMemo = { mtime: -1, doc: null };
+function shopNotices() {
+  try {
+    const mtime = fs.statSync(SHOP_NOTICES).mtimeMs;
+    if (mtime !== shopNoticesMemo.mtime) shopNoticesMemo = { mtime, doc: JSON.parse(fs.readFileSync(SHOP_NOTICES, 'utf8')) };
+    return shopNoticesMemo.doc;
+  } catch { shopNoticesMemo = { mtime: -1, doc: null }; return null; }
+}
 let raidMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
@@ -1801,12 +1813,20 @@ function respondGachaWeb(res, url) {
     const list = one ? [one] : shop;
     return html(gacha.oddsPage(list.map((banner) => ({ banner, ex: expandFor(banner, story), medalNames }))));
   }
+  // /web/gacha/notice/<drawMedalTypeId>[?n=<noticeId>][&from=catalog]: the banner's original notice (shop-notice-pages.js)
+  const fromCatalog = /[?&]from=catalog\b/.test(url);
+  const nt = /^\/web\/gacha\/notice\/(\d+)$/i.exec(p);
+  if (nt) {
+    const nb = gachaData.bannerById(banners, nt[1]);
+    return html(shopNoticePages.noticePage(nb, shopNotices(), new URLSearchParams(url.split('?')[1] || '').get('n'), { fromCatalog }));
+  }
   const det = /^\/web\/gacha\/detail\/(\d+)$/i.exec(p);
   const banner = det && gachaData.bannerById(banners, det[1]);
   if (!banner) return html('<!doctype html><meta charset="utf-8"><body style="background:#043654;color:#fff;font:18px sans-serif">Banner not found.</body>', 404);
   const skillNames = new Set(masterRows('skill').map((r) => r.name));
   const medalAttr = new Map(masterRows('medal').map((m) => [m.medalId, m.attribute]));
-  return html(gacha.detailPage(banner, expandFor(banner, story), medalNames, { ...ctx, skillNames, medalAttr, fromCatalog: /[?&]from=catalog\b/.test(url) }));
+  const noticeSection = shopNoticePages.detailSection(banner, shopNotices(), { fromCatalog });
+  return html(gacha.detailPage(banner, expandFor(banner, story), medalNames, { ...ctx, skillNames, medalAttr, fromCatalog, noticeSection }));
 }
 
 // POST /web/gacha/pin/<drawMedalTypeId> e /web/gacha/unpin (spec Shop sp3 6.3), dai pulsanti dei Details dal Catalog.
