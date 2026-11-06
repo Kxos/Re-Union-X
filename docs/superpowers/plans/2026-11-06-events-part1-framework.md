@@ -70,7 +70,7 @@ Private data work, with a report for the user.
 The author's rule: every enemy we do not have must be found. Private research, then kept product work.
 
 **Files:**
-- Modify: `D:\Progetto_Restauro_KH_UX	mp\events_p1\pilot\MISSING_ENEMIES.md` (each enemy: sources tried, what was found)
+- Modify: `D:\Progetto_Restauro_KH_UX\tmp\events_p1\pilot\MISSING_ENEMIES.md` (each enemy: sources tried, what was found)
 - Modify: the enemy importer list (`recon/tools/make_jp_enemies.py` or the raid model importer, whichever fits) and the master enemy rows generator
 - Test: bench
 
