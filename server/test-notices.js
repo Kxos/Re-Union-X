@@ -193,6 +193,16 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(/## Raids of the Japanese version/.test(jl) && /\*\*2\*\* raids held only in the \*\*Japanese version\*\*/.test(jl) && /marked \*\*Japan only\*\*/.test(jl) && /not original/.test(jl)
     && /December 25, 2016/.test(jl) && /1 Japanese raid event of 2018/.test(jl) && !/not here yet/.test(jl), `righe dei raid giapponesi: ${jl}`);
   check(n.raidJpLines(facts).length === 0 && /not here yet/.test(n.raidNoticeLines(facts).join(' ')), 'senza raid giapponesi: la riga «not here yet»');
+  check(!/July, August and September 2017|2016 Showdown|August 4|Magic Broom/.test(jl), 'senza le righe jpCensus quando quei raid non sono serviti');
+  // jpCensus (06-11): the lines of the later JP research, each only when its raid is served; the span follows the served dates
+  const h = require('path').join(dir, 'raids-jp2.json');
+  const jpE = (censusId, start, end) => ({ boss: 'J', available: true, jp: true, censusId, start, end });
+  require('fs').writeFileSync(h, JSON.stringify({ entries: [{ boss: 'A', available: true }, jpE('JP-RAID-1', '2015-10-18', '2015-10-31'), jpE('JP-RAID-21', '2016-12-25', '2017-01-01'),
+    jpE('JP-RAID-30', '2017-09-01', '2017-09-30'), jpE('JP-D-2018-09-01', '2018-09-01', '2018-09-01'), jpE('JP-RAID-9', '2016-03-27', '2016-04-03')], jp: { notServed: [], skipped: [] } }));
+  const kl = n.raidJpLines(n.raidNoticeFacts(h)).join(' ');
+  check(/October 2015 to September 2018/.test(kl) && /July, August and September 2017/.test(kl) && /LV 1 after each 30-minute window/.test(kl) && /Destroyer Behemoth/.test(kl)
+    && /Crabby Cake\*\* \(\*\*probable\*\*/.test(kl) && /2016 Showdown!/.test(kl) && /10 levels/.test(kl) && /Saturday only/.test(kl) && /Malicious Spider/.test(kl) && /1\.5 billion/.test(kl)
+    && /Magic Broom/.test(kl) && /Prince & Belle/.test(kl), `righe jpCensus: ${kl}`);
   require('fs').rmSync(dir, { recursive: true, force: true });
 }
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
