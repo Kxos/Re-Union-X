@@ -1763,6 +1763,20 @@
   "JP-SHR-1/JP-SHR-1:jp1-super-hard-raid-reward": 744,
   "JP-SHR-3/JP-SHR-3:jp1-super-hard-raid-reward": 745,
   "JP-SHR-4/JP-SHR-4:jp1-super-hard-raid-reward": 746,
-  "JP-RAID-3/JP-RAID-3:jp1-raid-board": 747
+  "JP-RAID-3/JP-RAID-3:jp1-raid-board": 747,
+  "JP-RAID-5/JP-RAID-5:jp1-m-happi-coat": 748,
+  "JP-RAID-5/JP-RAID-5:jp2-l-happi-coat": 749,
+  "JP-RAID-5/JP-RAID-5:jp3-seasoned-wielder-bonus-1": 750,
+  "JP-RAID-5/JP-RAID-5:jp4-seasoned-wielder-bonus-2": 751,
+  "JP-RAID-7/JP-RAID-7:jp1-minnie-vd-ver": 752,
+  "JP-RAID-7/JP-RAID-7:jp2-magic-broom": 753,
+  "JP-RAID-7/JP-RAID-7:jp3-seasoned-wielder-bonus": 754,
+  "JP-RAID-8/JP-RAID-8:jp1-beast-wd-ver": 755,
+  "JP-RAID-10/JP-RAID-10:jp3-seasoned-wielder-bonus": 756,
+  "JP-RAID-11/JP-RAID-11:jp2-seasoned-wielder-bonus": 757,
+  "JP-RAID-13/JP-RAID-13:jp1-m-treasure-trove-frog-cap": 758,
+  "JP-RAID-13/JP-RAID-13:jp2-l-treasure-trove-frog-cap": 759,
+  "JP-RAID-18/JP-RAID-18:jp1-m-clarice-set": 760,
+  "JP-SHR-5/JP-SHR-5:jp1-super-hard-raid-reward": 761
  }
 }
