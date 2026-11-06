@@ -904,6 +904,9 @@ for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
 // raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off.
 // After the copy of server/tables: the Raid Boards are appended to the sphere tables copied from there
 require('./make-raid').patch(OUT);
+// Event quests: stage rows 4000000+, evStage 20000+, game_data/events.json and event_maps.json from server/event_config.json and the
+// private event quest records (KHUX_EVENT_SRC; without it nothing is written). KHUX_EVENTS=0 turns it off (make-events.js)
+require('./make-events').patch(OUT);
 // Raid «AP 0» campaign: evCampaign rows type 7 power 0 over the raid quest stages written just above (make-ev-campaign.js)
 require('./make-ev-campaign').patch(OUT);
 // rewards written above by the generators that read Roboloid-numbered sources (special, raid, story): medal ids mapped (I-225)

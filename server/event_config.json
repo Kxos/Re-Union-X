@@ -1,0 +1,27 @@
+{
+ "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). onlyCensusIds: the April 2019 pilot (Events Part 1); drop it to build every record. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices).",
+ "evStageBase": 20000,
+ "evStageMax": 29999,
+ "stageBase": 4000000,
+ "stageMax": 4009999,
+ "eventCategory": 2,
+ "eventType": 2,
+ "imgVersion": 1,
+ "shortWindowHours": 12,
+ "onlyCensusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
+ "labelPhrases": {
+  "donor kept; wiki is the 2018 run": "donorKept",
+  "wiki value applied, low confidence": "wikiLowConfidence",
+  "map incomplete": "mapIncomplete",
+  "no khuxwiki page": "noWikiPage"
+ },
+ "reconstructedWhy": {
+  "donorKept": "The quest keeps the values of the later game data; the khuxwiki page describes an earlier run of the same quest (2018), so it was not used for this one.",
+  "wikiLowConfidence": "One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.",
+  "mapIncomplete": "The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.",
+  "noWikiPage": "No khuxwiki page exists for this quest: its values come from the later game data only, without a second source.",
+  "wholeDay": "In the original this event was open for a short window (minutes to hours); here it is open for its whole original day.",
+  "dramaOff": "The original scenes before or after this quest are not shown yet.",
+  "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update."
+ }
+}
