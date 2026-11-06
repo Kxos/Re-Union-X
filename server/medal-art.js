@@ -86,11 +86,26 @@ const NO_ART = new Map([
   [302011, 'SN++ - Terra, Ven, Aqua (own picture, not in Art_52197)'],
 ]);
 const IMAGE_CATEGORY_ART = 2;
+// Medals outside the 55 families whose own picture is part of one of the 55 arts (image match 06-11, evidence
+// tmp/art_match/candidates.json): the JP data gives them no art; flagged by user decision 06-11 (all 30 pictures),
+// RECONSTRUCTED and declared in the Notices. [art id, medal ids]
+const CONTAINED = [
+  [53136, [43036, 143036, 300615, 300616, 300617]], // Illustrated Aqua, Illustrated Aqua A, SN - Illustrated Aqua, SN+ - Illustrated Aqua
+  [43146, [300763, 310765, 302060]], // Illustrated Xemnas, SN++ - Illustrated Xemnas
+  [52096, [310843, 300843]], // Illustrated Sora B
+  [51167, [311033, 301033]], // Illustrated Terra B
+  [21536, [301147, 301148, 301149, 301150]], // Illustrated Donald B, Illustrated Goofy
+  [41146, [301198, 301199, 301999, 302083]], // Illustrated Marluxia [EX], SN++ - Illustrated Zexion, SN++ - Illus. Marluxia
+  [21266, [311245, 301245]], // Illustrated Xion [EX]
+  [353907, [301515, 301516]], // KH II Kairi [EX+]
+  [52197, [301667, 301668, 301669, 301670, 301671, 311673, 301987]], // Supernova - HD Terra, Supernova+ - HD Terra, Supernova - HD Ventus, Supernova+ - HD Ventus, Supernova - HD Aqua, Supernova+ - HD Aqua, SN++ - Master Xehanort
+];
 
-// medalId -> JP art id for the family rows (reissues included, NO_ART excluded)
+// medalId -> JP art id for the family rows (reissues included, NO_ART excluded) and the CONTAINED medals
 function familyArt() {
   const m = new Map();
   for (const [art, , rows] of ART) for (const id of rows) m.set(id, art);
+  for (const [art, rows] of CONTAINED) for (const id of rows) m.set(id, art);
   return m;
 }
 
@@ -137,4 +152,4 @@ function patch(masterDir) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { ART, REISSUES, NO_ART, IMAGE_CATEGORY_ART, familyArt, applyMedalArt, patch };
+module.exports = { ART, REISSUES, NO_ART, CONTAINED, IMAGE_CATEGORY_ART, familyArt, applyMedalArt, patch };

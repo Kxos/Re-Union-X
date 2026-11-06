@@ -1104,6 +1104,8 @@ Key Art #3, Key Art #8, Axel Art, Roxas Art serve the very same picture as the f
 Roboloid's database gives them the 7★ album picture), so they match. Not proven: which star variants showed the button,
 and whether the served reissue pictures are what the original showed for them.
 
+**User decision 06-11 (later): all 30 candidate pictures get their art** (31 medal ids, `CONTAINED` in `server/medal-art.js`, evidence `tmp/art_match/candidates.html`): the JP data gives them no art, so they are **reconstructed** and named in the Notice. Flagged rows after regeneration: 143 + their boosted copies.
+
 **Non-flagged Medals whose picture is inside one of the 55 arts (candidates only, not flagged; same scan over the 1,651
 other pictures of 5★-7★ rows, `candidates.json`, at least 12 inliers, the two SN++ - Terra, Ven, Aqua pictures included
 and not found).** In the original these had no art of their own (they are not among the 55): Illustrated Aqua / Aqua A /

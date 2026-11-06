@@ -6,7 +6,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { ART, REISSUES, NO_ART, applyMedalArt, familyArt } = require('./medal-art');
+const { ART, REISSUES, NO_ART, CONTAINED, applyMedalArt, familyArt } = require('./medal-art');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -16,7 +16,10 @@ assert.strictEqual(new Set(ART.map((a) => a[0])).size, 55, 'art ids unique');
 const allRows = ART.flatMap((a) => a[2]);
 assert.strictEqual(new Set(allRows).size, allRows.length, 'a row belongs to one family only');
 for (const id of REISSUES) assert.ok(allRows.includes(id), `reissue ${id} is a listed family row`);
-assert.strictEqual(familyArt().size, allRows.length, 'reissues with the family picture flagged too (06-11)');
+const contained = CONTAINED.flatMap((c) => c[1]);
+assert.strictEqual(new Set(contained).size, 31, '31 contained medals (30 pictures, user 06-11)');
+assert.ok(!contained.some((id) => allRows.includes(id)), 'a contained medal is not a family row');
+assert.strictEqual(familyArt().size, allRows.length + contained.length, 'family rows, reissues and contained medals flagged (06-11)');
 // user rule 06-11: only rows whose own picture is part of the art; SN++ Terra, Ven, Aqua has its own picture
 assert.deepStrictEqual([...NO_ART.keys()].sort(), [302011, 311945], 'rows without art');
 for (const id of NO_ART.keys()) assert.ok(!allRows.includes(id) && !familyArt().has(id), `${id} not flagged`);
