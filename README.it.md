@@ -55,7 +55,7 @@ server dopo l'installazione e viene ricostruita dal progetto. Dal 27 ottobre non
 famiglia di nemici della storia (appello del 22 ottobre su
 [Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)); aiutano ancora screenshot e video
 delle **36 famiglie ricostruite** (elencate sul [sito](https://kxos.github.io/Re-Union-X/#status)) per
-verificarle e migliorarle, dei nemici degli eventi, screenshot delle **Raid Board** che mostrano come erano disposte le celle, e tutto cio' che riguarda **eventi, Coliseum, Union Cross e PvP** (screenshot, video, regole,
+verificarle e migliorarle, dei nemici degli eventi e tutto cio' che riguarda **eventi, Coliseum, Union Cross e PvP** (screenshot, video, regole,
 premi, guide). Contattaci aprendo una issue; non inviare ne' pubblicare file del gioco.
 
 ## Sintesi tecnica

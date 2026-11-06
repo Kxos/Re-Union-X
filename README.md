@@ -55,7 +55,7 @@ the servers after install and is rebuilt by the project. Since 27 October no ene
 is missing any more (appeal of 22 October on
 [Reddit](https://www.reddit.com/r/KingdomHearts/comments/1xcbwjg/)); screenshots and videos of the
 **36 reconstructed families** (listed on the [site](https://kxos.github.io/Re-Union-X/#status)) still
-help to check and improve them, as do the enemies of events, screenshots of **Raid Boards** showing how their cells were laid out, and anything about **events, Coliseum, Union Cross and PvP** (screenshots, videos,
+help to check and improve them, as do the enemies of events and anything about **events, Coliseum, Union Cross and PvP** (screenshots, videos,
 rules, rewards, guides). Please get in touch by opening an issue; do not send or post game files.
 
 ## Technical summary
