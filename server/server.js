@@ -34,6 +34,7 @@ const loginBonus = require('./login-bonus');
 const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
 const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
+const routesEvents = require('./routes-events'); // event quest routes (docs/notes/events.md)
 const raidPages = require('./raid-pages'); // Raid Catalog web pages (Task 9)
 const legalPages = require('./legal-pages');
 const { routePartyRanking, respondPartyRanking } = require('./routes-party-ranking');
@@ -1230,6 +1231,8 @@ function poiStageId(stageId) {
   if (row && row.stageKind === PROUD_KIND && row.stageBinId) return row.stageBinId + (id - row.stageId);
   // a Japan-only raid quest (I-232, make-raid.js) plays on the map file of a worldwide raid quest: stageBinId, as the client
   if (row && id >= 980000 && id <= 989999 && row.stageBinId >= 980000 && row.stageBinId <= 989999 && row.stageBinId !== id) return row.stageBinId;
+  // an event quest (make-events.js) plays on the map of its record: stageBinId = the map key, as the client loads mappoi_stg<stageBinId>
+  if (row && row.stageBinId && eventRoutes().isEventStage(id)) return row.stageBinId;
   return id;
 }
 const poiOf = (stageId) => STAGE_POI[poiStageId(stageId)];
@@ -1439,6 +1442,9 @@ function shopNotices() {
   } catch { shopNoticesMemo = { mtime: -1, doc: null }; return null; }
 }
 let raidMemo = null;
+// Event quests (make-events.js, not versioned): the entries listed in the Events tab after the raids (routes-events.js)
+const EVENT_INDEX = process.env.KHUX_EVENT_INDEX || path.join(__dirname, 'game_data', 'events.json');
+let eventMemo = null;
 const KEPT_BADGE_PY = path.join(__dirname, '..', 'recon', 'tools', 'kept_banner_badge.py');
 const keptFailed = new Set();
 // File del banner con il bollino (generato se manca o se l'originale e' piu' recente); se non riesce, quello normale
@@ -2206,7 +2212,7 @@ function grantItem(type, id, num) {
   } else if (type === 2) player.freeStone = (player.freeStone || 0) + num;
   else if (type === 4) player.money = (player.money || 0) + num;
   else if (type === 14) player.spherePoint = (player.spherePoint || 0) + num;
-  else if (type === 15 || type === 16) player.raidSpherePoint = (player.raidSpherePoint || 0) + num; // Raid Coin (16) and Event Coin (15): userPoint.raidSpherePoint
+  else if (type === 15 || type === 16) player.raidSpherePoint = (player.raidSpherePoint || 0) + num; // Raid Coin (16) and Event Coin (15): userPoint.raidSpherePoint (raid coin tables only: event quests never pay 15, routes-events.js)
   else if (type === 26) player.stageSkipTicket = (player.stageSkipTicket || 0) + num; // Skip Ticket (testo 102600058)
   else if (type === 28) player.superSkipTicket = (player.superSkipTicket || 0) + num; // Skip Ticket+ (102600065, «Force Skip»)
   // 11 Lux (testo 100200001)
@@ -2457,7 +2463,9 @@ function respondStageClear(res, req) {
   // titoli che questa partita assegna: solo questi vanno in userTitles, il client mostra un popup per ognuno (I-220)
   const titlesBefore = new Set(player.titles || []);
   // premio del primo completamento («Quest Complete!»: es. Combat 101, 300 jewel)
-  if (first && !training && stage?.validClearGetItem) {
+  // an event quest (routes-events.js) pays its first-clear items and objectives itself, once per quest, without Event Coins
+  const eventStage = eventRoutes().isEventStage(stageId);
+  if (first && !training && !eventStage && stage?.validClearGetItem) {
     stage.clearGetItemType.forEach((t, i) => grantItem(t, stage.clearGetItemId[i], stage.clearGetItemNum[i]));
   }
   if (first && !training && stage?.validClearGetTitle && stage.clearGetTitle) grantItem(7, stage.clearGetTitle, 1);
@@ -2490,7 +2498,8 @@ function respondStageClear(res, req) {
   if (isSpecialStage(stageId)) specialResetCheck(realNow());
   // premio di ogni obiettivo compiuto per la prima volta («Objective Complete!»)
   const before = stageClearMissions(stageId);
-  for (const n of cleared.filter((n) => !before.includes(n))) grantObjectiveReward(stage, n);
+  if (eventStage) eventRoutes().onStageClear(stageId, cleared);
+  else for (const n of cleared.filter((n) => !before.includes(n))) grantObjectiveReward(stage, n);
   player.clearMissions[stageId] = [...new Set([...before, ...cleared])].sort((a, b) => a - b).slice(0, 3);
   if (isSpecialStage(stageId)) specialResetCheck(realNow()); // Daily Cid: segna la settimana in cui il giro e' completo
   // stage completato, con il record di Lux (Lux Record nell'elenco delle missioni); uno skip (Skip Ticket o
@@ -4280,7 +4289,8 @@ function respondStageEvent(res, body) {
   if (fs.existsSync(evPath)) {
     try { events = JSON.parse(fs.readFileSync(evPath, 'utf8')); } catch (e) { console.log('[event] event.json non valido:', e.message); }
   }
-  if (Number(body?.eventCategory) === 2) events = [...raid().events(), ...events];
+  // Events tab: the raids (Raid Catalog banner, kept raid, the week's raids), then the event quests (routes-events.js)
+  if (Number(body?.eventCategory) === 2) events = [...raid().events(), ...eventRoutes().events(), ...events];
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
 // ---------------------------------------------------------------------------
@@ -4460,6 +4470,28 @@ function grantRaidItem(item) {
   const before = (player.medals || []).length;
   grantItem(item.type, item.id, item.num);
   if (item.type === 3 && item.skillId) giveSkill((player.medals || []).slice(before), item.skillId, item.skillLv);
+}
+// game_data/events.json (make-events.js). Read once; without it the Events tab lists only the raids, with one warning.
+function eventIndex() {
+  if (eventMemo) return eventMemo;
+  try {
+    eventMemo = JSON.parse(fs.readFileSync(EVENT_INDEX, 'utf8'));
+    if (!Array.isArray(eventMemo.entries)) eventMemo.entries = [];
+  } catch (e) {
+    console.warn(`[event] ${EVENT_INDEX} absent or not valid (${e.message}): no event quests`);
+    eventMemo = { entries: [] };
+  }
+  return eventMemo;
+}
+var eventRoutesMemo = null; // var: respondStageClear and poiStageId can run before this line
+function eventRoutes() {
+  return eventRoutesMemo ??= routesEvents({
+    player, savePlayer, masterRows, eventIndex, realNow, serverTimeAt, clock, webBase: WEB_BASE,
+    // the Shop week of the story, as the raids (event-calendar.js)
+    storyWeek: () => { const c = storyCtx(); return { shopFrom: c.shopFrom, shopTo: c.shopTo }; },
+    stageState: (id) => ({ score: player.stageScores?.[id] || 0, playStatus: id in (player.stageScores || {}) ? STAGE_CLEARED : 0 }),
+    grantItem, grantObjective: grantObjectiveReward,
+  });
 }
 var raidRoutes = null; // var: respondStageStart can run before this line
 function raid() {
@@ -5332,6 +5364,7 @@ module.exports._test = {
   respondMedalSell, drawPointsUnlocked, // server/test-draw-points.js
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
+  eventRoutes, eventIndex, // server/test-event-routes.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, raidPageCtx, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
