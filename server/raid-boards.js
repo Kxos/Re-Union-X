@@ -290,6 +290,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       const ownArt = artOf(r.board.id) || (r.board.art ? r.board.art : null), art = ownArt || (r.board.artFrom ? artOf(r.board.artFrom) : null);
       if (!art) labels.add('boardNoArt');
       else if (art.screenshot) labels.add('boardArt');
+      else if (art.wiki) labels.add('boardArtWiki'); // the card as shown on the JP wiki (recon/tools/raid_board_wikicards.py, --loc)
       if (art) out.art.push({ sphereBoardId: id, board: ownArt ? r.board.id : r.board.artFrom, ...art });
       out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: background, arryId: id, masuId: id, type: TYPE, openId: 0, openParam: 0, price: 0, detailUrl: '',
         startDatetime: START, endDatetime: END });
@@ -319,11 +320,12 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
 
 // Lines of the list read by recon/tools/import_originals.py (destination, source, path): the card picture of every Raid Board
 // under its own id. jp: the JP 4.3.1 file of the same art; screenshot: the card cut from a screenshot of the original game by
-// recon/tools/raid_board_screens.py into the --loc folder (img/sphere_incentive_ww/<board key>.png, «:» of an event key as «_»:
+// recon/tools/raid_board_screens.py into the --loc folder (img/sphere_incentive_ww/<board key>.png, «:» of an event key as «_»;
+// wiki: a JP board card as shown on the JP wiki, written there by recon/tools/raid_board_wikicards.py;
 // Windows file names have no colon).
 function artLines(art) {
   const head = ['# Raid Board card pictures, written by server/make-raid.js from raid_config.json boards.art (docs/notes/bacheche.md «Raid Boards»).',
-    '# Columns as in originals.tsv. jp = the JP 4.3.1 picture of the same board art; loc = cut from a screenshot of the original game.'];
+    '# Columns as in originals.tsv. jp = the JP 4.3.1 picture of the same board art; loc = cut from a screenshot of the original game or a JP wiki card picture.'];
   const line = (a) => [`img/sphere_incentive/${a.sphereBoardId}.png`, a.jp ? 'jp' : 'loc', a.jp || `=img/sphere_incentive_ww/${String(a.board).replace(/:/g, '_')}.png`].join('\t');
   return [...head, ...art.map(line)].join('\n') + '\n';
 }

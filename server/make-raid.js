@@ -318,13 +318,15 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
   // board rows of the shared 2017 master, jpOriginal; the super-hard standard board = WW Legendary Raid Reward, jpBoard), (b)
   // boards reconstructed from the row's evidence (private raid_rewards/e_jp/jp_boards.json, built by make_jp_boards.js:
   // jpDeduced), (c) else no board at all (jpNone, label jpNoBoard).
-  const jpBoard = new Set(), jpOriginal = new Set(), jpDeduced = new Set(), jpNone = new Set();
+  const jpBoard = new Set(), jpOriginal = new Set(), jpDeduced = new Set(), jpNone = new Set(), jpProbable = new Set();
   const sh = (jpCfg || {}).superHard || null;
   const specs = ((eventRewards || {}).jpBoards || {}).rows || {};
   for (const row of ((census || {}).rows || []).filter((r) => jpServed(r, census))) {
     const spec = specs[row.id];
     if (spec) {
       (spec.status === 'original' ? jpOriginal : jpDeduced).add(row.id);
+      // a board whose tie to this raid is only probable (JP-RAID-3 = SE 2017 master board 4400001, Gap research 10): label jpBoardProbable
+      if (spec.probable) jpProbable.add(row.id);
       const refs = spec.boards.map((b, i) => {
         const id = `${row.id}:jp${i + 1}-${slug(b.name)}`;
         boards.push({ id, name: b.name, cells: b.cells.map((c, k) => ({ n: k + 1, cost: c.cost, kind: c.kind, reward: c.reward, qty: c.qty || 1 })),
@@ -354,7 +356,7 @@ function eventBoardDoc(census, eventRewards, jpCfg = null) {
     });
     weeks.push({ census_id: row.id, family: row.family, start: row.start, boards: refs, donor: donorRow.id });
   }
-  return { boards, weeks, gendered, standard, jpBoard, jpOriginal, jpDeduced, jpNone };
+  return { boards, weeks, gendered, standard, jpBoard, jpOriginal, jpDeduced, jpNone, jpProbable };
 }
 const boardDocOf = (boards, census, eventRewards, jpCfg = null) => {
   const ev = eventBoardDoc(census, eventRewards, jpCfg);
@@ -465,7 +467,7 @@ function eventTimer({ row, w, settings, orig, rareBody, config, original }) {
     if (s) ap = s.ap; else { ap = config.useAp; labels.push('useAp'); }
     return { up, ap, labels, setting: s };
   }
-  // JP rules of the JP wiki (raid_config.json jpTimer): super-hard weekends 12 h, 1 h from 2018-05-05; the monthly raids' 30 minutes
+  // JP rules of the JP wiki (raid_config.json jpTimer): super-hard weekends 12 h, 1 h from the JP Saturday 2018-05-12; the monthly raids' 30 minutes
   const jp = w.jp ? (config.jpTimer || {})[row.family] : null;
   if (jp) {
     up = jp.minutes || (row.start < jp.oneHourFrom ? jp.before : jp.after);
@@ -1256,7 +1258,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
     for (const e of out.index.entries) {
       e.sphereBoardIds = b.byCensus[e.censusId] || [];
       if (e.sphereBoardIds.length) e.reconstructed.push(...(b.labels[e.censusId] || []), ...(ev.standard.has(e.censusId) ? ['boardStandard'] : []), ...(ev.gendered.has(e.censusId) ? ['boardGender'] : []), ...(ev.jpBoard && ev.jpBoard.has(e.censusId) ? ['jpBoard'] : []),
-        ...(ev.jpOriginal.has(e.censusId) ? ['jpBoardOriginal'] : []), ...(ev.jpDeduced.has(e.censusId) ? ['jpBoardDeduced'] : []));
+        ...(ev.jpOriginal.has(e.censusId) ? ['jpBoardOriginal'] : []), ...(ev.jpDeduced.has(e.censusId) ? ['jpBoardDeduced'] : []),
+        ...(ev.jpProbable && ev.jpProbable.has(e.censusId) ? ['jpBoardProbable'] : []));
       // a JP row with nothing known of its board, or whose built boards lost every cell: no board, and the page says so
       if (e.jp && !e.sphereBoardIds.length) e.reconstructed.push('jpNoBoard');
     }
