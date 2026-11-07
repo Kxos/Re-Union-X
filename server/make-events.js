@@ -8,8 +8,10 @@
 //   notices, evStage: [donor rows], quests: [{stageId, name, worldId, room, level, ap, addLevel, targets, objectives, combined,
 //   firstClear, drops, enemies: [{id, level, label, ...}], restrictions, drama, map: {key, stageBinId, status}, window, label}]}].
 // Rules:
-// - one evStage row per record (eventCategory / eventType of the config: 2 / 2, the values proven by the raids; the donor
-//   eventType stays in the entry as origEventType), stageId capped at EVSTAGE_MAX_STAGES with the range (make-raid evStageRow);
+// - one evStage row per record: eventCategory of the config (2, proven by the raids); eventType = the donor's (origEventType, 1 or 3
+//   in the pilot), the config eventType (1) when the donor rows have none or disagree. Never 2: on the client eventType 2 is the
+//   raid mode and adds the «Raid Boards» button to the quest list, which original non-raid events never had (bench 07-11,
+//   reference/event_quest_screen); the value is written in the entry (eventType) for /stage/event. stageId capped at EVSTAGE_MAX_STAGES with the range (make-raid evStageRow);
 // - one stage row per served quest: copy of a story row of the quest's world (make-raid storyRefs), stageKind 2, the record's
 //   cost, restrictions and objectives, stageBinId = the record's map key (the client loads mappoi_stg<stageBinId>), raidBoss 0,
 //   no first-clear item unless the record has one, scenes off (label dramaOff: their files are not checked yet);
@@ -235,6 +237,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     const donorTypes = [...new Set((rec.evStage || []).map((r) => r.eventType))];
     const entry = { censusId: rec.censusId, evStageId, name: rec.name, type: rec.type, start: rec.start, end: rec.end, stageIds: [], useAp: null, label: 'original', labels: [],
       noticeIds: rec.notices || [], banner: `/web/event/img/v${config.imgVersion}/${evStageId}.png`, origEventType: donorTypes.length === 1 ? donorTypes[0] : donorTypes,
+      eventType: donorTypes.length === 1 && Number.isInteger(donorTypes[0]) && donorTypes[0] !== 2 ? donorTypes[0] : config.eventType,
       available: false, why: null, quests: [] };
     const labels = new Set();
     // short windows of the donor rows: open the whole Pacific day
@@ -320,7 +323,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     else if (!entry.stageIds.length) entry.why = `no quest served yet (${entry.quests.length} ${NOT_SERVED})`;
     else {
       // Details of the card: the original notice of the event (event-pages.js noticePage; «not available» without its text)
-      const row = evStageRow(evStageId, entry.stageIds, { eventType: config.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${evStageId}` : '' });
+      const row = evStageRow(evStageId, entry.stageIds, { eventType: entry.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${evStageId}` : '' });
       row.eventCategory = config.eventCategory;
       row.bannerUrl = entry.banner;
       out.evStage.push(row);

@@ -1,5 +1,5 @@
 {
- "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). onlyCensusIds: the April 2019 pilot (Events Part 1); drop it to build every record. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
+ "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). onlyCensusIds: the April 2019 pilot (Events Part 1); drop it to build every record. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the fallback when the donor rows give none (make-events uses the donor value, never 2 = the raid mode with the Raid Boards button). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
  "catalogEvStage": 20000,
  "catalogStage": 970000,
  "catalogUrl": "/web/event/catalog",
@@ -8,7 +8,7 @@
  "stageBase": 4000000,
  "stageMax": 4009999,
  "eventCategory": 2,
- "eventType": 2,
+ "eventType": 1,
  "imgVersion": 4,
  "shortWindowHours": 12,
  "onlyCensusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],

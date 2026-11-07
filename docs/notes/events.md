@@ -23,7 +23,7 @@ All fields are mandatory in the master. What a non-raid quest event sets:
 | Field | Raid rows | Quest events (pilot rows of the donated 2021 master) |
 |---|---|---|
 | `eventCategory` | 2 | 2, 3 or 4 in the donor (3 = most quest events, 4 = High Score). The client never filters by it in the list; **on tap, 4 selects the High Score mode, anything else is a plain quest list** (bench 30-10). So our rows keep 2 except High Score (4) |
-| `eventType` | 2 (raid button, Raid Boards), 0 (catalog banner) | 1 on most quest events (daily, coins, quiz, Org XIII, time attack), 3 on the countdown dailies, High Score, the keyblade and the character-return events, **(unverified)** what the client does with 1 and 3 (the 30-10 note says 1/2/4 are board/raid modes: check on the bench before relying on it) |
+| `eventType` | 2 (raid button, Raid Boards: raids only), 0 (catalog banner), our events: the donor value (07-11) | 1 on most quest events (daily, coins, quiz, Org XIII, time attack), 3 on the countdown dailies, High Score, the keyblade and the character-return events, **(unverified)** what the client does with 1 and 3 (the 30-10 note says 1/2/4 are board/raid modes: check on the bench before relying on it) |
 | `validStageId`, `stageId[5]` | count and first 5 ids | same; with more than 5 stages the donor uses `validStageId` 0 and the range |
 | `stageStartId`, `stageEndId` | first and last stage | same; the range is contiguous in stage ids but not in every id between |
 | `validStageWidthId` | 0 | 1 on range rows (the donor), meaning «use the range» **(unverified)**; 0 on a one-stage daily row |
@@ -192,8 +192,15 @@ Open points:
    spawns outside raid events from 2019-01-24 00:00 PT, and khuxwiki `raid=` (2750 event quest pages) stops at that date; before it, event
    quests did spawn (Behemoth / Behemoth Ω from the January 2017 events). The April 2019 re-runs of the pilot fall after it, so «no spawn»
    is original for them; for 2016-2018 runs it is a declared simplification (all events are served as re-runs on the same rule). The
-   server already behaves this way (event quests add nothing to the raid counter). Still open: whether the Raid Boards button belongs on
-   the quest list of a non-raid event (research running).
+   server already behaves this way (event quests add nothing to the raid counter). **Raid Boards button: not original on non-raid events,
+   fixed 07-11 (rev 278).** Frames of original videos (private `reference/event_quest_screen/sources.md`: JP 2017-01 cup event, WW
+   2018-04 Hidden Menace, 2018-09 Dark-Winged Warrior 12/12 (4:3, probable), 2019-09 Defeat Titan) show nothing at the top right of a
+   non-raid event's quest list; raid events (JP 2017-01, WW 2018-01) show «Raid Boards», and «Event Coins Galore!» (2019-08) shows
+   «Event Boards». In the client, `/stage/event` `eventType` 2 is the raid mode that builds `AdventureTop2_Raid_Button`. make-events now
+   writes the donor eventType per entry (pilot: 3, the Daily Event 1; fallback `event_config.json` eventType 1, never 2) into the
+   evStage row and the index, and routes-events serves it. Bench (rev 278, `events1_dww_list_no_raid_button`): no button on Dark-Winged
+   Warrior (type 3), the quest still starts and clears. Not benched: a type 1 list (the Daily Event is not in the 04-11..17 week), and
+   which value maps to «Event Boards» (needed with the Event Coin boards, Part 2+).
 2. ~~The quest counter says «1/12» on an event with 9 served quests.~~ Not a bug (07-11): «1/12» is part of the original quest NAME
    («Dark-Winged Warrior - 1/12», donor row and khuxwiki alike), the client shows no counter.
 3. ~~«Complete without having to continue» twice.~~ Original (07-11): the donor row has objectives [28, 10, 10] and khuxwiki DWW 1/12 lists
