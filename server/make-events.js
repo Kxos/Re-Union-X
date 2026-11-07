@@ -348,8 +348,16 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (raidish) { item.reason = 'raidSpecial'; item.why = 'raid or Special quest'; continue; }
       // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
       if (wiki && (!Number.isInteger(mapKey) || !(q.enemies || []).some((e) => Number.isInteger(e.id)))) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
-      const missing = enemyIdsOf(q).filter((id) => (wiki ? Number.isInteger(id) : true) && !enemies.has(id));
-      if (missing.length) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
+      // an enemy or target without an integer id cannot be looked up: on an unusable map the map is the cause, else it is listed by name
+      const noId = wiki ? [] : [...new Set([...(q.enemies || []), ...(q.targets || [])].filter((e) => !Number.isInteger(e.id)).map((e) => `${e.name || 'unnamed'} (no id)`))];
+      const missing = [...enemyIdsOf(q).filter((id) => Number.isInteger(id) && !enemies.has(id)), ...noId];
+      if (missing.length) {
+        const rep = maps ? maps.status.get(mapKey) : null;
+        const stat = (q.map || {}).status;
+        const unusable = maps ? (!rep || rep.status !== 'imported') : (stat !== undefined && stat !== null && stat !== 'ok');
+        if (unusable && missing.length === noId.length) { item.reason = 'mapUnusable'; item.why = `map not usable: ${stat || (rep && rep.status) || 'not imported'}`; continue; }
+        item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${missing.join(', ')}`; continue;
+      }
       if (resolveItem) {
         const r = remapItems(q, resolveItem);
         if (r.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${r.missing.join('; ')})`; continue; }

@@ -560,6 +560,18 @@ const tests = {
     assert.strictEqual(entry(o2, 'W-2').reason, 'wikiEmpty');
     assert.strictEqual(o2.stage.length, 0);
   },
+  null_id_target_reason() {
+    // a target without an id on a map the donor file could not give: the map is the cause, not an enemy
+    const inc = quest(701100, 1, [501], { enemies: [], targets: [{ id: null, name: 'High Wizard' }], map: { key: 701100, status: 'incomplete: STG header absent' } });
+    const q = entry(build([record('N-1', [inc], { type: 'GEM' })]), 'N-1').quests[0];
+    assert.strictEqual(q.reason, 'mapUnusable');
+    assert.match(q.why, /incomplete: STG header absent/);
+    // a usable map: enemyMissing, and the list is never empty
+    const ok = quest(701101, 1, [501], { enemies: [], targets: [{ id: null, name: 'High Wizard' }] });
+    const q2 = entry(build([record('N-2', [ok], { type: 'GEM' })]), 'N-2').quests[0];
+    assert.strictEqual(q2.reason, 'enemyMissing');
+    assert.match(q2.why, /High Wizard \(no id\)/);
+  },
   no_source_writes_nothing() {
     const old = process.env.KHUX_EVENT_SRC;
     delete process.env.KHUX_EVENT_SRC;
