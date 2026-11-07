@@ -302,5 +302,11 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
 - Battle VS Ramuh (fix of 7 Nov): the census gave it the notices of the Iron Giant week and of the permanent Daily Quests, so
   it held their rows. The private builder now corrects its notice (its own row: Defeat Ramuh 1-10, not served until the Ramuh
   enemies are in the master); its old quest keys stay reserved in `event_ids.json` under `EV-1360~old/` (numbers never
-  reused, no record reads them). Every donor row of a record now has its notice among the record's notices. The Monthly Gem
-  records still hold the rows of the other events announced by the same monthly notice (served when their quests are).
+  reused, no record reads them). Every donor row of a record now has its notice among the record's notices.
+- Row owners (controller ruling, 7 Nov): a donor row belongs to the census event whose content it is, not to every record of its
+  notice. The private builder (`ROW_OWNER`) keeps on a Monthly Gem record only its own «Clear All Challenges» row; the rows of
+  the other events of the monthly notice go to their census row: the gem drop events (Magic / PSM / Power Gem) to their own GEM
+  records, which are no longer shared rows; Event Coins Galore, Defeat X, New Year's Challenge, Keyblade Challenges, Org. XIII
+  avatars, Daily Enhancement / Avatar Coin to census rows not selected yet (not built); the raid rows (eventType 2) to the raids.
+  Quests that moved to a record keep their stage ids (key moved); the others keep them reserved under `<censusId>~old/`. Three
+  «Event & Trait Medals» rows (June-August 2020) stay on their Monthly record, owner not certain.
