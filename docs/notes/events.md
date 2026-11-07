@@ -299,3 +299,8 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
 - Cards: `make_event_banners.py` writes one card per card id (the entry id and every built row) from the row's donor banner key
   (fetched as `row_<key>.png` into `reference\event_banners_ww`, or any `*_<key>.png` already there), else `--extra`, else for
   the entry id its notice banner; `make_special_banners.py --section event` writes the KEPT copies of every card id.
+- Battle VS Ramuh (fix of 7 Nov): the census gave it the notices of the Iron Giant week and of the permanent Daily Quests, so
+  it held their rows. The private builder now corrects its notice (its own row: Defeat Ramuh 1-10, not served until the Ramuh
+  enemies are in the master); its old quest keys stay reserved in `event_ids.json` under `EV-1360~old/` (numbers never
+  reused, no record reads them). Every donor row of a record now has its notice among the record's notices. The Monthly Gem
+  records still hold the rows of the other events announced by the same monthly notice (served when their quests are).
