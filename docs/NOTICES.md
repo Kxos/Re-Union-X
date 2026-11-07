@@ -420,7 +420,7 @@ They are materials for other Medals: with this cost they do not fit on a Keyblad
 
 **IMPORTANT** · 10/26
 
-**Free Deals** are the free banners with one draw a day, such as the anniversary and holiday draws and the VIP Free Deals. In this version a free draw costs 1 Jewel.
+**Free Deals** are the free banners with one draw a day, such as the anniversary and holiday draws and the VIP Free Deals. A free draw costs nothing and starts at once, without a confirmation, as in the original.
 
 All Free Deals share **one free draw a day**: when more than one is in the Shop, choose which one to draw. The draw comes back the next day (**not original**: each Free Deal had its own daily draw).
 
@@ -662,7 +662,7 @@ When two seasons overlap, both appear, unless they use different special tickets
 
 In the Banner Catalog, tap **📌 Keep in the Shop** on a banner's row (or in its **Details**). It then stays in the Shop every week, right after the Banner Catalog plate and above the seasonal banners, marked with a **📌 KEPT IN SHOP** badge.
 
-You can keep only banners from a period you have already passed in the Story. Daily Free Deals can be kept too (see the Free Deals notice). Other draws that cost 1 Jewel and seasonal banners cannot be kept.
+You can keep only banners from a period you have already passed in the Story. Daily Free Deals can be kept too (see the Free Deals notice). Other free draws and seasonal banners cannot be kept.
 
 Keep one banner at a time: keeping another replaces the first, and **Remove from the Shop** takes it out whenever you like.
 
@@ -754,7 +754,7 @@ Shop draw rates are reconstructed where the original game did not publish them (
 
 Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.
 
-Free draws cost 1 Jewel. All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).
+All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).
 
 Free deals that could be drawn only once (or once per day) keep that limit.
 

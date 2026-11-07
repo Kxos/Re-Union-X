@@ -185,7 +185,7 @@ About 22 single quests: LV 999 or 1200, AP 0, 10 or 25, one target, and the rewa
 - [ ] **Step 3:** Build resources 107:
   - full build if Task 2 added enemy families, otherwise `-Quick`;
   - then `update-resources.ps1` and the two taps;
-  - master regen, revision 279 in the four session scripts;
+  - master regen, revision 280 in the four session scripts;
   - check the log.
 - [ ] **Step 4:** Commit tools and revision.
 

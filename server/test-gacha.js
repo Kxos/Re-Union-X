@@ -22,14 +22,15 @@ const next = clock.dayEnd(t0) + 1;
 // prezzi dinamici
 const first = mk({ prices: [0, 3000] });
 const pl = { gacha: {} };
-check(g.priceFor(first, pl) === 1, 'FIRST_FREE: 1 alla prima');
+check(g.priceFor(first, pl) === 0, 'FIRST_FREE: 0 alla prima');
 pl.gacha.count = { [first.drawMedalTypeId]: 1 };
 check(g.priceFor(first, pl) === 3000, 'FIRST_FREE: prezzo pieno dopo');
 const fall = mk({ prices: [3000, 2500, 2200, 1900] });
 const seq = [0, 1, 2, 3, 4].map((n) => g.priceFor(fall, { gacha: { count: { [fall.drawMedalTypeId]: n } } }));
 check(JSON.stringify(seq) === '[3000,2500,2200,1900,1900]', `FALLING: ${seq}`);
 const free = mk({ prices: [0] });
-check(g.priceFor(free, {}) === 1 && g.priceFor(free, { gacha: { count: { [free.drawMedalTypeId]: 5 } } }) === 1, 'prices [0]: sempre 1');
+check(g.priceFor(free, {}) === 0 && g.priceFor(free, { gacha: { count: { [free.drawMedalTypeId]: 5 } } }) === 0, 'prices [0]: sempre 0');
+check(g.priceFor(mk({ prices: [] }), {}) === 1, 'senza prices: 1');
 
 // lista provvisoria
 const opt = { storyQuest: 525, storyDay: '2016-12-08', sizes, show: new Set() };
@@ -94,7 +95,7 @@ check(l.petGachaList.length === 0 && l.gachaList[0].drawMedalTypeId === 9001, 'C
 check(pList.gacha.listedCurrency === 'spooky', 'listedCurrency della valuta elencata');
 check(pList.drawTickets && pList.drawTickets.draw === 0, 'ticketsOf nella lista');
 const e = l.gachaList.find((x) => x.drawMedalTypeId === first.drawMedalTypeId);
-check(e.price === 1 && e.userLimitedCount === 0 && e.isDayLimited === 0, 'piastra: price da priceFor');
+check(e.price === 0 && e.userLimitedCount === 0 && e.isDayLimited === 0, 'piastra: price da priceFor');
 check(['validAdd', 'drawMedalTypeId', 'drawType', 'sortId', 'payType', 'price', 'lotCount', 'isDayLimited', 'userLimitedCount',
   'userWarrantDisplayOfTime', 'name', 'description', 'bannerUrl', 'warrantMedalIds', 'drawTicketlimitDate'].every((k) => k in e), 'campi obbligatori');
 check(e.bannerUrl === `http://h/web/gacha/img/${first.drawMedalTypeId}.png`, 'bannerUrl');
@@ -118,7 +119,9 @@ check(JSON.stringify(bySort.map((x) => x.drawMedalTypeId)) === JSON.stringify(wa
 check(new Set(lo.gachaList.map((x) => x.sortId)).size === lo.gachaList.length, 'sortId distinti');
 const cat = l.gachaList[0];
 check(cat.payType === 3 && cat.price === 1 && cat.drawType === 1, 'Catalog innocuo (paid Jewels, I-135)');
-check(l.gachaList.every((x) => x.price >= 1 && (x.payType !== 3 || x.drawMedalTypeId === 9001)), 'mai prezzo 0; payType 3 only on the Catalog plate');
+check(l.gachaList.every((x) => x.price >= 0 && (x.payType !== 3 || x.drawMedalTypeId === 9001)), 'prezzi >= 0; payType 3 only on the Catalog plate');
+// la piastra del Catalog resta a 1: a prezzo 0 il client estrarrebbe subito, senza aprire i Details
+check(l.gachaList.filter((x) => x.drawMedalTypeId === 9001).every((x) => x.price === 1), 'Catalog mai a prezzo 0');
 l = g.gachaListData([inside], {}, { realMs: t0, webBase: 'http://h', ...opt });
 check(l.gachaList.length === 2, 'senza payType 8');
 const pNone = {};
@@ -143,7 +146,7 @@ check(plate(pv, vip1, t0).userLimitedCount === 1 && plate(pv, vip1, t0).isDayLim
 check(g.checkDraw(vip1, pv, { count: 10 }, dopt) === 'VIP Draw senza il benefit VIP', 'VIP: Free Deal senza benefit (I-134)');
 check(g.checkDraw(vip1, pv, { count: 10 }, { ...dopt, vip: true }) === null, 'VIP: prima estrazione');
 g.payDraw(vip1, pv, t0, false);
-check(pv.freeStone === 9, 'VIP: 1 Jewel scalato');
+check(pv.freeStone === 10, 'VIP: gratuita, nessun Jewel scalato');
 check(g.checkDraw(vip2, pv, { count: 10 }, { ...dopt, vip: true }) === 'Free Deal gia\' usata oggi', 'VIP: seconda Free Deal rifiutata');
 // una Free Deal giornaliera NON VIP condivide la stessa estrazione del giorno (decisione dell'utente 26-10)
 const freeN = mk({ dayLimit: 1, prices: [0] });
@@ -165,7 +168,7 @@ check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, dopt) === 'b
 check(g.checkDraw({ ...cheap, unlockQuest: 540 }, pc, { count: 3 }, { ...dopt, show: new Set([cheap.rowId]) }) === null, 'show sblocca');
 for (const pt of [4, 5, 6]) check(g.checkDraw({ ...cheap, payType: pt }, pc, { count: 3 }, dopt) === `payType ${pt} non estraibile`, `payType ${pt}`);
 check(g.checkDraw(mk({ prices: [3000] }), pc, { count: 10 }, dopt) !== null, 'jewel insufficienti');
-check(g.checkDraw(first, { freeStone: 1 }, { count: 10 }, dopt) === null, 'FIRST_FREE: basta 1 Jewel');
+check(g.checkDraw(first, { freeStone: 0 }, { count: 10 }, dopt) === null, 'FIRST_FREE: gratuita anche senza Jewel');
 check(g.checkDraw(cheap, pc, { count: 3 }, { ...dopt, freeSlots: 2 }) !== null, 'box senza posti per 3');
 check(g.checkDraw(mk({ prices: [10] }), pc, { count: 10 }, { ...dopt, sizes: new Set([1, 3]) }) !== null, 'dimensione senza animazione');
 check(g.checkDraw(tSpooky, { drawTickets: { draw: 5, spooky: 0 } }, { count: 10 }, dopt) !== null, 'spooky: senza cookie');
@@ -265,7 +268,7 @@ check(d3.includes('3 times per day') && !d3.includes('once per day'), 'dettagli:
 check(g.detailPage(sb({ dayLimit: 1 }), exA, medalNames, sctx).includes('once per day'), 'dettagli: dayLimit 1');
 const dF = g.detailPage(sb({ prices: [3000, 2500, 2200, 2000, 1900] }), exA, medalNames, sctx);
 check(dF.includes('Price falls with each draw: 3,000 → 2,500 → 2,200 → 2,000 → 1,900 Jewels'), 'dettagli: prezzo in calo');
-check(g.detailPage(sb({ prices: [0, 3000] }), exA, medalNames, sctx).includes('First draw: 1 Jewel, then 3,000 Jewels'), 'dettagli: FIRST_FREE');
+check(g.detailPage(sb({ prices: [0, 3000] }), exA, medalNames, sctx).includes('First draw free, then 3,000 Jewels'), 'dettagli: FIRST_FREE');
 check(!g.detailPage(sb({}), exA, medalNames, sctx).includes('Price falls'), 'dettagli: prezzo unico senza riga');
 const inc = sb({ catalogOnly: 'INCOMPLETE', lotCount: null, prices: [], rarityMix: undefined, name: 'Mancante', guaranteesText: 'Nota X' });
 const dI = g.detailPage(inc, undefined, medalNames, sctx);
@@ -282,7 +285,7 @@ check(g.checkDraw(once, po, { count: 10 }, dopt) === null, 'totalLimit: prima es
 g.payDraw(once, po, t0, false);
 check(g.checkDraw(once, po, { count: 10 }, dopt) === 'limite totale raggiunto', 'totalLimit: seconda rifiutata');
 check(g.checkDraw(once, po, { count: 10 }, { ...dopt, realMs: next }) === 'limite totale raggiunto', 'totalLimit: rifiutata anche il giorno dopo');
-check(po.freeStone === 9 && plate(po, once, next).userLimitedCount === 0, 'totalLimit: 1 Jewel scalato una volta, 0 rimanenti');
+check(po.freeStone === 10 && plate(po, once, next).userLimitedCount === 0, 'totalLimit: gratuita, 0 rimanenti');
 const three = mk({ prices: [100], totalLimit: 3 });
 const p3 = { freeStone: 1000 };
 g.payDraw(three, p3, t0, false);

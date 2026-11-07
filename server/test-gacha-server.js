@@ -122,7 +122,7 @@ check(t.gachaCatalog().banners.find((b) => b.rowId === 'B0008').catalogOnly, 'Bl
 // lista alla quest 200 (storia al 2016-04-07): show B0005 per primo (start 2019), poi start uguale per id
 let l = call(t.respondGachaList);
 check(Array.isArray(l.petGachaList) && JSON.stringify(ids(l)) === '[9001,10005,10001,10002,10003,10004,10006]', `lista: ${ids(l)}`);
-check(plate(l, 10002).price === 3000 && plate(l, 10003).price === 1, 'lista: prezzi dinamici (3000, VIP 1)');
+check(plate(l, 10002).price === 3000 && plate(l, 10003).price === 0, 'lista: prezzi dinamici (3000, VIP 0)');
 
 // estrazioni rifiutate senza addebito: catalogOnly, fuori periodo, scartato, sconosciuto, Catalog
 p.freeStone = 1000;
@@ -189,15 +189,15 @@ check(p.freeStone === 2500 && JSON.stringify(p) === before, 'consegna fallita: n
 check(!Object.isFrozen(p.medals), 'consegna fallita: elenco medaglie ripristinato');
 check(logs.some((x) => /consegna/.test(x)), 'consegna fallita: log');
 
-// VIP gratuito: 1 Jewel, una volta al giorno, solo con il benefit VIP (I-134, KHUX_VIP=1 per la prova)
+// VIP gratuito: 0 Jewel, una volta al giorno, solo con il benefit VIP (I-134, KHUX_VIP=1 per la prova)
 p.freeStone = 5;
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
 check(!r.userMedalIds && p.freeStone === 5, 'VIP Free Deal senza benefit: rifiutata');
 process.env.KHUX_VIP = '1';
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
-check(r.userMedalIds && p.freeStone === 4, 'VIP: costa 1 Jewel');
+check(r.userMedalIds && p.freeStone === 5, 'VIP: gratuita');
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10003, count: 1 });
-check(!r.userMedalIds && p.freeStone === 4, 'VIP: seconda rifiutata');
+check(!r.userMedalIds && p.freeStone === 5, 'VIP: seconda rifiutata');
 delete process.env.KHUX_VIP;
 
 // abilita' e bonus
