@@ -1,5 +1,5 @@
 {
- "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). onlyCensusIds: the April 2019 pilot (Events Part 1); drop it to build every record. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the fallback when the donor rows give none (make-events uses the donor value, never 2 = the raid mode with the Raid Boards button). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
+ "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). serve: census ids (the April 2019 pilot, Events Part 1) and types (GEM, Part 2) that are built, the rest is notSelected (an old onlyCensusIds list still works; no serve and no list builds every record). reasonText: the catalogue text of every reason a record or quest is not built. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the fallback when the donor rows give none (make-events uses the donor value, never 2 = the raid mode with the Raid Boards button). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
  "catalogEvStage": 20000,
  "catalogStage": 970000,
  "catalogUrl": "/web/event/catalog",
@@ -11,8 +11,21 @@
  "eventType": 1,
  "imgVersion": 4,
  "shortWindowHours": 12,
- "onlyCensusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
+ "serve": {
+  "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
+  "types": ["GEM"]
+ },
+ "reasonText": {
+  "shared": "This notice shares its quests with another row of the catalogue: they are built once, under the other row.",
+  "board": "In the original this event had no quests of its own: it was played on the event boards, which come with a later update.",
+  "coin": "In the original this event had no quests of its own: it paid Event Coins, which come with the event boards in a later update.",
+  "undated": "The original start date of this event is not known, so it cannot be placed in the calendar and is not listed.",
+  "wikiEmpty": "The khuxwiki page of this quest gives no map and no enemy we can identify, so it cannot be rebuilt yet.",
+  "rewardItemMissing": "A reward of this quest (a medal or a material) does not exist in our game data yet, so the quest is not served.",
+  "notSelected": "Not part of the events served so far."
+ },
  "labelPhrases": {
+  "wikiQuest": "wikiQuest",
   "donor kept; wiki is the 2018 run": "donorKept",
   "wiki value applied, low confidence": "wikiLowConfidence",
   "map incomplete": "mapIncomplete",
@@ -23,6 +36,7 @@
   "wikiLowConfidence": "One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.",
   "mapIncomplete": "The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.",
   "noWikiPage": "No khuxwiki page exists for this quest: its values come from the later game data only, without a second source.",
+  "wikiQuest": "Quest rebuilt from the khuxwiki page: no master row of the original is known",
   "wholeDay": "In the original this event was open for a short window (minutes to hours); here it is open for its whole original day.",
   "dramaOff": "The original scenes before or after this quest are not shown yet.",
   "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update.",

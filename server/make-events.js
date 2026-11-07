@@ -2,9 +2,9 @@
 // Master rows and index of the event quests (Events Part 1, plan docs/superpowers/plans/2026-11-06-events-part1-framework.md
 // Task 3, spec docs/superpowers/specs/2026-11-06-events-design.md, client facts docs/notes/events.md). Same shape as make-raid.js.
 // Inputs:
-// - server/event_config.json (versioned, ours): id bases, eventCategory / eventType of our rows, onlyCensusIds (the pilot filter),
+// - server/event_config.json (versioned, ours): id bases, eventCategory / eventType of our rows, serve {censusIds, types} (what is built; Part 2: GEM), reasonText (why a record or quest is not built),
 //   labelPhrases (reconstruction notes of the records -> label id) and reconstructedWhy (the text of every label);
-// - the event quest records (private, path in KHUX_EVENT_SRC, never copied into the repo): [{censusId, name, start, end, type,
+// - the event quest records (private, path in KHUX_EVENT_SRC: a file or a folder of *.json, readRecords; never copied into the repo): [{censusId, name, start, end, type,
 //   notices, evStage: [donor rows], quests: [{stageId, name, worldId, room, level, ap, addLevel, targets, objectives, combined,
 //   firstClear, drops, enemies: [{id, level, label, ...}], restrictions, drama, map: {key, stageBinId, status}, window, label}]}].
 // Rules:
@@ -47,6 +47,8 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy'];
+// reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
+const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected'];
 const COIN_TYPE = 15;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -211,6 +213,60 @@ function dropRows(q) {
 const rewardRowOf = (rewardId, rows) => ({ rewardId, validReward: rows.length, display: rows.map(() => 1), type: rows.map((r) => r.type), id: rows.map((r) => r.id || 0),
   assignSkillType: rows.map(() => 0), assignSkillId: rows.map(() => 0), assignSkillLv: rows.map(() => 0), num: rows.map((r) => r.num), odds: rows.map((r) => r.odds) });
 
+// Serve selection: config.serve {censusIds, types} (a record is built when its id or its type is listed); the old onlyCensusIds
+// (ids only) still works. Neither: every record.
+function selector(config) {
+  if (config.serve) {
+    const ids = new Set(config.serve.censusIds || []), types = new Set(config.serve.types || []);
+    return (rec) => ids.has(rec.censusId) || types.has(rec.type);
+  }
+  if (Array.isArray(config.onlyCensusIds)) { const ids = new Set(config.onlyCensusIds); return (rec) => ids.has(rec.censusId); }
+  return () => true;
+}
+
+// Reward items (Part 2): the donor master numbers medals differently from ours. A medal whose id is not in our medal master is
+// resolved by name: «Name N★» -> our row named Name with rarity N (one match; on a tie the row whose medalId == imageId); the served
+// reward uses our id. A gem material must be in the material table. Without master.medal / master.material (unit fixtures of
+// Part 1) nothing is checked.
+function itemResolver(master) {
+  if (!master.medal && !master.material) return null;
+  const medalIds = new Set((master.medal || []).map((m) => m.medalId)), materialIds = new Set((master.material || []).map((m) => m.materialId));
+  const byName = new Map();
+  for (const m of master.medal || []) {
+    const k = `${m.name}|${m.rare}`;
+    if (!byName.has(k)) byName.set(k, []);
+    byName.get(k).push(m);
+  }
+  const medal = (d) => {
+    if (medalIds.has(d.id)) return d.id;
+    const mt = /^(.*) (\d+)★$/.exec(String(d.name || ''));
+    if (!mt) return null;
+    let rows = byName.get(`${mt[1]}|${mt[2]}`) || [];
+    if (rows.length > 1) rows = rows.filter((m) => m.medalId === m.imageId);
+    return rows.length === 1 ? rows[0].medalId : null;
+  };
+  return (d, missing) => {
+    if (!d || (d.type !== 3 && d.type !== 5)) return d;
+    let id = d.id;
+    if (d.type === 3 && master.medal) id = medal(d);
+    else if (d.type === 5 && master.material) id = materialIds.has(d.id) ? d.id : null;
+    if (id === null) { missing.push(`type ${d.type} id ${d.id}${d.name ? ` (${d.name})` : ''}`); return d; }
+    return id === d.id ? d : { ...d, id };
+  };
+}
+// copy of the quest with our item ids in its first-clear items, objective rewards and drop rows
+function remapItems(q, resolve) {
+  const missing = [];
+  const c = JSON.parse(JSON.stringify(q));
+  c.firstClear = (c.firstClear || []).map((x) => resolve(x, missing));
+  c.objectives = (c.objectives || []).map((o) => (o.reward ? { ...o, reward: resolve(o.reward, missing) } : o));
+  if (c.drops) {
+    c.drops.enemies = (c.drops.enemies || []).map((e) => ({ ...e, rows: (e.rows || []).map((r) => resolve(r, missing)) }));
+    c.drops.chests = (c.drops.chests || []).map((e) => ({ ...e, rows: (e.rows || []).map((r) => resolve(r, missing)) }));
+  }
+  return { q: c, missing: [...new Set(missing)] };
+}
+
 // records, config (event_config.json), master {stage, evStage, enemy, reward?} without our own rows, ids (event_ids.json), anchors,
 // maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}} of import_event_stages.py)
 // -> {evStage, stage, reward, poi, maps, ids, index: {entries, reasons}}
@@ -226,19 +282,32 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
   // map key -> a stage row of the master that loads it (stageBinId, or its own id when the bin is 0)
   const byMap = new Map();
   for (const s of master.stage || []) byMap.set(s.stageBinId || s.stageId, s);
-  const only = Array.isArray(config.onlyCensusIds) ? new Set(config.onlyCensusIds) : null;
-  const out = { evStage: [], stage: [], reward: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, index: { entries: [], reasons: {} } };
+  const selected = selector(config);
+  const resolveItem = itemResolver(master);
+  const reasonText = config.reasonText || {};
+  const textOf = (r) => { if (!reasonText[r]) throw new Error(`events: reason ${r} has no reasonText in event_config.json`); return reasonText[r]; };
+  const out = { evStage: [], stage: [], reward: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, skipped: [], index: { entries: [], reasons: {} } };
   const used = new Set();
   const builtMaps = new Map(); // map key -> our stage id built on it in this run
 
   for (const rec of records) {
-    if (only && !only.has(rec.censusId)) continue;
+    if (!selected(rec)) { out.skipped.push({ censusId: rec.censusId, reason: 'notSelected' }); continue; }
     const evStageId = config.evStageBase + allIds.rows[rec.censusId];
     const donorTypes = [...new Set((rec.evStage || []).map((r) => r.eventType))];
     const entry = { censusId: rec.censusId, evStageId, name: rec.name, type: rec.type, start: rec.start, end: rec.end, stageIds: [], useAp: null, label: 'original', labels: [],
       noticeIds: rec.notices || [], banner: `/web/event/img/v${config.imgVersion}/${evStageId}.png`, origEventType: donorTypes.length === 1 ? donorTypes[0] : donorTypes,
       eventType: donorTypes.length === 1 && Number.isInteger(donorTypes[0]) && donorTypes[0] !== 2 ? donorTypes[0] : config.eventType,
       available: false, why: null, quests: [] };
+    if (rec.sharedWith) entry.sharedWith = rec.sharedWith;
+    if (rec.noQuests) entry.noQuests = rec.noQuests;
+    // a record that builds no quest of its own: noQuests (board, coin, undated), a shared notice (built with the other row), no date
+    const noBuild = rec.noQuests || (rec.sharedWith ? 'shared' : (!rec.start ? 'undated' : null));
+    if (noBuild) {
+      entry.reason = noBuild;
+      entry.why = textOf(noBuild);
+      out.index.entries.push(entry);
+      continue;
+    }
     const labels = new Set();
     // short windows of the donor rows: open the whole Pacific day
     const shortDays = new Set();
@@ -263,15 +332,23 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       const qLabels = labelIds(q0.label, config.labelPhrases);
       const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(mapKey)], names);
       if (swapped) qLabels.push('wwEnemy');
-      const q = swapped || q0;
+      let q = swapped || q0;
+      const wiki = qLabels.includes('wikiQuest');
       const item = { key, donorStageId: q.stageId, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       entry.quests.push(item);
       qLabels.forEach((l) => used.add(l));
       if (raidish) { item.why = 'raid or Special quest'; continue; }
-      const missing = enemyIdsOf(q).filter((id) => !enemies.has(id));
+      // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
+      if (wiki && (!Number.isInteger(mapKey) || !(q.enemies || []).some((e) => Number.isInteger(e.id)))) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
+      const missing = enemyIdsOf(q).filter((id) => Number.isInteger(id) && !enemies.has(id));
       if (missing.length) { item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
+      if (resolveItem) {
+        const r = remapItems(q, resolveItem);
+        if (r.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${r.missing.join('; ')})`; continue; }
+        q = r.q;
+      }
       const clash = byMap.get(mapKey);
       if (clash) { item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
       if (builtMaps.has(mapKey)) { item.why = `map key ${mapKey} is the map of event stage ${builtMaps.get(mapKey)} too`; continue; }
@@ -320,7 +397,11 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if ((q.objectives || []).some((o) => (o.reward || {}).type === COIN_TYPE)) labels.add('eventCoins');
     }
     if (raidish) entry.why = `raid or Special ${raidish}: served by make-raid / make-special`;
-    else if (!entry.stageIds.length) entry.why = `no quest served yet (${entry.quests.length} ${NOT_SERVED})`;
+    else if (!entry.stageIds.length) {
+      entry.why = `no quest served yet (${entry.quests.length} ${NOT_SERVED})`;
+      const rs = [...new Set(entry.quests.map((x) => x.reason))];
+      if (entry.quests.length && rs.length === 1 && rs[0]) { entry.reason = rs[0]; entry.why = textOf(rs[0]); }
+    }
     else {
       // Details of the card: the original notice of the event (event-pages.js noticePage; «not available» without its text)
       const row = evStageRow(evStageId, entry.stageIds, { eventType: entry.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${evStageId}` : '' });
@@ -335,6 +416,12 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     entry.labels.forEach((l) => used.add(l));
     out.index.entries.push(entry);
   }
+  // shared notices: the stage rows of the row they share (built once), no evStage row of their own
+  for (const e of out.index.entries) {
+    if (!e.sharedWith) continue;
+    const target = out.index.entries.find((x) => x.censusId === e.sharedWith);
+    if (target) Object.assign(e, { stageIds: [...target.stageIds], useAp: target.useAp, sharedEvStageId: target.evStageId });
+  }
   // Event Catalog banner (Task 5): as the Raid Catalog banner of make-raid.js (CATALOG_EV), an evStage holding the Training
   // Grounds of the Special Catalog (our own quest, no Lux, no drops: a tap always opens the banner's quest list), eventType 0,
   // Details -> the catalogue. Kept apart from the event rows; emitted only when that stage row is in the master.
@@ -347,6 +434,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     out.catalogEvStage = row;
     out.index.catalog = { evStageId: config.catalogEvStage, stageIds: [config.catalogStage], useAp: [Number(training.useAp) || 0] };
   }
+  for (const e of out.index.entries) if (e.reason && !REASONS.includes(e.reason)) throw new Error(`events: unknown reason ${e.reason}`);
   for (const l of [...used].sort()) {
     const why = (config.reconstructedWhy || {})[l];
     if (!why) throw new Error(`events: label ${l} has no reconstructedWhy text in event_config.json`);
@@ -382,6 +470,24 @@ function loadMaps(dir) {
   if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {} }; }
   return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '' }])), poi: readJson(path.join(dir, 'stage_poi_events.json'), {}) };
 }
+// The records: a file (a list of records) or a folder (every *.json except the anchors file, sorted by name, concatenated).
+// The anchors sidecar is next to the file, or inside the folder.
+function readRecords(src) {
+  const files = fs.statSync(src).isDirectory()
+    ? fs.readdirSync(src).filter((f) => f.endsWith('.json') && f !== ANCHORS_NAME).sort().map((f) => path.join(src, f)) : [src];
+  const out = [], seen = new Set();
+  for (const f of files) {
+    const list = readJson(f);
+    if (!Array.isArray(list)) throw new Error(`events: ${f} is not a list of records`);
+    for (const r of list) {
+      if (r.censusId && seen.has(r.censusId)) throw new Error(`events: record ${r.censusId} is given twice (${f})`);
+      seen.add(r.censusId);
+      out.push(r);
+    }
+  }
+  return out;
+}
+const anchorsPathOf = (src) => path.join(fs.existsSync(src) && fs.statSync(src).isDirectory() ? src : path.dirname(src), ANCHORS_NAME);
 const loadConfig = () => JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8'));
 
 // Appends the rows to the master tables and writes game_data/events.json and event_maps.json. Returns null (nothing written)
@@ -395,8 +501,7 @@ function patch(masterDir, opts = {}) {
   if (!records) {
     const src = process.env.KHUX_EVENT_SRC;
     if (!src) { console.warn('events: skipped, KHUX_EVENT_SRC not set (the private event quest records): no event rows'); return null; }
-    try { records = readJson(src); } catch (e) { console.warn(`events: skipped, ${e.message}: no event rows`); return null; }
-    if (!Array.isArray(records)) { console.warn(`events: skipped, ${src} is not a list of records: no event rows`); return null; }
+    try { records = readRecords(src); } catch (e) { console.warn(`events: skipped, ${e.message}: no event rows`); return null; }
   }
   const gameData = opts.gameDataDir || path.join(__dirname, 'game_data');
   const prev = readJson(path.join(gameData, 'events.json'), {}).own || {};
@@ -406,10 +511,11 @@ function patch(masterDir, opts = {}) {
     return readJson(path.join(masterDir, `${table}.json`), dflt).filter((r) => !mine.has(r[keyOf[table]]));
   };
   const hadReward = fs.existsSync(path.join(masterDir, 'reward.json'));
-  const master = { stage: load('stage'), evStage: load('evStage'), reward: load('reward', []), enemy: readJson(path.join(masterDir, 'enemy.json')) };
+  const master = { stage: load('stage'), evStage: load('evStage'), reward: load('reward', []), enemy: readJson(path.join(masterDir, 'enemy.json')),
+    medal: readJson(path.join(masterDir, 'medal.json'), null), material: readJson(path.join(masterDir, 'material.json'), null) };
   const idsFile = opts.idsFile || IDS_FILE;
   // the anchors sidecar: next to the records (private), or opts.anchorsFile; records given in opts without a file: game_data
-  const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : path.join(path.dirname(process.env.KHUX_EVENT_SRC), ANCHORS_NAME));
+  const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : anchorsPathOf(process.env.KHUX_EVENT_SRC));
   const config = opts.config || loadConfig();
   const maps = opts.maps !== undefined ? opts.maps : (opts.records ? null : loadMaps(MAPS_DIR));
   const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps);
@@ -436,6 +542,11 @@ function patch(masterDir, opts = {}) {
   const e = out.index.entries, qs = e.flatMap((x) => x.quests);
   console.log(`events: ${e.length} entries, ${e.filter((x) => x.available).length} with a served quest; ${qs.filter((q) => q.served).length} of ${qs.length} quests served, `
     + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage, +${out.reward.length} reward, ${own.poi.length} POI keys`);
+  const byReason = {};
+  for (const q of qs.filter((x) => !x.served)) byReason[q.reason || 'other'] = (byReason[q.reason || 'other'] || 0) + 1;
+  const entryReasons = {};
+  for (const x of e) if (x.reason) entryReasons[x.reason] = (entryReasons[x.reason] || 0) + 1;
+  console.log(`events: quests not served by reason ${JSON.stringify(byReason)}; entries by reason ${JSON.stringify(entryReasons)}; ${out.skipped.length} records not selected`);
   const skipped = e.filter((x) => !x.available).map((x) => `${x.censusId} (${x.why})`);
   if (skipped.length) console.log(`events: no evStage row: ${skipped.join(', ')}`);
   if (!out.catalogEvStage) console.warn(`events: no Event Catalog banner: the Training Grounds stage ${config.catalogStage} is not in the master (make-special first)`);
@@ -444,4 +555,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, allocateIds, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };
+module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };
