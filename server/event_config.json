@@ -22,7 +22,12 @@
   "undated": "The original start date of this event is not known, so it cannot be placed in the calendar and is not listed.",
   "wikiEmpty": "The khuxwiki page of this quest gives no map or no enemy we can identify, so it cannot be rebuilt yet.",
   "rewardItemMissing": "A reward of this quest (a medal or a material) does not exist in our game data yet, so the quest is not served.",
-  "notSelected": "Not part of the events served so far."
+  "notSelected": "Not part of the events served so far.",
+  "enemyMissing": "An enemy of this quest is not in our game data yet (its model has to be found first), so the quest is not served: enemies are never replaced by another one.",
+  "mapUnusable": "The original map of this quest cannot be used yet (a file or a room is missing), so the quest is not served.",
+  "mapKeyUsed": "The map of this quest is already used by another quest of the events, so it cannot be built a second time.",
+  "rewardRowsMissing": "The reward rows of the enemies or chests on the map of this quest are not known yet, so the quest is not served.",
+  "raidSpecial": "This quest is a raid or Special stage, served by its own generator."
  },
  "labelPhrases": {
   "wikiQuest": "wikiQuest",
