@@ -48,7 +48,8 @@ const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy'];
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
-const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected'];
+const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
+  'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial'];
 const COIN_TYPE = 15;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -344,24 +345,24 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       entry.quests.push(item);
       qLabels.forEach((l) => used.add(l));
-      if (raidish) { item.why = 'raid or Special quest'; continue; }
+      if (raidish) { item.reason = 'raidSpecial'; item.why = 'raid or Special quest'; continue; }
       // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
       if (wiki && (!Number.isInteger(mapKey) || !(q.enemies || []).some((e) => Number.isInteger(e.id)))) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
       const missing = enemyIdsOf(q).filter((id) => (wiki ? Number.isInteger(id) : true) && !enemies.has(id));
-      if (missing.length) { item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
+      if (missing.length) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
       if (resolveItem) {
         const r = remapItems(q, resolveItem);
         if (r.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${r.missing.join('; ')})`; continue; }
         q = r.q;
       }
       const clash = byMap.get(mapKey);
-      if (clash) { item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
+      if (clash) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
       // difficulty variants of one record share a donor map (same stageBinId, map and POI written once: the POI holds only the
       // uid -> reward rows of the map file, the level of a variant is its stage row's addLevel); another record or other drops: not served
       const prior = builtMaps.get(mapKey);
-      if (prior && prior.censusId !== rec.censusId) { item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
+      if (prior && prior.censusId !== rec.censusId) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
       const dropsKey = JSON.stringify(q.drops || null);
-      if (prior && prior.dropsKey !== dropsKey) { item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
+      if (prior && prior.dropsKey !== dropsKey) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
@@ -371,7 +372,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (maps) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
         const st = maps.status.get(mapKey);
-        if (!st || st.status !== 'imported') { item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
+        if (!st || st.status !== 'imported') { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
         // reward rows of the map's enemies and chests: the master's, or the original rows of the record's drops (written here); else not served
         const known = dropRows(q), missing = [];
         for (const r of poiRewards(maps.poi[String(mapKey)] || {})) {
@@ -382,7 +383,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
           if (own && own.key !== d.key) { missing.push(r); continue; }
           if (!own) newRewards.push([r, d]);
         }
-        if (missing.length) { item.why = mapItem.why = `reward rows missing: ${missing.join(', ')}`; continue; }
+        if (missing.length) { item.reason = 'rewardRowsMissing'; item.why = mapItem.why = `reward rows missing: ${missing.join(', ')}`; continue; }
         for (const [r, d] of newRewards) { const row = rewardRowOf(r, d.rows); ownRewards.set(r, { row, key: d.key }); out.reward.push(row); }
         out.poi[String(mapKey)] = maps.poi[String(mapKey)];
       }

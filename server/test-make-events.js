@@ -524,6 +524,20 @@ const tests = {
     const wq = quest(700901, 1, [501], { label: 'wikiQuest', targets: [{ id: null, name: 'X' }] });
     assert.ok(entry(build([record('X-2', [wq], { type: 'GEM' })]), 'X-2').quests[0].served);
   },
+  quest_reason_codes() {
+    // every not-served quest has its own reason code, with a reasonText in event_config.json
+    for (const k of ['enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial']) assert.ok(REAL_CONFIG.reasonText[k] && REAL_CONFIG.reasonText[k].length > 10, k);
+    const bad = quest(701000, 1, [501], { targets: [{ id: null, name: 'X' }] });
+    const q = entry(build([record('R-1', [bad], { type: 'GEM' })]), 'R-1').quests[0];
+    assert.strictEqual(q.reason, 'enemyMissing');
+    assert.match(q.why, /^enemies not in the master/);
+    const maps = { status: new Map([[701011, { status: 'skipped', why: 'rooms not served' }]]), poi: {} };
+    const m1 = quest(701010, 1, [501], { map: { key: 701011, status: 'ok' } });
+    const o2 = me.buildEvents([record('R-2', [m1], { type: 'GEM' })], CONFIG, master(), undefined, undefined, maps);
+    assert.strictEqual(entry(o2, 'R-2').quests[0].reason, 'mapUnusable');
+    const o3 = build([record('R-3', [quest(701020, 1, [501])], { type: 'GEM' }), record('R-4', [quest(701020, 1, [501])], { type: 'GEM' })]);
+    assert.strictEqual(entry(o3, 'R-4').quests[0].reason, 'mapKeyUsed');
+  },
   shared_target_checked() {
     assert.throws(() => build([record('S-9', [], { type: 'GEM', sharedWith: 'S-0' })]), /S-0.*not in the records/);
     const warn = console.warn; const seen = [];
