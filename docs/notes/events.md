@@ -235,3 +235,12 @@ Dark-Winged Warrior 1/12 (stage 4000030 on map 734910, Powerwild LV 100, AP 5):
 - Pre-existing test failures on HEAD 98e60b1 (same without the fix, to check in the final review): test-enemy-attack, test-enemy-mechanics,
   test-enemy-oltre, test-enemy-start-state, test-medal-renumber, test-raid-routes, test-special-server, test-trait-medals; test-keyblades
   runs over 300 s.
+
+## Weekly gem quests of 2017-09..2018-02 (Events Part 2, Task 4)
+
+The 22 weekly gem quests and the Moon Gem Cup of 11 Jan 2018 (EV-0367) have no donor evStage row, but the donor stage table holds
+the same quest in a later run (`No Continues: Weekly Gem`, stages in order of the weeks) with its JP 4.3.1 map. The private builder
+accepts a stage only when its map has exactly the enemy names and counts of the khuxwiki page and the same target; the quest then
+takes AP, gem, objectives and world from the wiki page and the map, level (999) and Moogle 6★ reward from that stage row (label
+`laterRun`). They keep their `w1` keys of event_ids.json. A quest is served only when its map is imported and all its enemies
+are in the master (no substitute): 9 of 23 are served today. The Almighty Challenge (EV-0417) has no map in any source: not served (`wikiEmpty`).
