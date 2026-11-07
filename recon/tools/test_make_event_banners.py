@@ -79,11 +79,34 @@ try:
     assert d2[20003] == 'hand.png' and d2[20001] == '51518_9c3xN7ln4R.png' and m2 == [(20004, 'EV-D')], (d2, m2)
     assert Image.open(os.path.join(t, 'o3', '20003.png')).size == (640, 140)
     assert meb.build(index, notices, dest, os.path.join(t, 'o2'), {20002})[0] == {20002: '51523_9cbFN5Ie4.png'}
+    # one card per original evStage row (Part 2 Task 5): each built row from its donor banner key (fetched as row_<key>.png, a
+    # file of that key already in the folder or in notices_extra is reused); the row key wins over extra and the notice
+    rindex = {'entries': [{'censusId': 'EV-R', 'evStageId': 20001, 'noticeIds': [51518], 'rows': [
+        {'evStageId': 20001, 'bannerKey': 'rowK1', 'available': True}, {'evStageId': 20051, 'bannerKey': 'rowK2', 'available': True},
+        {'evStageId': 20052, 'bannerKey': 'rowK3', 'available': False}, {'evStageId': 20053, 'bannerKey': None, 'available': True}]},
+        {'censusId': 'EV-W', 'evStageId': 20003, 'noticeIds': [52000], 'rows': [{'evStageId': 20003, 'bannerKey': None, 'available': True}]}]}
+    assert meb.card_ids(rindex) == [20001, 20051, 20053, 20003], meb.card_ids(rindex)
+    wr = meb.wanted_rows(rindex)
+    assert wr == [(20001, None, 'rowK1'), (20051, None, 'rowK2')], wr
+    os.makedirs(os.path.join(dest, 'notices_extra'), exist_ok=True)
+    open(os.path.join(dest, 'notices_extra', '777_rowK2.png'), 'wb').write(png((640, 140), (4, 5, 6)))
+    calls.clear()
+    fr, cr, flr, _ = meb.fetch(wr, dest, get_ok, sleep=lambda s: None)
+    assert fr == ['row_rowK1.png'] and cr == ['notices_extra/777_rowK2.png'] and not flr, (fr, cr, flr)
+    assert calls == ['https://img.example/img/rowK1'], calls
+    d5, m5 = meb.build(rindex, notices, dest, os.path.join(t, 'o5'), None, {'20001': 'hand.png', '20053': 'hand.png', '20003': 'hand.png'})
+    assert d5 == {20001: 'row_rowK1.png', 20051: 'notices_extra/777_rowK2.png', 20053: 'hand.png', 20003: 'hand.png'}, d5
+    assert not m5 and not os.path.exists(os.path.join(t, 'o5', '20052.png')), m5
+    d6, m6 = meb.build(rindex, notices, dest, os.path.join(t, 'o6'))
+    assert 20053 not in d6 and (20053, 'EV-R') in m6, 'a new row without key or extra: no card (never the notice image of another row)'
+    assert 20003 not in d6, 'no notice banner, no extra: no card'
     # --section event: the Event Catalog banner 20000 (own design) and a KEPT EVENT copy of every card
     assert msb.EVENT_KEPT_TEXT == 'KEPT EVENT' and msb.EVENT_CATALOG_TITLE == 'EVENT CATALOG'
     Image.new('RGB', (640, 140), (200, 0, 0)).save(os.path.join(out, '20000.png'))   # an old catalog banner
     Image.new('RGB', (640, 140), (0, 0, 200)).save(os.path.join(out, '29999.png'))   # a stray numeric png, no event
     assert [os.path.basename(p) for p in msb.event_cards(index, out)] == ['20001.png', '20002.png'], 'cards of events.json only'
+    Image.new('RGB', (640, 140), (0, 200, 0)).save(os.path.join(out, '20051.png'))
+    assert [os.path.basename(p) for p in msb.event_cards(rindex, out)] == ['20001.png', '20051.png'], 'the row cards too'
     coin = os.path.join(t, 'coin.png')
     Image.new('RGBA', (86, 86), (200, 200, 230, 255)).save(coin)
     red = Image.new('RGB', (640, 140), (230, 0, 0))

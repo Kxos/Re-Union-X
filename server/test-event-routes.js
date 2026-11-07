@@ -92,6 +92,25 @@ const tests = {
     w.ev.onStageClear(S3, [1]);
     assert.deepStrictEqual(w.player.events, { kept: null, cleared: { [S3]: [1] } });
   },
+  // one card per original evStage row (Part 2 Task 5): own eventStageId, card, eventType and quests; the kept event as well
+  cards_per_row() {
+    const ix = INDEX();
+    Object.assign(ix.entries[0], { rows: [{ evStageId: 29901, start: '2019-04-01', end: '2019-04-14', eventType: 1, stageIds: [S1], available: true },
+      { evStageId: 29911, start: '2019-04-08', end: '2019-04-10', eventType: 3, stageIds: [S2], available: true },
+      { evStageId: 29912, start: '2019-04-01', end: '2019-04-14', eventType: 3, stageIds: [], available: false }] });
+    Object.assign(ix.entries[2], { rows: [{ evStageId: 29900, start: '2019-03-01', end: '2019-03-03', stageIds: [], available: false },
+      { evStageId: 29920, start: '2019-03-01', end: '2019-03-07', eventType: 3, stageIds: [PAST], available: true }] });
+    const w = world({ index: ix });
+    const list = w.ev.events();
+    assert.deepStrictEqual(list.map((e) => [e.eventStageId, e.eventType, e.stages.map((s) => s.stageId)]), [[29901, 1, [S1]], [29911, 3, [S2]], [29902, 1, [S3]]]);
+    assert.strictEqual(list[1].bannerUrl, `http://x/web/event/img/v${EVENT_IMG_VERSION}/29911.png`);
+    // keep by the entry id or by a row id: the kept event, one KEPT card per built row
+    assert.deepStrictEqual(w.ev.keep(29920), { code: 200, body: { ok: true } });
+    assert.strictEqual(w.player.events.kept, 'E-0');
+    const k = w.ev.events()[0];
+    assert.deepStrictEqual([k.eventStageId, k.bannerUrl, k.stages.map((s) => s.stageId)], [29920, `http://x/web/event/img/v${EVENT_IMG_VERSION}/29920-kept.png`, [PAST]]);
+    assert.deepStrictEqual(w.ev.keep(29911), { code: 409, body: { ok: false, why: 'now' } });
+  },
   // crown: every listed quest with its objectives 1..min(3, validSubmission) done
   complete_crown() {
     const w = world();

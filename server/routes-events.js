@@ -90,16 +90,22 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     const c = catalogCtx(realMs), e = c.kept && entryOf(c.kept);
     return e && calendar.listable(e) && rowState(e, c) === 'kept' ? e : null;
   }
-  // the kept event's open quests: its dates are past, so `days` (entry or quest) are read as real weekdays (Pacific)
-  function keptQuests(e, realMs) {
+  // the kept event's open cards, one per built row (Part 2 Task 5): its dates are past, so `days` (row or quest) are read as real
+  // weekdays (Pacific). [{row, quests}]
+  function keptCards(e, realMs) {
     const wd = ptWeekday(realMs);
     const onDay = (ds) => !Array.isArray(ds) || !ds.length || ds.some((d) => weekdayOf(d) === wd);
-    return onDay(e.days) ? (e.quests || []).filter((q) => q.served && onDay(q.days)) : [];
+    return calendar.builtRows(e).map((row) => {
+      const ids = new Set(row.stageIds || []);
+      return { row, quests: onDay(row.days) ? (e.quests || []).filter((q) => q.served && ids.has(q.stageId) && onDay(q.days)) : [] };
+    }).filter((c) => c.quests.length);
   }
+  // an entry by its id or by the id of one of its rows (the Details and Keep buttons of a row card)
+  const entryById = (id) => entries().find((x) => x.evStageId === id || (x.rows || []).some((r) => r.evStageId === id));
   // POST /web/event/keep/<evStageId> and /web/event/unkeep (Task 5 buttons): {code, body {ok, why?}}. Only a past event with a
   // served quest can be kept (else why: now, other, later, removed); keeping one replaces the previous.
   function keep(evStageId) {
-    const id = Number(evStageId), e = entries().find((x) => x.evStageId === id);
+    const id = Number(evStageId), e = entryById(id);
     if (!e) return { code: 404, body: { ok: false, why: 'unknown event' } };
     const st = calendar.listable(e) ? rowState(e, { ...catalogCtx(), kept: null }) : 'removed';
     if (st !== 'can') return { code: 409, body: { ok: false, why: st } };
@@ -114,8 +120,8 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     return { code: 200, body: { ok: true } };
   }
 
-  // /stage/event category 2, after the raids: the kept event (its card with the KEPT tab), then one card per event of the week with
-  // its open served quests. endTime: the end of the real day when the entry or one of its open quests has days (a short-window
+  // /stage/event category 2, after the raids: the kept event (its cards with the KEPT tab), then one card per built original
+  // evStage row (Part 2 Task 5: own eventStageId, card, eventType) of the events of the week, with its open served quests. endTime: the end of the real day when the entry or one of its open quests has days (a short-window
   // event or quest; `days: []` is no days), else of the real week (as the raids).
   function events(realMs = realNow()) {
     const cleared = view().cleared || {};
@@ -125,25 +131,25 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     };
     const objectives = (id) => Math.min(3, (stageRow(id) || {}).validSubmission || 0);
     const hasDays = (x) => Array.isArray(x.days) && x.days.length > 0;
-    const card = (e, quests, kept = false) => {
+    const card = (e, row, quests, kept = false) => {
       const stages = quests.map(stageOf);
       return {
         stages,
-        eventStageId: e.evStageId,
+        eventStageId: row.evStageId,
         showIcon: 1,
-        bannerUrl: `${webBase}/web/event/img/v${EVENT_IMG_VERSION}/${e.evStageId}${kept ? '-kept' : ''}.png`,
-        eventType: Number.isInteger(e.eventType) ? e.eventType : EVENT_TYPE,
+        bannerUrl: `${webBase}/web/event/img/v${EVENT_IMG_VERSION}/${row.evStageId}${kept ? '-kept' : ''}.png`,
+        eventType: Number.isInteger(row.eventType) ? row.eventType : Number.isInteger(e.eventType) ? e.eventType : EVENT_TYPE,
         status: 1,
-        endTime: serverTimeAt(hasDays(e) || quests.some(hasDays) ? clock.dayEnd(realMs) : clock.weekEnd(realMs)),
+        endTime: serverTimeAt(hasDays(row) || quests.some(hasDays) ? clock.dayEnd(realMs) : clock.weekEnd(realMs)),
         newStageId: 0,
         isLock: 0,
         // crown (as the Special tab): every quest with its objectives 1..min(3, validSubmission) done
         complete: stages.length && stages.every((s) => special.stageDone(s, objectives(s.stageId))) ? 1 : 0,
       };
     };
-    const kept = keptEntry(realMs), keptList = kept ? keptQuests(kept, realMs) : [];
-    const week = storyWeek();
-    return [...(keptList.length ? [card(kept, keptList, true)] : []), ...currentEntries(realMs).map((e) => card(e, calendar.openQuests(e, week, realMs)))];
+    const kept = keptEntry(realMs);
+    return [...(kept ? keptCards(kept, realMs).map((c) => card(kept, c.row, c.quests, true)) : []),
+      ...calendar.currentCards(eventIndex(), storyWeek(), realMs).map((c) => card(c.entry, c.row, c.quests))];
   }
 
   // The Event Catalog banner (index.catalog of make-events.js: eventType 0, Details -> /web/event/catalog, a tap opens its Training

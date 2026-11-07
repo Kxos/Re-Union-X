@@ -274,3 +274,28 @@ are in the master (no substitute): 9 of 23 are served today. The Almighty Challe
   enhanceAttack/enhanceDefense 1000; cost/minCost 999 like the siblings) only when `medal_gen\files\img\medal\Medal_L/S_90346`
   exist (master and package together); art from the Roboloid render (`fetch_medal_images.py`, `medal_map.json` 90346 -> 1796),
   no cut-in. Served with resources 107.
+
+## One card per original evStage row (Events Part 2, Task 5, 7 November 2026)
+
+User decision: the original event list showed one banner per original `evStage` row, so a record that bundles several donor
+rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countdown, the Daily Gem events) is no longer one card.
+
+- `make-events.js` builds one `evStage` row per donor row of the record with a served quest (`allocateRows`); a record with no
+  donor row (wiki-only, weekly 2017-18) keeps its single row. A quest goes to its donor row by its `evStageId`, else by the
+  row's stage list / range (`stageRange`, added to the private records by the builder from the donor table). A row whose
+  quests are all not served is not built; the raid / Special rule stays per record.
+- Ids: the record id (`event_ids.json` `rows`) stays on one donor row, frozen in the private sidecar as `<censusId>#row`: the
+  row whose banner was the record's card (migration of 7 Nov), else the first donor row. The other donor rows are numbered in
+  `subRows` (`<censusId>/r+<offset from that row>`, no donor id), same number space; quest stage ids never change.
+- Index (`events.json`, git-ignored): the catalogue keeps one entry per record (its id, notice, quests) with `rows`
+  [{evStageId, donorEvStageId, start, end, days?, eventType, origCategory, parentEventStageId, bannerKey, stageIds, available}];
+  each quest has the `evStageId` of its row. A row of a record with several rows has its own Pacific dates (a donor window past
+  the record end, as the category 1 rows until 2037, ends with the record; the entry widens to cover a row that starts
+  earlier); a single row keeps the record dates. Our rows keep `parentEventStageId` 0 (the donor value is only in the index:
+  some December 2019 rows are children of another row of their month; client effect untested, bench).
+- Routes: `/stage/event` lists one card per built row of the week (`event-calendar.js currentCards`: own dates, days and
+  quests; own `eventStageId`, card and `eventType`); the kept event lists one KEPT card per row. Keep, Details and the notice
+  page accept a row id (it opens its record). The details page lists the rows (card, dates, quests) under «Cards».
+- Cards: `make_event_banners.py` writes one card per card id (the entry id and every built row) from the row's donor banner key
+  (fetched as `row_<key>.png` into `reference\event_banners_ww`, or any `*_<key>.png` already there), else `--extra`, else for
+  the entry id its notice banner; `make_special_banners.py --section event` writes the KEPT copies of every card id.

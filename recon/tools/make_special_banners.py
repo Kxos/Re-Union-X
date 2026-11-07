@@ -713,15 +713,20 @@ def event_catalog_banner(coin=None, title=EVENT_CATALOG_TITLE, sub=EVENT_CATALOG
     return im
 
 
-def event_cards(index, event_img):
-    """the event cards of make_event_banners.py for the events of events.json (entries with an evStageId, index order),
-    the ones written only"""
+def event_card_ids(index):
+    """card ids of events.json in index order: each entry's id, then its built original evStage rows (rows, available; Part 2
+    Task 5: one card per row, as make_event_banners.card_ids)"""
     ids = []
     for e in index.get('entries', []):
-        ev = e.get('evStageId')
-        if ev and ev not in ids and os.path.exists(os.path.join(event_img, '%d.png' % ev)):
-            ids.append(ev)
-    return [os.path.join(event_img, '%d.png' % i) for i in ids]
+        for ev in [e.get('evStageId')] + [r.get('evStageId') for r in e.get('rows') or [] if r.get('available')]:
+            if ev and ev not in ids:
+                ids.append(ev)
+    return ids
+
+
+def event_cards(index, event_img):
+    """the event cards of make_event_banners.py for the card ids of events.json (event_card_ids), the ones written only"""
+    return [os.path.join(event_img, '%d.png' % i) for i in event_card_ids(index) if os.path.exists(os.path.join(event_img, '%d.png' % i))]
 
 
 def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
@@ -735,7 +740,7 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
     if catalog_ev:
         save_catalog(event_option(CATALOG_CHOICE['event'], coin), os.path.join(event_img, '%d.png' % catalog_ev))
         n['catalog'] += 1
-    for ev in sorted({e['evStageId'] for e in index.get('entries', []) if e.get('evStageId')}):
+    for ev in sorted(event_card_ids(index)):
         src = next((p for p in (os.path.join(event_img, '%d.png' % ev), os.path.join(event_img, '0.png')) if os.path.exists(p)), None)
         if not src:
             n['missing'] += 1

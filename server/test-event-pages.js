@@ -123,6 +123,21 @@ const tests = {
     assert.ok(lost.includes('Not restored yet') && lost.includes('Not served yet'));
   },
   // the shared parts are one module: the raid pages use it (no copy of the box, bands or notice card CSS)
+  // one card per original evStage row (Part 2 Task 5): the catalogue keeps one entry per record, its details page lists the rows
+  // (card, dates, quests) and the Details of a row card (its own id) open the record's notice and details
+  rows_listed() {
+    const ix = INDEX();
+    ix.entries[0].rows = [{ evStageId: 29900, start: '2019-03-01', end: '2019-03-07', stageIds: [4009904], quests: 1, available: true },
+      { evStageId: 29930, start: '2019-03-02', end: '2019-03-02', days: ['2019-03-02'], stageIds: [], quests: 1, available: false }];
+    const cat = pages.catalogPage(ix, ctx());
+    assert.strictEqual((cat.match(/class="row /g) || []).length, 4, 'one catalogue row per record');
+    assert.ok(!cat.includes('id="q29930"'));
+    const d = pages.detailPage(ix, 29900, ctx());
+    assert.ok(d.includes('<h2>Cards</h2>') && d.includes('/img/v1/29930.png') && d.includes('Mar 2, 2019'), 'the rows with card and dates');
+    assert.ok(/Not served yet/.test(d.slice(d.indexOf('<h2>Cards</h2>'))), 'a row without a served quest says so');
+    assert.ok(pages.detailPage(ix, 29930, ctx()).includes('<h1>March Fun</h1>'), 'a row id opens the record');
+    assert.ok(pages.noticePage(ix, 29930, DOC(), ctx()).includes(NOTICE_LINE), 'Details of a row card: the record notice');
+  },
   shared_parts_not_copied() {
     const src = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');
     for (const f of ['raid-pages.js', 'event-pages.js']) {

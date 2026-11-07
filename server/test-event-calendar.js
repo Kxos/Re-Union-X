@@ -61,6 +61,22 @@ const tests = {
     const daily = entry('E-6', '2019-04-01', '2019-04-07', { quests: [1, 2, 3].map((n) => quest(4000060 + n, { window: [`2019-04-0${n} 07:00:00`, `2019-04-0${n + 1} 06:59:59`] })) });
     assert.deepStrictEqual(cal.openQuests(daily, week('2019-04-01', '2019-04-07'), TUE).map((q) => q.stageId), [4000061, 4000062, 4000063]);
   },
+  // one card per original evStage row (Part 2 Task 5): each built row of an entry with its own dates, days and quests
+  rows_own_cards() {
+    const qs = [quest(4000071), quest(4000072), quest(4000073, { days: ['2019-04-10'] }), quest(4000074, { served: false })];
+    const e = entry('E-7', '2019-04-01', '2019-04-14', { stageIds: [4000071, 4000072, 4000073], quests: qs, rows: [
+      { evStageId: 20071, start: '2019-04-01', end: '2019-04-14', stageIds: [4000071], available: true },
+      { evStageId: 20072, start: '2019-04-08', end: '2019-04-14', stageIds: [4000072], available: true },
+      { evStageId: 20073, start: '2019-04-10', end: '2019-04-10', days: ['2019-04-10'], stageIds: [4000073], available: true },
+      { evStageId: 20074, start: '2019-04-01', end: '2019-04-07', stageIds: [], available: false }] });
+    const cards = (w, now) => cal.currentCards({ entries: [e] }, w, now).map((c) => [c.row.evStageId, c.quests.map((q) => q.stageId)]);
+    assert.deepStrictEqual(cards(week('2019-04-01', '2019-04-07'), WED), [[20071, [4000071]]], 'first week: the long row only');
+    assert.deepStrictEqual(cards(week('2019-04-08', '2019-04-14'), WED), [[20071, [4000071]], [20072, [4000072]], [20073, [4000073]]], 'its day (a Wednesday)');
+    assert.deepStrictEqual(cards(week('2019-04-08', '2019-04-14'), THU), [[20071, [4000071]], [20072, [4000072]]], 'not on another day');
+    assert.deepStrictEqual(ids(cal.currentEntries({ entries: [e] }, week('2019-04-01', '2019-04-07'), WED)), ['E-7']);
+    // an entry without rows (an index before Task 5): one card, the entry itself
+    assert.deepStrictEqual(cal.currentCards({ entries: [entry('E-1', '2019-04-01', '2019-04-07')] }, week('2019-04-01', '2019-04-07'), WED).map((c) => c.row.evStageId), [20001]);
+  },
 };
 
 let failed = 0;

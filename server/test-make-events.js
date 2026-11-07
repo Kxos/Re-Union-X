@@ -572,6 +572,80 @@ const tests = {
     assert.strictEqual(q2.reason, 'enemyMissing');
     assert.match(q2.why, /High Wizard \(no id\)/);
   },
+  // Part 2 Task 5 (user decision 07-11): the original event list showed one banner per original evStage row, so a record gets one
+  // evStage row per donor row with its own card (bannerKey), dates and quests (quest -> row: its evStageId, else the row's stage range)
+  rows_one_per_donor_row() {
+    const recs = [record('R-1', [quest(700101, 1, [501], { evStageId: 900011 }), quest(700102, 1, [501], { evStageId: 900011 }),
+      quest(700103, 2, [502], { evStageId: 900012, window: ['2019-04-01 07:00:00', '2019-04-03 06:59:59'] }), quest(700104, 1, [777])],
+    { type: 'GEM', evStage: [
+      donorEv({ eventStageId: 900011, eventType: 1, eventCategory: 2, bannerKey: 'kA', detailNoticeId: 11, stageRange: { validStageWidthId: 1, stageStartId: 700101, stageEndId: 700102 } }),
+      donorEv({ eventStageId: 900012, eventType: 3, eventCategory: 3, parentEventStageId: 900011, bannerKey: 'kB', startTime: '2019-04-01 07:00:00', endTime: '2019-04-03 06:59:59' }),
+      donorEv({ eventStageId: 900013, eventType: 2, eventCategory: 2, bannerKey: 'kC', stageRange: { validStageId: 1, stageId: [700104] } })] })];
+    const out = build(recs);
+    const e = entry(out, 'R-1');
+    const legacy = CONFIG.evStageBase + out.ids.rows['R-1'];
+    assert.strictEqual(e.evStageId, legacy, 'the catalogue entry keeps its id');
+    assert.deepStrictEqual(e.rows.map((r) => [r.donorEvStageId, r.bannerKey, r.available]), [[900011, 'kA', true], [900012, 'kB', true], [900013, 'kC', false]]);
+    assert.strictEqual(e.rows[0].evStageId, legacy, 'the first donor row holds the record id');
+    assert.ok(e.rows[1].evStageId > legacy && e.rows[2].evStageId > legacy, 'new rows: new ids');
+    assert.deepStrictEqual(out.evStage.map((r) => r.eventStageId), [e.rows[0].evStageId, e.rows[1].evStageId], 'one evStage row per built donor row; the unserved one not built');
+    const [r1, r2] = out.evStage;
+    assert.deepStrictEqual([r1.stageId, r2.stageId], [[e.quests[0].stageId, e.quests[1].stageId], [e.quests[2].stageId]], 'each row its own quests');
+    assert.deepStrictEqual([r1.eventType, r2.eventType], [1, 3], 'the donor eventType of each row');
+    assert.ok(r2.bannerUrl.endsWith(`/${e.rows[1].evStageId}.png`) && r2.detailUrl === `/web/event/notice/${e.rows[1].evStageId}`, 'own card and Details');
+    assert.deepStrictEqual([r1.parentEventStageId, r2.parentEventStageId], [0, 0], 'parentEventStageId 0 on our rows (the donor value stays in the index)');
+    assert.strictEqual(e.rows[1].parentEventStageId, 900011);
+    assert.deepStrictEqual([e.rows[0].start, e.rows[0].end, e.rows[1].start, e.rows[1].end], ['2019-04-01', '2019-04-07', '2019-04-01', '2019-04-02'], 'own dates (Pacific)');
+    assert.deepStrictEqual(e.quests.map((q) => q.evStageId), [e.rows[0].evStageId, e.rows[0].evStageId, e.rows[1].evStageId, e.rows[2].evStageId], 'quest -> row, by evStageId or stage range');
+    assert.deepStrictEqual(e.rows.map((r) => r.stageIds.length), [2, 1, 0]);
+    assert.deepStrictEqual(e.stageIds, [...r1.stageId, ...r2.stageId]);
+    assert.strictEqual(e.rows[2].eventType, 1, 'a raid-mode donor row (2) never gives eventType 2');
+    assert.ok(!JSON.stringify(out.ids).includes('9000'), 'no donor id in event_ids.json');
+    assert.deepStrictEqual(Object.keys(out.ids.subRows), ['R-1/r+1', 'R-1/r+2']);
+    assert.strictEqual(out.anchors['R-1#row'], 900011);
+    // a record without donor rows (wiki-only, weekly 2017-18): today's single row
+    const w = build([record('R-2', [quest(700120, 1, [501])], { type: 'GEM', evStage: [] })]);
+    assert.deepStrictEqual(w.evStage.map((r) => r.eventStageId), [entry(w, 'R-2').evStageId]);
+    assert.deepStrictEqual(entry(w, 'R-2').rows.map((r) => [r.evStageId, r.bannerKey]), [[entry(w, 'R-2').evStageId, null]]);
+  },
+  rows_ids_stable() {
+    // the record id stays on its first donor row (frozen in the sidecar), served or not; the sidecar may name the matching row instead
+    const mk = () => [record('R-3', [quest(700201, 1, [777], { evStageId: 900021 }), quest(700202, 1, [501], { evStageId: 900022 })],
+      { type: 'GEM', evStage: [donorEv({ eventStageId: 900021 }), donorEv({ eventStageId: 900022 })] })];
+    const a = build(mk());
+    const legacy = CONFIG.evStageBase + a.ids.rows['R-3'];
+    assert.strictEqual(a.anchors['R-3#row'], 900021);
+    assert.deepStrictEqual(entry(a, 'R-3').rows.map((r) => [r.evStageId, r.available]), [[legacy, false], [CONFIG.evStageBase + a.ids.subRows['R-3/r+1'], true]]);
+    assert.deepStrictEqual(a.evStage.map((r) => r.eventStageId), [CONFIG.evStageBase + a.ids.subRows['R-3/r+1']], 'only the served row is built');
+    // later the enemy lands: the first row is built under the record id, nothing renumbered, quest stage ids unchanged
+    const m = master();
+    m.enemy.push({ enemyId: 777 });
+    const b = build(mk(), a.ids, CONFIG, m, a.anchors);
+    assert.deepStrictEqual(b.ids, a.ids, 'nothing renumbered');
+    assert.deepStrictEqual(b.evStage.map((r) => r.eventStageId), [legacy, CONFIG.evStageBase + a.ids.subRows['R-3/r+1']]);
+    assert.deepStrictEqual(b.stage.map((s) => s.stageId).sort(), [entry(a, 'R-3').quests[0].stageId, entry(a, 'R-3').quests[1].stageId].sort(), 'quest stage ids unchanged');
+    // the sidecar names the matching row: the record id goes there, the first row gets a key of its own
+    const c = build(mk(), undefined, CONFIG, master(), { 'R-3#row': 900022 });
+    assert.deepStrictEqual(entry(c, 'R-3').rows.map((r) => r.evStageId), [CONFIG.evStageBase + c.ids.subRows['R-3/r-1'], CONFIG.evStageBase + c.ids.rows['R-3']]);
+    assert.deepStrictEqual(c.evStage.map((r) => r.eventStageId), [CONFIG.evStageBase + c.ids.rows['R-3']]);
+    // a stored donor row gone from the record stops the run; so does a sidecar row the record no longer has
+    const gone = mk();
+    gone[0].evStage = gone[0].evStage.slice(0, 1);
+    gone[0].quests[1].evStageId = 900021;
+    assert.throws(() => build(gone, a.ids, CONFIG, master(), a.anchors), /R-3\/r\+1/);
+    assert.throws(() => build(mk(), undefined, CONFIG, master(), { 'R-3#row': 900029 }), /not in the record any more/);
+    // numbers repeated between rows and subRows stop the run
+    assert.throws(() => build(mk(), { ...a.ids, subRows: { 'R-3/r+1': a.ids.rows['R-3'] } }, CONFIG, master(), a.anchors), /repeats/);
+  },
+  rows_window_capped() {
+    // a permanent category 1 row (until 2037) ends with the record; a row that starts before the record widens the entry
+    const rec = record('R-4', [quest(700301, 1, [501], { evStageId: 900031 }), quest(700302, 1, [501], { evStageId: 900032 })], { type: 'GEM', start: '2019-04-03', end: '2019-04-07',
+      evStage: [donorEv({ eventStageId: 900031, eventCategory: 1, startTime: '2019-04-01 07:00:00', endTime: '2037-12-31 11:59:59' }),
+        donorEv({ eventStageId: 900032, startTime: '2019-04-01 07:00:00', endTime: '2019-04-02 06:59:59' })] });
+    const e = entry(build([rec]), 'R-4');
+    assert.deepStrictEqual(e.rows.map((r) => [r.start, r.end]), [['2019-04-01', '2019-04-07'], ['2019-04-01', '2019-04-01']]);
+    assert.deepStrictEqual([e.start, e.end], ['2019-04-01', '2019-04-07']);
+  },
   no_source_writes_nothing() {
     const old = process.env.KHUX_EVENT_SRC;
     delete process.env.KHUX_EVENT_SRC;

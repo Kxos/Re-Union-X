@@ -10,7 +10,8 @@
 //   real weekday (Pacific) of a day of `days` that falls in the Shop week (calendar-util.weekDateAt), all day, closed the day
 //   after; a quest with days of its own opens only on them. Without a real clock (nowMs) a short-window event is never listed;
 // - a daily event (one quest per original day, 24 h windows, no `days`) is listed for its whole period with every served quest:
-//   no weekday restriction (ruling of 06-11, «whole original period unless the record says otherwise»).
+//   no weekday restriction (ruling of 06-11, «whole original period unless the record says otherwise»);
+// - one card per original evStage row of an entry (Part 2 Task 5, currentCards): a row is listed in the weeks its own dates overlap.
 'use strict';
 const { weekTo, weekDateAt } = require('./calendar-util');
 
@@ -28,12 +29,38 @@ function openQuests(entry, week = {}, nowMs) {
   return quests.filter((q) => !hasDays(q) || q.days.includes(today));
 }
 
-// The entries listed in the Shop week {shopFrom, shopTo} at the real moment nowMs, in index order
-function currentEntries(index, week = {}, nowMs) {
-  const { shopFrom } = week;
-  if (!shopFrom) return [];
-  const to = weekTo(week);
-  return ((index && index.entries) || []).filter((e) => listable(e) && e.start <= to && (e.end || e.start) >= shopFrom && openQuests(e, week, nowMs).length);
+// One card per original evStage row (Part 2 Task 5, make-events.js entry `rows`): the built rows of an entry, each with its own
+// dates, days and served quests; an entry without rows (an index before Task 5) is one row, the entry itself.
+const builtRows = (e) => (Array.isArray(e.rows) && e.rows.length
+  ? e.rows.filter((r) => r.available && (r.stageIds || []).length)
+  : [{ evStageId: e.evStageId, start: e.start, end: e.end, days: e.days, eventType: e.eventType, stageIds: e.stageIds || [] }]);
+// the served quests of one row of the entry open now (its days, then the quests' own days, as openQuests)
+function rowQuests(entry, row, week = {}, nowMs) {
+  const ids = new Set(row.stageIds || []);
+  return openQuests({ days: row.days, quests: ((entry && entry.quests) || []).filter((q) => ids.has(q.stageId)) }, week, nowMs);
 }
 
-module.exports = { currentEntries, openQuests, listable };
+// The cards listed in the Shop week {shopFrom, shopTo} at the real moment nowMs, in index and row order: [{entry, row, quests}]
+// for every built row whose dates overlap the week with an open quest
+function currentCards(index, week = {}, nowMs) {
+  const { shopFrom } = week;
+  if (!shopFrom) return [];
+  const to = weekTo(week), out = [];
+  for (const e of ((index && index.entries) || []).filter(listable)) {
+    for (const row of builtRows(e)) {
+      const start = row.start || e.start, end = row.end || row.start || e.end || e.start;
+      if (!start || start > to || end < shopFrom) continue;
+      const quests = rowQuests(e, row, week, nowMs);
+      if (quests.length) out.push({ entry: e, row, quests });
+    }
+  }
+  return out;
+}
+
+// The entries listed in the Shop week {shopFrom, shopTo} at the real moment nowMs (one card or more), in index order
+function currentEntries(index, week = {}, nowMs) {
+  const seen = new Set();
+  return currentCards(index, week, nowMs).map((c) => c.entry).filter((e) => !seen.has(e) && seen.add(e));
+}
+
+module.exports = { currentEntries, currentCards, openQuests, rowQuests, builtRows, listable };

@@ -73,6 +73,8 @@ const replacesLine = (st, kept) => (st.button === null ? ''
 const doneOf = (e, ctx) => !!ctx.stageDone && servedOf(e).length > 0 && servedOf(e).every((q) => ctx.stageDone(q.stageId));
 const entriesOf = (index) => ((index && index.entries) || []).filter((e) => e && e.censusId && e.evStageId && e.start)
   .slice().sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
+// an entry by its id or by the id of one of its original evStage rows (Part 2 Task 5: the Details of a row card)
+const entryOfId = (entries, id) => entries.find((x) => x.evStageId === id) || entries.find((x) => (x.rows || []).some((r) => r.evStageId === id));
 
 // ES5: a row opens its details page; after a keep / remove the kept row turns gold, the previous one back to «can be kept»
 const ROWS_JS = `(function(){var PILL=__PILL__;
@@ -149,7 +151,7 @@ const daysText = (days) => days.map(niceDay).join(', ');
 // Rebuilt values closed, quests not served yet, links), then the event and its quests (each served or «Not served yet» with the
 // reason in plain words). null = unknown id (404).
 function detailPage(index, evStageId, ctx = {}) {
-  const entries = entriesOf(index), e = entries.find((x) => x.evStageId === Number(evStageId));
+  const entries = entriesOf(index), e = entryOfId(entries, Number(evStageId));
   if (!e) return null;
   const st = statusOf(e, ctx), kept = keptOf(entries, ctx), title = e.name || e.censusId;
   const button = st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(){b.style.display=\'none\';})"')}</div>`;
@@ -163,6 +165,12 @@ function detailPage(index, evStageId, ctx = {}) {
     return `<tr><td>${esc(q.name || '')}${done ? CROWN : ''}${day}</td><td>${q.level ?? ''}</td><td>${q.ap ?? ''}</td>`
       + (q.served ? '<td>Served</td>' : `<td class="r">Not served yet<small>${esc(whyPlain(q.why))}</small></td>`) + '</tr>';
   }).join('');
+  // the original evStage rows of the event (Part 2 Task 5): one card each in the Events tab, with its own dates and quests
+  const rows = Array.isArray(e.rows) && e.rows.length > 1 ? e.rows : [];
+  const cards = rows.length ? `<h2>Cards</h2><p class="n">In the original game this event showed ${rows.length} cards in the Events tab, each with its own dates and quests.</p>`
+    + `<table class="tt"><tr><th>Card</th><th>Dates</th><th>Quests</th></tr>${rows.map((r) => `<tr><td>${r.evStageId ? `<img width="160" height="35" src="${imgOf(ctx, r.evStageId)}" alt="">` : ''}</td>`
+      + `<td>${esc(`${niceDay(r.start)}${r.end && r.end !== r.start ? ` – ${niceDay(r.end)}` : ''}`)}${Array.isArray(r.days) && r.days.length ? '<small>its whole day</small>' : ''}</td>`
+      + (r.available ? `<td>${esc(plural((r.stageIds || []).length, 'quest'))}</td>` : `<td class="r">Not served yet<small>${esc(plural(r.quests || 0, 'quest'))}</small></td>`) + '</tr>').join('')}</table>` : '';
   const back = ctx.fromCatalog ? backBar(`${BASE}/catalog#q${e.evStageId}`) : '';
   const notice = ctx.hasNotice && ctx.hasNotice(e.censusId) ? 'Original notice of this event ›' : '';
   const box = srvBox(e, st, index, { after: `<div id="pinmsg" class="pinmsg"></div>${replacesLine(st, kept)}${button}`,
@@ -171,7 +179,7 @@ function detailPage(index, evStageId, ctx = {}) {
   return PAGE_HEAD(title, CSS + DETAIL_CSS + EVENT_DETAIL_CSS + RULE_CSS + SRV_CSS + FOLD_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt="">${box}`
     + `<h2>Event</h2><table class="kv">${kv}</table>`
-    + `<h2>Quests</h2><table class="tt"><tr><th>Quest</th><th>LV</th><th>AP</th><th>Status</th></tr>${qRows}</table>`
+    + cards + `<h2>Quests</h2><table class="tt"><tr><th>Quest</th><th>LV</th><th>AP</th><th>Status</th></tr>${qRows}</table>`
     + `<p class="n">The Event Catalog is an addition of this server: in the original game an event was played only in its own dates.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }
 
@@ -197,7 +205,7 @@ function noticeMissing(e, ctx) {
 function noticePage(index, evStageId, doc, ctx = {}) {
   let e = null;
   try {
-    e = entriesOf(index).find((x) => x.evStageId === Number(evStageId)) || null;
+    e = entryOfId(entriesOf(index), Number(evStageId)) || null;
     const hit = e && doc && doc.rows ? doc.rows[e.censusId] : null;
     const notices = (hit && doc.notices ? hit.noticeIds || [] : []).map((id) => doc.notices[id]).filter((n) => n && Array.isArray(n.body));
     if (!notices.length) return noticeMissing(e, ctx);

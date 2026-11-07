@@ -8,8 +8,11 @@
 //   notices, evStage: [donor rows], quests: [{stageId, name, worldId, room, level, ap, addLevel, targets, objectives, combined,
 //   firstClear, drops, enemies: [{id, level, label, ...}], restrictions, drama, map: {key, stageBinId, status}, window, label}]}].
 // Rules:
-// - one evStage row per record: eventCategory of the config (2, proven by the raids); eventType = the donor's (origEventType, 1 or 3
-//   in the pilot), the config eventType (1) when the donor rows have none or disagree. Never 2: on the client eventType 2 is the
+// - one evStage row per ORIGINAL donor evStage row of the record with a served quest (Part 2 Task 5; a record without donor rows:
+//   one row): own id (allocateRows), card (/web/event/img/v<N>/<its id>.png, from the donor bannerKey: make_event_banners.py),
+//   dates (index entry `rows`) and quests (quest -> row by its evStageId or the row's stage range); parentEventStageId stays 0 on
+//   our rows (the donor value is in the index row only). eventCategory of the config (2, proven by the raids); eventType = the
+//   donor row's (1 or 3), the config eventType (1) when the donor row has none (the entry keeps the record-level value). Never 2: on the client eventType 2 is the
 //   raid mode and adds the «Raid Boards» button to the quest list, which original non-raid events never had (bench 07-11,
 //   reference/event_quest_screen); the value is written in the entry (eventType) for /stage/event. stageId capped at EVSTAGE_MAX_STAGES with the range (make-raid evStageRow);
 // - one stage row per served quest: copy of a story row of the quest's world (make-raid storyRefs), stageKind 2, the record's
@@ -109,12 +112,13 @@ const keysHash = (keys) => crypto.createHash('sha256').update([...keys].sort().j
 // Stops when a numbered record has no anchor (sidecar lost: re-anchoring could hand old numbers to other quests) or when the
 // keys of a numbered record no longer include every stored key (anchor changed, or a quest gone from the record).
 function allocateIds(records, ids, config, anchors = {}) {
-  const out = { ...(ids || {}), rows: { ...((ids || {}).rows || {}) }, entries: { ...((ids || {}).entries || {}) }, checks: { ...((ids || {}).checks || {}) } };
+  const out = { ...(ids || {}), rows: { ...((ids || {}).rows || {}) }, subRows: { ...((ids || {}).subRows || {}) }, entries: { ...((ids || {}).entries || {}) },
+    checks: { ...((ids || {}).checks || {}) } };
   const outAnchors = { ...(anchors || {}) };
   const maxRow = config.evStageMax - config.evStageBase, maxEntry = config.stageMax - config.stageBase;
-  checkNumbers(out.rows, 'row', maxRow);
+  checkNumbers({ ...out.rows, ...out.subRows }, 'row', maxRow);
   checkNumbers(out.entries, 'entry', maxEntry);
-  let nextRow = Math.max(0, ...Object.values(out.rows)) + 1, nextEntry = Math.max(0, ...Object.values(out.entries)) + 1;
+  let nextRow = Math.max(0, ...Object.values(out.rows), ...Object.values(out.subRows)) + 1, nextEntry = Math.max(0, ...Object.values(out.entries)) + 1;
   for (const rec of records) {
     if (!rec.censusId) throw new Error('events: a record has no censusId');
     const prefix = `${rec.censusId}/`;
@@ -142,9 +146,53 @@ function allocateIds(records, ids, config, anchors = {}) {
     for (const key of keys) if (!(key in out.entries)) out.entries[key] = nextEntry++;
     out.checks[rec.censusId] = { keys: keys.size, hash: keysHash(keys) };
   }
-  checkNumbers(out.rows, 'row', maxRow);
+  checkNumbers({ ...out.rows, ...out.subRows }, 'row', maxRow);
   checkNumbers(out.entries, 'entry', maxEntry);
   return { ids: out, anchors: outAnchors };
+}
+
+// One evStage row per ORIGINAL donor evStage row of a record (Part 2 Task 5, user decision 07-11: the original event list showed
+// one banner per row). The donor row that holds the record's number (event_ids.json rows) is frozen in the private sidecar as
+// «<censusId>#row» (its donor eventStageId) on the record's first row numbering: the first donor row (record order), unless the
+// sidecar already names the row matching the record (Task 5 migration: the row whose banner was the record's card). Every other donor row gets a number in event_ids.json subRows, key «<censusId>/r+<offset of its donor
+// eventStageId from that row>» (no donor id in the public file). A stored key the record no longer gives stops the run.
+const ROW_ANCHOR = (censusId) => `${censusId}#row`;
+const donorRowsOf = (rec) => (rec.evStage || []).filter((r) => Number.isInteger(r.eventStageId));
+function allocateRows(rec, ids, anchors, config) {
+  const rows = donorRowsOf(rec), cid = rec.censusId, ak = ROW_ANCHOR(cid);
+  const out = new Map();
+  if (!rows.length) return out;
+  // one donor row: it holds the record's number, nothing to freeze
+  if (rows.length === 1 && !(ak in anchors)) return out.set(rows[0].eventStageId, config.evStageBase + ids.rows[cid]);
+  if (!(ak in anchors)) anchors[ak] = rows[0].eventStageId;
+  const anchor = anchors[ak];
+  if (!rows.some((r) => r.eventStageId === anchor)) throw new Error(`events: ${cid}: the donor row that holds its evStage id (${ak} in event_anchors.json) is not in the record any more`);
+  const prefix = `${cid}/r`, keys = new Set();
+  let next = Math.max(0, ...Object.values(ids.rows), ...Object.values(ids.subRows)) + 1;
+  for (const r of rows) {
+    if (r.eventStageId === anchor) { out.set(r.eventStageId, config.evStageBase + ids.rows[cid]); continue; }
+    const d = r.eventStageId - anchor, key = `${prefix}${d < 0 ? '-' : '+'}${Math.abs(d)}`;
+    if (keys.has(key)) throw new Error(`events: two donor rows give the key ${key}`);
+    keys.add(key);
+    if (!(key in ids.subRows)) ids.subRows[key] = next++;
+    out.set(r.eventStageId, config.evStageBase + ids.subRows[key]);
+  }
+  const lost = Object.keys(ids.subRows).filter((k) => k.startsWith(prefix) && !keys.has(k));
+  if (lost.length) throw new Error(`events: ${cid}: the stored row keys ${lost.join(', ')} are not given by the record any more (a donor row removed, or ${ak} changed)`);
+  checkNumbers({ ...ids.rows, ...ids.subRows }, 'row', config.evStageMax - config.evStageBase);
+  return out;
+}
+// the donor row of a quest: its evStageId, else the row whose stage list / range holds its stage id; else the first donor row
+function inStageRange(row, stageId) {
+  const r = row.stageRange || {};
+  if (!Number.isInteger(stageId)) return false;
+  if ((r.stageId || []).includes(stageId)) return true;
+  return !!r.validStageWidthId && r.stageStartId <= stageId && stageId <= r.stageEndId;
+}
+function rowOfQuest(rows, q) {
+  if (!rows.length) return null;
+  const sid = Number.isInteger(q.stageId) ? q.stageId : q.donorStageOfLaterRun;
+  return rows.find((r) => r.eventStageId === q.evStageId) || rows.find((r) => inStageRange(r, sid)) || rows[0];
 }
 
 function checkRanges(master, config) {
@@ -333,6 +381,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     }).find(Boolean);
 
     let apMin = null;
+    const donorRows = donorRowsOf(rec);
     for (const q0 of rec.quests || []) {
       const key = questKey(rec, q0, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q0);
       const qLabels = labelIds(q0.label, config.labelPhrases);
@@ -340,7 +389,8 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (swapped) qLabels.push('wwEnemy');
       let q = swapped || q0;
       const wiki = qLabels.includes('wikiQuest');
-      const item = { key, donorStageId: q.stageId, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
+      const donorRow = rowOfQuest(donorRows, q0);
+      const item = { key, donorStageId: q.stageId, donorRow: donorRow ? donorRow.eventStageId : null, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       entry.quests.push(item);
@@ -420,13 +470,46 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       const rs = [...new Set(entry.quests.map((x) => x.reason))];
       if (entry.quests.length && rs.length === 1 && rs[0]) { entry.reason = rs[0]; entry.why = textOf(rs[0]); }
     }
-    else {
-      // Details of the card: the original notice of the event (event-pages.js noticePage; «not available» without its text)
-      const row = evStageRow(evStageId, entry.stageIds, { eventType: entry.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${evStageId}` : '' });
-      row.eventCategory = config.eventCategory;
-      row.bannerUrl = entry.banner;
-      out.evStage.push(row);
+    // one row per donor row (allocateRows); a record without donor rows: one row, as before Task 5
+    const rowIds = allocateRows(rec, allIds, allAnchors, config);
+    const recEnd = rec.end || null;
+    entry.rows = (donorRows.length ? donorRows : [null]).map((d) => {
+      const id = d ? rowIds.get(d.eventStageId) || null : evStageId;
+      const quests = entry.quests.filter((x) => (d ? x.donorRow === d.eventStageId : true));
+      const r = { evStageId: id, donorEvStageId: d ? d.eventStageId : null, start: rec.start, end: rec.end, eventType: entry.eventType, origEventType: d ? d.eventType : entry.origEventType,
+        origCategory: d ? d.eventCategory : null, parentEventStageId: d ? d.parentEventStageId || 0 : 0, bannerKey: d ? d.bannerKey || null : null,
+        noticeId: d ? d.detailNoticeId || null : null, stageIds: quests.filter((x) => x.served).map((x) => x.stageId), quests: quests.length, available: false };
+      if (d) {
+        r.eventType = Number.isInteger(d.eventType) && d.eventType !== 2 ? d.eventType : config.eventType;
+        // own dates (Pacific) when the record has several rows (a single row keeps the record's dates and days, as before Task 5);
+        // a window past the record's end (the permanent category 1 rows, until 2037) ends with the record
+        if (donorRows.length > 1 && d.startTime && d.endTime) {
+          r.start = ptDate(utcMs(d.startTime));
+          r.end = ptDate(utcMs(d.endTime));
+          if (recEnd && r.end > recEnd) r.end = recEnd < r.start ? r.start : recEnd;
+          if (isShort([d.startTime, d.endTime], config.shortWindowHours)) r.days = daysOf([d.startTime, d.endTime]);
+        }
+      }
+      if (!r.days && entry.days && !(d && donorRows.length > 1)) r.days = entry.days;
+      for (const x of quests) x.evStageId = id;
+      return r;
+    });
+    if (!raidish && entry.stageIds.length) {
+      for (const r of entry.rows) {
+        if (!r.stageIds.length) continue;
+        // Details of the card: the original notice of the event (event-pages.js noticePage; «not available» without its text)
+        const row = evStageRow(r.evStageId, r.stageIds, { eventType: r.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${r.evStageId}` : '' });
+        row.eventCategory = config.eventCategory;
+        row.bannerUrl = `/web/event/img/v${config.imgVersion}/${r.evStageId}.png`;
+        out.evStage.push(row);
+        r.available = true;
+      }
       entry.available = true;
+      // the entry covers its built rows (a donor row may start before the census dates)
+      const built = entry.rows.filter((r) => r.available);
+      const lo = built.map((r) => r.start).filter(Boolean).sort()[0], hi = built.map((r) => r.end).filter(Boolean).sort().pop();
+      if (lo && entry.start && lo < entry.start) entry.start = lo;
+      if (hi && entry.end && hi > entry.end) entry.end = hi;
     }
     entry.useAp = apMin;
     entry.labels = [...labels];
@@ -473,7 +556,7 @@ function readJson(p, dflt) {
   try { return JSON.parse(text); } catch (e) { throw new Error(`events: ${p} is corrupt: ${e.message}`); }
 }
 const IDS_FILE = path.join(__dirname, 'event_ids.json');
-const IDS_NOTE = 'Append-only: event ids live in saves and in the master. Numbers are written by make-events.js; a key that disappears stays, its number is never reused. rows: evStage = evStageBase + r. entries ("<censusId>/+<offset from the anchor of the record>", no donor id; anchors in the private event_anchors.json next to the records): stage = stageBase + n (bases in event_config.json).';
+const IDS_NOTE = 'Append-only: event ids live in saves and in the master. Numbers are written by make-events.js; a key that disappears stays, its number is never reused. rows: evStage = evStageBase + r (the record; it stays on one donor row of the record, frozen in the private sidecar). subRows ("<censusId>/r+<offset of a donor evStage row from that row>"): the other original evStage rows of the record, same number space. entries ("<censusId>/+<offset from the anchor of the record>", no donor id; anchors in the private event_anchors.json next to the records): stage = stageBase + n (bases in event_config.json).';
 const ANCHORS_NAME = 'event_anchors.json';
 const readIds = (file) => readJson(file, { note: IDS_NOTE, rows: {}, entries: {} });
 function writeIds(file, ids) {
@@ -575,4 +658,4 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };
+module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };
