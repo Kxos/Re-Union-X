@@ -208,6 +208,13 @@ Open points:
 4. The Details page says «the reasons are with the quests below», but the Details view has no quest table; the catalog page has one.
 5. The Story progress on the Quests menu reads 1% on `events1`.
 
+**Keyblade event save (07-11, rev 278).** Save `events2` = `maxpower` with story quests 856-979 removed (last story quest 855, period
+2019-04-18; script `tmp/events_p1/mksave2.js`, private), `relogin -Save events2` on the real clock: Shop week 04-18..24 lists the weekly
+raid, «A New Friend? Returns!» and «Keyblade Wielders Summer Adventure Returns!» (EV-0783, 20012, eventType 3). The Summer Adventure card
+loads a few seconds late (first download of `v4/20012.png`), then shows (`events2_tab`). Its quest list opens on «DAY 1 - 1/3» (Dual
+Blade LV 150, AP 5, objectives 1 turn / no continue / Equip the Starlight Keyblade) with no Raid Boards button (`events2_key_list`).
+To play: the user (keyblade objective, first clear, Day 2-3 unlock).
+
 **Quest played on the bench (07-11, save `events1`, `-RealNow 2026-11-10T20:00:00Z`, deck of `maxpower`, pet Steal x4 open).**
 Dark-Winged Warrior 1/12 (stage 4000030 on map 734910, Powerwild LV 100, AP 5):
 - first clear in one turn: the 3 objectives ticked, «Objective Complete!» Moogle 6★, Huey 5★, Huey & Dewey & Louie 6★ paid once
