@@ -1217,6 +1217,18 @@ function enemyDropTypes(rewardId) {
   return types;
 }
 
+// Odds of a reward row: one independent chance per position, in ten-thousandths (10000 = always). Our story/Special rows
+// are all 10000; the ORIGINAL rows served by events are not (62202, Dark-Winged Warrior 1/12: Moogle 15%, three Moogles 5%;
+// the original table has sums up to 20,833, so the positions are rolled one by one, not as one share). Rolled at
+// /stage/start, so the client shows exactly what /stage/clear pays (bench 07-11: all four were paid, x4 with Steal).
+const ODDS_ALWAYS = 10000;
+function rollDropTypes(rewardId, types, rng = Math.random) {
+  const odds = rewardRowById(rewardId)?.odds || [];
+  const out = types.map((t, i) => (t && (odds[i] ?? ODDS_ALWAYS) >= ODDS_ALWAYS ? t : t && rng() * ODDS_ALWAYS < odds[i] ? t : 0));
+  while (out.length && !out[out.length - 1]) out.pop();
+  return out;
+}
+
 // dropItemTypeIds di un forziere: per ogni premio della riga il suo tipo, 0 dove il
 // premio e' del nemico (materiale: nel forziere resta vuoto)
 function chestDropTypes(rewardId) {
@@ -1254,7 +1266,7 @@ function stageTreasures(stageId) {
 // sacchetti si aprono e rivelano l'oggetto. Non tutti gli uid dei nemici compaiono
 // come record nella mappa (es. 1 nel Prologue): si mandano tutti quelli da 1 al
 // massimo, tolti i forzieri (stesso spazio di id).
-function stageEnemyDrops(stageId) {
+function stageEnemyDrops(stageId, rng = Math.random) {
   const poi = poiOf(stageId);
   if (!poi) return [];
   const chests = new Set(poi.chests.map((c) => c.uid));
@@ -1264,7 +1276,10 @@ function stageEnemyDrops(stageId) {
   const rows = new Map(poi.enemies.map((e) => [e.uid, e.reward]));
   // allenamento (970000): nessun drop, anche se i record della mappa restano sulla riga 1 (revisione finale Special)
   const training = poiStageId(stageId) === TRAINING_STAGE_ID;
-  return ids.map((id) => ({ uniqueEnemyId: id, dropItemTypeIds: training ? [] : enemyDropTypes(rows.get(id) ?? 1), stealType: 0 }));
+  return ids.map((id) => {
+    const rewardId = rows.get(id) ?? 1;
+    return { uniqueEnemyId: id, dropItemTypeIds: training ? [] : rollDropTypes(rewardId, enemyDropTypes(rewardId), rng), stealType: 0 };
+  });
 }
 
 // Trick Steal del pet (I-137): il client manda isSteal a /stage/start se un trick aperto ha invokeType 1;
@@ -1283,7 +1298,7 @@ function applySteal(stageId, drops, rng = Math.random, mult = stealMultiplier())
   if (mult < 2) return drops;
   const rows = new Map((poiOf(stageId)?.enemies || []).map((e) => [e.uid, e.reward]));
   // solo i nemici con un record nella mappa: gli altri uid (mandati per sicurezza, es. 1) non compaiono mai (banco 20-10)
-  const withDrop = drops.filter((d) => rows.has(d.uniqueEnemyId) && enemyDropTypes(rows.get(d.uniqueEnemyId)).some(Boolean));
+  const withDrop = drops.filter((d) => rows.has(d.uniqueEnemyId) && (d.dropItemTypeIds || []).some(Boolean));
   // solo banco: KHUX_BENCH_STEAL_UID forza il nemico rubato (prova del crash di I-137)
   const forced = Number(process.env.KHUX_BENCH_STEAL_UID || 0);
   const hit = forced ? withDrop.find((d) => d.uniqueEnemyId === forced) : withDrop.find(() => rng() < STEAL_CHANCE);
@@ -1291,6 +1306,16 @@ function applySteal(stageId, drops, rng = Math.random, mult = stealMultiplier())
   player.steal = { stageId, uid: hit.uniqueEnemyId, mult };
   console.log(`[pet] Steal: drop del nemico ${hit.uniqueEnemyId} x${mult}`);
   return drops.map((d) => (d === hit ? { ...d, stealType: 1 } : d));
+}
+
+// /stage/start: the drops rolled for this play, kept for /stage/clear (player.enemyDrops), then the pet Steal
+function startEnemyDrops(req) {
+  const stageId = Number(req?.stageId ?? START_STAGE_ID);
+  const drops = stageEnemyDrops(stageId);
+  player.enemyDrops = { stageId, types: Object.fromEntries(drops.map((d) => [d.uniqueEnemyId, d.dropItemTypeIds])) };
+  if (req?.isSteal) return applySteal(stageId, drops);
+  player.steal = null;
+  return drops;
 }
 
 // userData.userPoint, in GET /user e in POST /stage/start.
@@ -2027,8 +2052,7 @@ function respondStageStart(res, req) {
       highScore: 0,
     },
     userRandomEnemies: [],
-    userEnemyDropItems: req?.isSteal ? applySteal(req?.stageId ?? START_STAGE_ID, stageEnemyDrops(req?.stageId ?? START_STAGE_ID))
-      : (player.steal = null, stageEnemyDrops(req?.stageId ?? START_STAGE_ID)),
+    userEnemyDropItems: startEnemyDrops(req),
     userTreasures: stageTreasures(req?.stageId ?? START_STAGE_ID),
     campaigns: raid().campaignIds(), // raid AP 0 campaign in the bonus hours (routes-raid.js)
     luxMagnifications: { campaign: 0, party: 0 },
@@ -2468,12 +2492,16 @@ function respondStageClear(res, req) {
   // (enemyDropTypes: materiali e medaglie delle quest Special)
   const enemyRows = new Map((poiOf(playedId)?.enemies || []).map((e) => [e.uid, e.reward]));
   const steal = player.steal?.stageId === playedId ? player.steal : null;
+  // the positions rolled at /stage/start (rollDropTypes); a play started before this server ran pays the row unrolled
+  const rolled = player.enemyDrops?.stageId === playedId ? player.enemyDrops.types : null;
   for (const uid of training ? [] : req?.getEnemyDropItems || []) {
     const row = rewardRowById(enemyRows.get(uid) ?? 1);
     const k = steal && steal.uid === uid ? steal.mult : 1; // drop rubato dal pet (Steal): x skillValue3
-    if (row) enemyDropTypes(row.rewardId).forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
+    const types = rolled ? rolled[uid] || [] : row ? enemyDropTypes(row.rewardId) : [];
+    if (row) types.forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
   }
   player.steal = null;
+  player.enemyDrops = null;
   // titoli che questa partita assegna: solo questi vanno in userTitles, il client mostra un popup per ognuno (I-220)
   const titlesBefore = new Set(player.titles || []);
   // premio del primo completamento («Quest Complete!»: es. Combat 101, 300 jewel)
@@ -5465,7 +5493,7 @@ module.exports._test = {
   // server/test-story-oltre.js (missioni 526-979)
   respondStageList, lastStoryStageId, stageNumber, stageRowOf, userDetailData, ensureUnion,
   // server/test-proud.js (Proud Mode, I-200)
-  respondProudList, proudUnlocked, lastProudNumber, poiStageId, stageTreasures, stageEnemyDrops,
+  respondProudList, proudUnlocked, lastProudNumber, poiStageId, stageTreasures, stageEnemyDrops, rollDropTypes, startEnemyDrops, enemyDropTypes,
   // server/test-achievements.js (I-037)
   respondStageAchievements, raidEventsNow: (ms) => raid().events(ms),
   // server/test-special-server.js (scheda Special)
