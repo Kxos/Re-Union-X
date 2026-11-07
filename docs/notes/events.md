@@ -213,7 +213,13 @@ Open points:
 raid, «A New Friend? Returns!» and «Keyblade Wielders Summer Adventure Returns!» (EV-0783, 20012, eventType 3). The Summer Adventure card
 loads a few seconds late (first download of `v4/20012.png`), then shows (`events2_tab`). Its quest list opens on «DAY 1 - 1/3» (Dual
 Blade LV 150, AP 5, objectives 1 turn / no continue / Equip the Starlight Keyblade) with no Raid Boards button (`events2_key_list`).
-To play: the user (keyblade objective, first clear, Day 2-3 unlock).
+Played by Claude (07-11, user asked): Day 1 - 1/3 (stage 4000094) with Starlight +60 (picked with the side arrows of «Select a
+Keyblade»), pet Steal on: one turn, the 3 objectives ticked including «Equip the Starlight Keyblade» (`events2_key1_results`), first
+clear paid once (Moogle 6★ 90146, Huey 5★ 90025, Huey & Dewey & Louie 6★ 90016, `events2_key1_objectives`); drops Moogle x1, x1 and x5
+(Steal x4) = +7 Moogle 90011 in the save, same as the client (`events2_key1_drops`); `events.cleared` 4000094 = [1,2,3]; raid state
+unchanged (the client reports raidPoint 1458, ignored for event quests). Day unlock: every quest of the 2019 re-run has the same donor
+window (04-21 07:00 .. 04-28 06:59 PT), so all 17 served quests are open at once (Day 1 - 2/3 opens with «Equip the Treasure Trove
+Keyblade»); 17 of 34 are not served yet (maps not imported, enemies 11547 / 11026 missing).
 
 **Quest played on the bench (07-11, save `events1`, `-RealNow 2026-11-10T20:00:00Z`, deck of `maxpower`, pet Steal x4 open).**
 Dark-Winged Warrior 1/12 (stage 4000030 on map 734910, Powerwild LV 100, AP 5):
