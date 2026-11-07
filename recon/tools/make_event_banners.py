@@ -130,14 +130,18 @@ def _get(url):
         return r.read()
 
 
-def build(index, notices, banners, out, ids=None):
+def build(index, notices, banners, out, ids=None, extra=None):
     """writes out/<evStageId>.png from the first notice of each entry whose banner file is in banners; returns
-    (done {evStageId: file}, missing [(evStageId, censusId)])"""
+    (done {evStageId: file}, missing [(evStageId, censusId)]). extra {evStageId: file name in banners}: a banner found by
+    hand (another notice of the event, a later run, a wiki file); it wins over the notice's own image"""
     os.makedirs(out, exist_ok=True)
     files = {}
     for ev, nid, key in wanted(index, notices, ids):
         if key and ev not in files and os.path.exists(os.path.join(banners, file_name(nid, key))):
             files[ev] = file_name(nid, key)
+    for ev, f in (extra or {}).items():
+        if os.path.exists(os.path.join(banners, f)):
+            files[int(ev)] = f
     done, missing = {}, []
     for e in index.get('entries', []):
         ev = e.get('evStageId')
@@ -158,6 +162,7 @@ def main(argv=None):
     ap.add_argument('--banners', required=True, help='folder of the downloaded notice banners (private)')
     ap.add_argument('--index', default=os.path.join(REPO, 'server', 'game_data', 'events.json'))
     ap.add_argument('--out', default=os.path.join(REPO, 'server', 'game_data', 'event_img'))
+    ap.add_argument('--extra', help='JSON {evStageId: file in --banners}: banners found by hand (private, never in the repo)')
     ap.add_argument('--ids', help='only these evStageIds: A-B,C')
     a = ap.parse_args(argv)
     index = json.load(open(a.index, encoding='utf-8'))
@@ -168,7 +173,8 @@ def main(argv=None):
         print('event banners: %d fetched, %d already here, %d failed%s %s' % (
             len(fetched), len(cached), len(failed), ' (gave up after two failures)' if gave_up else '', failed[:12]))
         return 1 if failed else 0
-    done, missing = build(index, notices, a.banners, a.out, ids)
+    extra = json.load(open(a.extra, encoding='utf-8')) if a.extra else None
+    done, missing = build(index, notices, a.banners, a.out, ids, extra)
     print('event banners: %d cards written, %d entries without a banner: %s -> %s' % (len(done), len(missing), missing[:12], a.out))
     return 0
 

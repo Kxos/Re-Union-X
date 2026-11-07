@@ -73,6 +73,11 @@ try:
     assert done == {20001: '51518_9c3xN7ln4R.png', 20002: '51523_9cbFN5Ie4.png'}, done
     assert missing == [(20003, 'EV-C'), (20004, 'EV-D')], missing
     assert Image.open(os.path.join(out, '20001.png')).size == (640, 140), 'card scaled to 640x140'
+    # extra: a banner found by hand fills an entry without one, and wins over the notice's own file
+    open(os.path.join(dest, 'hand.png'), 'wb').write(png((320, 70), (1, 2, 3)))
+    d2, m2 = meb.build(index, notices, dest, os.path.join(t, 'o3'), None, {'20003': 'hand.png', '20001': 'nofile.png'})
+    assert d2[20003] == 'hand.png' and d2[20001] == '51518_9c3xN7ln4R.png' and m2 == [(20004, 'EV-D')], (d2, m2)
+    assert Image.open(os.path.join(t, 'o3', '20003.png')).size == (640, 140)
     assert meb.build(index, notices, dest, os.path.join(t, 'o2'), {20002})[0] == {20002: '51523_9cbFN5Ie4.png'}
     # --section event: the Event Catalog banner 20000 (own design) and a KEPT EVENT copy of every card
     assert msb.EVENT_KEPT_TEXT == 'KEPT EVENT' and msb.EVENT_CATALOG_TITLE == 'EVENT CATALOG'
