@@ -308,12 +308,19 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
   the other events of the monthly notice go to their census row: the gem drop events (Magic / PSM / Power Gem) to their own GEM
   records, which are no longer shared rows; Event Coins Galore, Defeat X, New Year's Challenge, Keyblade Challenges, Org. XIII
   avatars, Daily Enhancement / Avatar Coin to census rows not selected yet (not built); the raid rows (eventType 2) to the raids.
-  Quests that moved to a record keep their stage ids (key moved); the others keep them reserved under `<censusId>~old/`. Three
-  «Event & Trait Medals» rows (June-August 2020) stay on their Monthly record, owner not certain.
+  Quests that moved to a record keep their stage ids (key moved); the others keep them reserved under `<censusId>~old/`.
+  The three «Event & Trait Medals» rows of June-August 2020 belong to the medal event of the month (EV-1154 Stitch Screen Debut
+  Celebration, EV-1198 SN++ Aeleus, EV-1232 SN++ Dilan): their banner sits under that event's heading in the monthly notice and
+  their quest gives its SN++ medal (fix round 1); not selected, so not built.
 - Full map import (Task 5 Step 2, 7 Nov): with the event enemies in the master, `import_event_stages.py` imports 373 of 418
-  candidate maps (43 skipped: rooms not served; 2 missing). Served: 536 of 687 quests (gem 443, pilot records 93; before: 117).
-  New check in make-events.js: the rooms of the map must be of the quest's world (`event_config.json` `roomWorlds`;
-  `neutralRooms` DG = Corridor of Darkness / arenas fit any world; `worldExceptions` EV-0282), else `worldMismatch` (EV-0293:
-  Castle of Dreams quest on Enchanted Dominion rooms). A script check of the 419 new quests (world, event enemy models, no
-  substitution, reward rows, AP / addLevel against the donor row or the documented khuxwiki AP, one record per map key) found
-  no other failure. The resource staging (`stage_gen\files\stage`) holds exactly the event maps of the import.
+  candidate maps (43 skipped: rooms not served; 2 missing). Served after fix round 1: 534 of 684 quests (gem 441, pilot records
+  93; before: 117). New check in make-events.js: the rooms of the map must be of the quest's world (`event_config.json`
+  `roomWorlds`, a prefix missing there is another world; `neutralRooms` {DG: 1}: the Corridor of Darkness / DG_0100 arenas fit
+  world 1, where the original quests stand on DG rooms alone, or any world when the map also has a room of the quest's world;
+  `worldExceptions` by map key: EV-0282 and EV-0293, donor world kept on the Enchanted Dominion rooms of the later run's JP
+  map), else `worldMismatch`. A script check of the new quests (world, event enemy models, no substitution, reward rows, AP /
+  addLevel against the donor row or the documented khuxwiki AP, one record per map key) found no failure. The resource staging
+  (`stage_geniles\stage`) holds exactly the event maps of the import.
+- Fix round 1: every record freezes the row of its id (`<censusId>#row`, one row too); stored row keys without it stop the run.
+  A quest that matches no donor row is flagged `rowGuess` (warning; none today). Quests whose AP comes from the khuxwiki page of
+  their run (the private record's conflict) carry the label `wikiAp`. The details page draws a card only for built rows.
