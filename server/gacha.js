@@ -64,10 +64,11 @@ function spend(player, b, n) {
 // player.gacha = {day, used: {id: n, vipFree: n}, count: {id: n}, sinceFeatured: {id: n}, listedCurrency}
 const gstate = (player) => (player.gacha ||= {});
 const drawCount = (player, b) => gstate(player).count?.[b.drawMedalTypeId] || 0;
-// Prezzo della prossima estrazione: lo scalino di prices per le estrazioni gia' fatte, mai sotto 1.
+// Prezzo della prossima estrazione: lo scalino di prices per le estrazioni gia' fatte. 0 = gratuita: il client estrae
+// subito senza la conferma, come nell'originale (utente 07-11); 1 senza prices.
 function priceFor(b, player) {
   const p = b.prices || [];
-  return Math.max(1, p.length ? p[Math.min(drawCount(player, b), p.length - 1)] : 1);
+  return p.length ? Math.max(0, p[Math.min(drawCount(player, b), p.length - 1)]) : 1;
 }
 const DRAWABLE_PAY = [1, 7, 8, 9];
 const drawable = (b, sizes) => !b.catalogOnly && DRAWABLE_PAY.includes(b.payType) && sizes.has(b.lotCount);
@@ -80,7 +81,7 @@ function ticketUnlockQuest(banners, rewardType, sizes) {
   return banners.filter((b) => drawable(b, sizes) && spends(b)).reduce((m, b) => Math.min(m, b.unlockQuest), Infinity);
 }
 // Banner fissabile nello Shop (sp3 6.1): vecchio (finito prima dell'inizio del periodo della tranche, ctx.periodStart),
-// sbloccato, estraibile, ne' Free Deal / 1 Jewel (tutti i prezzi <= 1, vipFree, nome «Free...») ne' stagionale.
+// sbloccato, estraibile, ne' Free Deal / gratuite (tutti i prezzi <= 1, vipFree, nome «Free...») ne' stagionale.
 const isFreeLike = (b) => (b.prices || []).every((x) => x <= 1) || !!b.vipFree || /^Free\b/i.test(b.name || '');
 function pinnable(b, ctx) {
   if (!ctx.periodStart || b.catalogOnly || !drawable(b, ctx.sizes)) return false;
@@ -372,18 +373,18 @@ const PAY = { 1: 'Jewels', 4: 'Bronze Tickets', 5: 'Silver Tickets', 6: 'Gold Ti
 const CURRENCY_NAME = { spooky: 'Spooky Cookies', moogle: 'Moogle Points', holiday: 'Holiday Draw Tickets', draw: 'Draw Tickets' };
 // payType sconosciuto: ripiega su Jewels (1) o Tickets, senza lanciare; payType 8: valuta del banner
 const unitOf = (b) => (b.payType === 8 ? CURRENCY_NAME[b.currency] || PAY[8] : PAY[b.payType] || (b.payType === 1 ? 'Jewels' : 'Tickets'));
-const priceText = (b, price) => `${price} ${price === 1 ? unitOf(b).replace(/s$/, '') : unitOf(b)}`;
+const priceText = (b, price) => (price === 0 ? 'Free' : `${price} ${price === 1 ? unitOf(b).replace(/s$/, '') : unitOf(b)}`);
 const num = (n) => n.toLocaleString('en-US');
 // Riga sui gradini di prezzo (FIRST_FREE o in calo a ogni estrazione); '' se il prezzo e' unico.
 function priceSteps(b) {
   const p = b.prices || [];
   if (p.length < 2) return '';
-  if (p[0] === 0) return `<p class="n">First draw: 1 ${unitOf(b).replace(/s$/, '')}, then ${num(p[1])} ${unitOf(b)}.</p>`;
+  if (p[0] === 0) return `<p class="n">First draw free, then ${num(p[1])} ${unitOf(b)}.</p>`;
   return `<p class="n">Price falls with each draw: ${p.map(num).join(' → ')} ${unitOf(b)}.</p>`;
 }
 const priceLine = (b) => (b.catalogOnly === 'INCOMPLETE' ? ''
   : `${esc(priceText(b, firstPrice(b)))}, ${b.lotCount ?? '?'} Medal${b.lotCount === 1 ? '' : 's'}`);
-const firstPrice = (b) => Math.max(1, (b.prices || [])[0] || 1);
+const firstPrice = (b) => ((b.prices || []).length ? Math.max(0, b.prices[0]) : 1);
 // Stile delle pagine originali (reference\shop_odds_details\NOTE.md: notice 46003 da Wayback e screenshot di Draw
 // Odds): fondo #043654, testo bianco spaziato, titoli «■» azzurri #00d4ed, frasi chiave arancio/giallo, tabelle con
 // bordi bianchi e intestazione #365e76, sezioni gialle «6★Medals» con «↑PAGE TOP», nomi colorati per attributo.

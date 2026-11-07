@@ -17,12 +17,12 @@ const catalog = { banners: [
 const rows = m.masterRows(catalog);
 check(rows.length === 1 + catalog.banners.length && rows[0].drawMedalTypeId === 9001 && rows[0].payType === 3, '1 + N righe, prima la piastra 9001 (paid Jewels, I-135)');
 check(rows[0].bannerUrl === `/web/gacha/img/9001-v${require('./gacha').CATALOG_PLATE_STYLE}.png` && require('./gacha').CATALOG_PLATE_STYLE >= 3, `piastra 9001: url con la versione dell'immagine (${rows[0].bannerUrl})`);
-check(rows.every((r) => r.price >= 1), 'price >= 1');
+check(rows.every((r) => r.price >= 0), 'price >= 0');
 check(rows.slice(1).every((r) => [1, 4, 5, 6, 7, 8, 9].includes(r.payType)), 'payType ammessi (banners never 3)');
 check(rows.find((r) => r.drawMedalTypeId === 10003).payType === 9 && rows.find((r) => r.drawMedalTypeId === 10006).payType === 1, 'payType 9 kept (Draw Points), 3 -> 1');
 check(rows.every((r) => r.benefitId === 0), 'benefitId 0 senza VIP Draw');
 check(m.masterRows({ ...catalog, banners: [{ ...catalog.banners[0], vipDraw: true }] })[1].benefitId === require('./vip-benefit').VIP_BENEFIT_ID, 'VIP Draw: benefitId VIP');
-check(rows.find((r) => r.drawMedalTypeId === 10001).price === 600 && rows.find((r) => r.drawMedalTypeId === 10002).price === 1, 'prezzo della prima estrazione');
+check(rows.find((r) => r.drawMedalTypeId === 10001).price === 600 && rows.find((r) => r.drawMedalTypeId === 10002).price === 0, 'prezzo della prima estrazione (0 = gratuita)');
 const r1 = rows.find((r) => r.drawMedalTypeId === 10001);
 check(r1.bannerUrl === '/web/gacha/img/10001.png' && r1.detailUrl === '/web/gacha/detail/10001' && r1.sortId === 10, 'url e sortId');
 check(rows.every((r) => !/%(?!%)/.test(r.comment.replace(/%%|%d/g, ''))), 'nessun % sciolto fuori da %d');

@@ -245,7 +245,7 @@ those that cannot be completed stay only in the catalog.
   that grows with the story; B0456 with Dual Meow Wow LV7-9.
 
 ### 9.4 Free draws
-Never price 0: payType 1, price 1 (1 Jewel really deducted). isDayLimited where the original had
+**Changed 7 November 2026 (user):** free draws cost 0 and draw at once without the confirmation, as the original did; only the Banner Catalog plate keeps price 1. Before: never price 0: payType 1, price 1 (1 Jewel really deducted). isDayLimited where the original had
 «once per day». FIRST_FREE and FALLING: dynamic price per player in `/gacha/list` (counter of the
 banner's draws in `player.gacha`): 1st draw 1 Jewel, then full price or the price step.
 

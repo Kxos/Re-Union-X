@@ -30,7 +30,7 @@ is no longer written). Tests: `node server/test-gacha-data.js`, `node server/tes
 ### POST /gacha/draw (action 76)
 
 - Tap on DrawButton1/3 (drawType in {1,3,5,6}; isDayLimited with userLimitedCount 0 -> no action): the client checks
-  jewels or tickets locally, a full box gives a popup; price 0 -> direct draw without confirmation (never use price 0),
+  jewels or tickets locally, a full box gives a popup; price 0 -> direct draw without confirmation, as in the original (user 07-11: free draws now cost 0; only the Banner Catalog plate keeps price 1, or its tap would draw),
   otherwise a confirmation, then the request and the draw scene.
 - Request `{"drawMedalTypeId", "count"}` (count = lotCount); payType and price are taken by the server from its catalogue.
 - Response: `userData.userPoint`,

@@ -77,7 +77,7 @@ function masterRows(catalog, xmlSafe = WARRANT_XML_SAFE, nameOf = null) {
     }
     return gd.drawMedalTypeRow({
       drawMedalTypeId: b.drawMedalTypeId, name: b.name, payType: [1, 4, 5, 6, 7, 8, 9].includes(b.payType) ? b.payType : 1,
-      price: Math.max(1, (b.prices || [])[0] || 1), sortId: 10 + i,
+      price: (b.prices || []).length ? Math.max(0, b.prices[0]) : 1, sortId: 10 + i,
       bannerUrl: `/web/gacha/img/${b.drawMedalTypeId}.png`, detailUrl: `/web/gacha/detail/${b.drawMedalTypeId}`, comment: warrant.comment || commentOf(b), warrant,
       benefitId: b.vipDraw ? VIP_BENEFIT_ID : 0,
     });

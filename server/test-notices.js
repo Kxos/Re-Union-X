@@ -49,7 +49,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   const shop = n.NOTICES.find((x) => x.title === 'Shop').body;
   for (const s of ['Shop draw rates are reconstructed where the original game did not publish them (Medal rarities, guarantees and Skill rates are original): Draw Odds and each banner\'s Details say so.',
     'Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.',
-    'Free draws cost 1 Jewel. All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).',
+    'All Free Deals share one draw a day, and VIP Free Deals need the VIP benefit (see the Free Deals and VIP Draws notices).',
     'Seasonal draw currencies (Spooky Cookies, Moogle Points, Holiday Draw Tickets) are kept separately; the Shop shows one of them at a time. When you earn one of them, the reward message calls it a Draw Ticket, but it goes to its own currency.',
     'Some 2016-17 banners only drew Epic Medals; the game data no longer says which Medals were Epic, so these banners draw from their full sets.',
     'Blue Fairy Deal banners are in the Banner Catalog but cannot be drawn yet: Blue Fairies will come with a future update.',
@@ -96,7 +96,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(require('./gacha-seasons').SEASONS.length === 8, 'otto stagioni');
   check(/most recent unlocked edition/.test(all) && /nothing appears/.test(all), 'Shop: edizione piu recente, niente se nessuna');
   check(/Keep in the Shop/.test(all) && /Banner Catalog/.test(all) && /Leave and re-enter the Shop/.test(all), 'Shop: pulsante e rientro');
-  check(/already passed in the Story/.test(all) && /Free Deals/.test(all) && /1 Jewel/.test(all) && /one banner at a time/.test(all)
+  check(/already passed in the Story/.test(all) && /Free Deals/.test(all) && /Other free draws/.test(all) && /one banner at a time/.test(all)
     && /limits still apply/.test(all), 'Shop: regole del banner fissato');
   check(/right after the Banner Catalog plate and above the seasonal banners/.test(all) && /KEPT IN SHOP/.test(all) && /on a banner's row/.test(all), 'Shop: posizione e bollino del banner fissato');
   check(/right after the Banner Catalog \(and the kept banner, if any\)/.test(all), 'Shop: stagionali dopo Catalog e fissato');
