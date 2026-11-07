@@ -126,7 +126,7 @@ const tests = {
     assert.strictEqual(row.stageStartId, CONFIG.stageBase + 1);
     assert.strictEqual(row.stageEndId, CONFIG.stageBase + 7);
     assert.strictEqual(row.eventCategory, 2);
-    assert.strictEqual(row.eventType, 2);
+    assert.strictEqual(row.eventType, 3, 'the donor eventType (never 2: raid mode, Raid Boards button)');
     assert.ok(row.bannerUrl.includes(`/${row.eventStageId}.png`) && !row.bannerUrl.includes('/raid/'));
     assert.strictEqual(entry(out, 'E-9').origEventType, 3, 'donor value kept for the bench');
     assert.strictEqual(entry(out, 'E-9').stageIds.length, 7);

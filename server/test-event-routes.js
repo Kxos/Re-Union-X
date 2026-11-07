@@ -45,7 +45,7 @@ const tests = {
     const e = list[0];
     assert.deepStrictEqual(Object.keys(e), ['stages', 'eventStageId', 'showIcon', 'bannerUrl', 'eventType', 'status', 'endTime', 'newStageId', 'isLock', 'complete']);
     assert.strictEqual(e.bannerUrl, `http://x/web/event/img/v${EVENT_IMG_VERSION}/29901.png`);
-    assert.strictEqual(e.eventType, 2);
+    assert.strictEqual(e.eventType, 1, 'index entry without eventType: the config fallback (never 2, the raid mode)');
     assert.strictEqual(e.endTime, fmt(TUE + 7000));
     assert.deepStrictEqual(e.stages.map((s) => s.stageId), [S1, S2], 'only served quests');
     assert.deepStrictEqual(e.stages[0], { stageId: S1, useAp: 5, score: 0, playStatus: 0, clearMissionIds: [] });
@@ -191,7 +191,7 @@ function wiring() {
     call(t.respondUserCreate, { name: 'Prova', unionId: 1 });
     // events_after_raids: Raid Catalog banner, Event Catalog banner (second), (kept raid), the week's raids, then the events
     const ev = call(t.respondStageEvent, { eventCategory: 2 }).events;
-    assert.deepStrictEqual(ev.map((e) => [e.eventStageId, e.eventType]), [[8000, 0], [20000, 0], [8999, 2], [29901, 2]]);
+    assert.deepStrictEqual(ev.map((e) => [e.eventStageId, e.eventType]), [[8000, 0], [20000, 0], [8999, 2], [29901, 1]]); // raids 2 (Raid Boards), events their own type
     assert.strictEqual(ev[3].bannerUrl, `${t.WEB_BASE}/web/event/img/v${EVENT_IMG_VERSION}/29901.png`);
     console.log('ok events_after_raids');
     // drops: the event quest reads the POI of its map key (stageBinId), as the client loads mappoi_stg<stageBinId>

@@ -20,7 +20,7 @@ const CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.jso
 // Version segment of the event card URL (/web/event/img/v<N>/<evStageId>.png): the client caches banner images by URL. The same
 // value make-events.js writes in the evStage rows (event_config.json imgVersion): bump it there when the cards change.
 const EVENT_IMG_VERSION = CONFIG.imgVersion;
-const EVENT_TYPE = CONFIG.eventType; // eventType of our evStage rows (make-events.js)
+const EVENT_TYPE = CONFIG.eventType; // eventType of an index entry without one (make-events.js writes the donor value per entry)
 const STAGE_FIRST = CONFIG.stageBase, STAGE_LAST = CONFIG.stageMax; // stage ids of the event quests
 const COIN_TYPE = 15; // Event Coins: not paid in this part
 
@@ -132,7 +132,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
         eventStageId: e.evStageId,
         showIcon: 1,
         bannerUrl: `${webBase}/web/event/img/v${EVENT_IMG_VERSION}/${e.evStageId}${kept ? '-kept' : ''}.png`,
-        eventType: EVENT_TYPE,
+        eventType: Number.isInteger(e.eventType) ? e.eventType : EVENT_TYPE,
         status: 1,
         endTime: serverTimeAt(hasDays(e) || quests.some(hasDays) ? clock.dayEnd(realMs) : clock.weekEnd(realMs)),
         newStageId: 0,
