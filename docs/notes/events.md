@@ -320,7 +320,7 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
   `worldExceptions` by map key: EV-0282 and EV-0293, donor world kept on the Enchanted Dominion rooms of the later run's JP
   map), else `worldMismatch`. A script check of the new quests (world, event enemy models, no substitution, reward rows, AP /
   addLevel against the donor row or the documented khuxwiki AP, one record per map key) found no failure. The resource staging
-  (`stage_geniles\stage`) holds exactly the event maps of the import.
+  (`stage_gen\files\stage`) holds exactly the event maps of the import.
 - Fix round 1: every record freezes the row of its id (`<censusId>#row`, one row too); stored row keys without it stop the run.
   A quest that matches no donor row is flagged `rowGuess` (warning; none today). Quests whose AP comes from the khuxwiki page of
   their run (the private record's conflict) carry the label `wikiAp`. The details page draws a card only for built rows.
