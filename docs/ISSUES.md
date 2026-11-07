@@ -33,7 +33,7 @@ Last revision: 6 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
-| I-245 | **IN PROGRESS** | **Events: non-raid event quests** (design 06-11, Part 1 framework + April 2019 pilot): restore all worldwide event quests (EQ, CELEB, KEY, QUIZ, STORY, COLLAB, COIN, HSC) through the Events tab. Task 1 done: what the client needs beyond raids (evStage/stage fields, pilot rows, id ranges `evStage` 20000+r, `stage` 4000000+n) | [events](notes/events.md) | — |
+| I-245 | **IN PROGRESS** | **Events: non-raid event quests** (design 06-11, Part 1 framework + April 2019 pilot): restore all worldwide event quests (EQ, CELEB, KEY, QUIZ, STORY, COLLAB, COIN, HSC) through the Events tab. **Part 1 DONE 07-11 (rev 278, resources 106):** framework (make-events.js, event-calendar.js, routes-events.js, Event Catalog with one kept event, original JP maps, original drop rows rolled at /stage/start, donor eventType so no Raid Boards button on non-raid events) and the April 2019 pilot (5 events, 49 of 130 quests; filter `onlyCensusIds` in event_config.json kept until Part 2); no raid spawns from event quests (user decision 07-11, notice 49535); Notice «Events» (IMPORTANT). Benched: Dark-Winged Warrior 1/12 (save `events1`), Summer Adventure Day 1 - 1/3 with the Starlight objective (save `events2`). Next: Part 2 (gem quests) | [events](notes/events.md) | bench 07-11 |
 
 ### Resources and layout
 

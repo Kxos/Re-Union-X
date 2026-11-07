@@ -57,6 +57,28 @@ function raidNoticeFacts(file = process.env.KHUX_RAID_INDEX || path.join(__dirna
       ids: new Set(jpOn.map((e) => e.censusId)), from: jpOn.map((e) => e.start).sort()[0] || null, to: jpOn.map((e) => e.end || e.start).sort().pop() || null } : null,
   };
 }
+// Event counts and labels for the Events notice (Events Part 1 Task 8), read from the served events.json (make-events.js) and
+// event_config.json (the label texts), so the text follows the data: a quest served later changes the numbers at the next build.
+function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dirname, 'game_data', 'events.json')) {
+  let x, cfg = {};
+  try { x = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+  try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')); } catch { /* no label texts */ }
+  const all = Array.isArray(x.entries) ? x.entries : [];
+  const on = all.filter((e) => e.available);
+  const quests = all.flatMap((e) => e.quests || []);
+  const used = new Set([...all.flatMap((e) => e.labels || []), ...quests.flatMap((q) => q.labels || [])]);
+  const why = cfg.reconstructedWhy || {};
+  return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
+    labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
+}
+function eventNoticeLines(f) {
+  if (!f || !f.events) return ['No event quest is served yet: the Event Catalog lists the events and why they are not here yet.'];
+  return [`Today **${f.events} events** are served, with **${f.served} of their ${f.quests} quests** (${f.records} events are in the data so far, starting with April 2019). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.`];
+}
+function eventLabelLines(f) {
+  if (!f || !f.labels.length) return [];
+  return ['Where a quest or event is not exactly as in the original game, the Event Catalog marks it with one of these notes:', ...f.labels.map((l) => `- ${l.text}`)];
+}
 const nameList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a.join(''));
 function raidNoticeLines(f) {
   // no Japan-only raid served (raid_config.json jpRaids.served false, user decision 06-11: worldwide content only for now)
@@ -297,6 +319,23 @@ const NOTICES = [
       ...raidJpLines(raidNoticeFacts()),
       '## Raids not here yet',
       ...raidNoticeLines(raidNoticeFacts())] },
+  // Events Part 1 Task 8 (07-11): event quests, Event Catalog, kept event, short windows, coins, no raid spawns (user decision 07-11,
+  // notice 49535), counts and labels from events.json (eventNoticeFacts); docs/notes/events.md
+  { date: '11/07', tag: 'IMPORTANT', title: 'Events',
+    body: ['The **Event Quests** are back: the limited-time events of the original game, with their original maps, enemies, objectives and rewards wherever their files survive. They are in **Quests > Events**, after the raids.',
+      'Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.',
+      ...eventNoticeLines(eventNoticeFacts()),
+      '## Opening hours',
+      'An event that was open for only a few minutes or hours in the original game is open here for its **whole original day** (**not original**): it is listed on the real weekday (Pacific time) of that day, all day. An event with one quest a day lists **all its quests for its whole period** (**not original** where the original opened them one a day).',
+      '## Event Catalog',
+      'The **Event Catalog** is **not original**: it is an addition of this server, in the style of the Special and Raid Catalogs. Its banner in the Events tab opens the **Training Grounds** when tapped, and its **Details** button lists every event of the game with its quests.',
+      'One **past event** at a time can be **kept** in the Events tab (it shows the **KEPT EVENT** tab), beside the events of the week. Events later than your Story stay locked (**Unlocks at Story Quest N**), and events with no quest served yet are marked **Not restored yet** and cannot be kept.',
+      '## Rewards',
+      'Objective rewards and first-clear items are given **once**, as in the original game. Enemy drops keep their **original chances**: an item that dropped 5% of the time still does.',
+      '**Event Coins** are not given yet: they come with the **Event Boards** in a later update. Each event\'s **Details** shows its original notice as it was.',
+      'Event quests **never bring a Raid Boss** and do not fill the raid gauge. This is the original rule from January 24, 2019, when Raid Bosses began to appear only in raid events; before that date some event quests could bring one, so for older events it is **not original**.',
+      'The story scenes before and after some event quests are not shown yet.',
+      ...eventLabelLines(eventNoticeFacts())] },
   // Medal Gallery (I-242, user requests 06-11): server/medal-gallery.js, block on the Banner Catalog page (gacha.js catalogPage)
   { date: '11/06', tag: 'INFORMATION', title: 'Medal Gallery',
     body: ['The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then the **Medal Gallery** box under the title.',
@@ -641,4 +680,4 @@ function albumData(owned, medalRows, maxGuilt) {
   };
 }
 
-module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines };
+module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines, eventNoticeFacts };

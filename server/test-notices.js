@@ -213,6 +213,22 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
     && /Magic Broom/.test(kl) && /Prince & Belle/.test(kl), `righe jpCensus: ${kl}`);
   require('fs').rmSync(dir, { recursive: true, force: true });
 }
+{
+  // Events Part 1 Task 8: the IMPORTANT Events notice, counts and labels from events.json
+  const ev = n.NOTICES.find((x) => x.title === 'Events');
+  const t = ev ? ev.body.join(' ') : '';
+  check(ev && ev.tag === 'IMPORTANT', 'Events: notizia IMPORTANT');
+  check(/follow your Story like the Shop/.test(t) && /whole original day/.test(t) && /Event Catalog\*\* is \*\*not original/.test(t)
+    && /KEPT EVENT/.test(t) && /Event Coins\*\* are not given yet/.test(t) && /never bring a Raid Boss/.test(t) && /January 24, 2019/.test(t)
+    && /original chances/.test(t) && /no other enemy stands in for it/.test(t), `Events: regole (${t.slice(0, 120)})`);
+  const f = n.eventNoticeFacts();
+  if (f && f.events) {
+    check(t.includes(`**${f.events} events**`) && t.includes(`**${f.served} of their ${f.quests} quests**`), 'Events: conteggi da events.json');
+    for (const l of f.labels) check(t.includes(l.text), `Events: etichetta ${l.id} nel testo`);
+  }
+  const fake = n.eventNoticeFacts('nope.json');
+  check(fake === null, 'Events: senza events.json niente conteggi');
+}
 // every inline script of the Notices page must compile, in-game popup and site copy alike (06-11: a missing «;» after the
 // #slug opener broke the whole popup: no notice could be opened)
 for (const web of [false, true]) {
