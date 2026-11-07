@@ -538,6 +538,21 @@ const tests = {
     const o3 = build([record('R-3', [quest(701020, 1, [501])], { type: 'GEM' }), record('R-4', [quest(701020, 1, [501])], { type: 'GEM' })]);
     assert.strictEqual(entry(o3, 'R-4').quests[0].reason, 'mapKeyUsed');
   },
+  // the rooms of the imported map must be of the quest's world (event_config.json roomWorlds; neutralRooms such as the Corridor of
+  // Darkness DG fit any world; worldExceptions: records checked by hand), else worldMismatch (Task 5 Step 2 checks)
+  world_of_rooms() {
+    const maps = { status: new Map([[701201, { status: 'imported', rooms: ['ED_0008_01_00'] }], [701202, { status: 'imported', rooms: ['DG_0100_02_00', 'DB_0004_00_00'] }],
+      [701203, { status: 'imported', rooms: ['ED_0008_01_00'] }]]), poi: {} };
+    const qs = [quest(701201, 1, [501], { map: { key: 701201, status: 'ok' } }), quest(701202, 1, [501], { map: { key: 701202, status: 'ok' } })];
+    const out = me.buildEvents([record('W-7', qs, { type: 'GEM' }), record('W-8', [quest(701203, 1, [501], { map: { key: 701203, status: 'ok' } })], { type: 'GEM' })],
+      { ...CONFIG, worldExceptions: ['W-8'] }, master(), undefined, undefined, maps);
+    const q = entry(out, 'W-7').quests;
+    assert.deepStrictEqual([q[0].reason, q[1].served], ['worldMismatch', true], JSON.stringify(q.map((x) => x.why)));
+    assert.match(q[0].why, /ED_0008_01_00/);
+    assert.ok(entry(out, 'W-8').quests[0].served, 'a listed exception is served');
+    assert.ok(REAL_CONFIG.reasonText.worldMismatch && REAL_CONFIG.roomWorlds.DB === 1 && REAL_CONFIG.neutralRooms.includes('DG'));
+    assert.deepStrictEqual(REAL_CONFIG.worldExceptions, ['EV-0282']);
+  },
   shared_target_checked() {
     assert.throws(() => build([record('S-9', [], { type: 'GEM', sharedWith: 'S-0' })]), /S-0.*not in the records/);
     const warn = console.warn; const seen = [];

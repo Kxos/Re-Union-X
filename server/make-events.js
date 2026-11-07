@@ -52,7 +52,7 @@ const NOT_SERVED = 'not served yet';
 const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy'];
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
-  'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial'];
+  'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch'];
 const COIN_TYPE = 15;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -431,6 +431,12 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
         const st = maps.status.get(mapKey);
         if (!st || st.status !== 'imported') { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
+        // the map's rooms must be of the quest's world (roomWorlds by room prefix; neutralRooms fit any world; worldExceptions:
+        // records checked by hand, as EV-0282: donor world kept on another world's rooms)
+        const off = (st.rooms || []).filter((rm) => !(config.neutralRooms || []).includes(rm.slice(0, 2)) && (config.roomWorlds || {})[rm.slice(0, 2)] !== q.worldId);
+        if (off.length && !(config.worldExceptions || []).includes(rec.censusId)) {
+          item.reason = 'worldMismatch'; item.why = mapItem.why = `rooms of another world than ${q.worldId}: ${[...new Set(off)].join(', ')}`; continue;
+        }
         // reward rows of the map's enemies and chests: the master's, or the original rows of the record's drops (written here); else not served
         const known = dropRows(q), missing = [];
         for (const r of poiRewards(maps.poi[String(mapKey)] || {})) {
@@ -571,7 +577,7 @@ const MAPS_DIR = process.env.KHUX_EVENT_MAPS || path.join('D:', path.sep, 'Proge
 function loadMaps(dir) {
   const rep = readJson(path.join(dir, 'report.json'), null);
   if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {} }; }
-  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '' }])), poi: readJson(path.join(dir, 'stage_poi_events.json'), {}) };
+  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [] }])), poi: readJson(path.join(dir, 'stage_poi_events.json'), {}) };
 }
 // The records: a file (a list of records) or a folder (every *.json except the anchors file, sorted by name, concatenated).
 // The anchors sidecar is next to the file, or inside the folder.

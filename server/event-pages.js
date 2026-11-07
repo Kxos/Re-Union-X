@@ -34,6 +34,7 @@ function whyPlain(why) {
   const w = String(why || '');
   if (/^enemies not in the master/.test(w)) return 'An enemy of this quest is still being searched for in the surviving game files: the quest comes back when it is found.';
   if (/raid or Special/.test(w)) return 'It is a raid or Special quest: it is served by the Raid Catalog or the Special tab instead.';
+  if (/^rooms of another world/.test(w)) return 'Its original map lies in another world than the quest itself: it is held back until it is checked.';
   if (/^map key/.test(w)) return 'Its map is also the map of another quest in the surviving game data: it cannot be served on its own yet.';
   return 'Its data is not complete in the surviving game files yet.';
 }

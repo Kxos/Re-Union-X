@@ -310,3 +310,10 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
   avatars, Daily Enhancement / Avatar Coin to census rows not selected yet (not built); the raid rows (eventType 2) to the raids.
   Quests that moved to a record keep their stage ids (key moved); the others keep them reserved under `<censusId>~old/`. Three
   «Event & Trait Medals» rows (June-August 2020) stay on their Monthly record, owner not certain.
+- Full map import (Task 5 Step 2, 7 Nov): with the event enemies in the master, `import_event_stages.py` imports 373 of 418
+  candidate maps (43 skipped: rooms not served; 2 missing). Served: 536 of 687 quests (gem 443, pilot records 93; before: 117).
+  New check in make-events.js: the rooms of the map must be of the quest's world (`event_config.json` `roomWorlds`;
+  `neutralRooms` DG = Corridor of Darkness / arenas fit any world; `worldExceptions` EV-0282), else `worldMismatch` (EV-0293:
+  Castle of Dreams quest on Enchanted Dominion rooms). A script check of the 419 new quests (world, event enemy models, no
+  substitution, reward rows, AP / addLevel against the donor row or the documented khuxwiki AP, one record per map key) found
+  no other failure. The resource staging (`stage_gen\files\stage`) holds exactly the event maps of the import.

@@ -27,7 +27,8 @@
   "mapUnusable": "The original map of this quest cannot be used yet (a file or a room is missing), so the quest is not served.",
   "mapKeyUsed": "The map of this quest is already used by another quest of the events, so it cannot be built a second time.",
   "rewardRowsMissing": "The reward rows of the enemies or chests on the map of this quest are not known yet, so the quest is not served.",
-  "raidSpecial": "This quest is a raid or Special stage, served by its own generator."
+  "raidSpecial": "This quest is a raid or Special stage, served by its own generator.",
+  "worldMismatch": "The original map of this quest lies in another world than the quest itself, so it is held back until it is checked."
  },
  "labelPhrases": {
   "wikiQuest": "wikiQuest",
@@ -49,6 +50,10 @@
   "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update.",
   "wwEnemy": "Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops)."
  },
+ "roomWorldsNote": "make-events.js (Task 5 Step 2): the rooms of an imported event map must be of the quest's world: roomWorlds = world of a room prefix (as gen_tours_v2.py WIDX), neutralRooms fit any world (DG: Corridor of Darkness and the DG_0100 arenas, used by the original quests of every world), worldExceptions = records checked by hand (EV-0282: donor world Olympus Coliseum on Enchanted Dominion rooms, donor kept). Else the quest is worldMismatch.",
+ "roomWorlds": { "DB": 1, "DW": 2, "WL": 3, "AG": 4, "OC": 5, "BC": 6, "CD": 7, "ED": 8, "CS": 11, "HD": 12, "NL": 13, "SR": 14, "KG": 15, "SA": 16 },
+ "neutralRooms": ["DG"],
+ "worldExceptions": ["EV-0282"],
  "mapEnemySwapsNote": "User ruling 06-11: where the JP map file names another enemy than the WW quest (khuxwiki), the WW enemy. Keyed by map key (the stage row's stageBinId); from/to are enemy ids of our master (story rows). Read by make-events.js (quest enemies, label wwEnemy) and recon/tools/import_event_stages.py (patches the same ids in the copied map file).",
  "mapEnemySwaps": {
   "734970": [{ "from": 126, "to": 99, "names": "Gummi Hammer -> Morning Star (Dark-Winged Warrior - 7/12)" }],
