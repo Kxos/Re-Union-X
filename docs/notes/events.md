@@ -187,8 +187,28 @@ Save `events1`: `maxpower` without the story clears above Q850 and without `gach
   - `events1_kept`: the KEPT EVENT card in the tab.
 
 Open points:
-1. The quest list of an event shows the Raid Boards button (`eventType` 2 of `event_config.json`).
-2. The quest counter says «1/12» on an event with 9 served quests.
-3. The first Dark-Winged quest shows «Complete without having to continue» twice as an objective (to check against the original).
+1. The quest list of an event shows the Raid Boards button (`eventType` 2 of `event_config.json`). **Fidelity question (07-11):** khuxwiki
+   gives a raid boss (`raid=`) on 491 event quest pages (86 tagged 2017, 188 tagged 2018, 176 tagged 2019, 41 tagged 2020, 16 tagged 2021;
+   DWW 1/12: `raid=Darkside`), so event quests fed the raid spawn like story quests in 2017-2019, and the button may be original. Our rule
+   today: event quests add nothing to the raid counter. Decision for the author.
+2. ~~The quest counter says «1/12» on an event with 9 served quests.~~ Not a bug (07-11): «1/12» is part of the original quest NAME
+   («Dark-Winged Warrior - 1/12», donor row and khuxwiki alike), the client shows no counter.
+3. ~~«Complete without having to continue» twice.~~ Original (07-11): the donor row has objectives [28, 10, 10] and khuxwiki DWW 1/12 lists
+   obj 2 and obj 3 with that same text (rewards Huey 5★ and Moogle 6★).
 4. The Details page says «the reasons are with the quests below», but the Details view has no quest table; the catalog page has one.
 5. The Story progress on the Quests menu reads 1% on `events1`.
+
+**Quest played on the bench (07-11, save `events1`, `-RealNow 2026-11-10T20:00:00Z`, deck of `maxpower`, pet Steal x4 open).**
+Dark-Winged Warrior 1/12 (stage 4000030 on map 734910, Powerwild LV 100, AP 5):
+- first clear in one turn: the 3 objectives ticked, «Objective Complete!» Moogle 6★, Huey 5★, Huey & Dewey & Louie 6★ paid once
+  (`events1_dww1_results`, `events1_dww1_objectives`); Lux and Munny as the client reported; raid, Raid Coins, raid points and draw
+  points unchanged;
+- **bug found and fixed (d8339ed):** the original drop row 62202 (Moogle 15%, Louie, Dewey, Huey 5% each, odds independent per
+  position) was paid whole, x4 by the Steal: 16 medals, while CONGRATULATIONS showed «Moogle x4» and a nameless silver bag
+  (`events1_dww1_drops_before_fix`). Now the odds are rolled at `/stage/start` (`rollDropTypes`) and `/stage/clear` pays the rolled
+  positions only (test `server/test-drop-odds.js`);
+- 6 replays after the fix: objectives never paid again, AP 5 each; 5 runs «No items gathered.» (`events1_dww1_replay`), 1 run «Huey x4»
+  (Steal) = 4 Huey 1★ in the save (`events1_dww1_steal_huey`).
+- Pre-existing test failures on HEAD 98e60b1 (same without the fix, to check in the final review): test-enemy-attack, test-enemy-mechanics,
+  test-enemy-oltre, test-enemy-start-state, test-medal-renumber, test-raid-routes, test-special-server, test-trait-medals; test-keyblades
+  runs over 300 s.
