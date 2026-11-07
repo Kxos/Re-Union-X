@@ -442,33 +442,39 @@ const tests = {
     for (const k of ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing']) assert.ok(REAL_CONFIG.reasonText[k] && REAL_CONFIG.reasonText[k].length > 10, k);
   },
   reward_items_exist() {
-    const m = { ...master(), medal: [{ medalId: 90011, imageId: 90011, name: 'Moogle', rare: 6 }], material: [{ materialId: 48, name: 'Power Gem' }] };
+    const m = { ...master(), medal: [{ medalId: 99011, imageId: 99011, name: 'Fictional', rare: 6 }], material: [{ materialId: 48, name: 'Power Gem' }] };
     const gem = { type: 5, id: 48, num: 1, name: 'Power Gem' };
+    const plain = [objective(10, 'Complete without having to continue', { type: 2, id: 0, num: 1 })];
     const withObj = (rewards) => rewards.map((r) => objective(10, 'Complete without having to continue', r));
-    const good = quest(700500, 1, [501], { objectives: withObj([gem, { type: 3, id: 90011, num: 1, name: 'Moogle 6★' }]) });
-    const bad = quest(700501, 1, [501], { firstClear: [{ type: 3, id: 90346, num: 1, name: 'SP Chip & Dale 6★' }] });
+    const good = quest(700500, 1, [501], { objectives: withObj([gem, { type: 3, id: 99011, num: 1, name: 'Fictional 6★' }]) });
+    const bad = quest(700501, 1, [501], { objectives: plain, firstClear: [{ type: 3, id: 90346, num: 1, name: 'SP Fictional 6★' }] });
     const badGem = quest(700502, 1, [501], { objectives: withObj([{ type: 5, id: 999, num: 1, name: 'Nothing Gem' }]) });
-    const okFirst = quest(700503, 1, [501], { firstClear: [{ type: 3, id: 90011, num: 1, name: 'Moogle 6★' }, gem] });
+    const okFirst = quest(700503, 1, [501], { objectives: plain, firstClear: [{ type: 3, id: 99011, num: 1, name: 'Fictional 6★' }, gem] });
     const out = build([record('R-1', [good, bad, badGem, okFirst], { type: 'GEM' })], undefined, CONFIG, m);
     const qs = entry(out, 'R-1').quests;
     assert.deepStrictEqual(qs.map((q) => q.served), [true, false, false, true]);
     assert.strictEqual(qs[1].reason, 'rewardItemMissing');
     assert.strictEqual(qs[2].reason, 'rewardItemMissing');
     assert.match(qs[1].why, /90346/);
-    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [90011, 48]);
+    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [99011, 48]);
   },
   medal_id_remapped() {
     const row = (medalId, imageId, name, rare) => ({ medalId, imageId, name, rare });
     const m = { ...master(), material: [], medal: [row(300001, 300001, 'Foo', 7), row(300002, 300002, 'Foo', 6), row(400001, 400001, 'Tie', 7), row(400002, 400001, 'Tie', 7),
-      row(500001, 500001, 'Dup', 7), row(500002, 500002, 'Dup', 7)] };
+      row(500001, 500001, 'Dup', 7), row(500002, 500002, 'Dup', 7), row(600001, 600001, 'Bar', 5), row(600002, 600002, 'Baz', 6)] };
     const first = (id, name) => ({ firstClear: [{ type: 3, id, num: 5, name }], objectives: [objective(10, 'Complete without having to continue', { type: 2, id: 0, num: 1 })] });
     const recs = [record('M-1', [quest(700600, 1, [501], first(95001, 'Foo 7★')), quest(700601, 1, [501], first(95002, 'Tie 7★')), quest(700602, 1, [501], first(95003, 'Dup 7★')),
-      quest(700603, 1, [501], first(95004, 'Nope 7★'))], { type: 'GEM' })];
+      quest(700603, 1, [501], first(95004, 'Nope 7★')),
+      // the donor id is in our master but names another medal: by name -> ours; no such name -> rewardItemMissing; same name and rarity -> kept
+      quest(700604, 1, [501], first(600001, 'Foo 7★')), quest(700605, 1, [501], first(600001, 'Nope 5★')), quest(700606, 1, [501], first(600001, 'Bar 5★')),
+      quest(700607, 1, [501], first(600002, 'Baz 5★'))], { type: 'GEM' })];
     const out = build(recs, undefined, CONFIG, m);
     const qs = entry(out, 'M-1').quests;
-    assert.deepStrictEqual(qs.map((q) => q.served), [true, true, false, false]);
-    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [300001, 400001], 'our id; a tie goes to medalId == imageId');
+    assert.deepStrictEqual(qs.map((q) => q.served), [true, true, false, false, true, false, true, false]);
+    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [300001, 400001, 300001, 600001], 'our id; a tie goes to medalId == imageId');
     assert.strictEqual(qs[2].reason, 'rewardItemMissing');
+    assert.strictEqual(qs[5].reason, 'rewardItemMissing');
+    assert.strictEqual(qs[7].reason, 'rewardItemMissing', 'same name, other rarity: not the same medal');
     assert.strictEqual(recs[0].quests[0].firstClear[0].id, 95001, 'the record is not changed');
   },
   pilot_ids_unchanged() {
@@ -488,10 +494,42 @@ const tests = {
     assert.strictEqual(Object.keys(out.ids.entries).filter((k) => k.startsWith('G-NEW/')).length, 2);
   },
   difficulty_quests_apart() {
-    const qs = [5, 20, 40].map((ap, i) => quest(700700 + i, 1, [501], { ap, name: 'No Continues: Weekly Gem' }));
+    // three AP variants of one quest on ONE donor map: three stage rows, one map file and one POI, each with its own AP and level
+    const same = { map: { key: 760001, stageBinId: 0, status: 'ok' } };
+    const qs = [5, 20, 40].map((ap, i) => quest(700700 + i, 1, [501], { ap, level: 10 + i * 100, addLevel: i * 100, name: 'No Continues: Weekly Gem', ...same }));
     const out = build([record('D-1', qs, { type: 'GEM' })]);
     assert.deepStrictEqual(out.stage.map((s) => s.useAp), [5, 20, 40]);
+    assert.deepStrictEqual(out.stage.map((s) => s.addLevel), [0, 100, 200]);
     assert.strictEqual(new Set(out.stage.map((s) => s.stageId)).size, 3);
+    assert.deepStrictEqual(out.stage.map((s) => s.stageBinId), [760001, 760001, 760001]);
+    assert.strictEqual(out.maps.length, 1, 'the map is listed once');
+    assert.ok(entry(out, 'D-1').quests.every((q) => q.served));
+    // with the map report: one POI key for the three
+    const maps = { status: new Map([[760001, { status: 'imported' }]]), poi: { 760001: { enemies: [{ uid: 2, enemyId: 501, reward: 1, map: 0 }], chests: [] } } };
+    const o2 = me.buildEvents([record('D-1', qs, { type: 'GEM' })], CONFIG, { ...master(), reward: [{ rewardId: 1 }] }, undefined, undefined, maps);
+    assert.deepStrictEqual(o2.stage.map((s) => s.useAp), [5, 20, 40]);
+    assert.deepStrictEqual(Object.keys(o2.poi), ['760001']);
+    assert.ok(o2.maps[0].served);
+    // another record on the same map, or other drops: not served
+    const other = build([record('D-1', qs, { type: 'GEM' }), record('D-2', [quest(700710, 1, [501], same)], { type: 'GEM' })]);
+    assert.match(entry(other, 'D-2').quests[0].why, /760001 is the map of event stage/);
+    const diffDrops = [quest(700720, 1, [501], same), quest(700721, 1, [501], { ...same, drops: { enemies: [{ enemy: 501, rewardId: 5, rows: [{ type: 3, id: 90011, num: 1, odds: 1 }] }], chests: [] } })];
+    assert.deepStrictEqual(entry(build([record('D-3', diffDrops, { type: 'GEM' })]), 'D-3').quests.map((q) => q.served), [true, false]);
+  },
+  wiki_enemy_null_ids_only_for_wiki() {
+    // a donor quest with a null target keeps the old reason; a wikiQuest ignores null ids
+    const bad = quest(700900, 1, [501], { targets: [{ id: null, name: 'X' }] });
+    const out = build([record('X-1', [bad], { type: 'GEM' })]);
+    assert.match(entry(out, 'X-1').quests[0].why, /^enemies not in the master/);
+    const wq = quest(700901, 1, [501], { label: 'wikiQuest', targets: [{ id: null, name: 'X' }] });
+    assert.ok(entry(build([record('X-2', [wq], { type: 'GEM' })]), 'X-2').quests[0].served);
+  },
+  shared_target_checked() {
+    assert.throws(() => build([record('S-9', [], { type: 'GEM', sharedWith: 'S-0' })]), /S-0.*not in the records/);
+    const warn = console.warn; const seen = [];
+    console.warn = (m) => seen.push(m);
+    try { build([record('S-9', [], { type: 'GEM', sharedWith: 'Q-0' }), record('Q-0', [quest(700950, 1, [501])], { type: 'EQ' })], undefined, { ...CONFIG, serve: { censusIds: ['S-9'], types: [] } }); } finally { console.warn = warn; }
+    assert.ok(seen.some((m) => /Q-0.*not selected/.test(m)), JSON.stringify(seen));
   },
   wiki_quest_labelled() {
     const wq = quest(700800, 1, [501], { label: 'wikiQuest' });
