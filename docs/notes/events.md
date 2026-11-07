@@ -187,10 +187,13 @@ Save `events1`: `maxpower` without the story clears above Q850 and without `gach
   - `events1_kept`: the KEPT EVENT card in the tab.
 
 Open points:
-1. The quest list of an event shows the Raid Boards button (`eventType` 2 of `event_config.json`). **Fidelity question (07-11):** khuxwiki
-   gives a raid boss (`raid=`) on 491 event quest pages (86 tagged 2017, 188 tagged 2018, 176 tagged 2019, 41 tagged 2020, 16 tagged 2021;
-   DWW 1/12: `raid=Darkside`), so event quests fed the raid spawn like story quests in 2017-2019, and the button may be original. Our rule
-   today: event quests add nothing to the raid counter. Decision for the author.
+1. The quest list of an event shows the Raid Boards button (`eventType` 2 of `event_config.json`). **Raid spawns from event quests,
+   decided 07-11 by the author: none, by default.** Research (private `events/sources/EVENT_RAID_SPAWNS.md`): notice 49535 ends raid
+   spawns outside raid events from 2019-01-24 00:00 PT, and khuxwiki `raid=` (2750 event quest pages) stops at that date; before it, event
+   quests did spawn (Behemoth / Behemoth Ω from the January 2017 events). The April 2019 re-runs of the pilot fall after it, so «no spawn»
+   is original for them; for 2016-2018 runs it is a declared simplification (all events are served as re-runs on the same rule). The
+   server already behaves this way (event quests add nothing to the raid counter). Still open: whether the Raid Boards button belongs on
+   the quest list of a non-raid event (research running).
 2. ~~The quest counter says «1/12» on an event with 9 served quests.~~ Not a bug (07-11): «1/12» is part of the original quest NAME
    («Dark-Winged Warrior - 1/12», donor row and khuxwiki alike), the client shows no counter.
 3. ~~«Complete without having to continue» twice.~~ Original (07-11): the donor row has objectives [28, 10, 10] and khuxwiki DWW 1/12 lists
