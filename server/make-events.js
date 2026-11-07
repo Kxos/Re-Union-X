@@ -237,9 +237,14 @@ function itemResolver(master) {
     if (!byName.has(k)) byName.set(k, []);
     byName.get(k).push(m);
   }
+  const medalOf = new Map((master.medal || []).map((m) => [m.medalId, m]));
   const medal = (d) => {
-    if (medalIds.has(d.id)) return d.id;
     const mt = /^(.*) (\d+)★$/.exec(String(d.name || ''));
+    // the donor id is ours when it names the same medal (or the record gives no «Name N★» to compare)
+    if (medalIds.has(d.id)) {
+      const own = medalOf.get(d.id);
+      if (!mt || (own.name === mt[1] && String(own.rare) === mt[2])) return d.id;
+    }
     if (!mt) return null;
     let rows = byName.get(`${mt[1]}|${mt[2]}`) || [];
     if (rows.length > 1) rows = rows.filter((m) => m.medalId === m.imageId);
@@ -342,7 +347,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (raidish) { item.why = 'raid or Special quest'; continue; }
       // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
       if (wiki && (!Number.isInteger(mapKey) || !(q.enemies || []).some((e) => Number.isInteger(e.id)))) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
-      const missing = enemyIdsOf(q).filter((id) => Number.isInteger(id) && !enemies.has(id));
+      const missing = enemyIdsOf(q).filter((id) => (wiki ? Number.isInteger(id) : true) && !enemies.has(id));
       if (missing.length) { item.why = `enemies not in the master: ${missing.join(', ')}`; continue; }
       if (resolveItem) {
         const r = remapItems(q, resolveItem);
@@ -351,13 +356,17 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       }
       const clash = byMap.get(mapKey);
       if (clash) { item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
-      if (builtMaps.has(mapKey)) { item.why = `map key ${mapKey} is the map of event stage ${builtMaps.get(mapKey)} too`; continue; }
-      builtMaps.set(mapKey, stageId);
+      // difficulty variants of one record share a donor map (same stageBinId, map and POI written once: the POI holds only the
+      // uid -> reward rows of the map file, the level of a variant is its stage row's addLevel); another record or other drops: not served
+      const prior = builtMaps.get(mapKey);
+      if (prior && prior.censusId !== rec.censusId) { item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
+      const dropsKey = JSON.stringify(q.drops || null);
+      if (prior && prior.dropsKey !== dropsKey) { item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
-      const mapItem = { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
+      const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
         drops: q.drops || null, served: false };
-      out.maps.push(mapItem);
+      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem }); out.maps.push(mapItem); }
       let newRewards = [];
       if (maps) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
@@ -421,6 +430,8 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     if (!e.sharedWith) continue;
     const target = out.index.entries.find((x) => x.censusId === e.sharedWith);
     if (target) Object.assign(e, { stageIds: [...target.stageIds], useAp: target.useAp, sharedEvStageId: target.evStageId });
+    else if (!records.some((r) => r.censusId === e.sharedWith)) throw new Error(`events: ${e.censusId} shares with ${e.sharedWith}, which is not in the records`);
+    else console.warn(`events: ${e.censusId} shares with ${e.sharedWith}, which is not selected: no quests for it`);
   }
   // Event Catalog banner (Task 5): as the Raid Catalog banner of make-raid.js (CATALOG_EV), an evStage holding the Training
   // Grounds of the Special Catalog (our own quest, no Lux, no drops: a tap always opens the banner's quest list), eventType 0,
@@ -434,7 +445,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     out.catalogEvStage = row;
     out.index.catalog = { evStageId: config.catalogEvStage, stageIds: [config.catalogStage], useAp: [Number(training.useAp) || 0] };
   }
-  for (const e of out.index.entries) if (e.reason && !REASONS.includes(e.reason)) throw new Error(`events: unknown reason ${e.reason}`);
+  for (const e of out.index.entries) for (const r of [e.reason, ...e.quests.map((x) => x.reason)]) if (r && !REASONS.includes(r)) throw new Error(`events: unknown reason ${r}`);
   for (const l of [...used].sort()) {
     const why = (config.reconstructedWhy || {})[l];
     if (!why) throw new Error(`events: label ${l} has no reconstructedWhy text in event_config.json`);

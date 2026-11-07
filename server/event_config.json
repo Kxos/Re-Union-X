@@ -20,7 +20,7 @@
   "board": "In the original this event had no quests of its own: it was played on the event boards, which come with a later update.",
   "coin": "In the original this event had no quests of its own: it paid Event Coins, which come with the event boards in a later update.",
   "undated": "The original start date of this event is not known, so it cannot be placed in the calendar and is not listed.",
-  "wikiEmpty": "The khuxwiki page of this quest gives no map and no enemy we can identify, so it cannot be rebuilt yet.",
+  "wikiEmpty": "The khuxwiki page of this quest gives no map or no enemy we can identify, so it cannot be rebuilt yet.",
   "rewardItemMissing": "A reward of this quest (a medal or a material) does not exist in our game data yet, so the quest is not served.",
   "notSelected": "Not part of the events served so far."
  },
