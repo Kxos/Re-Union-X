@@ -133,6 +133,9 @@ This restoration stands on the work of people who preserved and documented the g
   quests, medals, special attacks, events and images used as references.
 - **ReLux Team** — research on the game's events, raids, Union Cross and campaigns, player-made calculators, and
   pointers to community references, which guide the restoration of the event modes.
+- **SmellyOctopus** ([YouTube](https://www.youtube.com/@SmellyOctopus)) — thank you for teaching so many of us to
+  play free-to-play wisely, and for keeping us company back then with videos full of joy. Those KHUX videos are now
+  a huge help as references and information for the restoration.
 
 ## Repository rules
 

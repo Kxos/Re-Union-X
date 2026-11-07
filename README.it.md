@@ -133,6 +133,9 @@ Questo restauro si regge sul lavoro di chi ha conservato e documentato il gioco 
   missioni, medaglie, speciali, eventi e immagini usati come riferimento.
 - **ReLux Team** — ricerche su eventi, raid, Union Cross e campagne del gioco, calcolatori fatti dai giocatori e
   indicazioni sui riferimenti della community, che guidano il restauro delle modalita' a evento.
+- **SmellyOctopus** ([YouTube](https://www.youtube.com/@SmellyOctopus)) — grazie per aver insegnato a tanti di noi a
+  essere giocatori F2P consapevoli e per averci tenuto compagnia all'epoca con video pieni di gioia. Quei video di
+  KHUX oggi ci aiutano moltissimo come riferimento e fonte di informazioni per il restauro.
 
 ## Regole del repository
 
