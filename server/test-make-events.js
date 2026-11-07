@@ -7,7 +7,7 @@ const me = require('./make-events');
 const { EVSTAGE_MAX_STAGES } = require('./make-raid');
 
 const REAL_CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8'));
-const CONFIG = { ...REAL_CONFIG, onlyCensusIds: null };
+const CONFIG = { ...REAL_CONFIG, onlyCensusIds: null, serve: null };
 
 const storyRow = (id, worldId) => ({ stageId: 1000 + id, stageBinId: 0, id, name: `Story ${id}`, mapName: 'Room', useAp: 9, chapterId: 1, worldId, thumbId: 40000, onlyDrama: 0, stageKind: 1,
   showIcon: 0, hideIcon: 0, noPartner: 0, validStopStage: 0, validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 1, afterDramaId: [7], afterDramaType: [0], branchType: 0,
@@ -369,6 +369,144 @@ const tests = {
     fs.writeFileSync(path.join(gd, 'events.json'), JSON.stringify({ ...idx3, own: { ...idx3.own, poi: [] } }));
     assert.throws(() => me.patch(md, opts), /not ours/);
     fs.rmSync(dir, { recursive: true, force: true });
+  },
+  // ---- Events Part 2 (gem quests), Task 3 ----
+  records_folder() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-events-'));
+    fs.writeFileSync(path.join(dir, 'b.json'), JSON.stringify([record('E-2', [quest(700010, 2, [502])])]));
+    fs.writeFileSync(path.join(dir, 'a.json'), JSON.stringify([record('E-1', [quest(700001, 1, [501])])]));
+    fs.writeFileSync(path.join(dir, 'event_anchors.json'), JSON.stringify({ 'E-1': 700001, 'E-2': 700010 }));
+    assert.deepStrictEqual(me.readRecords(dir).map((r) => r.censusId), ['E-1', 'E-2'], 'sorted by file name, anchors apart');
+    assert.deepStrictEqual(me.readRecords(path.join(dir, 'b.json')).map((r) => r.censusId), ['E-2'], 'a file as in Part 1');
+    assert.strictEqual(me.anchorsPathOf(dir), path.join(dir, 'event_anchors.json'));
+    assert.strictEqual(me.anchorsPathOf(path.join(dir, 'b.json')), path.join(dir, 'event_anchors.json'));
+    fs.writeFileSync(path.join(dir, 'c.json'), JSON.stringify([record('E-1', [])]));
+    assert.throws(() => me.readRecords(dir), /E-1.*twice/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  },
+  serve_selection() {
+    const recs = [...records(), record('G-1', [quest(700100, 1, [501])], { type: 'GEM' }), record('Q-1', [quest(700200, 1, [501])], { type: 'EQ' })];
+    const serve = { censusIds: ['E-1', 'E-2'], types: ['GEM'] };
+    const out = build(recs, undefined, { ...CONFIG, serve });
+    assert.deepStrictEqual(out.index.entries.map((e) => e.censusId), ['E-1', 'E-2', 'G-1'], 'ids and type both build');
+    assert.deepStrictEqual(out.skipped, [{ censusId: 'Q-1', reason: 'notSelected' }]);
+    assert.ok('Q-1' in out.ids.rows, 'every record is numbered');
+    // the old key alone still filters
+    const old = build(recs, undefined, { ...CONFIG, onlyCensusIds: ['E-2'] });
+    assert.deepStrictEqual(old.index.entries.map((e) => e.censusId), ['E-2']);
+    // the real config: 13 pilot ids and the GEM type
+    assert.strictEqual(REAL_CONFIG.serve.censusIds.length, 13);
+    assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM']);
+    assert.ok(!('onlyCensusIds' in REAL_CONFIG));
+  },
+  shared_notice_built_once() {
+    const recs = [record('S-1', [quest(700300, 1, [501]), quest(700301, 1, [502])], { type: 'GEM' }), record('S-2', [], { type: 'GEM', sharedWith: 'S-1' })];
+    const out = build(recs);
+    const a = entry(out, 'S-1'), b = entry(out, 'S-2');
+    assert.strictEqual(a.stageIds.length, 2);
+    assert.deepStrictEqual(b.stageIds, a.stageIds);
+    assert.strictEqual(b.sharedWith, 'S-1');
+    assert.strictEqual(b.reason, 'shared');
+    assert.strictEqual(b.why, REAL_CONFIG.reasonText.shared);
+    assert.strictEqual(out.evStage.length, 1, 'one evStage row for the shared stages');
+    assert.strictEqual(out.stage.length, 2);
+    // the other way round (the sharing row first) gives the same
+    const rev = build([recs[1], recs[0]]);
+    assert.deepStrictEqual(entry(rev, 'S-2').stageIds, entry(rev, 'S-1').stageIds);
+    assert.strictEqual(rev.evStage.length, 1);
+    // a sharing record with quests of its own: still no second set
+    const both = build([recs[0], record('S-3', [quest(700310, 1, [501])], { type: 'GEM', sharedWith: 'S-1' })]);
+    assert.strictEqual(both.stage.length, 2);
+  },
+  no_quest_rows_reasoned() {
+    for (const why of ['board', 'coin']) {
+      const out = build([record('N-1', [], { type: 'GEM', noQuests: why })]);
+      const e = entry(out, 'N-1');
+      assert.strictEqual(e.reason, why);
+      assert.strictEqual(e.why, REAL_CONFIG.reasonText[why]);
+      assert.ok(e.why.length > 10 && e.noQuests === why && !e.available);
+      assert.strictEqual(out.evStage.length, 0);
+      assert.strictEqual(out.stage.length, 0);
+    }
+  },
+  undated_not_listed() {
+    const rec = record('U-1', [quest(700400, 1, [501])], { type: 'GEM' });
+    delete rec.start; delete rec.end;
+    const out = build([rec]);
+    const e = entry(out, 'U-1');
+    assert.strictEqual(e.reason, 'undated');
+    assert.strictEqual(e.why, REAL_CONFIG.reasonText.undated);
+    assert.strictEqual(out.evStage.length, 0);
+    assert.strictEqual(out.stage.length, 0);
+    assert.ok(!e.available);
+    for (const k of ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing']) assert.ok(REAL_CONFIG.reasonText[k] && REAL_CONFIG.reasonText[k].length > 10, k);
+  },
+  reward_items_exist() {
+    const m = { ...master(), medal: [{ medalId: 90011, imageId: 90011, name: 'Moogle', rare: 6 }], material: [{ materialId: 48, name: 'Power Gem' }] };
+    const gem = { type: 5, id: 48, num: 1, name: 'Power Gem' };
+    const withObj = (rewards) => rewards.map((r) => objective(10, 'Complete without having to continue', r));
+    const good = quest(700500, 1, [501], { objectives: withObj([gem, { type: 3, id: 90011, num: 1, name: 'Moogle 6★' }]) });
+    const bad = quest(700501, 1, [501], { firstClear: [{ type: 3, id: 90346, num: 1, name: 'SP Chip & Dale 6★' }] });
+    const badGem = quest(700502, 1, [501], { objectives: withObj([{ type: 5, id: 999, num: 1, name: 'Nothing Gem' }]) });
+    const okFirst = quest(700503, 1, [501], { firstClear: [{ type: 3, id: 90011, num: 1, name: 'Moogle 6★' }, gem] });
+    const out = build([record('R-1', [good, bad, badGem, okFirst], { type: 'GEM' })], undefined, CONFIG, m);
+    const qs = entry(out, 'R-1').quests;
+    assert.deepStrictEqual(qs.map((q) => q.served), [true, false, false, true]);
+    assert.strictEqual(qs[1].reason, 'rewardItemMissing');
+    assert.strictEqual(qs[2].reason, 'rewardItemMissing');
+    assert.match(qs[1].why, /90346/);
+    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [90011, 48]);
+  },
+  medal_id_remapped() {
+    const row = (medalId, imageId, name, rare) => ({ medalId, imageId, name, rare });
+    const m = { ...master(), material: [], medal: [row(300001, 300001, 'Foo', 7), row(300002, 300002, 'Foo', 6), row(400001, 400001, 'Tie', 7), row(400002, 400001, 'Tie', 7),
+      row(500001, 500001, 'Dup', 7), row(500002, 500002, 'Dup', 7)] };
+    const first = (id, name) => ({ firstClear: [{ type: 3, id, num: 5, name }], objectives: [objective(10, 'Complete without having to continue', { type: 2, id: 0, num: 1 })] });
+    const recs = [record('M-1', [quest(700600, 1, [501], first(95001, 'Foo 7★')), quest(700601, 1, [501], first(95002, 'Tie 7★')), quest(700602, 1, [501], first(95003, 'Dup 7★')),
+      quest(700603, 1, [501], first(95004, 'Nope 7★'))], { type: 'GEM' })];
+    const out = build(recs, undefined, CONFIG, m);
+    const qs = entry(out, 'M-1').quests;
+    assert.deepStrictEqual(qs.map((q) => q.served), [true, true, false, false]);
+    assert.deepStrictEqual(out.stage.flatMap((s) => s.clearGetItemId), [300001, 400001], 'our id; a tie goes to medalId == imageId');
+    assert.strictEqual(qs[2].reason, 'rewardItemMissing');
+    assert.strictEqual(recs[0].quests[0].firstClear[0].id, 95001, 'the record is not changed');
+  },
+  pilot_ids_unchanged() {
+    const ids = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_ids.json'), 'utf8'));
+    // a record per numbered census row, its quests from the stored keys (offsets from a fixed anchor)
+    const ANCH = 5000000, byRec = {};
+    for (const k of Object.keys(ids.entries)) { const [c, off] = k.split('/'); (byRec[c] = byRec[c] || []).push(off); }
+    const recs = Object.keys(ids.rows).map((c) => record(c, (byRec[c] || []).map((off) => quest(ANCH + Number(off), 1, [501])), { type: 'EQ' }));
+    const anchors = Object.fromEntries(Object.keys(ids.rows).map((c) => [c, ANCH]));
+    const maxRow = Math.max(...Object.values(ids.rows)), maxEntry = Math.max(...Object.values(ids.entries));
+    recs.push(record('G-NEW', [quest(ANCH + 1, 1, [501]), quest(ANCH + 2, 1, [501])], { type: 'GEM' }));
+    const out = build(recs, ids, { ...CONFIG, serve: { censusIds: Object.keys(ids.rows), types: ['GEM'] } }, master(), { ...anchors, 'G-NEW': ANCH + 1 });
+    for (const [k, v] of Object.entries(ids.rows)) assert.strictEqual(out.ids.rows[k], v, k);
+    for (const [k, v] of Object.entries(ids.entries)) assert.strictEqual(out.ids.entries[k], v, k);
+    assert.ok(out.ids.rows['G-NEW'] > maxRow);
+    assert.ok(Object.entries(out.ids.entries).filter(([k]) => !(k in ids.entries)).every(([, v]) => v > maxEntry));
+    assert.strictEqual(Object.keys(out.ids.entries).filter((k) => k.startsWith('G-NEW/')).length, 2);
+  },
+  difficulty_quests_apart() {
+    const qs = [5, 20, 40].map((ap, i) => quest(700700 + i, 1, [501], { ap, name: 'No Continues: Weekly Gem' }));
+    const out = build([record('D-1', qs, { type: 'GEM' })]);
+    assert.deepStrictEqual(out.stage.map((s) => s.useAp), [5, 20, 40]);
+    assert.strictEqual(new Set(out.stage.map((s) => s.stageId)).size, 3);
+  },
+  wiki_quest_labelled() {
+    const wq = quest(700800, 1, [501], { label: 'wikiQuest' });
+    const out = build([record('W-1', [wq], { type: 'GEM' })]);
+    const e = entry(out, 'W-1');
+    assert.ok(e.available && e.labels.includes('wikiQuest'), JSON.stringify(e.labels));
+    assert.match(out.index.reasons.wikiQuest, /rebuilt from the khuxwiki page/);
+    assert.strictEqual(REAL_CONFIG.reconstructedWhy.wikiQuest, 'Quest rebuilt from the khuxwiki page: no master row of the original is known');
+    // a wiki-only quest with no map key and no enemy id cannot be built: wikiEmpty
+    const empty = quest(1, 1, [501], { label: 'wikiQuest', map: { status: 'absent', source: null }, enemies: [{ id: null, name: 'X', label: 'wikiEnemy' }], targets: [{ id: null, name: 'X' }] });
+    delete empty.stageId;
+    const o2 = build([record('W-2', [empty], { type: 'GEM' })]);
+    assert.strictEqual(entry(o2, 'W-2').quests[0].reason, 'wikiEmpty');
+    assert.strictEqual(entry(o2, 'W-2').reason, 'wikiEmpty');
+    assert.strictEqual(o2.stage.length, 0);
   },
   no_source_writes_nothing() {
     const old = process.env.KHUX_EVENT_SRC;
