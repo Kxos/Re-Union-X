@@ -133,7 +133,8 @@ const tests = {
     assert.strictEqual((cat.match(/class="row /g) || []).length, 4, 'one catalogue row per record');
     assert.ok(!cat.includes('id="q29930"'));
     const d = pages.detailPage(ix, 29900, ctx());
-    assert.ok(d.includes('<h2>Cards</h2>') && d.includes('/img/v1/29930.png') && d.includes('Mar 2, 2019'), 'the rows with card and dates');
+    assert.ok(d.includes('<h2>Cards</h2>') && d.includes('Mar 2, 2019'), 'the rows with dates');
+    assert.ok(!d.includes('/img/v1/29930.png'), 'no card image for a row not built (its card is never written)');
     assert.ok(/Not served yet/.test(d.slice(d.indexOf('<h2>Cards</h2>'))), 'a row without a served quest says so');
     assert.ok(pages.detailPage(ix, 29930, ctx()).includes('<h1>March Fun</h1>'), 'a row id opens the record');
     assert.ok(pages.noticePage(ix, 29930, DOC(), ctx()).includes(NOTICE_LINE), 'Details of a row card: the record notice');

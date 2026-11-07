@@ -119,12 +119,13 @@ const EVENT_SHORT = {
   donorKept: ['values', 'Later game data', 'Used instead of the wiki page (the 2018 run)', 'replaced'],
   wikiLowConfidence: ['values', 'Wiki value', 'From khuxwiki, not confirmed by a second source', 'replaced'],
   noWikiPage: ['values', 'No wiki page', 'Later game data only, no second source', 'replaced'],
+  wikiAp: ['values', 'AP', 'From the khuxwiki page of this run', 'replaced'],
   mapIncomplete: ['values', 'Map', 'Incomplete in our data: the gaps are reported', 'removed'],
   eventCoins: ['rewards', 'Event Coins', 'Not paid yet: they come with the event boards', 'camp'],
   wholeDay: ['rules', 'Opening time', 'Its whole original day (was a short window)', 'bonus'],
   dramaOff: ['rules', 'Scenes', 'The original scenes are not shown yet', 'later'],
 };
-const EVENT_LABEL = { donorKept: 'later game data', wikiLowConfidence: 'a wiki value', noWikiPage: 'no wiki page', mapIncomplete: 'map', eventCoins: 'Event Coins',
+const EVENT_LABEL = { wikiAp: 'AP', donorKept: 'later game data', wikiLowConfidence: 'a wiki value', noWikiPage: 'no wiki page', mapIncomplete: 'map', eventCoins: 'Event Coins',
   wholeDay: 'opening time', dramaOff: 'scenes' };
 const EVENT_GROUPS = [['values', 'Quest data', 'tleg', ''], ['rewards', 'Rewards', 'camp', ' rw'], ['rules', 'Rules', 'weekday', ' ru'], ['other', 'Other', 'replaced', ' ot']];
 // every label in use: the event's and its quests' (served or not), in the order of EVENT_SHORT, unknown ones last
@@ -169,7 +170,7 @@ function detailPage(index, evStageId, ctx = {}) {
   // the original evStage rows of the event (Part 2 Task 5): one card each in the Events tab, with its own dates and quests
   const rows = Array.isArray(e.rows) && e.rows.length > 1 ? e.rows : [];
   const cards = rows.length ? `<h2>Cards</h2><p class="n">In the original game this event showed ${rows.length} cards in the Events tab, each with its own dates and quests.</p>`
-    + `<table class="tt"><tr><th>Card</th><th>Dates</th><th>Quests</th></tr>${rows.map((r) => `<tr><td>${r.evStageId ? `<img width="160" height="35" src="${imgOf(ctx, r.evStageId)}" alt="">` : ''}</td>`
+    + `<table class="tt"><tr><th>Card</th><th>Dates</th><th>Quests</th></tr>${rows.map((r) => `<tr><td>${r.available && r.evStageId ? `<img width="160" height="35" src="${imgOf(ctx, r.evStageId)}" alt="">` : ''}</td>`
       + `<td>${esc(`${niceDay(r.start)}${r.end && r.end !== r.start ? ` – ${niceDay(r.end)}` : ''}`)}${Array.isArray(r.days) && r.days.length ? '<small>its whole day</small>' : ''}</td>`
       + (r.available ? `<td>${esc(plural((r.stageIds || []).length, 'quest'))}</td>` : `<td class="r">Not served yet<small>${esc(plural(r.quests || 0, 'quest'))}</small></td>`) + '</tr>').join('')}</table>` : '';
   const back = ctx.fromCatalog ? backBar(`${BASE}/catalog#q${e.evStageId}`) : '';

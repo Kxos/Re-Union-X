@@ -54,7 +54,7 @@ const tests = {
     assert.deepStrictEqual(b.ids, a.ids, 'same input, same ids');
     // the versioned ids file holds no donor stage id (offsets from the record's anchor, kept apart)
     assert.deepStrictEqual(Object.keys(a.ids.entries), ['E-1/+0', 'E-1/+1', 'E-2/+0']);
-    assert.deepStrictEqual(a.anchors, { 'E-1': 700001, 'E-2': 700010 });
+    assert.deepStrictEqual(a.anchors, { 'E-1': 700001, 'E-2': 700010, 'E-1#row': 900001, 'E-2#row': 900001 }, 'the row of the record id frozen too');
     assert.ok(!JSON.stringify(a.ids).includes('7000'), 'no donor id in event_ids.json');
     assert.strictEqual(a.ids.checks['E-1'].keys, 2);
     assert.deepStrictEqual(b.stage.map((s) => s.stageId), a.stage.map((s) => s.stageId));
@@ -103,7 +103,7 @@ const tests = {
     const opts = { records: records(), config: CONFIG, gameDataDir: path.join(dir, 'gd'), idsFile: path.join(dir, 'event_ids.json'), anchorsFile: path.join(dir, 'private', 'event_anchors.json') };
     fs.mkdirSync(path.join(dir, 'private'));
     me.patch(md, opts);
-    assert.deepStrictEqual(JSON.parse(fs.readFileSync(opts.anchorsFile, 'utf8')), { 'E-1': 700001, 'E-2': 700010 });
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(opts.anchorsFile, 'utf8')), { 'E-1': 700001, 'E-2': 700010, 'E-1#row': 900001, 'E-2#row': 900001 });
     me.patch(md, opts);
     fs.rmSync(opts.anchorsFile);
     assert.throws(() => me.patch(md, opts), /no anchor/);
@@ -482,7 +482,8 @@ const tests = {
     // a record per numbered census row, its quests from the stored keys (offsets from a fixed anchor)
     const ANCH = 5000000, byRec = {};
     for (const k of Object.keys(ids.entries)) { const [c, off] = k.split('/'); (byRec[c] = byRec[c] || []).push(off); }
-    const recs = Object.keys(ids.rows).map((c) => record(c, (byRec[c] || []).map((off) => quest(ANCH + Number(off), 1, [501])), { type: 'EQ' }));
+    // no donor rows: the stage ids are checked here (rows: rows_ids_stable)
+    const recs = Object.keys(ids.rows).map((c) => record(c, (byRec[c] || []).map((off) => quest(ANCH + Number(off), 1, [501])), { type: 'EQ', evStage: [] }));
     const anchors = Object.fromEntries(Object.keys(ids.rows).map((c) => [c, ANCH]));
     const maxRow = Math.max(...Object.values(ids.rows)), maxEntry = Math.max(...Object.values(ids.entries));
     recs.push(record('G-NEW', [quest(ANCH + 1, 1, [501]), quest(ANCH + 2, 1, [501])], { type: 'GEM' }));
@@ -540,18 +541,54 @@ const tests = {
   },
   // the rooms of the imported map must be of the quest's world (event_config.json roomWorlds; neutralRooms such as the Corridor of
   // Darkness DG fit any world; worldExceptions: records checked by hand), else worldMismatch (Task 5 Step 2 checks)
+  // the rooms of the imported map must be of the quest's world (event_config.json roomWorlds; neutralRooms {prefix: home world}:
+  // DG fits world 1, or any world when another room of the quest's world is on the map; worldExceptions by map key: maps checked
+  // by hand), else worldMismatch (Task 5 Step 2 checks, fix round 1)
   world_of_rooms() {
-    const maps = { status: new Map([[701201, { status: 'imported', rooms: ['ED_0008_01_00'] }], [701202, { status: 'imported', rooms: ['DG_0100_02_00', 'DB_0004_00_00'] }],
-      [701203, { status: 'imported', rooms: ['ED_0008_01_00'] }]]), poi: {} };
-    const qs = [quest(701201, 1, [501], { map: { key: 701201, status: 'ok' } }), quest(701202, 1, [501], { map: { key: 701202, status: 'ok' } })];
-    const out = me.buildEvents([record('W-7', qs, { type: 'GEM' }), record('W-8', [quest(701203, 1, [501], { map: { key: 701203, status: 'ok' } })], { type: 'GEM' })],
-      { ...CONFIG, worldExceptions: ['W-8'] }, master(), undefined, undefined, maps);
+    const st = (rooms) => ({ status: 'imported', rooms });
+    const maps = { status: new Map([[701201, st(['ED_0008_01_00'])], [701202, st(['DG_0100_02_00', 'DB_0004_00_00'])], [701203, st(['ED_0008_01_00'])],
+      [701204, st(['DG_0200_27_00'])], [701205, st(['DG_0200_27_00'])], [701206, st(['BC_0005_00_00', 'DG_0100_02_00'])], [701207, st(['ZZ_0001_00_00'])]]), poi: {} };
+    const qq = (id, world) => quest(id, world, [501], { map: { key: id, status: 'ok' } });
+    const qs = [qq(701201, 1), qq(701202, 1), qq(701204, 1), qq(701205, 6), qq(701206, 6), qq(701207, 1)];
+    const cfg = { ...CONFIG, worldExceptions: { 701203: 'checked by hand' } };
+    const out = me.buildEvents([record('W-7', qs, { type: 'GEM' }), record('W-8', [qq(701203, 1)], { type: 'GEM' })], cfg, master(), undefined, undefined, maps);
     const q = entry(out, 'W-7').quests;
-    assert.deepStrictEqual([q[0].reason, q[1].served], ['worldMismatch', true], JSON.stringify(q.map((x) => x.why)));
+    assert.deepStrictEqual(q.map((x) => x.reason || 'served'), ['worldMismatch', 'served', 'served', 'worldMismatch', 'served', 'worldMismatch'], JSON.stringify(q.map((x) => x.why)));
     assert.match(q[0].why, /ED_0008_01_00/);
-    assert.ok(entry(out, 'W-8').quests[0].served, 'a listed exception is served');
-    assert.ok(REAL_CONFIG.reasonText.worldMismatch && REAL_CONFIG.roomWorlds.DB === 1 && REAL_CONFIG.neutralRooms.includes('DG'));
-    assert.deepStrictEqual(REAL_CONFIG.worldExceptions, ['EV-0282']);
+    assert.match(q[3].why, /DG_0200_27_00/, 'DG alone fits world 1 only');
+    assert.match(q[5].why, /ZZ_0001_00_00/, 'a prefix missing from roomWorlds is another world');
+    assert.ok(entry(out, 'W-8').quests[0].served, 'a map listed in worldExceptions is served');
+    assert.ok(REAL_CONFIG.reasonText.worldMismatch && REAL_CONFIG.roomWorlds.DB === 1 && REAL_CONFIG.neutralRooms.DG === 1);
+    assert.deepStrictEqual(Object.keys(REAL_CONFIG.worldExceptions).sort(), ['360010', '360030'], 'EV-0282 and EV-0293 (ruling 07-11)');
+    // the catalogue says it in plain words
+    assert.match(require('./event-pages').whyPlain(q[0].why), /another world/);
+  },
+  // a quest whose row is a guess (no evStageId, outside every stage range): flagged rowGuess
+  row_guess_flagged() {
+    const rec = record('G-1', [quest(700401, 1, [501], { evStageId: 900041 }), quest(700402, 1, [501])], { type: 'GEM',
+      evStage: [donorEv({ eventStageId: 900041, stageRange: { validStageId: 1, stageId: [700401] } }), donorEv({ eventStageId: 900042, stageRange: { validStageId: 1, stageId: [700499] } })] });
+    const q = entry(build([rec]), 'G-1').quests;
+    assert.deepStrictEqual(q.map((x) => !!x.rowGuess), [false, true]);
+  },
+  // a single donor row freezes the row of the record id: a row prepended later does not take it (review Important 3)
+  single_row_frozen() {
+    const one = () => record('F-1', [quest(700501, 1, [501], { evStageId: 900051 })], { type: 'GEM', evStage: [donorEv({ eventStageId: 900051 })] });
+    const a = build([one()]);
+    assert.strictEqual(a.anchors['F-1#row'], 900051);
+    const two = one();
+    two.evStage.unshift(donorEv({ eventStageId: 900050 }));
+    two.quests.unshift(quest(700500, 1, [501], { evStageId: 900050 }));
+    const b = build([two], a.ids, CONFIG, master(), a.anchors);
+    const rows = entry(b, 'F-1').rows;
+    assert.deepStrictEqual(rows.map((r) => [r.donorEvStageId, r.evStageId === CONFIG.evStageBase + a.ids.rows['F-1']]), [[900050, false], [900051, true]]);
+  },
+  // khuxwiki AP over the surviving stage row (record conflict kind ap, resolution khuxwiki): label wikiAp (review Minor 5)
+  wiki_ap_labelled() {
+    const q = quest(700601, 1, [501], { ap: 25, conflicts: [{ kind: 'ap', detail: 'wiki 25 / donor 5', resolution: 'khuxwiki', reason: '' }] });
+    const out = build([record('A-1', [q, quest(700602, 1, [501], { conflicts: [{ kind: 'ap', detail: 'wiki 25 / donor 5', resolution: 'donor kept', reason: '' }] })], { type: 'GEM' })]);
+    const e = entry(out, 'A-1');
+    assert.deepStrictEqual(e.quests.map((x) => x.labels.includes('wikiAp')), [true, false]);
+    assert.ok(e.labels.includes('wikiAp') && /khuxwiki/.test(out.index.reasons.wikiAp));
   },
   shared_target_checked() {
     assert.throws(() => build([record('S-9', [], { type: 'GEM', sharedWith: 'S-0' })]), /S-0.*not in the records/);
@@ -649,6 +686,10 @@ const tests = {
     gone[0].quests[1].evStageId = 900021;
     assert.throws(() => build(gone, a.ids, CONFIG, master(), a.anchors), /R-3\/r\+1/);
     assert.throws(() => build(mk(), undefined, CONFIG, master(), { 'R-3#row': 900029 }), /not in the record any more/);
+    // stored row keys but no #row anchor (sidecar lost): stop, never re-derive the row of the record id
+    const lost = { ...a.anchors };
+    delete lost['R-3#row'];
+    assert.throws(() => build(mk(), a.ids, CONFIG, master(), lost), /R-3#row/);
     // numbers repeated between rows and subRows stop the run
     assert.throws(() => build(mk(), { ...a.ids, subRows: { 'R-3/r+1': a.ids.rows['R-3'] } }, CONFIG, master(), a.anchors), /repeats/);
   },

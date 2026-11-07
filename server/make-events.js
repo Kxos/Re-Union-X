@@ -49,7 +49,7 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy'];
+const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp'];
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
   'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch'];
@@ -162,9 +162,12 @@ function allocateRows(rec, ids, anchors, config) {
   const rows = donorRowsOf(rec), cid = rec.censusId, ak = ROW_ANCHOR(cid);
   const out = new Map();
   if (!rows.length) return out;
-  // one donor row: it holds the record's number, nothing to freeze
-  if (rows.length === 1 && !(ak in anchors)) return out.set(rows[0].eventStageId, config.evStageBase + ids.rows[cid]);
-  if (!(ak in anchors)) anchors[ak] = rows[0].eventStageId;
+  if (!(ak in anchors)) {
+    if (Object.keys(ids.subRows).some((k) => k.startsWith(`${cid}/r`))) {
+      throw new Error(`events: ${cid} has row keys in event_ids.json but no ${ak} in event_anchors.json (the private sidecar was lost or moved): restore it`);
+    }
+    anchors[ak] = rows[0].eventStageId;
+  }
   const anchor = anchors[ak];
   if (!rows.some((r) => r.eventStageId === anchor)) throw new Error(`events: ${cid}: the donor row that holds its evStage id (${ak} in event_anchors.json) is not in the record any more`);
   const prefix = `${cid}/r`, keys = new Set();
@@ -189,10 +192,12 @@ function inStageRange(row, stageId) {
   if ((r.stageId || []).includes(stageId)) return true;
   return !!r.validStageWidthId && r.stageStartId <= stageId && stageId <= r.stageEndId;
 }
+// -> {row, guess}: guess true when the quest matches no row (the first row is taken; patch() warns)
 function rowOfQuest(rows, q) {
-  if (!rows.length) return null;
+  if (!rows.length) return { row: null, guess: false };
   const sid = Number.isInteger(q.stageId) ? q.stageId : q.donorStageOfLaterRun;
-  return rows.find((r) => r.eventStageId === q.evStageId) || rows.find((r) => inStageRange(r, sid)) || rows[0];
+  const hit = rows.find((r) => r.eventStageId === q.evStageId) || rows.find((r) => inStageRange(r, sid));
+  return { row: hit || rows[0], guess: !hit && rows.length > 1 };
 }
 
 function checkRanges(master, config) {
@@ -387,10 +392,12 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       const qLabels = labelIds(q0.label, config.labelPhrases);
       const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(mapKey)], names);
       if (swapped) qLabels.push('wwEnemy');
+      // AP of the khuxwiki page of this run over the surviving stage row (private builder rule, conflict recorded in the record)
+      if ((q0.conflicts || []).some((c) => c.kind === 'ap' && c.resolution === 'khuxwiki')) qLabels.push('wikiAp');
       let q = swapped || q0;
       const wiki = qLabels.includes('wikiQuest');
-      const donorRow = rowOfQuest(donorRows, q0);
-      const item = { key, donorStageId: q.stageId, donorRow: donorRow ? donorRow.eventStageId : null, stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
+      const { row: donorRow, guess: rowGuess } = rowOfQuest(donorRows, q0);
+      const item = { key, donorStageId: q.stageId, donorRow: donorRow ? donorRow.eventStageId : null, ...(rowGuess ? { rowGuess: true } : {}), stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       entry.quests.push(item);
@@ -431,10 +438,13 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
         const st = maps.status.get(mapKey);
         if (!st || st.status !== 'imported') { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
-        // the map's rooms must be of the quest's world (roomWorlds by room prefix; neutralRooms fit any world; worldExceptions:
-        // records checked by hand, as EV-0282: donor world kept on another world's rooms)
-        const off = (st.rooms || []).filter((rm) => !(config.neutralRooms || []).includes(rm.slice(0, 2)) && (config.roomWorlds || {})[rm.slice(0, 2)] !== q.worldId);
-        if (off.length && !(config.worldExceptions || []).includes(rec.censusId)) {
+        // the map's rooms must be of the quest's world (roomWorlds by room prefix; a prefix missing there is another world).
+        // neutralRooms {prefix: home world}: fits its home world, or any world when another room of the map is of the quest's
+        // world. worldExceptions {mapKey: why}: maps checked by hand (EV-0282, EV-0293: donor world kept on another world's rooms)
+        const worldOf = (rm) => (config.roomWorlds || {})[rm.slice(0, 2)], neutral = config.neutralRooms || {};
+        const ownRoom = (st.rooms || []).some((rm) => !(rm.slice(0, 2) in neutral) && worldOf(rm) === q.worldId);
+        const off = (st.rooms || []).filter((rm) => (rm.slice(0, 2) in neutral ? !(neutral[rm.slice(0, 2)] === q.worldId || ownRoom) : worldOf(rm) !== q.worldId));
+        if (off.length && !(String(mapKey) in (config.worldExceptions || {}))) {
           item.reason = 'worldMismatch'; item.why = mapItem.why = `rooms of another world than ${q.worldId}: ${[...new Set(off)].join(', ')}`; continue;
         }
         // reward rows of the map's enemies and chests: the master's, or the original rows of the record's drops (written here); else not served
@@ -658,6 +668,8 @@ function patch(masterDir, opts = {}) {
   console.log(`events: quests not served by reason ${JSON.stringify(byReason)}; entries by reason ${JSON.stringify(entryReasons)}; ${out.skipped.length} records not selected`);
   const skipped = e.filter((x) => !x.available).map((x) => `${x.censusId} (${x.why})`);
   if (skipped.length) console.log(`events: no evStage row: ${skipped.join(', ')}`);
+  const guesses = qs.filter((q) => q.rowGuess);
+  if (guesses.length) console.warn(`events: ${guesses.length} quests match no donor row of their record (first row taken): ${guesses.slice(0, 8).map((q) => q.key).join(', ')}`);
   if (!out.catalogEvStage) console.warn(`events: no Event Catalog banner: the Training Grounds stage ${config.catalogStage} is not in the master (make-special first)`);
   return out;
 }
