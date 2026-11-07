@@ -166,3 +166,16 @@
 1526
 97
 1556
+# Events Part 2, user-approved 07-11 (rendered animations, review rounds 1-5): the pilot families of the 2018 WW
+# record rows appended in Events Task 2b (their served recipe is extra_donors_events2.tsv, override priority)
+1026
+1547
+1555
+1579
+1582
+1585
+1589
+1594
+1596
+1597
+1603

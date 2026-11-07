@@ -70,6 +70,12 @@ function withoutEventRows(rows, ids = eventIds()) {
   return (rows || []).filter((e) => !ids.has(e.enemyId));
 }
 
+// Event families without a model of their own whose rows show another SERVED model of the same creature (user
+// decisions only): 185 Enraged Elk (gem quests) has only a dead animation anywhere, identical to the served 184; the user
+// decided (07-11, Events Part 2) that its rows show the story model 184 (the reference footage, story quest 475, is 184).
+// Declared in the Notices. The private source row keeps its donor displayId; the master row gets the shown one.
+const DISPLAY_AS = Object.freeze({ 185: 184 });
+
 // -> {on, added: [ids], missing: [ids], unapproved: [ids], notDrawn: [ids], stripped}
 function addRows(enemies, src, drawn, on = enabled()) {
   const rep = { on, added: [], missing: [], unapproved: [], notDrawn: [], stripped: strip(enemies, src) };
@@ -79,8 +85,9 @@ function addRows(enemies, src, drawn, on = enabled()) {
     if (!v.row || v.row.enemyId !== id) throw new Error(`event-enemies: row ${k} without its enemyId`);
     if (v.model === 'missing') { rep.missing.push(id); continue; }
     if (!v.approved) { rep.unapproved.push(id); continue; }
-    if (!drawn || !drawn.has(v.row.displayId)) { rep.notDrawn.push(id); continue; }
-    enemies.push(JSON.parse(JSON.stringify(v.row)));
+    const shown = DISPLAY_AS[v.row.displayId] ?? v.row.displayId;
+    if (!drawn || !drawn.has(shown)) { rep.notDrawn.push(id); continue; }
+    enemies.push(Object.assign(JSON.parse(JSON.stringify(v.row)), { displayId: shown }));
     rep.added.push(id);
   }
   return rep;
@@ -98,7 +105,7 @@ function summary(rep) {
     + (rep.unapproved.length ? ` (${rep.unapproved.join(', ')})` : '');
 }
 
-module.exports = { EVENT_ENEMIES_PATH, ID_LIST_PATH, enabled, readEventEnemies, eventIds, writeIdList, withoutEventRows, strip,
+module.exports = { EVENT_ENEMIES_PATH, ID_LIST_PATH, DISPLAY_AS, enabled, readEventEnemies, eventIds, writeIdList, withoutEventRows, strip,
   addRows, attackRows, summary };
 
 if (require.main === module && process.argv[2] === '--report') {

@@ -56,6 +56,16 @@ assert.strictEqual(src.enemies[11].row.name, 'X', 'rows are copies');
 assert.deepStrictEqual(ev.addRows([row(1, 1)], null, drawn, true).added, []);
 assert.deepStrictEqual(ev.addRows([], src, null, true).added, []);
 assert.throws(() => ev.addRows([], { enemies: { 9: { row: row(8, 1), model: 'served', approved: true } } }, drawn, true));
+// 185 Enraged Elk has no model of its own (user decision 07-11): its event rows show the served story model 184; the
+// gate checks the shown model, the private source row keeps its donor displayId
+assert.strictEqual(ev.DISPLAY_AS[185], 184);
+const elk = { enemies: { 170510184: { row: row(170510184, 185, 'Enraged Elk'), model: 'served', approved: true, attacks: [] } } };
+const elkMaster = [];
+rep = ev.addRows(elkMaster, elk, new Set([184]), true);
+assert.deepStrictEqual(rep.added, [170510184], '185 drawn as 184');
+assert.strictEqual(elkMaster[0].displayId, 184, 'event row shows the story model 184');
+assert.strictEqual(elk.enemies[170510184].row.displayId, 185, 'source row untouched');
+assert.deepStrictEqual(ev.addRows([], elk, new Set([185]), true).notDrawn, [170510184], 'gate on 184, not 185');
 // attack rows for enemy-attack-fix: the thethiny row wins on the same id
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ev-enemies-'));
 fs.writeFileSync(path.join(tmp, 'atk.json'), JSON.stringify([{ enemyAttackId: 1, power: 5 }]));

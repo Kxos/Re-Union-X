@@ -1,6 +1,20 @@
 {
- "_doc": "Event quest enemies our master lacks (Events Part 1, Task 2b, 6 Nov 2026): displayId -> name, model (new = every mandatory animation complete in the JP 4.3.1 data with the versioned copy tables; missing = textures or animations still not found, never replaced by another enemy), approved (the user saw the rendered animations). make_jp_enemies.py builds only the approved ones (--event-all: every one, for renders and deep_donors.py). review: user decision on the rendered sheets.",
+ "_doc": "Event quest enemies our master lacks (Events Part 1, Task 2b, 6 Nov 2026): displayId -> name, model (new = every mandatory animation complete in the JP 4.3.1 data with the versioned copy tables; missing = textures or animations still not found, never replaced by another enemy), approved (the user saw the rendered animations). make_jp_enemies.py builds only the approved ones (--event-all: every one, for renders and deep_donors.py). review: user decision on the rendered sheets. Events Part 2 (07-11-2026): 36 models + 96 Circus Clown approved on the rendered review (17 of the pilot, 19 of the gem quests); partial = accepted with missing pieces; std_dead = standard smoke dead. 185 Enraged Elk has no own model and no entry: its event rows show the served story model 184 (server/make-event-enemies.js DISPLAY_AS, user decision 07-11).",
  "families": {
+  "65": {
+   "name": "Cloudy Sunrise",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review round 1; complete with the standard rules)"
+  },
+  "96": {
+   "name": "Circus Clown",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, review round 2: black legs from film 2170401 bitmaps 302-325)",
+   "no_b2016": true,
+   "no_b2016_why": "the 2016 package folder 96 is another creature (purple serpent with a flower head); JP 4.3.1 folder 96 is the Circus Clown; its stale plain pictures come from the old LWF (stale_plain)"
+  },
   "97": {
    "name": "Ringmaster",
    "model": "new",
@@ -15,6 +29,12 @@
    "approved": true,
    "review": "user-approved 06-11 (rendered animations)"
   },
+  "242": {
+   "name": "Trickmaster Ω",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
   "261": {
    "name": "Fortress Crab",
    "model": "new",
@@ -27,6 +47,19 @@
    "approved": true,
    "review": "user-approved 06-11 (rendered animations)"
   },
+  "282": {
+   "name": "Nightmare Chirithy",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "partial": "accepted by the user (round 2): missing pieces are blank (events2-blank), declared in the Notices"
+  },
+  "1024": {
+   "name": "Behemoth Ω",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
   "1025": {
    "name": "Queen Bee",
    "model": "new",
@@ -35,14 +68,42 @@
   },
   "1026": {
    "name": "Queen Bee Ω",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1027": {
    "name": "Guard Armor",
    "model": "new",
    "approved": true,
    "review": "user-approved 06-11 (rendered animations)"
+  },
+  "1029": {
+   "name": "Savage Spider",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1032": {
+   "name": "Scourge Spider",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "partial": "accepted by the user (round 2): missing pieces are blank (events2-blank), declared in the Notices"
+  },
+  "1033": {
+   "name": "Wicked Spider",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "partial": "accepted by the user (round 1): missing pieces are blank (events2-blank), declared in the Notices"
+  },
+  "1034": {
+   "name": "Malicious Spider",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "partial": "accepted by the user (round 1): missing pieces are blank (events2-blank), declared in the Notices"
   },
   "1522": {
    "name": "Iron Giant",
@@ -62,6 +123,12 @@
    "approved": true,
    "review": "user-approved 06-11 (rendered animations)"
   },
+  "1531": {
+   "name": "Adventurer",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
   "1546": {
    "name": "Jewel Sorceress",
    "model": "new",
@@ -70,8 +137,9 @@
   },
   "1547": {
    "name": "Assault Dragon",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1553": {
    "name": "Pink Agaricus",
@@ -81,8 +149,9 @@
   },
   "1555": {
    "name": "Titan",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1556": {
    "name": "Icy Beast",
@@ -92,8 +161,9 @@
   },
   "1564": {
    "name": "Ramuh",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1565": {
    "name": "Upright Defender",
@@ -107,10 +177,45 @@
    "approved": true,
    "review": "user-approved 06-11 (rendered animations)"
   },
+  "1568": {
+   "name": "Rush Ghost",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "std_dead": "no dead anywhere: standard Shadow smoke dead (std-dead, user-approved 07-11)"
+  },
+  "1569": {
+   "name": "Shred Ghost",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1570": {
+   "name": "Trick Ghost",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "std_dead": "no dead anywhere: standard Shadow smoke dead (std-dead, user-approved 07-11)"
+  },
+  "1572": {
+   "name": "White Mushroom",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "std_dead": "no dead anywhere: standard Shadow smoke dead (std-dead, user-approved 07-11)"
+  },
+  "1573": {
+   "name": "Rare Truffle",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "std_dead": "no dead anywhere: standard Shadow smoke dead (std-dead, user-approved 07-11)"
+  },
   "1579": {
    "name": "Xaldin",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1580": {
    "name": "Shiva",
@@ -120,18 +225,33 @@
   },
   "1582": {
    "name": "Vexen",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1585": {
    "name": "Lexaeus",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1586": {
+   "name": "Driller Mole",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1588": {
+   "name": "Ribbitoad",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1589": {
    "name": "Zexion",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1593": {
    "name": "Sephiroth",
@@ -141,48 +261,76 @@
   },
   "1594": {
    "name": "Saïx",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1596": {
    "name": "Axel",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1597": {
    "name": "Demyx",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1603": {
    "name": "Luxord",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1604": {
    "name": "Marluxia",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1605": {
    "name": "Larxene",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1606": {
    "name": "Xemnas",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "1607": {
    "name": "Xigbar",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)",
+   "partial": "accepted by the user (round 4): missing pieces are blank (events2-blank), declared in the Notices"
+  },
+  "1626": {
+   "name": "Poisonous Pretender",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1627": {
+   "name": "Paralysis Pretender",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1634": {
+   "name": "False Master",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   },
   "2009": {
    "name": "sEnm_2009",
-   "model": "missing",
-   "approved": false
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
   }
  }
 }

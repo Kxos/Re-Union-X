@@ -13,6 +13,8 @@ lwfhunt study (local, tmp\\dedup\\lwfhunt):
     wait has the same 1-frame wait.lwf, equal draw for draw to frame 1 of atk1_o in all 8 allies);
   * rule whole-same-rig (category 3, reconstruction: not a proven copy): 1576/1578 dead = 1577 dead (Gearbit rig with
     identical texture tables and placement), 1618 dead = 1624 dead (Cy-Bug rig, same footprint; 1624 and 1628 share it).
+  * rule std-dead (category 3, Events Part 2, user-approved 07-11): event families with no dead anywhere (1568, 1570,
+    1572, 1573) and 96 Circus Clown take the standard Heartless defeat, the Shadow smoke of enemy/1/dead.
 For each copy the donor animation is planned with make_jp_enemies.plan_anim (LWF + the source of every texture as the
 generator serves it for the donor) and every file becomes a row `<published>\\t<container>:<path>\\t<rule>\\t<note>`.
 make_jp_enemies.py reads the table with extra_donors.tsv (whole animations only: the LWF row and all its textures).
@@ -31,6 +33,7 @@ SMOKE = (251, 255, 271, 285, 1500, 1502, 1504, 1505, 1506, 1510, 2500, 2501, 250
 IDX = '2018 WW container name index: same record offsets as %s (I-194 23-10, user-approved)'
 IDX_PENDING = '2018 WW container name index: same record offsets as %s (Events Task 2b, pending user review)'
 IDX_EVENTS = '2018 WW container name index: same record offsets as %s (Events Task 2b, user-approved 06-11)'
+STD_DEAD = 'std-dead (user-approved 07-11): standard Heartless defeat, enemy/1/dead (Shadow smoke cloud); no dead of this family exists'
 # (family, anim, donor: (family, anim) planned like the generator, or 'container:folder' copied as is, rule, note)
 COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (generic Shadow smoke)') for f in SMOKE] +
           [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX % ('%d/dead (twin)' % t))
@@ -51,7 +54,14 @@ COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (gener
           [(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX_EVENTS % 'enemy/1/dead (generic Shadow smoke)')
            for f in (226, 1530)] +
           [(f, 'dead', (t, 'dead'), 'whole-ww-index', IDX_EVENTS % ('%d/dead (twin)' % t))
-           for f, t in ((1522, 1529), (1566, 1565))])
+           for f, t in ((1522, 1529), (1566, 1565))] +
+          # Events Part 2 (07-11-2026): no dead of these event families exists in any local source (Rush Ghost, Trick
+          # Ghost, White Mushroom, Rare Truffle); the user approved the standard Heartless defeat, the Shadow smoke cloud
+          # of enemy/1/dead (rule std-dead, category 3: not a proven copy). 96 Circus Clown: the JP folder keeps only
+          # dead.res and its 2016 folder is another creature (no_b2016), whose dead is byte-identical to enemy/1/dead
+          [(f, 'dead', (1, 'dead'), 'std-dead', STD_DEAD) for f in (1568, 1570, 1572, 1573)] +
+          [(96, 'dead', (1, 'dead'), 'std-dead', STD_DEAD + '; 96 Circus Clown: JP keeps only dead.res, the 2016 dead '
+            'of folder 96 is byte-identical to enemy/1/dead')])
 
 
 def to_box(p):
@@ -110,7 +120,8 @@ def main():
     head = ['# WHOLE-animation copies approved by the user (I-194, 23-10; whole_export.py, read by make_jp_enemies.py).',
             '# Columns: published path, source <container>:<path>, rule, note. Only names and paths.',
             '# Rules: whole-ww-index, whole-same-pose = original copies (category 2); whole-same-rig = reconstruction',
-            '# (category 3). %d copies, %d rows.' % (len(COPIES), len(rows))]
+            '# (category 3); std-dead = standard Shadow smoke dead where no dead exists (user-approved 07-11, category 3).',
+            '# %d copies, %d rows.' % (len(COPIES), len(rows))]
     print('%d copies, %d rows' % (len(COPIES), len(rows)))
     if not a.dry:
         with open(a.out, 'w', encoding='utf-8', newline='\n') as fh:

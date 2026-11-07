@@ -52,6 +52,13 @@ whole_export.py, `--whole ''` excludes it): the 2018 WW container name index put
 the records of a donor dead (generic Shadow smoke or the twin; rule whole-ww-index, category 2), Ralph allies' wait =
 2013 wait (whole-same-pose, category 2), 1576/1578/1618 dead from a same-rig family (whole-same-rig, category 3).
 
+Approved event models (Events Part 2, 07-11-2026; recon/tools/extra_donors_events2.tsv from events2_export.py, `--events2 ''`
+excludes it): an animation whose LWF has a row is taken WHOLE from that table, before every other source (override priority:
+the exact recipe of the rendered model the user approved); rules events2-jp (category 1), events2-copy (2), events2-recon,
+events2-cand, events2-rescale and events2-blank (3; rescaled and blank pieces only at exactly the declared size). Family and
+animation rules in report.json (`events2`, `events2_complete`). Whole standard dead where none exists: rule std-dead of
+extra_donors_whole.tsv (category 3).
+
 Effetti di comparsa: lwf/character/enemy/show_effect_fla/show_effect<N>/ per gli showSwf originali
 (external\\thethiny\\enemy_dec.json) non serviti, stesse regole (completi o niente).
 
@@ -105,6 +112,9 @@ ap.add_argument('--whole', default=None,
 ap.add_argument('--dedup', default=None,
                 help="original copies matched by texture-table order, user-approved (default "
                      "recon/tools/extra_donors_dedup.tsv, dedup_export.py; '' = none)")
+ap.add_argument('--events2', default=None,
+                help="approved event models, whole animations with override priority (default "
+                     "recon/tools/extra_donors_events2.tsv, events2_export.py; '' = none)")
 ap.add_argument('--recolour', default=None,
                 help="texture ricolorate da un gemello (default recon/tools/jp_recoloured.tsv; '' = nessuna)")
 ap.add_argument('--src-root', action='append', default=[], metavar='CONTENITORE=CARTELLA',
@@ -138,7 +148,8 @@ RECON = jp_reconstructed.load(jp_reconstructed.TABLE if a.recon is None else a.r
 import extra_donors  # noqa: E402
 EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra,
                           rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override', 'dedup-rescale',
-                                                           'dedup-wwrecord-override'})
+                                                           'dedup-wwrecord-override', 'std-dead'}
+                          - set(extra_donors.EVENTS2_RULES))
 # original copies found by content (deep_donors.py: rules content-anchor and bracket, category 2); extra_donors.tsv
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
@@ -146,7 +157,11 @@ EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.
 # user-approved WHOLE-animation copies (extra_donors_whole.tsv from whole_export.py, I-194 23-10): used only as whole
 # animations (LWF row + all its texture rows) when the JP LWF is absent; extra_donors.tsv wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.WHOLE_TABLE if a.whole is None else a.whole,
-                               rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig'}), **EXTRA)
+                               rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig', 'std-dead'}), **EXTRA)
+# Events Part 2 (07-11): the user-approved event models (extra_donors_events2.tsv from events2_export.py): an animation
+# whose LWF has a row is taken WHOLE from this table, before every other source (override priority: the table is the
+# exact recipe of the rendered model the user approved); a texture without a usable row leaves it incomplete
+EV2 = extra_donors.load(extra_donors.EVENTS2_TABLE if a.events2 is None else a.events2, rules=set(extra_donors.EVENTS2_RULES))
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
 # category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
 # rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
@@ -357,11 +372,56 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
     return None, None
 
 
+EV2_USED = {}   # '<root_rel>/<anim>' -> {rule: rows} of the animations taken from the events2 table (report.json)
+
+
+def plan_events2(pre, lw):
+    """Animation of an approved event model (extra_donors_events2.tsv, Events Part 2 07-11) -> (status, todo or None,
+    note, category, {rule: rows}); None when the table has no row for its LWF. The animation comes WHOLE from the table
+    (override priority): the LWF row and one row per texture of its texture table. Size rules: events2-jp = the
+    family's own JP file at its stored resolution (as the 'jp' source); copies and reconstructions within +-2 px of the
+    declared size; events2-rescale and events2-blank at EXACTLY the declared size. A missing row or file, or a size
+    off, leaves the animation incomplete: never another source mixed in."""
+    if (pre + lw) not in EV2:
+        return None
+    lp = extra_donors.lookup(EV2, pre + lw, ROOTS)
+    if not lp:
+        return 'incompleta', None, 'events2: LWF source missing (%s)' % EV2[pre + lw][1], None, {}
+    dims = tex_dims(lp)
+    names = sorted(dims) if dims is not None else refs_of(lp)
+    todo, cat, used, bad = {pre + lw: lp}, extra_donors.category(EV2[pre + lw][2]), {EV2[pre + lw][2]: 1}, []
+    for t in names:
+        v = EV2.get(pre + t)
+        p = extra_donors.lookup(EV2, pre + t, ROOTS) if v else None
+        if p and v[2] in ('events2-rescale', 'events2-blank'):
+            ok = dims is not None and fits_exact(p, dims.get(t))
+        elif p and v[2] != 'events2-jp':
+            ok = dims is None or fits(p, dims.get(t))
+        else:
+            ok = bool(p)
+        if not ok:
+            bad.append(t)
+            continue
+        todo[pre + t] = p
+        used[v[2]] = used.get(v[2], 0) + 1
+        cat = max(cat, extra_donors.category(v[2]))
+    if bad:
+        return 'incompleta', None, 'events2: %d of %d textures without a usable row' % (len(bad), len(names)), None, used
+    return 'events2', todo, 'events2: approved event model (%s)' % ', '.join(
+        '%d %s' % (n, k) for k, n in sorted(used.items())), cat, used
+
+
 def plan_anim(root_rel, anim, jp_all):
     """Animazione <root_rel>/<anim>/: -> (stato, {nome: fonte} o None, nota, categoria).
     jp_all: {anim: listing JP} dello stesso nemico (per le texture scartate come doppioni).
     categoria (regola dell'utente, extra_donors.py): 1 file diretti, 2 copie originali, 3 ricostruite, 4 ricolorate;
     la peggiore fra le texture."""
+    ev = plan_events2('%s/%s/%s/' % (ENEMY, root_rel, anim), anim + '.lwf')
+    if ev is not None:
+        st, files, note, cat, used = ev
+        if files:
+            EV2_USED['%s/%s' % (root_rel, anim)] = used
+        return st, files, note, cat
     jp = jp_all.get(anim) or {}
     # families whose 2016 folder is ANOTHER creature (event_enemy_families.json no_b2016, e.g. 97: the 2016 package
     # holds a Shadow placeholder under displayId 97, JP revised it into the Ringmaster): the 2016 files are never used
@@ -440,7 +500,8 @@ def plan_anim(root_rel, anim, jp_all):
             if table is RECOL:
                 st = 'gemello ricolorato'
             else:
-                st = {'whole-dr-twin': 'gemello DR', 'whole-same-rig': 'ricostruita intera'}.get(rule, 'copia intera')
+                st = {'whole-dr-twin': 'gemello DR', 'whole-same-rig': 'ricostruita intera',
+                      'std-dead': 'std-dead'}.get(rule, 'copia intera')
                 label = 'animazione intera dal gemello Dark Road' if rule == 'whole-dr-twin' else label + ' (' + rule + ')'
             notes.append('%s (%s)' % (label, table[pre + lw][3]))
             return st, todo, '; '.join(notes), wc
@@ -459,6 +520,8 @@ def plan_enemy(d):
                 jp_all[an] = listing(os.path.join(jd, an))
     bd = os.path.join(a.b2016, rel)
     anims = set(jp_all) | (set(f for f in os.listdir(bd) if os.path.isdir(os.path.join(bd, f))) if os.path.isdir(bd) else set())
+    ev_pre = '%s/%s/' % (ENEMY, rel)
+    anims |= {k[len(ev_pre):].split('/')[0] for k in EV2 if k.startswith(ev_pre)}   # animations of the events2 table
     r = {'displayId': d, 'sources': [s for s, p in (('jp', jd), ('2016', bd)) if os.path.isdir(p)], 'anims': {}}
     todo = {}
     fatal = []
@@ -474,6 +537,8 @@ def plan_enemy(d):
             r['anims'][an]['category'] = c
             todo.update(files)
             cat = max(cat, c)
+            if st == 'events2':
+                r.setdefault('events2', {})[an] = EV2_USED.get('%s/%s' % (rel, an), {})
         elif an in mandatory:
             fatal.append(an)
     # da wait: move per tutti, knockback e dead solo per gli alleati (stessi file: le texture tengono il nome wait_*,
@@ -684,6 +749,10 @@ def main():
            'complete_by_category': {c: [r['displayId'] for r in ok if r.get('category') == c] for c in (1, 2, 3, 4)},
            'move_from_wait': [r['displayId'] for r in ok if r['anims']['move']['status'].startswith('da wait')],
            'allies_complete': [r['displayId'] for r in ok if r.get('ally')],
+           # approved event models of extra_donors_events2.tsv (Events Part 2): complete ones and the incomplete ones
+           'events2_complete': [r['displayId'] for r in ok if r.get('events2')],
+           'events2_incomplete': [r['displayId'] for r in bad if any(v.get('note', '').startswith('events2')
+                                                                     for v in r['anims'].values())],
            'shows': show_res, 'results': results}
     os.makedirs(a.out, exist_ok=True)
     json.dump(rep, open(os.path.join(a.out, 'report.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

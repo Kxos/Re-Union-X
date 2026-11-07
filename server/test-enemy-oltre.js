@@ -211,7 +211,11 @@ if (fs.existsSync(path.join(MASTER, 'enemy.json')) && fs.existsSync(MISSING)) {
   }
   const all = JSON.parse(fs.readFileSync(MISSING, 'utf8')).missing;
   // master gia' rifatto con questo patch (Task 6, 21-10): le sue righe via, come strip(), cosi' «prima» = master senza
-  const before = JSON.parse(fs.readFileSync(path.join(dir, 'enemy.json'), 'utf8')).filter((r) => !(String(r.enemyId) in all));
+  // the event rows (make-event-enemies.js, present when the master was made with KHUX_EVENT_ENEMIES=1) go too: patch()
+  // strips them before the clones are computed, so they are never a clone base (11537, 11505, 11028, 11548)
+  const evIds = require('./make-event-enemies').eventIds();
+  const before = JSON.parse(fs.readFileSync(path.join(dir, 'enemy.json'), 'utf8'))
+    .filter((r) => !(String(r.enemyId) in all) && !evIds.has(r.enemyId));
   fs.writeFileSync(path.join(dir, 'enemy.json'), JSON.stringify(before));
   const beforeIds = new Set(before.map((r) => r.enemyId));
   const drawn = drawnDisplays();

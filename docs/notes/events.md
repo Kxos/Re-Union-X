@@ -244,3 +244,33 @@ accepts a stage only when its map has exactly the enemy names and counts of the 
 takes AP, gem, objectives and world from the wiki page and the map, level (999) and Moogle 6★ reward from that stage row (label
 `laterRun`). They keep their `w1` keys of event_ids.json. A quest is served only when its map is imported and all its enemies
 are in the master (no substitute): 9 of 23 are served today. The Almighty Challenge (EV-0417) has no map in any source: not served (`wikiEmpty`).
+
+## Event enemy models and SP Chip & Dale (Events Part 2, Task 5a, 7 November 2026)
+
+- **Models**: the 36 event enemy models the user approved on the rendered review (17 of the pilot: 12 Organization XIII members,
+  1026 Queen Bee Ω, 1547 Assault Dragon, 1555 Titan, 1564 Ramuh, 2009 guest Keyblade wielder; 19 of the gem quests) and 96
+  Circus Clown are served from `recon/tools/extra_donors_events2.tsv` (`events2_export.py` from the private reconstruction
+  manifest of `tmp\events_enemies`; rows: published path, container, rule, declared size, short rule label). `make_jp_enemies.py
+  --events2` (default on, `''` off) takes each animation of the table WHOLE, before every other source (override priority:
+  the table is the exact recipe the user approved), never mixing in another table; a texture without a usable row leaves
+  the animation incomplete. Rules: `events2-jp` (own JP file, category 1), `events2-copy` (2), `events2-recon`, `events2-cand`,
+  `events2-rescale` (212 off-size copies rescaled to EXACTLY the declared size, like dedup-rescale) and `events2-blank` (89
+  fully transparent pieces for the slots still missing in the mandatory animations of the accepted partial models 282, 1032,
+  1033, 1034, 1607), all category 3. Container `events2` = `D:\Progetto_Restauro_KH_UX\enemy_gen_src\events2` (rescaled,
+  blank, frozen copies of raid_gen/enemy_x sources). 65 Cloudy Sunrise is complete with the standard rules.
+- **Standard dead**: rule `std-dead` of `extra_donors_whole.tsv` (`whole_export.py`, label «std-dead (user-approved 07-11)»,
+  category 3): 1568, 1570, 1572, 1573 (no dead anywhere) and 96 take the whole enemy/1/dead (Shadow smoke cloud).
+- **Optional animations**: an atkSp with holes is not served (19 families: the client falls back to wait), as for every
+  family; the notice draft names them. **2009** is an event guest ally (team flag 0x20) and joins `ally_families.json`
+  (wait + atk1_o; move/knockback/dead from wait).
+- **185 Enraged Elk**: no own model (user decision 07-11): `server/make-event-enemies.js DISPLAY_AS` {185: 184} shows the served
+  story model 184 on its event rows (the private row keeps the donor displayId; the drawn gate checks 184).
+- **Families**: `event_enemy_families.json` now lists 53 families, all approved (`partial`, `std_dead`, `no_b2016` for 96);
+  the 11 pilot families of the dedup pending list moved to `extra_donors_dedup_approved.txt`.
+- **Event rows**: the private builder (`tmp/events_p1/pilot/work/build_event_enemies.py`) now also writes the gem rows and the
+  12 later-run map ids of Task 4: 590 rows, none missing. Regen 07-11: 116 of 897 quests served (58 before; gem 32, was 9);
+  not served: mapUnusable 620, enemyMissing 115 (map enemies with no id, label mapIncomplete), mapKeyUsed 45, wikiEmpty 1.
+- **SP Chip & Dale 6★ (90346)**: `server/medal-restored.js` clones our 90056 «Chip» 6★ (name, flavor, advantage, album 1702,
+  enhanceAttack/enhanceDefense 1000; cost/minCost 999 like the siblings) only when `medal_gen\files\img\medal\Medal_L/S_90346`
+  exist (master and package together); art from the Roboloid render (`fetch_medal_images.py`, `medal_map.json` 90346 -> 1796),
+  no cut-in. Served with resources 107.

@@ -3,14 +3,4 @@
 # extra_donors_dedup_approved.txt only when the user approves the family's rendered animations (and its entry in
 # event_enemy_families.json gets approved: true); make_jp_enemies.py never builds a non-approved event family.
 # Read by test_dedup_export.py (rows of these families are allowed only while pending).
-1026
-1547
-1555
-1579
-1582
-1585
-1589
-1594
-1596
-1597
-1603
+# (07-11-2026: the 11 pilot families listed here were approved by the user, Events Part 2; moved to the approved list)

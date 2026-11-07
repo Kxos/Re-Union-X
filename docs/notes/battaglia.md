@@ -636,5 +636,9 @@ For the April 2019 pilot 65 enemy ids (54 names) were missing from our master.
   Bee, 1027 Guard Armor, 1522 Iron Giant, 1526 Royal Pretender, 1530 Ogre, 1546 Jewel Sorceress, 1553 Pink Agaricus, 1556 Icy
   Beast, 1565 Upright Defender, 1566 Reversed Defender, 1580 Shiva, 1593 Sephiroth), awaiting the user's review of the rendered
   animations; 17 still missing (1026, 1547, 1555, 1564, the 12 Organization XIII members 1579-1607, guest ally 2009).
+- **Events Part 2 (07-11)**: those 17, 19 gem-quest families and 96 Circus Clown are approved and built from
+  `extra_donors_events2.tsv` (`make_jp_enemies.py --events2`, whole animations with override priority; rescaled and blank
+  pieces at exactly the declared size), std-dead whole dead for 1568/1570/1572/1573/96, 2009 in `ally_families.json`, 185
+  shown as 184 (`make-event-enemies.js DISPLAY_AS`). Details: [events.md](events.md), «Event enemy models and SP Chip & Dale».
 - **Deviations**: 56 event attack rows name a hit effect we do not serve (27 effects, all in the JP data): they keep the
   template's effect, as every attack row does (`enemy-attack-fix.js`). `move` is a copy of `wait` where the JP data has none.

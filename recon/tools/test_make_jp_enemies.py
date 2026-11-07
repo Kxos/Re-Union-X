@@ -76,9 +76,35 @@ with open(WHL, 'w', encoding='utf-8') as fh:
              'lwf/character/enemy/1915/dead/dead_d.png\tjp501:lwf/character/enemy/5915/dead/dead_d.png\twhole-ww-index\tn\n'
              'lwf/character/enemy/1916/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-same-rig\tn\n'
              'lwf/character/enemy/1916/dead/dead_d.png\tjp501:lwf/character/enemy/5915/dead/dead_d.png\twhole-same-rig\tn\n'
-             'lwf/character/enemy/1917/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-ww-index\tn\n')
+             'lwf/character/enemy/1917/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\twhole-ww-index\tn\n'
+             # std-dead (Events Part 2, user-approved 07-11): the standard Shadow smoke dead, category 3
+             'lwf/character/enemy/1954/dead/dead.lwf\tjp501:lwf/character/enemy/5915/dead/dead.lwf\tstd-dead\tn\n'
+             'lwf/character/enemy/1954/dead/dead_d.png\tjp501:lwf/character/enemy/5915/dead/dead_d.png\tstd-dead\tn\n')
+# Events Part 2 (07-11): the approved event models (extra_donors_events2.tsv): an animation of the table is taken WHOLE
+# from it, before every other source (override priority); container events2 = rescaled copies and blank pieces
+BOX['events2'] = os.path.join(TMP, 'events2')
+EV2 = os.path.join(TMP, 'events2.tsv')
+_E = 'lwf/character/enemy/'
+with open(EV2, 'w', encoding='utf-8') as fh:
+    fh.write('# test\n' +
+             # 1950: the table wins over the family's own JP file (override priority), category 2 (copy)
+             _E + '1950/wait/wait.lwf\tjp431:' + _E + '1950/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             _E + '1950/wait/wait_a.png\tevents2:copy/a.png\tevents2-copy\t10x10\tALIGN\n' +
+             # 1951: a texture of the LWF without a row -> the animation is incomplete (no fallback to other sources)
+             _E + '1951/wait/wait.lwf\tjp431:' + _E + '1951/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             # 1952: rescaled copy and blank piece, accepted only at EXACTLY the declared size (category 3)
+             _E + '1952/wait/wait.lwf\tjp431:' + _E + '1952/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             _E + '1952/wait/wait_a.png\tevents2:rescale/1952/wait/wait_a.png\tevents2-rescale\t10x10\tRUN\n' +
+             _E + '1952/wait/wait_b.png\tevents2:blank/12x8.png\tevents2-blank\t12x8\thole\n' +
+             # 1953: a copy off the declared size by more than 2 px -> incomplete
+             _E + '1953/wait/wait.lwf\tjp431:' + _E + '1953/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             _E + '1953/wait/wait_a.png\tevents2:copy/big.png\tevents2-copy\t10x10\tLIB\n' +
+             # 1955: a rescaled copy off by 1 px -> refused (exact size only)
+             _E + '1955/wait/wait.lwf\tjp431:' + _E + '1955/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             _E + '1955/wait/wait_a.png\tevents2:rescale/1955/wait/wait_a.png\tevents2-rescale\t10x10\tRUN\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
-            '--extra', XTR, '--recolour', COL, '--dedup', DDP, '--whole', WHL] + ['--src-root=%s=%s' % kv for kv in BOX.items()]
+            '--extra', XTR, '--recolour', COL, '--dedup', DDP, '--whole', WHL, '--events2', EV2] + \
+    ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
 import make_jp_enemies as m  # noqa: E402
 
@@ -369,9 +395,61 @@ try:
     check(m.extra_donors.category('whole-ww-index') == 2 and m.extra_donors.category('whole-same-pose') == 2
           and m.extra_donors.category('whole-same-rig') == 3, 'whole rules categories')
 
+    # std-dead (Events Part 2, user-approved 07-11): whole standard smoke dead from the whole table, category 3
+    put('1954/wait/wait.lwf', lwf('wait_k.png'))
+    put('1954/wait/wait_k.png', b'K')
+    body('1954', skip=('dead',))
+    r, todo = m.plan_enemy(1954)
+    check(r['status'] == 'completo' and r['anims']['dead']['status'] == 'std-dead' and r['category'] == 3
+          and todo.get('lwf/character/enemy/1954/dead/dead_d.png') == qd2, 'std-dead: whole copy, category 3 (%s)' % r)
+    check(m.extra_donors.category('std-dead') == 3 and 'std-dead' in m.extra_donors.WHOLE_RULES, 'std-dead rule')
+
+    # Events Part 2 (extra_donors_events2.tsv, --events2): the approved recipe of an event model
+    def ev2(rel, data):
+        q = os.path.join(BOX['events2'], *rel.split('/'))
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        with open(q, 'wb') as fh:
+            fh.write(data)
+        return q
+    qa = ev2('copy/a.png', png(10, 10))
+    for fam, tex in (('1950', {'wait_a.png': (10, 10)}), ('1951', {'wait_a.png': (10, 10)}),
+                     ('1952', {'wait_a.png': (10, 10), 'wait_b.png': (12, 8)}), ('1953', {'wait_a.png': (10, 10)}),
+                     ('1955', {'wait_a.png': (10, 10)})):
+        put(fam + '/wait/wait.lwf', real_lwf(**tex))
+        put(fam + '/wait/wait_a.png', png(10, 10))       # the family's own JP file: the table still wins
+        body(fam)
+    r, todo = m.plan_enemy(1950)
+    check(r['status'] == 'completo' and r['anims']['wait']['status'] == 'events2' and r['category'] == 2
+          and todo.get('lwf/character/enemy/1950/wait/wait_a.png') == qa
+          and todo.get('lwf/character/enemy/1950/wait/wait.lwf') == os.path.join(JP, '1950', 'wait', 'wait.lwf'),
+          'events2: the table wins over the JP file, category 2 (%s)' % r)
+    check(todo.get('lwf/character/enemy/1950/move/wait_a.png') == qa, 'events2: move from wait keeps the table file')
+    check(r.get('events2') == {'wait': {'events2-jp': 1, 'events2-copy': 1}}, 'events2 rules in the report: %s' % r.get('events2'))
+    check(r['anims']['knockback']['status'] != 'events2', 'events2 only for the animations of the table')
+    r, todo = m.plan_enemy(1951)
+    check(r['status'] == 'incompleto' and r['anims']['wait']['status'] == 'incompleta' and not todo,
+          'events2: a texture without a row -> incomplete, no fallback (%s)' % r)
+    qr = ev2('rescale/1952/wait/wait_a.png', png(10, 10))
+    qb = ev2('blank/12x8.png', png(12, 8))
+    r, todo = m.plan_enemy(1952)
+    check(r['status'] == 'completo' and r['category'] == 3 and todo.get('lwf/character/enemy/1952/wait/wait_a.png') == qr
+          and todo.get('lwf/character/enemy/1952/wait/wait_b.png') == qb, 'events2: rescaled + blank, category 3 (%s)' % r)
+    ev2('copy/big.png', png(40, 40))
+    r, todo = m.plan_enemy(1953)
+    check(r['status'] == 'incompleto' and not todo, 'events2: a copy off the declared size -> incomplete (%s)' % r)
+    ev2('rescale/1955/wait/wait_a.png', png(11, 10))
+    r, todo = m.plan_enemy(1955)
+    check(r['status'] == 'incompleto' and not todo, 'events2: a rescaled copy must be exactly the declared size (%s)' % r)
+    check(all(m.extra_donors.category(x) == c for x, c in (('events2-jp', 1), ('events2-copy', 2), ('events2-recon', 3),
+                                                             ('events2-cand', 3), ('events2-rescale', 3), ('events2-blank', 3))),
+          'events2 categories')
+    check(not {v[2] for v in m.EXTRA.values()} & set(m.extra_donors.EVENTS2_RULES), 'events2 rules only in the events2 table')
+
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto
     check(2001 in m.ALLY_FAMILIES and 1650 not in m.ALLY_FAMILIES, 'famiglie alleate: %s' % sorted(m.ALLY_FAMILIES)[:5])
+    # Events Part 2: the event guest ally 2009 (team flag 0x20 in EV-0772) follows the ally rule (no knockback/dead)
+    check(2009 in m.ALLY_FAMILIES, 'event guest ally 2009 in ally_families.json')
     for fam in ('2001', '1650'):
         put(fam + '/wait/wait.lwf', lwf('wait_h.png'))
         put(fam + '/wait/wait_h.png', b'H')

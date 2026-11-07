@@ -70,7 +70,7 @@ finally:
     shutil.rmtree(TMP, ignore_errors=True)
 
 # tabelle versionate
-ex = xd.load(xd.TABLE, rules=set(xd.RULES) - {'recolour', 'recolour-whole'})
+ex = xd.load(xd.TABLE, rules=set(xd.RULES) - {'recolour', 'recolour-whole', 'std-dead'} - set(xd.EVENTS2_RULES))
 rc = xd.load(xd.RECOLOUR_TABLE, rules={'recolour', 'recolour-whole'})
 dd = jp_dedup_donors.load()
 rr = jp_reconstructed.load()
@@ -105,7 +105,7 @@ for fam, src in WHOLE_DEAD.items():
         check(refs and refs <= have, 'dead generica %d: texture senza riga %s' % (fam, sorted(refs - have)[:3]))
 # user-approved whole-animation copies (extra_donors_whole.tsv, whole_export.py, I-194 23-10): known rules only, every
 # animation has its LWF row and a row for every texture its LWF cites, one source folder per animation, no overlap
-wh = xd.load(xd.WHOLE_TABLE, rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig'})
+wh = xd.load(xd.WHOLE_TABLE, rules={'whole-ww-index', 'whole-same-pose', 'whole-same-rig', 'std-dead'})
 check(len(wh) > 300, 'extra_donors_whole.tsv: %d rows' % len(wh))
 check(not set(wh) & (set(ex) | set(dd) | set(rr) | set(rc)), 'whole copies overlap another table')
 anims = {}
@@ -113,7 +113,13 @@ for k, v in wh.items():
     anims.setdefault(k.rsplit('/', 1)[0], []).append((k, v))
 # 31 approved 23-10 + 4 dead.lwf of event quest families (Events Part 1 Task 2b: 226, 1522, 1530, 1566), approved by the
 # user on the rendered sheets 06-11 (label «Events Task 2b, user-approved 06-11»); a pending one would say «pending user review»
-check(len(anims) == 35, 'whole copies: %d animations (35)' % len(anims))
+# + 5 std-dead (Events Part 2, user-approved 07-11: 1568, 1570, 1572, 1573 and 96 Circus Clown)
+check(len(anims) == 40, 'whole copies: %d animations (40)' % len(anims))
+std = {d for d, rows in anims.items() if rows[0][1][2] == 'std-dead'}
+check(std == {'lwf/character/enemy/%d/dead' % f for f in (96, 1568, 1570, 1572, 1573)}, 'std-dead copies: %s' % sorted(std))
+check(all(v[1].startswith('lwf/character/enemy/1/dead/') and v[3].startswith('std-dead (user-approved 07-11)')
+          for d in std for _, v in anims[d]), 'std-dead: enemy/1/dead with the user-approved label')
+check(xd.category('std-dead') == 3 and 'std-dead' in xd.WHOLE_RULES, 'std-dead: whole rule, category 3')
 ev = {d for d, rows in anims.items() if any('Events Task 2b, user-approved 06-11' in v[3] for _, v in rows)}
 check(ev == {'lwf/character/enemy/%d/dead' % f for f in (226, 1522, 1530, 1566)}, 'Task 2b whole copies: %s' % sorted(ev))
 check(not any('pending user review' in v[3] for rows in anims.values() for _, v in rows), 'pending whole copies left')
@@ -131,6 +137,36 @@ check({int(d.split('/')[3]) for d, rows in anims.items() if rows[0][1][2] == 'wh
 if os.path.isdir(xd.ROOTS['jp501'][0]):
     miss = [k for k in wh if not xd.lookup(wh, k)]
     check(not miss, 'sources missing in extra_donors_whole.tsv: %d (%s)' % (len(miss), miss[:3]))
+# approved event models (extra_donors_events2.tsv, events2_export.py, Events Part 2 07-11): EVENTS2_RULES only, never in
+# another table; every animation has its LWF row; blank pieces only in the mandatory animations of the accepted partial
+# models; no row for the families left out (65 standard rules, 185 shown as 184) nor for the std-dead animations
+ev2 = xd.load(xd.EVENTS2_TABLE, rules=set(xd.EVENTS2_RULES))
+check(len(ev2) > 7000, 'extra_donors_events2.tsv: %d rows' % len(ev2))
+check(not set(ev2) & set(wh), 'events2 rows overlap the whole copies')
+check(not {v[2] for v in list(ex.values()) + list(wh.values()) + list(rc.values())} & set(xd.EVENTS2_RULES),
+      'events2 rules in another table')
+ev_anims = {k.rsplit('/', 1)[0] for k in ev2}
+check(all(d + '/' + d.rsplit('/', 1)[1] + '.lwf' in ev2 for d in ev_anims), 'events2 animation without its LWF row')
+ev_fams = {int(k.split('/')[3]) for k in ev2}
+check(len(ev_fams) == 36 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
+blank = {(int(k.split('/')[3]), k.split('/')[4]) for k, v in ev2.items() if v[2] == 'events2-blank'}
+check({f for f, _ in blank} <= {282, 1032, 1033, 1034, 1607}
+      and {an for _, an in blank} <= {'wait', 'move', 'atk1_o', 'knockback', 'dead'},
+      'blank pieces outside the accepted partial models: %s' % sorted(blank))
+check(all(v[0] == 'events2' for v in ev2.values() if v[2] in ('events2-rescale', 'events2-blank')),
+      'rescaled and blank pieces come from the events2 container')
+if os.path.isdir(xd.ROOTS['events2'][0]) and os.path.isdir(xd.ROOTS['jp501'][0]):
+    miss = [k for k in ev2 if not xd.lookup(ev2, k)]
+    check(not miss, 'sources missing in extra_donors_events2.tsv: %d (%s)' % (len(miss), miss[:3]))
+    import struct
+    bad = []
+    for k, v in ev2.items():
+        if v[2] in ('events2-rescale', 'events2-blank'):
+            with open(xd.lookup(ev2, k), 'rb') as fh:
+                sz = struct.unpack('>II', fh.read(24)[16:24])
+            if '%dx%d' % sz != v[3]:
+                bad.append(k)
+    check(not bad, 'rescaled/blank pieces not at the declared size: %d (%s)' % (len(bad), bad[:2]))
 if rc and os.path.isdir(xd.ROOTS['recolour'][0]):
     miss = [k for k in rc if not xd.lookup(rc, k)]
     check(not miss, 'sorgenti assenti in jp_recoloured.tsv: %d (%s)' % (len(miss), miss[:3]))

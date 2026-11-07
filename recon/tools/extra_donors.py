@@ -45,7 +45,14 @@ DEDUP_TABLE = os.path.join(HERE, 'extra_donors_dedup.tsv')
 # user-approved WHOLE-animation copies (whole_export.py, I-194 23-10): rules whole-ww-index, whole-same-pose (category 2)
 # and whole-same-rig (category 3); read with extra_donors.tsv, whole animations only (LWF row + every texture row)
 WHOLE_TABLE = os.path.join(HERE, 'extra_donors_whole.tsv')
-WHOLE_RULES = ('whole-dr-twin', 'whole-ww-index', 'whole-same-pose', 'whole-same-rig')
+WHOLE_RULES = ('whole-dr-twin', 'whole-ww-index', 'whole-same-pose', 'whole-same-rig', 'std-dead')
+# Events Part 2 (07-11-2026): the event enemy models the user approved on the rendered review (events2_export.py from the
+# private manifest of tmp\\events_enemies): one row per file of every animation of those families (LWF + every texture).
+# The table is the approved recipe: make_jp_enemies.py takes such an animation WHOLE from it, before every other source
+# (override priority), never mixing in another table. Rules EVENTS2_RULES; container events2 = the rescaled copies, the
+# blank pieces and the frozen copies of generated files (outside the repo, enemy_gen_src\\events2).
+EVENTS2_TABLE = os.path.join(HERE, 'extra_donors_events2.tsv')
+EVENTS2_RULES = ('events2-jp', 'events2-copy', 'events2-recon', 'events2-cand', 'events2-rescale', 'events2-blank')
 D = r'D:\Progetto_Restauro_KH_UX'
 import sys  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # with python -I the script folder is not on sys.path
@@ -60,6 +67,9 @@ ROOTS = {
     # them outside the repo): rule dedup-rescale of extra_donors_dedup.tsv only
     'rescale': [os.path.join(D, 'tmp', 'dedup', 'rescale', 'png')],
     'rescale_e1': [os.path.join(D, 'tmp', 'dedup', 'review', 'work_E1', 'png')],
+    # Events Part 2 (07-11): rescaled copies (exact declared size), blank pieces of the accepted partial models and
+    # frozen copies of generated files (raid_gen, enemy_x) written by events2_export.py; extra_donors_events2.tsv only
+    'events2': [os.path.join(D, 'enemy_gen_src', 'events2')],
 }
 RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'donor&order': 2, 'twinfam': 2,
          'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4,
@@ -81,7 +91,18 @@ RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'd
          # PNG names on the same records as the donor folder (proven copy); whole-same-pose = Ralph allies' 1-frame wait
          # (identical in every surviving ally); whole-same-rig = same rig and placement, NOT a proven copy
          # (reconstruction, category 3)
-         'whole-ww-index': 2, 'whole-same-pose': 2, 'whole-same-rig': 3}
+         'whole-ww-index': 2, 'whole-same-pose': 2, 'whole-same-rig': 3,
+         # std-dead (user-approved 07-11, Events Part 2): no dead of the family exists in any local source; the standard
+         # Heartless defeat (the Shadow smoke cloud of enemy/1/dead, as served for 226/1530) as a whole copy;
+         # extra_donors_whole.tsv only; category 3 (not a proven copy)
+         'std-dead': 3,
+         # extra_donors_events2.tsv only (events2_export.py, Events Part 2 07-11, user-approved rendered models):
+         # events2-jp = the family's own JP file (category 1), events2-copy = original copy (2), events2-recon =
+         # reconstructed piece (3), events2-cand = reconstructed candidate (3, «3c» of the review), events2-rescale = an
+         # off-size copy rescaled to the exact declared size (3, like dedup-rescale), events2-blank = a fully transparent
+         # piece at the declared size for a piece still missing in an accepted partial model (3, declared in the Notices)
+         'events2-jp': 1, 'events2-copy': 2, 'events2-recon': 3, 'events2-cand': 3, 'events2-rescale': 3,
+         'events2-blank': 3}
 
 
 def category(rule):
