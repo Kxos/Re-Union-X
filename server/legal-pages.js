@@ -92,6 +92,7 @@ function creditsPage() {
       ['Roboloid and Ultimadei', 'The KHUχ database: Medal data, multipliers and special attack conditions.'],
       ['KHUX Wiki and KH Wiki', 'Quests, Medals, special attacks, events and images used as references.'],
       ['ReLux Team', 'Research on events, raids, Union Cross and campaigns, and player-made calculators.'],
+      ['SmellyOctopus', 'Thank you for teaching so many of us to play free-to-play wisely, and for keeping us company back then with videos full of joy. Those videos are now a huge help as references for the restoration.'],
       ['The community', 'Players who shared screenshots, videos, notes and memories of the game, and the testers of the restoration.']]],
     ['The original game', [
       'KINGDOM HEARTS Union χ[Cross] was developed and published by SQUARE ENIX. KINGDOM HEARTS and all its characters, images, music and texts belong to SQUARE ENIX and Disney.',
