@@ -125,12 +125,14 @@ const EVENT_SHORT = {
   noWikiPage: ['values', 'No wiki page', 'Later game data only, no second source', 'replaced'],
   wikiAp: ['values', 'AP', 'From the khuxwiki page of this run', 'replaced'],
   mapIncomplete: ['values', 'Map', 'Incomplete in our data: the gaps are reported', 'removed'],
-  eventCoins: ['rewards', 'Event Coins', 'Not paid yet: they come with the event boards', 'camp'],
+  eventCoins: ['rewards', 'Event Coins', 'Paid into the boards of this event; they never expire', 'camp'],
+  boardsLater: ['rewards', 'Event boards', 'Not served yet: they wait for the Boosters (a later update)', 'later'],
+  noCoinSource: ['rewards', 'Event boards', 'Not handed out yet: no quest pays their Event Coins', 'later'],
   wholeDay: ['rules', 'Opening time', 'Its whole original day (was a short window)', 'bonus'],
   dramaOff: ['rules', 'Scenes', 'The original scenes are not shown yet', 'later'],
 };
 const EVENT_LABEL = { wikiAp: 'AP', donorKept: 'later game data', wikiLowConfidence: 'a wiki value', noWikiPage: 'no wiki page', mapIncomplete: 'map', eventCoins: 'Event Coins',
-  wholeDay: 'opening time', dramaOff: 'scenes' };
+  wholeDay: 'opening time', dramaOff: 'scenes', boardsLater: 'event boards', noCoinSource: 'event boards' };
 const EVENT_GROUPS = [['values', 'Quest data', 'tleg', ''], ['rewards', 'Rewards', 'camp', ' rw'], ['rules', 'Rules', 'weekday', ' ru'], ['other', 'Other', 'replaced', ' ot']];
 // every label in use: the event's and its quests' (served or not), in the order of EVENT_SHORT, unknown ones last
 const codesOf = (e) => {
@@ -150,7 +152,26 @@ const notServedLine = (e) => {
 function srvBox(e, st, index, o) {
   return srvFrame(st, { ...o, body: rebuilt(e, (index && index.reasons) || {}) + notServedLine(e) }, 'camp');
 }
-const EVENT_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(2),.tt td:nth-child(3){white-space:nowrap}.tt td.r{color:#ffcd4a}.tt small{display:block;color:#b9cfdc;font-size:13px}';
+const EVENT_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(2),.tt td:nth-child(3){white-space:nowrap}.tt td.r{color:#ffcd4a}.tt small{display:block;color:#b9cfdc;font-size:13px}'
+  + '.tt.bt td:nth-child(2){white-space:normal}.bt td.cd{color:#8fe3a0}.bt td.r{white-space:normal}.ecoin{margin:6px 0 12px;font-size:15px}.ecoin b{color:#ffcd4a;font-size:18px}';
+// Event Boards of an entry's set (Part 3 Task 6, as the Raid Catalog lists the boards of a raid, with the cells): the coin line (one
+// balance per set, never expires), then each board of the set in order with its cells. ctx.eventBoard(boardId) -> {name, cells:
+// [{n, cost, reward, done, pass}], finish, done} | null; ctx.eventCoins(setKey) -> n. '' without a set or without a board served.
+function boardsSection(index, e, ctx) {
+  const set = e.boardSet && ((index && index.boardSets) || {})[e.boardSet];
+  if (!set || !ctx.eventBoard) return '';
+  const boards = (set.boardIds || []).map((id) => ctx.eventBoard(id)).filter(Boolean);
+  if (!boards.length) return '';
+  const num = (n) => Number(n).toLocaleString('en-US'), shared = (set.censusIds || []).length;
+  const coins = `<p class="ecoin">${icon('camp')}Your Event Coins: <b>${num(ctx.eventCoins ? ctx.eventCoins(e.boardSet) : 0)}</b>. `
+    + `One balance per board set${shared > 1 ? `, shared by ${plural(shared, 'event')}` : ''}; Event Coins never expire.</p>`;
+  const cell = (c) => `<tr><td>${c.n}</td><td>${c.reward ? esc(c.reward) : '—'}</td><td>${num(c.cost)}</td>`
+    + (c.done ? `<td class="cd">Unlocked${CROWN}</td>` : c.pass ? '<td class="r">Not restored yet</td>' : '<td>Not unlocked</td>') + '</tr>';
+  const board = (b) => `<h3>${esc(b.name)}${b.done ? CROWN : ''}</h3><table class="tt bt"><tr><th>Cell</th><th>Reward</th><th>Cost</th><th>Status</th></tr>`
+    + b.cells.map(cell).join('') + `<tr><td colspan="2">Board complete${b.finish ? `: ${esc(b.finish)}` : ''}</td><td></td><td${b.done ? ' class="cd">Done' : '>—'}</td></tr></table>`;
+  return `<h2>Event Boards</h2>${coins}${boards.map(board).join('')}`
+    + '<p class="n">A board opens in the Events tab while one of the events of its set is in your week or kept. A cell with no cost and no reward is not restored yet.</p>';
+}
 const daysText = (days) => days.map(niceDay).join(', ');
 
 // GET /web/event/event/<evStageId>: header (name, card), the «On this server» box first (status, Keep button, the Story line,
@@ -185,7 +206,7 @@ function detailPage(index, evStageId, ctx = {}) {
   return PAGE_HEAD(title, CSS + DETAIL_CSS + EVENT_DETAIL_CSS + RULE_CSS + SRV_CSS + FOLD_CSS) + `<body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt=""${NO_CARD(640, 140)}>${box}`
     + `<h2>Event</h2><table class="kv">${kv}</table>`
-    + cards + `<h2>Quests</h2><table class="tt"><tr><th>Quest</th><th>LV</th><th>AP</th><th>Status</th></tr>${qRows}</table>`
+    + cards + boardsSection(index, e, ctx) + `<h2>Quests</h2><table class="tt"><tr><th>Quest</th><th>LV</th><th>AP</th><th>Status</th></tr>${qRows}</table>`
     + `<p class="n">The Event Catalog is an addition of this server: in the original game an event was played only in its own dates.</p>${back}<script>${KEEP_JS}</script></body></html>`;
 }
 

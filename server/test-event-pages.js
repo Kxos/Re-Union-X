@@ -139,6 +139,53 @@ const tests = {
     assert.ok(pages.detailPage(ix, 29930, ctx()).includes('<h1>March Fun</h1>'), 'a row id opens the record');
     assert.ok(pages.noticePage(ix, 29930, DOC(), ctx()).includes(NOTICE_LINE), 'Details of a row card: the record notice');
   },
+  // Part 3 Task 6: an entry with a board set lists its boards and their cells; the unlocked cells are marked done, a cell with
+  // no cost and no reward is shown as not restored yet
+  event_board_items() {
+    const ix = INDEX();
+    ix.entries[0].boardSet = 'S1';
+    ix.boardSets = { S1: { boardIds: [7001, 7002], chains: { 7002: 7001 }, censusIds: ['E-0', 'E-1'] } };
+    const boards = {
+      7001: { id: 7001, name: 'Board #1: Fixture', done: false, finish: 'Fixture Medal', cells: [{ n: 1, cost: 0, reward: '', done: true, pass: true }, { n: 2, cost: 0, reward: '', done: false, pass: true },
+        { n: 3, cost: 900, reward: 'Fixture Medal x2', done: true, pass: false }, { n: 5, cost: 1000, reward: 'Jewels x500', done: false, pass: false }] },
+      7002: { id: 7002, name: 'Board #2: Fixture', done: true, finish: '', cells: [{ n: 3, cost: 50, reward: 'Max HP +3', done: true, pass: false }] },
+    };
+    const c = ctx({ eventBoard: (id) => boards[id] || null, eventCoins: () => 1234 });
+    const d = pages.detailPage(ix, 29900, c);
+    const sec = d.slice(d.indexOf('<h2>Event Boards</h2>'));
+    assert.ok(sec.length < d.length, 'an Event Boards section');
+    assert.ok(sec.includes('Board #1: Fixture') && sec.includes('Board #2: Fixture'), 'both boards, in set order');
+    assert.ok(sec.indexOf('Board #1') < sec.indexOf('Board #2'));
+    const b1 = sec.slice(sec.indexOf('Board #1'), sec.indexOf('Board #2'));
+    assert.ok(b1.includes('Fixture Medal x2') && b1.includes('Jewels x500') && b1.includes('900') && b1.includes('1,000'), 'rewards and costs');
+    assert.strictEqual((b1.match(/class="cd"/g) || []).length, 2, 'two unlocked cells carry the done mark (1 and 3)');
+    assert.ok(/class="r"[^>]*>Not restored yet/.test(b1), 'a pass-through cell is shown as not restored yet, not hidden');
+    assert.ok(b1.includes('Board complete') && b1.includes('Fixture Medal'), 'the reward of the finished board');
+    assert.ok(sec.includes('Max HP +3'));
+    // an entry without a set, or a master without that board: no section, no error
+    assert.ok(!pages.detailPage(ix, 29901, c).includes('Event Boards</h2>'), 'no set: no section');
+    assert.ok(!pages.detailPage(ix, 29900, ctx()).includes('<h2>Event Boards</h2>'), 'no lookups: no section');
+    assert.ok(!pages.detailPage(ix, 29900, ctx({ eventBoard: () => null, eventCoins: () => 0 })).includes('<h2>Event Boards</h2>'), 'no board served: no section');
+  },
+  // the coin line: the balance of the set and the note that coins never expire (one balance per set, shared by its events)
+  event_coins_label() {
+    const ix = INDEX();
+    ix.entries[0].boardSet = 'S1';
+    ix.boardSets = { S1: { boardIds: [7001], chains: {}, censusIds: ['E-0', 'E-1'] } };
+    const c = ctx({ eventBoard: () => ({ id: 7001, name: 'Board #1', done: false, finish: '', cells: [] }), eventCoins: (k) => (k === 'S1' ? 1234 : 0) });
+    const d = pages.detailPage(ix, 29900, c);
+    const line = (/<p class="ecoin">(.*?)<\/p>/.exec(d) || [])[1] || '';
+    assert.ok(line.includes('1,234'), line);
+    assert.ok(/never expire/i.test(line) && /one balance/i.test(line), line);
+    assert.ok(line.includes('2 events'), 'the set is shared by its events');
+    // texts: paid now, and the two reasons a set is not handed out
+    const e = ix.entries[0];
+    e.labels = ['eventCoins', 'boardsLater'];
+    e.quests[0].labels = ['noCoinSource'];
+    const r = pages.detailPage(ix, 29900, ctx());
+    assert.ok(!/not paid yet|come with the event boards/i.test(r), 'no stale text');
+    assert.ok(/Boosters/.test(r) && /no quest pays/i.test(r), 'short texts of boardsLater and noCoinSource');
+  },
   shared_parts_not_copied() {
     const src = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');
     for (const f of ['raid-pages.js', 'event-pages.js']) {

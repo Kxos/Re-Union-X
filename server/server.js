@@ -4635,26 +4635,49 @@ function raidBoardIndex() {
     title: by('title', 'titleId'), avatarParts: by('avatarParts', 'avatarPartsId'), petParts: by('petParts', 'petPartsId'), items: new Map() };
   return raidBoardIx;
 }
+// the name of one board reward (rewardSelect sel, rewardId x), '' when not a named item; shared by the raid and the event pages
+function boardRewardName(ix, sel, x) {
+  if (sel === 3) return ix.medal.get(x)?.name;
+  if (sel === 5) return ix.material.get(x)?.name;
+  if (sel === 7) return ix.title.get(x)?.title;
+  if (sel === 19 || sel === 20 || sel === 23) return ix.avatarParts.get(x)?.name;
+  if (sel === 33) return ix.petParts.get(x)?.name;
+  if (sel === 2) return 'Jewels';
+  if (sel === 41) return RAID_TICKET_NAMES[x] || RAID_TICKET_NAMES[0];
+  return '';
+}
 function raidBoardItems(sphereBoardId) {
   const ix = raidBoardIndex(), id = Number(sphereBoardId);
   if (ix.items.has(id)) return ix.items.get(id).slice();
   const masu = ix.masu.get(id);
   if (!masu) return [];
-  const name = (sel, x) => {
-    if (sel === 3) return ix.medal.get(x)?.name;
-    if (sel === 5) return ix.material.get(x)?.name;
-    if (sel === 7) return ix.title.get(x)?.title;
-    if (sel === 19 || sel === 20 || sel === 23) return ix.avatarParts.get(x)?.name;
-    if (sel === 33) return ix.petParts.get(x)?.name;
-    if (sel === 2) return 'Jewels';
-    if (sel === 41) return RAID_TICKET_NAMES[x] || RAID_TICKET_NAMES[0];
-    return '';
-  };
-  const out = [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? name(sel, masu.rewardId[i]) : '')).filter(Boolean))];
+  const out = [...new Set((masu.rewardSelect || []).map((sel, i) => (sel ? boardRewardName(ix, sel, masu.rewardId[i]) : '')).filter(Boolean))];
   ix.items.set(id, out);
   return out.slice();
 }
 const raidBoardName = (sphereBoardId) => raidBoardIndex().sphere.get(Number(sphereBoardId))?.boardName || '';
+// Event Catalog (event-pages.js, Events Part 3 Task 6): one Event Board with its cells, as the board screen holds them: cell n
+// (1..22, the nodes of sphereArray) costs spherePoint[n-1] Event Coins and pays rewardSelect[n-1]; the 23rd entry is the reward of
+// the finished board. pass = a cell with no cost and no reward (nothing restored for it yet); done = unlocked in player.eventSphere.
+// null when the master has no such type 4 board.
+function eventBoardCells(boardId) {
+  const ix = raidBoardIndex(), id = Number(boardId), board = ix.sphere.get(id), masu = ix.masu.get(id);
+  if (!board || board.type !== 4 || !masu) return null;
+  const unlocked = ((player.eventSphere || {})[id] || {}).unlock || [];
+  const text = (i) => {
+    const sel = masu.rewardSelect[i], val = masu.rewardValue[i] || 1;
+    if (!sel) return '';
+    if (sel === 12) return `Max HP +${val}`;
+    if (sel === 21) return `Max AP +${val}`;
+    if (sel === 22) return `Max Cost +${val}`;
+    const name = boardRewardName(ix, sel, masu.rewardId[i]);
+    return name ? (val > 1 ? `${name} x${val}` : name) : 'Reward';
+  };
+  const nodes = sphereNodes(board);
+  const cells = nodes.map((n) => ({ n, cost: masu.spherePoint[n - 1] || 0, reward: text(n - 1), done: unlocked.includes(n) }))
+    .map((c) => ({ ...c, pass: !c.cost && !c.reward }));
+  return { id, name: board.boardName || `Board ${id}`, cells, finish: text(22), done: nodes.length > 0 && nodes.every((n) => unlocked.includes(n)) };
+}
 // RAID BOARDS filter of the Raid Catalog (user 03-11): a Raid Board is complete when every node is unlocked in player.raidSphere,
 // the rule of the board screen (status 3 of userSphereData), whether it is handed out now or not (its progress is kept for good);
 // a board never handed out or not served by the master is not complete.
@@ -4702,7 +4725,8 @@ function respondRaidWeb(res, url) {
 // Event Catalog pages (event-pages.js, Events Part 1 Task 5): the context of routes-events.js plus the lookups of the pages.
 const eventPageCtx = (fromCatalog = false) => ({ ...eventRoutes().catalogCtx(), imgVersion: routesEvents.EVENT_IMG_VERSION, fromCatalog,
   unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
-  stageDone: (id) => catalogStageDone(id), hasNotice: (censusId) => !!eventNotices()?.rows?.[censusId] });
+  stageDone: (id) => catalogStageDone(id), hasNotice: (censusId) => !!eventNotices()?.rows?.[censusId],
+  eventBoard: eventBoardCells, eventCoins: (setKey) => Number((player.eventCoins || {})[setKey]) || 0 });
 // GET /web/event/catalog (Details of the Event Catalog banner; a kept event the index lost is cleared first), /web/event/event/
 // <evStageId> (details page; ?from=catalog: BACK), /web/event/notice/<evStageId> (Details of an event card: its original
 // notice, ?from=event: BACK; always a page, «not available» without it), /web/event/img/v<N>/<evStageId>[-kept].png (the card;
