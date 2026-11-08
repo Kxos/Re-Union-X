@@ -15,7 +15,7 @@
 //   the client enforces neither the chain nor the window (bench 08-11), so update() refuses anything not handed out;
 // - a board id goes in a /user/sphere/check answer once per hand-out (the client pops «Unlocked an Event Board!» per entry):
 //   a check whose checkTypes has 3 closes the boards no longer handed out (closeEventSphereBoardIds), GET /user/sphere
-//   replaces the list. Coins and progress stay; a cell is paid once, the completion reward (index 22) once.
+//   drops the closed ones from the list (a new board is still sent by the next check). Coins and progress stay; a cell is paid once, the completion reward (index 22) once.
 'use strict';
 
 const TYPE = 4;
@@ -108,10 +108,13 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
     return { add, close: [] };
   }
 
-  // GET /user/sphere (setSent true: replaces eventSphereSent; 'merge': adds to it): the boards handed out now
+  // GET /user/sphere: the boards handed out now. setSent true drops from eventSphereSent the boards no longer handed out; a board
+  // handed out for the first time by the list is NOT marked as sent, so the next check still sends it once and the client pops
+  // «Unlocked an Event Board!» (bench 08-11, Task 7b: the login GET came before the home check and the popup never showed).
+  // 'merge' leaves eventSphereSent as it is
   function list({ setSent = false } = {}) {
     const act = active();
-    if (setSent) player.eventSphereSent = [...new Set([...(setSent === 'merge' ? player.eventSphereSent || [] : []), ...act])];
+    if (setSent === true) player.eventSphereSent = (player.eventSphereSent || []).map(Number).filter((id) => act.includes(id));
     return act;
   }
 

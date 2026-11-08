@@ -78,8 +78,19 @@ const tests = {
     assert.deepStrictEqual(w.player.eventSphereSent, [A1]);
     assert.deepStrictEqual(Object.keys(w.player.eventSphere).map(Number), [A1], 'state only for the board handed out');
     assert.deepStrictEqual(w.eb.list({ setSent: true }), [A1], 'GET /user/sphere');
-    // GET replaced the list: the next check sends nothing again
+    // GET kept the board as sent: the next check sends nothing again
     assert.deepStrictEqual(w.eb.check(HOME).add, []);
+  },
+  // login order (bench 08-11): GET /user/sphere hands Board 1 out before the home check; the check still sends it once (popup)
+  login_list_then_home_check_pops_once() {
+    const w = world({ current: ['EV-0759'] });
+    assert.deepStrictEqual(w.eb.list({ setSent: true }), [A1], 'listed at login');
+    assert.deepStrictEqual(w.player.eventSphereSent, [], 'not marked as sent by the list');
+    assert.deepStrictEqual(w.eb.check(HOME).add, [A1], 'home check: popup once');
+    assert.deepStrictEqual(w.eb.list({ setSent: true }), [A1]);
+    assert.deepStrictEqual(w.eb.check(HOME).add, [], 'not again after the next login list');
+    w.eb.list({ setSent: 'merge' });
+    assert.deepStrictEqual(w.player.eventSphereSent, [A1], 'merge leaves it');
   },
   // the focus moves to another set: the old boards close, the new ones are handed out; old progress and coins stay
   focus_switch_keeps_progress() {
