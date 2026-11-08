@@ -331,6 +331,12 @@
    "model": "new",
    "approved": true,
    "review": "user-approved 07-11 (rendered animations, Events Part 2 review rounds 1-5; recipe in extra_donors_events2.tsv)"
+  },
+  "1507": {
+   "name": "Sparkler",
+   "model": "new",
+   "approved": false,
+   "review": "pending (Events Part 3 Task 7a, 08-11): rendered review tmp/events_enemies/review/coins/index.html; every texture JP 4.3.1 or proven by the 2018 WW container name index (category 2); dead = enemy/1/dead (whole-ww-index)"
   }
  }
 }

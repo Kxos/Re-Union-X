@@ -61,7 +61,10 @@ COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (gener
           # dead.res and its 2016 folder is another creature (no_b2016), whose dead is byte-identical to enemy/1/dead
           [(f, 'dead', (1, 'dead'), 'std-dead', STD_DEAD) for f in (1568, 1570, 1572, 1573)] +
           [(96, 'dead', (1, 'dead'), 'std-dead', STD_DEAD + '; 96 Circus Clown: JP keeps only dead.res, the 2016 dead '
-            'of folder 96 is byte-identical to enemy/1/dead')])
+            'of folder 96 is byte-identical to enemy/1/dead')] +
+          # Events Part 3 Task 7a (08-11-2026): 1507 Sparkler (coin quests EV-0894) has no dead in the JP dump; the 2018 index
+          # stores 1507/dead/dead.lwf and its 9 PNGs at the record offsets of enemy/1/dead (pending the user's review)
+          [(1507, 'dead', (1, 'dead'), 'whole-ww-index', IDX_PENDING % 'enemy/1/dead (generic Shadow smoke)')])
 
 
 def to_box(p):
