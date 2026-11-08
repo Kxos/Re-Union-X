@@ -86,6 +86,12 @@ try:
         {'evStageId': 20052, 'bannerKey': 'rowK3', 'available': False}, {'evStageId': 20053, 'bannerKey': None, 'available': True}]},
         {'censusId': 'EV-W', 'evStageId': 20003, 'noticeIds': [52000], 'rows': [{'evStageId': 20003, 'bannerKey': None, 'available': True}]}]}
     assert meb.card_ids(rindex) == [20001, 20051, 20053, 20003], meb.card_ids(rindex)
+    # an announcement entry played only on the boards (noQuests 'board', EV-0579 / 20181) has no card, even with a notice banner
+    bindex = {'entries': [{'censusId': 'EV-0579', 'evStageId': 20181, 'noticeIds': [51518], 'noQuests': 'board'},
+                          {'censusId': 'EV-K', 'evStageId': 20015, 'noticeIds': [51518], 'noQuests': 'coin'}]}
+    assert meb.card_ids(bindex) == [20015], meb.card_ids(bindex)
+    db, mb = meb.build(bindex, notices, dest, os.path.join(t, 'ob'))
+    assert 20181 not in db and not os.path.exists(os.path.join(t, 'ob', '20181.png')) and not mb, (db, mb)
     wr = meb.wanted_rows(rindex)
     assert wr == [(20001, None, 'rowK1'), (20051, None, 'rowK2')], wr
     os.makedirs(os.path.join(dest, 'notices_extra'), exist_ok=True)

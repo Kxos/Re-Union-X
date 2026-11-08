@@ -33,6 +33,7 @@ SMOKE = (251, 255, 271, 285, 1500, 1502, 1504, 1505, 1506, 1510, 2500, 2501, 250
 IDX = '2018 WW container name index: same record offsets as %s (I-194 23-10, user-approved)'
 IDX_PENDING = '2018 WW container name index: same record offsets as %s (Events Task 2b, pending user review)'
 IDX_EVENTS = '2018 WW container name index: same record offsets as %s (Events Task 2b, user-approved 06-11)'
+IDX_COINS = '2018 WW container name index: same record offsets as %s (Events Part 3 Task 7a, user-approved 08-11)'
 STD_DEAD = 'std-dead (user-approved 07-11): standard Heartless defeat, enemy/1/dead (Shadow smoke cloud); no dead of this family exists'
 # (family, anim, donor: (family, anim) planned like the generator, or 'container:folder' copied as is, rule, note)
 COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (generic Shadow smoke)') for f in SMOKE] +
@@ -63,8 +64,8 @@ COPIES = ([(f, 'dead', (1, 'dead'), 'whole-ww-index', IDX % 'enemy/1/dead (gener
           [(96, 'dead', (1, 'dead'), 'std-dead', STD_DEAD + '; 96 Circus Clown: JP keeps only dead.res, the 2016 dead '
             'of folder 96 is byte-identical to enemy/1/dead')] +
           # Events Part 3 Task 7a (08-11-2026): 1507 Sparkler (coin quests EV-0894) has no dead in the JP dump; the 2018 index
-          # stores 1507/dead/dead.lwf and its 9 PNGs at the record offsets of enemy/1/dead (pending the user's review)
-          [(1507, 'dead', (1, 'dead'), 'whole-ww-index', IDX_PENDING % 'enemy/1/dead (generic Shadow smoke)')])
+          # stores 1507/dead/dead.lwf and its 9 PNGs at the record offsets of enemy/1/dead (user-approved 08-11 on the rendered review)
+          [(1507, 'dead', (1, 'dead'), 'whole-ww-index', IDX_COINS % 'enemy/1/dead (generic Shadow smoke)')])
 
 
 def to_box(p):

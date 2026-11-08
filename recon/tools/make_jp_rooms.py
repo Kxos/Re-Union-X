@@ -60,6 +60,8 @@ PLACEHOLDER = bytes.fromhex('894254460000010000000000000000000100000000000001000
 BAD_PLACEHOLDER = bytes.fromhex('8942544600000100000000000000000000010000000000000100010000000001'
                                 '0001000100050000000000000000')
 assert len(PLACEHOLDER) == 45
+# event quest rooms with no story door, taken also with --story-only (see main)
+EVENT_ROOMS = ('DB_0026_09_00', 'DB_0026_10_00', 'DB_0026_11_00', 'DB_0026_12_00')
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--merged', default=private_tools.local_path('ref_work', 'rooms_merged'))
@@ -337,6 +339,9 @@ def main():
         for s in (st.values() if isinstance(st, dict) else st):
             if s.get('stage_type') in ('storia_master', 'storia_variante', 'storia_oltre'):
                 story.update(r for r in s.get('rooms', {}).values() if r)
+    # rooms of served event quests with no story door (Events Part 3 Task 7b, 08-11-2026): the four EV-0894 «Event Coins
+    # plus Riku & Moogle» maps (import_event_stages.py skipped them: rooms not served); same original JP rooms as the rest
+    story.update(EVENT_ROOMS)
     rooms = sorted(f for f in os.listdir(a.merged) if os.path.isdir(os.path.join(a.merged, f)))
     if a.rooms:
         rooms = [x for x in a.rooms.split(',') if x]

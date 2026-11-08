@@ -85,10 +85,14 @@ def file_name(nid, key):
 
 
 def card_ids(index, ids=None):
-    """the card ids of the index in order: each entry's id, then its built original evStage rows (rows, available)"""
+    """the card ids of the index in order: each entry's id, then its built original evStage rows (rows, available).
+    An entry with noQuests 'board' (an announcement notice whose quests were only on the event boards: no quest and no
+    evStage row of its own, e.g. EV-0579) had no card in the original: its id is left out (the Event Catalog shows the
+    «No card in the original» box; user decision 08-11)"""
     out = []
     for e in index.get('entries', []):
-        for ev in [e.get('evStageId')] + [r.get('evStageId') for r in e.get('rows') or [] if r.get('available')]:
+        own = [] if e.get('noQuests') == 'board' else [e.get('evStageId')]
+        for ev in own + [r.get('evStageId') for r in e.get('rows') or [] if r.get('available')]:
             if ev and ev not in out and (ids is None or ev in ids):
                 out.append(ev)
     return out

@@ -335,8 +335,8 @@
   "1507": {
    "name": "Sparkler",
    "model": "new",
-   "approved": false,
-   "review": "pending (Events Part 3 Task 7a, 08-11): rendered review tmp/events_enemies/review/coins/index.html; every texture JP 4.3.1 or proven by the 2018 WW container name index (category 2); dead = enemy/1/dead (whole-ww-index)"
+   "approved": true,
+   "review": "user-approved 08-11 (Events Part 3 Task 7a, rendered review tmp/events_enemies/review/coins/index.html); every texture JP 4.3.1 or proven by the 2018 WW container name index (category 2); dead = enemy/1/dead (whole-ww-index)"
   }
  }
 }
