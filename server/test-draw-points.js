@@ -98,5 +98,14 @@ p.drawPoints = 99;
 r = call(t.respondGachaDraw, { drawMedalTypeId: 10001, count: 1 });
 check(!r.userMedalIds && p.drawPoints === 99, 'draw refused with 99 points');
 
+// Sell Medals worth Jewels (medal.sellJewel; Riku & Moogle 6★ 90296, medal-restored.js): +500 Jewels each, no Munny
+const RM = medalRows.find((x) => x.medalId === 90296);
+if (RM) {
+  const st0 = p.freeStone || 0, mo0 = p.money || 0, dp0 = p.drawPoints;
+  sell(give(90296), give(90296));
+  check(p.freeStone === st0 + 1000 && p.money === mo0 && p.drawPoints === dp0,
+    `two Riku & Moogle sold: +1000 Jewels (${(p.freeStone || 0) - st0}), Munny +${p.money - mo0}`);
+} else console.log('  (Riku & Moogle 90296 not in this master: Sell Jewel check skipped)');
+
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ${errors.join('\n  ')}`); process.exit(1); }
 console.log('OK: draw points');

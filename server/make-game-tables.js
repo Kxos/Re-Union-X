@@ -246,9 +246,10 @@ if (process.env.KHUX_MEDALS_ALL === '1' && medals.some((m) => m.medalId === 9008
   Object.assign(medals.find((m) => m.medalId === 90085), extra.mickeyAPatch);
   guiltExtra = extra.rows.length;
 }
-// medals that event rewards name and our master lacks (medal-restored.js, Events Part 2: SP Chip & Dale 6★ 90346), a
-// clone of a sibling row; only when their art is in the medal package (medal_gen\files next to medal_map.json)
-if (medals.some((m) => m.medalId === 90056)) {
+// medals that event rewards name and our master lacks (medal-restored.js, Events Part 2: SP Chip & Dale 6★ 90346; Events
+// Part 3: Riku & Moogle 6★ 90296), a clone of a sibling row; only when their art is in the medal package (medal_gen\files
+// next to medal_map.json)
+if (require('./medal-restored').RESTORED.every((r) => medals.some((m) => m.medalId === r.sibling))) {
   const restored = require('./medal-restored').restoredMedalRows(medals, path.join(path.dirname(MEDAL_MAP_PATH), 'files'));
   medals.push(...restored.rows);
   console.log(`medal-restored: +${restored.rows.length} (${restored.rows.map((m) => m.medalId).join(', ') || '-'})`

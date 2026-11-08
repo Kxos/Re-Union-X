@@ -4051,11 +4051,12 @@ function respondMedalSell(res, body) {
     const cell = cells.get(Number(id));
     return cell ? cell.copies.slice(0, Math.max(1, Number(n) || 1)) : [Number(id)];
   }));
-  let gain = 0, points = 0;
+  let gain = 0, points = 0, jewels = 0;
   player.medals = (player.medals || []).filter((m) => {
     if (!copies.has(m.userMedalId)) return true;
     gain += rows.get(m.medalId)?.sell || 0;
     points += rows.get(m.medalId)?.sellTicket || 0;
+    jewels += rows.get(m.medalId)?.sellJewel || 0;
     copies.delete(m.userMedalId);
     return false;
   });
@@ -4065,15 +4066,18 @@ function respondMedalSell(res, body) {
     if (!copies.has(m.userMedalId)) continue;
     gain += rows.get(m.medalId)?.sell || 0;
     points += rows.get(m.medalId)?.sellTicket || 0;
+    jewels += rows.get(m.medalId)?.sellJewel || 0;
     setMedalState(m.userMedalId, { removed: true });
   }
   player.money = (player.money || 0) + gain;
+  // Sell Medals worth Jewels (medal.sellJewel: Riku & Moogle 6* 90296, 500 each, medal-restored.js)
+  if (jewels) player.freeStone = (player.freeStone || 0) + jewels;
   // Draw Points (sellTicket = Tier of the Attack Medals of Tier >= 2, make-sell-ticket.js): only once the Story has reached
   // the first Draw Points Deal (the Sell screen still shows the master's number before)
   const dpOpen = drawPointsUnlocked();
   if (points && dpOpen) player.drawPoints = (player.drawPoints || 0) + points;
   savePlayer();
-  console.log(`  [vendita] medaglie ${[...sold.keys()].join(',') || '(nessun id nel corpo)'}: +${gain} munny`
+  console.log(`  [vendita] medaglie ${[...sold.keys()].join(',') || '(nessun id nel corpo)'}: +${gain} munny${jewels ? `, +${jewels} jewel` : ''}`
     + `${points ? (dpOpen ? `, +${points} Draw Points` : `, ${points} Draw Points not given (Story before the Draw Points Deal)`) : ''}`);
   // risposta dell'azione 51: userData.userPoint, poi
   // userSkills, userMedals, infine sellUserMedalIds;

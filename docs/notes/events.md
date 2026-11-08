@@ -274,6 +274,17 @@ are in the master (no substitute): 9 of 23 are served today. The Almighty Challe
   enhanceAttack/enhanceDefense 1000; cost/minCost 999 like the siblings) only when `medal_gen\files\img\medal\Medal_L/S_90346`
   exist (master and package together); art from the Roboloid render (`fetch_medal_images.py`, `medal_map.json` 90346 -> 1796),
   no cut-in. Served with resources 107.
+- **Riku & Moogle 6★ (90296)** (Events Part 3, Task 7a2, 8 November 2026): Gift Shadow drop (6.35%, reward 190804; the EV-0894 Sparkler 1507
+  drops it at 100%, reward 190805) of the four «Event Coins plus Riku & Moogle» events (EV-0885/0894/0909/0925, Aug-Sep 2019). A Sell Medal (type 3,
+  attribute none, upright, album 1588, Roboloid 1638), no stats and no Special Attack, sold for 500 Jewels (khuxwiki «Riku &
+  Moogle»: «can be sold for 500 Jewels each»); not a Subslot Medal (I-169, type 10), so no dependency on that feature.
+  `medal-restored.js` clones our 90016 «Moogle» 6★ (name, flavor, advantage, album 1588, sell 0, sellJewel 500, materialExp 0).
+  Art: the original JP 4.3.1 files (`img/medal/Medal_S_90296.png` and the texture of `mixture/medal/compose/90296/Medal_L`,
+  which is the medal's Medal_L byte for byte), BTF-encoded into `medal_gen\files\img\medal`; `medal_map.json` 90296 -> 1638.
+  `server.js respondMedalSell` now credits `medal.sellJewel` to the Jewels (`freeStone`; no other medal of our master has it).
+  Regen 08-11: 628 of 798 event quests (616 before); coin quests 94 of 114 (82): EV-0885, EV-0909, EV-0925 4 each; EV-0894
+  still waits for the 1507 Sparkler (Task 7b). Board sets handed out 9 (6 before): + 2019-08, 2019-09, 2019-09b; 2019-08b is
+  EV-0894's. The «Subslot Medal» cells of those boards stay left off (268 cells, unchanged): they are I-169, not this medal.
 
 ## One card per original evStage row (Events Part 2, Task 5, 7 November 2026)
 
