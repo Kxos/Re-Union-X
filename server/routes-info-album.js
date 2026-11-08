@@ -68,12 +68,14 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
   const quests = all.flatMap((e) => e.quests || []);
   const used = new Set([...all.flatMap((e) => e.labels || []), ...quests.flatMap((q) => q.labels || [])]);
   const why = cfg.reconstructedWhy || {};
+  const starts = on.map((e) => e.start).filter(Boolean).sort();
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
+    first: starts[0] || null, last: starts[starts.length - 1] || null,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
 }
 function eventNoticeLines(f) {
   if (!f || !f.events) return ['No event quest is served yet: the Event Catalog lists the events and why they are not here yet.'];
-  return [`Today **${f.events} events** are served, with **${f.served} of their ${f.quests} quests** (${f.records} events are in the data so far, starting with April 2019). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.`];
+  return [`Today **${f.events} events** are served, with **${f.served} of their ${f.quests} quests** (${f.records} events are in the data so far${f.first && f.last ? `, from ${usMonth(f.first)} to ${usMonth(f.last)}` : ''}). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.`];
 }
 function eventLabelLines(f) {
   if (!f || !f.labels.length) return [];
@@ -321,10 +323,14 @@ const NOTICES = [
       ...raidNoticeLines(raidNoticeFacts())] },
   // Events Part 1 Task 8 (07-11): event quests, Event Catalog, kept event, short windows, coins, no raid spawns (user decision 07-11,
   // notice 49535), counts and labels from events.json (eventNoticeFacts); docs/notes/events.md
-  { date: '11/07', tag: 'IMPORTANT', title: 'Events',
+  { date: '11/08', tag: 'IMPORTANT', title: 'Events',
     body: ['The **Event Quests** are back: the limited-time events of the original game, with their original maps, enemies, objectives and rewards wherever their files survive. They are in **Quests > Events**, after the raids.',
       'Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.',
       ...eventNoticeLines(eventNoticeFacts()),
+      '## Gem quests',
+      'The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **Monthly Gem Quests**, the **Gem Drop** and **Daily Gem** events, each one with its own card and dates. Where an original quest record did not survive, the quest is rebuilt from the community wiki and from the same quest of a later run (marked in the Event Catalog). The **Gem Boards** were played on the Avatar Boards and come with the Event Boards in a later update; their notices had no banner, so the Event Catalog shows **No card in the original** for them.',
+      'Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.',
+      'The quest lists of the events show no **Event Boards** button (**not original** for the events that had one): it comes back with the Event Boards.',
       '## Opening hours',
       'An event that was open for only a few minutes or hours in the original game is open here for its **whole original day** (**not original**): it is listed on the real weekday (Pacific time) of that day, all day. An event with one quest a day lists **all its quests for its whole period** (**not original** where the original opened them one a day).',
       '## Event Catalog',
@@ -335,6 +341,13 @@ const NOTICES = [
       '**Event Coins** are not given yet: they come with the **Event Boards** in a later update. Each event\'s **Details** shows its original notice as it was.',
       'Event quests **never bring a Raid Boss** and do not fill the raid gauge. This is the original rule from January 24, 2019, when Raid Bosses began to appear only in raid events; before that date some event quests could bring one, so for older events it is **not original**.',
       'The story scenes before and after some event quests are not shown yet.',
+      '## Enemy graphics',
+      'The enemies of many event quests had no complete graphics in the surviving game files. **37 of them** are rebuilt from the game\'s own files and were checked against the original look, with their special attacks: the twelve members of **Organization XIII**, **Queen Bee Ω, Assault Dragon, Titan, Ramuh, Behemoth Ω, Trickmaster Ω, Adventurer, Savage Spider, Scourge Spider, Wicked Spider, Malicious Spider, Driller Mole, Ribbitoad, Poisonous Pretender, Paralysis Pretender, False Master, Rush Ghost, Shred Ghost, Trick Ghost, White Mushroom, Rare Truffle, Nightmare Chirithy, Cloudy Sunrise, Circus Clown** and the **Keyblade wielder** who fights beside you against the Iron Giant.',
+      'Most of their pieces are original pictures found elsewhere in the game files: in another animation of the same enemy, in its raid version, in a story scene or in the game\'s attack effects. Some pieces are **reconstructed**: an existing picture of the same size chosen by rule and checked against videos of the original game, a piece of a twin enemy, or an original picture resized to its slot.',
+      'The flames of **Lexaeus**\' special attack are **recoloured orange** (**not original**): the original orange flames were lost, so the surviving green ones are tinted to match videos of the original game. The spores of **Ribbitoad**\'s special attack are a pink dot from another original effect (**reconstructed**). One thin web thread of **Wicked Spider**\'s attack is still missing and is left out (**not original**).',
+      '**Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).',
+      '## SP Chip & Dale',
+      'The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), a reward of some event quests, is back. Its data comes from the community wiki; its picture is the community render of the original Medal (**reconstructed**: the original file was not found).',
       ...eventLabelLines(eventNoticeFacts())] },
   // Medal Gallery (I-242, user requests 06-11): server/medal-gallery.js, block on the Banner Catalog page (gacha.js catalogPage)
   { date: '11/06', tag: 'INFORMATION', title: 'Medal Gallery',
