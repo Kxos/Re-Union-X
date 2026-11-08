@@ -434,3 +434,19 @@ yet (Task 7).
   (window, focus, chain), the node is invalid or open, or the set's balance is short; each cell paid once, the completion (index 22)
   once.
 - Test: `server/test-event-board-routes.js`.
+
+## Bench of the coin events (Part 3, Task 7)
+
+- **Content (Task 7b, 8 November 2026, f0cb34e).** 1507 Sparkler user-approved (event_enemy_families.json, whole_export.py label,
+  extra_donors_events2.tsv +139 rows); `make_jp_enemies.py`: 1507 complete (category 3 for the standard ground shadow).
+  The four EV-0894 maps use the original JP rooms DB_0026_09..12_00, which have no story door: `make_jp_rooms.py` `EVENT_ROOMS`
+  builds them with `--story-only` (they also let DAY 9 - 1/2 and 2/2, stages 730190/730191, be imported). Regen: 634 of 798
+  event quests served (628), EV-0894 4 quests, board sets 10 (+2019-08b), eventType 1 entries 22.
+- **No card for EV-0579 (20181)** (user 08-11): an entry with `noQuests` 'board' (announcement notice played only on the boards, no
+  quest and no evStage row) gets no card from `make_event_banners.py` (test in test_make_event_banners.py); the Event Catalog shows the
+  «No card in the original» box. Cards written: 138 (25 new coin cards, identical to the reviewed ones), imgVersion 6.
+- **Keeping an October event from April 2019**: only a past event can be kept (`rowState`: a later event is 'later'), so the
+  October 2019 set cannot be kept on an April 2019 save; the focus test uses an October 2018 coin event (EV-0603, set 2018-10).
+- **Riku & Moogle on the bench**: no save tool can add it (`grant-all-medals.js` skips medals with sell 0); its sale is benched only
+  with a save that got it from a drop (August-September 2019 events).
+- Resource build 108 was stopped by the host (low memory) before the version was written; bench pending.
