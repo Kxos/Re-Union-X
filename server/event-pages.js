@@ -25,6 +25,10 @@ const KEEP_JS = parts.keepJs(BASE, 'event');
 const PILLS = { kept: ['pinned', `${icon('pin')}Kept in the event list`], can: ['can', `${icon('pin')}Past event — can be kept`] };
 const dateRange = (e) => `${niceDay(e.start)} – ${niceDay(e.end || e.start)}`;
 const imgOf = (ctx, id) => `${BASE}/img/v${ctx.imgVersion || 1}/${id}.png`;
+// a record whose original notice had no banner has no card file (Gem Boards 20014/20017/20040, user 08-11): the broken-image
+// icon is replaced by a plain box of the same size
+const NO_CARD = (w, h) => ` onerror="this.outerHTML='<span style=&quot;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;`
+  + `width:${w}px;max-width:100%;height:${h}px;border:1px solid #2f6f93;border-radius:6px;background:#06283e;color:#b9cfdc;font-size:13px&quot;>No card in the original</span>'"`;
 const detailHref = (id) => `${BASE}/event/${id}?from=catalog`;
 const servedOf = (e) => (e.quests || []).filter((q) => q.served);
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
@@ -99,7 +103,7 @@ function catalogPage(index, ctx = {}) {
     lastM = m;
     const line = `${dateRange(e)} · ${served === all ? plural(all, 'quest') : `${served} of ${plural(all, 'quest')} served`}`;
     rows += `<div class="row ${st.cls}" id="q${e.evStageId}" data-href="${href}" data-name="${esc(e.name || e.censusId)}" data-eid="${e.evStageId}" data-show="${st.show}" data-y="${e.start.slice(0, 4)}">`
-      + `<a class="im" href="${href}"><img width="320" height="70" src="${imgOf(ctx, e.evStageId)}" alt=""></a>`
+      + `<a class="im" href="${href}"><img width="320" height="70" src="${imgOf(ctx, e.evStageId)}" alt=""${NO_CARD(320, 70)}></a>`
       + `<div class="info"><a class="nm" href="${href}">${esc(e.name || e.censusId)}${doneOf(e, ctx) ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
       + `</div><a class="go" href="${href}" aria-label="Details">›</a></div>\n`;
@@ -170,7 +174,7 @@ function detailPage(index, evStageId, ctx = {}) {
   // the original evStage rows of the event (Part 2 Task 5): one card each in the Events tab, with its own dates and quests
   const rows = Array.isArray(e.rows) && e.rows.length > 1 ? e.rows : [];
   const cards = rows.length ? `<h2>Cards</h2><p class="n">In the original game this event showed ${rows.length} cards in the Events tab, each with its own dates and quests.</p>`
-    + `<table class="tt"><tr><th>Card</th><th>Dates</th><th>Quests</th></tr>${rows.map((r) => `<tr><td>${r.available && r.evStageId ? `<img width="160" height="35" src="${imgOf(ctx, r.evStageId)}" alt="">` : ''}</td>`
+    + `<table class="tt"><tr><th>Card</th><th>Dates</th><th>Quests</th></tr>${rows.map((r) => `<tr><td>${r.available && r.evStageId ? `<img width="160" height="35" src="${imgOf(ctx, r.evStageId)}" alt=""${NO_CARD(160, 35)}>` : ''}</td>`
       + `<td>${esc(`${niceDay(r.start)}${r.end && r.end !== r.start ? ` – ${niceDay(r.end)}` : ''}`)}${Array.isArray(r.days) && r.days.length ? '<small>its whole day</small>' : ''}</td>`
       + (r.available ? `<td>${esc(plural((r.stageIds || []).length, 'quest'))}</td>` : `<td class="r">Not served yet<small>${esc(plural(r.quests || 0, 'quest'))}</small></td>`) + '</tr>').join('')}</table>` : '';
   const back = ctx.fromCatalog ? backBar(`${BASE}/catalog#q${e.evStageId}`) : '';
@@ -179,7 +183,7 @@ function detailPage(index, evStageId, ctx = {}) {
     intro: `This server follows your Story, not the calendar: this event of the original game (${esc(dateRange(e))}) opens when your Story reaches it.`,
     links: [...(notice ? [[`${BASE}/notice/${e.evStageId}?from=event`, notice]] : []), [`${BASE}/catalog`, 'Event Catalog ›']] });
   return PAGE_HEAD(title, CSS + DETAIL_CSS + EVENT_DETAIL_CSS + RULE_CSS + SRV_CSS + FOLD_CSS) + `<body${back ? ' class="hb"' : ''}>`
-    + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt="">${box}`
+    + `<h1>${esc(title)}</h1><img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt=""${NO_CARD(640, 140)}>${box}`
     + `<h2>Event</h2><table class="kv">${kv}</table>`
     + cards + `<h2>Quests</h2><table class="tt"><tr><th>Quest</th><th>LV</th><th>AP</th><th>Status</th></tr>${qRows}</table>`
     + `<p class="n">The Event Catalog is an addition of this server: in the original game an event was played only in its own dates.</p>${back}<script>${KEEP_JS}</script></body></html>`;
@@ -214,7 +218,7 @@ function noticePage(index, evStageId, doc, ctx = {}) {
     const n = notices[0], st = statusOf(e, ctx);
     const back = ctx.from === 'event' ? backBar(`${BASE}/event/${e.evStageId}?from=catalog`) : '';
     return PAGE_HEAD(n.title, CSS + DETAIL_CSS + NOTICE_CSS) + `<body${back ? ' class="hb"' : ''}>`
-      + `<img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt="">`
+      + `<img class="banner" width="640" height="140" src="${imgOf(ctx, e.evStageId)}" alt=""${NO_CARD(640, 140)}>`
       + `<h1>${esc(n.title)}</h1><p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(niceDay(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
       + srvBox(e, st, index, { intro: 'Below: the original notice of this event, unchanged (top-player lists left out). '
         + `Its dates are the original game's (${esc(dateRange(e))}): here the event opens when your Story reaches them.`,
