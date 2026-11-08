@@ -482,3 +482,39 @@ yet (Task 7).
     announcements (6 boards of 2018-10).
   - Not checked: Riku & Moogle 6★ sale (no save tool can give a sell-0 medal; coordinator: later, with an Aug-Sep 2019 save);
     the board card art (`img/sphere_incentive`) is still the plain lilac frame.
+
+### Boards with unpayable cells, informative notices (Task 7c, 8 November 2026)
+
+User decisions 08-11 (4c5ce3f, master rev 288, 8f87e7f):
+- **No pass-through cells.** In the donor WW master every cell of every type-4 board has a reward and a coin cost (Booster cells cost
+  150-1000 coins); no original board had an empty or pre-opened cell. The pass-through cells of Task 3 / 7dc0cf4 let paid cells open
+  out of the original path order, so `event-boards.js` now skips a board with ANY cell we cannot pay (`report.skipped`: `unpayable
+  cells (Boosters: Part 6)`, `unmatched medal`, a bad index, a grid node without a cell); a board chained behind a skipped one is
+  skipped too (`chained to a skipped board`), a skipped Board 2 leaves Board 1 served. The pre-open logic of 7dc0cf4 is gone;
+  `routes-event-boards.js` keeps a guard: a board with a rewardSelect 0 node is never handed out, opened or bought (logged once).
+  A board held in a save but no longer in the master is closed by the next check and never listed (tests).
+- **Medal names of the donor study.** A medal cell whose donor name has a variant letter our master lacks uses the study's `ourName`
+  when it gives exactly one medal of the same rarity: 5★ Halloween Sora A -> 22095 (x2), 5★ Halloween Goofy A -> 21095, so the
+  «Re: Halloween Medals Board» of 2018-10 is served whole.
+- **Event Catalog = playable events only.** An informative notice with no quest and no original card (`noQuests 'board'`: EV-0579
+  «New Event Coins Available in October!», EV-0223, EV-0280, EV-0396 Gem Boards announcements) has no row and no page (404); 52e747f
+  is reverted. Playable events whose quests are not served yet stay with their reason; the 2018-10 boards are listed on the pages of
+  the playable 2018-10 events (EV-0582, 0588, 0589, 0603).
+- **Regen** (`KHUX_EVENT_BOARDS=D:/Progetto_Restauro_KH_UX/tmp/events/boards/board_sets.json`, log `tmp\events\t7c\regen.log`):
+  83 donor boards -> 53 built, 30 skipped (19 `no matched cells` = all of 2019-12, 6 `unpayable cells (Boosters: Part 6)` = 3 of
+  2018-10 + Board 1 of 2019-04 / 2019-06 / 2019-10, 3 `chained to a skipped board` = their Board 2, 2 completion Booster = 2019-02);
+  265 cells left off, all Boosters. **7 sets handed out** (2018-10 with 3 boards, 2019-08, 08b, 09, 09b, 11, 11b; 41 type-4 rows);
+  2020-01 / 01b built but not handed out (no coin quest served: `noCoinSource`); 2019-02, 04, 06, 10, 12 not served (`boardsLater`,
+  their entries eventType 3). Entries by eventType {1: 10, 3: 106}; catalogue 110 events (was 114). No resource change (event boards
+  have no card art in the resources).
+- **Bench** (save `coin1`, `relogin -Save coin1 -RealNow 2026-11-10T20:00:00Z`, rev 288, Download tapped; frames
+  `screenshots\t7c_*.png`): `[master] 106 tabelle valide`. Focus fell to the kept EV-0603 (2018-10): «Unlocked an Event Board!»
+  popped for the three 2018-10 boards (Cherub x2, Re: Halloween Medals Board). The April 2019 events show no Event Boards button.
+  Event Boards list of the kept event: 3 boards, coins 8. Cursor moved over all 19 cells of each Cherub board and all 11 cells of the
+  Halloween board: no crash; cell 1 of Cherub unlocked (5 coins, EXP Medal Huey & Dewey & Louie), the cursor moved to cell 2, no
+  crash. Event Catalog: 110 events, June 2017 Gem Boards (EV-0223) and Sept. 25 Gem Boards (EV-0280) gone, EV-0242 (coin, with card)
+  kept; `/web/event/event/20181` 404. EV-0603 page (via its card Details -> «See this event in the Event Catalog»): Event Boards
+  section with the Cherub cells, costs, «Not unlocked» / «Unlocked» (cell 19).
+- **Leftover on the test save `coin1` only:** the Halloween board 4000006 holds cells 2, 3, 14 unlocked by the 7dc0cf4 pre-open
+  (they were the Halloween A cells, now paid medal cells): shown unlocked, never paid. 7dc0cf4 was never released, so only bench
+  saves can hold this; clear them by hand if the save is reused.
