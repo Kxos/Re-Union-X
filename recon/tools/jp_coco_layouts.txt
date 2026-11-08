@@ -293,3 +293,11 @@ Adv_Raid_Boss_List_Reward.json
 AdventureTop2_RaidInfo2_Start.json
 BattleResultReidScene.json
 BattleResultDefeatedScene.json
+# Fixed-keyblade start popup (holdKeyblade != 0 on event/story stages): StartDeckEdit3Scene_ver330 is served by WW
+# without its children (GUIReader crash on Begin, bench 08-11 Monthly Gem 4000208); the CONDITION box (Rules) needs
+# MMode_Rule_Panel_A, the «Cannot change» plate NotChange_panel01/02 (JP only). Original: reference/quest_start_screen.
+StartDeckEdit3_Panel_KB_ver240.json
+StartDeckEdit3_Panel_KB_Ad_ver240.json
+StartDeckEdit3_Deck_ver240.json
+StartDeckEdit2_NotChangeKB_ver240.json
+StartDeckEdit3_Rules_ver240.json

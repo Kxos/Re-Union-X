@@ -347,10 +347,15 @@ week 01-10..01-16).
   -> Results with the three objectives. First clear: Magic Gem +1 (material 50), Jewels +30, Moogle medal, drops (Spring Water,
   Iron Ore), munny 4,617; score and clear missions [1,2,3] saved. Three replays: no objective paid again (gem and Jewels unchanged),
   drops and munny only. A reward row that looks empty for a moment is the client's bonus animation (the text fills in), not a fault.
-- **Monthly gem quest crashes on Begin (gem2, Jan 2019, stage 4000208):** SIGSEGV in GUIReader (missing cocostudio layout), no server
-  request. Its rows differ from the weekly ones by `noPartner 1` (only on 84 event quests, never benched) and `holdKeyblade`
-  (1000..12000; 978 Proud rows already work). `hardmodeRequire 1` («No special attack restrictions.», 334 event rows, unknown to the
-  WW client) is now served as 0 (rev 282) but was not the cause. Suspects: the start-deck condition panels missing in WW
-  (`StartDeckEdit3_Panel_KB_ver240`, `StartDeckEdit3_Panel_KB_Ad_ver240`, `StartDeckEdit3_Deck_ver240`); the user notes the empty
-  box at the right of «Select a Keyblade», where the original may show the quest conditions. Research in progress
-  (`tmp/quest_start_panels/REPORT.md`, private).
+- **Monthly gem quest crashed on Begin, fixed (rev 283, -Quick on resources 107):** a stage with `holdKeyblade` != 0 (event/story mode)
+  opens the fixed-keyblade start popup `StartDeckEdit3Scene_ver330`, which WW serves without its children: the client crashed in
+  GUIReader (320 event quests: the 84 Monthly Gem rows and 236 «Quest - N/15» / «Clear All Challenges» rows). Proud quests use
+  StartDeckProudScene and were not affected. Imported from JP 4.3.1 (`jp_coco_layouts.txt`): StartDeckEdit3_Panel_KB(_Ad)_ver240,
+  StartDeckEdit3_Deck_ver240, StartDeckEdit2_NotChangeKB_ver240, StartDeckEdit3_Rules_ver240 (+ NotChange_panel01/02,
+  MMode_Rule_Panel_A). `noPartner` only hides the friend list and adds «*No borrowed Medals.»; the right box (Rules) shows only
+  when `hardmodeRequire` != 0, so the short-lived 1 -> 0 mapping was reverted (1 = «No special attack restrictions.», a valid
+  «no limit» code). Original frames: private `reference/quest_start_screen/` (WW 2018-05 Monthly Gem: «CONDITION» box, orange
+  «Stroke of Midnight +25 Cannot change» plate; WW 2017-12 weekly: empty right area, as ours).
+  Bench (`gem2_begin`): «This quest must be played with this Keyblade.», box with the three lines, «Starlight +60 Cannot change», lock,
+  no friend column. Differences left: the box header reads «RULE» (JP texture) instead of the WW «CONDITION», no yellow frame,
+  red plate instead of orange. Played: Iron Giant LV 500, objectives paid once (Power Gem +1, Huey, Moogle), clear [1,2,3].
