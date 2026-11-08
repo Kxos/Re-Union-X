@@ -522,3 +522,31 @@ User decisions 08-11 (4c5ce3f, master rev 288, 8f87e7f):
   `boardSetOf` falls back to the entry's `boardSetKey` and `addCoins` accepts a set that has member entries; the set is never
   handed out nor the focus, its entries stay eventType 3 (test `coins_paid_to_held_set`). Master unchanged (rev stays 288).
   Save `coin1`: the 7dc0cf4 leftovers on board 4000006 (cells 2, 3, 14) cleared by hand.
+
+## Part 3 summary (event coins and boards, 8 November 2026)
+
+Final state (rev 288, resources 108; plan `docs/superpowers/plans/2026-11-08-events-part3-coins.md`, ledger
+`.superpowers/sdd/2026-11-08-events-part3-coins/progress.md`):
+- **Coins.** Event Coins = reward type 15; Raid Coins moved to type 16 (same amounts). Objectives and first-clear items pay once,
+  enemy drops at every clear (kept events included), into `player.eventCoins[set]`: one balance per board set, never expiring (the
+  original lost them when the event ended; the client's board marquee still says so). A served event whose set is held
+  (`boardSetKey` without a `boardSets` entry) pays into its set too; the balance is not shown until the boards are served.
+- **Focus.** One set listed at a time: the set of the last event quest started, else the newest set of the story week, else the kept
+  event's; `userPoint.stageSpherePoint` = that set's balance.
+- **Boards.** 83 donor boards -> 53 built, 41 handed out in 7 sets (2018-10 with 3 of 6, 2019-08, 08b, 09, 09b, 11, 11b); each cell
+  and each completion paid once; chains and windows enforced by the server. No pass-through cells: a board with any unpayable cell
+  (265 Booster cells) is held with any board chained behind it (30 boards: all of 2019-12, 3 of 2018-10, both boards of 2019-04 /
+  06 / 10, 2 of 2019-02) until Part 6 (Boosters, I-166). 2020-01 / 01b have no served coin quest (`noCoinSource`).
+- **Content.** 47 missing event enemies served as event rows, new model 1507 Sparkler (user-approved; defeat = Shadow smoke cloud,
+  standard ground shadow, both declared); Riku & Moogle 6★ Sell Medal 90296 (500 Jewels, `sellJewel`); EV-0894 rooms
+  DB_0026_09..12. 95 events / 634 of 798 quests served; Event Catalog 110 events (informative notices without a banner left out;
+  «shared by N events» counts only listed events, Task 8).
+- **Notice.** «Events» (11/08) section «Event coins and boards» (counts from `events.json` via `eventNoticeFacts().coins`) and the
+  Sparkler line in «Enemy graphics».
+- **Open:** pet Steal x4 multiplies coin drops (+2015 on one Galore clear: check the original Steal rule); EV-0603 objective rewards
+  pay 1 coin each (check the records); board card art is the plain lilac frame (`img/sphere_incentive` art missing); the Riku & Moogle
+  sale not benched in the client; test-make-special and the 8 known failing tests; deferred minors in the ledger.
+- **Lessons for Part 4.** Check what the original paid before inventing a fallback (the pass-through cells had to be undone: every
+  original cell had a cost and a reward); a missing enemy is found and approved on a rendered review, never substituted; a feature
+  half-served (boards without Boosters) is held back whole and declared in the notice; memory-heavy steps (resources build,
+  update-resources) can be killed by the host: stop, free memory, resume, never chain taps after a kill.
