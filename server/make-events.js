@@ -34,6 +34,13 @@
 // stage, evStage (with the Event Catalog banner catalogEvStage, Task 5); game_data/events.json {entries, reasons, catalog?, own};
 // game_data/event_maps.json (every candidate stage, for recon/tools/import_event_stages.py: the original JP maps), reward rows of the
 // served maps (original drops) and their POI merged into game_data/stage_poi.json (map import report: MAPS_DIR, see loadMaps). An event row has detailUrl /web/event/notice/<evStageId> when its record names a notice.
+// Event Boards (Events Part 3 Task 4): KHUX_EVENT_BOARDS = the private board sets (board_sets.json {sets: [{setKey, censusIds, boards}]}):
+// the type-4 rows of event-boards.js (ids event_ids.json `boards`) are appended to sphere / sphereArray / sphereMasu for the sets
+// handed out: a set with at least one built board and a member entry (census id in its censusIds) with a served quest. Such an
+// entry gets boardSet = its set and eventType config.boardEventType (1: the Event Boards button); every other entry boardSet null
+// and a donor 1 served as config.eventType (3). A member of a set not handed out gets the label boardsLater (no board built: its
+// rewards do not exist here yet) or noCoinSource (boards, but no quest of the set is served). events.json boardSets {[setKey]:
+// {boardIds, chains, censusIds}} lists the sets handed out (server: Part 3 Task 5).
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
 //
 //   node server/make-events.js [master folder]
@@ -43,13 +50,14 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { evStageRow, storyRefs } = require('./make-raid');
+const eventBoards = require('./event-boards');
 
 const STAGE_KIND = 2;
 // raid and Special stage ids (make-special.js 970000-979999, make-raid.js 980000-989999) and the raid target Eggcognito
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp'];
+const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource'];
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
   'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch'];
@@ -200,8 +208,10 @@ function rowOfQuest(rows, q) {
   return { row: hit || rows[0], guess: !hit && rows.length > 1 };
 }
 
+const BOARD_TABLES = { sphere: 'sphereBoardId', sphereArray: 'arryId', sphereMasu: 'masuId' };
 function checkRanges(master, config) {
-  const ranges = { evStage: ['eventStageId', config.evStageBase, config.evStageMax], stage: ['stageId', config.stageBase, config.stageMax] };
+  const ranges = { evStage: ['eventStageId', config.evStageBase, config.evStageMax], stage: ['stageId', config.stageBase, config.stageMax],
+    ...Object.fromEntries(Object.entries(BOARD_TABLES).map(([t, k]) => [t, [k, eventBoards.ID_BASE, eventBoards.ID_MAX]])) };
   for (const [table, [key, lo, hi]] of Object.entries(ranges)) {
     const hit = (master[table] || []).find((r) => r[key] >= lo && r[key] <= hi);
     if (hit) throw new Error(`events: ${table} row ${hit[key]} is inside our id range ${lo}-${hi} and is not ours`);
@@ -326,12 +336,32 @@ function remapItems(q, resolve) {
   return { q: c, missing: [...new Set(missing)] };
 }
 
-// records, config (event_config.json), master {stage, evStage, enemy, reward?} without our own rows, ids (event_ids.json), anchors,
-// maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}} of import_event_stages.py)
-// -> {evStage, stage, reward, poi, maps, ids, index: {entries, reasons}}
-function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
+// records, config (event_config.json), master {stage, evStage, enemy, reward?, sphere tables?, item tables?} without our own rows,
+// ids (event_ids.json), anchors, maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}}
+// of import_event_stages.py), boardSets (null: no event board; else the board sets {sets} of KHUX_EVENT_BOARDS)
+// -> {evStage, stage, reward, sphere, sphereArray, sphereMasu, poi, maps, ids, boardReport, index: {entries, reasons, boardSets}}
+function buildEvents(records, config, master, ids, anchors = {}, maps = null, boardSets = null) {
   checkRanges(master, config);
   const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
+  // board sets: census id -> set key (sets[].censusIds); every board numbered (append-only), rows kept for the sets handed out
+  const sets = (boardSets && boardSets.sets) || [];
+  const setOf = new Map();
+  for (const st of sets) {
+    for (const c of st.censusIds || []) {
+      if (setOf.has(c) && setOf.get(c) !== st.setKey) throw new Error(`events: ${c} feeds two board sets (${setOf.get(c)}, ${st.setKey})`);
+      setOf.set(c, st.setKey);
+    }
+  }
+  if (boardSets) {
+    for (const rec of records) {
+      if (rec.boardSet && setOf.get(rec.censusId) !== rec.boardSet) {
+        throw new Error(`events: ${rec.censusId} has boardSet ${rec.boardSet} but the board sets list it under ${setOf.get(rec.censusId) || 'none'}`);
+      }
+    }
+  }
+  const eb = boardSets ? eventBoards.buildEventBoards({ sets, master, ids: allIds }) : null;
+  if (eb) allIds.boards = eb.ids.boards;
+  const builtBoards = (k) => ((eb && eb.bySet[k]) || []);
   const enemies = new Set((master.enemy || []).map((e) => e.enemyId));
   const names = new Map((master.enemy || []).map((e) => [e.enemyId, e.name]));
   const masterRewards = new Set((master.reward || []).map((r) => r.rewardId));
@@ -345,23 +375,29 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
   const resolveItem = itemResolver(master);
   const reasonText = config.reasonText || {};
   const textOf = (r) => { if (!reasonText[r]) throw new Error(`events: reason ${r} has no reasonText in event_config.json`); return reasonText[r]; };
-  const out = { evStage: [], stage: [], reward: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, skipped: [], index: { entries: [], reasons: {} } };
+  const out = { evStage: [], stage: [], reward: [], sphere: [], sphereArray: [], sphereMasu: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, skipped: [],
+    boardReport: eb ? eb.report : null, index: { entries: [], reasons: {}, boardSets: {} } };
   const used = new Set();
   const builtMaps = new Map(); // map key -> our stage id built on it in this run
 
   // eventType served on /stage/event (bench 08-11): the client turns 1 into the board mode with the «Event Boards» button and 2 into
-  // the raid mode (Raid Boards); original videos show no button on the quest list of a non-board event (Defeat Titan, donor 1), and
-  // the event boards are not served yet (Part 3): a donor value outside config.servedEventTypes gives config.eventType (3, plain list);
-  // the donor value stays in origEventType.
-  const servedType = (t) => (Number.isInteger(t) && (config.servedEventTypes || []).includes(t) ? t : config.eventType);
+  // the raid mode (Raid Boards); original videos show no button on the quest list of a non-board event (Defeat Titan, donor 1).
+  // An entry with a board set handed out (Part 3 Task 4): config.boardEventType (1) on every row. Otherwise a donor value in
+  // config.servedEventTypes stays, except the board type, and anything else gives config.eventType (3, plain list); the donor value
+  // stays in origEventType.
+  const servedType = (t, boardSet) => {
+    if (boardSet) return config.boardEventType;
+    return Number.isInteger(t) && t !== config.boardEventType && (config.servedEventTypes || []).includes(t) ? t : config.eventType;
+  };
   for (const rec of records) {
     if (!selected(rec)) { out.skipped.push({ censusId: rec.censusId, reason: 'notSelected' }); continue; }
     const evStageId = config.evStageBase + allIds.rows[rec.censusId];
     const donorTypes = [...new Set((rec.evStage || []).map((r) => r.eventType))];
     const entry = { censusId: rec.censusId, evStageId, name: rec.name, type: rec.type, start: rec.start, end: rec.end, stageIds: [], useAp: null, label: 'original', labels: [],
       noticeIds: rec.notices || [], banner: `/web/event/img/v${config.imgVersion}/${evStageId}.png`, origEventType: donorTypes.length === 1 ? donorTypes[0] : donorTypes,
-      eventType: servedType(donorTypes.length === 1 ? donorTypes[0] : null),
+      eventType: servedType(donorTypes.length === 1 ? donorTypes[0] : null, null), boardSet: null,
       available: false, why: null, quests: [] };
+    if (setOf.has(rec.censusId)) entry.boardSetKey = setOf.get(rec.censusId);
     if (rec.sharedWith) entry.sharedWith = rec.sharedWith;
     if (rec.noQuests) entry.noQuests = rec.noQuests;
     // a record that builds no quest of its own: noQuests (board, coin, undated), a shared notice (built with the other row), no date
@@ -485,6 +521,11 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       if (d.before || d.after) { item.drama = { beforeIds: d.beforeIds || [], afterIds: d.afterIds || [] }; labels.add('dramaOff'); }
       if ((q.objectives || []).some((o) => (o.reward || {}).type === COIN_TYPE)) labels.add('eventCoins');
     }
+    // the entry's board set: handed out when it has a built board and this entry a served quest
+    if (entry.boardSetKey && !raidish && entry.stageIds.length && builtBoards(entry.boardSetKey).length) {
+      entry.boardSet = entry.boardSetKey;
+      entry.eventType = servedType(null, entry.boardSet);
+    }
     if (raidish) entry.why = `raid or Special ${raidish}: served by make-raid / make-special`;
     else if (!entry.stageIds.length) {
       entry.why = `no quest served yet (${entry.quests.length} ${NOT_SERVED})`;
@@ -501,7 +542,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
         origCategory: d ? d.eventCategory : null, parentEventStageId: d ? d.parentEventStageId || 0 : 0, bannerKey: d ? d.bannerKey || null : null,
         noticeId: d ? d.detailNoticeId || null : null, stageIds: quests.filter((x) => x.served).map((x) => x.stageId), quests: quests.length, available: false };
       if (d) {
-        r.eventType = servedType(d.eventType);
+        r.eventType = servedType(d.eventType, entry.boardSet);
         // own dates (Pacific) when the record has several rows (a single row keeps the record's dates and days, as before Task 5);
         // a window past the record's end (the permanent category 1 rows, until 2037) ends with the record
         if (donorRows.length > 1 && d.startTime && d.endTime) {
@@ -537,6 +578,25 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
     entry.label = entry.labels.length ? 'reconstructed' : 'original';
     entry.labels.forEach((l) => used.add(l));
     out.index.entries.push(entry);
+  }
+  // board sets handed out: their rows and the index; a member entry of a set not handed out says why (label)
+  const handed = new Set(out.index.entries.map((e) => e.boardSet).filter(Boolean));
+  if (eb) {
+    for (const st of sets) {
+      if (!handed.has(st.setKey)) continue;
+      const boardIds = builtBoards(st.setKey), mine = new Set(boardIds);
+      out.index.boardSets[st.setKey] = { boardIds, chains: Object.fromEntries(Object.entries(eb.chains).filter(([id]) => mine.has(Number(id)))), censusIds: [...(st.censusIds || [])] };
+      out.sphere.push(...eb.sphereRows.filter((r) => mine.has(r.sphereBoardId)));
+      out.sphereArray.push(...eb.arrayRows.filter((r) => mine.has(r.arryId)));
+      out.sphereMasu.push(...eb.masuRows.filter((r) => mine.has(r.masuId)));
+    }
+    for (const e of out.index.entries) {
+      if (!e.boardSetKey || e.boardSet || handed.has(e.boardSetKey)) continue;
+      const l = builtBoards(e.boardSetKey).length ? 'noCoinSource' : 'boardsLater';
+      if (!e.labels.includes(l)) e.labels.push(l);
+      e.label = 'reconstructed';
+      used.add(l);
+    }
   }
   // shared notices: the stage rows of the row they share (built once), no evStage row of their own
   for (const e of out.index.entries) {
@@ -629,24 +689,32 @@ function patch(masterDir, opts = {}) {
   }
   const gameData = opts.gameDataDir || path.join(__dirname, 'game_data');
   const prev = readJson(path.join(gameData, 'events.json'), {}).own || {};
-  const keyOf = { stage: 'stageId', evStage: 'eventStageId', reward: 'rewardId' };
+  const keyOf = { stage: 'stageId', evStage: 'eventStageId', reward: 'rewardId', ...BOARD_TABLES };
   const load = (table, dflt) => {
     const mine = new Set(prev[table] || []);
     return readJson(path.join(masterDir, `${table}.json`), dflt).filter((r) => !mine.has(r[keyOf[table]]));
   };
-  const hadReward = fs.existsSync(path.join(masterDir, 'reward.json'));
+  const had = Object.fromEntries(['reward', ...Object.keys(BOARD_TABLES)].map((t) => [t, fs.existsSync(path.join(masterDir, `${t}.json`))]));
   const master = { stage: load('stage'), evStage: load('evStage'), reward: load('reward', []), enemy: readJson(path.join(masterDir, 'enemy.json')),
-    medal: readJson(path.join(masterDir, 'medal.json'), null), material: readJson(path.join(masterDir, 'material.json'), null) };
+    medal: readJson(path.join(masterDir, 'medal.json'), null), material: readJson(path.join(masterDir, 'material.json'), null),
+    ...Object.fromEntries(Object.keys(BOARD_TABLES).map((t) => [t, load(t, [])])),
+    ...Object.fromEntries(['title', 'avatarParts', 'petParts'].map((t) => [t, readJson(path.join(masterDir, `${t}.json`), [])])) };
+  // the private board sets (KHUX_EVENT_BOARDS, or opts.boardSets in the tests): none -> no event board, every entry as before
+  let boardSets = opts.boardSets !== undefined ? opts.boardSets : null;
+  if (opts.boardSets === undefined && process.env.KHUX_EVENT_BOARDS) boardSets = readJson(process.env.KHUX_EVENT_BOARDS);
+  if (!boardSets && !opts.records) console.warn('events: KHUX_EVENT_BOARDS not set (the private board sets): no event board, every entry served as a plain list');
   const idsFile = opts.idsFile || IDS_FILE;
   // the anchors sidecar: next to the records (private), or opts.anchorsFile; records given in opts without a file: game_data
   const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : anchorsPathOf(process.env.KHUX_EVENT_SRC));
   const config = opts.config || loadConfig();
   const maps = opts.maps !== undefined ? opts.maps : (opts.records ? null : loadMaps(MAPS_DIR));
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps);
-  const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward };
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets);
+  const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward,
+    sphere: out.sphere, sphereArray: out.sphereArray, sphereMasu: out.sphereMasu };
   const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));
   if (clashR) throw new Error(`events: reward row ${clashR.rewardId} is in the master already`);
-  for (const [t, rows] of Object.entries(added)) if (t !== 'reward' || hadReward || rows.length) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
+  // reward and sphere tables: written when the file is there, or when there are rows to add
+  for (const [t, rows] of Object.entries(added)) if (!(t in had) || had[t] || rows.length) fs.writeFileSync(path.join(masterDir, `${t}.json`), JSON.stringify([...master[t], ...rows]));
   fs.mkdirSync(gameData, { recursive: true });
   const own = Object.fromEntries(Object.entries(added).map(([t, rows]) => [t, rows.map((r) => r[keyOf[t]])]));
   // POI of the served event maps into stage_poi.json (the server reads an event stage's POI by its stageBinId)
@@ -658,7 +726,8 @@ function patch(masterDir, opts = {}) {
     fs.writeFileSync(poiFile, JSON.stringify(Object.fromEntries(Object.entries({ ...poiAll, ...out.poi }).sort((a, b) => Number(a[0]) - Number(b[0])))));
   }
   own.poi = Object.keys(out.poi).sort((a, b) => a - b);
-  fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}), own }, null, 1));
+  fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}),
+    boardSets: out.index.boardSets, own }, null, 1));
   fs.writeFileSync(path.join(gameData, 'event_maps.json'), JSON.stringify(out.maps, null, 1));
   // anchors first (only grow: allocateIds never changes one), so ids are never written with keys whose anchor is not saved
   if (JSON.stringify(readJson(anchorsFile, {})) !== JSON.stringify(out.anchors)) fs.writeFileSync(anchorsFile, JSON.stringify(out.anchors, null, 1) + '\n');
@@ -673,6 +742,14 @@ function patch(masterDir, opts = {}) {
   console.log(`events: quests not served by reason ${JSON.stringify(byReason)}; entries by reason ${JSON.stringify(entryReasons)}; ${out.skipped.length} records not selected`);
   const skipped = e.filter((x) => !x.available).map((x) => `${x.censusId} (${x.why})`);
   if (skipped.length) console.log(`events: no evStage row: ${skipped.join(', ')}`);
+  if (out.boardReport) {
+    const bs = out.index.boardSets, byType = {};
+    for (const x of e) byType[x.eventType] = (byType[x.eventType] || 0) + 1;
+    console.log(`events: event boards: ${Object.keys(bs).length} sets handed out (${Object.keys(bs).join(', ') || '-'}), +${out.sphere.length} sphere rows (type 4); `
+      + `${out.boardReport.unmatched.length} cells left off, ${out.boardReport.skipped.length} boards skipped; entries by eventType ${JSON.stringify(byType)}`);
+    const later = [...new Set(e.filter((x) => x.boardSetKey && !bs[x.boardSetKey]).map((x) => x.boardSetKey))];
+    if (later.length) console.log(`events: board sets not handed out: ${later.join(', ')}`);
+  }
   const guesses = qs.filter((q) => q.rowGuess);
   if (guesses.length) console.warn(`events: ${guesses.length} quests match no donor row of their record (first row taken): ${guesses.slice(0, 8).map((q) => q.key).join(', ')}`);
   if (!out.catalogEvStage) console.warn(`events: no Event Catalog banner: the Training Grounds stage ${config.catalogStage} is not in the master (make-special first)`);

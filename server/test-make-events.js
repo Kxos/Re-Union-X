@@ -45,6 +45,11 @@ function records() {
   record('E-2', [quest(700010, 2, [502], { map: { key: 740260, stageBinId: 740260, status: 'ok' } })])];
 }
 const build = (recs = records(), ids, config = CONFIG, m = master(), anchors) => me.buildEvents(recs, config, m, ids, anchors);
+// board sets (Part 3): the synthetic fixture of test-event-boards.js, its set fed by E-1; master items it needs (and medal 90011 of the quest objectives)
+const BOARD_FIX = JSON.parse(fs.readFileSync(path.join(__dirname, 'test-fixtures', 'event_board_sets.json'), 'utf8'));
+const boardSets = () => ({ sets: BOARD_FIX.sets.map((s) => ({ ...JSON.parse(JSON.stringify(s)), censusIds: ['E-1'] })) });
+const BOARD_MASTER = () => ({ medal: [{ medalId: 900001, name: 'Fixture Medal', rare: 6, groupId: 0 }, { medalId: 900002, name: 'Fixture Medal B', rare: 5, groupId: 0 },
+  { medalId: 90011, name: 'Quest Medal', rare: 6, groupId: 0 }], material: [{ materialId: 9001, name: 'Fixture Gem' }], title: [{ titleId: 9101, title: 'Fixture Title' }], avatarParts: [], petParts: [] });
 const entry = (out, id) => out.index.entries.find((e) => e.censusId === id);
 
 const tests = {
@@ -394,9 +399,9 @@ const tests = {
     // the old key alone still filters
     const old = build(recs, undefined, { ...CONFIG, onlyCensusIds: ['E-2'] });
     assert.deepStrictEqual(old.index.entries.map((e) => e.censusId), ['E-2']);
-    // the real config: 13 pilot ids and the GEM type
+    // the real config: 13 pilot ids, the GEM type (Part 2) and the COIN type (Part 3)
     assert.strictEqual(REAL_CONFIG.serve.censusIds.length, 13);
-    assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM']);
+    assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM', 'COIN']);
     assert.ok(!('onlyCensusIds' in REAL_CONFIG));
   },
   shared_notice_built_once() {
@@ -643,7 +648,7 @@ const tests = {
     assert.deepStrictEqual(out.evStage.map((r) => r.eventStageId), [e.rows[0].evStageId, e.rows[1].evStageId], 'one evStage row per built donor row; the unserved one not built');
     const [r1, r2] = out.evStage;
     assert.deepStrictEqual([r1.stageId, r2.stageId], [[e.quests[0].stageId, e.quests[1].stageId], [e.quests[2].stageId]], 'each row its own quests');
-    assert.deepStrictEqual([r1.eventType, r2.eventType], [3, 3], 'donor 1 (board mode) is not served before the event boards: plain list 3');
+    assert.deepStrictEqual([r1.eventType, r2.eventType], [3, 3], 'donor 1 without a set served as 3 (board mode only with a board set)');
     assert.deepStrictEqual(e.rows.map((r) => r.origEventType), [1, 3, 2], 'the donor eventType of each row stays in origEventType');
     assert.ok(r2.bannerUrl.endsWith(`/${e.rows[1].evStageId}.png`) && r2.detailUrl === `/web/event/notice/${e.rows[1].evStageId}`, 'own card and Details');
     assert.deepStrictEqual([r1.parentEventStageId, r2.parentEventStageId], [0, 0], 'parentEventStageId 0 on our rows (the donor value stays in the index)');
@@ -702,6 +707,71 @@ const tests = {
     const e = entry(build([rec]), 'R-4');
     assert.deepStrictEqual(e.rows.map((r) => [r.start, r.end]), [['2019-04-01', '2019-04-07'], ['2019-04-01', '2019-04-01']]);
     assert.deepStrictEqual([e.start, e.end], ['2019-04-01', '2019-04-07']);
+  },
+  // Part 3 Task 4: an entry whose census id belongs to a board set with a served board, and that has served quests, is served as
+  // eventType 1 (Event Boards button); any other entry as 3. boardSets carries only the sets handed out.
+  board_entry_type1() {
+    const m = { ...master(), ...BOARD_MASTER() };
+    const sets = boardSets();
+    sets.sets.push({ setKey: '2099-02', censusIds: ['E-3'], boards: [JSON.parse(JSON.stringify(sets.sets[0].boards[2]))] });
+    sets.sets.push({ setKey: '2099-03', censusIds: ['E-4'], boards: [JSON.parse(JSON.stringify(sets.sets[0].boards[0]))] });
+    const recs = [...records(), record('E-3', [quest(700030, 1, [501])]), record('E-4', [quest(700040, 1, [777])])];
+    const out = me.buildEvents(recs, CONFIG, m, undefined, undefined, null, sets);
+    const e1 = entry(out, 'E-1'), e2 = entry(out, 'E-2'), e3 = entry(out, 'E-3'), e4 = entry(out, 'E-4');
+    assert.strictEqual(e1.boardSet, '2099-01');
+    assert.strictEqual(e1.eventType, 1, 'a board set with a served board: Event Boards button');
+    assert.ok(e1.rows.every((r) => r.eventType === 1));
+    assert.ok(out.evStage.filter((r) => e1.rows.some((x) => x.evStageId === r.eventStageId)).every((r) => r.eventType === 1), 'the evStage rows too');
+    assert.strictEqual(e2.boardSet, null);
+    assert.strictEqual(e2.eventType, 3, 'donor 1 without a set served as 3');
+    // a set whose every board is skipped (completion with no item): not handed out, its entry is a plain list, labelled
+    assert.strictEqual(e3.boardSet, null);
+    assert.strictEqual(e3.eventType, 3);
+    assert.strictEqual(e3.boardSetKey, '2099-02');
+    assert.ok(e3.labels.includes('boardsLater'), JSON.stringify(e3.labels));
+    // a set with a board but no served feeder quest: not handed out either
+    assert.strictEqual(e4.available, false);
+    assert.strictEqual(e4.boardSet, null);
+    assert.ok(e4.labels.includes('noCoinSource'), JSON.stringify(e4.labels));
+    assert.deepStrictEqual(Object.keys(out.index.boardSets), ['2099-01']);
+    assert.deepStrictEqual(out.index.boardSets['2099-01'], { boardIds: [4000001, 4000002], chains: { 4000002: 4000001 }, censusIds: ['E-1'] });
+    assert.deepStrictEqual(out.sphere.map((r) => r.sphereBoardId), [4000001, 4000002], 'only the rows of the sets handed out');
+    assert.ok(out.sphere.every((r) => r.type === 4));
+    assert.strictEqual(out.sphereMasu.length, 2);
+    assert.strictEqual(out.sphereArray.length, 2);
+    assert.ok(Object.keys(out.ids.boards).length >= 5, 'every board numbered, served or not (append-only)');
+    for (const l of ['boardsLater', 'noCoinSource']) assert.ok(out.index.reasons[l], l);
+    // without board sets: no board, every entry as before
+    const plain = build();
+    assert.ok(plain.index.entries.every((e) => e.boardSet === null && e.eventType === 3));
+    assert.deepStrictEqual(plain.index.boardSets, {});
+  },
+  boards_in_patch() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-events-'));
+    const md = path.join(dir, 'master'), gd = path.join(dir, 'game_data');
+    fs.mkdirSync(md);
+    const m = { ...master(), ...BOARD_MASTER(), sphere: [{ sphereBoardId: 3000001, type: 5 }], sphereArray: [{ arryId: 3000001 }], sphereMasu: [{ masuId: 3000001 }] };
+    for (const [t, rows] of Object.entries(m)) fs.writeFileSync(path.join(md, `${t}.json`), JSON.stringify(rows));
+    const opts = { records: records(), config: CONFIG, gameDataDir: gd, idsFile: path.join(dir, 'event_ids.json'), boardSets: boardSets() };
+    const snap = () => ['sphere', 'sphereArray', 'sphereMasu', 'stage', 'evStage'].map((t) => fs.readFileSync(path.join(md, `${t}.json`), 'utf8'))
+      .concat([fs.readFileSync(path.join(gd, 'events.json'), 'utf8'), fs.readFileSync(opts.idsFile, 'utf8')]);
+    me.patch(md, opts);
+    const first = snap();
+    const idx = JSON.parse(fs.readFileSync(path.join(gd, 'events.json'), 'utf8'));
+    assert.deepStrictEqual(idx.own.sphere, [4000001, 4000002]);
+    assert.deepStrictEqual(idx.own.sphereArray, [4000001, 4000002]);
+    assert.deepStrictEqual(idx.own.sphereMasu, [4000001, 4000002]);
+    assert.deepStrictEqual(Object.keys(idx.boardSets), ['2099-01']);
+    assert.strictEqual(idx.entries.find((e) => e.censusId === 'E-1').boardSet, '2099-01');
+    const sphere = JSON.parse(first[0]);
+    assert.deepStrictEqual(sphere.map((r) => r.sphereBoardId), [3000001, 4000001, 4000002], 'appended after the raid boards');
+    assert.ok(JSON.parse(fs.readFileSync(opts.idsFile, 'utf8')).boards['2099-01/7001'], 'board ids in event_ids.json');
+    me.patch(md, opts);
+    assert.deepStrictEqual(snap(), first, 'the second regen is identical');
+    // a row in our board range that is not ours stops the run
+    fs.writeFileSync(path.join(md, 'sphere.json'), JSON.stringify([...sphere, { sphereBoardId: 4000077, type: 4 }]));
+    assert.throws(() => me.patch(md, opts), /not ours/);
+    fs.rmSync(dir, { recursive: true, force: true });
   },
   no_source_writes_nothing() {
     const old = process.env.KHUX_EVENT_SRC;

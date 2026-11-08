@@ -1,5 +1,5 @@
 {
- "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). serve: census ids (the April 2019 pilot, Events Part 1) and types (GEM, Part 2) that are built, the rest is notSelected (an old onlyCensusIds list still works; no serve and no list builds every record). reasonText: the catalogue text of every reason a record or quest is not built. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the value served when the donor value is not in servedEventTypes (3 = plain quest list; 1 = board mode with the Event Boards button, served from Part 3 with the event boards; never 2 = raid mode with Raid Boards). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
+ "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). serve: census ids (the April 2019 pilot, Events Part 1) and types (GEM, Part 2) that are built, the rest is notSelected (an old onlyCensusIds list still works; no serve and no list builds every record). reasonText: the catalogue text of every reason a record or quest is not built. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the value served when the donor value is not in servedEventTypes (3 = plain quest list; never 2 = raid mode with Raid Boards). boardEventType (1 = board mode with the Event Boards button, Part 3): served only on an entry with a board set handed out (KHUX_EVENT_BOARDS, make-events.js); without one a donor 1 is served as eventType. catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
  "catalogEvStage": 20000,
  "catalogStage": 970000,
  "catalogUrl": "/web/event/catalog",
@@ -9,7 +9,8 @@
  "stageMax": 4009999,
  "eventCategory": 2,
  "eventType": 3,
- "servedEventTypes": [3],
+ "boardEventType": 1,
+ "servedEventTypes": [1, 3],
  "spike": {
   "on": false,
   "note": "Events Part 3 Task 1 bench spike (temporary, server.js EVENT_SPIKE; Task 5 replaces it). With on: the event censusId is served with eventType (1 = Event Boards button), the rows of boardFixture are added to the master sphere tables (type 4) and handed out on GET /user/sphere and on a check whose boardTypes has 4, stageSpherePoint = the Event Coins of a save that has none, /user/sphere/update works on them. boardEndTime: override of the evStage boardEndTime of the event rows (null = keep). sphereOverrides: {sphereBoardId: {field: value}} on the fixture sphere rows (variants). handOut false: no board is handed out (empty list). The plan named EV-0759, which is not a served record: EV-0760 (donor eventType 1, open in the events1 week) is used.",
@@ -25,7 +26,7 @@
  "shortWindowHours": 12,
  "serve": {
   "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
-  "types": ["GEM"]
+  "types": ["GEM", "COIN"]
  },
  "reasonText": {
   "shared": "This notice shares its quests with another row of the catalogue: they are built once, under the other row.",
@@ -60,6 +61,8 @@
   "wholeDay": "In the original this event was open for a short window (minutes to hours); here it is open for its whole original day.",
   "dramaOff": "The original scenes before or after this quest are not shown yet.",
   "eventCoins": "Event Coin rewards are not paid yet: they come with the event boards in a later update.",
+  "boardsLater": "The event boards of this event are not served yet: every board of its set pays a reward that does not exist here yet (a Booster, a later update), so its quests are served as a plain list and their Event Coins have no board to be spent on.",
+  "noCoinSource": "The event boards of this event are not handed out yet: none of the quests that paid their Event Coins can be served yet, so the boards could not be filled.",
   "wikiAp": "AP from the khuxwiki page of this run: the surviving game data (a later snapshot) gives another AP.",
   "wwEnemy": "Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops)."
  },

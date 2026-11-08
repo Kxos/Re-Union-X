@@ -624,15 +624,24 @@ const tests = {
     // the 2016 reward rows, under our ids, garbage slots blanked
     const victory = out.rewardRows.find((r) => r.raidRewardId === body.rewardId[0]);
     assert.strictEqual(body.rewardId[0], rr.rewardRowId(e.enemyId, 1, 1));
-    assert.deepStrictEqual([victory.validReward, victory.type, victory.num, victory.oddsUpPerLv], [3, [15, 15, 15, 0], [11, 13, 16, 0], 50]);
+    assert.deepStrictEqual([victory.validReward, victory.type, victory.num, victory.oddsUpPerLv], [3, [16, 16, 16, 0], [11, 13, 16, 0], 50], 'the 2016 type 15 coins written as 16 (Raid Coins, same amounts)');
     assert.strictEqual(enemyOf(out, e.enemyId).rewardId[3], rr.rewardRowId(e.enemyId, 1, 4));
-    // the quest of the event: its AP, level and objectives with their own rewards (Event Coin 15, Jewel 2, Raid Coin 16)
+    // the quest of the event: its AP, level and objectives with their own rewards (Event Coin and Raid Coin both 16: raid coins, Part 3; Jewel 2)
     const st = out.stageRows.find((s) => s.stageId === e.stageId);
     assert.deepStrictEqual(e.questAp, [10]);
     assert.strictEqual(st.useAp, 10);
-    assert.deepStrictEqual(st.submissionRewardType, [15, 2, 16]);
+    assert.deepStrictEqual(st.submissionRewardType, [16, 2, 16]);
     assert.deepStrictEqual(st.submissionItemNum, [10, 10, 5]);
     assert.strictEqual(st.name, 'Trickmaster');
+  },
+  raid_coins_type16() {
+    // Events Part 3: type 15 is the Event Coin of the event boards; a raid pays its coins (the 2016 rows' type 15, the «Event Coin»
+    // objectives of the event quest pages) as Raid Coins, type 16, with the same amounts
+    const out = build(eventFixture([eventRow('WW-E1-1', 'one-off event', '2016-06-06', '2016-06-13', ['Trickmaster'], { data: { hp: 'yes (2016 row)' } })]));
+    assert.ok(out.rewardRows.length && out.stageRows.length);
+    for (const r of out.rewardRows) assert.ok(!r.type.slice(0, r.validReward).includes(15), `raidReward ${r.raidRewardId} pays type 15`);
+    for (const st of out.stageRows) assert.ok(!(st.submissionRewardType || []).includes(15), `stage ${st.stageId} objective pays type 15`);
+    assert.ok(out.rewardRows.some((r) => r.type.slice(0, r.validReward).includes(rr.CONFIG.coinType)));
   },
   old_hp_scale_labelled() {
     // fix round 1, user decision I-1 (b): 2016-11 to 2018-08 without an original row, HP is the boss's own 2016 row (its growth

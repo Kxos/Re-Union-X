@@ -44,6 +44,8 @@
 const fs = require('fs');
 const path = require('path');
 const { coinRows, rewardRowId, CONFIG: REWARDS } = require('./raid-rewards');
+// reward type of the Event Coin (event boards, Events Part 3): never paid by a raid row
+const EVENT_COIN = 15;
 const { objectiveCodes } = require('./make-story-oltre');
 const raidBoards = require('./raid-boards');
 const raidWindows = require('./raid-windows');
@@ -390,7 +392,8 @@ function eventQuestSubs(q, medals) {
     const qty = num(o.qty);
     if (!code || !qty) return null;
     const name = String(o.reward || '').trim(), medal = /^(.+?) (\d)★$/.exec(name);
-    let reward = { 'Raid Coin': [REWARDS.coinType, 0], 'Event Coin': [15, 0], Jewel: [2, 0] }[name];
+    // «Event Coin» on a raid quest page is paid as Raid Coins (type 16): type 15 is the Event Coin of the event boards (Events Part 3)
+    let reward = { 'Raid Coin': [REWARDS.coinType, 0], 'Event Coin': [REWARDS.coinType, 0], Jewel: [2, 0] }[name];
     if (!reward && medal) {
       const hit = medals.get(`${medal[2]}|${raidBoards.norm(medal[1])}`) || [];
       if (hit.length === 1) reward = [3, hit[0].medalId];
@@ -985,7 +988,8 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   const usable = (m) => !!(m && m.fight && m.put_down);
   const skillsMissing = (template) => template.skillId.slice(0, template.validSkill).some((id) => !haveAttack.has(id) && !origAttack.has(id));
   // reward rows of a body: the 2016 rows of its own row for an original event raid (copied under our ids, slots past validReward
-  // blanked), else the coin tables of raid-rewards.js (one set per level band or tier)
+  // blanked; their type 15 Event Coins written as type 16 Raid Coins, same amounts: type 15 is the Event Coin of the event boards,
+  // Events Part 3), else the coin tables of raid-rewards.js (one set per level band or tier)
   const rewardRowsOf = (made, enemyId, tier, date, gemDrop) => {
     const body = made.rows.body, lvList = body.baseLv.slice(0, body.validGrowth);
     const fields = ['rewardId', 'mvpRewardId', 'destroyAllRewardId'];
@@ -996,7 +1000,7 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
           const src = reward2016.get((made.own[f] || [])[k]);
           if (!src) throw new Error(`raid: 2016 raidReward ${(made.own[f] || [])[k]} of ${made.own.name} (knot ${k}) is missing`);
           const v = Math.max(0, Math.min(4, src.validReward || 0)), slot = (a, dflt = 0) => pad((a || []).slice(0, v), 4).map((x, i) => (i < v ? x : dflt));
-          rows.push({ raidRewardId: rewardRowId(enemyId, t + 1, k + 1), oddsUpPerLv: src.oddsUpPerLv || 0, pointUpPerLv: src.pointUpPerLv || 0, validReward: v, type: slot(src.type), id: slot(src.id),
+          rows.push({ raidRewardId: rewardRowId(enemyId, t + 1, k + 1), oddsUpPerLv: src.oddsUpPerLv || 0, pointUpPerLv: src.pointUpPerLv || 0, validReward: v, type: slot(src.type).map((x) => (x === EVENT_COIN ? REWARDS.coinType : x)), id: slot(src.id),
             assignSkillType: slot(src.assignSkillType, 1), assignSkillId: slot(src.assignSkillId), assignSkillLv: slot(src.assignSkillLv, 1), burstUpperNumber: slot(src.burstUpperNumber), num: slot(src.num), odds: slot(src.odds) });
           body[f][k] = rewardRowId(enemyId, t + 1, k + 1);
         });
