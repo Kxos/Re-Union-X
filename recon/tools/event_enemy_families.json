@@ -337,6 +337,170 @@
    "model": "new",
    "approved": true,
    "review": "user-approved 08-11 (Events Part 3 Task 7a, rendered review tmp/events_enemies/review/coins/index.html); every texture JP 4.3.1 or proven by the 2018 WW container name index (category 2); dead = enemy/1/dead (whole-ww-index)"
+  },
+  "1616": {
+   "name": "Ifrit",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 22 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1613": {
+   "name": "Leviathan",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 16 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1631": {
+   "name": "Demon Tide",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 12 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1622": {
+   "name": "Savage Vanguard",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 13 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1639": {
+   "name": "Nimble Reaper",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1598": {
+   "name": "Loudmouth Parade",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1035": {
+   "name": "Hocus Pocus",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1567": {
+   "name": "Brilliant Opera",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1640": {
+   "name": "Sorcerous Reaper",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1643": {
+   "name": "Upright Warlock",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1621": {
+   "name": "Gummi Dragon",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1623": {
+   "name": "Savage Vanguard Ω",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1638": {
+   "name": "Vile Reaper",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1575": {
+   "name": "Mysterious Sir",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 4 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1031": {
+   "name": "Submarine Carp",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1574": {
+   "name": "Weapon Master",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 4 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1644": {
+   "name": "Reversed Warlock",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 3 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1529": {
+   "name": "Metal Giant",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "95": {
+   "name": "Circus Balloon",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html",
+   "no_b2016": true,
+   "no_b2016_why": "the 2016 package folder 95 and the plain JP 4.3.1 pictures are another creature (purple serpent with a flower head, as for 96); the JP revisions .0024-.0025xxxx are the Circus Balloon (stale_plain)"
+  },
+  "25": {
+   "name": "Festive Fireworks",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1601": {
+   "name": "Jewel Princess",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "135": {
+   "name": "Living Bone",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1583": {
+   "name": "Raccoon Dog Rookie",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "1584": {
+   "name": "Raccoon Dog Soldier",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "156": {
+   "name": "Raging Reindeer",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "157": {
+   "name": "Bag O' Gifts",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+  },
+  "245": {
+   "name": "Jack in the Box",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 3 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
   }
  }
 }

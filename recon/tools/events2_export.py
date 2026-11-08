@@ -104,6 +104,12 @@ def off_size(r):
     return bool(r.get('real')) and (abs(r['real'][0] - r['wh'][0]) > 2 or abs(r['real'][1] - r['wh'][1]) > 2)
 
 
+# Families of event_enemy_families.json still pending the user's review (approved false, e.g. the Part 4 challenge models
+# of 08-11): the private manifest holds them for the rendered review; they are exported only once approved.
+FAMILIES = os.path.join(HERE, 'event_enemy_families.json')
+PENDING = {int(k) for k, v in json.load(open(FAMILIES, encoding='utf-8'))['families'].items() if not v.get('approved')}
+
+
 def plan(man):
     """manifest -> (rows [(published, box, rel, rule, WxH, label)], jobs [(kind, src, dst rel, size)], stats)"""
     rows, jobs, stats = [], [], {}
@@ -111,6 +117,8 @@ def plan(man):
         f = int(fam)
         if f in SKIP:
             continue
+        if f in PENDING:
+            continue          # in the review manifest, not approved yet (event_enemy_families.json approved false)
         st = stats[f] = {'slots': 0, 'blank': 0, 'rescale': 0, 'frozen': 0, 'holes_optional': {}, 'anims': [], 'whole': []}
         for an, av in sorted(man[fam].items()):
             rs = av['rows']
