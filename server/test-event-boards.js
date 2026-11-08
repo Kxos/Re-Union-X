@@ -8,9 +8,9 @@ const eb = require('./event-boards');
 const FIX = JSON.parse(fs.readFileSync(path.join(__dirname, 'test-fixtures', 'event_board_sets.json'), 'utf8'));
 const sets = () => JSON.parse(JSON.stringify(FIX.sets));
 const master = {
-  medal: [{ medalId: 90076, name: 'Cid', rare: 6, groupId: 0 }, { medalId: 301159, name: 'Halloween Sora C', rare: 5, groupId: 0 }],
-  material: [{ materialId: 48, name: 'Power Gem' }],
-  title: [{ titleId: 12229, title: 'Angelic' }],
+  medal: [{ medalId: 900001, name: 'Fixture Medal', rare: 6, groupId: 0 }, { medalId: 900002, name: 'Fixture Medal B', rare: 5, groupId: 0 }],
+  material: [{ materialId: 9001, name: 'Fixture Gem' }],
+  title: [{ titleId: 9101, title: 'Fixture Title' }],
   avatarParts: [], petParts: [],
 };
 const tests = [];
@@ -23,9 +23,9 @@ test('type4_rows', () => {
   const m = r.masuRows[0];
   assert.deepStrictEqual(m.spherePoint.slice(0, 7), [0, 10, 20, 30, 40, 0, 50]);
   assert.deepStrictEqual(m.rewardSelect.slice(0, 7), [0, 2, 3, 3, 5, 0, 41]);
-  assert.strictEqual(m.rewardId[3], 301159, 'donor medal id replaced by ours (name + rarity)');
+  assert.strictEqual(m.rewardId[3], 900002, 'donor medal id replaced by ours (name + rarity)');
   assert.strictEqual(m.rewardId[6], 0, 'Draw Ticket is wallet 0');
-  assert.deepStrictEqual([m.rewardSelect[22], m.rewardId[22]], [7, 12229]);
+  assert.deepStrictEqual([m.rewardSelect[22], m.rewardId[22]], [7, 9101]);
   assert.strictEqual(r.arrayRows[0].spCol4[0], 1000);
   assert.deepStrictEqual(r.bySet['2099-01'], [4000001, 4000002]);
 });
@@ -36,13 +36,15 @@ test('chain_remapped', () => {
   assert.strictEqual(b2.openParam, 4000009);
   assert.deepStrictEqual(r.chains, { 4000005: 4000009 });
 });
-test('unmatched_cell_dropped', () => {
+test('unmatched_cell_pass_through', () => {
   const r = eb.buildEventBoards({ sets: sets(), master, ids: {} });
   const m = r.masuRows[1];
   assert.strictEqual(m.rewardSelect[2], 0); assert.strictEqual(m.spherePoint[2], 0);
   assert.strictEqual(m.rewardSelect[1], 2, 'the matched cell stays');
   assert.deepStrictEqual(r.report.unmatched.filter((u) => u.board === 7002).map((u) => u.idx), [2, 3]);
   assert.ok(r.report.unmatched.every((u) => u.why));
+  assert.strictEqual(m.rewardId[2], 0); assert.strictEqual(m.rewardValue[2], 0);
+  assert.deepStrictEqual(r.arrayRows[1], { arryId: 4000002, ...Object.fromEntries(['spCol4', 'spCol3', 'spCol2', 'spCol1', 'spCol0'].map((k) => [k, FIX.sets[0].boards[1].grid[k]])) }, 'the donor path stays connected');
 });
 test('unmatched_completion_skips_board', () => {
   const r = eb.buildEventBoards({ sets: sets(), master, ids: {} });
@@ -55,6 +57,22 @@ test('chain_target_skipped_cascades', () => {
   const r = eb.buildEventBoards({ sets: s, master, ids: {} });
   assert.deepStrictEqual(r.report.skipped.map((x) => x.board).sort(), [7001, 7002, 7003]);
   assert.deepStrictEqual(r.chains, {});
+});
+test('all_unmatched_board_skipped', () => {
+  const s = sets(); const b = s[0].boards[2];
+  b.cells = [{ idx: 1, cost: 10, rewardSelect: 34, rewardId: 9900, num: 1, name: 'Fixture Booster' }]; b.completion = s[0].boards[0].completion;
+  const r = eb.buildEventBoards({ sets: s, master, ids: {} });
+  assert.deepStrictEqual(r.report.skipped.map((x) => [x.board, x.why]), [[7003, 'no matched cells']]);
+  assert.strictEqual(r.sphereRows.length, 2);
+  assert.strictEqual(r.report.unmatched.filter((u) => u.board === 7003).length, 1);
+});
+test('bad_index', () => {
+  const s = sets(); const b = s[0].boards[0];
+  b.cells.push({ idx: 22, cost: 5, rewardSelect: 2, rewardId: 0, num: 1, name: '5 Jewels' }, { idx: 30, cost: 5, rewardSelect: 2, rewardId: 0, num: 1, name: '5 Jewels' },
+    { idx: 5, cost: 5, rewardSelect: 2, rewardId: 0, num: 1, name: '5 Jewels' });
+  const r = eb.buildEventBoards({ sets: s, master, ids: {} });
+  assert.deepStrictEqual(r.report.unmatched.filter((u) => u.board === 7001).map((u) => [u.idx, u.why]), [[22, 'bad index'], [30, 'bad index'], [5, 'bad index']]);
+  assert.deepStrictEqual(r.masuRows[0].rewardSelect[22], 7, 'the completion slot is untouched');
 });
 test('ids_append_only', () => {
   const a = eb.buildEventBoards({ sets: sets(), master, ids: {} });

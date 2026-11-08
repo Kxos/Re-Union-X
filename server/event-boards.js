@@ -2,8 +2,8 @@
 // Part 3, Task 3). Input: the board sets of the private donor study (a set = a month/week of boards:
 // {setKey, boards: [{donorId, name, openId, openParam, kindId, grid: {spCol0..4}, cells: [{idx, cost, rewardSelect, rewardId, num,
 // name}], completion: {rewardSelect, rewardId, num, name}}]}); the file stays private, the tests use a hand-made fixture.
-// - Layout from the data: the board's own grid (an event board is not a 22-node raid snake) and the masu index = the cell's idx
-//   (completion = index 22). A node whose reward cannot be matched is left empty (cost 0, no reward) and reported.
+// - Layout from the data (an unmatched node stays on the path as a pass-through: cost 0, no reward; a board with no matched cell is skipped): the board's own grid (an event board is not a 22-node raid snake) and the masu index = the cell's idx
+//   (completion = index 22). 
 // - Ids: ids.boards {"<setKey>/<donorBoardId>": n}, sphereBoardId = arryId = masuId = 4000000 + n, append-only (event_ids.json).
 // - Rewards: donor medal ids that differ from ours are mapped by name + rarity against our master (exactly one candidate; none
 //   or several -> unmatched); other items are kept by id when our master has the row; Boosters (rewardSelect 34) stay unmatched
@@ -69,13 +69,16 @@ function buildEventBoards({ sets, master, ids }) {
     const state = new Map(); // donorId -> {b, cells, done} | {skip}
     for (const b of s.boards || []) {
       const cells = [];
+      const nodes = new Set(GRID_KEYS.flatMap((k) => b.grid[k]).filter((v) => v > 0 && v < 1000));
       for (const c of b.cells || []) {
-        const m = matchDonor(ix, c);
+        // idx = masu index (node value - 1): it must be a node of the grid and not the completion slot
+        const m = Number.isInteger(c.idx) && c.idx >= 0 && c.idx < rb.COMPLETION && nodes.has(c.idx + 1) ? matchDonor(ix, c) : { why: 'bad index' };
         if (m.why) out.report.unmatched.push({ setKey: s.setKey, board: b.donorId, idx: c.idx, rewardSelect: c.rewardSelect, rewardId: c.rewardId, name: c.name, why: m.why });
         else cells.push({ ...c, item: m });
       }
       const done = matchDonor(ix, b.completion || {});
       if (done.why) { state.set(b.donorId, { skip: `completion ${b.completion && b.completion.name}: ${done.why}` }); continue; }
+      if (!cells.length) { state.set(b.donorId, { skip: 'no matched cells' }); continue; }
       state.set(b.donorId, { b, cells, done });
     }
     // a chained board is only reachable through the previous one

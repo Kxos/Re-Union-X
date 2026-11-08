@@ -12,7 +12,7 @@
    "boards": [
     {
      "donorId": 7001,
-     "name": "Alpha",
+     "name": "Fixture Board 1",
      "openId": 3,
      "openParam": 0,
      "kindId": 1,
@@ -86,25 +86,25 @@
        "idx": 2,
        "cost": 20,
        "rewardSelect": 3,
-       "rewardId": 90076,
+       "rewardId": 900001,
        "num": 1,
-       "name": "6★ Cid"
+       "name": "6★ Fixture Medal"
       },
       {
        "idx": 3,
        "cost": 30,
        "rewardSelect": 3,
-       "rewardId": 22595,
+       "rewardId": 900099,
        "num": 1,
-       "name": "5★ Halloween Sora C"
+       "name": "5★ Fixture Medal B"
       },
       {
        "idx": 4,
        "cost": 40,
        "rewardSelect": 5,
-       "rewardId": 48,
+       "rewardId": 9001,
        "num": 1,
-       "name": "Power Gem"
+       "name": "Fixture Gem"
       },
       {
        "idx": 6,
@@ -117,14 +117,14 @@
      ],
      "completion": {
       "rewardSelect": 7,
-      "rewardId": 12229,
+      "rewardId": 9101,
       "num": 1,
-      "name": "Title «Angelic»"
+      "name": "Title «Fixture Title»"
      }
     },
     {
      "donorId": 7002,
-     "name": "Beta",
+     "name": "Fixture Board 2",
      "openId": 5,
      "openParam": 7001,
      "kindId": 1,
@@ -198,17 +198,17 @@
        "idx": 2,
        "cost": 25,
        "rewardSelect": 3,
-       "rewardId": 99999,
+       "rewardId": 900777,
        "num": 1,
-       "name": "6★ Nobody"
+       "name": "6★ Fixture Missing"
       },
       {
        "idx": 3,
        "cost": 35,
        "rewardSelect": 34,
-       "rewardId": 1902117,
+       "rewardId": 9900,
        "num": 1,
-       "name": "Booster"
+       "name": "Fixture Booster"
       }
      ],
      "completion": {
@@ -220,7 +220,7 @@
     },
     {
      "donorId": 7003,
-     "name": "Gamma",
+     "name": "Fixture Board 3",
      "openId": 3,
      "openParam": 0,
      "kindId": 1,
@@ -293,9 +293,9 @@
      ],
      "completion": {
       "rewardSelect": 3,
-      "rewardId": 99998,
+      "rewardId": 900778,
       "num": 1,
-      "name": "6★ Nobody Else"
+      "name": "6★ Fixture Missing Two"
      }
     }
    ]
