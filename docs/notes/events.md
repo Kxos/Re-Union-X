@@ -324,3 +324,23 @@ rows (18 Monthly Gem Quests records, Battle VS Ramuh, the 3rd Anniversary Countd
 - Fix round 1: every record freezes the row of its id (`<censusId>#row`, one row too); stored row keys without it stop the run.
   A quest that matches no donor row is flagged `rowGuess` (warning; none today). Quests whose AP comes from the khuxwiki page of
   their run (the private record's conflict) carry the label `wikiAp`. The details page draws a card only for built rows.
+
+## Bench of the gem quests (Events Part 2, Task 6, 8 November 2026)
+
+Resources 107, master rev 281. Saves made from `maxpower` with the `mksave2.js` pattern (story quests above LIMIT removed, Shop
+rotation reset): `gem1` = LIMIT 690 (tranche 2017-10-05, first Shop week 10-05..10-11), `gem2` = LIMIT 825 (tranche 2019-01-10,
+week 01-10..01-16).
+
+- `gem1_tab`/`gem1_tab6`: the week lists both Weekly Gem Quests (Oct. 2 Speed Gem, 20019; Oct. 9 Magic Gem, 20020) after the raids.
+  On the first visit the Oct. 9 card stayed black (heart placeholder) although `/web/event/img/v5/20020.png` was served 200 with the
+  right bytes; it showed on the next visit: the client's first-download delay, as for Summer Adventure (07-11), not a server fault.
+- `gem1_list`: «No Continues: Weekly Gem», Malicious Spider LV 999 (round 8 model), AP 25, three «no continue» objectives
+  (Magic Gem, Jewels, Moogle). **Fixed (dd6a811, rev 281):** the list showed an «Event Boards» button: the client turns
+  `eventType` 1 into the board mode. The weekly gem records have no donor row (fallback 1) and the pilot type-1 events had it too;
+  original videos show no button on non-board lists (Defeat Titan has donor 1). Now `servedEventTypes: [3]`: every event row is
+  served 3 (plain list) until the event boards are served (Part 3); the donor value stays in `origEventType`.
+- `gem_catalog`: Event Catalog, 95 events / 79 with quests served. **Fixed (6e71fa5):** the three Gem Boards records (no banner in
+  the original notice) showed a broken-image icon; now a box «No card in the original».
+- `gem2_tab`, `gem2_list`: «Monthly Gem Quests!» card; list «No Continues: Monthly Gem», Iron Giant LV 500, AP 5, quest
+  thumbnails in a row, no board button.
+- Not checked yet: playing a weekly and a monthly gem quest (objectives paid once, gem rewards, drops, replay).
