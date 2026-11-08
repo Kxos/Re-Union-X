@@ -188,6 +188,22 @@ const tests = {
     const d = pages.detailPage(ix, 29900, ctx({ eventBoard: (id) => ({ id, name: 'Board #1: Fixture', done: false, finish: '', cells: [] }), eventCoins: () => 7 }));
     assert.ok(d.includes('<h2>Event Boards</h2>') && d.includes('Board #1: Fixture'));
   },
+  // Part 3 Task 8: «shared by N events» counts only the events listed in the catalogue (an informative notice of the set, like
+  // EV-0579 on the 2018-10 pages, is not counted: 9 censusIds, 8 listed events)
+  shared_count_listed_only() {
+    const ix = INDEX();
+    ix.entries.push({ censusId: 'E-579', evStageId: 29979, name: 'New Coins Notice', start: '2019-03-20', end: '2019-04-20', stageIds: [], available: false, labels: [], noticeIds: [9003],
+      quests: [], noQuests: 'board', boardSetKey: 'S1', reason: 'board', why: 'no quests of its own' });
+    ix.entries[0].boardSet = 'S1'; ix.entries[1].boardSet = 'S1';
+    ix.boardSets = { S1: { boardIds: [7001], chains: {}, censusIds: ['E-0', 'E-1', 'E-579'] } };
+    const c = ctx({ eventBoard: () => ({ id: 7001, name: 'Board #1', done: false, finish: '', cells: [] }), eventCoins: () => 0 });
+    const line = (/<p class="ecoin">(.*?)<\/p>/.exec(pages.detailPage(ix, 29900, c)) || [])[1] || '';
+    assert.ok(line.includes('shared by 2 events'), line);
+    // only one listed event left in the set: no «shared by» at all
+    ix.boardSets.S1.censusIds = ['E-0', 'E-579'];
+    const one = (/<p class="ecoin">(.*?)<\/p>/.exec(pages.detailPage(ix, 29900, c)) || [])[1] || '';
+    assert.ok(!/shared by/.test(one), one);
+  },
   // the coin line: the balance of the set and the note that coins never expire (one balance per set, shared by its events)
   event_coins_label() {
     const ix = INDEX();

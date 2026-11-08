@@ -167,7 +167,9 @@ function boardsSection(index, e, ctx) {
   if (!set || !ctx.eventBoard) return '';
   const boards = (set.boardIds || []).map((id) => ctx.eventBoard(id)).filter(Boolean);
   if (!boards.length) return '';
-  const num = (n) => Number(n).toLocaleString('en-US'), shared = (set.censusIds || []).length;
+  // only the events listed in the catalogue count (Task 8: an informative notice of the set, e.g. EV-0579, is not an event)
+  const listed = new Set(entriesOf(index).map((x) => x.censusId));
+  const num = (n) => Number(n).toLocaleString('en-US'), shared = (set.censusIds || []).filter((id) => listed.has(id)).length;
   const coins = `<p class="ecoin">${icon('camp')}Your Event Coins: <b>${num(ctx.eventCoins ? ctx.eventCoins(key) : 0)}</b>. `
     + `One balance per board set${shared > 1 ? `, shared by ${plural(shared, 'event')}` : ''}; Event Coins never expire.</p>`;
   const cell = (c) => `<tr><td>${c.n}</td><td>${c.reward ? esc(c.reward) : '—'}</td><td>${num(c.cost)}</td>`
