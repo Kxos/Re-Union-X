@@ -449,4 +449,36 @@ yet (Task 7).
   October 2019 set cannot be kept on an April 2019 save; the focus test uses an October 2018 coin event (EV-0603, set 2018-10).
 - **Riku & Moogle on the bench**: no save tool can add it (`grant-all-medals.js` skips medals with sell 0); its sale is benched only
   with a save that got it from a drop (August-September 2019 events).
-- Resource build 108 was stopped by the host (low memory) before the version was written; bench pending.
+- **Resources 108 / master rev 287** (6ee7982): full build 5.04 GiB (41 parts), installed with update-resources + Download.
+- **Bench (8 November 2026, save `coin1` = copy of `events1`, `relogin -Save coin1 -RealNow 2026-11-10T20:00:00Z`, week
+  2019-04-11..17; battles played by Claude with the save's deck, user «giocale tu»).** Frames: `reference\event_boards	7b_*.png`.
+  - Events tab: the April 2019 coin events with their cards (Event Coins Galore 20187, Banish the Heartless 20188, Pink Possessor,
+    Titan, Boss Time Attack, Shiva, Egg Hunt, Quiz...); the last cards of the long list draw only after a moment (lazy load, no bug).
+    The Event Boards button shows on the eventType 1 entries.
+  - «Unlocked an Event Board!» popup: **bug fixed (3d0529a)**: the login `GET /user/sphere` marked Board 1 as sent before the home
+    check, so the popup never showed; now the list does not mark new boards and the home check pops it once (not again at the next
+    login). Board 2 popped once when Board 1 was completed (back to the list); the six 2018-10 boards popped once each when the focus moved.
+  - Board list: Board 1 only (Board 2 chained), Event Coins = the set balance (0, then 200...), To Complete 4100.
+  - **Crash fixed (7dc0cf4)**: after the first unlock (cell 19, 100 coins, Sora & Chip & Dale) the client crashed (SIGSEGV, native)
+    on OK and again on reopening the board: its cursor went to a pass-through node (a Booster cell left off: cost 0, rewardSelect 0).
+    Pass-through nodes are now handed out already open (`openPassThrough`, also for older states); the board opens with the cursor on
+    the next paid cell. Side effect: with the boosters open several paid cells of Board 1 are reachable at once (the original path
+    order had boosters in between); the Event Catalog shows them as «Not restored yet» / done.
+  - Coins: EV-0774 quest 1 first clear 3 objectives = 150 + 50 coins (balance 200, shown on the board screen); second clear pays
+    no objective again (200 kept). Objective coins of 5 EV-0774 + 3 Titan + 2 Shiva + 5 Pink Possessor quests; Event Coins Galore
+    Beginner also paid **enemy coin drops** (Event Coin x15 lines in CONGRATULATIONS; +2015 with the pet's Steal x4, which
+    multiplies the coin drops too). Egg Hunt 1/5 «Clear All Challenges Together»: objectives failed (eggs not on the target path).
+  - Cells: cell 2 (300, Trait Medal #95) by Unlock, then Unlock All («Use 3700 coins to unlock all nodes?») -> «You completed the
+    board! You got a Boost Medal!» (Magic Mirror), Jewels +500 from the 1000 cell (5889 -> 6389); Board 2 handed out (COMPLETE ribbon
+    on Board 1), opens, first cell 1400 -> Jewel x100 (6389 -> 6489).
+  - Focus: `POST /web/event/keep/20185` (EV-0603 «Event Coins Galore!» Oct 2018; an October **2019** event cannot be kept on an
+    April 2019 save: only past events can be kept), Kept card at the top, quest Beginner played: focus 2019-04 -> 2018-10, the Event
+    Boards list shows the six 2018-10 boards (Cherub x2, P/S/M Booster, Re: Halloween Medals Board), April boards closed
+    (`closeEventSphereBoardIds` 4000009, 4000010), balance 8. Then a Boss Time Attack quest (2019-04): focus back, Board 1 COMPLETE,
+    Board 2 1/19, balance 515 (265 + 250): April progress kept.
+  - Event Catalog: feeder pages list the boards with cells, costs, done marks and «Your Event Coins: N. One balance per board set,
+    shared by 12 events; Event Coins never expire.»; the 20181 card is absent (404) and the «No card in the original» box is drawn.
+    **Fixed (52e747f)**: the EV-0579 page did not list its set's boards (it promises them); it now uses `boardSetKey` for board-only
+    announcements (6 boards of 2018-10).
+  - Not checked: Riku & Moogle 6★ sale (no save tool can give a sell-0 medal; coordinator: later, with an Aug-Sep 2019 save);
+    the board card art (`img/sphere_incentive`) is still the plain lilac frame.
