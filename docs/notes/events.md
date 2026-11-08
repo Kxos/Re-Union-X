@@ -358,4 +358,4 @@ week 01-10..01-16).
   «Stroke of Midnight +25 Cannot change» plate; WW 2017-12 weekly: empty right area, as ours).
   Bench (`gem2_begin`): «This quest must be played with this Keyblade.», box with the three lines, «Starlight +60 Cannot change», lock,
   no friend column. Differences left: the box header reads «RULE» (JP texture) instead of the WW «CONDITION», no yellow frame,
-  red plate instead of orange. Played: Iron Giant LV 500, objectives paid once (Power Gem +1, Huey, Moogle), clear [1,2,3].
+  red plate instead of orange (user 08-11: keep the JP version, to declare in the Events notice). Played: Iron Giant LV 500, objectives paid once (Power Gem +1, Huey, Moogle), clear [1,2,3].
