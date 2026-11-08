@@ -14,7 +14,8 @@ repo, the files the table needs in the container `events2` (extra_donors.ROOTS):
   * blank/<W>x<H>.png: a fully transparent piece for a slot still missing in a mandatory animation of an accepted partial
     model (PARTIAL: user decisions of the review rounds), rule events2-blank, declared in the Notices;
   * copy/<...>: frozen copies of generated files used as sources (raid_gen 1531, enemy_x 5075), so a later regeneration
-    of those packages cannot change an approved model.
+    of those packages cannot change an approved model; also the Round 11 tint pictures (copy/r11_tint/, 1585 atkSp,
+    rule events2-tint, category 4: a declared recolour of a cat 3 piece, user-approved 08-11, in the Notices).
 Not exported: 65 Cloudy Sunrise (complete with the standard rules, family list only), 185 Enraged Elk (no own model: the
 event rows show the served story model 184, server/make-event-enemies.js DISPLAY_AS), and the whole standard dead of
 1568/1570/1572/1573/96 (rule std-dead of extra_donors_whole.tsv, whole_export.py). A hole of an optional animation
@@ -39,10 +40,16 @@ SKIP = {65: 'complete with the standard rules', 185: 'no own model: event rows s
 # accepted partial models (user review rounds 07-11: 1033 and 1034 OK in round 1, 1032 and 282 in round 2, 1607 in round 4)
 PARTIAL = {282, 1032, 1033, 1034, 1607}
 MANDATORY = ('wait', 'move', 'atk1_o', 'knockback', 'dead')
-CAT_RULE = {1: 'events2-jp', 2: 'events2-copy', 3: 'events2-recon', '3c': 'events2-cand'}
+# 'tint' (Round 11, 08-11, user-approved declared deviation): an already-found cat 3 piece RECOLOURED to match the
+# original footage (1585 Lexaeus atkSp fire_M_c, manifest rule R11-TINT, donor kept in r11_from); category 4 like the
+# recolour rules of extra_donors.py, declared in the in-game Notices
+CAT_RULE = {1: 'events2-jp', 2: 'events2-copy', 3: 'events2-recon', '3c': 'events2-cand', 'tint': 'events2-tint'}
 ROOTS = dict(extra_donors.ROOTS, jp431=[private_tools.local_path('jp_data')],
              b2016=[private_tools.local_path('ref_work', 'bundle2016', 'files')])
-FROZEN = {'raid_gen': os.path.join(D, 'raid_gen', 'files'), 'enemy_x': os.path.join(D, 'enemy_x')}
+FROZEN = {'raid_gen': os.path.join(D, 'raid_gen', 'files'), 'enemy_x': os.path.join(D, 'enemy_x'),
+          # Round 11 tint (08-11): the recoloured pictures (tmp\events_enemies\work\r11\recolor.py 20 0.7 0.85), frozen
+          # into events2/copy/r11_tint/ so the served file stays the approved one
+          'r11_tint': os.path.join(D, 'tmp', 'events_enemies', 'work', 'r11', 'fire_orange')}
 
 
 def label(rule):

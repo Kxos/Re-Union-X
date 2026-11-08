@@ -52,7 +52,8 @@ WHOLE_RULES = ('whole-dr-twin', 'whole-ww-index', 'whole-same-pose', 'whole-same
 # (override priority), never mixing in another table. Rules EVENTS2_RULES; container events2 = the rescaled copies, the
 # blank pieces and the frozen copies of generated files (outside the repo, enemy_gen_src\\events2).
 EVENTS2_TABLE = os.path.join(HERE, 'extra_donors_events2.tsv')
-EVENTS2_RULES = ('events2-jp', 'events2-copy', 'events2-recon', 'events2-cand', 'events2-rescale', 'events2-blank')
+EVENTS2_RULES = ('events2-jp', 'events2-copy', 'events2-recon', 'events2-cand', 'events2-rescale', 'events2-blank',
+                 'events2-tint')
 D = r'D:\Progetto_Restauro_KH_UX'
 import sys  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # with python -I the script folder is not on sys.path
@@ -102,7 +103,10 @@ RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'd
          # off-size copy rescaled to the exact declared size (3, like dedup-rescale), events2-blank = a fully transparent
          # piece at the declared size for a piece still missing in an accepted partial model (3, declared in the Notices)
          'events2-jp': 1, 'events2-copy': 2, 'events2-recon': 3, 'events2-cand': 3, 'events2-rescale': 3,
-         'events2-blank': 3}
+         'events2-blank': 3,
+         # events2-tint (08-11, Round 11, user-approved declared deviation): a cat 3 piece recoloured to match the
+         # original footage (1585 Lexaeus atkSp flames, frozen copy in events2/copy/r11_tint), category 4 like recolour
+         'events2-tint': 4}
 
 
 def category(rule):
