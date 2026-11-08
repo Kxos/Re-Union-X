@@ -166,6 +166,12 @@ const tests = {
     assert.ok(!pages.detailPage(ix, 29901, c).includes('Event Boards</h2>'), 'no set: no section');
     assert.ok(!pages.detailPage(ix, 29900, ctx()).includes('<h2>Event Boards</h2>'), 'no lookups: no section');
     assert.ok(!pages.detailPage(ix, 29900, ctx({ eventBoard: () => null, eventCoins: () => 0 })).includes('<h2>Event Boards</h2>'), 'no board served: no section');
+    // a board-only announcement (noQuests 'board', no boardSet: EV-0579) lists the boards of its set (boardSetKey)
+    const a = ix.entries[1];
+    Object.assign(a, { noQuests: 'board', boardSetKey: 'S1' });
+    delete a.boardSet;
+    const ad = pages.detailPage(ix, 29901, c);
+    assert.ok(ad.includes('<h2>Event Boards</h2>') && ad.includes('Board #1: Fixture') && ad.includes('1,234'), 'board-only entry: its set');
   },
   // the coin line: the balance of the set and the note that coins never expire (one balance per set, shared by its events)
   event_coins_label() {

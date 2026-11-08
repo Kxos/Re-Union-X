@@ -158,12 +158,15 @@ const EVENT_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(2),.tt td:nth-c
 // balance per set, never expires), then each board of the set in order with its cells. ctx.eventBoard(boardId) -> {name, cells:
 // [{n, cost, reward, done, pass}], finish, done} | null; ctx.eventCoins(setKey) -> n. '' without a set or without a board served.
 function boardsSection(index, e, ctx) {
-  const set = e.boardSet && ((index && index.boardSets) || {})[e.boardSet];
+  // a board-only announcement (noQuests 'board' or 'coin', e.g. EV-0579) has no quest and so no boardSet, but its page promises
+  // «Where its boards are served they are listed on this page»: it lists the boards of its set (bench 08-11, Task 7b)
+  const key = e.boardSet || (['board', 'coin'].includes(e.noQuests) ? e.boardSetKey : null);
+  const set = key && ((index && index.boardSets) || {})[key];
   if (!set || !ctx.eventBoard) return '';
   const boards = (set.boardIds || []).map((id) => ctx.eventBoard(id)).filter(Boolean);
   if (!boards.length) return '';
   const num = (n) => Number(n).toLocaleString('en-US'), shared = (set.censusIds || []).length;
-  const coins = `<p class="ecoin">${icon('camp')}Your Event Coins: <b>${num(ctx.eventCoins ? ctx.eventCoins(e.boardSet) : 0)}</b>. `
+  const coins = `<p class="ecoin">${icon('camp')}Your Event Coins: <b>${num(ctx.eventCoins ? ctx.eventCoins(key) : 0)}</b>. `
     + `One balance per board set${shared > 1 ? `, shared by ${plural(shared, 'event')}` : ''}; Event Coins never expire.</p>`;
   const cell = (c) => `<tr><td>${c.n}</td><td>${c.reward ? esc(c.reward) : '—'}</td><td>${num(c.cost)}</td>`
     + (c.done ? `<td class="cd">Unlocked${CROWN}</td>` : c.pass ? '<td class="r">Not restored yet</td>' : '<td>Not unlocked</td>') + '</tr>';
