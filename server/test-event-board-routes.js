@@ -81,6 +81,25 @@ const tests = {
     // GET kept the board as sent: the next check sends nothing again
     assert.deepStrictEqual(w.eb.check(HOME).add, []);
   },
+  // a pass-through node (cost 0, rewardSelect 0: a donor cell we cannot serve) is handed out already open: the client crashes
+  // when its cursor lands on one (bench 08-11, Task 7b); it counts for the completion and cannot be bought
+  pass_through_nodes_open() {
+    const w = world({ current: ['EV-0759'] });
+    w.tables.sphereArray = [rb.gridRow(A1, 4), rb.gridRow(A2, 1), rb.gridRow(B1, 1)];
+    assert.deepStrictEqual(w.eb.passThrough(w.tables.sphere[0]), [4]);
+    assert.deepStrictEqual(w.eb.check(HOME).add, [A1]);
+    assert.deepStrictEqual(w.player.eventSphere[A1].unlock, [4], 'open at the hand-out');
+    fill(w, '2019-04', 100);
+    assert.deepStrictEqual([w.eb.update(A1, 4).ok, w.eb.update(A1, 4).why], [false, 'node'], 'already open, nothing paid');
+    assert.strictEqual(w.player.eventCoins['2019-04'], 100);
+    for (const n of [1, 2, 3]) assert.strictEqual(w.eb.update(A1, n).ok, true);
+    assert.deepStrictEqual(w.grants.map((g) => g[1]), [0, 1, 2, 22], 'three cells, then the completion');
+    // an older state without it gets it on the next hand-out
+    const v = world({ current: ['EV-0759'], player: { eventSphere: { [A1]: { id: 7, unlock: [1], getDatetime: 1 } } } });
+    v.tables.sphereArray = [rb.gridRow(A1, 4), rb.gridRow(A2, 1), rb.gridRow(B1, 1)];
+    v.eb.list({ setSent: true });
+    assert.deepStrictEqual(v.player.eventSphere[A1].unlock, [1, 4]);
+  },
   // login order (bench 08-11): GET /user/sphere hands Board 1 out before the home check; the check still sends it once (popup)
   login_list_then_home_check_pops_once() {
     const w = world({ current: ['EV-0759'] });

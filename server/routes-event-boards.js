@@ -37,6 +37,18 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
     for (const k of ['spCol0', 'spCol1', 'spCol2', 'spCol3', 'spCol4']) for (const v of arr?.[k] || []) if (v >= 1 && v <= CELLS) nodes.add(v);
     return [...nodes].sort((a, b) => a - b);
   }
+  // pass-through nodes (event-boards.js: a donor cell we cannot serve, e.g. a Booster, stays on the path with cost 0 and
+  // rewardSelect 0). The client crashes (SIGSEGV) when its cursor lands on such a node (bench 08-11, Task 7b: after the
+  // first unlock and on reopening the board), so they are handed out already open: kept in the board's unlock list
+  const passThrough = (board) => {
+    const masu = master('sphereMasu').find((r) => r.masuId === board.masuId);
+    return masu ? nodesOf(board).filter((n) => !masu.rewardSelect[n - 1] && !masu.spherePoint[n - 1]) : [];
+  };
+  function openPassThrough(id, s) {
+    const b = boardRow(id);
+    if (!b || !s) return;
+    for (const n of passThrough(b)) if (!s.unlock.includes(n)) s.unlock.push(n);
+  }
   const complete = (id) => { const b = boardRow(id), s = state(id); return !!(b && s && nodesOf(b).every((n) => s.unlock.includes(n))); };
 
   // {week: [setKey] (a feeder event listed in the current story week), kept: setKey | null (the kept event's)}
@@ -84,6 +96,7 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
       if (prev && !complete(prev)) continue;
       player.eventSphere ||= {};
       if (!player.eventSphere[id]) player.eventSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: now() };
+      openPassThrough(id, player.eventSphere[id]);
       out.push(id);
     }
     return out;
@@ -142,7 +155,7 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
     return { ok: true, nodes: todo, cost, setKey };
   }
 
-  return { focusSet, stagePoint, addCoins, check, update, onStageStart, list, active, known, setOfBoard, isEventBoard: (id) => !!boardRow(id) };
+  return { focusSet, stagePoint, addCoins, check, update, onStageStart, list, active, known, setOfBoard, passThrough, isEventBoard: (id) => !!boardRow(id) };
 }
 
 module.exports = eventBoardRoutes;
