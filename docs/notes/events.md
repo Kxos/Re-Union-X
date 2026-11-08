@@ -550,3 +550,23 @@ Final state (rev 288, resources 108; plan `docs/superpowers/plans/2026-11-08-eve
   original cell had a cost and a reward); a missing enemy is found and approved on a rendered review, never substituted; a feature
   half-served (boards without Boosters) is held back whole and declared in the notice; memory-heavy steps (resources build,
   update-resources) can be killed by the host: stop, free memory, resume, never chain taps after a kill.
+
+## Map coverage (Events Part 4, Task 2, 8 November 2026)
+
+- **Event rooms list.** `import_event_stages.py --rooms-out` (default `D:\Progetto_Restauro_KH_UX\tmp\events\maps\event_rooms.json`)
+  writes the rooms of every event map it could read (imported or left out for its rooms) with their map keys; `make_jp_rooms.py`
+  reads it (`--event-rooms`, `event_rooms_from_list`) in place of the four hand-listed DB_0026_09..12 rooms and builds them with
+  `--story-only`. A missing list or a bad room name stops the run (rooms_gen removes the files of the rooms it does not plan).
+  Order: import (list) -> `make_jp_rooms.py --story-only` -> import again with `--stage-dir`. Test: `test_make_jp_rooms.py`.
+- **Other copies.** An STG or part missing from the JP 4.3.1 copy is taken from the WW 2016 bundle copy of the same bin (byte for
+  byte, `copies` in the stage's report); the WW 2018 name index is listed in `tried` (names only). A stage left out gets `cause`
+  (`by_cause` in the summary: STG absent, part N absent, rooms not served, ...), a missing one `tried`.
+- **Result.** 162 event rooms in the list; rooms_gen 251 -> 267 complete rooms (+16: AG_0009_01_00, AG_0010_00_01, AG_0018_00_00,
+  BC_0004_00_00, CD_0016_00_00, DB_0020_02_00, DB_0020_03_00, DB_0022_00_01, DB_0023_02_00, DB_0025_00_00, DB_0026_05_00,
+  DB_0026_06_00, DB_0029_00_00, DG_0006_00_00, OC_0001_02_00, OC_0001_03_00; 1,938 files, +65 MB). Import: 470 -> 510 of 520 maps
+  imported; left out: rooms not served 47 -> 7 (all DB_0000_01_00: 4 base1 tiles of its last column exist in no copy on disk),
+  STG absent 3 (735820, 740280, 740282: only part 00 in any copy). 42 of the 49 «rooms not served» quests now have their map
+  (served at the next master run if the world and reward checks pass).
+- **Incomplete records.** The 106 quests with the record map status «STG header absent» (98) / «part 2 absent» (8) use 60 map keys:
+  no other copy holds the missing files (55 keys have no file at all in any copy; 740260/740262 have parts 00-01 of 3). Survey of
+  every copy tried: private `tmp\events\maps\INCOMPLETE.md`. They stay unserved (`mapUnusable`).

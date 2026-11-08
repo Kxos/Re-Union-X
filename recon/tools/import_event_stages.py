@@ -24,6 +24,11 @@ uid stay; STG [6] target / [10] card id too when they name `from`), never in the
 the stage (status skipped). The report lists the patched records under `swapped`.
 Output: <out>/stage/ (the imported files, cleared at each run), <out>/stage_poi_events.json (stage_poi.py format, keyed by
 the map key: the server's poiStageId reads an event stage's POI by its stageBinId), <out>/report.json.
+Other copies (Events Part 4 Task 2): an STG or part the JP copy lacks is taken from another original copy of the same bin,
+the WW 2016 bundle (--b2016), byte for byte (`copies` in the stage's report); the WW 2018 global container is known by its
+name index only (--index2018) and is listed in `tried`. A stage left out gets `cause` (summary by_cause: STG absent, part N
+absent, rooms not served, ...), a missing one `tried` (what each copy holds). --rooms-out: the rooms of every map that could
+be read (imported or left out for its rooms), for make_jp_rooms.py (--event-rooms), which then builds them with --story-only.
 --stage-dir: also copy the imported files into this folder (the resource staging, stage_gen/files/stage). The POI is not
 merged here: make-events.js (master run) reads report.json + stage_poi_events.json, serves only the imported stages whose
 reward rows it can write, and merges their POI into server/game_data/stage_poi.json in the same run.
@@ -97,14 +102,61 @@ def poi_of(parts):
     return out
 
 
+def pick_files(key, copies, indexes=None):
+    """copies [(label, {(key, part|None): path or bytes})], in order of trust (JP 4.3.1 first): the STG from the first copy
+    that has it, then each part it names from the first copy that has it (a part found in another original copy of the same
+    bin is used; nothing else is ever put in). indexes {label: set of client names}: copies known by name only (no bytes),
+    listed in `tried`. -> (files {(key, part|None): ...}, sources {client name: label}, tried [{copy, stg, parts}])"""
+    tried = []
+    for label, fs in copies:
+        tried.append({'copy': label, 'stg': (key, None) in fs, 'parts': sorted(k[1] for k in fs if k[0] == key and k[1] is not None)})
+    for label, names in (indexes or {}).items():
+        stg_name = file_names(key, 0)[0]
+        parts = sorted(int(n[-6:-4]) for n in names if n.startswith(stg_name[:-4] + '_') and n.endswith('.bin'))
+        tried.append({'copy': label, 'stg': stg_name in names, 'parts': parts, 'names_only': True})
+    out, src = {}, {}
+
+    def take(k, name):
+        for label, fs in copies:
+            if k in fs:
+                out[k] = fs[k]
+                src[name] = label
+                return
+
+    take((key, None), file_names(key, 0)[0])
+    if (key, None) in out:
+        rd = out[(key, None)]
+        try:
+            n = mapfile.parse_stg(rd if isinstance(rd, (bytes, bytearray)) else open(rd, 'rb').read())['parts']
+        except Exception:  # noqa: BLE001  (mapfile.load_stage reports it)
+            n = 0
+        for k, name in enumerate(file_names(key, n)[1:]):
+            take((key, k), name)
+    return out, src, tried
+
+
+def cause_of(why):
+    """short cause of a stage left out (report summary by_cause)"""
+    m = re.match(r'(STG assente|parte (\d+) assente)', why or '')
+    if m:
+        return 'part %s absent' % m.group(2) if m.group(2) else 'STG absent'
+    for pre, c in (('rooms not served', 'rooms not served'), ('enemies not in the master', 'enemies not in the master'),
+                   ('old format', 'old format'), ('incoherent', 'incoherent'), ('enemy swap', 'enemy swap finds no record'),
+                   ('map key twice', 'map key twice')):
+        if (why or '').startswith(pre):
+            return c
+    return 'other'
+
+
 def check_item(item, files, rooms, enemy_ids, reward_ids, swaps=None):
     """-> (result dict, raw [bytes] or None). result: {stageId, key, name, status, why?, parts, rooms, enemies {id: n},
     quest_enemies, differs?, swapped?, rewards_missing, warnings}"""
     key = item['key']
     res = {'stageId': item['stageId'], 'key': key, 'censusId': item.get('censusId'), 'name': item.get('name')}
+    rd = lambda x: x if isinstance(x, (bytes, bytearray)) else open(x, 'rb').read()
     try:
         stg, parts = mapfile.load_stage(files, key)
-        raw = [open(files[(key, None)], 'rb').read()] + [open(files[(key, k)], 'rb').read() for k in range(len(parts))]
+        raw = [rd(files[(key, None)])] + [rd(files[(key, k)]) for k in range(len(parts))]
         if swaps:
             raw, done = patch_swaps(raw, swaps)
             res['swapped'] = done
@@ -115,7 +167,7 @@ def check_item(item, files, rooms, enemy_ids, reward_ids, swaps=None):
     except mapfile.FormatError as e:
         have = sorted(k[1] for k in files if k[0] == key and k[1] is not None)
         stg_ok = (key, None) in files
-        return dict(res, status='missing', why='%s (STG %s, parts in the JP data: %s)' % (e, 'present' if stg_ok else 'absent', have)), None
+        return dict(res, status='missing', why='%s (STG %s, parts found: %s)' % (e, 'present' if stg_ok else 'absent', have)), None
     if not stg['client_layout'] or not all(p['client_layout'] for p in parts):
         return dict(res, status='skipped', why='old format (version < 13)'), None
     bad, warn = mapfile.check_stage(stg, parts)
@@ -146,18 +198,36 @@ def check_item(item, files, rooms, enemy_ids, reward_ids, swaps=None):
     return res, raw
 
 
-def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None):
-    """imports every item (swaps: {str(map key): [{from, to}]}); returns the report {summary, stages}"""
+def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None, indexes=None, rooms_out=None):
+    """imports every item (swaps: {str(map key): [{from, to}]}); files = the JP 4.3.1 copy; others [(label, files)] = the
+    other original copies of the same bins, tried in order for an STG or part the JP copy lacks; indexes {label: names}:
+    copies known by name only (reported in `tried`). rooms_out: write the rooms of every map that could be read (imported
+    or left out for its rooms) for make_jp_rooms.py. Returns the report {summary, stages}"""
     sdir = os.path.join(out, 'stage')
     shutil.rmtree(sdir, ignore_errors=True)
     os.makedirs(sdir)
-    stages, poi, seen = [], {}, set()
+    stages, poi, seen, by_room = [], {}, set(), {}
+    copies = [('jp431', files)] + list(others or [])
     for it in items:
         if it['key'] in seen:
-            stages.append({'stageId': it['stageId'], 'key': it['key'], 'status': 'skipped', 'why': 'map key twice in the list'})
+            stages.append({'stageId': it['stageId'], 'key': it['key'], 'status': 'skipped', 'why': 'map key twice in the list',
+                           'cause': 'map key twice'})
             continue
         seen.add(it['key'])
-        res, raw = check_item(it, files, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(it['key'])))
+        fk, src, tried = pick_files(it['key'], copies, indexes)
+        res, raw = check_item(it, fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(it['key'])))
+        if any(v != 'jp431' for v in src.values()):
+            res['copies'] = {n: v for n, v in sorted(src.items()) if v != 'jp431'}
+        if res['status'] != 'imported':
+            res['cause'] = cause_of(res.get('why'))
+            if res['status'] == 'missing':
+                res['tried'] = tried
+                res['why'] += '; copies tried: ' + '; '.join('%s STG %s parts %s' % (
+                    c['copy'], 'present' if c['stg'] else 'absent', c['parts']) for c in tried)
+        for r in res.get('rooms') or []:
+            by_room.setdefault(r, [])
+            if it['key'] not in by_room[r]:
+                by_room[r].append(it['key'])
         if raw:
             for name, b in zip(file_names(it['key'], len(raw) - 1), raw):
                 with open(os.path.join(sdir, name), 'wb') as f:
@@ -166,10 +236,19 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None):
         stages.append(res)
     with open(os.path.join(out, 'stage_poi_events.json'), 'w', encoding='utf-8') as f:
         json.dump(poi, f, indent=1)
-    by = {}
+    by, causes = {}, {}
     for s in stages:
         by[s['status']] = by.get(s['status'], 0) + 1
-    rep = {'summary': {'items': len(items), 'by_status': by, 'files': len(os.listdir(sdir)),
+        if s.get('cause'):
+            causes[s['cause']] = causes.get(s['cause'], 0) + 1
+    if rooms_out:
+        os.makedirs(os.path.dirname(os.path.abspath(rooms_out)), exist_ok=True)
+        with open(rooms_out, 'w', encoding='utf-8') as f:
+            json.dump({'_doc': 'rooms of every event map import_event_stages.py could read (imported or left out for its rooms), '
+                               'with the map keys that use them; read by make_jp_rooms.py (--story-only builds them too)',
+                       'rooms': sorted(by_room), 'by_room': {r: sorted(k) for r, k in sorted(by_room.items())}}, f, indent=1)
+    rep = {'summary': {'items': len(items), 'by_status': by, 'by_cause': causes, 'files': len(os.listdir(sdir)),
+                       'copies_used': sorted(s['key'] for s in stages if s.get('copies')),
                        'differs': [s['stageId'] for s in stages if s.get('differs')],
                        'swapped': [s['stageId'] for s in stages if s.get('swapped')],
                        'rewards_missing': sorted({r for s in stages if s['status'] == 'imported' for r in s.get('rewards_missing', [])})},
@@ -187,14 +266,27 @@ def main(argv=None):
     ap.add_argument('--master', default=os.path.join(REPO, 'server', 'master_data'))
     ap.add_argument('--stage-dir', help='also copy the imported files here (stage_gen/files/stage)')
     ap.add_argument('--config', default=os.path.join(REPO, 'server', 'event_config.json'), help='mapEnemySwaps')
+    ap.add_argument('--b2016', help='WW 2016 bundle stage/ folder (default: private_tools ref_work bundle2016/files/stage)')
+    ap.add_argument('--index2018', help='WW 2018 global container name index (default: ref_work bundle2016/names.tsv; '
+                                        'names only, the container is not on disk)')
+    ap.add_argument('--rooms-out', default=os.path.join(D, 'tmp', 'events', 'maps', 'event_rooms.json'),
+                    help='rooms of the event maps, read by make_jp_rooms.py')
     a = ap.parse_args(argv)
-    if not a.jp:
+    if not a.jp or not a.b2016 or not a.index2018:
         import private_tools
-        a.jp = private_tools.local_path('jp_data', 'stage')
+        a.jp = a.jp or private_tools.local_path('jp_data', 'stage')
+        a.b2016 = a.b2016 or private_tools.local_path('ref_work', 'bundle2016', 'files', 'stage')
+        a.index2018 = a.index2018 or private_tools.local_path('ref_work', 'bundle2016', 'names.tsv')
+    others = [('bundle2016', mapfile.iter_stage_files(a.b2016))] if os.path.isdir(a.b2016) else []
+    indexes = {}
+    if os.path.exists(a.index2018):
+        indexes['ww2018 index'] = {line.split('\t', 1)[0].rsplit('/', 1)[-1] for line in open(a.index2018, encoding='utf-8')
+                                   if line.startswith('stage/mappoi_stg')}
     items = json.load(open(a.maps, encoding='utf-8'))
     rows = lambda n: json.load(open(os.path.join(a.master, n + '.json'), encoding='utf-8'))
     rep = run(items, mapfile.iter_stage_files(a.jp), served_rooms(), {r['enemyId'] for r in rows('enemy')},
-              {r['rewardId'] for r in rows('reward')}, a.out, json.load(open(a.config, encoding='utf-8')).get('mapEnemySwaps') or {})
+              {r['rewardId'] for r in rows('reward')}, a.out, json.load(open(a.config, encoding='utf-8')).get('mapEnemySwaps') or {},
+              others, indexes, a.rooms_out)
     sdir = os.path.join(a.out, 'stage')
     if a.stage_dir:
         os.makedirs(a.stage_dir, exist_ok=True)
@@ -204,6 +296,8 @@ def main(argv=None):
     print('event stages: %d items, %s, %d files -> %s; enemies swapped: %s; map differs from the quest: %s; reward ids not in the '
           'master (make-events.js writes them from the drops): %s' % (
               s['items'], s['by_status'], s['files'], sdir, s['swapped'], s['differs'], s['rewards_missing']))
+    print('left out by cause: %s; parts from another original copy: %s; rooms list: %s' % (
+        s['by_cause'], s['copies_used'] or 'none', a.rooms_out))
     for st in rep['stages']:
         if st['status'] != 'imported':
             print('  %s %s (%s): %s %s' % (st['stageId'], st['key'], st.get('name'), st['status'], st.get('why')))

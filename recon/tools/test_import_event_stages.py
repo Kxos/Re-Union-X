@@ -105,6 +105,27 @@ try:
     # a swap that finds no record: the stage is left out
     rep6 = ies.run(items[:1], files, rooms, set(ids), rewards, out, {'740140': [{'from': 123456789, 'to': 1}]})
     assert rep6['stages'][0]['status'] == 'skipped' and 'finds no record' in rep6['stages'][0]['why'], rep6['stages'][0]
+    # Events Part 4 Task 2: causes, other original copies of the same bin, the rooms list for make_jp_rooms.py
+    assert st[2]['cause'] == 'STG absent' and st[3]['cause'] == 'STG absent', (st[2], st[3])
+    assert rep['summary']['by_cause'] == {'STG absent': 2, 'map key twice': 1}, rep['summary']['by_cause']
+    assert [c['copy'] for c in st[2]['tried']] == ['jp431'] and st[2]['tried'][0]['parts'] == [0], st[2]['tried']
+    assert rep3['stages'][0]['cause'] == 'rooms not served' and rep3['summary']['by_cause'] == {'rooms not served': 1}
+    # a part absent from the JP copy is taken from another original copy of the same bin (byte for byte, recorded)
+    jp_less = {k: v for k, v in files.items() if k != (740140, 0)}
+    rep7 = ies.run(items[:1], jp_less, rooms, set(ids), rewards, out)
+    assert rep7['stages'][0]['status'] == 'missing' and rep7['stages'][0]['cause'] == 'part 0 absent', rep7['stages'][0]
+    other = [('bundle2016', {(740140, 0): files[(740140, 0)]})]
+    rep8 = ies.run(items[:1], jp_less, rooms, set(ids), rewards, out, None, other)
+    s8 = rep8['stages'][0]
+    assert s8['status'] == 'imported' and s8['copies'] == {'mappoi_stg740140_00.bin': 'bundle2016'}, s8
+    assert open(os.path.join(out, 'stage', 'mappoi_stg740140_00.bin'), 'rb').read() == open(files[(740140, 0)], 'rb').read()
+    rep9 = ies.run(items[1:2], files, rooms, set(ids), rewards, out, None, [('bundle2016', {})], {'ww2018 index': set()})
+    assert [c['copy'] for c in rep9['stages'][0]['tried']] == ['jp431', 'bundle2016', 'ww2018 index'], rep9['stages'][0]['tried']
+    # rooms of every map that could be read (imported or left out for its rooms): the list make_jp_rooms.py builds
+    rl = os.path.join(t, 'event_rooms.json')
+    ies.run(items, files, set(), set(ids), rewards, out, rooms_out=rl)
+    lst = json.load(open(rl, encoding='utf-8'))
+    assert lst['rooms'] == sorted(rooms) and lst['by_room'][sorted(rooms)[0]] == [740140], lst
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')

@@ -60,8 +60,27 @@ PLACEHOLDER = bytes.fromhex('894254460000010000000000000000000100000000000001000
 BAD_PLACEHOLDER = bytes.fromhex('8942544600000100000000000000000000010000000000000100010000000001'
                                 '0001000100050000000000000000')
 assert len(PLACEHOLDER) == 45
-# event quest rooms with no story door, taken also with --story-only (see main)
-EVENT_ROOMS = ('DB_0026_09_00', 'DB_0026_10_00', 'DB_0026_11_00', 'DB_0026_12_00')
+# event quest rooms with no story door, taken also with --story-only (see main): the list written by
+# import_event_stages.py (every room of the event maps it could read), Events Part 4 Task 2 (before: four rooms by hand)
+EVENT_ROOMS_LIST = os.path.join(D, 'tmp', 'events', 'maps', 'event_rooms.json')
+ROOM_NAME = re.compile(r'^[A-Z]{2}_\d{4}_\d\d_\d\d$')
+
+
+def event_rooms_from_list(path):
+    """rooms of event_rooms.json ({rooms: [...]} or a plain list) -> sorted tuple. A missing list or a bad room name stops
+    the run: a silent empty list would drop rooms already built (the files of the rooms not planned are removed)."""
+    if not os.path.exists(path):
+        raise SystemExit('event rooms list not found: %s (written by recon/tools/import_event_stages.py; '
+                         '--event-rooms to point at another copy)' % path)
+    data = json.load(open(path, encoding='utf-8'))
+    rooms = data.get('rooms') if isinstance(data, dict) else data
+    if not isinstance(rooms, list):
+        raise SystemExit('event rooms list %s: no list of rooms' % path)
+    bad = [r for r in rooms if not isinstance(r, str) or not ROOM_NAME.match(r)]
+    if bad:
+        raise SystemExit('event rooms list %s: bad room names %s' % (path, bad[:5]))
+    return tuple(sorted(set(rooms)))
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--merged', default=private_tools.local_path('ref_work', 'rooms_merged'))
@@ -74,7 +93,9 @@ ap.add_argument('--story-only', action='store_true')
 ap.add_argument('--rooms', help='solo queste stanze (elenco con virgole), per prove')
 ap.add_argument('--dry', action='store_true', help='solo rapporto, nessuna scrittura in files')
 ap.add_argument('--jobs', type=int, default=0)
-a = ap.parse_args()
+ap.add_argument('--event-rooms', default=EVENT_ROOMS_LIST, help='rooms of the event maps (import_event_stages.py)')
+# imported (tests, the Pool workers): the defaults, nothing read from the command line
+a = ap.parse_args(None if __name__ == '__main__' else [])
 a.index = a.index or [os.path.join(D, 'resource_data', 'names_v4.tsv'), os.path.join(D, 'ipa431', 'names_addnl.tsv')]
 a.served_files = a.served_files or [p for p in (os.path.join(D, 'stage_gen', 'files'), os.path.join(D, 'medal_gen', 'files'))
                                     if os.path.isdir(p)]
@@ -113,15 +134,19 @@ def tiles(w, h):
 
 # ------------------------------------------------------------------ cosa e' gia' servito
 served = set()
-for tsv in a.index:
-    with open(tsv, encoding='utf-8') as fh:
-        next(fh)
-        for line in fh:
-            served.add(line.split('\t', 1)[0])
-for root in a.served_files:
-    for dp, _, fs in os.walk(root):
-        for f in fs:
-            served.add(os.path.relpath(os.path.join(dp, f), root).replace('\\', '/'))
+
+
+def load_served():
+    """names already served (the indexes and the generated packages), read once by main"""
+    for tsv in a.index:
+        with open(tsv, encoding='utf-8') as fh:
+            next(fh)
+            for line in fh:
+                served.add(line.split('\t', 1)[0])
+    for root in a.served_files:
+        for dp, _, fs in os.walk(root):
+            for f in fs:
+                served.add(os.path.relpath(os.path.join(dp, f), root).replace('\\', '/'))
 
 # ------------------------------------------------------------------ fonti
 _jp_dirs = {}
@@ -325,7 +350,18 @@ def convert(job):
         return name, 'errore %r' % e, 0
 
 
+def story_only_filter(r, todo, story, story_only, info_served):
+    """-> (r, todo): r['story'] = the room is to cover (story door, story stage or event room); with --story-only a complete
+    room that is not to cover and not served yet is left out ('esclusa', nothing written)"""
+    r['story'] = r['room'] in story
+    if r['status'] != 'scartata' and story_only and not r['story'] and not info_served:
+        r.update(status='esclusa', why='--story-only: nessuna porta di storia')
+        todo = {}
+    return r, todo
+
+
 def main():
+    load_served()
     story = set()
     sch = json.load(open(a.schema, encoding='utf-8'))
     for dr in sch['doors'].values():
@@ -339,9 +375,9 @@ def main():
         for s in (st.values() if isinstance(st, dict) else st):
             if s.get('stage_type') in ('storia_master', 'storia_variante', 'storia_oltre'):
                 story.update(r for r in s.get('rooms', {}).values() if r)
-    # rooms of served event quests with no story door (Events Part 3 Task 7b, 08-11-2026): the four EV-0894 «Event Coins
-    # plus Riku & Moogle» maps (import_event_stages.py skipped them: rooms not served); same original JP rooms as the rest
-    story.update(EVENT_ROOMS)
+    # rooms of the event quest maps with no story door (Events Part 3 Task 7b: the four EV-0894 rooms by hand; Part 4 Task 2:
+    # the list of import_event_stages.py, every room of an event map it could read); same original JP rooms as the rest
+    story.update(event_rooms_from_list(a.event_rooms))
     rooms = sorted(f for f in os.listdir(a.merged) if os.path.isdir(os.path.join(a.merged, f)))
     if a.rooms:
         rooms = [x for x in a.rooms.split(',') if x]
@@ -349,15 +385,12 @@ def main():
     for room in rooms:
         info_served = 'map/%s/%s_info.bin' % (room, room) in served
         r, todo = plan_room(room)
-        r['story'] = room in story
         if info_served:
             if r['status'] == 'completa' and not todo:
                 r.update(status='servita')           # gia' completa nelle risorse: niente da fare
             elif r['status'] == 'completa':
                 r['status'] = 'servita, completata'
-        if r['status'] != 'scartata' and a.story_only and not r['story'] and not info_served:
-            r.update(status='esclusa', why='--story-only: nessuna porta di storia')
-            todo = {}
+        r, todo = story_only_filter(r, todo, story, a.story_only, info_served)
         if r['status'] != 'scartata':
             plan.update(todo)
         results.append(r)
