@@ -70,11 +70,14 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
   }
   const stagePoint = () => { const f = focusSet(); return (f && (player.eventCoins || {})[f]) || 0; };
 
+  // a set whose boards are held (not in boardSets, e.g. Booster cells until Part 6) but which has member entries (boardSetKey):
+  // its Event Coins are still paid into its balance (one balance per set, never expiring; coordinator 08-11); it is never handed out
+  const heldSet = (k) => ((events.index() || {}).entries || []).some((e) => e && e.boardSetKey === k);
   // Event Coins into a set's balance (an event quest of that set: objective, first-clear item, drop); false = not paid
   function addCoins(setKey, n) {
     n = Number(n) || 0;
     if (!n) return false;
-    if (!setKey || !sets()[setKey]) { log(`[event boards] Event Coin x${n} not paid: no board set (${setKey || '-'})`); return false; }
+    if (!setKey || !(sets()[setKey] || heldSet(setKey))) { log(`[event boards] Event Coin x${n} not paid: no board set (${setKey || '-'})`); return false; }
     player.eventCoins ||= {};
     player.eventCoins[setKey] = (player.eventCoins[setKey] || 0) + n;
     return true;

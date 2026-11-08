@@ -518,3 +518,7 @@ User decisions 08-11 (4c5ce3f, master rev 288, 8f87e7f):
 - **Leftover on the test save `coin1` only:** the Halloween board 4000006 holds cells 2, 3, 14 unlocked by the 7dc0cf4 pre-open
   (they were the Halloween A cells, now paid medal cells): shown unlocked, never paid. 7dc0cf4 was never released, so only bench
   saves can hold this; clear them by hand if the save is reused.
+- **Coins into held sets (coordinator 08-11).** A set whose boards are held (not handed out) still collects its Event Coins:
+  `boardSetOf` falls back to the entry's `boardSetKey` and `addCoins` accepts a set that has member entries; the set is never
+  handed out nor the focus, its entries stay eventType 3 (test `coins_paid_to_held_set`). Master unchanged (rev stays 288).
+  Save `coin1`: the 7dc0cf4 leftovers on board 4000006 (cells 2, 3, 14) cleared by hand.

@@ -37,9 +37,10 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   const entries = () => (eventIndex() || {}).entries || [];
   const isEventStage = (stageId) => { const id = Number(stageId); return id >= STAGE_FIRST && id <= STAGE_LAST; };
   const stageRow = (id) => masterRows('stage').find((r) => r.stageId === id);
-  // the index entry of an event quest, and its board set (events.json entry.boardSet, make-events.js; null without one)
+  // the index entry of an event quest, and the board set its Event Coins go to: entry.boardSet when the set is handed out, else
+  // entry.boardSetKey (a set whose boards are held until Part 6: coins still paid into its balance, coordinator 08-11); null without one
   const entryOfStage = (stageId) => { const id = Number(stageId); return entries().find((e) => (e.quests || []).some((q) => q.stageId === id) || (e.stageIds || []).includes(id)) || null; };
-  const boardSetOf = (stageId) => (entryOfStage(stageId) || {}).boardSet || null;
+  const boardSetOf = (stageId) => { const e = entryOfStage(stageId) || {}; return e.boardSet || e.boardSetKey || null; };
 
   // From respondStageClear, after its objective rules (Lux objectives, all-together flag): cleared = the objective ids of this
   // clear. Pays the first-clear items (first clear of this quest) and the objectives never paid before; the caller saves.

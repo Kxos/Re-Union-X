@@ -250,7 +250,7 @@ const USERPOINT_KEYS = ['money', 'lux', 'totalLux', 'spherePoint', 'kizunaPoint'
   'multiPoint', 'missionPoint', 'limitedVipPoint', 'drawTicket1', 'drawTicket2', 'drawTicket3', 'limitedDrawTicket1', 'limitedDrawTicket2', 'limitedDrawTicket3'];
 function wiring() {
   if (!fs.existsSync(path.join(MASTER, 'sphere.json')) || !fs.existsSync(path.join(MASTER, 'stage.json'))) { console.log('wiring: skipped (no master_data)'); return; }
-  const W1 = 4999801, W2 = 4999802, S1 = 4009951, S2 = 4009952, REWARD = 989951;
+  const W1 = 4999801, W2 = 4999802, S1 = 4009951, S2 = 4009952, S3 = 4009953, REWARD = 989951;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-test-event-board-routes-'));
   process.env.KHUX_SAVE = path.join(dir, 'save.json');
   process.env.KHUX_RAID_INDEX = path.join(dir, 'raids.json');
@@ -264,12 +264,14 @@ function wiring() {
   fs.writeFileSync(process.env.KHUX_EVENT_INDEX, JSON.stringify({ entries: [
     { censusId: 'EV-0759', evStageId: 29951, start: '2015-01-01', end: '2099-12-31', stageIds: [S1], available: true, eventType: 1, boardSet: '2019-04', quests: [quest(S1)] },
     { censusId: 'EV-0001', evStageId: 29952, start: '2015-01-01', end: '2099-12-31', stageIds: [S2], available: true, boardSet: null, quests: [quest(S2)] },
+    // a member of a set whose boards are held until Part 6 (not in boardSets): boardSet null, eventType 3, boardSetKey = its set
+    { censusId: 'EV-0703', evStageId: 29953, start: '2015-01-01', end: '2099-12-31', stageIds: [S3], available: true, eventType: 3, boardSet: null, boardSetKey: '2019-02', quests: [quest(S3)] },
   ], boardSets: { '2019-04': { boardIds: [W1, W2], chains: { [W2]: W1 }, censusIds: ['EV-0759'] } }, reasons: {} }));
   // objectives: 1 jewels, 2 Event Coins x50, 3 munny; first clear: munny and Event Coins x30
   const stageRow = (stageId) => ({ stageId, stageKind: 2, useAp: 5, stageBinId: 0, validSubmission: 3, submissionRewardType: [2, 15, 4], submissionItemId: [0, 0, 0],
     submissionItemNum: [10, 50, 1], submissionSkillId: [0, 0, 0], validClearGetItem: 2, clearGetItemType: [4, 15], clearGetItemId: [0, 0], clearGetItemNum: [100, 30] });
   const EXTRA = {
-    'stage.json': [stageRow(S1), stageRow(S2)],
+    'stage.json': [stageRow(S1), stageRow(S2), stageRow(S3)],
     'reward.json': [{ rewardId: REWARD, validReward: 1, display: [1], type: [15], id: [0], assignSkillType: [0], assignSkillId: [0], assignSkillLv: [0], num: [20], odds: [10000] }],
     'sphere.json': [sphereRow(W1, 'Board #1: Test'), sphereRow(W2, 'Board #2: Test', 5, W1)],
     'sphereArray.json': [rb.gridRow(W1, 2), rb.gridRow(W2, 1)],
@@ -327,6 +329,18 @@ function wiring() {
       assert.strictEqual(p.eventCoinFocus, '2019-04', 'an event without a set keeps the focus');
       call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [2], getPoint: { lux: 0 } });
       assert.deepStrictEqual(p.eventCoins, { '2019-04': 120 });
+    });
+    // coordinator 08-11: Event Coins are paid into the set balance even while its boards are held (one balance per set, never
+    // expiring); the set is not handed out and the focus does not move to it
+    run('coins_paid_to_held_set', () => {
+      const focus = p.eventCoinFocus;
+      call(t.respondStageStart, { stageId: S3, userKeybladeId: 0 });
+      assert.strictEqual(p.eventCoinFocus, focus, 'a held set never becomes the focus');
+      call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 0 } });
+      assert.strictEqual(p.eventCoins['2019-02'], 50 + 30, 'objective 2 and the first-clear item into the held set');
+      assert.strictEqual(p.eventCoins['2019-04'], 120, 'the other set untouched');
+      assert.ok(!t.eventBoards().known().some((id) => id < W1 || id > W2), 'no board of the held set handed out');
+      assert.strictEqual(t.eventBoards().addCoins('2099-99', 5), false, 'a set no entry belongs to: not paid');
     });
     run('server_check_and_update', () => {
       const ids = (b) => (b.userSphere.userSphereDatas || []).map((d) => d.sphereBoardId).filter((id) => id >= 4000000 && id <= 4999999);
