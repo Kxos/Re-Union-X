@@ -353,6 +353,9 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
   // the raid mode (Raid Boards); original videos show no button on the quest list of a non-board event (Defeat Titan, donor 1), and
   // the event boards are not served yet (Part 3): a donor value outside config.servedEventTypes gives config.eventType (3, plain list);
   // the donor value stays in origEventType.
+  // hardmodeRequire 1 = «No special attack restrictions.» on 334 donor event quests (2017-2021): the WW 4.3.1 client knows no
+  // condition 1 and crashes on Begin (GUIReader on a null node, bench 08-11 gem2): no condition is the client's 0.
+  const hardmodeOf = (v) => (v === 1 ? 0 : v || 0);
   const servedType = (t) => (Number.isInteger(t) && (config.servedEventTypes || []).includes(t) ? t : config.eventType);
   for (const rec of records) {
     if (!selected(rec)) { out.skipped.push({ censusId: rec.censusId, reason: 'notSelected' }); continue; }
@@ -474,7 +477,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
       out.stage.push({ ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: q.name, mapName: room.name || ref.mapName, useAp: q.ap,
         chapterId: Math.floor(stageId / 1000), worldId: q.worldId, onlyDrama: 0, stageKind: STAGE_KIND, noPartner: r.noPartner || 0,
         validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0,
-        disableContinue: r.disableContinue || 0, addLevel: q.addLevel || 0, holdKeyblade: r.holdKeyblade || 0, hardmodeRequire: r.hardmodeRequire || 0,
+        disableContinue: r.disableContinue || 0, addLevel: q.addLevel || 0, holdKeyblade: r.holdKeyblade || 0, hardmodeRequire: hardmodeOf(r.hardmodeRequire),
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
         ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });

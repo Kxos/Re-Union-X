@@ -343,4 +343,14 @@ week 01-10..01-16).
   the original notice) showed a broken-image icon; now a box «No card in the original».
 - `gem2_tab`, `gem2_list`: «Monthly Gem Quests!» card; list «No Continues: Monthly Gem», Iron Giant LV 500, AP 5, quest
   thumbnails in a row, no board button.
-- Not checked yet: playing a weekly and a monthly gem quest (objectives paid once, gem rewards, drops, replay).
+- **Weekly gem quest played (gem1, Oct. 9 Magic Gem, stage 4000134):** Begin -> «Select a Keyblade» -> friends -> map (two rooms)
+  -> Results with the three objectives. First clear: Magic Gem +1 (material 50), Jewels +30, Moogle medal, drops (Spring Water,
+  Iron Ore), munny 4,617; score and clear missions [1,2,3] saved. Three replays: no objective paid again (gem and Jewels unchanged),
+  drops and munny only. A reward row that looks empty for a moment is the client's bonus animation (the text fills in), not a fault.
+- **Monthly gem quest crashes on Begin (gem2, Jan 2019, stage 4000208):** SIGSEGV in GUIReader (missing cocostudio layout), no server
+  request. Its rows differ from the weekly ones by `noPartner 1` (only on 84 event quests, never benched) and `holdKeyblade`
+  (1000..12000; 978 Proud rows already work). `hardmodeRequire 1` («No special attack restrictions.», 334 event rows, unknown to the
+  WW client) is now served as 0 (rev 282) but was not the cause. Suspects: the start-deck condition panels missing in WW
+  (`StartDeckEdit3_Panel_KB_ver240`, `StartDeckEdit3_Panel_KB_Ad_ver240`, `StartDeckEdit3_Deck_ver240`); the user notes the empty
+  box at the right of «Select a Keyblade», where the original may show the quest conditions. Research in progress
+  (`tmp/quest_start_panels/REPORT.md`, private).
