@@ -184,11 +184,11 @@ function cellsOf(board, fixes = []) {
 }
 
 // ids: copy of ids.boards with a number for every board of every Weekly / Radiant row (whatever the filter)
-function allocateBoardIds(doc, ids, families = FAMILIES) {
+function allocateBoardIds(doc, ids, families = FAMILIES, idBase = BOARD_BASE, idMax = BOARD_MAX) {
   const boards = { ...((ids || {}).boards || {}) };
   const seen = new Map();
   for (const [k, v] of Object.entries(boards)) {
-    if (!Number.isInteger(v) || v < 1 || v > BOARD_MAX - BOARD_BASE) throw new Error(`raid: raid_ids.json: board ${k} has number ${v}, outside 1-${BOARD_MAX - BOARD_BASE}`);
+    if (!Number.isInteger(v) || v < 1 || v > idMax - idBase) throw new Error(`raid: raid_ids.json: board ${k} has number ${v}, outside 1-${idMax - idBase}`);
     if (seen.has(v)) throw new Error(`raid: raid_ids.json: board number ${v} repeats (${seen.get(v)}, ${k})`);
     seen.set(v, k);
   }
@@ -213,8 +213,8 @@ const weeksOf = (doc, families = FAMILIES) => ((doc || {}).weeks || []).filter((
 // labels (census id -> reconstructed labels: boardPath, boardSet, boardCost, boardCells), boardIds,
 // report: {unmatched: [{board, n, kind, reward, why, weeks}], corrected: [...], dropped: [board ids with no cell left], bytes}}. Throws on a name that matches
 // no item and is not declared in config.unmatched (with the whole list), and on a completion reward that matches nothing.
-function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null, families = FAMILIES }) {
-  const boardIds = allocateBoardIds(doc, ids, families);
+function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null, families = FAMILIES, type = TYPE, idBase = BOARD_BASE, idMax = BOARD_MAX }) {
+  const boardIds = allocateBoardIds(doc, ids, families, idBase, idMax);
   const idx = itemIndex(master);
   const fixes = parseBoardCorrections(correctionsMd);
   const declared = config.unmatched || {};
@@ -278,7 +278,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
         unmatched.get(k).weeks++;
       }
       if (!r.cells.length) { if (!out.report.dropped.includes(r.board.id)) out.report.dropped.push(r.board.id); continue; } // every cell unmatched: no board
-      const id = BOARD_BASE + boardIds[`${w.census_id}/${ref.board}`];
+      const id = idBase + boardIds[`${w.census_id}/${ref.board}`];
       for (const c of r.cells) {
         if (c.corrected && !out.report.corrected.some((x) => x.board === r.board.id && x.n === c.n)) out.report.corrected.push({ board: r.board.id, n: c.n, what: c.corrected });
       }
@@ -295,7 +295,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       else if (art.screenshot) labels.add('boardArt');
       else if (art.wiki) labels.add('boardArtWiki'); // the card as shown on the JP wiki (recon/tools/raid_board_wikicards.py, --loc)
       if (art) out.art.push({ sphereBoardId: id, board: ownArt ? r.board.id : r.board.artFrom, ...art });
-      out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: background, arryId: id, masuId: id, type: TYPE, openId: 0, openParam: 0, price: 0, detailUrl: '',
+      out.sphereRows.push({ sphereBoardId: id, boardName, kindId: 0, boardId: background, arryId: id, masuId: id, type, openId: 0, openParam: 0, price: 0, detailUrl: '',
         startDatetime: START, endDatetime: END });
       out.arrayRows.push(gridRow(id, r.cells.length));
       const masu = { masuId: id, sphereBoardId: id };
@@ -333,4 +333,4 @@ function artLines(art) {
   return [...head, ...art.map(line)].join('\n') + '\n';
 }
 
-module.exports = { norm, artLines, usDate, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };
+module.exports = { SEL, PARTS_SEL, TICKETS, MASU_KEYS, MASU, START, END, num, norm, artLines, usDate, buildBoards, cellsOf, gridRow, matchReward, itemIndex, parseBoardCorrections, allocateBoardIds, BOARD_BASE, BOARD_MAX, TYPE, NODES, COMPLETION, PIECE, STARTCELL };

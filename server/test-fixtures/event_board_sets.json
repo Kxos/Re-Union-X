@@ -1,0 +1,305 @@
+{
+ "note": "Task 3 fixture (hand-made, numbers only): two set 2099-01 boards chained, one board with an unmatched medal cell, one with an unmatched completion",
+ "sets": [
+  {
+   "setKey": "2099-01",
+   "censusIds": [
+    "EV-0000"
+   ],
+   "sources": [
+    "fixture"
+   ],
+   "boards": [
+    {
+     "donorId": 7001,
+     "name": "Alpha",
+     "openId": 3,
+     "openParam": 0,
+     "kindId": 1,
+     "grid": {
+      "spCol0": [
+       0,
+       0,
+       2,
+       1002,
+       3,
+       1002,
+       4,
+       1002,
+       5
+      ],
+      "spCol1": [
+       0,
+       0,
+       1004,
+       7,
+       1002,
+       8,
+       1002,
+       9,
+       1005
+      ],
+      "spCol2": [
+       0,
+       1006,
+       10,
+       1002,
+       11,
+       1002,
+       12,
+       1002,
+       13
+      ],
+      "spCol3": [
+       0,
+       14,
+       1002,
+       15,
+       1002,
+       16,
+       1002,
+       17,
+       1005
+      ],
+      "spCol4": [
+       1000,
+       1002,
+       19,
+       1002,
+       20,
+       1002,
+       21,
+       1002,
+       22
+      ]
+     },
+     "cells": [
+      {
+       "idx": 1,
+       "cost": 10,
+       "rewardSelect": 2,
+       "rewardId": 0,
+       "num": 10,
+       "name": "10 Jewels"
+      },
+      {
+       "idx": 2,
+       "cost": 20,
+       "rewardSelect": 3,
+       "rewardId": 90076,
+       "num": 1,
+       "name": "6★ Cid"
+      },
+      {
+       "idx": 3,
+       "cost": 30,
+       "rewardSelect": 3,
+       "rewardId": 22595,
+       "num": 1,
+       "name": "5★ Halloween Sora C"
+      },
+      {
+       "idx": 4,
+       "cost": 40,
+       "rewardSelect": 5,
+       "rewardId": 48,
+       "num": 1,
+       "name": "Power Gem"
+      },
+      {
+       "idx": 6,
+       "cost": 50,
+       "rewardSelect": 41,
+       "rewardId": 41,
+       "num": 1,
+       "name": "Draw Ticket x1"
+      }
+     ],
+     "completion": {
+      "rewardSelect": 7,
+      "rewardId": 12229,
+      "num": 1,
+      "name": "Title «Angelic»"
+     }
+    },
+    {
+     "donorId": 7002,
+     "name": "Beta",
+     "openId": 5,
+     "openParam": 7001,
+     "kindId": 1,
+     "grid": {
+      "spCol0": [
+       0,
+       0,
+       2,
+       1002,
+       3,
+       1002,
+       4,
+       1002,
+       5
+      ],
+      "spCol1": [
+       0,
+       0,
+       1004,
+       7,
+       1002,
+       8,
+       1002,
+       9,
+       1005
+      ],
+      "spCol2": [
+       0,
+       1006,
+       10,
+       1002,
+       11,
+       1002,
+       12,
+       1002,
+       13
+      ],
+      "spCol3": [
+       0,
+       14,
+       1002,
+       15,
+       1002,
+       16,
+       1002,
+       17,
+       1005
+      ],
+      "spCol4": [
+       1000,
+       1002,
+       19,
+       1002,
+       20,
+       1002,
+       21,
+       1002,
+       22
+      ]
+     },
+     "cells": [
+      {
+       "idx": 1,
+       "cost": 15,
+       "rewardSelect": 2,
+       "rewardId": 0,
+       "num": 100,
+       "name": "100 Jewels"
+      },
+      {
+       "idx": 2,
+       "cost": 25,
+       "rewardSelect": 3,
+       "rewardId": 99999,
+       "num": 1,
+       "name": "6★ Nobody"
+      },
+      {
+       "idx": 3,
+       "cost": 35,
+       "rewardSelect": 34,
+       "rewardId": 1902117,
+       "num": 1,
+       "name": "Booster"
+      }
+     ],
+     "completion": {
+      "rewardSelect": 2,
+      "rewardId": 0,
+      "num": 500,
+      "name": "500 Jewels"
+     }
+    },
+    {
+     "donorId": 7003,
+     "name": "Gamma",
+     "openId": 3,
+     "openParam": 0,
+     "kindId": 1,
+     "grid": {
+      "spCol0": [
+       0,
+       0,
+       2,
+       1002,
+       3,
+       1002,
+       4,
+       1002,
+       5
+      ],
+      "spCol1": [
+       0,
+       0,
+       1004,
+       7,
+       1002,
+       8,
+       1002,
+       9,
+       1005
+      ],
+      "spCol2": [
+       0,
+       1006,
+       10,
+       1002,
+       11,
+       1002,
+       12,
+       1002,
+       13
+      ],
+      "spCol3": [
+       0,
+       14,
+       1002,
+       15,
+       1002,
+       16,
+       1002,
+       17,
+       1005
+      ],
+      "spCol4": [
+       1000,
+       1002,
+       19,
+       1002,
+       20,
+       1002,
+       21,
+       1002,
+       22
+      ]
+     },
+     "cells": [
+      {
+       "idx": 1,
+       "cost": 10,
+       "rewardSelect": 2,
+       "rewardId": 0,
+       "num": 10,
+       "name": "10 Jewels"
+      }
+     ],
+     "completion": {
+      "rewardSelect": 3,
+      "rewardId": 99998,
+      "num": 1,
+      "name": "6★ Nobody Else"
+     }
+    }
+   ]
+  }
+ ],
+ "unmapped": []
+}
