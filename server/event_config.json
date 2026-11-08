@@ -1,5 +1,5 @@
 {
- "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). serve: census ids (the April 2019 pilot, Events Part 1) and types (GEM, Part 2) that are built, the rest is notSelected (an old onlyCensusIds list still works; no serve and no list builds every record). reasonText: the catalogue text of every reason a record or quest is not built. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the fallback when the donor rows give none (make-events uses the donor value, never 2 = the raid mode with the Raid Boards button). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
+ "note": "Ours, read by make-events.js (docs/notes/events.md). evStage = evStageBase + r, stage = stageBase + n (server/event_ids.json, append-only). serve: census ids (the April 2019 pilot, Events Part 1) and types (GEM, Part 2) that are built, the rest is notSelected (an old onlyCensusIds list still works; no serve and no list builds every record). reasonText: the catalogue text of every reason a record or quest is not built. labelPhrases: the reconstruction notes of the event quest records -> label id; reconstructedWhy: the text of every label (shown in the Event Catalog, declared in the Notices). eventType: the value served when the donor value is not in servedEventTypes (3 = plain quest list; 1 = board mode with the Event Boards button, served from Part 3 with the event boards; never 2 = raid mode with Raid Boards). catalogEvStage: the Event Catalog banner (evStageBase + 0, never a record: records are numbered from 1), holding catalogStage (the Training Grounds of the Special Catalog), Details -> catalogUrl.",
  "catalogEvStage": 20000,
  "catalogStage": 970000,
  "catalogUrl": "/web/event/catalog",
@@ -8,7 +8,8 @@
  "stageBase": 4000000,
  "stageMax": 4009999,
  "eventCategory": 2,
- "eventType": 1,
+ "eventType": 3,
+ "servedEventTypes": [3],
  "imgVersion": 5,
  "shortWindowHours": 12,
  "serve": {

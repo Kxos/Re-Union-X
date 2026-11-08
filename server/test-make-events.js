@@ -643,7 +643,8 @@ const tests = {
     assert.deepStrictEqual(out.evStage.map((r) => r.eventStageId), [e.rows[0].evStageId, e.rows[1].evStageId], 'one evStage row per built donor row; the unserved one not built');
     const [r1, r2] = out.evStage;
     assert.deepStrictEqual([r1.stageId, r2.stageId], [[e.quests[0].stageId, e.quests[1].stageId], [e.quests[2].stageId]], 'each row its own quests');
-    assert.deepStrictEqual([r1.eventType, r2.eventType], [1, 3], 'the donor eventType of each row');
+    assert.deepStrictEqual([r1.eventType, r2.eventType], [3, 3], 'donor 1 (board mode) is not served before the event boards: plain list 3');
+    assert.deepStrictEqual(e.rows.map((r) => r.origEventType), [1, 3, 2], 'the donor eventType of each row stays in origEventType');
     assert.ok(r2.bannerUrl.endsWith(`/${e.rows[1].evStageId}.png`) && r2.detailUrl === `/web/event/notice/${e.rows[1].evStageId}`, 'own card and Details');
     assert.deepStrictEqual([r1.parentEventStageId, r2.parentEventStageId], [0, 0], 'parentEventStageId 0 on our rows (the donor value stays in the index)');
     assert.strictEqual(e.rows[1].parentEventStageId, 900011);
@@ -651,7 +652,7 @@ const tests = {
     assert.deepStrictEqual(e.quests.map((q) => q.evStageId), [e.rows[0].evStageId, e.rows[0].evStageId, e.rows[1].evStageId, e.rows[2].evStageId], 'quest -> row, by evStageId or stage range');
     assert.deepStrictEqual(e.rows.map((r) => r.stageIds.length), [2, 1, 0]);
     assert.deepStrictEqual(e.stageIds, [...r1.stageId, ...r2.stageId]);
-    assert.strictEqual(e.rows[2].eventType, 1, 'a raid-mode donor row (2) never gives eventType 2');
+    assert.strictEqual(e.rows[2].eventType, 3, 'a raid-mode donor row (2) never gives eventType 2');
     assert.ok(!JSON.stringify(out.ids).includes('9000'), 'no donor id in event_ids.json');
     assert.deepStrictEqual(Object.keys(out.ids.subRows), ['R-1/r+1', 'R-1/r+2']);
     assert.strictEqual(out.anchors['R-1#row'], 900011);

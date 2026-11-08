@@ -349,13 +349,18 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
   const used = new Set();
   const builtMaps = new Map(); // map key -> our stage id built on it in this run
 
+  // eventType served on /stage/event (bench 08-11): the client turns 1 into the board mode with the «Event Boards» button and 2 into
+  // the raid mode (Raid Boards); original videos show no button on the quest list of a non-board event (Defeat Titan, donor 1), and
+  // the event boards are not served yet (Part 3): a donor value outside config.servedEventTypes gives config.eventType (3, plain list);
+  // the donor value stays in origEventType.
+  const servedType = (t) => (Number.isInteger(t) && (config.servedEventTypes || []).includes(t) ? t : config.eventType);
   for (const rec of records) {
     if (!selected(rec)) { out.skipped.push({ censusId: rec.censusId, reason: 'notSelected' }); continue; }
     const evStageId = config.evStageBase + allIds.rows[rec.censusId];
     const donorTypes = [...new Set((rec.evStage || []).map((r) => r.eventType))];
     const entry = { censusId: rec.censusId, evStageId, name: rec.name, type: rec.type, start: rec.start, end: rec.end, stageIds: [], useAp: null, label: 'original', labels: [],
       noticeIds: rec.notices || [], banner: `/web/event/img/v${config.imgVersion}/${evStageId}.png`, origEventType: donorTypes.length === 1 ? donorTypes[0] : donorTypes,
-      eventType: donorTypes.length === 1 && Number.isInteger(donorTypes[0]) && donorTypes[0] !== 2 ? donorTypes[0] : config.eventType,
+      eventType: servedType(donorTypes.length === 1 ? donorTypes[0] : null),
       available: false, why: null, quests: [] };
     if (rec.sharedWith) entry.sharedWith = rec.sharedWith;
     if (rec.noQuests) entry.noQuests = rec.noQuests;
@@ -496,7 +501,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null) {
         origCategory: d ? d.eventCategory : null, parentEventStageId: d ? d.parentEventStageId || 0 : 0, bannerKey: d ? d.bannerKey || null : null,
         noticeId: d ? d.detailNoticeId || null : null, stageIds: quests.filter((x) => x.served).map((x) => x.stageId), quests: quests.length, available: false };
       if (d) {
-        r.eventType = Number.isInteger(d.eventType) && d.eventType !== 2 ? d.eventType : config.eventType;
+        r.eventType = servedType(d.eventType);
         // own dates (Pacific) when the record has several rows (a single row keeps the record's dates and days, as before Task 5);
         // a window past the record's end (the permanent category 1 rows, until 2037) ends with the record
         if (donorRows.length > 1 && d.startTime && d.endTime) {
