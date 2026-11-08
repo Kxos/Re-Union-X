@@ -69,9 +69,31 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
   const used = new Set([...all.flatMap((e) => e.labels || []), ...quests.flatMap((q) => q.labels || [])]);
   const why = cfg.reconstructedWhy || {};
   const starts = on.map((e) => e.start).filter(Boolean).sort();
+  // Event Coins and Boards (Events Part 3 Task 8): the sets handed out (boardSets), the served events of a set whose boards are
+  // held (boardSetKey without a served set: their coins are kept, the boards come with the Boosters, Part 6)
+  const sets = x.boardSets || {};
+  const held = on.filter((e) => e.boardSetKey && !sets[e.boardSetKey]);
+  const coins = { sets: Object.keys(sets).length, boards: Object.values(sets).reduce((n, s) => n + (s.boardIds || []).length, 0),
+    withBoards: on.filter((e) => e.boardSet && sets[e.boardSet]).length, heldEvents: held.length,
+    heldMonths: [...new Set(held.map((e) => e.boardSetKey.slice(0, 7)))].sort().map((k) => usMonth(k)) };
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
-    first: starts[0] || null, last: starts[starts.length - 1] || null,
+    first: starts[0] || null, last: starts[starts.length - 1] || null, coins,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
+}
+function eventCoinLines(f) {
+  const c = f && f.coins;
+  const out = ['## Event coins and boards'];
+  out.push(c && c.sets
+    ? `**Event Coins** are back, with the **Event Boards**: today **${c.boards} Event Boards** in **${c.sets} board sets**, for ${c.withBoards} events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).`
+    : '**Event Coins** are paid by event quests, but no **Event Board** is served yet.');
+  out.push('Each **board set** (the boards of a month, shared by its events) has **one balance**, and Event Coins **never expire** (**not original**: the original game lost them when the event ended, as the board screen still says). Each cell and each finished board gives its reward **once**.',
+    'One board set is listed at a time: the set of the **last event quest you started**, otherwise the newest set of your Story week, otherwise the set of your **kept event**. The Event Coins shown on the boards are that set\'s balance; the other sets keep theirs.',
+    'In the original game every cell of an Event Board paid a reward. A board with a cell that cannot be paid here yet (mostly a **Booster**) is **not served**, nor is a board that opens after it: it comes back whole with the Boosters in a later update.'
+      + (c && c.heldEvents ? ` The sets of **${nameList(c.heldMonths)}** have no board left (${c.heldEvents} events): those events are served **without Event Boards**, and the Event Coins they pay are **kept** in the balance of their set, which is not shown until its boards arrive.` : ''),
+    '**Raid Coins** are unchanged: raids pay and spend them as before.',
+    'Announcement notices with no quest and no banner of their own (for example «New Event Coins Available in October!») are not events: the Event Catalog does not list them, and their boards are on the pages of the events of their set.',
+    'The **Riku & Moogle** 6★ Medal, a drop of the August and September 2019 coin events, is back: a Sell Medal with no stats, sold for **500 Jewels**, with its original picture.');
+  return out;
 }
 function eventNoticeLines(f) {
   if (!f || !f.events) return ['No event quest is served yet: the Event Catalog lists the events and why they are not here yet.'];
@@ -330,7 +352,7 @@ const NOTICES = [
       '## Gem quests',
       'The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **Monthly Gem Quests**, the **Gem Drop** and **Daily Gem** events, each one with its own card and dates. Where an original quest record did not survive, the quest is rebuilt from the community wiki and from the same quest of a later run (marked in the Event Catalog). The **Gem Boards** were played on the Avatar Boards and come with the Event Boards in a later update; their notices had no banner, so the Event Catalog shows **No card in the original** for them.',
       'Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.',
-      'The quest lists of the events show no **Event Boards** button (**not original** for the events that had one): it comes back with the Event Boards.',
+      'The quest lists of the events whose Event Boards are not served yet show no **Event Boards** button (**not original**): see **Event coins and boards** below.',
       '## Opening hours',
       'An event that was open for only a few minutes or hours in the original game is open here for its **whole original day** (**not original**): it is listed on the real weekday (Pacific time) of that day, all day. An event with one quest a day lists **all its quests for its whole period** (**not original** where the original opened them one a day).',
       '## Event Catalog',
@@ -338,7 +360,7 @@ const NOTICES = [
       'One **past event** at a time can be **kept** in the Events tab (it shows the **KEPT EVENT** tab), beside the events of the week. Events later than your Story stay locked (**Unlocks at Story Quest N**), and events with no quest served yet are marked **Not restored yet** and cannot be kept.',
       '## Rewards',
       'Objective rewards and first-clear items are given **once**, as in the original game. Enemy drops keep their **original chances**: an item that dropped 5% of the time still does.',
-      '**Event Coins** are not given yet: they come with the **Event Boards** in a later update. Each event\'s **Details** shows its original notice as it was.',
+      'For **Event Coins**, see **Event coins and boards** below. Each event\'s **Details** shows its original notice as it was.',
       'Event quests **never bring a Raid Boss** and do not fill the raid gauge. This is the original rule from January 24, 2019, when Raid Bosses began to appear only in raid events; before that date some event quests could bring one, so for older events it is **not original**.',
       'The story scenes before and after some event quests are not shown yet.',
       '## Enemy graphics',
@@ -346,6 +368,8 @@ const NOTICES = [
       'Most of their pieces are original pictures found elsewhere in the game files: in another animation of the same enemy, in its raid version, in a story scene or in the game\'s attack effects. Some pieces are **reconstructed**: an existing picture of the same size chosen by rule and checked against videos of the original game, a piece of a twin enemy, or an original picture resized to its slot.',
       'The flames of **Lexaeus**\' special attack are **recoloured orange** (**not original**): the original orange flames were lost, so the surviving green ones are tinted to match videos of the original game. The spores of **Ribbitoad**\'s special attack are a pink dot from another original effect (**reconstructed**). One thin web thread of **Wicked Spider**\'s attack is still missing and is left out (**not original**).',
       '**Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).',
+      'The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is rebuilt in the same way from the game\'s own files, special attack included. Two parts are **reconstructed**: it vanishes in the **Shadow\'s smoke cloud** (its own defeat animation did not survive), and its ground shadow is the **standard one** (its own file is an empty stub).',
+      ...eventCoinLines(eventNoticeFacts()),
       '## SP Chip & Dale',
       'The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), a reward of some event quests, is back. Its data comes from the community wiki; its picture is the community render of the original Medal (**reconstructed**: the original file was not found).',
       ...eventLabelLines(eventNoticeFacts())] },

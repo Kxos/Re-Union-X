@@ -48,7 +48,7 @@ The **Event Quests** are back: the limited-time events of the original game, wit
 
 Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.
 
-Today **79 events** are served, with **534 of their 684 quests** (97 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+Today **95 events** are served, with **634 of their 798 quests** (116 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
 
 ### Gem quests
 
@@ -56,7 +56,7 @@ The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **M
 
 Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.
 
-The quest lists of the events show no **Event Boards** button (**not original** for the events that had one): it comes back with the Event Boards.
+The quest lists of the events whose Event Boards are not served yet show no **Event Boards** button (**not original**): see **Event coins and boards** below.
 
 ### Opening hours
 
@@ -72,7 +72,7 @@ One **past event** at a time can be **kept** in the Events tab (it shows the **K
 
 Objective rewards and first-clear items are given **once**, as in the original game. Enemy drops keep their **original chances**: an item that dropped 5% of the time still does.
 
-**Event Coins** are not given yet: they come with the **Event Boards** in a later update. Each event's **Details** shows its original notice as it was.
+For **Event Coins**, see **Event coins and boards** below. Each event's **Details** shows its original notice as it was.
 
 Event quests **never bring a Raid Boss** and do not fill the raid gauge. This is the original rule from January 24, 2019, when Raid Bosses began to appear only in raid events; before that date some event quests could bring one, so for older events it is **not original**.
 
@@ -88,21 +88,43 @@ The flames of **Lexaeus**' special attack are **recoloured orange** (**not origi
 
 **Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).
 
+The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is rebuilt in the same way from the game's own files, special attack included. Two parts are **reconstructed**: it vanishes in the **Shadow's smoke cloud** (its own defeat animation did not survive), and its ground shadow is the **standard one** (its own file is an empty stub).
+
+### Event coins and boards
+
+**Event Coins** are back, with the **Event Boards**: today **41 Event Boards** in **7 board sets**, for 10 events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).
+
+Each **board set** (the boards of a month, shared by its events) has **one balance**, and Event Coins **never expire** (**not original**: the original game lost them when the event ended, as the board screen still says). Each cell and each finished board gives its reward **once**.
+
+One board set is listed at a time: the set of the **last event quest you started**, otherwise the newest set of your Story week, otherwise the set of your **kept event**. The Event Coins shown on the boards are that set's balance; the other sets keep theirs.
+
+In the original game every cell of an Event Board paid a reward. A board with a cell that cannot be paid here yet (mostly a **Booster**) is **not served**, nor is a board that opens after it: it comes back whole with the Boosters in a later update. The sets of **February 2019, April 2019, June 2019, October 2019 and December 2019** have no board left (14 events): those events are served **without Event Boards**, and the Event Coins they pay are **kept** in the balance of their set, which is not shown until its boards arrive.
+
+**Raid Coins** are unchanged: raids pay and spend them as before.
+
+Announcement notices with no quest and no banner of their own (for example «New Event Coins Available in October!») are not events: the Event Catalog does not list them, and their boards are on the pages of the events of their set.
+
+The **Riku & Moogle** 6★ Medal, a drop of the August and September 2019 coin events, is back: a Sell Medal with no stats, sold for **500 Jewels**, with its original picture.
+
 ### SP Chip & Dale
 
 The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), a reward of some event quests, is back. Its data comes from the community wiki; its picture is the community render of the original Medal (**reconstructed**: the original file was not found).
 
 Where a quest or event is not exactly as in the original game, the Event Catalog marks it with one of these notes:
 
-- The stage row and the map file of this quest are those of the same weekly quest in a later run (the row of this run is not in the data we have). Enemies, level, gem and rewards were checked against the khuxwiki page of this run; the AP, the gem and the world follow the page.
+- The Event Coin rewards of this event are paid into the balance of its event boards: one balance per board set, shared by the events of the set, and the coins never expire.
+
+- The event boards of this event are not served yet: in the original every cell of a board paid a reward for its Event Coins, and every board of this set has a cell (or a board reward) that does not exist here yet, mostly a Booster. The boards come back whole in a later update, with the Boosters; until then its quests are served as a plain list, and the Event Coins they pay are kept in the balance of the set (they never expire) for when its boards are served.
 
 - AP from the khuxwiki page of this run: the surviving game data (a later snapshot) gives another AP.
+
+- The event boards of this event are not handed out yet: none of the quests that paid their Event Coins can be served yet, so the boards could not be filled.
+
+- The stage row and the map file of this quest are those of the same weekly quest in a later run (the row of this run is not in the data we have). Enemies, level, gem and rewards were checked against the khuxwiki page of this run; the AP, the gem and the world follow the page.
 
 - The quest keeps the values of the later game data; the khuxwiki page describes an earlier run of the same quest (2018), so it was not used for this one.
 
 - No khuxwiki page exists for this quest: its values come from the later game data only, without a second source.
-
-- Event Coin rewards are not paid yet: they come with the event boards in a later update.
 
 - The original scenes before or after this quest are not shown yet.
 
@@ -110,9 +132,9 @@ Where a quest or event is not exactly as in the original game, the Event Catalog
 
 - One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.
 
-- Quest rebuilt from the khuxwiki page: no master row of the original is known
-
 - The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.
+
+- Quest rebuilt from the khuxwiki page: no master row of the original is known
 
 ## Raid Bosses
 

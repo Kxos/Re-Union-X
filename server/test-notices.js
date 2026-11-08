@@ -219,12 +219,19 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const t = ev ? ev.body.join(' ') : '';
   check(ev && ev.tag === 'IMPORTANT', 'Events: notizia IMPORTANT');
   check(/follow your Story like the Shop/.test(t) && /whole original day/.test(t) && /Event Catalog\*\* is \*\*not original/.test(t)
-    && /KEPT EVENT/.test(t) && /Event Coins\*\* are not given yet/.test(t) && /never bring a Raid Boss/.test(t) && /January 24, 2019/.test(t)
+    && /KEPT EVENT/.test(t) && !/are not given yet/.test(t) && /never bring a Raid Boss/.test(t) && /January 24, 2019/.test(t)
     && /original chances/.test(t) && /no other enemy stands in for it/.test(t), `Events: regole (${t.slice(0, 120)})`);
   const f = n.eventNoticeFacts();
   if (f && f.events) {
     check(t.includes(`**${f.events} events**`) && t.includes(`**${f.served} of their ${f.quests} quests**`), 'Events: conteggi da events.json');
     for (const l of f.labels) check(t.includes(l.text), `Events: etichetta ${l.id} nel testo`);
+    // Events Part 3 Task 8: event coins and boards, counts from events.json boardSets
+    const c = f.coins;
+    check(c && c.sets > 0 && t.includes(`**${c.boards} Event Boards** in **${c.sets} board sets**`) && t.includes(`${c.withBoards} events`), `Events: conteggi delle board (${JSON.stringify(c)})`);
+    check(/## Event coins and boards/.test(t) && /never expire/.test(t) && /lost them when the event ended/.test(t) && /last event quest you started/.test(t)
+      && /kept event/.test(t) && /Booster/.test(t) && /not shown until/.test(t) && /\*\*Raid Coins\*\* are unchanged/.test(t) && /\*\*once\*\*/.test(t)
+      && /New Event Coins Available in October!/.test(t) && /Riku & Moogle/.test(t) && /500 Jewels/.test(t) && /Sparkler/.test(t), 'Events: monete e board');
+    if (c && c.heldEvents) check(t.includes(`(${c.heldEvents} events)`) && c.heldMonths.length && c.heldMonths.every((m) => t.includes(m)), `Events: set trattenuti ${JSON.stringify(c)}`);
   }
   const fake = n.eventNoticeFacts('nope.json');
   check(fake === null, 'Events: senza events.json niente conteggi');
