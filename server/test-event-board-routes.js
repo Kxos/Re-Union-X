@@ -81,24 +81,39 @@ const tests = {
     // GET kept the board as sent: the next check sends nothing again
     assert.deepStrictEqual(w.eb.check(HOME).add, []);
   },
-  // a pass-through node (cost 0, rewardSelect 0: a donor cell we cannot serve) is handed out already open: the client crashes
-  // when its cursor lands on one (bench 08-11, Task 7b); it counts for the completion and cannot be bought
-  pass_through_nodes_open() {
+  // defensive guard (user decision 08-11: no pass-through cells any more): a board with a node without a reward (rewardSelect 0:
+  // the client crashed on such a cursor, bench 08-11, Task 7b) is never handed out, nor opened, nor bought
+  empty_node_never_handed_out() {
     const w = world({ current: ['EV-0759'] });
     w.tables.sphereArray = [rb.gridRow(A1, 4), rb.gridRow(A2, 1), rb.gridRow(B1, 1)];
-    assert.deepStrictEqual(w.eb.passThrough(w.tables.sphere[0]), [4]);
-    assert.deepStrictEqual(w.eb.check(HOME).add, [A1]);
-    assert.deepStrictEqual(w.player.eventSphere[A1].unlock, [4], 'open at the hand-out');
+    assert.deepStrictEqual(w.eb.emptyNodes(w.tables.sphere[0]), [4]);
+    assert.deepStrictEqual(w.eb.check(HOME).add, [], 'Board 1 not handed out (Board 2 is chained behind it)');
+    assert.deepStrictEqual(w.eb.list({ setSent: true }), []);
+    assert.strictEqual((w.player.eventSphere || {})[A1], undefined, 'no state made');
     fill(w, '2019-04', 100);
-    assert.deepStrictEqual([w.eb.update(A1, 4).ok, w.eb.update(A1, 4).why], [false, 'node'], 'already open, nothing paid');
-    assert.strictEqual(w.player.eventCoins['2019-04'], 100);
-    for (const n of [1, 2, 3]) assert.strictEqual(w.eb.update(A1, n).ok, true);
-    assert.deepStrictEqual(w.grants.map((g) => g[1]), [0, 1, 2, 22], 'three cells, then the completion');
-    // an older state without it gets it on the next hand-out
-    const v = world({ current: ['EV-0759'], player: { eventSphere: { [A1]: { id: 7, unlock: [1], getDatetime: 1 } } } });
+    assert.deepStrictEqual([w.eb.update(A1, 1).ok, w.eb.update(A1, 1).why], [false, 'node without a reward']);
+    assert.strictEqual(w.eb.update(A1, 0, true).ok, false);
+    assert.strictEqual(w.player.eventCoins['2019-04'], 100, 'nothing paid');
+    assert.deepStrictEqual(w.grants, []);
+    assert.strictEqual(w.logs.filter((l) => /not handed out: nodes 4 without a reward/.test(l)).length, 1, 'logged once');
+    // an older save that holds the board (pre-opened pass-through unlocks of 7dc0cf4): closed, nothing else changes
+    const v = world({ current: ['EV-0759'], player: { eventSphere: { [A1]: { id: 7, unlock: [1, 4], getDatetime: 1 } }, eventSphereSent: [A1] } });
     v.tables.sphereArray = [rb.gridRow(A1, 4), rb.gridRow(A2, 1), rb.gridRow(B1, 1)];
-    v.eb.list({ setSent: true });
-    assert.deepStrictEqual(v.player.eventSphere[A1].unlock, [1, 4]);
+    assert.deepStrictEqual(v.eb.check(BUTTON_CLOSE).close, [A1]);
+    assert.deepStrictEqual(v.player.eventSphere[A1].unlock, [1, 4], 'kept as it was');
+  },
+  // a board in the save (and still in the index) that the master no longer serves: not listed, closed, update refused, no crash
+  board_in_save_not_in_master() {
+    const GONE = 4999003;
+    const w = world({ current: ['EV-0759'], player: { eventSphere: { [GONE]: { id: 9, unlock: [1, 2], getDatetime: 1 } }, eventSphereSent: [GONE] } });
+    w.index.boardSets['2019-04'].boardIds.push(GONE);
+    assert.deepStrictEqual(w.eb.list({ setSent: true }), [A1]);
+    assert.deepStrictEqual(w.player.eventSphereSent, [], 'dropped from the sent list');
+    assert.deepStrictEqual(w.eb.check(BUTTON_CLOSE).close, [GONE]);
+    assert.deepStrictEqual(w.eb.check(HOME).add, [A1]);
+    assert.deepStrictEqual([w.eb.update(GONE, 3).ok, w.eb.update(GONE, 3).why], [false, 'not an event board']);
+    assert.strictEqual(w.eb.isEventBoard(GONE), false);
+    assert.deepStrictEqual(w.player.eventSphere[GONE].unlock, [1, 2], 'progress kept');
   },
   // login order (bench 08-11): GET /user/sphere hands Board 1 out before the home check; the check still sends it once (popup)
   login_list_then_home_check_pops_once() {
@@ -338,6 +353,27 @@ function wiring() {
       const all = quiet(() => t.userSphereAll({ setSent: true })).userSphereDatas.map((d) => d.sphereBoardId);
       assert.ok(all.includes(W1) && all.includes(W2), 'GET /user/sphere lists both');
       assert.deepStrictEqual(p.eventSphereSent, [W1, W2]);
+    });
+    // a board in the save that the master no longer serves (a board skipped since 08-11): GET /user/sphere, check, update and
+    // the Event Catalog do not crash; the board is closed and never listed
+    run('board_gone_from_master', () => {
+      const GONE = 4999877;
+      p.eventSphere[GONE] = { id: 99, unlock: [1, 4], getDatetime: 1 };
+      p.eventSphereSent.push(GONE);
+      const all = quiet(() => t.userSphereAll({ setSent: true })).userSphereDatas.map((d) => d.sphereBoardId);
+      assert.ok(!all.includes(GONE) && all.includes(W1), 'not listed');
+      assert.ok(!p.eventSphereSent.includes(GONE));
+      assert.ok(call(t.respondSphereCheck, BUTTON_CLOSE).closeEventSphereBoardIds.includes(GONE), 'closed');
+      call(t.respondSphereCheck, HOME);
+      const coins = p.eventCoins['2019-04'];
+      quiet(() => t.respondSphereUpdate({ writeHead() {}, end() {} }, { sphereBoardId: GONE, releaseMasuId: 2 }));
+      assert.strictEqual(p.eventCoins['2019-04'], coins, 'nothing paid');
+      assert.deepStrictEqual(p.eventSphere[GONE].unlock, [1, 4]);
+      const web = (u) => { let code = 0, body = ''; quiet(() => t.respondEventWeb({ writeHead(c) { code = c; }, end(x) { body = String(x); } }, u)); return { code, body }; };
+      assert.strictEqual(web('/web/event/catalog').code, 200);
+      const d = web('/web/event/event/29951');
+      assert.strictEqual(d.code, 200);
+      assert.ok(d.body.includes('Board #1: Test'), 'the served boards are listed');
     });
   } finally {
     fs.readFileSync = readFile;

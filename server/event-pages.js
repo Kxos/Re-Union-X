@@ -76,7 +76,11 @@ const replacesLine = (st, kept) => (st.button === null ? ''
   : `<div class="rp"${st.button === 1 && kept ? '' : ' style="display:none"'}>${st.button === 1 && kept ? `Replaces: ${esc(kept.name || kept.censusId)}` : ''}</div>`);
 // every served quest with its objectives done (ctx.stageDone, the crown rule of the Special and Raid Catalogs)
 const doneOf = (e, ctx) => !!ctx.stageDone && servedOf(e).length > 0 && servedOf(e).every((q) => ctx.stageDone(q.stageId));
-const entriesOf = (index) => ((index && index.entries) || []).filter((e) => e && e.censusId && e.evStageId && e.start)
+// an informative notice, not a playable event (user 08-11): no quest of its own, no original card (noQuests 'board', the signal
+// that also leaves its card out in make_event_banners.py card_ids) and no evStage row with a card. Not in the catalogue, no page
+// (e.g. EV-0579 «New Event Coins Available in October!»: its boards are reached through the playable events of their set)
+const informative = (e) => e.noQuests === 'board' && !(e.quests || []).length && !(e.rows || []).some((r) => r.available);
+const entriesOf = (index) => ((index && index.entries) || []).filter((e) => e && e.censusId && e.evStageId && e.start && !informative(e))
   .slice().sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
 // an entry by its id or by the id of one of its original evStage rows (Part 2 Task 5: the Details of a row card)
 const entryOfId = (entries, id) => entries.find((x) => x.evStageId === id) || entries.find((x) => (x.rows || []).some((r) => r.evStageId === id));
@@ -126,7 +130,7 @@ const EVENT_SHORT = {
   wikiAp: ['values', 'AP', 'From the khuxwiki page of this run', 'replaced'],
   mapIncomplete: ['values', 'Map', 'Incomplete in our data: the gaps are reported', 'removed'],
   eventCoins: ['rewards', 'Event Coins', 'Paid into the boards of this event; they never expire', 'camp'],
-  boardsLater: ['rewards', 'Event boards', 'Not served yet: they wait for the Boosters (a later update)', 'later'],
+  boardsLater: ['rewards', 'Event boards', 'Not served yet: they come back whole with the Boosters (a later update)', 'later'],
   noCoinSource: ['rewards', 'Event boards', 'Not handed out yet: no quest pays their Event Coins', 'later'],
   wholeDay: ['rules', 'Opening time', 'Its whole original day (was a short window)', 'bonus'],
   dramaOff: ['rules', 'Scenes', 'The original scenes are not shown yet', 'later'],
@@ -156,11 +160,9 @@ const EVENT_DETAIL_CSS = '.tt{table-layout:auto}.tt td:nth-child(2),.tt td:nth-c
   + '.tt.bt td:nth-child(2){white-space:normal}.bt td.cd{color:#8fe3a0}.bt td.r{white-space:normal}.ecoin{margin:6px 0 12px;font-size:15px}.ecoin b{color:#ffcd4a;font-size:18px}';
 // Event Boards of an entry's set (Part 3 Task 6, as the Raid Catalog lists the boards of a raid, with the cells): the coin line (one
 // balance per set, never expires), then each board of the set in order with its cells. ctx.eventBoard(boardId) -> {name, cells:
-// [{n, cost, reward, done, pass}], finish, done} | null; ctx.eventCoins(setKey) -> n. '' without a set or without a board served.
+// [{n, cost, reward, done}], finish, done} | null; ctx.eventCoins(setKey) -> n. '' without a set or without a board served.
 function boardsSection(index, e, ctx) {
-  // a board-only announcement (noQuests 'board' or 'coin', e.g. EV-0579) has no quest and so no boardSet, but its page promises
-  // «Where its boards are served they are listed on this page»: it lists the boards of its set (bench 08-11, Task 7b)
-  const key = e.boardSet || (['board', 'coin'].includes(e.noQuests) ? e.boardSetKey : null);
+  const key = e.boardSet;
   const set = key && ((index && index.boardSets) || {})[key];
   if (!set || !ctx.eventBoard) return '';
   const boards = (set.boardIds || []).map((id) => ctx.eventBoard(id)).filter(Boolean);
@@ -169,11 +171,11 @@ function boardsSection(index, e, ctx) {
   const coins = `<p class="ecoin">${icon('camp')}Your Event Coins: <b>${num(ctx.eventCoins ? ctx.eventCoins(key) : 0)}</b>. `
     + `One balance per board set${shared > 1 ? `, shared by ${plural(shared, 'event')}` : ''}; Event Coins never expire.</p>`;
   const cell = (c) => `<tr><td>${c.n}</td><td>${c.reward ? esc(c.reward) : '—'}</td><td>${num(c.cost)}</td>`
-    + (c.done ? `<td class="cd">Unlocked${CROWN}</td>` : c.pass ? '<td class="r">Not restored yet</td>' : '<td>Not unlocked</td>') + '</tr>';
+    + (c.done ? `<td class="cd">Unlocked${CROWN}</td>` : '<td>Not unlocked</td>') + '</tr>';
   const board = (b) => `<h3>${esc(b.name)}${b.done ? CROWN : ''}</h3><table class="tt bt"><tr><th>Cell</th><th>Reward</th><th>Cost</th><th>Status</th></tr>`
     + b.cells.map(cell).join('') + `<tr><td colspan="2">Board complete${b.finish ? `: ${esc(b.finish)}` : ''}</td><td></td><td${b.done ? ' class="cd">Done' : '>—'}</td></tr></table>`;
   return `<h2>Event Boards</h2>${coins}${boards.map(board).join('')}`
-    + '<p class="n">A board opens in the Events tab while one of the events of its set is in your week or kept. A cell with no cost and no reward is not restored yet.</p>';
+    + '<p class="n">A board opens in the Events tab while one of the events of its set is in your week or kept.</p>';
 }
 const daysText = (days) => days.map(niceDay).join(', ');
 

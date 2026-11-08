@@ -4662,7 +4662,7 @@ function raidBoardItems(sphereBoardId) {
 const raidBoardName = (sphereBoardId) => raidBoardIndex().sphere.get(Number(sphereBoardId))?.boardName || '';
 // Event Catalog (event-pages.js, Events Part 3 Task 6): one Event Board with its cells, as the board screen holds them: cell n
 // (1..22, the nodes of sphereArray) costs spherePoint[n-1] Event Coins and pays rewardSelect[n-1]; the 23rd entry is the reward of
-// the finished board. pass = a cell with no cost and no reward (nothing restored for it yet); done = unlocked in player.eventSphere.
+// the finished board; done = unlocked in player.eventSphere. Every cell of a served board has a cost and a reward (event-boards.js).
 // null when the master has no such type 4 board.
 function eventBoardCells(boardId) {
   const ix = raidBoardIndex(), id = Number(boardId), board = ix.sphere.get(id), masu = ix.masu.get(id);
@@ -4678,8 +4678,7 @@ function eventBoardCells(boardId) {
     return name ? (val > 1 ? `${name} x${val}` : name) : 'Reward';
   };
   const nodes = sphereNodes(board);
-  const cells = nodes.map((n) => ({ n, cost: masu.spherePoint[n - 1] || 0, reward: text(n - 1), done: unlocked.includes(n) }))
-    .map((c) => ({ ...c, pass: !c.cost && !c.reward }));
+  const cells = nodes.map((n) => ({ n, cost: masu.spherePoint[n - 1] || 0, reward: text(n - 1), done: unlocked.includes(n) }));
   return { id, name: board.boardName || `Board ${id}`, cells, finish: text(22), done: nodes.length > 0 && nodes.every((n) => unlocked.includes(n)) };
 }
 // RAID BOARDS filter of the Raid Catalog (user 03-11): a Raid Board is complete when every node is unlocked in player.raidSphere,

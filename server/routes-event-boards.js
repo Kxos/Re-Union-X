@@ -2,7 +2,8 @@
 // Task 5; client side docs/notes/events.md «Event Boards spike»). game_data/events.json boardSets {[setKey]: {boardIds,
 // chains {boardId: prevBoardId}, censusIds}} (make-events.js): the event quests of a set's feeder events pay Event Coins
 // (reward type 15) into that set's balance, spent on that set's boards.
-// Save (all absent in older saves: empty defaults, nothing written by a read):
+// Save (all absent in older saves: empty defaults; a read writes only the state of a board it hands out for the first time,
+// active() below, and may trim eventSphereSent):
 //   player.eventCoins {[setKey]: n}            coin balance per set; never expires
 //   player.eventSphere {[boardId]: {id, unlock[], getDatetime}}   board progress, kept for good (as player.raidSphere)
 //   player.eventSphereSent [boardId]           the type-4 boards the client holds as far as the server knows
@@ -24,8 +25,22 @@ const CELLS = 23;
 function eventBoardRoutes({ player, events, master, grantSphereReward, now, nextUserSphereId, log = (...m) => console.log(...m) }) {
   const sets = () => ((events.index() || {}).boardSets) || {};
   const boardRow = (id) => master('sphere').find((r) => r.sphereBoardId === Number(id) && r.type === TYPE);
-  // the boards of a set the master serves, in set order
-  const boardsOf = (setKey) => ((sets()[setKey] || {}).boardIds || []).filter((id) => boardRow(id));
+  // defensive guard (user decision 08-11, event-boards.js): every node of a served board pays a reward; a node with rewardSelect 0
+  // crashed the client when its cursor landed on it (bench 08-11, Task 7b), so a board with one is never handed out
+  const emptyNodes = (board) => {
+    const masu = master('sphereMasu').find((r) => r.masuId === board.masuId);
+    return masu ? nodesOf(board).filter((n) => !masu.rewardSelect[n - 1]) : nodesOf(board);
+  };
+  const warned = new Set();
+  const servable = (id) => {
+    const b = boardRow(id);
+    if (!b) return false;
+    const empty = emptyNodes(b);
+    if (empty.length && !warned.has(id)) { warned.add(id); log(`[event boards] board ${id} not handed out: nodes ${empty.join(', ')} without a reward`); }
+    return !empty.length;
+  };
+  // the boards of a set the master serves, in set order (a board in a save but no longer in the master is simply not listed)
+  const boardsOf = (setKey) => ((sets()[setKey] || {}).boardIds || []).filter(servable);
   const setOfBoard = (id) => Object.keys(sets()).find((k) => (sets()[k].boardIds || []).includes(Number(id))) || null;
   const prevOf = (id) => { const s = sets()[setOfBoard(id)]; const p = s && (s.chains || {})[id]; return p ? Number(p) : null; };
   const setOfCensus = (cid) => Object.keys(sets()).find((k) => (sets()[k].censusIds || []).includes(cid)) || null;
@@ -36,18 +51,6 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
     const nodes = new Set();
     for (const k of ['spCol0', 'spCol1', 'spCol2', 'spCol3', 'spCol4']) for (const v of arr?.[k] || []) if (v >= 1 && v <= CELLS) nodes.add(v);
     return [...nodes].sort((a, b) => a - b);
-  }
-  // pass-through nodes (event-boards.js: a donor cell we cannot serve, e.g. a Booster, stays on the path with cost 0 and
-  // rewardSelect 0). The client crashes (SIGSEGV) when its cursor lands on such a node (bench 08-11, Task 7b: after the
-  // first unlock and on reopening the board), so they are handed out already open: kept in the board's unlock list
-  const passThrough = (board) => {
-    const masu = master('sphereMasu').find((r) => r.masuId === board.masuId);
-    return masu ? nodesOf(board).filter((n) => !masu.rewardSelect[n - 1] && !masu.spherePoint[n - 1]) : [];
-  };
-  function openPassThrough(id, s) {
-    const b = boardRow(id);
-    if (!b || !s) return;
-    for (const n of passThrough(b)) if (!s.unlock.includes(n)) s.unlock.push(n);
   }
   const complete = (id) => { const b = boardRow(id), s = state(id); return !!(b && s && nodesOf(b).every((n) => s.unlock.includes(n))); };
 
@@ -96,7 +99,6 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
       if (prev && !complete(prev)) continue;
       player.eventSphere ||= {};
       if (!player.eventSphere[id]) player.eventSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: now() };
-      openPassThrough(id, player.eventSphere[id]);
       out.push(id);
     }
     return out;
@@ -136,6 +138,7 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
   function update(boardId, releaseMasuId, allOpen = false) {
     const id = Number(boardId), board = boardRow(id);
     if (!board) return { ok: false, why: 'not an event board', nodes: [], cost: 0 };
+    if (!servable(id)) return { ok: false, why: 'node without a reward', nodes: [], cost: 0 };
     const prev = prevOf(id);
     if (prev && !complete(prev)) return { ok: false, why: `chained behind ${prev}`, nodes: [], cost: 0 };
     if (!active().includes(id)) return { ok: false, why: 'not handed out', nodes: [], cost: 0 };
@@ -155,7 +158,7 @@ function eventBoardRoutes({ player, events, master, grantSphereReward, now, next
     return { ok: true, nodes: todo, cost, setKey };
   }
 
-  return { focusSet, stagePoint, addCoins, check, update, onStageStart, list, active, known, setOfBoard, passThrough, isEventBoard: (id) => !!boardRow(id) };
+  return { focusSet, stagePoint, addCoins, check, update, onStageStart, list, active, known, setOfBoard, emptyNodes, isEventBoard: (id) => !!boardRow(id) };
 }
 
 module.exports = eventBoardRoutes;

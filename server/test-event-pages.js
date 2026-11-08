@@ -139,16 +139,16 @@ const tests = {
     assert.ok(pages.detailPage(ix, 29930, ctx()).includes('<h1>March Fun</h1>'), 'a row id opens the record');
     assert.ok(pages.noticePage(ix, 29930, DOC(), ctx()).includes(NOTICE_LINE), 'Details of a row card: the record notice');
   },
-  // Part 3 Task 6: an entry with a board set lists its boards and their cells; the unlocked cells are marked done, a cell with
-  // no cost and no reward is shown as not restored yet
+  // Part 3 Task 6: an entry with a board set lists its boards and their cells; the unlocked cells are marked done (every cell of a
+  // served board has a cost and a reward since 08-11: no «not restored yet» cell)
   event_board_items() {
     const ix = INDEX();
     ix.entries[0].boardSet = 'S1';
     ix.boardSets = { S1: { boardIds: [7001, 7002], chains: { 7002: 7001 }, censusIds: ['E-0', 'E-1'] } };
     const boards = {
-      7001: { id: 7001, name: 'Board #1: Fixture', done: false, finish: 'Fixture Medal', cells: [{ n: 1, cost: 0, reward: '', done: true, pass: true }, { n: 2, cost: 0, reward: '', done: false, pass: true },
-        { n: 3, cost: 900, reward: 'Fixture Medal x2', done: true, pass: false }, { n: 5, cost: 1000, reward: 'Jewels x500', done: false, pass: false }] },
-      7002: { id: 7002, name: 'Board #2: Fixture', done: true, finish: '', cells: [{ n: 3, cost: 50, reward: 'Max HP +3', done: true, pass: false }] },
+      7001: { id: 7001, name: 'Board #1: Fixture', done: false, finish: 'Fixture Medal', cells: [{ n: 1, cost: 100, reward: 'Fixture Gem', done: true }, { n: 2, cost: 200, reward: 'Jewels x50', done: false },
+        { n: 3, cost: 900, reward: 'Fixture Medal x2', done: true }, { n: 5, cost: 1000, reward: 'Jewels x500', done: false }] },
+      7002: { id: 7002, name: 'Board #2: Fixture', done: true, finish: '', cells: [{ n: 3, cost: 50, reward: 'Max HP +3', done: true }] },
     };
     const c = ctx({ eventBoard: (id) => boards[id] || null, eventCoins: () => 1234 });
     const d = pages.detailPage(ix, 29900, c);
@@ -159,19 +159,34 @@ const tests = {
     const b1 = sec.slice(sec.indexOf('Board #1'), sec.indexOf('Board #2'));
     assert.ok(b1.includes('Fixture Medal x2') && b1.includes('Jewels x500') && b1.includes('900') && b1.includes('1,000'), 'rewards and costs');
     assert.strictEqual((b1.match(/class="cd"/g) || []).length, 2, 'two unlocked cells carry the done mark (1 and 3)');
-    assert.ok(/class="r"[^>]*>Not restored yet/.test(b1), 'a pass-through cell is shown as not restored yet, not hidden');
+    assert.ok(!/Not restored yet/.test(sec), 'no pass-through cell any more');
+    assert.strictEqual((b1.match(/<td>Not unlocked<\/td>/g) || []).length, 2);
     assert.ok(b1.includes('Board complete') && b1.includes('Fixture Medal'), 'the reward of the finished board');
     assert.ok(sec.includes('Max HP +3'));
     // an entry without a set, or a master without that board: no section, no error
     assert.ok(!pages.detailPage(ix, 29901, c).includes('Event Boards</h2>'), 'no set: no section');
     assert.ok(!pages.detailPage(ix, 29900, ctx()).includes('<h2>Event Boards</h2>'), 'no lookups: no section');
     assert.ok(!pages.detailPage(ix, 29900, ctx({ eventBoard: () => null, eventCoins: () => 0 })).includes('<h2>Event Boards</h2>'), 'no board served: no section');
-    // a board-only announcement (noQuests 'board', no boardSet: EV-0579) lists the boards of its set (boardSetKey)
-    const a = ix.entries[1];
-    Object.assign(a, { noQuests: 'board', boardSetKey: 'S1' });
-    delete a.boardSet;
-    const ad = pages.detailPage(ix, 29901, c);
-    assert.ok(ad.includes('<h2>Event Boards</h2>') && ad.includes('Board #1: Fixture') && ad.includes('1,234'), 'board-only entry: its set');
+  },
+  // user 08-11: an informative notice with no original banner and no quest (noQuests 'board', e.g. EV-0579 «New Event Coins
+  // Available in October!») is not an event: not in the catalogue, no page. A playable event with a banner whose quests are not
+  // served yet stays listed with its reason (E-9), and so does a coin event with its card (noQuests 'coin', EV-0242)
+  informative_notice_not_listed() {
+    const ix = INDEX();
+    ix.entries.push({ censusId: 'E-579', evStageId: 29979, name: 'New Coins Notice', start: '2019-03-20', end: '2019-04-20', stageIds: [], available: false, labels: [], noticeIds: [9003],
+      quests: [], noQuests: 'board', boardSetKey: 'S1', reason: 'board', why: 'no quests of its own' },
+    { censusId: 'E-242', evStageId: 29942, name: 'Coin Challenge', start: '2019-03-21', end: '2019-03-28', stageIds: [], available: false, labels: [], noticeIds: [], quests: [], noQuests: 'coin', reason: 'coin' });
+    ix.boardSets = { S1: { boardIds: [7001], chains: {}, censusIds: ['E-0', 'E-579'] } };
+    const html = pages.catalogPage(ix, ctx());
+    assert.ok(!html.includes('id="q29979"') && !html.includes('New Coins Notice'), 'the informative notice is not listed');
+    assert.ok(rowOf(html, 29909).includes('Not restored yet'), 'an unserved playable event stays');
+    assert.ok(rowOf(html, 29942), 'a coin event with its card stays');
+    assert.ok(html.includes('5 events'), 'not counted');
+    assert.strictEqual(pages.detailPage(ix, 29979, ctx({ eventBoard: () => ({ id: 7001, name: 'B', done: false, finish: '', cells: [] }) })), null, 'no page');
+    // the boards stay reachable through the playable event of the set
+    ix.entries[0].boardSet = 'S1';
+    const d = pages.detailPage(ix, 29900, ctx({ eventBoard: (id) => ({ id, name: 'Board #1: Fixture', done: false, finish: '', cells: [] }), eventCoins: () => 7 }));
+    assert.ok(d.includes('<h2>Event Boards</h2>') && d.includes('Board #1: Fixture'));
   },
   // the coin line: the balance of the set and the note that coins never expire (one balance per set, shared by its events)
   event_coins_label() {

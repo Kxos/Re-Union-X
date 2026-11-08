@@ -47,7 +47,10 @@ function records() {
 const build = (recs = records(), ids, config = CONFIG, m = master(), anchors) => me.buildEvents(recs, config, m, ids, anchors);
 // board sets (Part 3): the synthetic fixture of test-event-boards.js, its set fed by E-1; master items it needs (and medal 90011 of the quest objectives)
 const BOARD_FIX = JSON.parse(fs.readFileSync(path.join(__dirname, 'test-fixtures', 'event_board_sets.json'), 'utf8'));
-const boardSets = () => ({ sets: BOARD_FIX.sets.map((s) => ({ ...JSON.parse(JSON.stringify(s)), censusIds: ['E-1'] })) });
+// Board 2 (7002) of the fixture made fully payable (its medal-not-found and Booster cells paid in Jewels): since 08-11 a board with
+// any unpayable cell is not served (test-event-boards.js)
+const payable = (s) => { for (const c of s.boards[1].cells.slice(1)) Object.assign(c, { rewardSelect: 2, rewardId: 0, num: 5, name: '5 Jewels' }); return s; };
+const boardSets = () => ({ sets: BOARD_FIX.sets.map((s) => payable({ ...JSON.parse(JSON.stringify(s)), censusIds: ['E-1'] })) });
 const BOARD_MASTER = () => ({ medal: [{ medalId: 900001, name: 'Fixture Medal', rare: 6, groupId: 0 }, { medalId: 900002, name: 'Fixture Medal B', rare: 5, groupId: 0 },
   { medalId: 90011, name: 'Quest Medal', rare: 6, groupId: 0 }], material: [{ materialId: 9001, name: 'Fixture Gem' }], title: [{ titleId: 9101, title: 'Fixture Title' }], avatarParts: [], petParts: [] });
 const entry = (out, id) => out.index.entries.find((e) => e.censusId === id);

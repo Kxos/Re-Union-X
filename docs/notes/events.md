@@ -451,7 +451,7 @@ yet (Task 7).
   with a save that got it from a drop (August-September 2019 events).
 - **Resources 108 / master rev 287** (6ee7982): full build 5.04 GiB (41 parts), installed with update-resources + Download.
 - **Bench (8 November 2026, save `coin1` = copy of `events1`, `relogin -Save coin1 -RealNow 2026-11-10T20:00:00Z`, week
-  2019-04-11..17; battles played by Claude with the save's deck, user «giocale tu»).** Frames: `reference\event_boards	7b_*.png`.
+  2019-04-11..17; battles played by Claude with the save's deck, user «giocale tu»).** Frames: `reference\event_boards\t7b_*.png`.
   - Events tab: the April 2019 coin events with their cards (Event Coins Galore 20187, Banish the Heartless 20188, Pink Possessor,
     Titan, Boss Time Attack, Shiva, Egg Hunt, Quiz...); the last cards of the long list draw only after a moment (lazy load, no bug).
     The Event Boards button shows on the eventType 1 entries.

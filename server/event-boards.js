@@ -2,13 +2,18 @@
 // Part 3, Task 3). Input: the board sets of the private donor study (a set = a month/week of boards:
 // {setKey, boards: [{donorId, name, openId, openParam, kindId, grid: {spCol0..4}, cells: [{idx, cost, rewardSelect, rewardId, num,
 // name}], completion: {rewardSelect, rewardId, num, name}}]}); the file stays private, the tests use a hand-made fixture.
-// - Layout from the data (an unmatched node stays on the path as a pass-through: cost 0, no reward; a board with no matched cell is skipped): the board's own grid (an event board is not a 22-node raid snake) and the masu index = the cell's idx
-//   (completion = index 22). 
+// - Layout from the data: the board's own grid (an event board is not a 22-node raid snake) and the masu index = the cell's idx
+//   (completion = index 22).
+// - Every cell of every original board had a reward and a coin cost (donor WW master; no empty or pre-opened cell): a board with
+//   ANY cell we cannot pay (a Booster, a medal not found, a bad index, a grid node without a cell) is not emitted
+//   (report.skipped; user decision 08-11: such boards wait for Part 6). A node with rewardSelect 0 crashed the client
+//   (bench 08-11, Task 7b), so no emitted board ever has one (checked again on the masu row).
 // - Ids: ids.boards {"<setKey>/<donorBoardId>": n}, sphereBoardId = arryId = masuId = 4000000 + n, append-only (event_ids.json).
 // - Rewards: donor medal ids that differ from ours are mapped by name + rarity against our master (exactly one candidate; none
-//   or several -> unmatched); other items are kept by id when our master has the row; Boosters (rewardSelect 34) stay unmatched
-//   until the Boosters exist (Part 6). A board whose completion is unmatched is not emitted (report.skipped), and neither is a
-//   board chained (openId 5) behind a skipped one.
+//   or several -> unmatched; when the donor name has a variant letter our master lacks, the study's `ourName` is tried, same
+//   rarity, exactly one candidate); other items are kept by id when our master has the row; Boosters (rewardSelect 34) stay
+//   unmatched until the Boosters exist (Part 6). A board whose completion or any cell is unmatched is not emitted
+//   (report.skipped), and neither is a board chained (openId 5) behind a skipped one ('chained to a skipped board').
 // - openId 5 (opens when the previous board is completed): openParam is remapped to our id of that board; `chains` lists them
 //   (the server enforces the chain, the client does not).
 'use strict';
@@ -30,6 +35,12 @@ function matchDonor(ix, c) {
     if (!n) return { why: 'medal name without rarity' };
     const hits = ix.idx.medal.get(`${n.rare}|${rb.norm(n.name)}`) || [];
     if (hits.length === 1) return { sel, id: hits[0].medalId, value };
+    // the donor study's name for our master (e.g. «5★ Halloween Sora A» -> «5★ Halloween Sora»), only at the same rarity
+    const o = !hits.length && c.ourName ? rareOf(c.ourName) : null;
+    if (o && o.rare === n.rare) {
+      const alt = ix.idx.medal.get(`${o.rare}|${rb.norm(o.name)}`) || [];
+      if (alt.length === 1) return { sel, id: alt[0].medalId, value };
+    }
     if (hits.length > 1) return { why: `${hits.length} medals of that name and rarity` };
     return { why: 'no medal of that name and rarity' };
   }
@@ -68,17 +79,24 @@ function buildEventBoards({ sets, master, ids }) {
     const idOf = (donor) => ID_BASE + boards[`${s.setKey}/${donor}`];
     const state = new Map(); // donorId -> {b, cells, done} | {skip}
     for (const b of s.boards || []) {
-      const cells = [];
+      const cells = [], miss = [];
       const nodes = new Set(GRID_KEYS.flatMap((k) => b.grid[k]).filter((v) => v > 0 && v < 1000));
       for (const c of b.cells || []) {
         // idx = masu index (node value - 1): it must be a node of the grid and not the completion slot
         const m = Number.isInteger(c.idx) && c.idx >= 0 && c.idx < rb.COMPLETION && nodes.has(c.idx + 1) ? matchDonor(ix, c) : { why: 'bad index' };
-        if (m.why) out.report.unmatched.push({ setKey: s.setKey, board: b.donorId, idx: c.idx, rewardSelect: c.rewardSelect, rewardId: c.rewardId, name: c.name, why: m.why });
+        if (m.why) { out.report.unmatched.push({ setKey: s.setKey, board: b.donorId, idx: c.idx, rewardSelect: c.rewardSelect, rewardId: c.rewardId, name: c.name, why: m.why }); miss.push(c.rewardSelect === 34 ? 'booster' : c.rewardSelect === 3 ? 'medal' : m.why); }
         else cells.push({ ...c, item: m });
       }
+      // a grid node without a cell would be a node with no reward and no cost
+      const have = new Set(cells.map((c) => c.idx + 1));
+      for (const n of nodes) if (!have.has(n) && !(b.cells || []).some((c) => c.idx + 1 === n)) miss.push('grid node without a cell');
       const done = matchDonor(ix, b.completion || {});
       if (done.why) { state.set(b.donorId, { skip: `completion ${b.completion && b.completion.name}: ${done.why}` }); continue; }
       if (!cells.length) { state.set(b.donorId, { skip: 'no matched cells' }); continue; }
+      if (miss.length) {
+        const why = miss.includes('booster') ? 'unpayable cells (Boosters: Part 6)' : miss.includes('medal') ? 'unmatched medal' : `unpayable cells (${[...new Set(miss)].join(', ')})`;
+        state.set(b.donorId, { skip: why }); continue;
+      }
       state.set(b.donorId, { b, cells, done });
     }
     // a chained board is only reachable through the previous one
@@ -88,7 +106,7 @@ function buildEventBoards({ sets, master, ids }) {
         if (st.skip || st.b.openId !== 5) continue;
         const prev = state.get(st.b.openParam);
         if (!prev) { state.set(id, { skip: `chained behind ${st.b.openParam}, which is not in the set` }); again = true; }
-        else if (prev.skip) { state.set(id, { skip: `chained behind ${st.b.openParam}, which is skipped` }); again = true; }
+        else if (prev.skip) { state.set(id, { skip: 'chained to a skipped board' }); again = true; }
       }
     }
     const list = [];
@@ -111,6 +129,9 @@ function buildEventBoards({ sets, master, ids }) {
       masu.rewardSelect[rb.COMPLETION] = st.done.sel;
       masu.rewardId[rb.COMPLETION] = st.done.id;
       masu.rewardValue[rb.COMPLETION] = st.done.value || 1;
+      // defensive: no node of an emitted board may have rewardSelect 0 (the client crashes on such a cursor)
+      const empty = [...new Set(GRID_KEYS.flatMap((k) => b.grid[k]).filter((v) => v > 0 && v < 1000))].filter((n) => !masu.rewardSelect[n - 1]);
+      if (empty.length) throw new Error(`events: event board ${s.setKey}/${donorId}: nodes ${empty.join(', ')} without a reward`);
       out.masuRows.push(masu);
       list.push(id);
     }
