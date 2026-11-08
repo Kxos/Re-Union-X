@@ -35,6 +35,7 @@ const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
 const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
 const routesEvents = require('./routes-events'); // event quest routes (docs/notes/events.md)
+const eventBoardRoutes = require('./routes-event-boards'); // Event Coins and Event Boards (type 4)
 const raidPages = require('./raid-pages'); // Raid Catalog web pages (Task 9)
 const eventPages = require('./event-pages'); // Event Catalog web pages (Events Part 1, Task 5)
 const legalPages = require('./legal-pages');
@@ -496,23 +497,6 @@ function masterBytes() {
 // ---------------------------------------------------------------------------
 const MASTER_DIR = process.env.KHUX_MASTER_DIR || path.join(__dirname, 'master_data');
 
-// Events Part 3 Task 1 bench spike (TEMPORARY, event_config.json spike, off by default; Task 5 replaces it, note there): the
-// fixture type-4 boards are added to the sphere tables, one event is served with eventType 1 (Event Boards button).
-const EVENT_SPIKE = (() => {
-  try {
-    const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')).spike;
-    if (!c || !c.on) return null;
-    const fx = JSON.parse(fs.readFileSync(path.join(__dirname, c.boardFixture), 'utf8'));
-    for (const r of fx.sphere) Object.assign(r, (c.sphereOverrides || {})[r.sphereBoardId] || {});
-    console.log(`[spike] event boards spike ON: ${c.censusId} eventType ${c.eventType}, boards ${JSON.stringify(fx.sphere.map((r) => [r.sphereBoardId, r.openId, r.openParam]))}`);
-    return { ...c, fx, boardIds: fx.sphere.map((r) => r.sphereBoardId) };
-  } catch (e) {
-    console.warn(`[spike] not loaded: ${e.message}`);
-    return null;
-  }
-})();
-const withSpikeRows = (name, rows) => (EVENT_SPIKE && Array.isArray(EVENT_SPIKE.fx[name]) ? [...rows, ...EVENT_SPIKE.fx[name]] : rows);
-
 function masterKey(name) {
   // 32 caratteri stabili tra i riavvii: il client li usa come chiave AES-256.
   return crypto.createHash('sha256').update('khux-master:' + name).digest('hex').slice(0, 32);
@@ -584,9 +568,7 @@ function servedMasterRows(name, realMs) {
   // drawPetType (Spirit Blind Box, pet-draw.js): same paths; the client opens detailUrl as given (a path = «file not found»)
   if (name === 'evStage' || name === 'drawPetType') {
     const abs = (u) => (String(u || '').startsWith('/') ? WEB_BASE + u : u);
-    const spike = name === 'evStage' ? spikeEvStageIds() : new Set(); // Events Part 3 Task 1 spike (off by default)
-    return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl),
-      ...(spike.has(r.eventStageId) ? { eventType: EVENT_SPIKE.eventType, ...(EVENT_SPIKE.boardEndTime ? { boardEndTime: EVENT_SPIKE.boardEndTime } : {}) } : {}) }));
+    return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl) }));
   }
   // moogleshop: le offerte a tempo (display 1, «N days left») scadono ogni lunedi' come le Weekly, in ora finta
   // (make-moogleshop.js fissava endDate alla generazione: «2137 days left», I-021)
@@ -1227,7 +1209,7 @@ function rewardRowById(rewardId) {
 // dropItemTypeIds di un nemico: per ogni premio della riga il suo tipo se e' un materiale (5) o una medaglia (3, quest
 // Special), 0 altrove, senza gli 0 in coda (le righe della storia, tutte di tipo 5, danno [5] come prima).
 // /stage/clear da' solo queste posizioni (banco 30-10: prima dava ogni tipo 5 della riga anche dove il client aveva 0)
-const ENEMY_DROP_TYPES = [ENEMY_DROP_TYPE, 3];
+const ENEMY_DROP_TYPES = [ENEMY_DROP_TYPE, 3, 15]; // 15: Event Coins of an event quest (Events Part 3 Task 5; no other row has 15)
 function enemyDropTypes(rewardId) {
   const row = rewardRowById(rewardId);
   if (!row) return [];
@@ -1997,8 +1979,9 @@ function userPointData(now) {
     baseHp: playerHp(), hp: playerHp(), ap: ap.ap,
     maxHp: playerHp(), maxAp: maxAp(),
     lastApDatetime: serverTimeAt(ap.time), // da qui il client conta la ricarica
-    // stageSpherePoint (Event Coins): 0 unless the Events Part 3 Task 1 spike is on
-    stageSpherePoint: spikeCoins(), raidSpherePoint: player.raidSpherePoint || 0, colosseumSpherePoint: 0,
+    // stageSpherePoint (Event Coins, routes-event-boards.js): the balance of the focus board set. Every key stays: a missing one
+    // (colosseumSpherePoint, bench 08-11) makes the client show «200 ERROR :1» (test-event-board-routes.js userpoint_keys)
+    stageSpherePoint: eventCoinPoint(), raidSpherePoint: player.raidSpherePoint || 0, colosseumSpherePoint: 0,
     // da qui in poi uint
     specialPoint: 0, stageSkipTicket: player.stageSkipTicket || 0, superSkipTicket: player.superSkipTicket || 0, vipPoint: 0,
     // livello del Burst (pulsante rosso in battaglia, una volta per missione; il client non
@@ -2045,6 +2028,10 @@ function respondStageStart(res, req) {
   player.currentStageId = Number(req?.stageId ?? START_STAGE_ID);
   player.stageInProgress = true; // /stage/clear lo spegne (ripiego della Q978 in respondStageClear)
   player.currentUserKeybladeId = Number(req?.userKeybladeId) || USER_KEYBLADE_ID; // gauge: setKeybladeBurst
+  // an event quest moves the Event Coins focus to its board set (routes-event-boards.js); an error never fails the start
+  if (eventRoutes().isEventStage(player.currentStageId)) {
+    try { eventBoards().onStageStart(eventRoutes().entryOfStage(player.currentStageId)); } catch (e) { console.log(`[event boards] onStageStart ${player.currentStageId}: ${e.message}`); }
+  }
   // costo in AP: campo useAp della tabella stage (Quest 130 = 10). Il client controlla
   // prima l'AP (popup PopupNormal_AP_Recovery se non basta); /stage/retire non rimborsa
   // Q978 (onlyDrama, solo filmato): useAp 0, nessun POI -> nessun drop ne' forziere; il client salta la mappa
@@ -2250,7 +2237,7 @@ function respondUserProfile(res) {
 // 3 medaglia (id della tabella medal: es. 90041 = Dewey ★ in The Dark Forest Pt. 2,
 // riconosciuta confrontando la tabella stage con khuxwiki; una userMedal per copia).
 // Gli altri tipi non sono ancora ricavati: si annotano nel log.
-function grantItem(type, id, num) {
+function grantItem(type, id, num, ctx = {}) {
   num = Number(num) || 0;
   if (!type || !num) return;
   if (type === 3 && id) {
@@ -2270,7 +2257,10 @@ function grantItem(type, id, num) {
   } else if (type === 2) player.freeStone = (player.freeStone || 0) + num;
   else if (type === 4) player.money = (player.money || 0) + num;
   else if (type === 14) player.spherePoint = (player.spherePoint || 0) + num;
-  else if (type === 15 || type === 16) player.raidSpherePoint = (player.raidSpherePoint || 0) + num; // Raid Coin (16) and Event Coin (15): userPoint.raidSpherePoint (raid coin tables only: event quests never pay 15, routes-events.js)
+  else if (type === 16) player.raidSpherePoint = (player.raidSpherePoint || 0) + num; // Raid Coin: userPoint.raidSpherePoint
+  // Event Coin: into the balance of a board set (ctx.coinSet: the event quest's, routes-event-boards.js); without one logged, not
+  // paid, never as Raid Coins (raids pay 16 since Events Part 3 Task 4)
+  else if (type === 15) eventBoards().addCoins(ctx.coinSet || null, num); // false (and a log line) without a set
   else if (type === 26) player.stageSkipTicket = (player.stageSkipTicket || 0) + num; // Skip Ticket (testo 102600058)
   else if (type === 28) player.superSkipTicket = (player.superSkipTicket || 0) + num; // Skip Ticket+ (102600065, «Force Skip»)
   // 11 Lux (testo 100200001)
@@ -2514,11 +2504,13 @@ function respondStageClear(res, req) {
   const steal = player.steal?.stageId === playedId ? player.steal : null;
   // the positions rolled at /stage/start (rollDropTypes); a play started before this server ran pays the row unrolled
   const rolled = player.enemyDrops?.stageId === playedId ? player.enemyDrops.types : null;
+  // Event Coins of a drop go into the board set of the event quest (routes-events.js boardSetOf; null for any other stage)
+  const coinSet = eventRoutes().isEventStage(stage ? stage.stageId : playedId) ? eventRoutes().boardSetOf(stage ? stage.stageId : playedId) : null;
   for (const uid of training ? [] : req?.getEnemyDropItems || []) {
     const row = rewardRowById(enemyRows.get(uid) ?? 1);
     const k = steal && steal.uid === uid ? steal.mult : 1; // drop rubato dal pet (Steal): x skillValue3
     const types = rolled ? rolled[uid] || [] : row ? enemyDropTypes(row.rewardId) : [];
-    if (row) types.forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k); });
+    if (row) types.forEach((t, i) => { if (t) grantItem(t, row.id[i], row.num[i] * k, { coinSet }); });
   }
   player.steal = null;
   player.enemyDrops = null;
@@ -2629,7 +2621,7 @@ function masterRows(name) {
     const st = fs.statSync(file);
     const c = masterCache.get(name);
     if (c && c.mtimeMs === st.mtimeMs && c.size === st.size) return c.rows.slice();
-    const rows = withSpikeRows(name, JSON.parse(fs.readFileSync(file, 'utf8')));
+    const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
     masterCache.set(name, { mtimeMs: st.mtimeMs, size: st.size, rows });
     return rows.slice();
   } catch {
@@ -2677,23 +2669,9 @@ function sphereBoards() {
   }
   return player.sphere;
 }
-// userSphereBoardId: one sequence for the standard and the Raid Boards
+// userSphereBoardId: one sequence for the standard, Raid (type 5) and Event Boards (type 4)
 const nextUserSphereId = () => Math.max(0, ...[...Object.values(player.sphere || {}), ...Object.values(player.raidSphere || {}),
   ...Object.values(player.eventSphere || {})].map((s) => s.id)) + 1;
-
-// Events Part 3 Task 1 spike (TEMPORARY, off by default): the fixture type-4 boards, player.eventSphere[id] = {id, unlock[], getDatetime},
-// handed out while the spike is on; Event Coins in player.stageSpherePoint (spike.stageSpherePoint for a save that has none).
-function spikeSphereBoards() {
-  if (!EVENT_SPIKE || EVENT_SPIKE.handOut === false) return []; // handOut false: no board handed out (empty list)
-  player.eventSphere = player.eventSphere || {};
-  for (const id of EVENT_SPIKE.boardIds) if (!player.eventSphere[id]) player.eventSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: realNow() };
-  return EVENT_SPIKE.boardIds;
-}
-function spikeCoins() {
-  if (!EVENT_SPIKE) return 0;
-  if (!Number.isInteger(player.stageSpherePoint)) player.stageSpherePoint = EVENT_SPIKE.stageSpherePoint || 0;
-  return player.stageSpherePoint;
-}
 
 // Raid Boards (type 5, master rows of make-raid.js / raid-boards.js; client path docs/notes/bacheche.md «Raid Boards»).
 // player.raidSphere[sphereBoardId] = {id, unlock[], getDatetime}, made when the board is first handed out and kept for good,
@@ -2718,12 +2696,15 @@ function userSphereData(sphereBoardId) {
     unlockMasuIds: s.unlock.slice(0, 23), getDatetime: outTime(s.getDatetime, serverTime()) };
 }
 
-// GET /user/sphere (and the lists of 190): the standard boards plus the Raid Boards handed out now. GET replaces the client's
-// list, so the closed Raid Boards drop out of it there and raidSphereSent is replaced (setSent true); 190 merges ('merge').
+// GET /user/sphere (and the lists of 190): the standard boards plus the Raid and Event Boards handed out now. GET replaces the
+// client's list, so the closed Raid/Event Boards drop out of it there and raidSphereSent / eventSphereSent are replaced
+// (setSent true); 190 merges ('merge').
 function userSphereAll({ setSent = false } = {}) {
   const raidIds = raidSphereBoards().active;
   if (setSent) player.raidSphereSent = [...new Set([...(setSent === 'merge' ? player.raidSphereSent || [] : []), ...raidIds])];
-  return { userSphereDatas: [...Object.keys(sphereBoards()).map(Number), ...raidIds, ...spikeSphereBoards()].map(userSphereData), notChargedSphereBoardIds: [] };
+  let eventIds = [];
+  try { eventIds = eventBoards().list({ setSent }); } catch (e) { console.log(`[event boards] list: ${e.message}`); }
+  return { userSphereDatas: [...Object.keys(sphereBoards()).map(Number), ...raidIds, ...eventIds].map(userSphereData), notChargedSphereBoardIds: [] };
 }
 
 // POST /user/sphere/check (azioni 60/61): ogni voce di userSphereDatas e' per il client una
@@ -2735,6 +2716,8 @@ function userSphereAll({ setSent = false } = {}) {
 // Raid Boards: the client reads closeEventSphereBoardIds only when checkTypes has 3, and then removes those ids from its list;
 // otherwise userSphere is merged. A check without 3 adds the Raid Boards handed out since the last GET (a new week, a kept
 // raid); one with 3 closes those no longer handed out. Their progress stays in player.raidSphere.
+// Event Boards (type 4, routes-event-boards.js check): the same, for the boards of the focus board set; a check without 3 adds
+// them only when its boardTypes has 4 (the Event Boards button sends [3]/[1], then [1,2]/[4,7]), each once per hand-out.
 function respondSphereCheck(res, req) {
   const owned = Object.keys(sphereBoards());
   if (!player.sphereNotified) player.sphereNotified = owned.map(Number);
@@ -2751,12 +2734,13 @@ function respondSphereCheck(res, req) {
     add = active.filter((id) => !sent.has(id));
     player.raidSphereSent = [...sent, ...add];
   }
-  // Events Part 3 Task 1 spike (off by default): a check without 3 whose boardTypes has 4 hands out the fixture boards
-  const spikeAdd = EVENT_SPIKE && !closing && (req?.boardTypes || []).map(Number).includes(4) ? spikeSphereBoards() : [];
-  if (EVENT_SPIKE) console.log(`[spike] sphere/check ${JSON.stringify(req)} -> type 4 boards ${spikeAdd.join(',') || '-'}`);
+  // an Event Boards error must never break the check (the home and every board list send one)
+  let ev = { add: [], close: [] };
+  try { ev = eventBoards().check(req || {}); } catch (e) { console.log(`[event boards] check: ${e.message}`); }
+  if (ev.add.length || ev.close.length) console.log(`[event boards] check ${JSON.stringify(req)}: +${ev.add.join(',') || '-'} closed ${ev.close.join(',') || '-'}`);
   savePlayer();
-  const userSphere = { userSphereDatas: [...fresh.map(userSphereData), ...add.map(userSphereData), ...spikeAdd.map(userSphereData)], notChargedSphereBoardIds: [] };
-  send(res, 200, { ret: ret(), userSphere, closeEventSphereBoardIds: close });
+  const userSphere = { userSphereDatas: [...fresh.map(userSphereData), ...add.map(userSphereData), ...ev.add.map(userSphereData)], notChargedSphereBoardIds: [] };
+  send(res, 200, { ret: ret(), userSphere, closeEventSphereBoardIds: [...close, ...ev.close] });
 }
 
 // premio di un nodo (rewardSelect di sphereMasu): 12 HP, 21 AP, 22 costo del deck (bonus sommati
@@ -2785,12 +2769,23 @@ function respondSphereUpdate(res, req) {
   const boardId = Number(req?.sphereBoardId);
   const board = masterRows('sphere').find((r) => r.sphereBoardId === boardId);
   const isRaid = board?.type === 5;
-  // Events Part 3 Task 1 spike (off by default): the fixture type-4 boards, paid in Event Coins (stageSpherePoint)
-  const isSpike = Boolean(EVENT_SPIKE) && board?.type === 4 && spikeSphereBoards().includes(boardId);
-  if (EVENT_SPIKE) console.log(`[spike] sphere/update ${JSON.stringify(req)} (board type ${board?.type}, coins ${spikeCoins()})`);
+  // Event Boards (type 4): routes-event-boards.js update (focus set, chain, window, the set's Event Coins, each reward once)
+  if (board?.type === 4) {
+    const r = eventBoards().update(boardId, req?.releaseMasuId, !!req?.allOpen);
+    console.log(r.ok ? `[sphere] bacheca evento ${boardId}: nodi ${r.nodes.join(',')} (-${r.cost} Event Coin, set ${r.setKey})`
+      : `[sphere] sblocco rifiutato: bacheca evento ${boardId} (${r.why})`);
+    const es = (player.eventSphere || {})[boardId];
+    savePlayer();
+    return send(res, 200, {
+      ret: ret(),
+      userData: { userPoint: userPointData(now), userDetail: userDetailData() },
+      userSphere: { userSphereDatas: es ? [userSphereData(boardId)] : [], notChargedSphereBoardIds: [] },
+      ...inventoryBlocks(now, snap),
+    });
+  }
   const s = !board ? undefined : isRaid ? (raidSphereBoards().active.includes(boardId) ? player.raidSphere[boardId] : undefined)
-    : isSpike ? player.eventSphere[boardId] : board.type === 1 ? sphereBoards()[boardId] : undefined;
-  const coin = isRaid ? 'raidSpherePoint' : isSpike ? 'stageSpherePoint' : 'spherePoint';
+    : board.type === 1 ? sphereBoards()[boardId] : undefined;
+  const coin = isRaid ? 'raidSpherePoint' : 'spherePoint';
   if (board && s) {
     const masu = masterRows('sphereMasu').find((r) => r.masuId === board.masuId);
     const nodes = sphereNodes(board);
@@ -2801,13 +2796,13 @@ function respondSphereUpdate(res, req) {
       player[coin] -= cost;
       for (const n of todo) { s.unlock.push(n); grantSphereReward(masu, n - 1); }
       if (nodes.every((n) => s.unlock.includes(n))) {
-        if (isRaid || isSpike) grantSphereReward(masu, 22);
+        if (isRaid) grantSphereReward(masu, 22);
         else {
           const title = 2000 + (boardId - 2100000);
           if (masterRows('title').some((t) => t.titleId === title)) player.titles = [...new Set([...(player.titles || []), title])];
         }
       }
-      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} ${isRaid ? 'Raid Coin' : isSpike ? 'Event Coin' : 'Avatar Coin'})`);
+      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} ${isRaid ? 'Raid Coin' : 'Avatar Coin'})`);
     } else console.log(`[sphere] sblocco rifiutato: bacheca ${boardId}, nodi ${todo.join(',') || '-'}, costo ${cost}`);
   } else if (board) console.log(`[sphere] sblocco rifiutato: bacheca ${boardId} non consegnata`);
   savePlayer();
@@ -4377,9 +4372,7 @@ function respondStageEvent(res, body) {
   // (routes-events.js). The Raid Catalog banner is the only raid card of eventType 0.
   if (Number(body?.eventCategory) === 2) {
     const raids = raid().events(), n = raids.length && raids[0].eventType === 0 ? 1 : 0;
-    const spike = spikeEvStageIds(); // Events Part 3 Task 1 spike (off by default)
-    const quests = eventRoutes().events().map((e) => (spike.has(e.eventStageId) ? { ...e, eventType: EVENT_SPIKE.eventType } : e));
-    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...quests, ...events];
+    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...eventRoutes().events(), ...events];
   }
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
@@ -4562,12 +4555,6 @@ function grantRaidItem(item) {
   if (item.type === 3 && item.skillId) giveSkill((player.medals || []).slice(before), item.skillId, item.skillLv);
 }
 // game_data/events.json (make-events.js). Read once; without it the Events tab lists only the raids, with one warning.
-// Events Part 3 Task 1 spike: the evStage ids of the spike event (empty when the spike is off)
-function spikeEvStageIds() {
-  if (!EVENT_SPIKE) return new Set();
-  const e = (eventIndex().entries || []).find((x) => x.censusId === EVENT_SPIKE.censusId);
-  return new Set(e ? [e.evStageId, ...(e.rows || []).map((r) => r.evStageId)].filter(Number.isInteger) : []);
-}
 function eventIndex() {
   if (eventMemo) return eventMemo;
   try {
@@ -4587,7 +4574,21 @@ function eventRoutes() {
     storyWeek: () => { const c = storyCtx(); return { shopFrom: c.shopFrom, shopTo: c.shopTo }; },
     stageState: (id) => ({ score: player.stageScores?.[id] || 0, playStatus: id in (player.stageScores || {}) ? STAGE_CLEARED : 0 }),
     grantItem, grantObjective: grantObjectiveReward,
+    addEventCoins: (setKey, n) => eventBoards().addCoins(setKey, n), // Event Coins (type 15) into the entry's board set
   });
+}
+// Event Coins and Event Boards (type 4, routes-event-boards.js): the sets of events.json boardSets, available while a feeder
+// event is in the story week (eventRoutes().currentEntries) or is the kept one (Event Catalog)
+var eventBoardsMemo = null; // var: grantItem and userPointData can run before this line
+function eventBoards() {
+  return eventBoardsMemo ??= eventBoardRoutes({
+    player, master: masterRows, grantSphereReward, now: realNow, nextUserSphereId,
+    events: { index: eventIndex, currentCensusIds: () => eventRoutes().currentEntries().map((e) => e.censusId), keptCensusId: () => eventRoutes().keptEntry()?.censusId || null },
+  });
+}
+// userPoint.stageSpherePoint: an error here must never break GET /user (every userPoint key is required)
+function eventCoinPoint() {
+  try { return eventBoards().stagePoint(); } catch (e) { console.log(`[event boards] stagePoint: ${e.message}`); return 0; }
 }
 var raidRoutes = null; // var: respondStageStart can run before this line
 function raid() {
@@ -5505,6 +5506,7 @@ module.exports._test = {
   userTitlesData, // server/test-title-popup.js (I-220)
   raid, respondRaidWeb, respondRaidPost, // server/test-raid-routes.js
   eventRoutes, eventIndex, // server/test-event-routes.js
+  eventBoards, // server/test-event-board-routes.js
   respondEventWeb, respondEventPost, // server/test-event-pages.js
   raidIndex, respondSphereCheck, respondSphereUpdate, userSphereAll, raidPageCtx, // server/test-raid-boards.js
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)

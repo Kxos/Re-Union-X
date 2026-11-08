@@ -1,5 +1,5 @@
 // Event routes (Events Part 1, Task 4): the Events tab list (/stage/event category 2 after the raids), the rewards of an event
-// quest clear (objectives and first clear once per quest, Event Coins not paid), old saves; then the wiring of server.js on
+// quest clear (objectives and first clear once per quest, Event Coins into the entry's board set), old saves; then the wiring of server.js on
 // fixture indexes. Synthetic fixtures only. Dates: 2026-11-03 is a Tuesday, 20:00 UTC = 12:00 PST.
 //   node server/test-event-routes.js
 'use strict';
@@ -23,7 +23,7 @@ const INDEX = () => ({ entries: [
 ] });
 
 function world(opts = {}) {
-  const w = { now: TUE, week: { shopFrom: '2019-04-08', shopTo: '2019-04-14' }, saves: 0, grants: [], objectives: [], logs: [], scores: {} };
+  const w = { now: TUE, week: { shopFrom: '2019-04-08', shopTo: '2019-04-14' }, saves: 0, grants: [], objectives: [], logs: [], scores: {}, coins: [] };
   w.player = opts.player || { name: 'Prova' };
   w.index = opts.index || INDEX();
   w.tables = { stage: [stageRow(S1), stageRow(S2), stageRow(S3, { validSubmission: 1 }), stageRow(PAST)] };
@@ -33,6 +33,7 @@ function world(opts = {}) {
     stageState: (id) => ({ score: w.scores[id] || 0, playStatus: id in w.scores ? 3 : 0 }),
     grantItem: (type, id, num) => w.grants.push({ type, id, num }),
     grantObjective: (stage, n) => w.objectives.push({ stageId: stage.stageId, n, type: stage.submissionRewardType[n - 1] }),
+    addEventCoins: (setKey, n) => { if (setKey !== '2019-04') return false; w.coins.push([setKey, n]); return true; },
   });
   return w;
 }
@@ -72,14 +73,26 @@ const tests = {
     assert.strictEqual(w.ev.isEventStage(1010), false);
     assert.strictEqual(w.ev.isEventStage(S1), true);
   },
-  // Event Coins (type 15) are not paid in this part, neither as an objective nor as a first-clear item (never as Raid Coins)
-  coins_not_paid() {
-    const w = world();
+  // Event Coins (type 15, Part 3 Task 5): an objective and a first-clear item go into the entry's board set (addEventCoins), once;
+  // never as a grantItem (Raid Coins). An entry without a set pays none (logged), the objective still counts as done
+  coins_paid_to_set() {
+    const ix = INDEX();
+    ix.entries[0].boardSet = '2019-04';
+    const w = world({ index: ix });
     w.ev.onStageClear(S1, [1, 2, 3]);
-    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1, 3], 'objective 2 (type 15) not paid');
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1, 3], 'objective 2 (type 15) not through grantObjective');
     assert.ok(!w.grants.some((g) => g.type === 15 || g.type === 16), `grants ${JSON.stringify(w.grants)}`);
-    assert.deepStrictEqual(w.player.events.cleared[S1], [1, 2, 3], 'the objective counts as done');
-    assert.ok(w.logs.some((l) => /Event Coin/.test(l)), 'logged');
+    assert.deepStrictEqual(w.coins, [['2019-04', 30], ['2019-04', 50]], 'first-clear item, then objective 2');
+    assert.deepStrictEqual(w.player.events.cleared[S1], [1, 2, 3]);
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.strictEqual(w.coins.length, 2, 'second clear: no coins again');
+    assert.strictEqual(w.ev.boardSetOf(S1), '2019-04');
+    assert.strictEqual(w.ev.boardSetOf(S3), null);
+    // no set: logged, not paid
+    w.ev.onStageClear(S3, [2]);
+    assert.strictEqual(w.coins.length, 2, 'E-2 has no set');
+    assert.deepStrictEqual(w.player.events.cleared[S3], [2], 'the objective counts as done');
+    assert.ok(w.logs.some((l) => /Event Coins x50 not paid/.test(l)), `logged: ${w.logs.join(' | ')}`);
   },
   // a save from before this part: no player.events; the list is served and nothing is cleared
   old_save() {
@@ -221,7 +234,7 @@ function wiring() {
     call(t.respondStageStart, { stageId: S1, userKeybladeId: 0 });
     const out = call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 0 } });
     assert.deepStrictEqual(out.clearMissionIds, [1, 2, 3]);
-    assert.strictEqual(p.raidSpherePoint || 0, coins, 'coins_not_paid: no Raid Coins');
+    assert.strictEqual(p.raidSpherePoint || 0, coins, 'an entry without a board set: no Event Coins, no Raid Coins');
     assert.strictEqual(p.freeStone, stone + 10, 'objective 1 once');
     assert.strictEqual(p.money, money + 100, 'first clear once');
     assert.deepStrictEqual(p.events.cleared[S1], [1, 2, 3]);

@@ -5,8 +5,9 @@
 // Absent in older saves: the tab lists the served events with nothing cleared, and listing never writes the save.
 // Rewards (spec, «Rewards»): the objective rewards and the first-clear items of the stage row (submission*, validClearGetItem,
 // make-events.js) once per quest, paid here (server.js skips its own payment for event stages); drops on every clear by the
-// usual /stage/clear path (the POI of the quest's map key, server.js poiStageId). Reward type 15 (Event Coins) is not paid in
-// this part (event boards later), never as Raid Coins: the objective counts as done, the coins are only logged.
+// usual /stage/clear path (the POI of the quest's map key, server.js poiStageId). Reward type 15 (Event Coins, Part 3 Task 5) is
+// paid into the balance of the entry's board set (entry.boardSet, addEventCoins = routes-event-boards.js addCoins), never as Raid
+// Coins; an entry without a set pays none (the objective counts as done, the coins are only logged).
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
 //   pruneKept (Event Catalog, Task 5).
 'use strict';
@@ -22,9 +23,9 @@ const CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.jso
 const EVENT_IMG_VERSION = CONFIG.imgVersion;
 const EVENT_TYPE = CONFIG.eventType; // eventType of an index entry without one (make-events.js writes the donor value per entry)
 const STAGE_FIRST = CONFIG.stageBase, STAGE_LAST = CONFIG.stageMax; // stage ids of the event quests
-const COIN_TYPE = 15; // Event Coins: not paid in this part
+const COIN_TYPE = 15; // Event Coins: into the entry's board set (addEventCoins)
 
-function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, webBase, log = console.log }) {
+function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, webBase, log = console.log }) {
   // read-only view of player.events (an older save has none: nothing kept, nothing cleared); state() creates it to write
   const view = () => player.events || { kept: null, cleared: {} };
   const state = () => {
@@ -36,6 +37,9 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   const entries = () => (eventIndex() || {}).entries || [];
   const isEventStage = (stageId) => { const id = Number(stageId); return id >= STAGE_FIRST && id <= STAGE_LAST; };
   const stageRow = (id) => masterRows('stage').find((r) => r.stageId === id);
+  // the index entry of an event quest, and its board set (events.json entry.boardSet, make-events.js; null without one)
+  const entryOfStage = (stageId) => { const id = Number(stageId); return entries().find((e) => (e.quests || []).some((q) => q.stageId === id) || (e.stageIds || []).includes(id)) || null; };
+  const boardSetOf = (stageId) => (entryOfStage(stageId) || {}).boardSet || null;
 
   // From respondStageClear, after its objective rules (Lux objectives, all-together flag): cleared = the objective ids of this
   // clear. Pays the first-clear items (first clear of this quest) and the objectives never paid before; the caller saves.
@@ -44,15 +48,19 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     if (!isEventStage(stageId)) return false;
     const id = Number(stageId), row = stageRow(id), ev = state();
     const before = ev.cleared[id];
-    const pay = (type, what, fn) => {
-      if (type === COIN_TYPE) { log(`[event] ${id}: ${what} in Event Coins not paid (event boards not served yet)`); return; }
-      fn();
+    // Event Coins (type 15) go into the balance of the entry's board set (routes-event-boards.js); an entry without a set
+    // pays none (logged), never Raid Coins
+    const setKey = boardSetOf(id);
+    const pay = (type, what, fn, num) => {
+      if (type !== COIN_TYPE) { fn(); return; }
+      if (setKey && addEventCoins && addEventCoins(setKey, num)) return;
+      log(`[event] ${id}: ${what} in Event Coins x${num} not paid (no board set)`);
     };
     if (!row) log(`[event] ${id}: no stage row, no reward`);
     if (row && before === undefined) {
       for (let i = 0; i < (row.validClearGetItem || 0); i++) {
         const type = row.clearGetItemType[i];
-        pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]));
+        pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]), row.clearGetItemNum[i]);
       }
     }
     // no stage row (a master not rebuilt yet): nothing paid and nothing recorded, so the first-clear items and the objectives
@@ -60,7 +68,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     if (!row) return true;
     const done = before || [];
     const fresh = [...new Set(cleared)].filter((n) => n >= 1 && n <= 3 && !done.includes(n)).sort((a, b) => a - b);
-    for (const n of fresh) pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n));
+    for (const n of fresh) pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
     return true;
   }
@@ -162,7 +170,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       endTime: serverTimeAt(clock.weekEnd(realNow())), newStageId: 0, isLock: 0, complete: 0 }];
   }
 
-  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept };
+  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries };
 }
 
 module.exports = routesEvents;

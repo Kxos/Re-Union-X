@@ -103,10 +103,11 @@ const tests = {
     let t; try { t = require('./server')._test; } finally { console.log = log; }
     const q = (fn) => { console.log = () => {}; try { return fn(); } finally { console.log = log; } };
     const before = q(() => t.userPointData(Date.now())).raidSpherePoint;
+    // 15 (Event Coins) no longer pays Raid Coins (Events Part 3 Task 5: into a board set, test-event-board-routes.js); 16 does
     q(() => t.grantObjectiveReward({ submissionRewardType: [15], submissionItemId: [0], submissionItemNum: [7] }, 1));
     q(() => t.grantObjectiveReward({ submissionRewardType: [16], submissionItemId: [0], submissionItemNum: [5] }, 1));
-    assert.strictEqual(t.player.raidSpherePoint, 12);
-    assert.strictEqual(q(() => t.userPointData(Date.now())).raidSpherePoint, before + 12);
+    assert.strictEqual(t.player.raidSpherePoint, 5);
+    assert.strictEqual(q(() => t.userPointData(Date.now())).raidSpherePoint, before + 5);
     try { fs.unlinkSync(SAVE); } catch { /* gone */ }
   },
 };

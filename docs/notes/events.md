@@ -402,3 +402,24 @@ Frames: `D:\Progetto_Restauro_KH_UX\reference\event_boards\spike_*.png`.
 - Not seen: the client never sent `checkTypes` 3 with `boardTypes` 4, so closing event boards at the end of an event must go
   through `GET /user/sphere` (replaces the list) or a `checkTypes [3]` answer of the first Event Boards check
   (`closeEventSphereBoardIds`, which the client reads whatever `boardTypes` is: untested).
+
+## Event Coins and Event Boards served (Part 3, Task 5, 8 November 2026)
+
+`server/routes-event-boards.js` replaces the spike (removed with its fixture and the `event_config.json` `spike` key). Not benched
+yet (Task 7).
+
+- **Coins.** Reward type 15 of an event quest goes into the balance of its entry's board set (`events.json` `entry.boardSet`):
+  objectives and first-clear items once (`routes-events.js`), enemy drops on every clear (`grantItem(15, .., {coinSet})` in
+  `/stage/clear`; 15 is now one of the enemy drop types, no row outside events has it). Without a set: logged, not paid, never
+  Raid Coins (`raidSpherePoint` is type 16 only). Save `player.eventCoins {[setKey]: n}`; coins never expire.
+- **Focus.** `/stage/start` of an event quest with a set sets `player.eventCoinFocus`. A set is available while a feeder event
+  (`boardSets[set].censusIds`) is listed in the story week or is the kept event. Focus = the last started set if available, else the
+  newest set of the week, else the kept event's. `userPoint.stageSpherePoint` = the focus balance (all other userPoint keys kept:
+  test `userpoint_keys`).
+- **Boards.** Only the focus set's boards are handed out (`player.eventSphere`, kept for good); a chained board (`chains`) only once
+  the board before is complete. Check: `checkTypes` with 3 answers `closeEventSphereBoardIds` = every type-4 board sent or ever handed out that is not handed
+  out now; a check without 3 whose `boardTypes` has 4 sends each newly handed-out board once (`player.eventSphereSent`); `GET /user/sphere`
+  lists the handed-out boards and replaces `eventSphereSent`. Update: refused with no change when the board is not handed out
+  (window, focus, chain), the node is invalid or open, or the set's balance is short; each cell paid once, the completion (index 22)
+  once.
+- Test: `server/test-event-board-routes.js`.
