@@ -496,6 +496,23 @@ function masterBytes() {
 // ---------------------------------------------------------------------------
 const MASTER_DIR = process.env.KHUX_MASTER_DIR || path.join(__dirname, 'master_data');
 
+// Events Part 3 Task 1 bench spike (TEMPORARY, event_config.json spike, off by default; Task 5 replaces it, note there): the
+// fixture type-4 boards are added to the sphere tables, one event is served with eventType 1 (Event Boards button).
+const EVENT_SPIKE = (() => {
+  try {
+    const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')).spike;
+    if (!c || !c.on) return null;
+    const fx = JSON.parse(fs.readFileSync(path.join(__dirname, c.boardFixture), 'utf8'));
+    for (const r of fx.sphere) Object.assign(r, (c.sphereOverrides || {})[r.sphereBoardId] || {});
+    console.log(`[spike] event boards spike ON: ${c.censusId} eventType ${c.eventType}, boards ${JSON.stringify(fx.sphere.map((r) => [r.sphereBoardId, r.openId, r.openParam]))}`);
+    return { ...c, fx, boardIds: fx.sphere.map((r) => r.sphereBoardId) };
+  } catch (e) {
+    console.warn(`[spike] not loaded: ${e.message}`);
+    return null;
+  }
+})();
+const withSpikeRows = (name, rows) => (EVENT_SPIKE && Array.isArray(EVENT_SPIKE.fx[name]) ? [...rows, ...EVENT_SPIKE.fx[name]] : rows);
+
 function masterKey(name) {
   // 32 caratteri stabili tra i riavvii: il client li usa come chiave AES-256.
   return crypto.createHash('sha256').update('khux-master:' + name).digest('hex').slice(0, 32);
@@ -567,7 +584,9 @@ function servedMasterRows(name, realMs) {
   // drawPetType (Spirit Blind Box, pet-draw.js): same paths; the client opens detailUrl as given (a path = «file not found»)
   if (name === 'evStage' || name === 'drawPetType') {
     const abs = (u) => (String(u || '').startsWith('/') ? WEB_BASE + u : u);
-    return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl) }));
+    const spike = name === 'evStage' ? spikeEvStageIds() : new Set(); // Events Part 3 Task 1 spike (off by default)
+    return rows.map((r) => ({ ...r, bannerUrl: abs(r.bannerUrl), detailUrl: abs(r.detailUrl),
+      ...(spike.has(r.eventStageId) ? { eventType: EVENT_SPIKE.eventType, ...(EVENT_SPIKE.boardEndTime ? { boardEndTime: EVENT_SPIKE.boardEndTime } : {}) } : {}) }));
   }
   // moogleshop: le offerte a tempo (display 1, «N days left») scadono ogni lunedi' come le Weekly, in ora finta
   // (make-moogleshop.js fissava endDate alla generazione: «2137 days left», I-021)
@@ -1978,7 +1997,8 @@ function userPointData(now) {
     baseHp: playerHp(), hp: playerHp(), ap: ap.ap,
     maxHp: playerHp(), maxAp: maxAp(),
     lastApDatetime: serverTimeAt(ap.time), // da qui il client conta la ricarica
-    stageSpherePoint: 0, raidSpherePoint: player.raidSpherePoint || 0, colosseumSpherePoint: 0,
+    // stageSpherePoint (Event Coins): 0 unless the Events Part 3 Task 1 spike is on
+    stageSpherePoint: spikeCoins(), raidSpherePoint: player.raidSpherePoint || 0, colosseumSpherePoint: 0,
     // da qui in poi uint
     specialPoint: 0, stageSkipTicket: player.stageSkipTicket || 0, superSkipTicket: player.superSkipTicket || 0, vipPoint: 0,
     // livello del Burst (pulsante rosso in battaglia, una volta per missione; il client non
@@ -2609,7 +2629,7 @@ function masterRows(name) {
     const st = fs.statSync(file);
     const c = masterCache.get(name);
     if (c && c.mtimeMs === st.mtimeMs && c.size === st.size) return c.rows.slice();
-    const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const rows = withSpikeRows(name, JSON.parse(fs.readFileSync(file, 'utf8')));
     masterCache.set(name, { mtimeMs: st.mtimeMs, size: st.size, rows });
     return rows.slice();
   } catch {
@@ -2658,7 +2678,22 @@ function sphereBoards() {
   return player.sphere;
 }
 // userSphereBoardId: one sequence for the standard and the Raid Boards
-const nextUserSphereId = () => Math.max(0, ...[...Object.values(player.sphere || {}), ...Object.values(player.raidSphere || {})].map((s) => s.id)) + 1;
+const nextUserSphereId = () => Math.max(0, ...[...Object.values(player.sphere || {}), ...Object.values(player.raidSphere || {}),
+  ...Object.values(player.eventSphere || {})].map((s) => s.id)) + 1;
+
+// Events Part 3 Task 1 spike (TEMPORARY, off by default): the fixture type-4 boards, player.eventSphere[id] = {id, unlock[], getDatetime},
+// handed out while the spike is on; Event Coins in player.stageSpherePoint (spike.stageSpherePoint for a save that has none).
+function spikeSphereBoards() {
+  if (!EVENT_SPIKE || EVENT_SPIKE.handOut === false) return []; // handOut false: no board handed out (empty list)
+  player.eventSphere = player.eventSphere || {};
+  for (const id of EVENT_SPIKE.boardIds) if (!player.eventSphere[id]) player.eventSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: realNow() };
+  return EVENT_SPIKE.boardIds;
+}
+function spikeCoins() {
+  if (!EVENT_SPIKE) return 0;
+  if (!Number.isInteger(player.stageSpherePoint)) player.stageSpherePoint = EVENT_SPIKE.stageSpherePoint || 0;
+  return player.stageSpherePoint;
+}
 
 // Raid Boards (type 5, master rows of make-raid.js / raid-boards.js; client path docs/notes/bacheche.md «Raid Boards»).
 // player.raidSphere[sphereBoardId] = {id, unlock[], getDatetime}, made when the board is first handed out and kept for good,
@@ -2673,7 +2708,7 @@ function raidSphereBoards() {
   for (const id of active) if (!player.raidSphere[id]) player.raidSphere[id] = { id: nextUserSphereId(), unlock: [], getDatetime: realNow() };
   return { active, all: new Set([...ids.all, ...Object.keys(player.raidSphere).map(Number)]) };
 }
-const sphereState = (sphereBoardId) => sphereBoards()[sphereBoardId] || (player.raidSphere || {})[sphereBoardId];
+const sphereState = (sphereBoardId) => sphereBoards()[sphereBoardId] || (player.raidSphere || {})[sphereBoardId] || (player.eventSphere || {})[sphereBoardId];
 
 function userSphereData(sphereBoardId) {
   const s = sphereState(sphereBoardId);
@@ -2688,7 +2723,7 @@ function userSphereData(sphereBoardId) {
 function userSphereAll({ setSent = false } = {}) {
   const raidIds = raidSphereBoards().active;
   if (setSent) player.raidSphereSent = [...new Set([...(setSent === 'merge' ? player.raidSphereSent || [] : []), ...raidIds])];
-  return { userSphereDatas: [...Object.keys(sphereBoards()).map(Number), ...raidIds].map(userSphereData), notChargedSphereBoardIds: [] };
+  return { userSphereDatas: [...Object.keys(sphereBoards()).map(Number), ...raidIds, ...spikeSphereBoards()].map(userSphereData), notChargedSphereBoardIds: [] };
 }
 
 // POST /user/sphere/check (azioni 60/61): ogni voce di userSphereDatas e' per il client una
@@ -2716,8 +2751,11 @@ function respondSphereCheck(res, req) {
     add = active.filter((id) => !sent.has(id));
     player.raidSphereSent = [...sent, ...add];
   }
+  // Events Part 3 Task 1 spike (off by default): a check without 3 whose boardTypes has 4 hands out the fixture boards
+  const spikeAdd = EVENT_SPIKE && !closing && (req?.boardTypes || []).map(Number).includes(4) ? spikeSphereBoards() : [];
+  if (EVENT_SPIKE) console.log(`[spike] sphere/check ${JSON.stringify(req)} -> type 4 boards ${spikeAdd.join(',') || '-'}`);
   savePlayer();
-  const userSphere = { userSphereDatas: [...fresh.map(userSphereData), ...add.map(userSphereData)], notChargedSphereBoardIds: [] };
+  const userSphere = { userSphereDatas: [...fresh.map(userSphereData), ...add.map(userSphereData), ...spikeAdd.map(userSphereData)], notChargedSphereBoardIds: [] };
   send(res, 200, { ret: ret(), userSphere, closeEventSphereBoardIds: close });
 }
 
@@ -2747,9 +2785,12 @@ function respondSphereUpdate(res, req) {
   const boardId = Number(req?.sphereBoardId);
   const board = masterRows('sphere').find((r) => r.sphereBoardId === boardId);
   const isRaid = board?.type === 5;
+  // Events Part 3 Task 1 spike (off by default): the fixture type-4 boards, paid in Event Coins (stageSpherePoint)
+  const isSpike = Boolean(EVENT_SPIKE) && board?.type === 4 && spikeSphereBoards().includes(boardId);
+  if (EVENT_SPIKE) console.log(`[spike] sphere/update ${JSON.stringify(req)} (board type ${board?.type}, coins ${spikeCoins()})`);
   const s = !board ? undefined : isRaid ? (raidSphereBoards().active.includes(boardId) ? player.raidSphere[boardId] : undefined)
-    : board.type === 1 ? sphereBoards()[boardId] : undefined;
-  const coin = isRaid ? 'raidSpherePoint' : 'spherePoint';
+    : isSpike ? player.eventSphere[boardId] : board.type === 1 ? sphereBoards()[boardId] : undefined;
+  const coin = isRaid ? 'raidSpherePoint' : isSpike ? 'stageSpherePoint' : 'spherePoint';
   if (board && s) {
     const masu = masterRows('sphereMasu').find((r) => r.masuId === board.masuId);
     const nodes = sphereNodes(board);
@@ -2760,13 +2801,13 @@ function respondSphereUpdate(res, req) {
       player[coin] -= cost;
       for (const n of todo) { s.unlock.push(n); grantSphereReward(masu, n - 1); }
       if (nodes.every((n) => s.unlock.includes(n))) {
-        if (isRaid) grantSphereReward(masu, 22);
+        if (isRaid || isSpike) grantSphereReward(masu, 22);
         else {
           const title = 2000 + (boardId - 2100000);
           if (masterRows('title').some((t) => t.titleId === title)) player.titles = [...new Set([...(player.titles || []), title])];
         }
       }
-      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} ${isRaid ? 'Raid Coin' : 'Avatar Coin'})`);
+      console.log(`[sphere] bacheca ${boardId}: nodi ${todo.join(',')} (-${cost} ${isRaid ? 'Raid Coin' : isSpike ? 'Event Coin' : 'Avatar Coin'})`);
     } else console.log(`[sphere] sblocco rifiutato: bacheca ${boardId}, nodi ${todo.join(',') || '-'}, costo ${cost}`);
   } else if (board) console.log(`[sphere] sblocco rifiutato: bacheca ${boardId} non consegnata`);
   savePlayer();
@@ -4336,7 +4377,9 @@ function respondStageEvent(res, body) {
   // (routes-events.js). The Raid Catalog banner is the only raid card of eventType 0.
   if (Number(body?.eventCategory) === 2) {
     const raids = raid().events(), n = raids.length && raids[0].eventType === 0 ? 1 : 0;
-    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...eventRoutes().events(), ...events];
+    const spike = spikeEvStageIds(); // Events Part 3 Task 1 spike (off by default)
+    const quests = eventRoutes().events().map((e) => (spike.has(e.eventStageId) ? { ...e, eventType: EVENT_SPIKE.eventType } : e));
+    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...quests, ...events];
   }
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }
@@ -4519,6 +4562,12 @@ function grantRaidItem(item) {
   if (item.type === 3 && item.skillId) giveSkill((player.medals || []).slice(before), item.skillId, item.skillLv);
 }
 // game_data/events.json (make-events.js). Read once; without it the Events tab lists only the raids, with one warning.
+// Events Part 3 Task 1 spike: the evStage ids of the spike event (empty when the spike is off)
+function spikeEvStageIds() {
+  if (!EVENT_SPIKE) return new Set();
+  const e = (eventIndex().entries || []).find((x) => x.censusId === EVENT_SPIKE.censusId);
+  return new Set(e ? [e.evStageId, ...(e.rows || []).map((r) => r.evStageId)].filter(Number.isInteger) : []);
+}
 function eventIndex() {
   if (eventMemo) return eventMemo;
   try {

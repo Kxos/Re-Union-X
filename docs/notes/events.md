@@ -359,3 +359,46 @@ week 01-10..01-16).
   Bench (`gem2_begin`): «This quest must be played with this Keyblade.», box with the three lines, «Starlight +60 Cannot change», lock,
   no friend column. Differences left: the box header reads «RULE» (JP texture) instead of the WW «CONDITION», no yellow frame,
   red plate instead of orange (user 08-11: keep the JP version, to declare in the Events notice). Played: Iron Giant LV 500, objectives paid once (Power Gem +1, Huey, Moogle), clear [1,2,3].
+
+## Event Boards spike (Part 3, Task 1, 8 November 2026)
+
+Bench of the client side of the event boards (sphere `type` 4) before the generator is written. Temporary server code
+behind `event_config.json` `spike` (off by default; `server.js` `EVENT_SPIKE`, Task 5 replaces it): the event `censusId`
+is served with `eventType` 1, the two boards of `server/test-fixtures/event_board_spike.json` are added to the master
+`sphere`/`sphereArray`/`sphereMasu` tables, handed out on `GET /user/sphere` and on a check whose `boardTypes` has 4, paid
+in `userPoint.stageSpherePoint`. Fixture: layout, costs and `openId`/`openParam` of the donor WW type-4 rows «Event Board 1/2»
+(numbers only), our test ids 4999901/4999902 (Board 1 `openId` 3 / `openParam` 0, Board 2 `openId` 5 / `openParam` 4999901),
+every cell and the completion pay Jewels, no card picture, `boardId` 4. The plan named EV-0759, which is not a served record;
+EV-0760 «Defeat the Pink Possessor!» (donor `eventType` 1) was used. Save: copy `evboard1` of `events1`,
+`-RealNow 2026-11-10T20:00:00Z` (week 2019-04-11..17). Master revisions 284 (variant A), 285 (B, C), 286 (spike off).
+Frames: `D:\Progetto_Restauro_KH_UX\reference\event_boards\spike_*.png`.
+
+- **Button.** With `eventType` 1 the quest list of the event shows the «Event Boards» button (right of the list, where raid
+  events show «Raid Boards»). The tap sends `POST /user/sphere/reset {}`, `POST /user/sphere/check/170119
+  {"checkTypes":[3],"boardTypes":[1]}` (close), then `{"checkTypes":[1,2],"boardTypes":[4,7]}`, and opens the list.
+  Back from a board screen to the list sends `{"checkTypes":[1,2],"boardTypes":[4]}`. The home check after the Notices sends
+  `{"checkTypes":[1,2],"boardTypes":[1,2,3,4,5,6,7,8,9,10,11]}`.
+- **«Unlocked an Event Board!» popup.** Every type-4 entry of `userSphereDatas` in a check answer opens one
+  «CONGRATULATIONS! Unlocked an Event Board!» popup with the card and `boardName` (home and board list alike, one per entry,
+  also for Board 2 while Board 1 is not complete). The spike sent both boards on every check, so the popups came back each
+  time: the real server must send a board in a check once (as `sphereNotified` does for type 1), and the full list only on
+  `GET /user/sphere`.
+- **List.** «Tap a board to view its details.»; one card per type-4 board the client holds, both with the NEW tag, title
+  bar = `boardName`, «Event Coins» box with the coin icon (`SpherePointIcon_EV`, the Event Coin of the event cards) and the
+  `stageSpherePoint` balance (500), «To Complete» = sum of the board's cell costs (10450 / 45900), «Nodes 0 / 19». Cards
+  without `img/sphere_incentive/<id>.png` are the plain lilac frame (as the raid boards before their art). Empty list
+  (variant C, no type-4 board handed out): «No Event Boards.».
+- **Board screen.** Title «Event Board N», marquee «Complete the boards while the event lasts! All Event Coins will be lost
+  when the event ends.», costs on the cells, «Event Coins» balance, reward line («Jewels / Jewel x 10»), Unlock grey when the
+  balance is below the Target cell cost. Unlock sends `POST /user/sphere/update {"sphereBoardId":4999901,"releaseMasuId":19}`
+  (node numbers as for type 1/5, first node after START = 19 on this layout); the answer's `userPoint` is shown at once
+  (500 -> 400) with the «You received Jewel x 10!» popup; Jewels in the header updated on the next screen.
+- **`openId` 5 / `openParam` is not enforced by the client.** Board 2 (`openId` 5, `openParam` = Board 1) is listed, opens,
+  and with 5000 coins its Unlock is red and works (3600 left) while Board 1 is 1/19. The chain must be enforced by the server
+  (hand out Board 2 only when Board 1 is complete, and refuse updates on it before).
+- **`boardEndTime` is not read for the list.** Variant B (`boardEndTime` of the EV-0760 row 2015-01-02, master rev 285): the
+  button, the list and both boards stay as in A, progress kept (1/19). So, as for raid boards, the server decides which type-4
+  boards exist by handing their ids out; `endTime`/`boardEndTime` do not hide them.
+- Not seen: the client never sent `checkTypes` 3 with `boardTypes` 4, so closing event boards at the end of an event must go
+  through `GET /user/sphere` (replaces the list) or a `checkTypes [3]` answer of the first Event Boards check
+  (`closeEventSphereBoardIds`, which the client reads whatever `boardTypes` is: untested).

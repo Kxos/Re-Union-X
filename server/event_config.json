@@ -10,6 +10,17 @@
  "eventCategory": 2,
  "eventType": 3,
  "servedEventTypes": [3],
+ "spike": {
+  "on": false,
+  "note": "Events Part 3 Task 1 bench spike (temporary, server.js EVENT_SPIKE; Task 5 replaces it). With on: the event censusId is served with eventType (1 = Event Boards button), the rows of boardFixture are added to the master sphere tables (type 4) and handed out on GET /user/sphere and on a check whose boardTypes has 4, stageSpherePoint = the Event Coins of a save that has none, /user/sphere/update works on them. boardEndTime: override of the evStage boardEndTime of the event rows (null = keep). sphereOverrides: {sphereBoardId: {field: value}} on the fixture sphere rows (variants). handOut false: no board is handed out (empty list). The plan named EV-0759, which is not a served record: EV-0760 (donor eventType 1, open in the events1 week) is used.",
+  "censusId": "EV-0760",
+  "eventType": 1,
+  "boardFixture": "test-fixtures/event_board_spike.json",
+  "stageSpherePoint": 500,
+  "boardEndTime": null,
+  "handOut": true,
+  "sphereOverrides": {}
+ },
  "imgVersion": 5,
  "shortWindowHours": 12,
  "serve": {
