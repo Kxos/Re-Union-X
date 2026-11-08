@@ -103,10 +103,13 @@ def poi_of(parts):
 
 
 def pick_files(key, copies, indexes=None):
-    """copies [(label, {(key, part|None): path or bytes})], in order of trust (JP 4.3.1 first): the STG from the first copy
-    that has it, then each part it names from the first copy that has it (a part found in another original copy of the same
-    bin is used; nothing else is ever put in). indexes {label: set of client names}: copies known by name only (no bytes),
-    listed in `tried`. -> (files {(key, part|None): ...}, sources {client name: label}, tried [{copy, stg, parts}])"""
+    """copies [(label, {(key, part|None): path or bytes})], in order of trust (JP 4.3.1 first). Every file of a map comes from
+    ONE copy: the first that has the STG and all the parts it names (fix round 1, review I1: never mix bins or versions).
+    Only when no copy is whole, the STG copy is completed with parts of other copies, and only if every file such a copy
+    shares with the STG copy is byte-identical (at least one shared file: the part is provably the same version); else the
+    map stays incomplete (conflict -> status missing, cause 'copies differ'). indexes {label: set of client names}: copies
+    known by name only (no bytes), listed in `tried`.
+    -> (files {(key, part|None): ...}, sources {client name: label}, tried [{copy, stg, parts}], conflict str or None)"""
     tried = []
     for label, fs in copies:
         tried.append({'copy': label, 'stg': (key, None) in fs, 'parts': sorted(k[1] for k in fs if k[0] == key and k[1] is not None)})
@@ -114,25 +117,42 @@ def pick_files(key, copies, indexes=None):
         stg_name = file_names(key, 0)[0]
         parts = sorted(int(n[-6:-4]) for n in names if n.startswith(stg_name[:-4] + '_') and n.endswith('.bin'))
         tried.append({'copy': label, 'stg': stg_name in names, 'parts': parts, 'names_only': True})
-    out, src = {}, {}
+    rd = lambda x: x if isinstance(x, (bytes, bytearray)) else open(x, 'rb').read()
 
-    def take(k, name):
+    def nparts(fs):
+        try:
+            return mapfile.parse_stg(rd(fs[(key, None)]))['parts']
+        except Exception:  # noqa: BLE001  (mapfile.load_stage reports it)
+            return 0
+
+    names = lambda n: list(zip([(key, None)] + [(key, k) for k in range(n)], file_names(key, n)))
+    with_stg = [(label, fs) for label, fs in copies if (key, None) in fs]
+    for label, fs in with_stg:                      # one whole copy
+        n = nparts(fs)
+        if all(k in fs for k, _ in names(n)):
+            return {k: fs[k] for k, _ in names(n)}, {nm: label for _, nm in names(n)}, tried, None
+    if not with_stg:
+        return {}, {}, tried, None                  # load_stage: STG absent
+    label0, fs0 = with_stg[0]
+    n = nparts(fs0)
+    out, src = {(key, None): fs0[(key, None)]}, {file_names(key, 0)[0]: label0}
+    for k, nm in names(n)[1:]:
         for label, fs in copies:
             if k in fs:
-                out[k] = fs[k]
-                src[name] = label
-                return
-
-    take((key, None), file_names(key, 0)[0])
-    if (key, None) in out:
-        rd = out[(key, None)]
-        try:
-            n = mapfile.parse_stg(rd if isinstance(rd, (bytes, bytearray)) else open(rd, 'rb').read())['parts']
-        except Exception:  # noqa: BLE001  (mapfile.load_stage reports it)
-            n = 0
-        for k, name in enumerate(file_names(key, n)[1:]):
-            take((key, k), name)
-    return out, src, tried
+                out[k], src[nm] = fs[k], label
+                break
+    if len(out) < n + 1:
+        return out, src, tried, None                # load_stage: part N absent
+    for label, fs in copies:                        # a copy that lends a part must agree with the STG copy on what both hold
+        if label == label0 or label not in src.values():
+            continue
+        shared = [(k, nm) for k, nm in names(n) if k in fs and k in fs0]
+        if not shared:
+            return out, src, tried, '%s shares no file with %s (same version not provable)' % (label, label0)
+        diff = [nm for k, nm in shared if rd(fs[k]) != rd(fs0[k])]
+        if diff:
+            return out, src, tried, '%s and %s hold different %s' % (label, label0, ', '.join(diff))
+    return out, src, tried, None
 
 
 def cause_of(why):
@@ -142,7 +162,7 @@ def cause_of(why):
         return 'part %s absent' % m.group(2) if m.group(2) else 'STG absent'
     for pre, c in (('rooms not served', 'rooms not served'), ('enemies not in the master', 'enemies not in the master'),
                    ('old format', 'old format'), ('incoherent', 'incoherent'), ('enemy swap', 'enemy swap finds no record'),
-                   ('map key twice', 'map key twice')):
+                   ('map key twice', 'map key twice'), ('copies differ', 'copies differ')):
         if (why or '').startswith(pre):
             return c
     return 'other'
@@ -214,8 +234,12 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
                            'cause': 'map key twice'})
             continue
         seen.add(it['key'])
-        fk, src, tried = pick_files(it['key'], copies, indexes)
-        res, raw = check_item(it, fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(it['key'])))
+        fk, src, tried, conflict = pick_files(it['key'], copies, indexes)
+        if conflict:
+            res, raw = {'stageId': it['stageId'], 'key': it['key'], 'censusId': it.get('censusId'), 'name': it.get('name'),
+                        'status': 'missing', 'why': 'copies differ: ' + conflict}, None
+        else:
+            res, raw = check_item(it, fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(it['key'])))
         if any(v != 'jp431' for v in src.values()):
             res['copies'] = {n: v for n, v in sorted(src.items()) if v != 'jp431'}
         if res['status'] != 'imported':

@@ -114,11 +114,36 @@ try:
     jp_less = {k: v for k, v in files.items() if k != (740140, 0)}
     rep7 = ies.run(items[:1], jp_less, rooms, set(ids), rewards, out)
     assert rep7['stages'][0]['status'] == 'missing' and rep7['stages'][0]['cause'] == 'part 0 absent', rep7['stages'][0]
-    other = [('bundle2016', {(740140, 0): files[(740140, 0)]})]
-    rep8 = ies.run(items[:1], jp_less, rooms, set(ids), rewards, out, None, other)
+    # fix round 1 (review I1): never a mix of bins or versions
+    rb = lambda k: open(files[k], 'rb').read()
+    whole = {k: rb(k) for k in files if k[0] == 740140}
+    # (a) single-copy pick: the whole map comes from the one copy that has every file, none from the incomplete JP copy
+    rep8 = ies.run(items[:1], jp_less, rooms, set(ids), rewards, out, None, [('bundle2016', whole)])
     s8 = rep8['stages'][0]
-    assert s8['status'] == 'imported' and s8['copies'] == {'mappoi_stg740140_00.bin': 'bundle2016'}, s8
-    assert open(os.path.join(out, 'stage', 'mappoi_stg740140_00.bin'), 'rb').read() == open(files[(740140, 0)], 'rb').read()
+    assert s8['status'] == 'imported' and s8['copies'] == {n: 'bundle2016' for n in ies.file_names(740140, len(parts))}, s8
+    assert open(os.path.join(out, 'stage', 'mappoi_stg740140_00.bin'), 'rb').read() == rb((740140, 0))
+    # (b)-(d) a 3-part map (740261) whose JP copy lacks part 1; the lending copy has the STG and part 1, not part 0 (not whole)
+    MK = 740261
+    stm, pm = mapfile.load_stage(files, MK)
+    ids_m = {e['enemyId'] for x in pm for e in x['enemies']}
+    rooms_m = {x['room'] for x in pm}
+    rw_m = {e['reward'] for x in pm for e in x['enemies']} | {c['reward'] for x in pm for c in x['chests']}
+    it_m = {'stageId': 7, 'key': MK, 'name': 'mix', 'enemies': [{'enemyId': i} for i in sorted(ids_m)]}
+    jp_m = {k: v for k, v in files.items() if k != (MK, 1)}
+    # (b) mixed pick accepted: the shared STG is byte-identical to the JP one
+    same = {(MK, None): rb((MK, None)), (MK, 1): rb((MK, 1))}
+    s10 = ies.run([it_m], jp_m, rooms_m, ids_m, rw_m, out, None, [('bundle2016', same)])['stages'][0]
+    assert s10['status'] == 'imported' and s10['copies'] == {'mappoi_stg740261_01.bin': 'bundle2016'}, s10
+    # (c) mixed pick refused: the shared STG differs (another version) -> incomplete, cause 'copies differ', nothing written
+    other_stg = bytearray(rb((MK, None)))
+    other_stg[-1] ^= 1
+    diff = {(MK, None): bytes(other_stg), (MK, 1): rb((MK, 1))}
+    s11 = ies.run([it_m], jp_m, rooms_m, ids_m, rw_m, out, None, [('bundle2016', diff)])['stages'][0]
+    assert s11['status'] == 'missing' and s11['cause'] == 'copies differ' and 'mappoi_stg740261.bin' in s11['why'], s11
+    assert os.listdir(os.path.join(out, 'stage')) == [], 'nothing written for a refused mix'
+    # (d) mixed pick refused: the lending copy shares no file with the STG copy (same version not provable)
+    s12 = ies.run([it_m], jp_m, rooms_m, ids_m, rw_m, out, None, [('bundle2016', {(MK, 1): rb((MK, 1))})])['stages'][0]
+    assert s12['status'] == 'missing' and s12['cause'] == 'copies differ' and 'shares no file' in s12['why'], s12
     rep9 = ies.run(items[1:2], files, rooms, set(ids), rewards, out, None, [('bundle2016', {})], {'ww2018 index': set()})
     assert [c['copy'] for c in rep9['stages'][0]['tried']] == ['jp431', 'bundle2016', 'ww2018 index'], rep9['stages'][0]['tried']
     # rooms of every map that could be read (imported or left out for its rooms): the list make_jp_rooms.py builds

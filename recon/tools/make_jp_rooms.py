@@ -70,8 +70,8 @@ def event_rooms_from_list(path):
     """rooms of event_rooms.json ({rooms: [...]} or a plain list) -> sorted tuple. A missing list or a bad room name stops
     the run: a silent empty list would drop rooms already built (the files of the rooms not planned are removed)."""
     if not os.path.exists(path):
-        raise SystemExit('event rooms list not found: %s (written by recon/tools/import_event_stages.py; '
-                         '--event-rooms to point at another copy)' % path)
+        raise SystemExit('event rooms list not found: %s (run python -I recon/tools/import_event_stages.py first: it '
+                         'writes the list, --rooms-out; or --event-rooms to point at another copy)' % path)
     data = json.load(open(path, encoding='utf-8'))
     rooms = data.get('rooms') if isinstance(data, dict) else data
     if not isinstance(rooms, list):
