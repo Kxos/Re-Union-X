@@ -96,7 +96,7 @@ The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is 
 
 Each **board set** (the boards of a month, shared by its events) has **one balance**, and Event Coins **never expire** (**not original**: the original game lost them when the event ended, as the board screen still says). Each cell and each finished board gives its reward **once**.
 
-One board set is listed at a time: the set of the **last event quest you started**, otherwise the newest set of your Story week, otherwise the set of your **kept event**. The Event Coins shown on the boards are that set's balance; the other sets keep theirs.
+One board set is listed at a time: the set of the **last event quest you started** (only a quest of an event whose Event Boards are available counts), otherwise the newest set of your Story week, otherwise the set of your **kept event**. The Event Coins shown on the boards are that set's balance; the other sets keep theirs.
 
 In the original game every cell of an Event Board paid a reward. A board with a cell that cannot be paid here yet (mostly a **Booster**) is **not served**, nor is a board that opens after it: it comes back whole with the Boosters in a later update. The sets of **February 2019, April 2019, June 2019, October 2019 and December 2019** have no board left (14 events): those events are served **without Event Boards**, and the Event Coins they pay are **kept** in the balance of their set, which is not shown until its boards arrive.
 

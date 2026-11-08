@@ -749,6 +749,38 @@ const tests = {
     assert.ok(plain.index.entries.every((e) => e.boardSet === null && e.eventType === 3));
     assert.deepStrictEqual(plain.index.boardSets, {});
   },
+  // Part 3 final fix: a feeder keeps its donor eventType (3: no Event Boards button); only a donor-1 entry gets 1
+  feeder_keeps_donor_type() {
+    const m = { ...master(), ...BOARD_MASTER() };
+    const sets = boardSets();
+    sets.sets[0].censusIds = ['E-1', 'E-5'];
+    const recs = [...records(), record('E-5', [quest(700050, 1, [501])], { evStage: [donorEv({ eventStageId: 900005, eventType: 3 })] })];
+    const out = me.buildEvents(recs, CONFIG, m, undefined, undefined, null, sets);
+    const e1 = entry(out, 'E-1'), e5 = entry(out, 'E-5');
+    assert.strictEqual(e1.eventType, 1);
+    assert.strictEqual(e5.boardSetKey, '2099-01', 'the coins of the feeder accrue to the set');
+    assert.strictEqual(e5.boardSet, '2099-01');
+    assert.strictEqual(e5.eventType, 3, 'a donor-3 feeder keeps 3');
+    assert.ok(e5.rows.every((r) => r.eventType === 3));
+    assert.ok(out.evStage.filter((r) => e5.rows.some((x) => x.evStageId === r.eventStageId)).every((r) => r.eventType === 3), 'the evStage rows too');
+    assert.deepStrictEqual(Object.keys(out.index.boardSets), ['2099-01']);
+  },
+  feeder_alone_does_not_hand_out_set() {
+    const m = { ...master(), ...BOARD_MASTER() };
+    const sets = boardSets();
+    sets.sets[0].censusIds = ['E-5'];
+    const recs = [record('E-5', [quest(700050, 1, [501])], { evStage: [donorEv({ eventStageId: 900005, eventType: 3 })] })];
+    const out = me.buildEvents(recs, CONFIG, m, undefined, undefined, null, sets);
+    const e5 = entry(out, 'E-5');
+    assert.strictEqual(e5.boardSetKey, '2099-01');
+    assert.strictEqual(e5.boardSet, null, 'a feeder alone does not hand out the set');
+    assert.strictEqual(e5.eventType, 3);
+    assert.ok(e5.rows.every((r) => r.eventType === 3));
+    assert.ok(out.evStage.every((r) => r.eventType === 3));
+    assert.deepStrictEqual(out.index.boardSets, {});
+    assert.strictEqual(out.sphere.length, 0);
+    assert.ok(e5.labels.includes('noCoinSource'), JSON.stringify(e5.labels));
+  },
   boards_in_patch() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-events-'));
     const md = path.join(dir, 'master'), gd = path.join(dir, 'game_data');

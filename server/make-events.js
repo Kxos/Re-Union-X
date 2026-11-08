@@ -382,11 +382,12 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
 
   // eventType served on /stage/event (bench 08-11): the client turns 1 into the board mode with the «Event Boards» button and 2 into
   // the raid mode (Raid Boards); original videos show no button on the quest list of a non-board event (Defeat Titan, donor 1).
-  // An entry with a board set handed out (Part 3 Task 4): config.boardEventType (1) on every row. Otherwise a donor value in
+  // A row of an entry whose board set is handed out and whose donor value is the board type (1): config.boardEventType (1), the Event
+  // Boards button. A feeder with another donor value (a challenge event, donor 3) keeps it: no button. Otherwise a donor value in
   // config.servedEventTypes stays, except the board type, and anything else gives config.eventType (3, plain list); the donor value
   // stays in origEventType.
   const servedType = (t, boardSet) => {
-    if (boardSet) return config.boardEventType;
+    if (boardSet && t === config.boardEventType) return config.boardEventType;
     return Number.isInteger(t) && t !== config.boardEventType && (config.servedEventTypes || []).includes(t) ? t : config.eventType;
   };
   for (const rec of records) {
@@ -524,7 +525,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     // the entry's board set: handed out when it has a built board and this entry a served quest
     if (entry.boardSetKey && !raidish && entry.stageIds.length && builtBoards(entry.boardSetKey).length) {
       entry.boardSet = entry.boardSetKey;
-      entry.eventType = servedType(null, entry.boardSet);
+      entry.eventType = servedType([].concat(entry.origEventType).includes(config.boardEventType) ? config.boardEventType : null, entry.boardSet);
     }
     if (raidish) entry.why = `raid or Special ${raidish}: served by make-raid / make-special`;
     else if (!entry.stageIds.length) {
@@ -580,7 +581,19 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     out.index.entries.push(entry);
   }
   // board sets handed out: their rows and the index; a member entry of a set not handed out says why (label)
-  const handed = new Set(out.index.entries.map((e) => e.boardSet).filter(Boolean));
+  // a set is handed out only when one of its entries is served as eventType 1 (donor 1); a feeder alone does not hand it out, its
+  // coins still accrue to the set (boardSetKey). The entries of a set not handed out go back to the plain list.
+  const handed = new Set(out.index.entries.filter((e) => e.boardSet && e.eventType === config.boardEventType).map((e) => e.boardSet));
+  for (const e of out.index.entries) {
+    if (!e.boardSet || handed.has(e.boardSet)) continue;
+    e.boardSet = null;
+    e.eventType = servedType([].concat(e.origEventType).length === 1 ? e.origEventType : null, null);
+    for (const r of e.rows) {
+      r.eventType = r.donorEvStageId !== null ? servedType(r.origEventType, null) : e.eventType;
+      const row = out.evStage.find((x) => x.eventStageId === r.evStageId);
+      if (row) row.eventType = r.eventType;
+    }
+  }
   if (eb) {
     for (const st of sets) {
       if (!handed.has(st.setKey)) continue;

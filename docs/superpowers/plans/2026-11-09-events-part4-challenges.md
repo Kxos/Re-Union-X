@@ -49,7 +49,7 @@ One record file per year. A year is served only when its records, enemies, maps 
 
 1. **Booster rewards.** A quest reward that is a Booster (31 rows carry the census `booster` flag) is not paid now. The quest is served with its other rewards. The Booster is recorded once in `player.pendingBoosters` (`[{emblemName, stageId, objective}]`) for Part 6 to grant, and the catalogue shows it as «comes with the Boosters». Label `boosterLater`. A Booster that is the quest's only reward holds the quest (`boosterOnly`).
 2. **Quizzes need their question.** A quiz quest is served only when the drama with its question is in our resources (`validBeforeDrama`). Otherwise it is not served (reason `quizTextMissing`), and the user is asked before any reconstruction.
-3. **Coin feeders.** A challenge event that pays type 15 gets the `boardSetKey` of the month's board set. The mapping is extended in `board_sets.json`, with a source for each event. With no cited set, the quest's coins are logged, not paid, and labelled `noBoardSet`.
+3. **Coin feeders.** A challenge event that pays type 15 gets the `boardSetKey` of the month's board set. The mapping is extended in `board_sets.json`, with a source for each event. With no cited set, the quest's coins are logged, not paid, and labelled `noBoardSet`. A feeder keeps its donor `eventType` (3: no Event Boards button; Part 3 `feeder_keeps_donor_type`), and a feeder alone does not hand out a set: only a set with a donor-1 entry is handed out, the coins of the feeders still accrue to it (`feeder_alone_does_not_hand_out_set`).
 4. **Years in order:** 2018-04..12, then 2019, 2020 and 2021. Surprise events and Time Missions are served last, in their own record file.
 
 ## Review Focus
@@ -133,6 +133,7 @@ Same procedure as Part 3 Task 7a.
 - Modify: `server/make-events.js`, `server/event_config.json` (`serve.types` + `EQ`, `KEY`, `QUIZ`; `payableTypes: [1, 3, 5, 15]`; `reasonText` and `reconstructedWhy` for `boosterLater`, `boosterOnly`, `rewardTypeUnknown`, `quizTextMissing`, `noBoardSet`, `notice`).
 - Modify: `server/routes-events.js` (a Booster reward goes to `player.pendingBoosters` once).
 - Modify: `server/event-pages.js` (a Booster cell or reward line «comes with the Boosters»).
+- Also in Task 4 (the new code `noQuests: 'notice'`): add `'notice'` to `REASONS` in `server/make-events.js` (otherwise `unknown reason` stops the run), and widen `informative()` in `server/event-pages.js` (today `e.noQuests === 'board'` only) to `['board', 'notice'].includes(e.noQuests)`, so that `entriesOf` drops the notice rows (`notice_row_not_listed`).
 - Test: `server/test-make-events.js`, `server/test-event-routes.js`, `server/test-event-pages.js`.
 
 **Interfaces:**
