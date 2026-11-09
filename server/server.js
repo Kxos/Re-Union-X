@@ -35,6 +35,7 @@ const vipBenefit = require('./vip-benefit');
 const infoAlbum = require('./routes-info-album');
 const routesRaid = require('./routes-raid'); // raid routes (docs/notes/raid.md)
 const routesEvents = require('./routes-events'); // event quest routes (docs/notes/events.md)
+const { eventsTabOrder } = require('./events-tab-order'); // Events tab order (user 10-11)
 const eventBoardRoutes = require('./routes-event-boards'); // Event Coins and Event Boards (type 4)
 const raidPages = require('./raid-pages'); // Raid Catalog web pages (Task 9)
 const eventPages = require('./event-pages'); // Event Catalog web pages (Events Part 1, Task 5)
@@ -4374,11 +4375,10 @@ function respondStageEvent(res, body) {
   if (fs.existsSync(evPath)) {
     try { events = JSON.parse(fs.readFileSync(evPath, 'utf8')); } catch (e) { console.log('[event] event.json non valido:', e.message); }
   }
-  // Events tab: the Raid Catalog banner, the Event Catalog banner, the kept raid and the week's raids, then the event quests
-  // (routes-events.js). The Raid Catalog banner is the only raid card of eventType 0.
+  // Events tab (events-tab-order.js, user 10-11): Raid Catalog, Event Catalog, kept raid, kept event, then the week's raids
+  // and event quests (routes-events.js). The Raid Catalog banner is the only raid card of eventType 0.
   if (Number(body?.eventCategory) === 2) {
-    const raids = raid().events(), n = raids.length && raids[0].eventType === 0 ? 1 : 0;
-    events = [...raids.slice(0, n), ...eventRoutes().catalogEvents(), ...raids.slice(n), ...eventRoutes().events(), ...events];
+    events = [...eventsTabOrder(raid().events(), eventRoutes().catalogEvents(), eventRoutes().events()), ...events];
   }
   send(res, 200, { ret: ret(), events, highScoreRank: 0 });
 }

@@ -117,8 +117,9 @@ Checked on our master (`server/master_data`, 6 Nov 2026):
 
 - **Index**: `server/game_data/events.json` (make-events.js), read once by `server.js` (`KHUX_EVENT_INDEX` overrides the path for tests);
   absent: the Events tab lists only the raids.
-- **Order of the Events tab** (`/stage/event` category 2): Raid Catalog banner, kept raid, the week's raids (routes-raid.js), then the
-  kept event, then the week's events (`routes-events.js`), then `save/event.json` (bench only).
+- **Order of the Events tab** (`/stage/event` category 2, `server/events-tab-order.js`, user 10-11-2026): Raid Catalog banner, Event
+  Catalog banner, kept raid, kept event, then the week's raids (routes-raid.js) and the week's events (`routes-events.js`), then
+  `save/event.json` (bench only). A kept card is recognised by its `-kept` banner copy.
 - **Which events are listed** (`event-calendar.js`, the Shop week `shopFrom` / `shopTo` of `storyCtx()`, as the raids): every entry with an
   `evStage` row whose dates overlap the week, all of them (an event of three weeks stays three real weeks; no largest-overlap rule as for
   the weekly raids), with its served quests only. A short-window event (`days`) opens on the real weekday (Pacific) of its day inside the
