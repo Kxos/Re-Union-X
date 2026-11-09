@@ -78,12 +78,13 @@ function noticeMessages(n) {
       if (i === 0 && s.heading) e.title = s.heading.slice(0, 256);
       if (si === 0 && i === 0) {
         e.author = { name: [n.kind, n.date].filter(Boolean).join(' · ') || 'Notice' };
-        if (!e.title) { e.title = n.title.slice(0, 256); e.url = PORTAL; }
+        if (!e.title) e.title = n.title.slice(0, 256);
+        e.url = noticeUrl(n.title);   // the portal opens that notice directly (routes-info-album.js, data-s slug)
       }
       embeds.push(e);
     });
   });
-  embeds[embeds.length - 1].footer = { text: 'Re-Union X · in-game Notices · full list: re-union-x.github.io/Re-Union-X/notices' };
+  embeds[embeds.length - 1].footer = { text: 'Re-Union X · in-game Notices · tap the title to read it on the website' };
   const msgs = [];
   let cur = [], size = 0;
   for (const e of embeds) {
@@ -95,6 +96,11 @@ function noticeMessages(n) {
   const out = msgs.map((embeds) => ({ embeds, allowed_mentions: { parse: [] } }));
   out[0].content = preview(n.body);   // what the forum list shows under the post title
   return out;
+}
+
+// Same slug as the portal page (server/routes-info-album.js noticesPage): /notices/#<slug> opens that notice.
+function noticeUrl(title) {
+  return PORTAL + '#' + String(title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 // The first sentence of the notice, for the forum list preview.

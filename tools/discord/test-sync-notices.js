@@ -18,6 +18,15 @@ assert.deepStrictEqual(b[0].embeds.map((e) => e.title), ['B', 'Sub']);
 assert.strictEqual(b[0].embeds[0].author.name, 'IMPORTANT · 11/10');
 assert.ok(b[0].embeds.every((e) => !e.description.includes('###')));
 assert.strictEqual(b[0].content, 'New text.');
+assert.strictEqual(noticeMessages({ title: 'Story Quests 526-979', kind: 'IMPORTANT', date: '1/1', body: 'x' })[0].embeds[0].url,
+  'https://re-union-x.github.io/Re-Union-X/notices/#story-quests-526-979');
+
+// every real notice link matches a data-s slug of the published portal page
+const page = fs.readFileSync(path.join(__dirname, '..', '..', 'docs', 'notices', 'index.html'), 'utf8');
+for (const n of parseNotices(fs.readFileSync(path.join(__dirname, '..', '..', 'docs', 'NOTICES.md'), 'utf8'))) {
+  const s = noticeMessages(n)[0].embeds[0].url.split('#')[1];
+  assert.ok(page.includes(`data-s="${s}"`), 'portal has no notice ' + s);
+}
 
 // chunks respect the limit and keep every character of the paragraphs
 const long = Array.from({ length: 50 }, (_, i) => `Paragraph ${i} ` + 'x'.repeat(300)).join('\n\n');
