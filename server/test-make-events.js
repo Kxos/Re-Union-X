@@ -992,6 +992,24 @@ const tests = {
     const bad = { ...CONFIG, quizDramas: { 'E-QL/+0': { ids: [1990011], label: 'wikiAp' } } };
     assert.throws(() => me.buildEvents(recs(), bad, master(), undefined, {}, null, null, { dramas: [1990011] }), /wikiAp/);
   },
+  // Part 4 Task 6 (coordinator ruling): every original quiz run sent its stages to the same answer maps (720510 / 720520 / 720530),
+  // so quiz stages of two quiz records share a map key whose drops are equal; any other second record on that key still waits
+  quiz_answer_map_shared() {
+    const k = { map: { key: 745300, stageBinId: 745300, status: 'ok' }, drama: { before: 1, after: 0, beforeIds: [1900501], afterIds: [] } };
+    const a = record('E-QA', [quest(700730, 1, [501], k)], { type: 'QUIZ' });
+    const b = record('E-QB', [quest(700731, 1, [501], k)], { type: 'QUIZ', start: '2019-05-01', end: '2019-05-07' });
+    const c = record('E-QC', [quest(700732, 1, [501], { ...k, drops: { enemies: [{ enemy: 501, rewardId: 999, rows: [] }], chests: [] } })], { type: 'QUIZ', start: '2019-06-01', end: '2019-06-07' });
+    const d = record('E-QE', [quest(700733, 1, [501], { map: k.map })], { start: '2019-07-01', end: '2019-07-07' });
+    const cfg = { ...CONFIG, quizDramas: { 'E-QA/+0': [1990021], 'E-QB/+0': [1990022], 'E-QC/+0': [1990023] } };
+    const out = me.buildEvents([a, b, c, d], cfg, master(), undefined, {}, null, null, { dramas: [1990021, 1990022, 1990023] });
+    const qa = entry(out, 'E-QA').quests[0], qb = entry(out, 'E-QB').quests[0];
+    assert.ok(qa.served && qb.served, JSON.stringify([qa.why, qb.why]));
+    assert.notStrictEqual(qa.stageId, qb.stageId, 'each quiz stage keeps its own stage row');
+    assert.deepStrictEqual(out.stage.filter((st) => st.stageBinId === 745300).map((st) => st.beforeDramaId), [[1990021], [1990022]]);
+    assert.strictEqual(out.maps.filter((m) => m.key === 745300).length, 1, 'the map is listed once');
+    assert.strictEqual(entry(out, 'E-QC').quests[0].reason, 'mapKeyUsed', 'other drops: still a clash');
+    assert.strictEqual(entry(out, 'E-QE').quests[0].reason, 'mapKeyUsed', 'a non-quiz quest on a quiz map: still a clash');
+  },
   // fix round 1 (M3): a record's own boardSetKey that the board sets do not have stops the run (when board sets are given)
   record_set_key_known() {
     const m = { ...master(), ...BOARD_MASTER() };

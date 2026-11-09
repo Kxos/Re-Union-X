@@ -373,7 +373,7 @@ const NOTICES = [
       ...raidNoticeLines(raidNoticeFacts())] },
   // Events Part 1 Task 8 (07-11): event quests, Event Catalog, kept event, short windows, coins, no raid spawns (user decision 07-11,
   // notice 49535), counts and labels from events.json (eventNoticeFacts); docs/notes/events.md
-  { date: '11/08', tag: 'IMPORTANT', title: 'Events',
+  { date: '11/10', tag: 'IMPORTANT', title: 'Events',
     body: ['The **Event Quests** are back: the limited-time events of the original game, with their original maps, enemies, objectives and rewards wherever their files survive. They are in **Quests > Events**, after the raids.',
       'Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.',
       ...eventNoticeLines(eventNoticeFacts()),

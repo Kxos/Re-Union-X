@@ -608,11 +608,19 @@ Everything up to the live master regen; the regen, resources 109 and the bench f
 - **Event Catalog.** Game-year tabs like the Raid Catalog's. The Story week's year opens first, and only its cards load.
   Real index: 324 events, 57.5 KB.
 - **Dry regen** (copy of server/ at the repository's depth `tmp\t6r`, records copied; nothing live written):
-  - 1,982 of 2,896 event quests served (634 of 798 before); 244 events with a served quest.
-  - Challenge records: 2018 423 served, 2019 295, 2020 532, 2021 56 (1,306 of 2,272 quests).
-  - Not served: mapUnusable 597, enemyMissing 167, mapKeyUsed 88, wikiEmpty 38, objectiveMismatch 18, boosterOnly 5,
+  - 2,012 of 2,896 event quests served (634 of 798 before); 247 events with a served quest.
+  - Challenge records: 2018 453 served, 2019 295, 2020 532, 2021 56 (1,336 of 2,272 quests).
+  - Not served: mapUnusable 597, enemyMissing 146, mapKeyUsed 79, wikiEmpty 38, objectiveMismatch 18, boosterOnly 5,
     rewardTypeUnknown 1.
-  - Quizzes: 23 served (EV-0538 14, EV-0910 7, EV-0763 2). EV-0624 has 9 quests held as mapKeyUsed: EV-0538 builds the
-    shared quiz maps 720510/720530 first. EV-0484 and EV-0500 are enemyMissing (WW check: no khuxwiki page of the run).
+  - Quizzes: 53 served (EV-0484 14, EV-0500 7, EV-0538 14, EV-0624 9, EV-0910 7, EV-0763 2); the others are on the
+    incomplete maps 720520 / 740260 / 740262 (mapUnusable).
+    - **Shared answer maps** (coordinator ruling): every original quiz run sent its stages to the same answer maps 720510 /
+      720520 / 720530 (and 740260-62). A quiz stage of another quiz record may share such a map key when the drops are equal;
+      any other second record on a key still waits (make-events.js, test quiz_answer_map_shared).
+    - **Quiz pages pinned by their answers** (build_challenge.py `quiz_pages_pinned`, private test `test_quiz_pin.py`).
+      EV-0484 / EV-0500 share their stage names with EV-0538, so the run rules could not pin their bare khuxwiki pages, and
+      the WW check held them. The bare page is now the page of the run when every quiz stage of the record has its page in
+      quiz_texts.json and each page's answer is the exit of the stage's WW answer map (20 / 10 independent checks). The WW
+      check then runs on that page's enemy list: it agrees on 720510 / 720530. The 720520 quests stay held (map incomplete).
   - 106 of 106 tables valid. Changed tables: stage, evStage, reward, enemy, enemyAttack.
   - Every stage and evStage id served before is unchanged. Only 4000021 and 4000027 change (their board drama).

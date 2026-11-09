@@ -608,14 +608,17 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // difficulty variants of one record share a donor map (same stageBinId, map and POI written once: the POI holds only the
       // uid -> reward rows of the map file, the level of a variant is its stage row's addLevel); another record or other drops: not served
       const prior = builtMaps.get(mapKey);
-      if (prior && prior.censusId !== rec.censusId) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
       const dropsKey = JSON.stringify(q.drops || null);
+      // quiz answer maps (Part 4 Task 6, coordinator ruling): every original quiz run sent its stages to the same answer maps
+      // (720510 / 720520 / 720530, 740260-740262), so a quiz stage of another quiz record shares the map key when the drops are equal
+      const quizShare = !!(prior && quiz && prior.quiz && prior.dropsKey === dropsKey);
+      if (prior && prior.censusId !== rec.censusId && !quizShare) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
       if (prior && prior.dropsKey !== dropsKey) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
         drops: q.drops || null, served: false };
-      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem }); put(out.maps, mapItem); }
+      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz }); put(out.maps, mapItem); }
       const newRewards = [];
       if (maps) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
