@@ -48,11 +48,13 @@ The **Event Quests** are back: the limited-time events of the original game, wit
 
 Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.
 
-Today **247 events** are served, with **2012 of their 2896 quests** (346 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+Today **254 events** are served, with **2130 of their 3070 quests** (403 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
 
 ### Challenge events
 
-The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **155 events** of 2018 to 2021 are served, with **1395 of their 2165 quests**. The Event Catalog lists the others with the reason they are not here yet.
+The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **162 events** of 2018 to 2021 are served, with **1513 of their 2339 quests**. The Event Catalog lists the others with the reason they are not here yet.
+
+**Surprise events** and **Time Missions** are back: today 1 Surprise event and 6 Time Missions events (**118 quests**). In the original game a Surprise event opened a few times a day for 15 to 60 minutes, and each group of Time Missions quests for one hour at a time; here each of them is open for its **whole original day** (Pacific time, on the real weekday of that day in your Story week) and is gone the next day (**not original**). A Time Missions event lists all its quests on each of its days. The other Surprise events wait in the Event Catalog, with the reason.
 
 The **quiz** events asked their question on a picture board before the quest, and no original board survives in the game files, so every board is **reconstructed**: 65 are redrawn in the original style from the question text recorded on the community wiki (obvious typing errors of the wiki corrected), 5 come from screenshots of the original boards and 5 are redrawn from videos of the original game. Today **53 quiz quests** are served with their board; the others wait, mostly for a map file that is incomplete.
 
@@ -155,6 +157,8 @@ Where a quest or event is not exactly as in the original game, the Event Catalog
 - Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops).
 
 - One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.
+
+- In the original this event was open for a short window (minutes to hours); here it is open for its whole original day.
 
 - Quest rebuilt from the khuxwiki page: no master row of the original is known
 

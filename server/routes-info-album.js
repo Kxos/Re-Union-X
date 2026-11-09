@@ -85,6 +85,10 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
     from: chYears[0] || null, to: chYears[chYears.length - 1] || null,
     quiz: servedQ.filter((q) => (q.labels || []).some((l) => /^quizBoard/.test(l))).length,
     boosters: servedQ.filter((q) => (q.labels || []).includes('boosterLater')).length };
+  // Events Part 4 Task 7: the Surprise events and Time Missions served (challenge entries open their whole day, label wholeDay)
+  const shortOn = chOn.filter((e) => (e.labels || []).includes('wholeDay'));
+  challenge.short = { surprise: shortOn.filter((e) => /surprise/i.test(e.name || '')).length, timeMissions: shortOn.filter((e) => /time mission/i.test(e.name || '')).length,
+    served: shortOn.flatMap((e) => e.quests || []).filter((q) => q.served).length };
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
     first: starts[0] || null, last: starts[starts.length - 1] || null, coins, challenge,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
@@ -103,6 +107,7 @@ function eventChallengeLines(f) {
     c && c.events
       ? `The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **${c.events} events**${span} are served, with **${c.served} of their ${c.quests} quests**. The Event Catalog lists the others with the reason they are not here yet.`
       : 'The **challenge and battle events** (Keyblade Challenges and quizzes included) are listed in the Event Catalog; none of their quests is served yet.',
+    ...(c && c.short && (c.short.surprise || c.short.timeMissions) ? [`**Surprise events** and **Time Missions** are back: today ${c.short.surprise} Surprise event${c.short.surprise === 1 ? '' : 's'} and ${c.short.timeMissions} Time Missions event${c.short.timeMissions === 1 ? '' : 's'} (**${c.short.served} quests**). In the original game a Surprise event opened a few times a day for 15 to 60 minutes, and each group of Time Missions quests for one hour at a time; here each of them is open for its **whole original day** (Pacific time, on the real weekday of that day in your Story week) and is gone the next day (**not original**). A Time Missions event lists all its quests on each of its days. The other Surprise events wait in the Event Catalog, with the reason.`] : []),
     `The **quiz** events asked their question on a picture board before the quest, and no original board survives in the game files, so every board is **reconstructed**: ${b.reconstructed} are redrawn in the original style from the question text recorded on the community wiki (obvious typing errors of the wiki corrected), ${b.original_screenshot} come from screenshots of the original boards and ${b.footage_redraw} are redrawn from videos of the original game.`
       + (c && c.quiz ? ` Today **${c.quiz} quiz quests** are served with their board; the others wait, mostly for a map file that is incomplete.` : ''),
     `${c && c.boosters ? `**${c.boosters}** served quest${c.boosters === 1 ? '' : 's'} paid a **Booster** among ${c.boosters === 1 ? 'its' : 'their'} rewards. ` : 'Some quests paid a **Booster** among their rewards. '}The Boosters do not exist on this server yet: a Booster reward is **recorded** when you complete its objective and given when the Boosters come in a later update; the other rewards are paid as usual. A quest whose only reward was a Booster waits for them.`,

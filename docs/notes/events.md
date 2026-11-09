@@ -625,3 +625,40 @@ Everything up to the live master regen; the regen, resources 109 and the bench f
       check then runs on that page's enemy list: it agrees on 720510 / 720530. The 720520 quests stay held (map incomplete).
   - 106 of 106 tables valid. Changed tables: stage, evStage, reward, enemy, enemyAttack.
   - Every stage and evStage id served before is unchanged. Only 4000021 and 4000027 change (their board drama).
+
+## Surprise events and Time Missions (Part 4, Task 7 preparation, 10 November 2026)
+
+Everything up to the live master regen; the regen, the resources and the bench follow.
+- **Records.** `short_2020.json` (57 records: 51 Surprise events, 6 Time Missions, 2020-02..2021-02) is now in the records
+  folder; `build_challenge.py` writes it there. Do not rerun the builder against a master that already holds the challenge
+  enemy rows (since the Task 6 regen): it reads the live master, marks those enemies as present and shrinks
+  `missing_challenge.json`, and a later `build_event_enemies.py` would then drop the rows. The Task 6 outputs are kept in
+  `tmp\events\t6p4\rebuild`.
+- **Surprise events are short although their donor row is a whole day.** The donor master has ONE row per Surprise event, from
+  08:00 UTC to 07:59:59 UTC the next day, while the original ran a few times a day for 15-60 minutes. The 12 h rule
+  (`shortWindowHours`) did not see them: the event was listed for the whole Shop week. The builder now marks these records
+  `shortWindow`, and make-events.js treats every donor row of such a record as short: the record is open on the Pacific day
+  where its row starts, label wholeDay (test `short_window_record_whole_day`). It uses the start day only, because in summer
+  08:00 UTC is 01:00 Pacific and the row would touch the next day. Time Missions need no mark: their donor rows are the hourly
+  windows (6 targets x 4 hours a day), merged into one row per day (`short_rows_one_per_day`). Each day row lists all 18 or 21
+  quests.
+- **Calendar.** `test-event-calendar.js` `short_rows_generated_shape` uses the shapes of the dry index. EV-1055 is listed on
+  Thursday 2020-03-05 from 00:00 to 23:59 Pacific, and not on 2020-03-06, its census end day. The Time Missions rows change
+  every day.
+- **Maps.** The dry regen lists 40 new candidate maps; all 40 are imported (1,489 of 1,507; same 15 + 3 left out as before),
+  80 files in `stage_gen\files\stage`. No new room (event rooms list 208, unchanged). The maps are part of the generated
+  pack, so `build-resources.ps1 -Quick` (or a full version) carries them; no static pack changes.
+- **Dry regen** (`tmp\t7r`, nothing live written): 2,130 of 3,070 quests served (2,012 before), 254 events.
+  - short_2020: 118 quests served in 7 events: EV-1055 (1 quest), the Time Missions EV-1075 (18), EV-1111, EV-1148, EV-1189,
+    EV-1224 (21 each) and EV-1271 (15 of 21). 75 evStage rows.
+  - Not served: 29 quests `enemyMissing` (26 Surprise events + 3 of EV-1271). The Surprise ones carry the Task 1 marker «no
+    WW enemy list»: no khuxwiki page pinned to the run, so the map enemies stay unconfirmed. 21 `mapKeyUsed`: every Surprise
+    event uses map 741710, and EV-1055 holds it. 6 `mapUnusable` (EV-1389/1398/1408 on map 743840 carry the same marker;
+    3 of EV-1271).
+  - Tables (dry run at imgVersion 8): only stage (+118) and evStage (+75) change. No served stage or evStage id moves;
+    106 tables valid. With imgVersion 9 the live regen also changes the bannerUrl of every event row (v9).
+- **Cards.** `make_event_banners.py --all-rows --extra` on the dry index: 125 new cards, each byte-identical to an approved
+  staging card (`t5p4\event_img_staging_short`, different ids then). The 479 old cards are unchanged. make_special_banners
+  `--section event` adds 125 kept copies; the catalogue banner is unchanged. imgVersion 8 -> 9.
+- **Notice.** «Challenge events» gains the Surprise events / Time Missions line (counts from events.json, the whole day
+  declared as not original).

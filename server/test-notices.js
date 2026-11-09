@@ -260,6 +260,18 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   check(lines.includes(`${bySrc('reconstructed')} are redrawn`) && lines.includes(`${bySrc('original_screenshot')} come from screenshots`)
     && lines.includes(`${bySrc('footage_redraw')} are redrawn from videos`) && /typing errors/.test(lines), 'Events: fonti delle tavole dei quiz dal piano');
   check(/Booster/.test(lines) && /Spirit part/.test(lines) && /later login/.test(lines), 'Events: Booster e parti dello Spirit');
+  check(!/Surprise events/.test(lines), 'Events: nessuna riga Surprise/Time Missions senza eventi serviti');
+  // Events Part 4 Task 7: Surprise events and Time Missions (wholeDay challenge entries) counted from events.json, declared all day
+  fx.entries.push({ censusId: 'S', type: 'EQ', name: 'Surprise Event! (3/5)', start: '2020-03-05', available: true, labels: ['wholeDay'], quests: [q(true)] },
+    { censusId: 'T', type: 'EQ', name: 'Time Missions! (3/26)', start: '2020-03-26', available: true, labels: ['wholeDay'], quests: [q(true), q(true), q(false)] },
+    { censusId: 'U', type: 'EQ', name: 'Surprise Event (2/2)', start: '2020-02-02', available: false, labels: [], quests: [q(false)] });
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  const f2 = n.eventNoticeFacts(path.join(dir, 'events.json'));
+  check(f2.challenge.short && f2.challenge.short.surprise === 1 && f2.challenge.short.timeMissions === 1 && f2.challenge.short.served === 3,
+    `Events: Surprise/Time Missions ${JSON.stringify(f2.challenge.short)}`);
+  const l2 = n.eventChallengeLines(f2).join(' ');
+  check(/\*\*Surprise events\*\* and \*\*Time Missions\*\*/.test(l2) && l2.includes('1 Surprise event and 1 Time Missions event (**3 quests**)')
+    && /15 to 60 minutes/.test(l2) && /whole original day/.test(l2) && /not original/.test(l2), `Events: riga Surprise/Time Missions ${l2.slice(0, 200)}`);
   const ev = n.NOTICES.find((x) => x.title === 'Events');
   const t = ev ? ev.body.join(' ') : '';
   check(t.includes("Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.")
