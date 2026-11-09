@@ -250,6 +250,44 @@ const tests = {
     assert.strictEqual((html.match(/<div class="row /g) || []).length, 400, 'one row per event');
     assert.deepStrictEqual([...new Set([...html.matchAll(/data-y="(\d+)"/g)].map((x) => x[1]))], ['2018', '2019', '2020', '2021'], 'year of every row (the year tabs)');
   },
+  // Part 4 Task 6 (review minor M6): game-year tabs as the Raid Catalog's (All years + one tab per game year with events, count),
+  // every row and month label carries its game year; the tab of the player's Story week is open first and only its rows load
+  // their cards (lazy loading per tab: kxImgs after the tab filter, never right after the rows are built)
+  catalog_year_tabs() {
+    const ix = INDEX();
+    ix.entries.push({ censusId: 'E-7', evStageId: 29907, name: 'Old Fun', start: '2018-06-01', end: '2018-06-07', stageIds: [4009907], available: true, labels: [], noticeIds: [], quests: [quest(4009907)] },
+      { censusId: 'E-8', evStageId: 29908, name: 'Early April', start: '2019-04-02', end: '2019-04-05', stageIds: [4009908], available: true, labels: [], noticeIds: [], quests: [quest(4009908)] });
+    const raw = pages.catalogPage(ix, ctx()), html = pages.expandCatalog(raw);
+    const tabs = [...raw.matchAll(/<button type="button" class="tab( on)?" data-p="(\w+)"><b>([^<]*)<\/b><small>[^<]*<\/small><span class="c">(\d+)<\/span>/g)].map((m) => [m[2], m[3], Number(m[4]), !!m[1]]);
+    // shopFrom 2019-04-08 is game year 3 (Apr 7, 2019 -> Apr 6, 2020): open first; 2019-03 and 2019-04-02 are game year 2
+    assert.deepStrictEqual(tabs, [['all', 'All years', 6, false], ['2', 'Year 3', 5, false], ['3', 'Year 4', 1, true]]);
+    assert.ok(/<div class="tabs" id="tabs" data-def="3">/.test(raw), 'default tab = game year of the Story week');
+    assert.strictEqual(rowOf(html, 29907).match(/data-p="(\d)"/)[1], '2');
+    assert.strictEqual(rowOf(html, 29908).match(/data-p="(\d)"/)[1], '2', 'April 2-5 is still the year before the anniversary');
+    assert.strictEqual(rowOf(html, 29903).match(/data-p="(\d)"/)[1], '3');
+    // the page script: rows built first, then the tab filter, then the cards of the shown rows only
+    assert.ok(!/kxImgs\(\);<\/script>/.test(raw.split('id="kxrows"')[1].split('</script>')[1] + '</script>'), 'no card load before the tab filter');
+    // run the tab script on stub rows: only the rows of the open tab are shown, the month label of a hidden month is hidden
+    const m = /<script>(\(function\(\)\{\/\* year tabs \*\/[\s\S]*?)<\/script>/.exec(raw);
+    assert.ok(m, 'tab script');
+    const el = (cls, attrs = {}) => ({ className: cls, getAttribute: (a) => (a in attrs ? String(attrs[a]) : null), parentNode: null });
+    const kids = [el('ml', { 'data-m': '2018-06' }), el('row can', { 'data-p': 2, 'data-eid': 29907, id: 'q29907' }), el('ml', { 'data-m': '2019-05' }),
+      el('row off', { 'data-p': 3, 'data-eid': 29903, id: 'q29903' })];
+    const tabEls = ['all', '2', '3'].map((p) => el('tab', { 'data-p': p }));
+    const tabsEl = { getAttribute: (a) => (a === 'data-def' ? '3' : null), querySelectorAll: () => tabEls, onclick: null };
+    let loads = 0;
+    const doc = { getElementById: (id) => (id === 'tabs' ? tabsEl : id === 'rows' ? { children: kids } : null) };
+    require('vm').runInNewContext(m[1], { document: doc, location: { hash: '' }, window: { kxImgs: () => { loads++; } }, kxImgs: () => { loads++; } });
+    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [true, true, false, false]);
+    assert.ok(loads >= 1, 'cards of the open tab requested after the filter');
+    assert.deepStrictEqual(tabEls.map((t) => / on/.test(t.className)), [false, false, true]);
+    tabsEl.onclick({ target: tabEls[0] });
+    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [false, false, false, false], 'All years shows every row');
+    tabsEl.onclick({ target: tabEls[1] });
+    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [false, false, true, true]);
+    // a keep / remove keeps a hidden row hidden (ROWS_JS setRow)
+    assert.ok(/el\.className='row '\+pc\[0\]\+\(\/ hide\/\.test\(el\.className\)\?' hide':''\)/.test(raw), 'setRow keeps the tab filter');
+  },
   // Booster rewards (boosterLater): a served quest with a Booster says it comes with the Boosters; the new reasons in plain words
   booster_and_new_reasons() {
     const ix = INDEX();

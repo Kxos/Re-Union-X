@@ -15,7 +15,7 @@ const special = require('./special-pages');
 const { rowState } = require('./calendar-util');
 const parts = require('./catalog-pages');
 
-const { CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, gameYearOf, GAME_YEARS } = special;
+const { CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, gameYearOf, GAME_YEARS, YEAR_SPAN } = special;
 const { PAGE_HEAD, pill, RULE_CSS, SRV_CSS, FOLD_CSS, NOTICE_CSS, rebuiltValues, srvFrame, noticeCard, parseNotice, noticeBlocks, backBar, packCatalog, expandCatalog, UNPACK_JS } = parts;
 
 const BASE = '/web/event';
@@ -107,12 +107,28 @@ var rows=[].slice.call(document.querySelectorAll('.row'));
 function href(el){return '/web/event/event/'+attr(el,'data-eid')+'?from=catalog';}
 function nameOf(el){var n=el.querySelector('.nm');return n?n.textContent:'';}
 window.kxK=function(b){return kxKeep(b,function(on){kxRow(b.getAttribute('data-id'),on);});};
-function setRow(el,st){var pc=PILL[st];el.setAttribute('data-show',st);el.className='row '+pc[0];var s=el.querySelector('.s');if(s){s.className='s s-'+pc[0];s.innerHTML=pc[1];}
+function setRow(el,st){var pc=PILL[st];el.setAttribute('data-show',st);el.className='row '+pc[0]+(/ hide/.test(el.className)?' hide':'');var s=el.querySelector('.s');if(s){s.className='s s-'+pc[0];s.innerHTML=pc[1];}
 var b=el.querySelector('.pk');if(b)kxSet(b,attr(el,'data-eid'),st==='kept');}
 window.kxRow=function(id,on){var name='',i,el;for(i=0;i<rows.length;i++){el=rows[i];if(attr(el,'data-show')==='kept')setRow(el,'can');if(attr(el,'data-eid')===id){setRow(el,on?'kept':'can');if(on)name=nameOf(el);}}
 for(i=0;i<rows.length;i++){var x=rows[i].querySelector('.rp');if(x){x.textContent=name?'Replaces\\u003a '+name:'';x.style.display=name&&attr(rows[i],'data-show')==='can'?'':'none';}}};
 rows.forEach(function(el){el.onclick=function(e){var t=e.target;while(t&&t!==el){if(t.tagName==='A')return;t=t.parentNode;}location.href=href(el);};});
 })();`;
+
+// ES5 game-year tabs (Part 4 Task 6, review minor M6; the Raid Catalog's tabs = the Shop's game years): a tab shows the rows of
+// its year (data-p) and the month labels that still have a row; then the cards of the shown rows load (kxImgs of UNPACK_JS:
+// lazy loading per tab, the page no longer loads every card when it opens). A #q<id> link to a row of another year opens that year.
+const TABS_JS = `(function(){/* year tabs */function attr(el,a){return el.getAttribute(a);}
+var tabs=document.getElementById('tabs');if(!tabs)return;
+var kids=[].slice.call(document.getElementById('rows').children),cur=attr(tabs,'data-def')||'all';
+function cls(el,on){el.className=el.className.replace(/ hide/g,'')+(on?'':' hide');}
+function render(){var i,el,lab=null,any=false,t=tabs.querySelectorAll('.tab');
+for(i=0;i<t.length;i++)t[i].className='tab'+(attr(t[i],'data-p')===cur?' on':'');
+for(i=0;i<kids.length;i++){el=kids[i];if(/(^| )ml( |$)/.test(el.className)){if(lab)cls(lab,any);lab=el;any=false;continue;}
+if(!/(^| )row( |$)/.test(el.className))continue;var on=cur==='all'||attr(el,'data-p')===cur;cls(el,on);if(on)any=true;}
+if(lab)cls(lab,any);if(typeof kxImgs==='function')kxImgs();}
+tabs.onclick=function(e){var t=e.target;while(t&&t!==tabs&&!attr(t,'data-p'))t=t.parentNode;if(!t||t===tabs)return;cur=attr(t,'data-p');render();};
+var h=location.hash?document.getElementById(location.hash.slice(1)):null;if(h&&cur!=='all'&&attr(h,'data-p')&&attr(h,'data-p')!==cur)cur=attr(h,'data-p');
+render();if(h&&h.scrollIntoView)h.scrollIntoView();})();`;
 
 // GET /web/event/catalog: every event of the index by date, one month label per month, one minimal row per event (card, name,
 // date line, ONE status line, at most ONE Keep button, «›»). A record with no quest served yet is listed as «Not restored yet».
@@ -128,20 +144,27 @@ function catalogPage(index, ctx = {}) {
     // one minimal row (Part 4 Task 4, catalog_size_budget: about 340 events): the row opens its page (ROWS_JS, from data-eid), the
     // name is the link, the missing card box and the Keep handler are functions of the page; the rows are sent packed, as the
     // Raid Catalog's (catalog-pages.js packCatalog), and the cards load from data-src once the rows are built (kxImgs)
-    packed.push({ label, fields: { d: line, n: name, e: String(e.evStageId), y }, html: `<div class="row ${st.cls}" id="q${e.evStageId}" data-eid="${e.evStageId}" data-show="${st.show}" data-y="${y}">`
+    packed.push({ label, fields: { d: line, n: name, e: String(e.evStageId), y }, html: `<div class="row ${st.cls}" id="q${e.evStageId}" data-eid="${e.evStageId}" data-show="${st.show}" data-y="${y}" data-p="${gameYearOf(e.start)}">`
       + `<span class="im"><img width="320" height="70" data-src="${imgOf(ctx, e.evStageId)}" alt="" onerror="kxNc(this)"></span>`
       + `<div class="info"><a class="nm" href="${href}">${name}${doneOf(e, ctx) ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
       + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="return kxK(this)"')}</div>`}`
       + '</div><span class="go">›</span></div>\n' });
   }
   const restored = entries.filter((e) => e.available).length;
+  // game-year tabs (the Raid Catalog's): All years + every game year with events, its count; the year of the Story week first
+  const perYear = GAME_YEARS.map((g, i) => entries.filter((e) => gameYearOf(e.start) === i).length);
+  const shopYear = ctx.shopFrom ? gameYearOf(ctx.shopFrom) : null, def = shopYear !== null && perYear[shopYear] ? String(shopYear) : 'all';
+  const tab = (p, name, sub, n) => `<button type="button" class="tab${p === def ? ' on' : ''}" data-p="${p}"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="c">${n}</span></button>`;
+  const tabsHtml = entries.length ? `<div class="tabs" id="tabs" data-def="${def}">${tab('all', 'All years', YEAR_SPAN, entries.length)}`
+    + `${GAME_YEARS.map((g, i) => (perYear[i] ? tab(String(i), g.name, g.sub, perYear[i]) : '')).join('')}</div><div class="tabline"></div>` : '';
   return PAGE_HEAD('Event Catalog', CSS + NO_CARD_CSS) + `<body><script>${NO_CARD_JS}</script>`
     + '<div class="hdr"><h1>Event Catalog</h1></div>'
     + '<p class="n">Every event of the game, by date. Tap an event for its quests. A past event can be kept in the Events tab, one at a time. The Event Catalog is an addition of this server.</p>'
+    + tabsHtml
     + `<div class="sum"><span class="n1">${plural(entries.length, 'event')}</span> · ${restored} with quests served</div>`
     + `<div id="rows">${packed.length ? '' : '<p class="n">No events.</p>'}</div>`
-    + (packed.length ? `<script id="kxrows" type="application/json">${packCatalog(packed)}</script><script>${UNPACK_JS}kxImgs();</script>` : '')
-    + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${ROWS_JS.replace('__PILL__', JSON.stringify(PILLS))}</script></body></html>`;
+    + (packed.length ? `<script id="kxrows" type="application/json">${packCatalog(packed)}</script><script>${UNPACK_JS}</script>` : '')
+    + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${ROWS_JS.replace('__PILL__', JSON.stringify(PILLS))}</script>${packed.length ? `<script>${TABS_JS}</script>` : ''}</body></html>`;
 }
 
 // The labels of events.json in the player's words: [group, short label, one short line, icon]; the full sentence is the reason
