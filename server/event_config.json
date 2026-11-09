@@ -15,7 +15,7 @@
  "shortWindowHours": 12,
  "serve": {
   "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
-  "types": ["GEM", "COIN"]
+  "types": ["GEM", "COIN", "EQ", "KEY", "QUIZ"]
  },
  "payableNote": "Events Part 4 Task 4 (make-events.js remapItems). payableTypes: the reward types of an objective or a first-clear item that server.js grantItem pays (2 Jewels, 3 medal, 4 munny, 5 material, 7 title, 11 Lux, 13 keyblade, 14 Avatar Coin, 15 Event Coins, 16 Raid Coin, 20 avatar part, 26 Skip Ticket, 28 Skip Ticket+, 33 Spirit part, 40 Platinum Ticket, 41 Draw Ticket, 42 Draw Points); payableDropTypes: the types of an original drop or chest row (3 medal, 5 material, 8 and 9 chest contents the client pays, as in our story reward rows, 15 Event Coins). boosterType 34: a Booster, not paid here (label boosterLater, player.pendingBoosters for Part 6; a quest whose only rewards are Boosters: boosterOnly). Any other type: the quest is not served (rewardTypeUnknown) and the type never reaches a row of the client.",
  "payableTypes": [2, 3, 4, 5, 7, 11, 13, 14, 15, 16, 20, 26, 28, 33, 40, 41, 42],

@@ -403,9 +403,9 @@ const tests = {
     // the old key alone still filters
     const old = build(recs, undefined, { ...CONFIG, onlyCensusIds: ['E-2'] });
     assert.deepStrictEqual(old.index.entries.map((e) => e.censusId), ['E-2']);
-    // the real config: 13 pilot ids, the GEM type (Part 2) and the COIN type (Part 3)
+    // the real config: 13 pilot ids, the GEM type (Part 2), the COIN type (Part 3) and the challenge types EQ, KEY, QUIZ (Part 4)
     assert.strictEqual(REAL_CONFIG.serve.censusIds.length, 13);
-    assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM', 'COIN']);
+    assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM', 'COIN', 'EQ', 'KEY', 'QUIZ']);
     assert.ok(!('onlyCensusIds' in REAL_CONFIG));
   },
   shared_notice_built_once() {
