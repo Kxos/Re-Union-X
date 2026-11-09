@@ -85,10 +85,19 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
     from: chYears[0] || null, to: chYears[chYears.length - 1] || null,
     quiz: servedQ.filter((q) => (q.labels || []).some((l) => /^quizBoard/.test(l))).length,
     boosters: servedQ.filter((q) => (q.labels || []).includes('boosterLater')).length };
-  // Events Part 4 Task 7: the Surprise events and Time Missions served (challenge entries open their whole day, label wholeDay)
-  const shortOn = chOn.filter((e) => (e.labels || []).includes('wholeDay'));
-  challenge.short = { surprise: shortOn.filter((e) => /surprise/i.test(e.name || '')).length, timeMissions: shortOn.filter((e) => /time mission/i.test(e.name || '')).length,
-    served: shortOn.flatMap((e) => e.quests || []).filter((q) => q.served).length };
+  // Events Part 4 Task 7: the Surprise events (oneDay: their one whole Pacific day, original) and Time Missions (label wholeDay:
+  // their whole day, not original) served
+  const surpriseOn = chOn.filter((e) => e.oneDay), tmOn = chOn.filter((e) => !e.oneDay && (e.labels || []).includes('wholeDay') && /time mission/i.test(e.name || ''));
+  challenge.short = { surprise: surpriseOn.length, timeMissions: tmOn.length,
+    served: [...surpriseOn, ...tmOn].flatMap((e) => e.quests || []).filter((q) => q.served).length,
+    surpriseWaiting: chAll.filter((e) => e.oneDay && !e.available).length };
+  // community-goal bonus (user rule 10-11-2026, make-events.js communityBonus): the events that pay it and the ones waiting for
+  // their original result, by start date
+  const withBonus = all.filter((e) => e.communityBonus).sort((a, b) => String(a.start).localeCompare(String(b.start)));
+  const bonusOf = (e) => ({ name: e.communityBonus.name || e.name || e.censusId, count: e.communityBonus.count, rewards: e.communityBonus.rewards || [],
+    ...(e.communityBonus.questPrefix ? { quests: e.communityBonus.questPrefix } : {}) });
+  challenge.bonus = { paid: withBonus.filter((e) => e.available && e.communityBonus.ready).map(bonusOf),
+    waiting: withBonus.filter((e) => e.available && e.communityBonus.waiting).map(bonusOf) };
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
     first: starts[0] || null, last: starts[starts.length - 1] || null, coins, challenge,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
@@ -107,11 +116,21 @@ function eventChallengeLines(f) {
     c && c.events
       ? `The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **${c.events} events**${span} are served, with **${c.served} of their ${c.quests} quests**. The Event Catalog lists the others with the reason they are not here yet.`
       : 'The **challenge and battle events** (Keyblade Challenges and quizzes included) are listed in the Event Catalog; none of their quests is served yet.',
-    ...(c && c.short && (c.short.surprise || c.short.timeMissions) ? [`**Surprise events** and **Time Missions** are back: today ${c.short.surprise} Surprise event${c.short.surprise === 1 ? '' : 's'} and ${c.short.timeMissions} Time Missions event${c.short.timeMissions === 1 ? '' : 's'} (**${c.short.served} quests**). In the original game a Surprise event opened a few times a day for 15 to 60 minutes, and each group of Time Missions quests for one hour at a time; here each of them is open for its **whole original day** (Pacific time, on the real weekday of that day in your Story week) and is gone the next day (**not original**). A Time Missions event lists all its quests on each of its days. The other Surprise events wait in the Event Catalog, with the reason.`] : []),
+    ...(c && c.short && (c.short.surprise || c.short.timeMissions) ? [`**Surprise events** and **Time Missions** are back: today ${c.short.surprise} Surprise event${c.short.surprise === 1 ? '' : 's'} and ${c.short.timeMissions} Time Missions event${c.short.timeMissions === 1 ? '' : 's'} (**${c.short.served} quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.${c.short.surpriseWaiting ? ' The other Surprise events wait in the Event Catalog, with the reason.' : ''}`] : []),
+    ...(c && c.bonus && (c.bonus.paid.length || c.bonus.waiting.length) ? [communityBonusLine(c.bonus)] : []),
     `The **quiz** events asked their question on a picture board before the quest, and no original board survives in the game files, so every board is **reconstructed**: ${b.reconstructed} are redrawn in the original style from the question text recorded on the community wiki (obvious typing errors of the wiki corrected), ${b.original_screenshot} come from screenshots of the original boards and ${b.footage_redraw} are redrawn from videos of the original game.`
       + (c && c.quiz ? ` Today **${c.quiz} quiz quests** are served with their board; the others wait, mostly for a map file that is incomplete.` : ''),
     `${c && c.boosters ? `**${c.boosters}** served quest${c.boosters === 1 ? '' : 's'} paid a **Booster** among ${c.boosters === 1 ? 'its' : 'their'} rewards. ` : 'Some quests paid a **Booster** among their rewards. '}The Boosters do not exist on this server yet: a Booster reward is **recorded** when you complete its objective and given when the Boosters come in a later update; the other rewards are paid as usual. A quest whose only reward was a Booster waits for them.`,
     'A **Spirit part** reward earned while your Spirit cannot receive it is **kept**, once, and given at a later login.'];
+}
+// the community-goal bonus line of the Events notice: the events and the result of their original result notice
+const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const rewardText = (r) => (r.type === 2 ? `${thousands(r.num)} Jewels` : `${r.name} x${r.num}`);
+function communityBonusLine(b) {
+  const paid = b.paid.map((x) => `${x.name} (${x.quests ? `its «${x.quests}» quests; ` : ''}${thousands(x.count)} players: ${x.rewards.map(rewardText).join(', ')})`);
+  return `**Community goals.** Some events of 2020 gave every player who cleared **all their objectives** a bonus whose size depended on how many players around the world did it, announced afterwards in a result notice. Here, when you clear every objective of such an event (a kept event of the Event Catalog too), you get **once** the bonus the original event reached, in your **Presents**: the count was of all the players of the time and is not redone for you alone (**not original**).`
+    + (paid.length ? ` The original results: ${nameList(paid)}.` : '')
+    + (b.waiting.length ? ` ${nameList(b.waiting.map((x) => x.name))} ${b.waiting.length === 1 ? 'waits' : 'wait'} for the original result: no bonus until it is found.` : '');
 }
 function eventCoinLines(f) {
   const c = f && f.coins;

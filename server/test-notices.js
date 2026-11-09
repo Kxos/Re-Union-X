@@ -261,17 +261,45 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
     && lines.includes(`${bySrc('footage_redraw')} are redrawn from videos`) && /typing errors/.test(lines), 'Events: fonti delle tavole dei quiz dal piano');
   check(/Booster/.test(lines) && /Spirit part/.test(lines) && /later login/.test(lines), 'Events: Booster e parti dello Spirit');
   check(!/Surprise events/.test(lines), 'Events: nessuna riga Surprise/Time Missions senza eventi serviti');
-  // Events Part 4 Task 7: Surprise events and Time Missions (wholeDay challenge entries) counted from events.json, declared all day
-  fx.entries.push({ censusId: 'S', type: 'EQ', name: 'Surprise Event! (3/5)', start: '2020-03-05', available: true, labels: ['wholeDay'], quests: [q(true)] },
+  check(!/Community goal/.test(lines), 'Events: nessuna riga dei bonus comunitari senza dati');
+  // Events Part 4 Task 7: Surprise events (oneDay: one whole Pacific day, as every WW notice said: original) and Time Missions
+  // (wholeDay: the original targets appeared at four set hours a day, notice 67747: declared) counted from events.json
+  fx.entries.push({ censusId: 'S', type: 'EQ', name: 'Surprise Event! (3/5)', start: '2020-03-05', available: true, oneDay: true, labels: [], quests: [q(true)] },
     { censusId: 'T', type: 'EQ', name: 'Time Missions! (3/26)', start: '2020-03-26', available: true, labels: ['wholeDay'], quests: [q(true), q(true), q(false)] },
-    { censusId: 'U', type: 'EQ', name: 'Surprise Event (2/2)', start: '2020-02-02', available: false, labels: [], quests: [q(false)] });
+    { censusId: 'U', type: 'EQ', name: 'Surprise Event (2/2)', start: '2020-02-02', available: false, oneDay: true, labels: [], quests: [q(false)] });
   fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
   const f2 = n.eventNoticeFacts(path.join(dir, 'events.json'));
   check(f2.challenge.short && f2.challenge.short.surprise === 1 && f2.challenge.short.timeMissions === 1 && f2.challenge.short.served === 3,
     `Events: Surprise/Time Missions ${JSON.stringify(f2.challenge.short)}`);
   const l2 = n.eventChallengeLines(f2).join(' ');
   check(/\*\*Surprise events\*\* and \*\*Time Missions\*\*/.test(l2) && l2.includes('1 Surprise event and 1 Time Missions event (**3 quests**)')
-    && /15 to 60 minutes/.test(l2) && /whole original day/.test(l2) && /not original/.test(l2), `Events: riga Surprise/Time Missions ${l2.slice(0, 200)}`);
+    && !/15 to 60 minutes/.test(l2) && /As in the original game, each Surprise event is open for \*\*one whole day\*\*/.test(l2)
+    && /four set hours a day/.test(l2) && /whole original day/.test(l2) && /not original/.test(l2) && /other Surprise events wait/.test(l2),
+    `Events: riga Surprise/Time Missions ${l2.slice(0, 400)}`);
+  fx.entries.find((e) => e.censusId === 'U').available = true;
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  check(!/other Surprise events wait/.test(n.eventChallengeLines(n.eventNoticeFacts(path.join(dir, 'events.json'))).join(' ')), 'Events: nessuna Surprise in attesa, nessuna frase');
+  fx.entries.find((e) => e.censusId === 'U').available = false;
+  // community-goal bonus (user 10-11-2026): the events with communityBonus and their original result, declared (single player)
+  fx.entries.push({ censusId: 'V', type: 'EQ', name: 'Defeat Savage Vanguard', start: '2020-03-09', available: true, labels: ['communityBonus'], quests: [q(true)],
+    communityBonus: { name: 'Defeat Savage Vanguard', noticeId: 63815, count: 7237, stageIds: [1], ready: true,
+      rewards: [{ type: 5, id: 48, num: 30, name: 'Power Gem' }, { type: 5, id: 49, num: 30, name: 'Speed Gem' }, { type: 5, id: 50, num: 30, name: 'Magic Gem' }] } },
+  { censusId: 'R', type: 'EQ', name: '[Updated 02_18] Summon Rush!', start: '2020-02-08', available: true, labels: ['communityBonus'], quests: [q(true)],
+    communityBonus: { name: 'Summon Rush!', noticeId: 62688, count: 732, stageIds: [2], ready: true, rewards: [{ type: 2, id: 0, num: 740, name: 'Jewels' }] } },
+  { censusId: 'M', type: 'EQ', name: 'Mean Maiden Battle Event', start: '2020-06-18', available: true, labels: ['communityBonus'], quests: [q(true)],
+    communityBonus: { name: 'Mean Maiden Battle Event', noticeId: 66620, count: 3931, stageIds: [4], ready: true, questPrefix: 'Defeat the Mean Maiden',
+      rewards: [{ type: 5, id: 48, num: 30, name: 'Power Gem' }] } },
+  { censusId: 'W', type: 'EQ', name: 'Waiting Event', start: '2020-05-01', available: true, labels: [], quests: [q(true)],
+    communityBonus: { name: 'Waiting Event', noticeId: 1, count: null, stageIds: [3], ready: false, waiting: true, rewards: [] } });
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  const f3 = n.eventNoticeFacts(path.join(dir, 'events.json'));
+  check(f3.challenge.bonus && f3.challenge.bonus.paid.length === 3 && f3.challenge.bonus.waiting.length === 1, `Events: bonus comunitari ${JSON.stringify(f3.challenge.bonus)}`);
+  const l3 = n.eventChallengeLines(f3).join(' ');
+  check(/\*\*Community goals\.\*\*/.test(l3) && /once/.test(l3) && /Presents/.test(l3) && /not original/.test(l3)
+    && l3.includes('Defeat Savage Vanguard (7,237 players: Power Gem x30, Speed Gem x30, Magic Gem x30)')
+    && l3.includes('Summon Rush! (732 players: 740 Jewels)') && l3.includes('Mean Maiden Battle Event (its «Defeat the Mean Maiden» quests; 3,931 players: Power Gem x30)')
+    && /Waiting Event/.test(l3) && /original result/.test(l3)
+    && !/\[Updated/.test(l3), `Events: riga dei bonus comunitari ${l3.slice(l3.indexOf('Community'), l3.indexOf('Community') + 900)}`);
   const ev = n.NOTICES.find((x) => x.title === 'Events');
   const t = ev ? ev.body.join(' ') : '';
   check(t.includes("Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.")

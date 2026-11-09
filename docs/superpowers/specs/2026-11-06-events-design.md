@@ -56,7 +56,8 @@ window overlaps the week is listed beside the raids. An event that ran three wee
 
 **Short windows (author).** Surprise events and Time Missions ran for 15-60 minutes (donor evStage category 3, about 2,500 rows,
 mostly 2020). Open them for their whole original day, not only the original minutes, because a solo player cannot
-wait for an exact hour; declared in the Notices.
+wait for an exact hour; declared in the Notices. (Corrected 10 Nov 2026: every WW Surprise notice gave a whole Pacific day, so
+a Surprise event open all day is original; only the Time Missions targets ran at four set hours a day, notice 67747.)
 
 **Event Catalog (author).** A banner in the Events tab opens a web page with every event by period,
 with filters, details and the original notice. One past event can be kept and played at a time, labelled KEPT.

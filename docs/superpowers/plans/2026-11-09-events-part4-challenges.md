@@ -55,6 +55,7 @@ One record file per year. A year is served only when its records, enemies, maps 
 ## Review Focus
 
 - **Several short rows on one day.** A Surprise event that ran 3 times a day for 15-60 minutes, with the same stages each time.
+  (Corrected 10 Nov 2026: the WW Surprise events ran for one whole Pacific day; the rule still covers short rows of one day.)
   - Expected: one evStage row per Pacific day, its stages once, and no duplicated card.
   - Pinned in Task 4 (`short_rows_one_per_day`).
 - **A Booster reward on an objective.**

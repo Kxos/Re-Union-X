@@ -634,11 +634,12 @@ Everything up to the live master regen; the regen, the resources and the bench f
   enemy rows (since the Task 6 regen): it reads the live master, marks those enemies as present and shrinks
   `missing_challenge.json`, and a later `build_event_enemies.py` would then drop the rows. The Task 6 outputs are kept in
   `tmp\events\t6p4\rebuild`.
-- **Surprise events are short although their donor row is a whole day.** The donor master has ONE row per Surprise event, from
-  08:00 UTC to 07:59:59 UTC the next day, while the original ran a few times a day for 15-60 minutes. The 12 h rule
-  (`shortWindowHours`) did not see them: the event was listed for the whole Shop week. The builder now marks these records
-  `shortWindow`, and make-events.js treats every donor row of such a record as short: the record is open on the Pacific day
-  where its row starts, label wholeDay (test `short_window_record_whole_day`). It uses the start day only, because in summer
+- **Surprise events are one-day events.** The donor master has ONE row per Surprise event, from 08:00 UTC to 07:59:59 UTC the
+  next day, and every WW notice gave that whole Pacific day («12:00 a.m. to 11:59 p.m. (PT)»; the «15-60 minutes» of the
+  plan was wrong, see the follow-up section below). The 12 h rule (`shortWindowHours`) did not see them: the event was listed
+  for the whole Shop week. The builder now marks these records `shortWindow`, and make-events.js treats every donor row of such
+  a record as a one-day row: the record is open on the Pacific day where its row starts (test
+  `short_window_record_whole_day`; since the follow-up `oneDay`, no wholeDay label). It uses the start day only, because in summer
   08:00 UTC is 01:00 Pacific and the row would touch the next day. Time Missions need no mark: their donor rows are the hourly
   windows (6 targets x 4 hours a day), merged into one row per day (`short_rows_one_per_day`). Each day row lists all 18 or 21
   quests.
@@ -662,3 +663,42 @@ Everything up to the live master regen; the regen, the resources and the bench f
   `--section event` adds 125 kept copies; the catalogue banner is unchanged. imgVersion 8 -> 9.
 - **Notice.** «Challenge events» gains the Surprise events / Time Missions line (counts from events.json, the whole day
   declared as not original).
+
+## Surprise events, follow-up: shared map, confirmed enemies, community goals (Part 4, Task 7, 10 November 2026)
+
+User decisions of 10 November 2026; everything up to the live master regen (dry run in `tmp\t7f`).
+- **One whole day is original.** Every WW Surprise notice gave «12:00 a.m. to 11:59 p.m. (PT)» (62306, 64147, ...; research in
+  `private\events\sources\surprise_2020\FINDINGS.md`). A `shortWindow` record whose rows are all whole days now gets `oneDay`
+  (entry field) and no wholeDay label; wholeDay stays on the Time Missions, whose targets appeared at four set hours a day
+  (notice 67747): declared as not original in the Events notice.
+- **Shared map.** Every Surprise run used map 741710 (Cave of Wonders: Treasure Room; 743840 Beast's Castle: Fireplace for the
+  Holiday Draw Tickets). A quest of another `shortWindow` record now shares the map key whatever its objective rewards (test
+  `surprise_map_shared`); each keeps its own stage row. The drops are in the shared map file, so they must still be equal: all
+  51 Surprise quests have the same drops (Gift Shadow / Bag O' Gifts drop slot 1, one Attack Prize chest, reward 80).
+- **Enemies confirmed.** The khuxwiki pages of the 29 held quests list every run date, so they are pinned to these runs: 26 gem
+  quests Gift Shadow x1 (target, Lv10), EV-1389 / 1398 / 1408 Bag O' Gifts x1 (target, Lv10; enemy 157 is in our master). The
+  records are patched surgically by `tmp\events\challenge\patch_surprise.py` (idempotent; backup in
+  `tmp\events\backup\t7f_before`); a rerun of build_challenge.py writes the marker back, so the patch must follow it.
+- **Why EV-1389 / 1398 / 1408 were «map not usable».** No file was missing: the marker «(no WW enemy list)» has no enemy id, so
+  the quests stopped before they became map candidates, and map 743840 was never in `event_maps.json`, never imported. With the
+  marker gone the regen lists it, `import_event_stages.py` imports it (JP `mappoi_stg743840.bin` + `_00.bin`, room
+  BC_0005_00_00 already served) and the next regen serves the three quests on the shared key.
+- **Community goals** (user rule). The events whose result notice gives the number of players who cleared all objectives pay,
+  once per event, the tier the original reached. Private data `tmp\events\community_bonus.json` (written by
+  `tmp\events\challenge\make_community_bonus.py`, every quote checked against the notice text); make-events.js reads it
+  (KHUX_EVENT_BONUS, default: next to the records folder) into `entry.communityBonus`; routes-events.js pays it into the
+  Presents when every objective of the counted quests is cleared (`player.events.bonus`, once per event, kept events too; at
+  login for an old save). Seven events: EV-1026 Summon Rush (732 players, 740 Jewels: «based on round number»), EV-1058
+  Savage Vanguard (7,237), EV-1100 Sephiroth (8,529), EV-1127 Dragon Maleficent (7,701, also Draw Ticket x10), EV-1175 Mean
+  Maiden (3,931; only its «Defeat the Mean Maiden» quests), EV-1221 Flame Core (4,370), EV-1243 Heartless Battle (4,026): all
+  on the top tier (30 Power, Speed and Magic Gems). Left out: the FFBE collaboration (58199: goals counted in FFBE), the Union
+  Challenges (tiers by Union), and two fixed completion rewards (61226, 68893: open question).
+- **Dry regen** (`tmp\t7f`): 2,180 of 3,070 quests served (2,130 before), 304 events (254). +50 stage and +50 evStage rows (51
+  Surprise events, all served; the 3 Holiday ones after the map import); no other row changes, event_ids.json unchanged (the
+  ids were numbered in the Task 7 regen), 106 tables valid. Not served by reason: enemyMissing 175 -> 149, mapKeyUsed
+  100 -> 79, mapUnusable 603 -> 600. The cards (and kept copies) of the 50 rows exist since Task 7 (`--all-rows`): no
+  imgVersion change. Map import 1,490 of 1,508 (+743840); rooms unchanged (208). The new map goes into
+  `stage_gen\files\stage` with `--stage-dir`, so `build-resources.ps1 -Quick` carries it.
+- **Not added:** the 2020-05-15 Moon Gems run (notice 65678). The donor master has its row (201584, 2020-05-15 07:00 to
+  05-16 06:59:59 UTC, stage 742560 «[Surprise Event] Moon Gems», map 741710, banner of the other Surprise rows), but the
+  event census has no row for it (the notice is filed as the Proud Leviathan update), so it has no census id yet.
