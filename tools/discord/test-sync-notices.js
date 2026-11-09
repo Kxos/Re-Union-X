@@ -17,6 +17,7 @@ assert.strictEqual(b.length, 1);
 assert.deepStrictEqual(b[0].embeds.map((e) => e.title), ['B', 'Sub']);
 assert.strictEqual(b[0].embeds[0].author.name, 'IMPORTANT · 11/10');
 assert.ok(b[0].embeds.every((e) => !e.description.includes('###')));
+assert.strictEqual(b[0].content, 'New text.');
 
 // chunks respect the limit and keep every character of the paragraphs
 const long = Array.from({ length: 50 }, (_, i) => `Paragraph ${i} ` + 'x'.repeat(300)).join('\n\n');

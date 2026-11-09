@@ -92,7 +92,17 @@ function noticeMessages(n) {
     cur.push(e); size += len;
   }
   msgs.push(cur);
-  return msgs.map((embeds) => ({ embeds, allowed_mentions: { parse: [] } }));
+  const out = msgs.map((embeds) => ({ embeds, allowed_mentions: { parse: [] } }));
+  out[0].content = preview(n.body);   // what the forum list shows under the post title
+  return out;
+}
+
+// The first sentence of the notice, for the forum list preview.
+function preview(body) {
+  const first = (sections(body)[0] || { text: '' }).text.split('\n\n')[0].replace(/\s+/g, ' ').trim();
+  const m = first.match(/^(.{20,280}?[.!?])(\s|$)/);
+  const s = m ? m[1] : first.slice(0, 280);
+  return s.length < first.length && !m ? s.replace(/\s+\S*$/, '') + '…' : s;
 }
 
 const hash = (x) => crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex').slice(0, 16);
