@@ -96,18 +96,20 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   // player's own Union only (player.unionId), and the reward is due only when that Union's quests are all served (readyUnions).
   const ownUnion = () => Number(player.unionId) || 0;
   const unionIds = (cb) => (cb.byUnion ? (cb.byUnion[ownUnion()] || []) : []);
-  const bonusDone = (cb) => {
+  // now: the stage cleared by this call (onStageClear runs before server.js writes its stageScores, so its playStatus is not
+  // there yet: fix round 1 of the Task 3 review), counted as cleared
+  const bonusDone = (cb, now = null) => {
     const cleared = view().cleared || {};
     const ids = [...(cb.stageIds || []), ...unionIds(cb)];
     if (cb.byUnion && !unionIds(cb).length) return false;
-    return ids.length > 0 && ids.every((id) => special.stageDone({ clearMissionIds: cleared[id] || [], playStatus: (stageState(id) || {}).playStatus || 0 },
+    return ids.length > 0 && ids.every((id) => special.stageDone({ clearMissionIds: cleared[id] || [], playStatus: id === now ? 1 : (stageState(id) || {}).playStatus || 0 },
       (stageRow(id) || {}).validSubmission || 0));
   };
   const bonusReady = (cb) => (cb.byUnion ? (cb.readyUnions || []).includes(ownUnion()) : !!cb.ready);
-  function payBonus(e) {
+  function payBonus(e, now = null) {
     const cb = e && e.communityBonus;
     if (!addPresent || !cb || !bonusReady(cb) || !(cb.rewards || []).length) return false;
-    if (((player.events || {}).bonus || {})[e.censusId] || !bonusDone(cb)) return false;
+    if (((player.events || {}).bonus || {})[e.censusId] || !bonusDone(cb, now)) return false;
     const ev = state();
     ev.bonus ||= {};
     ev.bonus[e.censusId] = { paidAt: realNow(), noticeId: cb.noticeId || null };
@@ -160,7 +162,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     // the community-goal bonus of every entry that counts this quest
     for (const e of entries()) {
       const cb = e.communityBonus || {};
-      if ((cb.stageIds || []).includes(id) || unionIds(cb).includes(id)) payBonus(e);
+      if ((cb.stageIds || []).includes(id) || unionIds(cb).includes(id)) payBonus(e, id);
     }
     return true;
   }

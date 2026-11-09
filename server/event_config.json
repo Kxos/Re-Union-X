@@ -136,7 +136,8 @@
   "objectiveMismatch": "The khuxwiki page and the surviving game data give different objectives for this quest, so it is held back until the right ones are confirmed.",
   "notice": "An information notice of the original game, not an event: it had no quests of its own.",
   "objectiveUnmapped": "An objective of this quest is known only from its text, and no surviving game data proves its code, so the quest is held back: it is never served with a guessed objective.",
-  "scheduleLine": "A second notice of an event that is listed under its own row: it had no quests of its own."
+  "scheduleLine": "A second notice of an event that is listed under its own row: it had no quests of its own.",
+  "enemyAmbiguous": "This quest has no original map, and our game data holds several versions of one of its enemies with different strength: the quest is held back until the right version is confirmed, never guessed."
  },
  "labelPhrases": {
   "wikiQuest": "wikiQuest",

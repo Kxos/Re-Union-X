@@ -1249,6 +1249,25 @@ const tests = {
     assert.deepStrictEqual([entry(vr, 'E-M').quests[0].reason, vr.genMaps.length], ['enemyMissing', 0]);
     assert.match(entry(vr, 'E-M').quests[0].why, /Foe A variant/);
   },
+  // fix round 1 (Task 3 review): never a silent pick among same-name rows. Rows with different stats -> enemyAmbiguous (held, the
+  // candidates in why, no gen entry); rows with the same stats -> the id; an explicit record id (wikiEnemyIds, targets[0].id) wins
+  wiki_room_enemy_ambiguous_held() {
+    const run = (extraRows, q) => {
+      const m = master();
+      m.enemy = [{ enemyId: 501, name: 'Foe A', hp: [1] }, { enemyId: 502, name: 'Foe B', hp: [1] }, ...extraRows];
+      return me.buildEvents([record('E-AM', [q || genQuest(702250)])], CONFIG, m, undefined, {}, null, null, { eventEnemyIds: [] });
+    };
+    const amb = run([{ enemyId: 30502, name: 'Foe B', hp: [9] }]);
+    const q = entry(amb, 'E-AM').quests[0];
+    assert.deepStrictEqual([q.reason, amb.genMaps.length, amb.stage.length], ['enemyAmbiguous', 0, 0]);
+    assert.ok(q.why.startsWith(REAL_CONFIG.reasonText.enemyAmbiguous) && q.why.includes('Foe B: 502, 30502'), q.why);
+    assert.deepStrictEqual(run([{ enemyId: 30502, name: 'Foe B', hp: [1] }]).genMaps[0].enemies[0][0].enemyId, 502, 'same stats: the row');
+    const pinned = run([{ enemyId: 30502, name: 'Foe B', hp: [9] }, { enemyId: 30501, name: 'Foe A', hp: [9] }],
+      genQuest(702250, { wikiEnemyIds: { 'Foe B': 30502 }, targets: [{ id: 30501, name: 'Foe A' }] }));
+    assert.ok(entry(pinned, 'E-AM').quests[0].served, JSON.stringify(entry(pinned, 'E-AM').quests[0]));
+    assert.deepStrictEqual([pinned.genMaps[0].targetId, pinned.genMaps[0].enemies[0][0].enemyId], [30501, 30502], 'explicit ids win');
+    assert.ok(/several versions/.test(require('./event-pages').whyPlain(q.why, 'enemyAmbiguous')));
+  },
   // a JP 4.3.1 map of the same quest (map.source 'jpTwin'): served on its map key, label jpTwinMap; the same layout at another level
   // (map.levelShifted): label levelShifted, event_maps.json carries the shift, and a live run serves it only once the import applied it
   jp_twin_map_served() {
@@ -1268,13 +1287,16 @@ const tests = {
     assert.ok(out.index.reasons.jpTwinMap && out.index.reasons.levelShifted);
     // the twin map is the own map of another record's quest (the Daily XIII maps): shared when the drops are equal, else mapKeyUsed
     const own = record('E-J2', [quest(702310, 1, [501], { map: { key: 69610, stageBinId: 69610, status: 'ok' } }), quest(702311, 1, [501], { map: { key: 69620, stageBinId: 69620, status: 'ok' } })],
-      { start: '2019-06-01', end: '2019-06-07' });
+      { start: '2019-06-01', end: '2019-06-07', dataHole: 'x' });
     const twin2 = quest(702302, 1, [501], { map: { key: 69620, stageBinId: 0, status: 'ok', source: 'jpTwin' }, label: 'original; jpTwinMap', drops: { enemies: [{ rewardId: 5, rows: [{ type: 3, id: 9, num: 1, odds: 100 }] }], chests: [] } });
     const sh = build([record('E-J', [twin, twin2]), own]);
     const o = entry(sh, 'E-J2').quests;
     assert.deepStrictEqual([o[0].served, o[0].stageId !== a.stageId], [true, true], 'own stage row on the shared map');
     assert.strictEqual(sh.stage.find((s) => s.stageId === o[0].stageId).stageBinId, 69610);
     assert.deepStrictEqual([o[1].served, o[1].reason], [false, 'mapKeyUsed'], 'drops differ');
+    // fix round 1: not a data-hole record -> the Part 4 rule (mapKeyUsed)
+    const plain = build([record('E-J', [twin]), { ...own, dataHole: undefined }]);
+    assert.strictEqual(entry(plain, 'E-J2').quests[0].reason, 'mapKeyUsed');
     const st = (shiftedDone) => new Map([[69610, { status: 'imported', why: '', rooms: [] }], [b.stageId, { status: 'imported', why: '', rooms: [], levelShifted: shiftedDone }]]);
     const live = me.buildEvents([record('E-J', [twin, shifted])], CONFIG, master(), undefined, {}, { status: st(false), poi: {} });
     assert.deepStrictEqual(entry(live, 'E-J').quests.map((q) => q.served), [true, false]);
@@ -1338,14 +1360,22 @@ const tests = {
   // datesOf (EV-0913 dates EV-0929 from 2019-09-03): the target starts then and, with no end, ends on the Pacific day its donor row
   // ends; the line itself is a schedule line (no row). objectiveResolved in a record label is a note, not a label phrase
   dates_of_applied() {
-    const target = record('E-D', [quest(702600, 1, [501], { label: 'original; objectiveResolved' })], { start: null, end: null,
+    const target = record('E-D', [quest(702600, 1, [501], { label: 'original; objectiveResolved' }), quest(702601, 1, [501])], { start: null, end: null,
       evStage: [donorEv({ startTime: '2019-09-20 07:00:00', endTime: '2019-10-04 06:59:59' })] });
-    const line = record('E-D0', [], { start: '2019-09-03', end: null, scheduleLineOf: { censusId: 'E-D' }, datesOf: { censusId: 'E-D', start: '2019-09-03' } });
+    const line = record('E-D0', [], { start: '2019-09-03', end: null, scheduleLineOf: { censusId: 'E-D' }, datesOf: { censusId: 'E-D', start: '2019-09-03', quests: [702600] } });
     const out = build([line, target]);
     const e = entry(out, 'E-D');
     assert.deepStrictEqual([e.start, e.end, e.available, e.datesFrom], ['2019-09-03', '2019-10-03', true, 'E-D0']);
     assert.deepStrictEqual(e.rows.map((r) => [r.start, r.end]), [['2019-09-03', '2019-10-03']]);
     assert.strictEqual(entry(out, 'E-D0').reason, 'scheduleLine');
+    // fix round 1: only the quests the line names open on its start; the others on their own original day (openFrom)
+    assert.deepStrictEqual(e.quests.map((q) => q.openFrom), [undefined, '2019-09-20']);
+    const cal = require('./event-calendar');
+    const open = (from, to) => cal.currentCards(out.index, { shopFrom: from, shopTo: to }).flatMap((c) => c.quests.map((q) => q.donorStageId));
+    assert.deepStrictEqual(open('2019-09-02', '2019-09-08'), [702600], 'Pt. 1 week: only the named quest');
+    assert.deepStrictEqual(open('2019-09-16', '2019-09-22'), [702600, 702601], 'the week of 09-20: both');
+    assert.strictEqual(entry(build([record('E-D0', [], { datesOf: { censusId: 'E-D', start: '2019-09-03' } }), target]), 'E-D').quests.some((q) => q.openFrom), false,
+      'no quest list in datesOf: every quest from its start');
     assert.strictEqual(target.start, null, 'the input record is not changed');
     assert.throws(() => build([record('E-D1', [], { datesOf: { censusId: 'E-NONE', start: '2019-09-03' } })]), /E-NONE, which is not in the records/);
   },

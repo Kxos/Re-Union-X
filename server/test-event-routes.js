@@ -297,16 +297,32 @@ const tests = {
   // a rerun sharing the stage row of an earlier run (make-events.js sharedWith): its objectives are paid once in all, whichever
   // record the player clears it from (the same stage id)
   rerun_shared_objectives_once() {
-    const ix = INDEX();
-    ix.entries.push({ censusId: 'E-3', evStageId: 29903, start: '2019-04-08', end: '2019-04-14', stageIds: [S1], available: true, quests: [quest(S1, { sharedWith: 'E-1' })] });
-    const w = world({ index: ix });
-    assert.strictEqual(w.ev.entryOfStage(S1).censusId, 'E-1', 'the entry that built the row');
-    w.ev.onStageClear(S1, [1, 3]);
-    const paid = w.objectives.length;
-    w.ev.onStageClear(S1, [1, 3]);
-    assert.strictEqual(w.objectives.length, paid, 'cleared again from the rerun: nothing');
-    assert.ok(w.ev.events().filter((c) => c.stages.some((s) => s.stageId === S1)).every((c) => c.stages.find((s) => s.stageId === S1).clearMissionIds.join() === '1,3'),
-      'both cards show the objectives done');
+    // fix round 1: the index and the stage row of make-events.js for two records with the same quest; cleared first from the card
+    // of the first run, then through the second record's entry and card (its own quest item and stage id)
+    const me = require('./make-events');
+    const cfg = { ...JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')), serve: null };
+    const story = { stageId: 1001, stageBinId: 0, id: 1, name: 'Story', mapName: 'Room', useAp: 9, worldId: 1, stageKind: 1, validSubmission: 1 };
+    const rec = (censusId, start, end) => ({ censusId, name: 'Run', start, end, type: 'EQ', notices: [],
+      evStage: [], quests: [{ stageId: 702900, name: 'Same', worldId: 1, room: [], level: 10, ap: 5, addLevel: 0, targets: [{ id: 501 }], combined: 0, firstClear: [],
+        objectives: [1, 2, 3].map((n) => ({ code: 10, text: 'x', dataType: 1, idType: 0, id: 0, num: 0, reward: { type: 2, id: 0, num: n } })),
+        drops: { enemies: [], chests: [] }, enemies: [{ id: 501, level: 10, count: 1 }], restrictions: {}, drama: {}, map: { key: 702900, stageBinId: 0, status: 'ok' }, label: 'original' }] });
+    const out = me.buildEvents([rec('R-1', '2019-04-01', '2019-04-07'), rec('R-2', '2019-04-08', '2019-04-14')], cfg, { stage: [story], evStage: [], enemy: [{ enemyId: 501, name: 'Foe' }] });
+    const [r1, r2] = out.index.entries;
+    assert.deepStrictEqual([out.stage.length, r2.quests[0].sharedWith, r2.quests[0].stageId], [1, 'R-1', r1.quests[0].stageId]);
+    const w = world({ index: out.index });
+    w.tables.stage = out.stage;
+    w.week = { shopFrom: '2019-04-01', shopTo: '2019-04-07' };
+    const sid1 = w.ev.events()[0].stages[0].stageId;
+    w.ev.onStageClear(sid1, [1, 3]);
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1, 3]);
+    w.week = { shopFrom: '2019-04-08', shopTo: '2019-04-14' };
+    const card2 = w.ev.events().find((c) => c.eventStageId === r2.evStageId);
+    const sid2 = r2.quests[0].stageId;
+    assert.ok(card2 && card2.stages[0].stageId === sid2, 'the card of the second record lists its quest');
+    assert.deepStrictEqual(card2.stages[0].clearMissionIds, [1, 3], 'done on the rerun card too');
+    w.ev.onStageClear(sid2, [1, 2, 3]);
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1, 3, 2], 'from the rerun: only the objective never paid');
+    assert.strictEqual(w.ev.entryOfStage(sid2).censusId, 'R-1', 'the entry that built the row');
   },
   // The Keyblade War part 3: a quest of another Union (index quest `union`) is not listed for the player; the completion reward
   // counts the common quests and the player's own Union version only (byUnion), and only when that Union is ready (readyUnions)
@@ -344,9 +360,12 @@ const tests = {
     w.ev = routesEvents({ ...w.opts, addPresent: (type, id, num) => presents.push(num) });
     w.tables.stage[0] = stageRow(S1, { validSubmission: 0 });
     assert.strictEqual(w.ev.payBonuses(), 0, 'not cleared');
-    w.scores[S1] = 100;
+    // fix round 1: server.js calls onStageClear BEFORE it writes stageScores (playStatus), so the clear itself must count: no score
+    // is set here, as at that moment in server.js
     w.ev.onStageClear(S1, []);
-    assert.deepStrictEqual(presents, [5]);
+    assert.deepStrictEqual(presents, [5], 'paid on the clear, not at the next login');
+    w.scores[S1] = 100;
+    assert.strictEqual(w.ev.payBonuses(), 0, 'once');
   },
   // fix round 1 (I1): a reward the server cannot give now (a Spirit part with the pet off, canPay false) is not lost: it is kept in
   // player.pendingRewards once per stage / objective / position, and paid once by payPending when it can be given

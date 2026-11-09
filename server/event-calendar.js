@@ -18,9 +18,12 @@ const { weekTo, weekDateAt } = require('./calendar-util');
 const served = (q) => q && q.served;
 const listable = (e) => !!(e && e.available && e.evStageId && (e.stageIds || []).length);
 
-// The served quests of an entry open now: a quest (or its entry) with `days` only on the Shop week's date of the real weekday
+// The served quests of an entry open now: a quest (or its entry) with `days` only on the Shop week's date of the real weekday.
+// A quest with openFrom (Part 5 fix round 1: the Pt. 2 quests of EV-0929, dated from its Pt. 1 line) only in the Shop weeks that
+// reach that date
 function openQuests(entry, week = {}, nowMs) {
-  const quests = ((entry && entry.quests) || []).filter(served);
+  const to = week.shopFrom ? weekTo(week) : null;
+  const quests = ((entry && entry.quests) || []).filter(served).filter((q) => !q.openFrom || !to || q.openFrom <= to);
   const hasDays = (x) => Array.isArray(x.days) && x.days.length;
   if (!hasDays(entry) && !quests.some(hasDays)) return quests;
   const today = weekDateAt(week, nowMs);

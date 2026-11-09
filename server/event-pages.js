@@ -48,6 +48,7 @@ const PLAIN_REASONS = {
   objectiveMismatch: 'Its objectives differ between the khuxwiki page and the surviving game data: it is held back until they are confirmed.',
   // Part 5 Task 3
   objectiveUnmapped: 'An objective of this quest is known only from its text: it is held back until the surviving game data proves it, never served with a guessed one.',
+  enemyAmbiguous: 'Our game data holds several versions of one of its enemies with different strength: it is held back until the right one is confirmed.',
 };
 function whyPlain(why, reason) {
   if (PLAIN_REASONS[reason]) return PLAIN_REASONS[reason];

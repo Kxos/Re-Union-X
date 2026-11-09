@@ -83,7 +83,7 @@ const QUIZ_BOARD_LABELS = ['quizBoard', 'quizBoardFootage', 'quizBoardScreenshot
 // Constraints «Nothing half-served»), scheduleLine (a second notice of an event, scheduleLineOf: no row, no card, no catalogue row)
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
   'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch',
-  'boosterOnly', 'rewardTypeUnknown', 'quizTextMissing', 'objectiveMismatch', 'notice', 'objectiveUnmapped', 'scheduleLine'];
+  'boosterOnly', 'rewardTypeUnknown', 'quizTextMissing', 'objectiveMismatch', 'notice', 'objectiveUnmapped', 'scheduleLine', 'enemyAmbiguous'];
 // flags the private builder writes in a quest label (Task 1): this generator decides them itself (payableTypes, quizDramas,
 // objectiveMismatch), so they carry no label of their own. objectiveResolved (I-251): a note, the donor objective is served as recorded
 const RECORD_FLAGS = ['boosterLater', 'boosterOnly', 'quizTextMissing', 'rewardTypeUnknown', 'objectiveMismatch', 'objectiveResolved'];
@@ -452,6 +452,11 @@ function applyDatesOf(records) {
     if (i < 0) throw new Error(`events: ${line.censusId} datesOf ${d.censusId}, which is not in the records`);
     if (!d.start) throw new Error(`events: ${line.censusId} datesOf ${d.censusId} without a start`);
     const t = { ...out[i], datesFrom: line.censusId };
+    // fix round 1: only the quests the line names (datesOf.quests: Pt. 1, 740900-740904) open on its start; the others keep the
+    // Pacific day their own donor row opened (origStart, Pt. 2 on 2019-09-20): index quest openFrom, read by event-calendar.js
+    const starts = donorRowsOf(t).filter((r) => r.startTime).map((r) => ptDate(utcMs(r.startTime))).sort();
+    const origStart = t.start || starts[0] || null;
+    if (Array.isArray(d.quests) && origStart && d.start < origStart) { t.datesOfQuests = d.quests; t.origStart = origStart; }
     if (!t.start || d.start < t.start) t.start = d.start;
     if (!t.end) {
       const ends = donorRowsOf(t).filter((r) => r.endTime).map((r) => ptDate(utcMs(r.endTime))).sort();
@@ -488,9 +493,21 @@ function genMapOf(q, stageId, look) {
   const target = ((q.targets || [])[0] || {}).name || null;
   const counts = new Map(Object.entries(q.wikiEnemies || {}).map(([n, c]) => [n, Number(c) || 0]));
   const missing = [];
+  // fix round 1 (review of Task 3): never a silent pick among same-name rows. An explicit id of the record wins (wikiEnemyIds
+  // {name: enemy id}, the target's targets[0].id; Task 4 pins them); else the rows of the name (target 1xxxx / others 8xxxx when
+  // the name has such rows, else all its non-event rows): one row, or rows with the same stats (hp, attack, defense, baseLv,
+  // growth), give that id; rows with different stats -> ambiguous (the quest is held: enemyAmbiguous, the candidates in why)
+  const explicit = q.wikiEnemyIds || {};
+  const ambiguous = [];
   const mapId = (name, isTarget) => {
+    const pinned = isTarget ? ((q.targets || [])[0] || {}).id : explicit[name];
+    if (Number.isInteger(pinned)) return pinned;
     const ids = look.byName(name);
-    return ids.find((i) => (isTarget ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
+    const band = ids.filter((i) => (isTarget ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000));
+    const cand = band.length ? band : ids;
+    if (!cand.length) return 0;
+    if (new Set(cand.map((i) => look.statsOf(i))).size > 1) { ambiguous.push({ name, ids: cand }); return -1; }
+    return cand[0];
   };
   if (!target) missing.push('the target (no name)');
   if (target && counts.has(target)) counts.set(target, Math.max(0, counts.get(target) - 1));
@@ -512,12 +529,14 @@ function genMapOf(q, stageId, look) {
     const own = ob ? Math.min(n, ob.n) : 0;
     const rest = n - own;
     const id = rest > 0 ? mapId(name, false) : 0;
+    if (id === -1) continue;
     if (rest > 0 && !id) { missing.push(name); continue; }
     for (let k = 0; k < own; k++) members.push({ name, enemyId: ob.id });
     for (let k = 0; k < rest; k++) members.push({ name, enemyId: id });
   }
-  const targetId = target ? mapId(target, true) : 0;
-  if (target && !targetId) missing.push(target);
+  const tId = target ? mapId(target, true) : 0;
+  const targetId = tId > 0 ? tId : 0;
+  if (target && !tId) missing.push(target);
   // groups: the members in record order, at most GEN_GROUP_MAX per group, same enemy id merged ({name, enemyId, n, reward 1: the
   // no-drop row, the data-hole quests have no drop rows})
   const groups = [];
@@ -535,7 +554,7 @@ function genMapOf(q, stageId, look) {
     enemies: groups, treasures: [], rooms: 1 };
   const enemies = [...groups.flat().map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
     ...(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : [])];
-  return { entry, enemies, targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)] };
+  return { entry, enemies, targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)], ambiguous };
 }
 
 // Completion rewards of the records (Part 5 Task 3: EV-0941 completionReward, The Keyblade War Challenge Campaign, notice 61226):
@@ -622,7 +641,9 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       byName.get(k).push(e.enemyId);
     }
     for (const v of byName.values()) v.sort((a, b) => a - b);
-    genLook = { byName: (n) => byName.get(String(n).trim().toLowerCase()) || [], nameOf: (id) => names.get(id) || null };
+    const rowOf = new Map((master.enemy || []).map((e) => [e.enemyId, e]));
+    const statsOf = (id) => { const e = rowOf.get(id) || {}; return JSON.stringify([e.hp, e.attack, e.defense, e.baseLv, e.validGrowth]); };
+    genLook = { byName: (n) => byName.get(String(n).trim().toLowerCase()) || [], nameOf: (id) => names.get(id) || null, statsOf };
     return genLook;
   };
   const aliases = config.rewardTypeAliases || null;
@@ -740,6 +761,8 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         why: null, labels: qLabels, mapKey, mapStatus: gen ? 'generated' : (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       if (unionOfStage.has(q0.stageId)) item.union = unionOfStage.get(q0.stageId);
+      // a quest of a datesOf target that the line does not name opens on its own original day (applyDatesOf)
+      if (rec.datesOfQuests && !rec.datesOfQuests.includes(q0.stageId)) item.openFrom = rec.origStart;
       if ((q0.map || {}).levelShifted) { const ls = q0.map.levelShifted; item.levelShift = { from: ls.from, to: ls.to, delta: ls.delta }; }
       entry.quests.push(item);
       srcOf.set(item, q0);
@@ -761,6 +784,10 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         if (/variant/i.test(jpT) && !/Ω/.test(tname)) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${tname} variant (JP table «${jpT}»: the Ω form, not named in the record)`; continue; }
         const g = genMapOf(q, stageId, lookGen());
         if (g.missing.length) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${g.missing.join(', ')}`; continue; }
+        if (g.ambiguous.length) {
+          item.reason = 'enemyAmbiguous';
+          item.why = `${textOf('enemyAmbiguous')} (${g.ambiguous.map((a) => `${a.name}: ${a.ids.join(', ')}`).join('; ')})`; continue;
+        }
         // «Collect all materials» needs materials on the map: the khuxwiki pages give none for a generated map, so the objective
         // could never be met as the original (nothing half-served)
         const chests = (q.objectives || []).filter((o) => o.code === 18);
@@ -844,8 +871,9 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       // the drops are in the shared map file, so they must still be equal (the check below)
       const surpriseShare = !!(prior && rec.shortWindow && prior.shortWindow);
       // a JP twin map (Part 5 Task 3, map.source 'jpTwin': the map of the same quest, same enemies, counts, target and level) may be the
-      // own map of another record's quest (the Daily XIII maps): one map file for both, so the drops must be equal (the check below)
-      const twinShare = !!(prior && (srcMap === 'jpTwin' || prior.jpTwin));
+      // own map of another record's quest (the Daily XIII maps): one map file for both, so the drops must be equal (the check below);
+      // data-hole records only (rec.dataHole, fix round 1), as binShare
+      const twinShare = !!(prior && rec.dataHole && (srcMap === 'jpTwin' || prior.jpTwin));
       // a record rebuilt from the surviving stage rows of the 2016-17 data hole (rec.dataHole, Part 5): the original stage row of a
       // quest loaded another stage's map (its stageBinId: the Daily XIII quests of EV-0333 on the maps of the monthly runs, user
       // 10-11-2026), so it shares that map file; the drops must be equal (the check below). Other records keep the Part 4 rule

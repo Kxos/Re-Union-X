@@ -833,3 +833,9 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   player when the common quests and their own Union's quests are done. I-253 item 2 fixed: a counted quest without objectives
   counts once cleared (playStatus).
 - **Catalogue.** `catalogName` renames the Event Catalog row and page (EV-1089 «Challenge Organization XIII Pt.1»).
+- **Fix round 1 (review).** Generated-map enemy ids are never picked silently: an explicit record id (`wikiEnemyIds {name: id}`,
+  `targets[0].id`) wins; else one row (or same-stat rows) of the name; rows with different stats hold the quest (`enemyAmbiguous`,
+  the candidates in `why`): 42 of the 55 candidate quests until Task 4 pins the ids. `datesOf.quests` opens only those quests on
+  the line's date; the others get `openFrom` (their own donor row's Pacific day, EV-0929 740905 / 740910 on 2019-09-20), read by
+  event-calendar.js. The bonus check counts the stage being cleared (server.js writes its playStatus after `onStageClear`). JP-twin
+  map sharing is limited to `dataHole` records, as `binShare`.
