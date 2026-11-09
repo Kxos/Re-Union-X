@@ -23,7 +23,8 @@
 //   enemy lands. A record with no served quest has no evStage row (entry available false);
 // - a record whose quest is a raid or Special stage (our ranges 970000-989999, a stageKind 2 row of the master on the same map
 //   key, an Eggcognito target) is skipped with a reason: make-raid / make-special serve it;
-// - short windows (a donor evStage row under shortWindowHours) open for their whole original Pacific day: entry `days`, label wholeDay.
+// - short windows (a donor evStage row under shortWindowHours, or every row of a record marked `shortWindow`: the Surprise events,
+//   whose donor row is the whole day) open for their whole original Pacific day: entry `days`, label wholeDay.
 // Ids come from server/event_ids.json (versioned, append-only, as raid_ids.json): rows {censusId: r}, entries
 // {"<censusId>/+<offset of its donor stage id from the record's anchor>": n}, checks {censusId: {keys, hash}}; evStage = evStageBase + r,
 // stage = stageBase + n. The anchor (a donor stage id per record, frozen at its first numbering) lives in the private sidecar
@@ -94,6 +95,12 @@ function daysOf([from, to]) {
   return out;
 }
 const isShort = ([from, to], hours) => utcMs(to) - utcMs(from) < hours * 3600000;
+// A donor row of a short-window event (Part 4 Task 7): a window under shortWindowHours, or any row of a record marked
+// `shortWindow` (the Surprise events: the original ran a few times a day for 15-60 minutes, the donor master keeps one row of
+// the whole day). Such a row is open on the Pacific days of its window; a long row of a shortWindow record on the day it starts
+// only (a 24 h row from 08:00 UTC starts at 01:00 Pacific in summer and would touch the next day).
+const shortWindowRow = (rec, r, hours) => !!(r && r.startTime && r.endTime && (isShort([r.startTime, r.endTime], hours) || rec.shortWindow));
+const shortDaysOf = (r, hours) => (isShort([r.startTime, r.endTime], hours) ? daysOf([r.startTime, r.endTime]) : [ptDate(utcMs(r.startTime))]);
 
 // Label ids of a record label («original; enemies missing: 2; donor kept; wiki is the 2018 run»): every phrase of labelPhrases;
 // «original» and «enemies missing: N» (the master check decides that) carry none; anything else stops the run.
@@ -514,7 +521,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     // short windows of the donor rows: open the whole Pacific day
     const shortDays = new Set();
     for (const r of rec.evStage || []) {
-      if (r.startTime && r.endTime && isShort([r.startTime, r.endTime], config.shortWindowHours)) daysOf([r.startTime, r.endTime]).forEach((d) => shortDays.add(d));
+      if (shortWindowRow(rec, r, config.shortWindowHours)) shortDaysOf(r, config.shortWindowHours).forEach((d) => shortDays.add(d));
     }
     if (shortDays.size) { entry.days = [...shortDays].sort(); labels.add('wholeDay'); }
 
@@ -684,7 +691,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     // row keeps its number (allocateRows, append-only); the merged ones get no evStage row and no card.
     const rowIds = allocateRows(rec, allIds, allAnchors, config);
     const recEnd = rec.end || null;
-    const shortRow = (d) => !!(d && d.startTime && d.endTime && isShort([d.startTime, d.endTime], config.shortWindowHours));
+    const shortRow = (d) => shortWindowRow(rec, d, config.shortWindowHours);
     const groups = [], byDay = new Map();
     for (const d of donorRows) {
       if (!shortRow(d)) { groups.push([d]); continue; }
@@ -714,7 +721,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
           r.start = ptDate(utcMs(d.startTime));
           r.end = [...g.map((m) => ptDate(utcMs(m.endTime || m.startTime)))].sort().pop();
           if (recEnd && r.end > recEnd) r.end = recEnd < r.start ? r.start : recEnd;
-          if (shortRow(d)) r.days = [...new Set(g.flatMap((m) => daysOf([m.startTime, m.endTime])))].sort();
+          if (shortRow(d)) r.days = [...new Set(g.flatMap((m) => shortDaysOf(m, config.shortWindowHours)))].sort();
         }
       }
       if (!r.days && entry.days && !(d && donorRows.length > 1)) r.days = entry.days;

@@ -845,6 +845,24 @@ const tests = {
     assert.strictEqual(o2.evStage.length, 2);
     assert.strictEqual(o2.stage.length, 5, 'stage rows once');
   },
+  // a Surprise event (Part 4 Task 7): the donor master keeps ONE row of the whole day (08:00 UTC to 07:59:59 UTC, which starts at
+  // 01:00 Pacific in summer), the original ran a few times a day for 15-60 minutes; the record's `shortWindow` makes it a short
+  // event: open on the day its row starts only, label wholeDay. Without the mark the same row is a daily event (no days).
+  short_window_record_whole_day() {
+    const range = { validStageId: 1, stageId: [700201], validStageWidthId: 0, stageStartId: 0, stageEndId: 0 };
+    const mk = (extra) => record('E-SW', [quest(700201, 1, [501], { evStageId: 900201, window: ['2020-05-06 08:00:00', '2020-05-07 07:59:59'] })], {
+      start: '2020-05-06', end: '2020-05-07', evStage: [donorEv({ eventStageId: 900201, startTime: '2020-05-06 08:00:00', endTime: '2020-05-07 07:59:59', eventType: 3, stageRange: range })], ...extra });
+    const e = entry(build([mk({ shortWindow: 'ran 3 times a day for 15-60 minutes (notice); donor row of the whole day' })]), 'E-SW');
+    assert.deepStrictEqual(e.days, ['2020-05-06'], 'the day its row starts, not the next one');
+    assert.ok(e.labels.includes('wholeDay'));
+    assert.strictEqual(e.rows.length, 1);
+    assert.deepStrictEqual(e.rows[0].days, ['2020-05-06']);
+    assert.deepStrictEqual(e.quests[0].days, undefined, 'a 24 h quest window adds no days of its own');
+    const plain = entry(build([mk({})]), 'E-SW');
+    assert.strictEqual(plain.days, undefined, 'unmarked: a daily event');
+    assert.ok(!plain.labels.includes('wholeDay'));
+    assert.strictEqual(plain.rows[0].days, undefined);
+  },
   // a Booster objective reward (Part 6 grants it): the quest is served, the objective pays nothing here (type 0 in the stage
   // row, never 34), the index names the Booster for player.pendingBoosters; label boosterLater
   booster_reward_pending_once() {

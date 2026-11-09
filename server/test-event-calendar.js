@@ -56,6 +56,33 @@ const tests = {
     assert.deepStrictEqual(cal.openQuests(two, w, THU).map((q) => q.stageId), [4000052]);
     assert.deepStrictEqual(cal.openQuests(two, w, TUE).map((q) => q.stageId), []);
   },
+  // the short events as make-events.js writes them (Part 4 Task 7, dry index of 10-11): a Surprise event of one row whose census
+  // end is the next day (EV-1055 «Surprise Event! (3/5)», 2020-03-05 a Thursday, end 2020-03-06), and Time Missions with one row
+  // per original day (EV-1075, 18 quests on every day row): each row is open its whole day only, never on the census end day
+  short_rows_generated_shape() {
+    const THU0 = Date.parse('2026-11-05T08:00:00Z'), THU2359 = Date.parse('2026-11-06T07:59:00Z'), FRI = Date.parse('2026-11-06T20:00:00Z');
+    const surprise = entry('E-1055', '2020-03-05', '2020-03-06', { evStageId: 20556, stageIds: [4003131], days: ['2020-03-05'], labels: ['wholeDay'],
+      quests: [quest(4003131)], rows: [{ evStageId: 20556, start: '2020-03-05', end: '2020-03-06', days: ['2020-03-05'], stageIds: [4003131], available: true }] });
+    const w = week('2020-03-05', '2020-03-11');
+    const cards = (idx, now) => cal.currentCards(idx, w, now).map((c) => c.row.evStageId);
+    assert.deepStrictEqual(cards({ entries: [surprise] }, WED), [], 'Wednesday is 2020-03-11: closed');
+    assert.deepStrictEqual(cards({ entries: [surprise] }, THU0), [20556], 'its day, 00:00 PST');
+    assert.deepStrictEqual(cards({ entries: [surprise] }, THU), [20556], 'its day, noon');
+    assert.deepStrictEqual(cards({ entries: [surprise] }, THU2359), [20556], 'its day, 23:59 PST');
+    assert.deepStrictEqual(cards({ entries: [surprise] }, FRI), [], 'the day after (2020-03-06, the census end): closed');
+    assert.deepStrictEqual(cards({ entries: [surprise] }, TUE), [], 'another day of the week');
+    // a week that does not hold 2020-03-05 but overlaps the census end: never listed
+    assert.deepStrictEqual(cal.currentCards({ entries: [surprise] }, week('2020-03-06', '2020-03-12'), FRI), []);
+    const ids18 = Array.from({ length: 18 }, (_, i) => 4003134 + i);
+    const tm = entry('E-1075', '2020-03-26', '2020-04-07', { evStageId: 20559, stageIds: ids18, labels: ['wholeDay'],
+      days: ['2020-03-26', '2020-03-27', '2020-03-28'], quests: ids18.map((id) => quest(id)),
+      rows: [['2020-03-26', 20559], ['2020-03-27', 20632], ['2020-03-28', 20656]].map(([d, id]) => ({ evStageId: id, start: d, end: d, days: [d], stageIds: ids18, available: true })) });
+    const tw = week('2020-03-26', '2020-04-01'); // Thursday 2020-03-26
+    const tcards = (now) => cal.currentCards({ entries: [tm] }, tw, now).map((c) => [c.row.evStageId, c.quests.length]);
+    assert.deepStrictEqual(tcards(THU), [[20559, 18]], 'Thursday: the 3/26 row with its 18 quests');
+    assert.deepStrictEqual(tcards(FRI), [[20632, 18]], 'Friday: the 3/27 row only');
+    assert.deepStrictEqual(tcards(TUE), [], 'Tuesday (2020-03-31): no row built for that day in this fixture');
+  },
   // a daily event (one quest per day, 24 h windows, no `days`): listed with every served quest for its whole period (ruling 06-11)
   daily_whole_period() {
     const daily = entry('E-6', '2019-04-01', '2019-04-07', { quests: [1, 2, 3].map((n) => quest(4000060 + n, { window: [`2019-04-0${n} 07:00:00`, `2019-04-0${n + 1} 06:59:59`] })) });
