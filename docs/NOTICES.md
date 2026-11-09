@@ -52,7 +52,7 @@ Today **305 events** are served, with **2181 of their 3071 quests** (404 events 
 
 ### Challenge events
 
-The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **213 events** of 2018 to 2021 are served, with **1564 of their 2340 quests**. The Event Catalog lists the others with the reason they are not here yet.
+The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **213 events** of 2018 to 2021 are served, with **1564 of their 2340 quests** (by year: 2018: 44 events, 453 quests; 2019: 45 events, 372 quests; 2020: 109 events, 675 quests; 2021: 15 events, 64 quests). The Event Catalog lists the others with the reason they are not here yet.
 
 **Surprise events** and **Time Missions** are back: today 52 Surprise events and 6 Time Missions events (**169 quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.
 

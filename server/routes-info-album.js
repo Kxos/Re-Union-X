@@ -85,6 +85,11 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
     from: chYears[0] || null, to: chYears[chYears.length - 1] || null,
     quiz: servedQ.filter((q) => (q.labels || []).some((l) => /^quizBoard/.test(l))).length,
     boosters: servedQ.filter((q) => (q.labels || []).includes('boosterLater')).length };
+  // Events Part 4 Task 8: the served challenge events and their served quests by year of start
+  challenge.years = [...new Set(chYears)].map((y) => {
+    const ev = chOn.filter((e) => String(e.start || '').startsWith(y));
+    return { year: y, events: ev.length, served: ev.flatMap((e) => e.quests || []).filter((q) => q.served).length };
+  });
   // Events Part 4 Task 7: the Surprise events (oneDay: their one whole Pacific day, original) and Time Missions (label wholeDay:
   // their whole day, not original) served
   const surpriseOn = chOn.filter((e) => e.oneDay), tmOn = chOn.filter((e) => !e.oneDay && (e.labels || []).includes('wholeDay') && /time mission/i.test(e.name || ''));
@@ -114,7 +119,7 @@ function eventChallengeLines(f) {
   const span = c && c.from ? (c.from === c.to ? ` of ${c.from}` : ` of ${c.from} to ${c.to}`) : '';
   return ['## Challenge events',
     c && c.events
-      ? `The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **${c.events} events**${span} are served, with **${c.served} of their ${c.quests} quests**. The Event Catalog lists the others with the reason they are not here yet.`
+      ? `The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **${c.events} events**${span} are served, with **${c.served} of their ${c.quests} quests**${c.years && c.years.length > 1 ? ` (by year: ${c.years.map((y) => `${y.year}: ${y.events} event${y.events === 1 ? '' : 's'}, ${y.served} quest${y.served === 1 ? '' : 's'}`).join('; ')})` : ''}. The Event Catalog lists the others with the reason they are not here yet.`
       : 'The **challenge and battle events** (Keyblade Challenges and quizzes included) are listed in the Event Catalog; none of their quests is served yet.',
     ...(c && c.short && (c.short.surprise || c.short.timeMissions) ? [`**Surprise events** and **Time Missions** are back: today ${c.short.surprise} Surprise event${c.short.surprise === 1 ? '' : 's'} and ${c.short.timeMissions} Time Missions event${c.short.timeMissions === 1 ? '' : 's'} (**${c.short.served} quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.${c.short.surpriseWaiting ? ' The other Surprise events wait in the Event Catalog, with the reason.' : ''}`] : []),
     ...(c && c.bonus && (c.bonus.paid.length || c.bonus.waiting.length) ? [communityBonusLine(c.bonus)] : []),

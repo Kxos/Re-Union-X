@@ -255,6 +255,9 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const lines = n.eventChallengeLines(f).join(' ');
   check(/## Challenge events/.test(lines) && lines.includes('**3 events**') && lines.includes('**5 of their 8 quests**')
     && lines.includes('**2 quiz quests**') && /\*\*2\*\* served quests/.test(lines), `Events: righe delle sfide ${lines.slice(0, 300)}`);
+  // Events Part 4 Task 8: the served challenge events by year (start year of the served events, served quests)
+  check(JSON.stringify(f.challenge.years) === JSON.stringify([{ year: '2018', events: 2, served: 4 }, { year: '2019', events: 1, served: 1 }])
+    && lines.includes('(by year: 2018: 2 events, 4 quests; 2019: 1 event, 1 quest)'), `Events: sfide per anno ${JSON.stringify(f.challenge.years)} ${lines.slice(0, 400)}`);
   const plan = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'recon', 'tools', 'quiz_dramas.json'), 'utf8')).stages;
   const bySrc = (src) => Object.values(plan).filter((x) => x.source === src).length;
   check(lines.includes(`${bySrc('reconstructed')} are redrawn`) && lines.includes(`${bySrc('original_screenshot')} come from screenshots`)
