@@ -11,7 +11,7 @@
  "eventType": 3,
  "boardEventType": 1,
  "servedEventTypes": [1, 3],
- "imgVersion": 7,
+ "imgVersion": 8,
  "shortWindowHours": 12,
  "serve": {
   "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
@@ -170,6 +170,6 @@
   "734970": [{ "from": 126, "to": 99, "names": "Gummi Hammer -> Morning Star (Dark-Winged Warrior - 7/12)" }],
   "725440": [{ "from": 32, "to": 23, "names": "Bag O' Coal -> Bag O' Jewels (Agrabah Mission #2)" }]
  },
- "keptTabNote": "Where the KEPT EVENT tab of make_special_banners.py --section event goes on a card: left (default) or right, by evStageId (the left one hides the art of some originals).",
- "keptTab": { "20004": "right" }
+ "keptTabNote": "Where the KEPT EVENT tab of make_special_banners.py --section event goes on a card: left (default) or right, by evStageId (user 10-11: all at the left, the Quiz card 20004 too).",
+ "keptTab": {}
 }

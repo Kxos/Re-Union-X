@@ -10,15 +10,15 @@
 Event section (Events Part 1, Task 6; run after make_event_banners.py, whose event cards it reads; not part of «all»): the
 Event Catalog banner (server/event_config.json catalogEvStage, 20000), its own design (user 06-11: never the Raid Catalog
 layout): cyan -> green background, the game's Event Coin as emblem, a large white «EVENT CATALOG», the subtitle and the
-TRAINING sticker; and for every event of server/game_data/events.json a -kept copy of its card with a gold «KEPT EVENT» tab
-(top left, or top right where event_config.json keptTab says so). After a change bump imgVersion in
+TRAINING sticker; and for every event of server/game_data/events.json a -kept copy of its card with a «KEPT EVENT» tab
+in the Event Catalog colours (KEPT_STYLES; top left, or top right where event_config.json keptTab says so). After a change bump imgVersion in
 server/event_config.json, then the master revision.
 
 Raid section (raids Part 2, Task 9; run after make_raid_banners.py): the Raid Catalog banner (raids.json catalog.evStageId,
 8000; redesigned 06-11 on the user's request): a red background with light rays, a group of original raid bosses (their
 wait pose from the local raid rigs, --raid-rigs, RAID_BOSSES), the large gold «RAID CATALOG», the subtitle and the TRAINING
-sticker (a tap opens the Training Grounds); and for every raid week a -kept copy of its card with a gold «KEPT RAID» tab
-(the kept raid of the Raid Catalog in the Events tab; --catalog-only leaves them as they are).
+sticker (a tap opens the Training Grounds); and for every raid week a -kept copy of its card with a «KEPT RAID» tab
+in the Raid Catalog colours (KEPT_STYLES; the kept raid of the Raid Catalog in the Events tab; --catalog-only leaves them as they are).
 After a change of these files bump RAID_IMG_VERSION (server/routes-raid.js), then the master revision.
 
 Index: server/game_data/special.json (make-special.js). Each entry names the original khuxwiki banner file in `banner`
@@ -155,9 +155,23 @@ def vip_tab_end(im):
     return x if sum(under) >= .7 * len(under) else 0
 
 
-def kept_tab(im, text=KEPT_TEXT, side='left'):
+# catalogue-coloured KEPT tabs (user 10-11, variant B of tmp/kept_tabs): the band in the background gradient of the catalogue
+# banner the card belongs to (Raid Catalog red, Event Catalog teal -> green), the lettering in the catalogue-title gold with its
+# brown outline, thin lines in the gold of the catalogue frame at the top and bottom of the band; (top, bottom, dark edge)
+KEPT_STYLES = {
+    'raid': ((214, 34, 30), (92, 6, 12), (40, 2, 6, 140)),
+    'event': ((82, 214, 210), (36, 154, 104), (6, 60, 56, 140)),
+}
+CATALOG_FRAME_GOLD = (236, 196, 84, 255)
+TITLE_GOLD = ((255, 250, 200), (232, 150, 20))           # gold_text of the catalogue titles
+
+
+def kept_tab(im, text=KEPT_TEXT, side='left', style=None):
     """copy of the banner with the gold «KEPT QUEST» tab (or «KEPT RAID», text) at the top left (RGBA, 640x140); side
-    'right': the same tab mirrored at the top right (event cards whose top-left art it would hide, event_config keptTab)"""
+    'right': the same tab mirrored at the top right (event cards whose top-left art it would hide, event_config keptTab);
+    style 'raid' / 'event' (KEPT_STYLES): the band in that catalogue's colours with gold lettering and gold lines"""
+    if style is not None and style not in KEPT_STYLES:
+        raise ValueError('kept tab style %r (%s)' % (style, ', '.join(sorted(KEPT_STYLES))))
     im = im.convert('RGBA')
     if im.size != (640, 140):
         im = im.resize((640, 140), Image.LANCZOS)
@@ -165,12 +179,15 @@ def kept_tab(im, text=KEPT_TEXT, side='left'):
         solid = max(TAB_SOLID, vip_tab_end(im) + 4)
     else:   # as short as the text allows: the right side of the originals holds art too
         solid = int(ImageDraw.Draw(im).textlength(text, font=make_shop_art.font(18))) + 22
+    if style:
+        hi, lo, dk = KEPT_STYLES[style]
+        return _tab(im, text, hi, lo, dk, solid, side=side, catalog=True)
     return _tab(im, text, kept.GOLD_HI, kept.GOLD_LO, kept.GOLD_DK, solid, side=side)
 
 
-def _tab(im, text, hi, lo, dk, solid, size=18, side='left'):
+def _tab(im, text, hi, lo, dk, solid, size=18, side='left', catalog=False):
     """the top-left tab band of the originals (KEPT QUEST gold, VIP Quest red) over an RGBA 640x140 banner (side 'right':
-    mirrored, text aligned right)"""
+    mirrored, text aligned right); catalog: gold frame lines at the top and bottom, gold lettering (KEPT_STYLES)"""
     W, H = 640 * S, 140 * S
     y0, y1, xs, xf = TAB_Y0 * S, TAB_Y1 * S, solid * S, (solid + TAB_FADE) * S
     alpha = Image.new('L', (W, H), 0)
@@ -185,15 +202,27 @@ def _tab(im, text, hi, lo, dk, solid, size=18, side='left'):
     L.putalpha(alpha)
     edge = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     de = ImageDraw.Draw(edge)
-    de.rectangle([0, y1 - S, xf, y1 - 1], fill=dk)                          # dark lower edge
-    de.rectangle([0, y0 + S, xf, y0 + 2 * S - 1], fill=(255, 252, 228, 200))  # light upper edge
+    if catalog:
+        de.rectangle([0, y1 - 3 * S, xf, y1 - 2 * S - 1], fill=dk)                 # shade over the lower gold line
+        de.rectangle([0, y0, xf, y0 + 2 * S - 1], fill=CATALOG_FRAME_GOLD)         # gold frame line, top
+        de.rectangle([0, y1 - 2 * S, xf, y1 - 1], fill=CATALOG_FRAME_GOLD)         # gold frame line, bottom
+    else:
+        de.rectangle([0, y1 - S, xf, y1 - 1], fill=dk)                          # dark lower edge
+        de.rectangle([0, y0 + S, xf, y0 + 2 * S - 1], fill=(255, 252, 228, 200))  # light upper edge
     edge.putalpha(ImageChops.multiply(edge.getchannel('A'), alpha))
     L = Image.alpha_composite(L, edge)
     right = side == 'right'
     if right:
         L, alpha = L.transpose(Image.FLIP_LEFT_RIGHT), alpha.transpose(Image.FLIP_LEFT_RIGHT)
-    ImageDraw.Draw(L).text((W - 9 * S if right else 9 * S, (y0 + y1) / 2 + S * .5), text, font=make_shop_art.font(size * S),
-                           fill=(255, 255, 255, 255), anchor='rm' if right else 'lm', stroke_width=int(2.2 * S), stroke_fill=BROWN)
+    xy, anchor, f = (W - 9 * S if right else 9 * S, (y0 + y1) / 2 + S * .5), 'rm' if right else 'lm', make_shop_art.font(size * S)
+    if catalog:   # the catalogue titles' gold: light yellow -> orange over a brown outline
+        ImageDraw.Draw(L).text(xy, text, font=f, anchor=anchor, fill=BROWN, stroke_width=int(2.6 * S), stroke_fill=BROWN)
+        m = Image.new('L', (W, H), 0)
+        ImageDraw.Draw(m).text(xy, text, font=f, anchor=anchor, fill=255)
+        bb = m.getbbox()
+        L.paste(kept.vgrad((W, H), TITLE_GOLD[0], TITLE_GOLD[1], bb[1], bb[3]), (0, 0), m)
+    else:
+        ImageDraw.Draw(L).text(xy, text, font=f, fill=(255, 255, 255, 255), anchor=anchor, stroke_width=int(2.2 * S), stroke_fill=BROWN)
     sh = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     # drop shadow only under the solid part: it fades out much faster than the band (cube of the band alpha), so
     # it never shows through the half-transparent fade as a dark edge (fix round 1)
@@ -587,7 +616,7 @@ def build_raid(index, raid_img, mode, rigs=None, catalog_only=False):
         if not src:
             n['missing'] += 1
             continue
-        mbi.save_png(kept_tab(Image.open(src), RAID_KEPT_TEXT), os.path.join(raid_img, '%d-kept.png' % ev), mode)
+        mbi.save_png(kept_tab(Image.open(src), RAID_KEPT_TEXT, style='raid'), os.path.join(raid_img, '%d-kept.png' % ev), mode)
         n['kept'] += 1
     return n
 
@@ -748,7 +777,7 @@ def build_event(index, catalog_ev, event_img, mode, coin=None, kept_side=None):
         side = sides.get(ev, 'left')
         if side not in ('left', 'right'):
             raise ValueError('keptTab %d: side %r (left or right)' % (ev, side))
-        mbi.save_png(kept_tab(Image.open(src), EVENT_KEPT_TEXT, side), os.path.join(event_img, '%d-kept.png' % ev), mode)
+        mbi.save_png(kept_tab(Image.open(src), EVENT_KEPT_TEXT, side, style='event'), os.path.join(event_img, '%d-kept.png' % ev), mode)
         n['kept'] += 1
     return n
 

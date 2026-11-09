@@ -280,6 +280,29 @@ try:
     k99 = Image.open(os.path.join(rimg, '8099-kept.png')).convert('RGB')
     check(k99.getpixel((400, 100)) == (90, 90, 90), 'a week without its card: the plain plate with the tab')
     check(m.kept_tab(Image.new('RGB', (640, 140)), m.RAID_KEPT_TEXT).size == (640, 140) and m.RAID_KEPT_TEXT == 'KEPT RAID', 'raid tab text')
+    # catalogue-coloured KEPT tabs (user 10-11, variant B): the band in the catalogue's background gradient, the lettering in
+    # the catalogue-title gold, thin gold frame lines at the top and bottom; KEPT RAID red, KEPT EVENT teal; build_raid red
+    check(set(m.KEPT_STYLES) >= {'raid', 'event'}, 'KEPT_STYLES raid / event')
+    wh = Image.new('RGB', (640, 140), (255, 255, 255))
+    kr = m.kept_tab(wh, m.RAID_KEPT_TEXT, style='raid').convert('RGB')
+    ke = m.kept_tab(wh, m.EVENT_KEPT_TEXT, style='event').convert('RGB')
+    redp = lambda p: p[0] > p[1] + 80 and p[0] > p[2] + 80  # noqa: E731
+    teal = lambda p: p[1] > p[0] + 60 and p[2] > p[0] + 40  # noqa: E731
+    check(redp(kr.getpixel((4, 22))) and redp(kr.getpixel((130, 22))), 'KEPT RAID band red %s' % (kr.getpixel((4, 22)),))
+    check(teal(ke.getpixel((4, 22))) and teal(ke.getpixel((140, 22))), 'KEPT EVENT band teal %s' % (ke.getpixel((4, 22)),))
+    for nm, k in (('raid', kr), ('event', ke)):
+        check(all(gold(k.getpixel((x, 6))) for x in range(0, 140, 10)), '%s tab: gold line at the top %s' % (nm, k.getpixel((60, 6))))
+        check(all(gold(k.getpixel((x, 32))) for x in range(0, 140, 10)), '%s tab: gold line at the bottom %s' % (nm, k.getpixel((60, 32))))
+        check(sum(gold(p) for p in pixels(k.crop((8, 11, 130, 30)))) > 250, '%s tab: gold lettering' % nm)
+        check(diffbox(k, wh)[3] <= 40, '%s tab: only the top band changes' % nm)
+    check(m.kept_tab(wh).convert('RGB').getpixel((4, 22)) == m.kept_tab(wh, style=None).convert('RGB').getpixel((4, 22))
+          and gold(m.kept_tab(wh).convert('RGB').getpixel((4, 22))), 'no style: the gold KEPT QUEST tab of the Special tab')
+    try:
+        m.kept_tab(wh, style='pink')
+        errors.append('kept_tab accepts an unknown style')
+    except ValueError:
+        pass
+    check(redp(k70.getpixel((4, 22))), 'build_raid: KEPT RAID tab in the Raid Catalog red %s' % (k70.getpixel((4, 22)),))
     empty = os.path.join(tmp, 'raid_none')
     check(m.build_raid({'entries': [{'evStageId': 8070}]}, empty, 'full') == {'catalog': 0, 'kept': 0, 'missing': 1}, 'no card, no index catalog')
     # Catalog options (user 06-11): every option 640x140, gold frame, gold title left of the TRAINING sticker, all different

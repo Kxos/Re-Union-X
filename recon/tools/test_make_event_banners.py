@@ -139,12 +139,12 @@ try:
     assert bg[1] > bg[0] + 40 and bg[2] > bg[0], ('cyan/green background', bg)
     nocoin = msb.event_option('A', os.path.join(t, 'no_coin.png')).convert('RGB')
     assert ImageChops.difference(cat.crop((440, 10, 620, 130)), nocoin.crop((440, 10, 620, 130))).getbbox(), 'the coin emblem is drawn'
-    # KEPT tab side: 20002 right (keptTab), 20001 left
+    # KEPT tab side: 20002 right (keptTab), 20001 left; the Event Catalog teal band (user 10-11, variant B)
+    teal = lambda p: p[1] > p[0] + 60 and p[2] > p[0] + 40  # noqa: E731
     k2 = Image.open(os.path.join(out, '20002-kept.png')).convert('RGB')
-    gold = lambda p: p[0] > 200 and p[1] > 120 and p[2] < 120  # noqa: E731
-    assert gold(k2.getpixel((630, 20))) and not gold(k2.getpixel((10, 20))), (k2.getpixel((630, 20)), k2.getpixel((10, 20)))
+    assert teal(k2.getpixel((636, 22))) and not teal(k2.getpixel((4, 22))), (k2.getpixel((636, 22)), k2.getpixel((4, 22)))
     k1 = Image.open(os.path.join(out, '20001-kept.png')).convert('RGB')
-    assert gold(k1.getpixel((10, 20))) or k1.getpixel((10, 20)) != Image.open(os.path.join(out, '20001.png')).convert('RGB').getpixel((10, 20))
+    assert teal(k1.getpixel((4, 22))), k1.getpixel((4, 22))
     try:
         msb.build_event(index, 0, out, 'full', coin, {'20001': 'middle'})
         raise AssertionError('a wrong keptTab side must stop')
@@ -153,9 +153,9 @@ try:
     Image.new('RGB', (640, 140)).save(os.path.join(out, '0.png'))
     assert msb.build_event(index, 0, out, 'full', coin) == {'catalog': 0, 'kept': 4, 'missing': 0}, \
         'no catalog id: no catalogue banner; plate 0.png for the events without a card'
-    # the real config: the Quiz card (20004) has its tab on the right
+    # the real config: every KEPT EVENT tab at the top left (user 10-11: the Quiz card 20004 too)
     cfg = json.load(open(os.path.join(meb.REPO, 'server', 'event_config.json'), encoding='utf-8'))
-    assert cfg['keptTab'] == {'20004': 'right'}, cfg.get('keptTab')
+    assert not cfg.get('keptTab'), cfg.get('keptTab')
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_make_event_banners')
