@@ -1,6 +1,6 @@
 # Ranked rewards in single player: score thresholds instead of leaderboards
 
-Date: 2026-11-10. Status: design, waiting for the user's approval.
+Date: 2026-11-10. Status: APPROVED by the user (10-11-2026).
 Applies first to Events Part 8 (High Score Challenges); the same rules are reused later by the Damage Contests, the
 Swiftstriker Championships, the weekly / Deluxe Lux rankings, the Coliseum and PvP when those modes are built.
 
