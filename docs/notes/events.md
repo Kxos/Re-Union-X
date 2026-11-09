@@ -741,3 +741,39 @@ User decisions of 10 November 2026; everything up to the live master regen (dry 
 - **Dry regen** (`tmp\t7g`): 2,181 of 3,071 quests served (2,180 of 3,070), 305 events (304); +1 stage row (4003301), +1 evStage
   row (22627), the three Holiday stage rows change only `submissionItemId` (41 -> 1); no other row changes, no served quest
   moves; event_ids.json +1 row, +1 entry, +1 check; 106 tables valid. No map import (741710 is served), no resource build.
+
+## Part 4 summary (challenge and battle events, 10 November 2026)
+
+Final state (rev 293, resources 110 + a `-Quick` pack with map 743840; plan
+`docs/superpowers/plans/2026-11-09-events-part4-challenges.md`, ledger `.superpowers/sdd/2026-11-09-events-part4-challenges/progress.md`):
+- **Data.** Private records `challenge_2018..2021.json` and `short_2020.json` (census EQ, KEY, QUIZ; built by
+  `tmp\events\challenge\build_challenge.py`, then `patch_surprise.py`, which must be re-applied after every rebuild). Every donor quest
+  cross-checked against khuxwiki: an unpinned page never sets enemies, objectives that disagree hold the quest (`objectiveMismatch`,
+  CROSSCHECK.md, I-251).
+- **Served.** 305 events, 2,181 of 3,071 quests (challenge events: 213 events, 1,564 of 2,340 quests; 2018 44 events / 453 quests,
+  2019 45 / 372, 2020 109 / 675, 2021 15 / 64). Not served: mapUnusable 600, enemyMissing 149, mapKeyUsed 79, wikiEmpty 38,
+  objectiveMismatch 18, boosterOnly 5, rewardTypeUnknown 1.
+- **Maps.** Event rooms list (`event_rooms.json`) read by `make_jp_rooms.py`; other original copies tried for incomplete maps (one copy
+  per map, a mix only when the shared files are identical); 1,490 of 1,508 candidate maps imported.
+- **Enemies.** 15 new models approved by the user on rendered reviews (two rounds; Demon Tide repeats tentacle frame 14, declared);
+  atkSp of Leviathan, Metal Giant and Jack in the Box completed; 12 models still missing (I-250); renders to recheck (I-252).
+- **Rewards.** Payable types widened to what the server pays; a Booster reward goes once into `player.pendingBoosters` for Part 6
+  (I-166), a Booster-only quest is held; an unknown reward type holds the quest and never reaches the client.
+- **Quizzes.** No original WW quiz file survives: 75 boards (5 original screenshots, 5 redrawn from footage, 65 rebuilt from the
+  khuxwiki text, style and typo fixes approved by the user), each quiz stage with its own drama (1906101..178) and picture
+  (39401..478), made by `recon/tools/make_quiz_dramas.py`; quiz stages share the answer maps 720510 / 720530 as in the original.
+- **Short events.** Surprise events open their whole Pacific day (original, every WW notice) and share map 741710 (743840 for the
+  Holiday Draw Tickets runs, which pay the Holiday ticket); the 2020-05-15 Moon Gems run is EV-1532; Time Missions open all day
+  (not original, declared).
+- **Community goals and completion rewards.** 7 events pay once into the Presents the tier the original reached
+  (`community_bonus.json`, KHUX_EVENT_BONUS); fixed completion rewards use the same mechanism (`kind: 'completion'`): The Keyblade
+  War waits for its date and part 3 (I-247), the 5th-anniversary Genie Jafar quests wait for their record (I-248).
+- **Catalogue and cards.** 479 cards after Task 6 and 125 for the short events (imgVersion 9); Event Catalog with game-year tabs (the story week's year opens first);
+  KEPT RAID / KEPT EVENT tabs top left in their catalogue colours (variant B).
+- **Notice.** «Events» section «Challenge events»: counts by year from `events.json`, quiz boards and their sources, Boosters later,
+  Surprise events (whole day, original) and Time Missions (not original), community goals and completion rewards.
+- **Open:** I-247 .. I-252; map 743840 bench look (I-249); the Part 3 open points still stand.
+- **Lessons for Part 5.** Never run `make_jp_enemies.py --ids` (it pruned enemy_gen and a master regen during the rebuild served only
+  393 quests); a builder rerun against a master that already has the new enemy rows shrinks the missing list; read the original
+  notices before trusting the plan's window rules (the Surprise «15-60 minutes» was wrong); a shared map is allowed when the drops
+  are equal; banner art and notices decide reward mixes over the wiki.
