@@ -27,7 +27,10 @@ def _arr(b, sec, fmt):
     o, c = sec; sz = struct.calcsize(fmt)
     return [struct.unpack_from(fmt, b, o + i * sz) for i in range(c)]
 class LWF:
-    def __init__(self, path):
+    def __init__(self, path, fixed=False):
+        """fixed=True (09-11, challenge review round 2): LWF timing of nested movie clips (draws_fixed) and the
+        32-byte colour-transform records (ctf); False keeps the old behaviour for reproducible older renders."""
+        self.fixed = fixed
         b = open(path, 'rb').read(); self.b = b
         assert b[:4] == b'LWF\0', path
         self.version = b[4:7].hex()
@@ -56,6 +59,12 @@ class LWF:
         self.frame = _arr(b, sec['frame'], '<2i')
         self.movie = _arr(b, sec['movie'], '<7i')
         self.links = {self.S[s]: m for s, m in _arr(b, sec['movieLinkage'], '<2i')}
+        # colorTransform: in the GREE files checked (enemy 1631/1585 atkSp, 0x131211) the section holds 32-byte records
+        # (multi RGBA, add RGBA, floats) and 'color' is empty; read as (colorId, colorId) pairs they all fell back to
+        # identity in ctf(), dropping every tint/darkening of the animation
+        o, n = sec['colorTransform']
+        nxt = min([v[0] for v in sec.values() if v[0] > o] + [len(b)])
+        self.ct32 = [struct.unpack_from('<8f', b, o + 32 * i) for i in range(n)] if n and nxt - o == 32 * n else None
     def mat(self, mid):
         if mid & FLAG:
             sx, sy, k0, k1, tx, ty = self.matrix[mid & 0x7fffffff]
@@ -64,6 +73,9 @@ class LWF:
         return np.array([[1, 0, tx], [0, 1, ty], [0, 0, 1.]])
     def ctf(self, cid):
         """(mul rgba, add rgba)"""
+        if self.fixed and self.ct32 is not None and cid & FLAG:
+            v = self.ct32[cid & 0x7fffffff]
+            return np.array(v[:4]), np.array(v[4:])
         if cid & FLAG:
             try:
                 m, a = self.ctrans[cid & 0x7fffffff]
@@ -95,6 +107,8 @@ class LWF:
                 if d not in alive: del dl[d]
         return dl
     def draws(self, movie_id=None, frame_idx=0, M=None, C=None, out=None, _lvl=0, blend=0, masks=()):
+        if self.fixed:
+            return self.draws_fixed(movie_id, frame_idx, M, C, out, _lvl, blend, masks)
         """lista appiattita di disegni: (texId, frag, M(3x3 da spazio texture px a mondo), mul, add); i pezzi maschera
         (clipDepth) non sono disegnati: finiscono in .masks dei disegni che ritagliano"""
         if movie_id is None: movie_id = self.root
@@ -141,3 +155,47 @@ class LWF:
         T = np.array([[1, 0, fx - u], [0, 1, fy - v], [0, 0, 1.]])
         if rot: raise NotImplementedError('frammento ruotato')
         out.append(Draw((tex, (u, v, fw, fh), B @ T, C[0], C[1]), bl))
+
+    def draws_fixed(self, movie_id=None, frame_idx=0, M=None, C=None, out=None, _lvl=0, blend=0, masks=(), _root=True):
+        """draws() with LWF/Flash clip timing: a clip instance advances one frame per tick from the tick it was created,
+        independently of its parent's timeline (frame_idx = ticks since creation; the root is clamped, children loop).
+        draws() derived a child's frame from the parent's local frame, so a clip inside a 1-frame container stayed on
+        frame 0 (enemy 1616 atk1_o: the 41 flames of movie 7 inside the 1-frame movie 8 never played)."""
+        if movie_id is None: movie_id = self.root
+        if M is None: M = np.eye(3)
+        if C is None: C = (np.ones(4), np.zeros(4))
+        if out is None: out = []
+        fn = self.movie[movie_id][4]
+        el = frame_idx
+        lf = min(el, fn - 1) if _root else el % max(1, fn)
+        dl = self.display(movie_id, lf)
+        last = self.display(movie_id, fn - 1) if (fn > 0 and el >= fn) else {}
+        active = []
+        for d in sorted(dl):
+            o, mid, cid, pa, clip = dl[d]
+            active = [a for a in active if d < a[0]]
+            ot, oid = self.objects[o & 0xffff]
+            bl = blend or ((o >> 16) & 0x7fff)
+            W = M @ self.mat(mid)
+            mul, add = self.ctf(cid)
+            Cm = (C[0] * mul, C[0] * add + C[1])
+            tgt = [] if clip else out
+            mk = () if clip else tuple(masks) + tuple(a[1] for a in active)
+            n0 = len(tgt)
+            if ot == 2:
+                # a child present from frame 0 to the parent's last frame survives the parent's loop (Flash keeps it)
+                persists = pa == 0 and d in last and last[d][0] == o and el >= fn
+                self.draws_fixed(oid, el if persists else (lf - pa), W, Cm, tgt, _lvl + 1, bl, mk, _root=False)
+            elif ot in (3, 4):
+                self._bm(ot, oid, W, Cm, tgt, bl)
+            elif ot == 1:
+                go, gn = self.graphic[oid]
+                for gt, gid in self.graphicObject[go: go + gn]:
+                    if gt in (0, 1): self._bm(gt + 3, gid, W, Cm, tgt, bl)
+            if clip:
+                active.append((clip, tgt))
+            else:
+                for x in tgt[n0:]:
+                    if x.masks is None:
+                        x.masks = mk
+        return out

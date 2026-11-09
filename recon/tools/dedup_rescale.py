@@ -660,7 +660,8 @@ def dedup_rows(ctx, cands, grades):
 
 # --- rendering: lwf_rig.LWF (blend mode from place.objectId bits 16-30; Flash mask layers = place.depth clip depth,
 #     never drawn, listed in Draw.masks) and the mask/blend-aware dedup_review.render() --------------------------------
-def rig(path):
+def rig(path, fixed=False):
+    """fixed=True: lwf_rig.LWF(fixed=True), LWF clip timing + colour transforms (09-11)"""
     import numpy as np
     import lwf_rig
 
@@ -670,7 +671,7 @@ def rig(path):
                 return lwf_rig.LWF.ctf(self, cid)
             except IndexError:
                 return np.ones(4), np.zeros(4)
-    return SafeLWF(path)
+    return SafeLWF(path, fixed=fixed)
 
 
 def render(L, frame, texmap, tint=None, s=1.0, box=None):

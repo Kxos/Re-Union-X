@@ -140,9 +140,12 @@ def _warp(im, M, S, W, H):
                       np.float32) / 255.
 
 
-def render(L, frame, texmap, tint=None, s=1.0, box=None, movie=None, bg=(0.32, 0.36, 0.42)):
+def render(L, frame, texmap, tint=None, s=1.0, box=None, movie=None, bg=(0.32, 0.36, 0.42), mask_binary=False):
     """L: lwf_rig.LWF; texmap {texture index: RGBA image of the declared size}; tint {texture index: TINT key}
-    -> (RGB image, box). Missing textures leave holes; a mask whose texture is missing clips with its rectangle."""
+    -> (RGB image, box). Missing textures leave holes; a mask whose texture is missing clips with its rectangle.
+    mask_binary=True (09-11): a mask clips by the shape it covers (alpha > 0), not by its alpha value, as a Flash
+    timeline mask does (enemy 1622/1623 atkSp: the 846x846 mask disc has alpha 1/255, so the alpha-weighted clip
+    hid the 681x673 aura completely)."""
     import numpy as np
     from PIL import Image
     dr = L.draws(movie_id=movie, frame_idx=frame)
@@ -167,7 +170,8 @@ def render(L, frame, texmap, tint=None, s=1.0, box=None, movie=None, bg=(0.32, 0
             a = np.zeros((H, W, 1), np.float32)
             for x in md:
                 im = texmap.get(x[0]) or Image.new('RGBA', (int(x[1][2]), int(x[1][3])), (255, 255, 255, 255))
-                a = np.maximum(a, _warp(im, x[2], S, W, H)[..., 3:4])
+                w = _warp(im, x[2], S, W, H)[..., 3:4]
+                a = np.maximum(a, (w > 0.5 / 255).astype(np.float32) if mask_binary else w)
             cache[id(md)] = a
         return cache[id(md)]
 
