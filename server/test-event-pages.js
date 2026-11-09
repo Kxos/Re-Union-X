@@ -8,8 +8,11 @@ const fs = require('fs'); const os = require('os'); const path = require('path')
 const pages = require('./event-pages');
 const routesEvents = require('./routes-events');
 const { rowState } = require('./calendar-util');
+// the catalogue with its rows written out (sent packed since Events Part 4 Task 4, as the Raid Catalog: catalog-pages.js packCatalog)
+const catalog = (...a) => pages.expandCatalog(pages.catalogPage(...a));
 
 const REASONS = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')).reconstructedWhy;
+const REASON_TEXT = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8')).reasonText;
 const quest = (stageId, extra = {}) => ({ key: `k${stageId}`, stageId, name: `Quest ${stageId}`, ap: 5, level: 10, served: true, status: 'served', why: null, labels: [], ...extra });
 const NOT_SERVED = (stageId, why) => quest(stageId, { served: false, status: 'not served yet', why });
 // the player's Shop week: 2019-04-08 .. 04-14. E-0 past (can), E-1 now, E-3 later, E-9 no served quest (removed)
@@ -37,7 +40,7 @@ const DOC = () => ({ rows: { 'E-0': { noticeIds: [9001] } }, notices: { 9001: { 
 const tests = {
   // rows by month (month labels in date order), each with the state of rowState: now / can / kept / later / removed
   catalog_by_period() {
-    const html = pages.catalogPage(INDEX(), ctx());
+    const html = catalog(INDEX(), ctx());
     const months = [...html.matchAll(/<div class="ml" data-m="([\d-]+)">([^<]+)<\/div>/g)].map((m) => [m[1], m[2]]);
     assert.deepStrictEqual(months, [['2019-03', 'March 2019'], ['2019-04', 'April 2019'], ['2019-05', 'May 2019']]);
     const show = (id) => (/data-show="(\w+)"/.exec(rowOf(html, id)) || [])[1];
@@ -45,14 +48,14 @@ const tests = {
     assert.deepStrictEqual([29900, 29901, 29903, 29909].map(show), ['can', 'now', 'later', 'removed']);
     assert.ok(rowOf(html, 29903).includes('Unlocks at Story Quest 612'));
     assert.ok(rowOf(html, 29909).includes('Not restored yet'), 'a record with no served quest is listed, never hidden');
-    const kept = pages.catalogPage(INDEX(), ctx({ kept: 'E-0' }));
+    const kept = catalog(INDEX(), ctx({ kept: 'E-0' }));
     assert.strictEqual((/data-show="(\w+)"/.exec(rowOf(kept, 29900)) || [])[1], 'kept');
     assert.ok(rowOf(kept, 29900).includes('Remove from Events'));
     assert.ok(html.includes('Event Catalog') && html.includes('/web/event/event/29900?from=catalog'));
   },
   // only a past event can be kept: the page offers Keep only there, and the route refuses the others
   keep_past_only() {
-    const html = pages.catalogPage(INDEX(), ctx());
+    const html = catalog(INDEX(), ctx());
     assert.ok(rowOf(html, 29900).includes('data-pin="/web/event/keep/29900"'), 'past: Keep');
     for (const id of [29901, 29903, 29909]) assert.ok(!rowOf(html, id).includes('class="pk'), `no Keep on ${id}`);
     const player = {};
@@ -129,7 +132,7 @@ const tests = {
     const ix = INDEX();
     ix.entries[0].rows = [{ evStageId: 29900, start: '2019-03-01', end: '2019-03-07', stageIds: [4009904], quests: 1, available: true },
       { evStageId: 29930, start: '2019-03-02', end: '2019-03-02', days: ['2019-03-02'], stageIds: [], quests: 1, available: false }];
-    const cat = pages.catalogPage(ix, ctx());
+    const cat = catalog(ix, ctx());
     assert.strictEqual((cat.match(/class="row /g) || []).length, 4, 'one catalogue row per record');
     assert.ok(!cat.includes('id="q29930"'));
     const d = pages.detailPage(ix, 29900, ctx());
@@ -177,7 +180,7 @@ const tests = {
       quests: [], noQuests: 'board', boardSetKey: 'S1', reason: 'board', why: 'no quests of its own' },
     { censusId: 'E-242', evStageId: 29942, name: 'Coin Challenge', start: '2019-03-21', end: '2019-03-28', stageIds: [], available: false, labels: [], noticeIds: [], quests: [], noQuests: 'coin', reason: 'coin' });
     ix.boardSets = { S1: { boardIds: [7001], chains: {}, censusIds: ['E-0', 'E-579'] } };
-    const html = pages.catalogPage(ix, ctx());
+    const html = catalog(ix, ctx());
     assert.ok(!html.includes('id="q29979"') && !html.includes('New Coins Notice'), 'the informative notice is not listed');
     assert.ok(rowOf(html, 29909).includes('Not restored yet'), 'an unserved playable event stays');
     assert.ok(rowOf(html, 29942), 'a coin event with its card stays');
@@ -231,6 +234,36 @@ const tests = {
       assert.ok(!src(f).includes('.onc{border:1px solid'), `${f}: no copy of the notice card CSS`);
     }
   },
+  // Events Part 4 Task 4: about 340 events in place of 110; a fixture of 400 entries with 6 quests each stays under the budget
+  // (the Raid Catalog's: about 100 KB, 150 KB at most), with one row per event and the year tabs usable
+  catalog_size_budget() {
+    const entries = [];
+    for (let i = 0; i < 400; i++) {
+      const y = 2018 + Math.floor(i / 100), m = String(1 + (Math.floor(i / 9) % 12)).padStart(2, '0'), d = String(1 + (i % 27)).padStart(2, '0');
+      entries.push({ censusId: `EV-${1000 + i}`, evStageId: 21000 + i, name: `Challenge Event Number ${i}: The Long Name`, start: `${y}-${m}-${d}`, end: `${y}-${m}-${d}`,
+        stageIds: [4001000 + i * 6], available: i % 3 !== 0, labels: ['wholeDay', 'dramaOff'], noticeIds: [1],
+        quests: Array.from({ length: 6 }, (_, k) => (k < 2 ? quest(4001000 + i * 6 + k, { labels: ['donorKept'] }) : NOT_SERVED(4001000 + i * 6 + k, 'enemies not in the master: 2001234'))) });
+    }
+    const raw = pages.catalogPage({ reasons: REASONS, entries }, ctx({ current: new Set() })), html = pages.expandCatalog(raw);
+    const kb = Buffer.byteLength(raw, 'utf8') / 1024;
+    assert.ok(kb < 150, `catalogue ${kb.toFixed(1)} KB`);
+    assert.strictEqual((html.match(/<div class="row /g) || []).length, 400, 'one row per event');
+    assert.deepStrictEqual([...new Set([...html.matchAll(/data-y="(\d+)"/g)].map((x) => x[1]))], ['2018', '2019', '2020', '2021'], 'year of every row (the year tabs)');
+  },
+  // Booster rewards (boosterLater): a served quest with a Booster says it comes with the Boosters; the new reasons in plain words
+  booster_and_new_reasons() {
+    const ix = INDEX();
+    ix.entries[1].quests[0].boosters = [{ objective: 1, emblemName: 'P Booster +25%' }];
+    ix.entries[1].quests[0].labels = ['boosterLater'];
+    ix.entries[1].quests.push(quest(4009920, { served: false, status: 'not served yet', reason: 'quizTextMissing', why: REASON_TEXT.quizTextMissing }),
+      quest(4009921, { served: false, status: 'not served yet', reason: 'boosterOnly', why: REASON_TEXT.boosterOnly }));
+    const d = pages.detailPage(ix, 29901, ctx());
+    assert.ok(/P Booster \+25%.{0,80}comes with the Boosters/.test(d), 'the Booster line of the quest');
+    assert.ok(d.includes('Boosters'), 'the rebuilt values name it');
+    assert.ok(d.includes(pages.whyPlain(REASON_TEXT.quizTextMissing, 'quizTextMissing')) && /question/i.test(pages.whyPlain(REASON_TEXT.quizTextMissing, 'quizTextMissing')));
+    assert.ok(/Booster/.test(pages.whyPlain(REASON_TEXT.boosterOnly, 'boosterOnly')));
+    assert.ok(/reward/i.test(pages.whyPlain('', 'rewardTypeUnknown')));
+  },
 };
 
 let failed = 0;
@@ -275,7 +308,7 @@ function wiring() {
     assert.strictEqual(t.route('/web/event/catalog'), 'eventweb');
     const cat = web(t.respondEventWeb, '/web/event/catalog');
     assert.strictEqual(cat.code, 200);
-    assert.ok(cat.body.includes('Event Catalog') && cat.body.includes('id="q29900"'));
+    assert.ok(cat.body.includes('Event Catalog') && pages.expandCatalog(cat.body).includes('id="q29900"'));
     assert.strictEqual(web(t.respondEventWeb, '/web/event/event/29900?from=catalog').code, 200);
     assert.strictEqual(web(t.respondEventWeb, '/web/event/event/1').code, 404);
     // no notice file yet: a page that says so; written now: seen at the next request, no restart

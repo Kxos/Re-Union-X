@@ -203,8 +203,9 @@ const tests = {
     recs[0].quests[0].label = 'original; something new';
     assert.throws(() => build(recs), /something new/);
     const bare = { ...CONFIG, reconstructedWhy: { ...CONFIG.reconstructedWhy } };
-    delete bare.reconstructedWhy.eventCoins;
-    assert.throws(() => build(records(), undefined, bare), /eventCoins/);
+    // E-1 pays Event Coins without a board set: noBoardSet (Part 4 Task 4; eventCoins only with a set)
+    delete bare.reconstructedWhy.noBoardSet;
+    assert.throws(() => build(records(), undefined, bare), /noBoardSet/);
   },
   real_config_covers_labels() {
     for (const id of [...Object.values(REAL_CONFIG.labelPhrases), ...me.GENERATED_LABELS]) assert.ok(REAL_CONFIG.reconstructedWhy[id], `reconstructedWhy.${id}`);
@@ -544,7 +545,8 @@ const tests = {
     const m1 = quest(701010, 1, [501], { map: { key: 701011, status: 'ok' } });
     const o2 = me.buildEvents([record('R-2', [m1], { type: 'GEM' })], CONFIG, master(), undefined, undefined, maps);
     assert.strictEqual(entry(o2, 'R-2').quests[0].reason, 'mapUnusable');
-    const o3 = build([record('R-3', [quest(701020, 1, [501])], { type: 'GEM' }), record('R-4', [quest(701020, 1, [501])], { type: 'GEM' })]);
+    // the same donor stage with other values in another record (the same quest is shared since Part 4: map_key_shared_quest)
+    const o3 = build([record('R-3', [quest(701020, 1, [501])], { type: 'GEM' }), record('R-4', [quest(701020, 1, [501], { level: 11 })], { type: 'GEM' })]);
     assert.strictEqual(entry(o3, 'R-4').quests[0].reason, 'mapKeyUsed');
   },
   // the rooms of the imported map must be of the quest's world (event_config.json roomWorlds; neutralRooms such as the Corridor of
@@ -812,6 +814,175 @@ const tests = {
     const old = process.env.KHUX_EVENT_SRC;
     delete process.env.KHUX_EVENT_SRC;
     try { assert.strictEqual(me.patch(path.join(os.tmpdir(), 'khux-none')), null); } finally { if (old !== undefined) process.env.KHUX_EVENT_SRC = old; }
+  },
+
+  // ---- Events Part 4 Task 4 ----
+  // a Surprise event ran 3 times on one Pacific day (20 minutes each, the same 5 stages): one evStage row for that day, its
+  // stages once, one card; a run on the next day is a row of its own with the same stages
+  short_rows_one_per_day() {
+    const ids = [700101, 700102, 700103, 700104, 700105];
+    const range = { validStageId: 1, stageId: ids, validStageWidthId: 0, stageStartId: 0, stageEndId: 0 };
+    const run = (n, from, to) => donorEv({ eventStageId: 900100 + n, startTime: from, endTime: to, eventType: 3, stageRange: range });
+    const qs = ids.map((id) => quest(id, 1, [501], { evStageId: 900101, window: ['2020-02-02 18:00:00', '2020-02-02 18:19:59'] }));
+    const rec = record('E-S', qs, { start: '2020-02-02', end: '2020-02-02', evStage: [run(1, '2020-02-02 18:00:00', '2020-02-02 18:19:59'),
+      run(2, '2020-02-02 21:00:00', '2020-02-02 21:19:59'), run(3, '2020-02-03 02:00:00', '2020-02-03 02:19:59')] });
+    const out = build([rec]);
+    const e = entry(out, 'E-S');
+    assert.strictEqual(out.evStage.length, 1, 'one evStage row for the day');
+    assert.strictEqual(e.rows.length, 1, 'one card, no duplicate');
+    assert.deepStrictEqual(e.rows[0].days, ['2020-02-02']);
+    assert.strictEqual(e.rows[0].stageIds.length, 5);
+    assert.strictEqual(new Set(e.rows[0].stageIds).size, 5, 'its stages once');
+    assert.strictEqual(out.evStage[0].stageId.length, 5);
+    assert.strictEqual(out.stage.length, 5);
+    // a fourth run on the next Pacific day: its own row, same stages
+    const two = record('E-S', ids.map((id) => quest(id, 1, [501], { evStageId: 900101 })), { start: '2020-02-02', end: '2020-02-03',
+      evStage: [...rec.evStage, run(4, '2020-02-03 18:00:00', '2020-02-03 18:19:59')] });
+    const o2 = build([two]);
+    const e2 = entry(o2, 'E-S');
+    assert.deepStrictEqual(e2.rows.map((r) => r.days), [['2020-02-02'], ['2020-02-03']]);
+    assert.deepStrictEqual(e2.rows[1].stageIds, e2.rows[0].stageIds);
+    assert.strictEqual(o2.evStage.length, 2);
+    assert.strictEqual(o2.stage.length, 5, 'stage rows once');
+  },
+  // a Booster objective reward (Part 6 grants it): the quest is served, the objective pays nothing here (type 0 in the stage
+  // row, never 34), the index names the Booster for player.pendingBoosters; label boosterLater
+  booster_reward_pending_once() {
+    const booster = objective(32, 'Deal 3 or less hits', { type: 34, id: 1809001, num: 1, booster: { name: 'P Booster +25%', emblemId: 1809001 } });
+    const q = quest(700600, 1, [501]);
+    q.objectives[0] = booster;
+    const out = build([record('E-B', [q])]);
+    const item = entry(out, 'E-B').quests[0];
+    assert.ok(item.served, JSON.stringify(item));
+    assert.ok(item.labels.includes('boosterLater') && entry(out, 'E-B').labels.includes('boosterLater'));
+    assert.deepStrictEqual(item.boosters, [{ objective: 1, emblemName: 'P Booster +25%' }]);
+    const [s] = out.stage;
+    assert.deepStrictEqual(s.submissionRewardType, [0, 15, 3]);
+    assert.deepStrictEqual(s.submissionItemId, [0, 0, 90011]);
+    assert.deepStrictEqual(s.submissionItemNum, [0, 50, 1]);
+    assert.ok(out.index.reasons.boosterLater && /Booster/.test(out.index.reasons.boosterLater));
+  },
+  booster_only_held() {
+    const b = (n) => objective(10, 'Complete without having to continue', { type: 34, id: 1809000 + n, num: 1, booster: { name: `M Booster +${n}%` } });
+    const q = quest(700610, 1, [501], { objectives: [b(1), b(2), b(3)] });
+    const out = build([record('E-BO', [q])]);
+    const item = entry(out, 'E-BO').quests[0];
+    assert.strictEqual(item.served, false);
+    assert.strictEqual(item.reason, 'boosterOnly');
+    assert.strictEqual(item.why, REAL_CONFIG.reasonText.boosterOnly);
+    assert.strictEqual(out.stage.length, 0);
+    assert.strictEqual(out.evStage.length, 0);
+  },
+  // a reward type the server cannot pay: the quest is not served and the type never reaches a row of the client
+  unknown_reward_type_held() {
+    const q = quest(700620, 1, [501]);
+    q.objectives[1] = objective(10, 'Complete without having to continue', { type: 99, id: 5, num: 1 });
+    const fc = quest(700621, 1, [501], { firstClear: [{ type: 99, id: 7, num: 1 }] });
+    const ok = quest(700622, 1, [501]);
+    const out = build([record('E-U', [q, fc, ok])]);
+    const qs = entry(out, 'E-U').quests;
+    assert.deepStrictEqual(qs.map((x) => x.reason || null), ['rewardTypeUnknown', 'rewardTypeUnknown', null]);
+    assert.match(qs[0].why, /99/);
+    assert.ok(!out.stage.some((s) => [...s.submissionRewardType, ...s.clearGetItemType].includes(99)), 'type 99 in no stage row');
+    assert.ok(!out.reward.some((r) => r.type.includes(99)), 'type 99 in no reward row');
+    assert.strictEqual(out.stage.length, 1);
+  },
+  // a quiz quest needs the drama with its question (event_config.json quizDramas {quest key: [drama ids]}, written by the quiz
+  // boards task): without it quizTextMissing; with it the stage row shows that drama before the quest
+  quiz_needs_drama() {
+    const qz = (id) => quest(id, 1, [501], { drama: { before: 1, after: 0, beforeIds: [1900501], afterIds: [] } });
+    const rec = () => record('E-Q', [qz(700700), qz(700701)], { type: 'QUIZ' });
+    const out = build([rec()]);
+    assert.deepStrictEqual(entry(out, 'E-Q').quests.map((x) => x.reason), ['quizTextMissing', 'quizTextMissing']);
+    assert.strictEqual(entry(out, 'E-Q').quests[0].why, REAL_CONFIG.reasonText.quizTextMissing);
+    assert.strictEqual(out.stage.length, 0);
+    // the list names the first quest only: that one is served with the drama, the other still waits
+    const cfg = { ...CONFIG, quizDramas: { 'E-Q/+0': { ids: [1990001], reconstructed: true } } };
+    const o2 = build([rec()], undefined, cfg);
+    const qs = entry(o2, 'E-Q').quests;
+    assert.deepStrictEqual(qs.map((x) => x.reason || null), [null, 'quizTextMissing']);
+    assert.strictEqual(o2.stage.length, 1);
+    assert.deepStrictEqual([o2.stage[0].validBeforeDrama, o2.stage[0].beforeDramaId, o2.stage[0].beforeDramaType], [1, [1990001], [0]]);
+    assert.ok(qs[0].labels.includes('quizBoard') && o2.index.reasons.quizBoard, 'a reconstructed board is labelled');
+    // a quest outside a quiz record with a before drama is served as before (scenes off)
+    const plain = build([record('E-P', [qz(700702)])]);
+    assert.ok(entry(plain, 'E-P').quests[0].served && entry(plain, 'E-P').labels.includes('dramaOff'));
+  },
+  // the same quest in two records (a rerun: same donor stage, same values): built once, the second record serves that stage
+  // (sharedWith); another quest on the same map key keeps mapKeyUsed
+  map_key_shared_quest() {
+    const k = { map: { key: 745000, stageBinId: 745000, status: 'ok' } };
+    const a = record('E-A', [quest(700800, 1, [501], k)]);
+    const b = record('E-B2', [quest(700800, 1, [501], { ...k, window: ['2020-08-10 07:00:00', '2020-08-22 06:59:59'] })], { start: '2020-08-10', end: '2020-08-21' });
+    const c = record('E-C', [quest(700801, 1, [501], k)], { start: '2020-09-01', end: '2020-09-07' });
+    const d = record('E-D2', [quest(700800, 1, [501], { ...k, level: 99 })], { start: '2020-10-01', end: '2020-10-07' });
+    const out = build([a, b, c, d]);
+    assert.strictEqual(out.stage.length, 1, 'one stage row');
+    const qa = entry(out, 'E-A').quests[0], qb = entry(out, 'E-B2').quests[0];
+    assert.ok(qb.served, JSON.stringify(qb));
+    assert.strictEqual(qb.sharedWith, 'E-A');
+    assert.strictEqual(qb.stageId, qa.stageId);
+    assert.deepStrictEqual(entry(out, 'E-B2').stageIds, [qa.stageId]);
+    assert.ok(entry(out, 'E-B2').available && out.evStage.length === 2, 'the rerun has its own card');
+    assert.strictEqual(entry(out, 'E-C').quests[0].reason, 'mapKeyUsed');
+    assert.strictEqual(entry(out, 'E-D2').quests[0].reason, 'mapKeyUsed', 'same donor stage, other values');
+  },
+  // a quest served before keeps its stage row when an older run of the same quest is added later, before it in the files
+  // (2018 challenge records read before the 2019 pilot): the newly numbered record shares it, whatever the file order
+  served_quest_keeps_its_row() {
+    const k = { map: { key: 745100, stageBinId: 745100, status: 'ok' } };
+    const pilot = record('E-P9', [quest(700850, 1, [501], k)], { start: '2019-04-01' });
+    const first = build([pilot]);
+    const old = record('E-O8', [quest(700850, 1, [501], k)], { start: '2018-08-01', end: '2018-08-07' });
+    const out = build([old, pilot], first.ids, CONFIG, master(), first.anchors);
+    assert.strictEqual(entry(out, 'E-P9').quests[0].stageId, entry(first, 'E-P9').quests[0].stageId, 'the served stage id stays');
+    assert.ok(!entry(out, 'E-P9').quests[0].sharedWith);
+    assert.strictEqual(entry(out, 'E-O8').quests[0].sharedWith, 'E-P9');
+    assert.deepStrictEqual(out.index.entries.map((e) => e.censusId), ['E-O8', 'E-P9'], 'index in record order');
+    assert.strictEqual(out.stage.length, 1);
+  },
+  // a challenge event paying Event Coins (type 15): with the boardSetKey of the month's set the quest is built and its coins go
+  // to that set; without one it is labelled noBoardSet (coins logged, not paid)
+  coin_feeder_by_set() {
+    const out = build([record('E-F', [quest(700900, 1, [501])], { boardSetKey: '2099-01' }), record('E-G', [quest(700901, 1, [501])])]);
+    const f = entry(out, 'E-F'), g = entry(out, 'E-G');
+    assert.ok(f.available && f.boardSetKey === '2099-01');
+    assert.ok(f.labels.includes('eventCoins') && !f.labels.includes('noBoardSet'), JSON.stringify(f.labels));
+    assert.ok(out.stage.find((s) => s.stageId === f.stageIds[0]).submissionRewardType.includes(15));
+    assert.ok(g.available && g.boardSetKey === undefined);
+    assert.ok(g.labels.includes('noBoardSet') && !g.labels.includes('eventCoins'), JSON.stringify(g.labels));
+    assert.ok(out.index.reasons.noBoardSet && /not paid/i.test(out.index.reasons.noBoardSet));
+    // a record key that the board sets file contradicts stops the run
+    assert.throws(() => me.buildEvents([record('E-1', [quest(700902, 1, [501])], { boardSetKey: '2099-02' })], CONFIG, { ...master(), ...BOARD_MASTER() }, undefined, {}, null, boardSets()), /2099-02/);
+  },
+  // an informative notice of the challenge records (noQuests 'notice'): no evStage row and no row in the catalogue
+  notice_row_not_listed() {
+    const out = build([record('E-N', [], { noQuests: 'notice' }), ...records()]);
+    const e = entry(out, 'E-N');
+    assert.strictEqual(e.reason, 'notice');
+    assert.strictEqual(e.why, REAL_CONFIG.reasonText.notice);
+    assert.ok(!e.available);
+    assert.strictEqual(out.evStage.length, 2, 'only the two playable records');
+    const listed = require('./event-pages').entriesOf(out.index).map((x) => x.censusId);
+    assert.ok(!listed.includes('E-N') && listed.includes('E-1'), JSON.stringify(listed));
+  },
+  // the generator flags of the private records (Task 1) are not label phrases: the generator decides them itself; a quest whose
+  // khuxwiki objective text contradicts the donor code (objectiveMismatch) is held
+  record_flags_decided_here() {
+    const q = quest(701100, 1, [501], { label: 'original; enemies missing: 1; boosterLater; quizTextMissing; rewardTypeUnknown; boosterOnly; objectiveMismatch' });
+    const out = build([record('E-L', [q, quest(701101, 1, [501], { objectiveMismatch: ['1: wiki «A» / donor «B» (code 3, num 16)'] })])]);
+    const qs = entry(out, 'E-L').quests;
+    assert.ok(qs[0].served, JSON.stringify(qs[0]));
+    assert.deepStrictEqual(qs[0].labels, []);
+    assert.strictEqual(qs[1].reason, 'objectiveMismatch');
+    assert.strictEqual(qs[1].why, REAL_CONFIG.reasonText.objectiveMismatch);
+  },
+  // the id ranges: a run that needs more numbers than the range holds stops with the range and the count
+  id_range_overflow() {
+    const cfg = { ...CONFIG, stageMax: CONFIG.stageBase + 2 };
+    assert.throws(() => build([record('E-O', [quest(701200, 1, [501]), quest(701201, 1, [501]), quest(701202, 1, [501])])], undefined, cfg), /4000000-4000002.*3/);
+    const rows = { ...CONFIG, evStageMax: CONFIG.evStageBase + 1 };
+    assert.throws(() => build(records(), undefined, rows), /20000-20001.*2/);
   },
 };
 

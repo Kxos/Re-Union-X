@@ -17,6 +17,8 @@ const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, k
 // the parts shared with the Event Catalog (event-pages.js): head, pill, Keep button and script, «On this server» box, notice card
 const parts = require('./catalog-pages');
 const { PAGE_HEAD, pill, keepJs, RULE_CSS, SRV_CSS, FOLD_CSS, NOTICE_CSS, rebuiltValues, srvFrame, noticeCard, parseNotice, noticeBlocks } = parts;
+// packed catalogue rows (task 3, 06-11; shared with the Event Catalog since Events Part 4): catalog-pages.js
+const { packCatalog, expandCatalog, UNPACK_JS } = parts;
 
 const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)',
   // the event raids of 2016-2018 (Task 10)
@@ -215,40 +217,6 @@ const replacesLine = (st, kept) => (st.button === null ? ''
   : `<div class="rp"${st.button === 1 && kept ? '' : ' style="display:none"'}>${st.button === 1 && kept ? `Replaces: ${esc(titleOf(kept))}` : ''}</div>`);
 
 
-// Light catalogue (task 3, 06-11: 366+ KB took long to show in the in-game WebView): the rows are sent packed and built by the
-// page before its filter script runs, so the DOM and the filters are the same as before. Each row's markup becomes a template:
-// its own values (search names, date line, name, evStageId, year) are replaced by markers \u0001<k>, so the rows share a few
-// dozen templates; the search names go through one dictionary. Replacing a value and putting the same value back is
-// lossless whatever else the text holds. Card pictures: data-src, loaded only for the rows shown (kxImgs after every render):
-// the old WebView ignores loading="lazy" and fetched all the cards at once. The details of a raid stay on its own page.
-const PACK_KEYS = ['s', 'd', 'n', 'e', 'y'];
-function packCatalog(packed) {
-  const tpl = [], tplIx = new Map(), dict = [], dictIx = new Map();
-  const word = (w) => { if (!dictIx.has(w)) { dictIx.set(w, dict.length); dict.push(w); } return dictIx.get(w); };
-  const rows = packed.map(({ label, fields, html }) => {
-    let h = html;
-    PACK_KEYS.forEach((k) => { if (fields[k]) h = h.split(fields[k]).join(`\u0001${k}`); });
-    // the TYPE of the row (06-11: one per JP family) only inside its attribute, so the rows of all types share their templates
-    if (fields.t) h = h.split(`data-type="${fields.t}"`).join('data-type="\u0001t"');
-    if (!tplIx.has(h)) { tplIx.set(h, tpl.length); tpl.push(h); }
-    return [tplIx.get(h), fields.s ? fields.s.split(' | ').map(word) : [], fields.d, fields.n, fields.e, fields.y, label, fields.t];
-  });
-  // «</» never closes the script element: written <\/ inside the JSON
-  return JSON.stringify({ t: tpl, w: dict, r: rows }).replace(/<\//g, '<\\/');
-}
-const unpackRow = (d, r) => r[6] + d.t[r[0]].replace(/\u0001([sdneyt])/g, (x, k) => ({ s: r[1].map((i) => d.w[i]).join(' | '), d: r[2], n: r[3], e: r[4], y: r[5], t: r[7] })[k]);
-// the same expansion as UNPACK_JS, for the tests: the catalogue page with its rows written out
-function expandCatalog(page) {
-  const m = /<script id="kxrows" type="application\/json">([\s\S]*?)<\/script><script>[\s\S]*?<\/script>/.exec(page);
-  if (!m) return page;
-  const d = JSON.parse(m[1]);
-  const html = d.r.map((r) => unpackRow(d, r)).join('');
-  return page.replace(m[0], '').replace(/(<div id="rows"[^>]*>)/, (x) => x + html);
-}
-const UNPACK_JS = 'function kxImgs(){var a=document.querySelectorAll("#rows .row"),i,im;for(i=0;i<a.length;i++){if(/ hide/.test(a[i].className))continue;im=a[i].querySelector("img[data-src]");if(im&&!im.getAttribute("src"))im.setAttribute("src",im.getAttribute("data-src"));}}'
-  + '(function(){var d=JSON.parse(document.getElementById("kxrows").textContent),o=[],i,r;for(i=0;i<d.r.length;i++){r=d.r[i];'
-  + 'o.push(r[6]+d.t[r[0]].replace(/\u0001([sdneyt])/g,function(x,k){if(k==="s"){var s=[],j;for(j=0;j<r[1].length;j++)s.push(d.w[r[1][j]]);return s.join(" | ");}return k==="d"?r[2]:k==="n"?r[3]:k==="e"?r[4]:k==="t"?r[7]:r[5];}));}'
-  + 'document.getElementById("rows").innerHTML=o.join("");})();';
 function catalogPage(index, ctx = {}) {
   const periods = ctx.periods, rows = calendar.catalogRows(index), kept = keptRow(rows, ctx);
   let lastM = '';

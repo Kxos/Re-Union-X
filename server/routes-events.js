@@ -8,6 +8,10 @@
 // usual /stage/clear path (the POI of the quest's map key, server.js poiStageId). Reward type 15 (Event Coins, Part 3 Task 5) is
 // paid into the balance of the entry's board set (entry.boardSet, addEventCoins = routes-event-boards.js addCoins), never as Raid
 // Coins; an entry without a set pays none (the objective counts as done, the coins are only logged).
+// Boosters (Events Part 4 Task 4): an objective (or first-clear item) whose reward was a Booster pays nothing here (make-events.js
+// writes type 0 in the stage row and names the Booster in the index quest, boosters [{objective, emblemName}], objective 0 = first
+// clear); its clear records the Booster once in player.pendingBoosters [{emblemName, stageId, objective}] (absent in older saves =
+// empty), for Part 6 to grant.
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
 //   pruneKept (Event Catalog, Task 5).
 'use strict';
@@ -39,8 +43,22 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   const stageRow = (id) => masterRows('stage').find((r) => r.stageId === id);
   // the index entry of an event quest, and the board set its Event Coins go to: entry.boardSet when the set is handed out, else
   // entry.boardSetKey (a set whose boards are held until Part 6: coins still paid into its balance, coordinator 08-11); null without one
-  const entryOfStage = (stageId) => { const id = Number(stageId); return entries().find((e) => (e.quests || []).some((q) => q.stageId === id) || (e.stageIds || []).includes(id)) || null; };
+  // (a quest shared by a rerun, make-events.js sharedWith: the entry that built its stage row)
+  const entryOfStage = (stageId) => {
+    const id = Number(stageId);
+    return entries().find((e) => (e.quests || []).some((q) => q.stageId === id && !q.sharedWith))
+      || entries().find((e) => (e.quests || []).some((q) => q.stageId === id) || (e.stageIds || []).includes(id)) || null;
+  };
   const boardSetOf = (stageId) => { const e = entryOfStage(stageId) || {}; return e.boardSet || e.boardSetKey || null; };
+  // the Boosters of an event quest (index quest boosters) and the ones recorded for Part 6; reading never writes the save
+  const boostersOf = (stageId) => { const id = Number(stageId), e = entryOfStage(id); return ((e && (e.quests || []).find((q) => q.stageId === id)) || {}).boosters || []; };
+  const pendingBoosters = () => (Array.isArray(player.pendingBoosters) ? player.pendingBoosters : []);
+  function recordBooster(stageId, b) {
+    const list = Array.isArray(player.pendingBoosters) ? player.pendingBoosters : (player.pendingBoosters = []);
+    if (list.some((x) => x.stageId === stageId && x.objective === b.objective)) return;
+    list.push({ emblemName: b.emblemName, stageId, objective: b.objective });
+    log(`[event] ${stageId}: ${b.objective ? `objective ${b.objective}` : 'first-clear item'} is a Booster (${b.emblemName}): recorded for the Boosters (Part 6)`);
+  }
 
   // From respondStageClear, after its objective rules (Lux objectives, all-together flag): cleared = the objective ids of this
   // clear. Pays the first-clear items (first clear of this quest) and the objectives never paid before; the caller saves.
@@ -58,7 +76,9 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       log(`[event] ${id}: ${what} in Event Coins x${num} not paid (no board set)`);
     };
     if (!row) log(`[event] ${id}: no stage row, no reward`);
+    const boosters = boostersOf(id);
     if (row && before === undefined) {
+      for (const b of boosters.filter((x) => x.objective === 0)) recordBooster(id, b);
       for (let i = 0; i < (row.validClearGetItem || 0); i++) {
         const type = row.clearGetItemType[i];
         pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]), row.clearGetItemNum[i]);
@@ -69,7 +89,11 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     if (!row) return true;
     const done = before || [];
     const fresh = [...new Set(cleared)].filter((n) => n >= 1 && n <= 3 && !done.includes(n)).sort((a, b) => a - b);
-    for (const n of fresh) pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
+    for (const n of fresh) {
+      const b = boosters.find((x) => x.objective === n);
+      if (b) { recordBooster(id, b); continue; }
+      pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
+    }
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
     return true;
   }
@@ -171,7 +195,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       endTime: serverTimeAt(clock.weekEnd(realNow())), newStageId: 0, isLock: 0, complete: 0 }];
   }
 
-  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries };
+  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries, pendingBoosters };
 }
 
 module.exports = routesEvents;

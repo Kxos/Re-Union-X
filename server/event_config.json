@@ -17,6 +17,13 @@
   "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
   "types": ["GEM", "COIN"]
  },
+ "payableNote": "Events Part 4 Task 4 (make-events.js remapItems). payableTypes: the reward types of an objective or a first-clear item that server.js grantItem pays (2 Jewels, 3 medal, 4 munny, 5 material, 7 title, 11 Lux, 13 keyblade, 14 Avatar Coin, 15 Event Coins, 16 Raid Coin, 20 avatar part, 26 Skip Ticket, 28 Skip Ticket+, 33 Spirit part, 40 Platinum Ticket, 41 Draw Ticket, 42 Draw Points); payableDropTypes: the types of an original drop or chest row (3 medal, 5 material, 8 and 9 chest contents the client pays, as in our story reward rows, 15 Event Coins). boosterType 34: a Booster, not paid here (label boosterLater, player.pendingBoosters for Part 6; a quest whose only rewards are Boosters: boosterOnly). Any other type: the quest is not served (rewardTypeUnknown) and the type never reaches a row of the client.",
+ "payableTypes": [2, 3, 4, 5, 7, 11, 13, 14, 15, 16, 20, 26, 28, 33, 40, 41, 42],
+ "payableDropTypes": [3, 5, 8, 9, 15],
+ "boosterType": 34,
+ "quizTypes": ["QUIZ"],
+ "quizDramasNote": "Quiz quests (records of a quizTypes type with a before drama): the question was a board picture shown in that drama, and no original WW quiz drama survives. A quiz quest is served only when its quest key (events.json entries[].quests[].key, e.g. \"EV-0484/+10\") is listed here with the drama ids that show its board: {\"<quest key>\": {\"ids\": [drama ids], \"reconstructed\": true}} (a bare list of ids also works). The quiz boards task writes the list; until then every quiz quest is quizTextMissing. reconstructed true: label quizBoard (the board rebuilt from the khuxwiki text).",
+ "quizDramas": {},
  "reasonText": {
   "shared": "This notice shares its quests with another row of the catalogue: they are built once, under the other row.",
   "board": "In the original this event had no quests of its own: it was played on the event boards. Where its boards are served they are listed on this page; otherwise they come with a later update.",
@@ -30,7 +37,12 @@
   "mapKeyUsed": "The map of this quest is already used by another quest of the events, so it cannot be built a second time.",
   "rewardRowsMissing": "The reward rows of the enemies or chests on the map of this quest are not known yet, so the quest is not served.",
   "raidSpecial": "This quest is a raid or Special stage, served by its own generator.",
-  "worldMismatch": "The original map of this quest lies in another world than the quest itself, so it is held back until it is checked."
+  "worldMismatch": "The original map of this quest lies in another world than the quest itself, so it is held back until it is checked.",
+  "boosterOnly": "Every reward of this quest is a Booster, and the Boosters do not exist on this server yet: the quest comes back with them, in a later update.",
+  "rewardTypeUnknown": "A reward of this quest is of a kind this server cannot give yet, so the quest is not served: it comes back when that reward can be given.",
+  "quizTextMissing": "This quiz quest asked its question on a picture board shown before the quest; that board is not in the surviving game files and has not been rebuilt yet, so the quest is not served.",
+  "objectiveMismatch": "The khuxwiki page and the surviving game data give different objectives for this quest, so it is held back until the right ones are confirmed.",
+  "notice": "An information notice of the original game, not an event: it had no quests of its own."
  },
  "labelPhrases": {
   "wikiQuest": "wikiQuest",
@@ -53,7 +65,10 @@
   "boardsLater": "The event boards of this event are not served yet: in the original every cell of a board paid a reward for its Event Coins, and every board of this set has a cell (or a board reward) that does not exist here yet, mostly a Booster. The boards come back whole in a later update, with the Boosters; until then its quests are served as a plain list, and the Event Coins they pay are kept in the balance of the set (they never expire) for when its boards are served.",
   "noCoinSource": "The event boards of this event are not handed out yet: none of the quests that paid their Event Coins can be served yet, so the boards could not be filled.",
   "wikiAp": "AP from the khuxwiki page of this run: the surviving game data (a later snapshot) gives another AP.",
-  "wwEnemy": "Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops)."
+  "wwEnemy": "Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops).",
+  "boosterLater": "A reward of this quest was a Booster, which does not exist on this server yet: it is recorded for you when you complete its objective, and given when the Boosters come (a later update). The other rewards are paid as usual.",
+  "noBoardSet": "This event paid Event Coins, but no source names the board set they were for: its Event Coins are not paid here (they are only logged) until its boards are identified.",
+  "quizBoard": "The original question board of this quiz is not in the surviving game files: it was redrawn in the original style from the question text recorded on khuxwiki."
  },
  "roomWorldsNote": "make-events.js (Task 5 Step 2, fix round 1): the rooms of an imported event map must be of the quest's world: roomWorlds = world of a room prefix (as gen_tours_v2.py WIDX; a prefix missing here counts as another world). neutralRooms {prefix: home world}: DG (Corridor of Darkness DG_0200, arenas DG_0100) fits world 1 Daybreak Town, where the original quests stand on DG rooms alone, or any world when the map also has a room of the quest's world (the Beast's Castle quiz quests). worldExceptions {map key: why}: maps checked by hand, the quest keeps the donor world. Else the quest is worldMismatch.",
  "roomWorlds": { "DB": 1, "DW": 2, "WL": 3, "AG": 4, "OC": 5, "BC": 6, "CD": 7, "ED": 8, "CS": 11, "HD": 12, "NL": 13, "SR": 14, "KG": 15, "SA": 16 },

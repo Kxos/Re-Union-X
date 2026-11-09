@@ -57,11 +57,18 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource'];
-// reason of a record or quest not built (Events Part 2): text in event_config.json reasonText
+const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard'];
+// reason of a record or quest not built (Events Part 2): text in event_config.json reasonText. Part 4 Task 4: boosterOnly (every
+// reward a Booster), rewardTypeUnknown (a reward type not in payableTypes / payableDropTypes), quizTextMissing (a quiz quest whose
+// board drama is not listed in quizDramas), objectiveMismatch (the private record's khuxwiki objective text contradicts the donor
+// code: held, Task 1 ruling), notice (an information notice of the records, noQuests 'notice': no row, no catalogue row)
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
-  'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch'];
-const COIN_TYPE = 15;
+  'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch',
+  'boosterOnly', 'rewardTypeUnknown', 'quizTextMissing', 'objectiveMismatch', 'notice'];
+// flags the private builder writes in a quest label (Task 1): this generator decides them itself (payableTypes, quizDramas,
+// objectiveMismatch), so they carry no label of their own
+const RECORD_FLAGS = ['boosterLater', 'boosterOnly', 'quizTextMissing', 'rewardTypeUnknown', 'objectiveMismatch'];
+const COIN_TYPE = 15, BOOSTER_TYPE = 34;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
 const ptDate = (ms) => PT_DATE.format(new Date(ms));
@@ -91,11 +98,17 @@ function labelIds(text, phrases) {
   for (const p of Object.keys(phrases || {}).sort((a, b) => b.length - a.length)) {
     if (rest.includes(p)) { out.push(phrases[p]); rest = rest.split(p).join(';'); }
   }
+  for (const f of RECORD_FLAGS) rest = rest.split(f).join(';');
   const left = rest.replace(/\boriginal\b/g, ';').replace(/enemies missing: \d+/g, ';').split(/[;,]/).map((s) => s.trim()).filter(Boolean);
   if (left.length) throw new Error(`events: quest label «${left.join('; ')}» has no labelPhrases entry in event_config.json`);
   return out;
 }
 
+// An id range that cannot hold the numbers of this run stops it, with the range and the count (Part 4 Task 4)
+function checkRoom(map, what, base, max) {
+  const top = Math.max(0, ...Object.values(map));
+  if (top > max - base) throw new Error(`events: ${what} id range ${base}-${max} overflows: ${top} numbers needed, ${max - base} available`);
+}
 function checkNumbers(map, what, max) {
   const seen = new Map();
   for (const [k, v] of Object.entries(map)) {
@@ -154,6 +167,8 @@ function allocateIds(records, ids, config, anchors = {}) {
     for (const key of keys) if (!(key in out.entries)) out.entries[key] = nextEntry++;
     out.checks[rec.censusId] = { keys: keys.size, hash: keysHash(keys) };
   }
+  checkRoom({ ...out.rows, ...out.subRows }, 'evStage', config.evStageBase, config.evStageMax);
+  checkRoom(out.entries, 'stage', config.stageBase, config.stageMax);
   checkNumbers({ ...out.rows, ...out.subRows }, 'row', maxRow);
   checkNumbers(out.entries, 'entry', maxEntry);
   return { ids: out, anchors: outAnchors };
@@ -190,6 +205,7 @@ function allocateRows(rec, ids, anchors, config) {
   }
   const lost = Object.keys(ids.subRows).filter((k) => k.startsWith(prefix) && !keys.has(k));
   if (lost.length) throw new Error(`events: ${cid}: the stored row keys ${lost.join(', ')} are not given by the record any more (a donor row removed, or ${ak} changed)`);
+  checkRoom({ ...ids.rows, ...ids.subRows }, 'evStage', config.evStageBase, config.evStageMax);
   checkNumbers({ ...ids.rows, ...ids.subRows }, 'row', config.evStageMax - config.evStageBase);
   return out;
 }
@@ -292,8 +308,13 @@ function selector(config) {
 // resolved by name: «Name N★» -> our row named Name with rarity N (one match; on a tie the row whose medalId == imageId); the served
 // reward uses our id. A gem material must be in the material table. Without master.medal / master.material (unit fixtures of
 // Part 1) nothing is checked.
+// Part 4 Task 4: a title (7), an avatar part (20) or a Spirit part (33) must be in its table (title, avatarParts, petParts) when
+// that table has rows (grantItem would hand out a row the client does not know).
 function itemResolver(master) {
-  if (!master.medal && !master.material) return null;
+  const has = (t) => Array.isArray(master[t]) && master[t].length > 0;
+  const owned = { 7: ['title', 'titleId'], 20: ['avatarParts', 'avatarPartsId'], 33: ['petParts', 'petPartsId'] };
+  const ownedIds = Object.fromEntries(Object.entries(owned).filter(([, [t]]) => has(t)).map(([type, [t, k]]) => [type, new Set(master[t].map((r) => r[k]))]));
+  if (!master.medal && !master.material && !Object.keys(ownedIds).length) return null;
   const medalIds = new Set((master.medal || []).map((m) => m.medalId)), materialIds = new Set((master.material || []).map((m) => m.materialId));
   const byName = new Map();
   for (const m of master.medal || []) {
@@ -315,6 +336,10 @@ function itemResolver(master) {
     return rows.length === 1 ? rows[0].medalId : null;
   };
   return (d, missing) => {
+    if (d && ownedIds[d.type]) {
+      if (!ownedIds[d.type].has(d.id)) missing.push(`type ${d.type} id ${d.id}${d.name ? ` (${d.name})` : ''}`);
+      return d;
+    }
     if (!d || (d.type !== 3 && d.type !== 5)) return d;
     let id = d.id;
     if (d.type === 3 && master.medal) id = medal(d);
@@ -323,17 +348,56 @@ function itemResolver(master) {
     return id === d.id ? d : { ...d, id };
   };
 }
-// copy of the quest with our item ids in its first-clear items, objective rewards and drop rows
-function remapItems(q, resolve) {
-  const missing = [];
+// Payable reward types of the config (Part 4 Task 4): {types, drop, booster} or null (no type check)
+const payableOf = (config) => (config.payableTypes ? { types: new Set(config.payableTypes), drop: new Set(config.payableDropTypes || config.payableTypes),
+  booster: Number.isInteger(config.boosterType) ? config.boosterType : BOOSTER_TYPE } : null);
+// copy of the quest with our item ids in its first-clear items, objective rewards and drop rows (resolve null: ids kept). payable
+// (payableOf): a Booster (reward.booster, objective.booster or the booster type) is taken out of the copy, its objective pays
+// nothing here (reward null: type 0 in the stage row), and listed in boosters [{objective (0: first clear), emblemName}] for
+// player.pendingBoosters (Part 6 grants it); any other type outside payable.types (objectives, first clear) or payable.drop (drop
+// and chest rows) is listed in unknownTypes: the caller holds the quest, so the type never reaches a row of the client.
+function remapItems(q, resolve, payable = null) {
+  const missing = [], boosters = [], unknown = [];
+  const res = resolve || ((d) => d);
   const c = JSON.parse(JSON.stringify(q));
-  c.firstClear = (c.firstClear || []).map((x) => resolve(x, missing));
-  c.objectives = (c.objectives || []).map((o) => (o.reward ? { ...o, reward: resolve(o.reward, missing) } : o));
+  const isBooster = (d, o) => !!((o && o.booster) || (d && (d.booster || (payable && d.type === payable.booster))));
+  const nameOf = (d, o) => ((o && o.booster) || (d && d.booster) || {}).name || (d && d.name) || 'Booster';
+  const check = (d, set, where) => { if (payable && d && d.type && !set.has(d.type)) unknown.push(`${where} type ${d.type}`); };
+  c.firstClear = (c.firstClear || []).filter((x) => {
+    if (!payable || !isBooster(x)) return true;
+    boosters.push({ objective: 0, emblemName: nameOf(x) });
+    return false;
+  }).map((x) => { check(x, payable && payable.types, 'first-clear item'); return res(x, missing); });
+  c.objectives = (c.objectives || []).map((o, i) => {
+    if (payable && isBooster(o.reward, o)) {
+      boosters.push({ objective: i + 1, emblemName: nameOf(o.reward, o) });
+      const { booster, ...rest } = o;
+      return { ...rest, reward: null };
+    }
+    if (!o.reward) return o;
+    check(o.reward, payable && payable.types, `objective ${i + 1}`);
+    return { ...o, reward: res(o.reward, missing) };
+  });
   if (c.drops) {
-    c.drops.enemies = (c.drops.enemies || []).map((e) => ({ ...e, rows: (e.rows || []).map((r) => resolve(r, missing)) }));
-    c.drops.chests = (c.drops.chests || []).map((e) => ({ ...e, rows: (e.rows || []).map((r) => resolve(r, missing)) }));
+    const rows = (list, where) => (list || []).map((e) => ({ ...e, rows: (e.rows || []).map((r) => { check(r, payable && payable.drop, where); return res(r, missing); }) }));
+    c.drops.enemies = rows(c.drops.enemies, 'drop row');
+    c.drops.chests = rows(c.drops.chests, 'chest row');
   }
-  return { q: c, missing: [...new Set(missing)] };
+  return { q: c, missing: [...new Set(missing)], boosters, unknownTypes: [...new Set(unknown)] };
+}
+// what makes two records' quests the same quest (Part 4 Task 4, map_key_shared_quest): everything the stage row and the map are
+// built from, not the name, window or labels
+const questSig = (q, mapKey) => JSON.stringify([mapKey, q.worldId, q.level, q.ap, q.addLevel || 0, (q.targets || []).map((t) => t.id),
+  (q.objectives || []).map((o) => [o.code, o.dataType, o.idType, o.id, o.num, (o.reward || {}).type || 0, (o.reward || {}).id || 0, (o.reward || {}).num || 0]),
+  (q.firstClear || []).map((x) => [x.type, x.id || 0, x.num || 1]), (q.enemies || []).map((e) => [e.id, e.level, e.count]), q.restrictions || {}, q.drops || null,
+  [(q.drama || {}).beforeIds || [], (q.drama || {}).afterIds || []], q.combined ? 1 : 0]);
+// quizDramas entry of a quest key: {ids, reconstructed} | null (a bare list: ids)
+function quizDramaOf(config, key) {
+  const v = (config.quizDramas || {})[key];
+  if (!v) return null;
+  const ids = Array.isArray(v) ? v : v.ids;
+  if (!Array.isArray(ids) || !ids.length || !ids.every(Number.isInteger)) throw new Error(`events: quizDramas ${key} has no list of drama ids`);
+  return { ids, reconstructed: !Array.isArray(v) && !!v.reconstructed };
 }
 
 // records, config (event_config.json), master {stage, evStage, enemy, reward?, sphere tables?, item tables?} without our own rows,
@@ -357,6 +421,10 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       if (rec.boardSet && setOf.get(rec.censusId) !== rec.boardSet) {
         throw new Error(`events: ${rec.censusId} has boardSet ${rec.boardSet} but the board sets list it under ${setOf.get(rec.censusId) || 'none'}`);
       }
+      // a challenge event's own boardSetKey (Part 4, the month's set, cited in the record): the board sets may not say otherwise
+      if (rec.boardSetKey && setOf.has(rec.censusId) && setOf.get(rec.censusId) !== rec.boardSetKey) {
+        throw new Error(`events: ${rec.censusId} has boardSetKey ${rec.boardSetKey} but the board sets list it under ${setOf.get(rec.censusId)}`);
+      }
     }
   }
   const eb = boardSets ? eventBoards.buildEventBoards({ sets, master, ids: allIds }) : null;
@@ -373,6 +441,9 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
   for (const s of master.stage || []) byMap.set(s.stageBinId || s.stageId, s);
   const selected = selector(config);
   const resolveItem = itemResolver(master);
+  const payable = payableOf(config);
+  const quizTypes = new Set(config.quizTypes || ['QUIZ']);
+  const builtQuests = new Map(); // donor stage id -> {stageId, censusId, sig}: the same quest in a later record is served by that row
   const reasonText = config.reasonText || {};
   const textOf = (r) => { if (!reasonText[r]) throw new Error(`events: reason ${r} has no reasonText in event_config.json`); return reasonText[r]; };
   const out = { evStage: [], stage: [], reward: [], sphere: [], sphereArray: [], sphereMasu: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, skipped: [],
@@ -390,8 +461,18 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     if (boardSet && t === config.boardEventType) return config.boardEventType;
     return Number.isInteger(t) && t !== config.boardEventType && (config.servedEventTypes || []).includes(t) ? t : config.eventType;
   };
-  for (const rec of records) {
-    if (!selected(rec)) { out.skipped.push({ censusId: rec.censusId, reason: 'notSelected' }); continue; }
+  // processing order (Part 4 Task 4): the records numbered first come first, by the lowest stage number of their quests
+  // (event_ids.json is append-only), so a quest served before keeps its map and its stage row when a newer record has the same
+  // quest (the newer one shares it, sharedWith) or the same map key (the newer one waits, mapKeyUsed), whatever the file order.
+  // The outputs are put back in record order after the loop.
+  const rankOf = (rec) => Math.min(Infinity, ...(rec.quests || []).map((q) => allIds.entries[questKey(rec, q, allAnchors[rec.censusId])] || Infinity));
+  const order = records.map((rec, i) => ({ rec, i, k: rankOf(rec) })).sort((a, b) => a.k - b.k || a.i - b.i);
+  const ixMap = new Map();
+  let recIx = 0;
+  const put = (arr, obj) => { ixMap.set(obj, recIx); arr.push(obj); };
+  for (const { rec, i } of order) {
+    recIx = i;
+    if (!selected(rec)) { put(out.skipped, { censusId: rec.censusId, reason: 'notSelected' }); continue; }
     const evStageId = config.evStageBase + allIds.rows[rec.censusId];
     const donorTypes = [...new Set((rec.evStage || []).map((r) => r.eventType))];
     const entry = { censusId: rec.censusId, evStageId, name: rec.name, type: rec.type, start: rec.start, end: rec.end, stageIds: [], useAp: null, label: 'original', labels: [],
@@ -399,6 +480,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       eventType: servedType(donorTypes.length === 1 ? donorTypes[0] : null, null), boardSet: null,
       available: false, why: null, quests: [] };
     if (setOf.has(rec.censusId)) entry.boardSetKey = setOf.get(rec.censusId);
+    else if (rec.boardSetKey) entry.boardSetKey = rec.boardSetKey;
     if (rec.sharedWith) entry.sharedWith = rec.sharedWith;
     if (rec.noQuests) entry.noQuests = rec.noQuests;
     // a record that builds no quest of its own: noQuests (board, coin, undated), a shared notice (built with the other row), no date
@@ -406,7 +488,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     if (noBuild) {
       entry.reason = noBuild;
       entry.why = textOf(noBuild);
-      out.index.entries.push(entry);
+      put(out.index.entries, entry);
       continue;
     }
     const labels = new Set();
@@ -429,6 +511,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
 
     let apMin = null;
     const donorRows = donorRowsOf(rec);
+    const srcOf = new Map(); // index quest -> its record quest
     for (const q0 of rec.quests || []) {
       const key = questKey(rec, q0, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q0);
       const qLabels = labelIds(q0.label, config.labelPhrases);
@@ -443,6 +526,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
       entry.quests.push(item);
+      srcOf.set(item, q0);
       qLabels.forEach((l) => used.add(l));
       if (raidish) { item.reason = 'raidSpecial'; item.why = 'raid or Special quest'; continue; }
       // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
@@ -457,10 +541,43 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         if (unusable && missing.length === noId.length) { item.reason = 'mapUnusable'; item.why = `map not usable: ${stat || (rep && rep.status) || 'not imported'}`; continue; }
         item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${missing.join(', ')}`; continue;
       }
-      if (resolveItem) {
-        const r = remapItems(q, resolveItem);
-        if (r.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${r.missing.join('; ')})`; continue; }
-        q = r.q;
+      // a quest whose khuxwiki objective text contradicts the donor code (private record, Task 1 ruling): held until confirmed
+      if ((q0.objectiveMismatch || []).length) { item.reason = 'objectiveMismatch'; item.why = textOf('objectiveMismatch'); continue; }
+      // rewards (Part 4 Task 4): our item ids, a type we cannot pay holds the quest (never passed to the client), Boosters later
+      const paid = remapItems(q, resolveItem, payable);
+      if (paid.unknownTypes.length) { item.reason = 'rewardTypeUnknown'; item.why = `${textOf('rewardTypeUnknown')} (${paid.unknownTypes.join('; ')})`; continue; }
+      if (paid.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${paid.missing.join('; ')})`; continue; }
+      q = paid.q;
+      const otherRewards = (q.objectives || []).filter((o) => (o.reward || {}).type).length + (q.firstClear || []).length;
+      if (paid.boosters.length && !otherRewards) { item.reason = 'boosterOnly'; item.why = textOf('boosterOnly'); continue; }
+      // a quiz quest asks its question on a board shown in its before drama: served only with that drama (config quizDramas)
+      const dr = q.drama || {};
+      const quiz = quizTypes.has(rec.type) && !!(dr.before || (dr.beforeIds || []).length);
+      const quizDrama = quiz ? quizDramaOf(config, key) : null;
+      // the bookkeeping of a served quest (its own stage row, or the row of the same quest in an earlier record)
+      const markServed = (sid) => {
+        item.served = true; item.status = 'served';
+        if (sid !== stageId) item.stageId = sid;
+        if (!entry.stageIds.includes(sid)) entry.stageIds.push(sid);
+        apMin = apMin === null ? q.ap : Math.min(apMin, q.ap);
+        if (paid.boosters.length) { item.boosters = paid.boosters.map((x) => ({ ...x })); item.labels.push('boosterLater'); }
+        if (quizDrama && quizDrama.reconstructed) item.labels.push('quizBoard');
+        item.labels.forEach((l) => { labels.add(l); used.add(l); });
+        const offIds = quizDrama ? [] : dr.beforeIds || [];
+        if ((dr.before && !quizDrama) || dr.after) { item.drama = { beforeIds: offIds, afterIds: dr.afterIds || [] }; labels.add('dramaOff'); }
+        const coins = [...(q.objectives || []).map((o) => o.reward || {}), ...(q.firstClear || []), ...((q.drops || {}).enemies || []).flatMap((e) => e.rows || []),
+          ...((q.drops || {}).chests || []).flatMap((e) => e.rows || [])].some((x) => x.type === COIN_TYPE);
+        // Event Coins go to the entry's board set (boardSetKey); without one they are logged, not paid (noBoardSet)
+        if (coins) labels.add(entry.boardSetKey ? 'eventCoins' : 'noBoardSet');
+      };
+      // the same quest in an earlier record (a rerun: same donor stage, same values): served by that stage row (sharedWith); its
+      // objectives are paid once, as any quest's
+      const sig = questSig(q, mapKey);
+      const twin = hasStage(q0) ? builtQuests.get(q0.stageId) : null;
+      if (twin && twin.censusId !== rec.censusId && twin.sig === sig && !quiz) {
+        item.sharedWith = twin.censusId;
+        markServed(twin.stageId);
+        continue;
       }
       const clash = byMap.get(mapKey);
       if (clash) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
@@ -474,8 +591,8 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
         drops: q.drops || null, served: false };
-      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem }); out.maps.push(mapItem); }
-      let newRewards = [];
+      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem }); put(out.maps, mapItem); }
+      const newRewards = [];
       if (maps) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
         const st = maps.status.get(mapKey);
@@ -500,27 +617,28 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
           if (!own) newRewards.push([r, d]);
         }
         if (missing.length) { item.reason = 'rewardRowsMissing'; item.why = mapItem.why = `reward rows missing: ${missing.join(', ')}`; continue; }
-        for (const [r, d] of newRewards) { const row = rewardRowOf(r, d.rows); ownRewards.set(r, { row, key: d.key }); out.reward.push(row); }
+      }
+      // last, so the quiz quests held for their board are otherwise ready (the quiz boards task draws those first)
+      if (quiz && !quizDrama) { item.reason = 'quizTextMissing'; item.why = textOf('quizTextMissing'); continue; }
+      if (maps) {
+        for (const [r, d] of newRewards) { const row = rewardRowOf(r, d.rows); ownRewards.set(r, { row, key: d.key }); put(out.reward, row); }
         out.poi[String(mapKey)] = maps.poi[String(mapKey)];
       }
       mapItem.served = true;
 
-      const r = q.restrictions || {}, d = q.drama || {};
+      const r = q.restrictions || {};
       const ref = refs.of(q.worldId);
       const room = (q.room || [])[0] || {};
-      out.stage.push({ ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: q.name, mapName: room.name || ref.mapName, useAp: q.ap,
+      const before = quizDrama ? quizDrama.ids : [];
+      put(out.stage, { ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: q.name, mapName: room.name || ref.mapName, useAp: q.ap,
         chapterId: Math.floor(stageId / 1000), worldId: q.worldId, onlyDrama: 0, stageKind: STAGE_KIND, noPartner: r.noPartner || 0,
-        validBeforeDrama: 0, beforeDramaId: [], beforeDramaType: [], validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0,
+        validBeforeDrama: before.length, beforeDramaId: [...before], beforeDramaType: before.map(() => 0), validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0,
         disableContinue: r.disableContinue || 0, addLevel: q.addLevel || 0, holdKeyblade: r.holdKeyblade || 0, hardmodeRequire: r.hardmodeRequire || 0,
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
         ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });
-      item.served = true; item.status = 'served';
-      entry.stageIds.push(stageId);
-      apMin = apMin === null ? q.ap : Math.min(apMin, q.ap);
-      qLabels.forEach((l) => labels.add(l));
-      if (d.before || d.after) { item.drama = { beforeIds: d.beforeIds || [], afterIds: d.afterIds || [] }; labels.add('dramaOff'); }
-      if ((q.objectives || []).some((o) => (o.reward || {}).type === COIN_TYPE)) labels.add('eventCoins');
+      if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig });
+      markServed(stageId);
     }
     // the entry's board set: handed out when it has a built board and this entry a served quest
     if (entry.boardSetKey && !raidish && entry.stageIds.length && builtBoards(entry.boardSetKey).length) {
@@ -533,28 +651,47 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       const rs = [...new Set(entry.quests.map((x) => x.reason))];
       if (entry.quests.length && rs.length === 1 && rs[0]) { entry.reason = rs[0]; entry.why = textOf(rs[0]); }
     }
-    // one row per donor row (allocateRows); a record without donor rows: one row, as before Task 5
+    // one row per donor row (allocateRows); a record without donor rows: one row, as before Task 5. Short rows (Part 4 Task 4,
+    // short_rows_one_per_day): the short donor rows that start on one Pacific day are ONE row (the first of them), with the quests
+    // of all of them, once: a Surprise event that ran 3 times a day with the same stages is one card of that day. Every donor
+    // row keeps its number (allocateRows, append-only); the merged ones get no evStage row and no card.
     const rowIds = allocateRows(rec, allIds, allAnchors, config);
     const recEnd = rec.end || null;
-    entry.rows = (donorRows.length ? donorRows : [null]).map((d) => {
+    const shortRow = (d) => !!(d && d.startTime && d.endTime && isShort([d.startTime, d.endTime], config.shortWindowHours));
+    const groups = [], byDay = new Map();
+    for (const d of donorRows) {
+      if (!shortRow(d)) { groups.push([d]); continue; }
+      const day = ptDate(utcMs(d.startTime));
+      if (byDay.has(day)) { byDay.get(day).push(d); continue; }
+      const g = [d];
+      byDay.set(day, g);
+      groups.push(g);
+    }
+    // the quests of a group: by their donor row; a short group also by the stage list / range of each member and the quest's other
+    // rows (alsoInRows of the record), so the run of every day lists them
+    const inGroup = (g, x) => g.some((m) => x.donorRow === m.eventStageId || (shortRow(m) && (inStageRange(m, x.donorStageId)
+      || ((srcOf.get(x) || {}).alsoInRows || []).includes(m.eventStageId))));
+    entry.rows = (donorRows.length ? groups : [[null]]).map((g) => {
+      const d = g[0];
       const id = d ? rowIds.get(d.eventStageId) || null : evStageId;
-      const quests = entry.quests.filter((x) => (d ? x.donorRow === d.eventStageId : true));
+      const quests = entry.quests.filter((x) => (d ? inGroup(g, x) : true));
       const r = { evStageId: id, donorEvStageId: d ? d.eventStageId : null, start: rec.start, end: rec.end, eventType: entry.eventType, origEventType: d ? d.eventType : entry.origEventType,
         origCategory: d ? d.eventCategory : null, parentEventStageId: d ? d.parentEventStageId || 0 : 0, bannerKey: d ? d.bannerKey || null : null,
-        noticeId: d ? d.detailNoticeId || null : null, stageIds: quests.filter((x) => x.served).map((x) => x.stageId), quests: quests.length, available: false };
+        noticeId: d ? d.detailNoticeId || null : null, stageIds: [...new Set(quests.filter((x) => x.served).map((x) => x.stageId))], quests: quests.length, available: false };
+      if (g.length > 1) r.runs = g.length;
       if (d) {
         r.eventType = servedType(d.eventType, entry.boardSet);
         // own dates (Pacific) when the record has several rows (a single row keeps the record's dates and days, as before Task 5);
         // a window past the record's end (the permanent category 1 rows, until 2037) ends with the record
         if (donorRows.length > 1 && d.startTime && d.endTime) {
           r.start = ptDate(utcMs(d.startTime));
-          r.end = ptDate(utcMs(d.endTime));
+          r.end = [...g.map((m) => ptDate(utcMs(m.endTime || m.startTime)))].sort().pop();
           if (recEnd && r.end > recEnd) r.end = recEnd < r.start ? r.start : recEnd;
-          if (isShort([d.startTime, d.endTime], config.shortWindowHours)) r.days = daysOf([d.startTime, d.endTime]);
+          if (shortRow(d)) r.days = [...new Set(g.flatMap((m) => daysOf([m.startTime, m.endTime])))].sort();
         }
       }
       if (!r.days && entry.days && !(d && donorRows.length > 1)) r.days = entry.days;
-      for (const x of quests) x.evStageId = id;
+      for (const x of quests) if (x.evStageId === undefined) x.evStageId = id;
       return r;
     });
     if (!raidish && entry.stageIds.length) {
@@ -564,7 +701,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         const row = evStageRow(r.evStageId, r.stageIds, { eventType: r.eventType, detailUrl: entry.noticeIds.length ? `/web/event/notice/${r.evStageId}` : '' });
         row.eventCategory = config.eventCategory;
         row.bannerUrl = `/web/event/img/v${config.imgVersion}/${r.evStageId}.png`;
-        out.evStage.push(row);
+        put(out.evStage, row);
         r.available = true;
       }
       entry.available = true;
@@ -578,8 +715,9 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     entry.labels = [...labels];
     entry.label = entry.labels.length ? 'reconstructed' : 'original';
     entry.labels.forEach((l) => used.add(l));
-    out.index.entries.push(entry);
+    put(out.index.entries, entry);
   }
+  for (const arr of [out.skipped, out.index.entries, out.maps, out.reward, out.stage, out.evStage]) arr.sort((a, b) => ixMap.get(a) - ixMap.get(b));
   // board sets handed out: their rows and the index; a member entry of a set not handed out says why (label)
   // a set is handed out only when one of its entries is served as eventType 1 (donor 1); a feeder alone does not hand it out, its
   // coins still accrue to the set (boardSetKey). The entries of a set not handed out go back to the plain list.

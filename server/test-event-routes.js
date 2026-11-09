@@ -181,6 +181,28 @@ const tests = {
     assert.deepStrictEqual(w.ev.unkeep(), { code: 200, body: { ok: true } });
     assert.deepStrictEqual(w.ev.events().map((e) => e.eventStageId), [29901, 29902]);
   },
+  // Events Part 4 Task 4: a Booster objective reward (make-events.js: type 0 in the stage row, the Booster named in the index
+  // quest) goes to player.pendingBoosters once, for Part 6 to grant; the other rewards are paid; a replay adds nothing
+  booster_reward_pending_once() {
+    const ix = INDEX();
+    ix.entries[0].quests[0].boosters = [{ objective: 1, emblemName: 'P Booster +25%' }];
+    const w = world({ index: ix });
+    w.tables.stage[0] = stageRow(S1, { submissionRewardType: [0, 2, 3], submissionItemId: [0, 0, 90011], submissionItemNum: [0, 10, 1] });
+    assert.deepStrictEqual(w.ev.pendingBoosters(), [], 'empty by default');
+    assert.strictEqual(w.player.pendingBoosters, undefined, 'reading does not write the save');
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [2, 3], 'the other objectives are paid');
+    assert.deepStrictEqual(w.grants, [{ type: 4, id: 0, num: 100 }], 'first clear paid');
+    assert.deepStrictEqual(w.player.pendingBoosters, [{ emblemName: 'P Booster +25%', stageId: S1, objective: 1 }]);
+    assert.deepStrictEqual(w.player.events.cleared[S1], [1, 2, 3]);
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.strictEqual(w.player.pendingBoosters.length, 1, 'a replay adds nothing');
+    // a save that lost its cleared list (or a second clear of objective 1 only) still records the Booster once
+    delete w.player.events.cleared[S1];
+    w.ev.onStageClear(S1, [1]);
+    assert.strictEqual(w.player.pendingBoosters.length, 1, 'never twice');
+    assert.ok(w.logs.some((l) => /Booster/.test(l)), 'logged');
+  },
 };
 
 let failed = 0;

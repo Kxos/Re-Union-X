@@ -16,7 +16,7 @@ const { rowState } = require('./calendar-util');
 const parts = require('./catalog-pages');
 
 const { CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, gameYearOf, GAME_YEARS } = special;
-const { PAGE_HEAD, pill, RULE_CSS, SRV_CSS, FOLD_CSS, NOTICE_CSS, rebuiltValues, srvFrame, noticeCard, parseNotice, noticeBlocks, backBar } = parts;
+const { PAGE_HEAD, pill, RULE_CSS, SRV_CSS, FOLD_CSS, NOTICE_CSS, rebuiltValues, srvFrame, noticeCard, parseNotice, noticeBlocks, backBar, packCatalog, expandCatalog, UNPACK_JS } = parts;
 
 const BASE = '/web/event';
 const keepButton = (id, on, extra = '') => parts.keepButton(BASE, id, on, extra);
@@ -24,17 +24,31 @@ const KEEP_JS = parts.keepJs(BASE, 'event');
 // the pills the page script writes after a keep / remove: [row class, html]
 const PILLS = { kept: ['pinned', `${icon('pin')}Kept in the event list`], can: ['can', `${icon('pin')}Past event — can be kept`] };
 const dateRange = (e) => `${niceDay(e.start)} – ${niceDay(e.end || e.start)}`;
+// the catalogue's date line: one day once (Part 4: about 340 short events, catalog_size_budget)
+const dateLine = (e) => (!e.end || e.end === e.start ? niceDay(e.start) : dateRange(e));
 const imgOf = (ctx, id) => `${BASE}/img/v${ctx.imgVersion || 1}/${id}.png`;
 // a record whose original notice had no banner has no card file (Gem Boards 20014/20017/20040, user 08-11): the broken-image
 // icon is replaced by a plain box of the same size
 const NO_CARD = (w, h) => ` onerror="this.outerHTML='<span style=&quot;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;`
   + `width:${w}px;max-width:100%;height:${h}px;border:1px solid #2f6f93;border-radius:6px;background:#06283e;color:#b9cfdc;font-size:13px&quot;>No card in the original</span>'"`;
+// the same box on the catalogue rows, from one function (written before the rows: an image can fail while the page loads)
+const NO_CARD_JS = `function kxNc(im){var s=document.createElement('span');s.className='nc';s.textContent='No card in the original';im.parentNode.replaceChild(s,im);}`;
+const NO_CARD_CSS = '.nc{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:320px;max-width:100%;height:70px;border:1px solid #2f6f93;'
+  + 'border-radius:6px;background:#06283e;color:#b9cfdc;font-size:13px}';
 const detailHref = (id) => `${BASE}/event/${id}?from=catalog`;
 const servedOf = (e) => (e.quests || []).filter((q) => q.served);
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
-// A quest not served yet, in plain words (make-events.js `why` holds the builder's note: enemy ids, map keys)
-function whyPlain(why) {
+// A quest not served yet, in plain words (make-events.js `why` holds the builder's note: enemy ids, map keys). Part 4 Task 4: the
+// reasons whose why is the player's text of event_config.json reasonText (or a fixed line here)
+const PLAIN_REASONS = {
+  boosterOnly: 'Every reward of this quest is a Booster: it comes back with the Boosters, in a later update.',
+  rewardTypeUnknown: 'A reward of this quest is of a kind this server cannot give yet: the quest comes back when it can.',
+  quizTextMissing: 'The picture board with the question of this quiz is not in the surviving game files: the quest comes back when its board is rebuilt.',
+  objectiveMismatch: 'Its objectives differ between the khuxwiki page and the surviving game data: it is held back until they are confirmed.',
+};
+function whyPlain(why, reason) {
+  if (PLAIN_REASONS[reason]) return PLAIN_REASONS[reason];
   const w = String(why || '');
   if (/^enemies not in the master/.test(w)) return 'An enemy of this quest is still being searched for in the surviving game files: the quest comes back when it is found.';
   if (/raid or Special/.test(w)) return 'It is a raid or Special quest: it is served by the Raid Catalog or the Special tab instead.';
@@ -78,8 +92,9 @@ const replacesLine = (st, kept) => (st.button === null ? ''
 const doneOf = (e, ctx) => !!ctx.stageDone && servedOf(e).length > 0 && servedOf(e).every((q) => ctx.stageDone(q.stageId));
 // an informative notice, not a playable event (user 08-11): no quest of its own, no original card (noQuests 'board', the signal
 // that also leaves its card out in make_event_banners.py card_ids) and no evStage row with a card. Not in the catalogue, no page
-// (e.g. EV-0579 «New Event Coins Available in October!»: its boards are reached through the playable events of their set)
-const informative = (e) => e.noQuests === 'board' && !(e.quests || []).length && !(e.rows || []).some((r) => r.available);
+// (e.g. EV-0579 «New Event Coins Available in October!»: its boards are reached through the playable events of their set).
+// Part 4 Task 4: noQuests 'notice' too (an information notice of the challenge records, notice_row_not_listed)
+const informative = (e) => ['board', 'notice'].includes(e.noQuests) && !(e.quests || []).length && !(e.rows || []).some((r) => r.available);
 const entriesOf = (index) => ((index && index.entries) || []).filter((e) => e && e.censusId && e.evStageId && e.start && !informative(e))
   .slice().sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
 // an entry by its id or by the id of one of its original evStage rows (Part 2 Task 5: the Details of a row card)
@@ -89,35 +104,43 @@ const entryOfId = (entries, id) => entries.find((x) => x.evStageId === id) || en
 const ROWS_JS = `(function(){var PILL=__PILL__;
 function attr(el,a){return el.getAttribute(a);}
 var rows=[].slice.call(document.querySelectorAll('.row'));
+function href(el){return '/web/event/event/'+attr(el,'data-eid')+'?from=catalog';}
+function nameOf(el){var n=el.querySelector('.nm');return n?n.textContent:'';}
+window.kxK=function(b){return kxKeep(b,function(on){kxRow(b.getAttribute('data-id'),on);});};
 function setRow(el,st){var pc=PILL[st];el.setAttribute('data-show',st);el.className='row '+pc[0];var s=el.querySelector('.s');if(s){s.className='s s-'+pc[0];s.innerHTML=pc[1];}
 var b=el.querySelector('.pk');if(b)kxSet(b,attr(el,'data-eid'),st==='kept');}
-window.kxRow=function(id,on){var name='',i,el;for(i=0;i<rows.length;i++){el=rows[i];if(attr(el,'data-show')==='kept')setRow(el,'can');if(attr(el,'data-eid')===id){setRow(el,on?'kept':'can');if(on)name=attr(el,'data-name');}}
+window.kxRow=function(id,on){var name='',i,el;for(i=0;i<rows.length;i++){el=rows[i];if(attr(el,'data-show')==='kept')setRow(el,'can');if(attr(el,'data-eid')===id){setRow(el,on?'kept':'can');if(on)name=nameOf(el);}}
 for(i=0;i<rows.length;i++){var x=rows[i].querySelector('.rp');if(x){x.textContent=name?'Replaces\\u003a '+name:'';x.style.display=name&&attr(rows[i],'data-show')==='can'?'':'none';}}};
-rows.forEach(function(el){el.onclick=function(e){var t=e.target;while(t&&t!==el){if(t.tagName==='A')return;t=t.parentNode;}location.href=attr(el,'data-href');};});
+rows.forEach(function(el){el.onclick=function(e){var t=e.target;while(t&&t!==el){if(t.tagName==='A')return;t=t.parentNode;}location.href=href(el);};});
 })();`;
 
 // GET /web/event/catalog: every event of the index by date, one month label per month, one minimal row per event (card, name,
 // date line, ONE status line, at most ONE Keep button, «›»). A record with no quest served yet is listed as «Not restored yet».
 function catalogPage(index, ctx = {}) {
   const entries = entriesOf(index), kept = keptOf(entries, ctx);
-  let lastM = '', rows = '';
+  let lastM = '';
+  const packed = [];
   for (const e of entries) {
     const st = statusOf(e, ctx), href = detailHref(e.evStageId), m = e.start.slice(0, 7), served = servedOf(e).length, all = (e.quests || []).length;
-    if (m !== lastM) rows += `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>`;
+    const label = m !== lastM ? `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>` : '';
     lastM = m;
-    const line = `${dateRange(e)} · ${served === all ? plural(all, 'quest') : `${served} of ${plural(all, 'quest')} served`}`;
-    rows += `<div class="row ${st.cls}" id="q${e.evStageId}" data-href="${href}" data-name="${esc(e.name || e.censusId)}" data-eid="${e.evStageId}" data-show="${st.show}" data-y="${e.start.slice(0, 4)}">`
-      + `<a class="im" href="${href}"><img width="320" height="70" src="${imgOf(ctx, e.evStageId)}" alt=""${NO_CARD(320, 70)}></a>`
-      + `<div class="info"><a class="nm" href="${href}">${esc(e.name || e.censusId)}${doneOf(e, ctx) ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
-      + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(on){kxRow(b.getAttribute(\'data-id\'),on);})"')}</div>`}`
-      + `</div><a class="go" href="${href}" aria-label="Details">›</a></div>\n`;
+    const line = `${dateLine(e)} · ${served === all ? plural(all, 'quest') : `${served} of ${plural(all, 'quest')} served`}`, name = esc(e.name || e.censusId), y = e.start.slice(0, 4);
+    // one minimal row (Part 4 Task 4, catalog_size_budget: about 340 events): the row opens its page (ROWS_JS, from data-eid), the
+    // name is the link, the missing card box and the Keep handler are functions of the page; the rows are sent packed, as the
+    // Raid Catalog's (catalog-pages.js packCatalog), and the cards load from data-src once the rows are built (kxImgs)
+    packed.push({ label, fields: { d: line, n: name, e: String(e.evStageId), y }, html: `<div class="row ${st.cls}" id="q${e.evStageId}" data-eid="${e.evStageId}" data-show="${st.show}" data-y="${y}">`
+      + `<span class="im"><img width="320" height="70" data-src="${imgOf(ctx, e.evStageId)}" alt="" onerror="kxNc(this)"></span>`
+      + `<div class="info"><a class="nm" href="${href}">${name}${doneOf(e, ctx) ? CROWN : ''}</a><div class="d">${line}</div>${st.pill}`
+      + `${replacesLine(st, kept)}${st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="return kxK(this)"')}</div>`}`
+      + '</div><span class="go">›</span></div>\n' });
   }
   const restored = entries.filter((e) => e.available).length;
-  return PAGE_HEAD('Event Catalog', CSS) + '<body>'
+  return PAGE_HEAD('Event Catalog', CSS + NO_CARD_CSS) + `<body><script>${NO_CARD_JS}</script>`
     + '<div class="hdr"><h1>Event Catalog</h1></div>'
     + '<p class="n">Every event of the game, by date. Tap an event for its quests. A past event can be kept in the Events tab, one at a time. The Event Catalog is an addition of this server.</p>'
     + `<div class="sum"><span class="n1">${plural(entries.length, 'event')}</span> · ${restored} with quests served</div>`
-    + `<div id="rows">${rows || '<p class="n">No events.</p>'}</div>`
+    + `<div id="rows">${packed.length ? '' : '<p class="n">No events.</p>'}</div>`
+    + (packed.length ? `<script id="kxrows" type="application/json">${packCatalog(packed)}</script><script>${UNPACK_JS}kxImgs();</script>` : '')
     + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${ROWS_JS.replace('__PILL__', JSON.stringify(PILLS))}</script></body></html>`;
 }
 
@@ -132,11 +155,14 @@ const EVENT_SHORT = {
   eventCoins: ['rewards', 'Event Coins', 'Paid into the boards of this event; they never expire', 'camp'],
   boardsLater: ['rewards', 'Event boards', 'Not served yet: they come back whole with the Boosters (a later update); your coins are kept', 'later'],
   noCoinSource: ['rewards', 'Event boards', 'Not handed out yet: no quest pays their Event Coins', 'later'],
+  boosterLater: ['rewards', 'Boosters', 'A Booster reward comes with the Boosters (a later update); the other rewards are paid', 'later'],
+  noBoardSet: ['rewards', 'Event Coins', 'No board set named for them: logged, not paid', 'removed'],
+  quizBoard: ['values', 'Quiz board', 'Redrawn from the khuxwiki text of the question', 'replaced'],
   wholeDay: ['rules', 'Opening time', 'Its whole original day (was a short window)', 'bonus'],
   dramaOff: ['rules', 'Scenes', 'The original scenes are not shown yet', 'later'],
 };
 const EVENT_LABEL = { wikiAp: 'AP', donorKept: 'later game data', wikiLowConfidence: 'a wiki value', noWikiPage: 'no wiki page', mapIncomplete: 'map', eventCoins: 'Event Coins',
-  wholeDay: 'opening time', dramaOff: 'scenes', boardsLater: 'event boards', noCoinSource: 'event boards' };
+  wholeDay: 'opening time', dramaOff: 'scenes', boardsLater: 'event boards', noCoinSource: 'event boards', boosterLater: 'Boosters', noBoardSet: 'Event Coins', quizBoard: 'quiz board' };
 const EVENT_GROUPS = [['values', 'Quest data', 'tleg', ''], ['rewards', 'Rewards', 'camp', ' rw'], ['rules', 'Rules', 'weekday', ' ru'], ['other', 'Other', 'replaced', ' ot']];
 // every label in use: the event's and its quests' (served or not), in the order of EVENT_SHORT, unknown ones last
 const codesOf = (e) => {
@@ -180,6 +206,8 @@ function boardsSection(index, e, ctx) {
     + '<p class="n">A board opens in the Events tab while one of the events of its set is in your week or kept.</p>';
 }
 const daysText = (days) => days.map(niceDay).join(', ');
+// a served quest with a Booster reward (make-events.js boosters, label boosterLater): the Booster comes with the Boosters (Part 6)
+const boosterLine = (q) => ((q.boosters || []).length ? `<small>${(q.boosters || []).map((b) => `${esc(b.emblemName)} (${b.objective ? `objective ${b.objective}` : 'first clear'})`).join(', ')}: comes with the Boosters</small>` : '');
 
 // GET /web/event/event/<evStageId>: header (name, card), the «On this server» box first (status, Keep button, the Story line,
 // Rebuilt values closed, quests not served yet, links), then the event and its quests (each served or «Not served yet» with the
@@ -197,7 +225,7 @@ function detailPage(index, evStageId, ctx = {}) {
     const done = q.served && ctx.stageDone && ctx.stageDone(q.stageId);
     const day = Array.isArray(q.days) && q.days.length ? `<small>Open on ${esc(daysText(q.days))}</small>` : '';
     return `<tr><td>${esc(q.name || '')}${done ? CROWN : ''}${day}</td><td>${q.level ?? ''}</td><td>${q.ap ?? ''}</td>`
-      + (q.served ? '<td>Served</td>' : `<td class="r">Not served yet<small>${esc(whyPlain(q.why))}</small></td>`) + '</tr>';
+      + (q.served ? `<td>Served${boosterLine(q)}</td>` : `<td class="r">Not served yet<small>${esc(whyPlain(q.why, q.reason))}</small></td>`) + '</tr>';
   }).join('');
   // the original evStage rows of the event (Part 2 Task 5): one card each in the Events tab, with its own dates and quests
   const rows = Array.isArray(e.rows) && e.rows.length > 1 ? e.rows : [];
@@ -258,4 +286,4 @@ function noticePage(index, evStageId, doc, ctx = {}) {
   }
 }
 
-module.exports = { catalogPage, detailPage, noticePage, statusOf, whyPlain };
+module.exports = { catalogPage, detailPage, noticePage, statusOf, whyPlain, entriesOf, expandCatalog };
