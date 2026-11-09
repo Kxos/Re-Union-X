@@ -95,7 +95,7 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
   // their original result, by start date
   const withBonus = all.filter((e) => e.communityBonus).sort((a, b) => String(a.start).localeCompare(String(b.start)));
   const bonusOf = (e) => ({ name: e.communityBonus.name || e.name || e.censusId, count: e.communityBonus.count, rewards: e.communityBonus.rewards || [],
-    ...(e.communityBonus.questPrefix ? { quests: e.communityBonus.questPrefix } : {}) });
+    ...(e.communityBonus.questPrefix ? { quests: e.communityBonus.questPrefix } : {}), ...(e.communityBonus.kind === 'completion' ? { fixed: true } : {}) });
   challenge.bonus = { paid: withBonus.filter((e) => e.available && e.communityBonus.ready).map(bonusOf),
     waiting: withBonus.filter((e) => e.available && e.communityBonus.waiting).map(bonusOf) };
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
@@ -126,11 +126,16 @@ function eventChallengeLines(f) {
 // the community-goal bonus line of the Events notice: the events and the result of their original result notice
 const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 const rewardText = (r) => (r.type === 2 ? `${thousands(r.num)} Jewels` : `${r.name} x${r.num}`);
+// (user 10-11-2026: a fixed completion reward, the same for every player who completed all the challenges, is original as it is)
 function communityBonusLine(b) {
-  const paid = b.paid.map((x) => `${x.name} (${x.quests ? `its «${x.quests}» quests; ` : ''}${thousands(x.count)} players: ${x.rewards.map(rewardText).join(', ')})`);
-  return `**Community goals.** Some events of 2020 gave every player who cleared **all their objectives** a bonus whose size depended on how many players around the world did it, announced afterwards in a result notice. Here, when you clear every objective of such an event (a kept event of the Event Catalog too), you get **once** the bonus the original event reached, in your **Presents**: the count was of all the players of the time and is not redone for you alone (**not original**).`
+  const counted = b.paid.filter((x) => !x.fixed), fixed = b.paid.filter((x) => x.fixed), waiting = b.waiting.filter((x) => !x.fixed);
+  const paid = counted.map((x) => `${x.name} (${x.quests ? `its «${x.quests}» quests; ` : ''}${thousands(x.count)} players: ${x.rewards.map(rewardText).join(', ')})`);
+  const done = fixed.map((x) => `${x.name} (${x.rewards.map(rewardText).join(', ')})`);
+  return '**Community goals.**'
+    + (counted.length || waiting.length ? ` Some events of 2020 gave every player who cleared **all their objectives** a bonus whose size depended on how many players around the world did it, announced afterwards in a result notice. Here, when you clear every objective of such an event (a kept event of the Event Catalog too), you get **once** the bonus the original event reached, in your **Presents**: the count was of all the players of the time and is not redone for you alone (**not original**).` : '')
     + (paid.length ? ` The original results: ${nameList(paid)}.` : '')
-    + (b.waiting.length ? ` ${nameList(b.waiting.map((x) => x.name))} ${b.waiting.length === 1 ? 'waits' : 'wait'} for the original result: no bonus until it is found.` : '');
+    + (waiting.length ? ` ${nameList(waiting.map((x) => x.name))} ${waiting.length === 1 ? 'waits' : 'wait'} for the original result: no bonus until it is found.` : '')
+    + (done.length ? ` ${counted.length || waiting.length ? 'Other events' : 'Some events'} gave a **fixed reward** to every player who completed all their challenges, whatever the number of players: as in the original, clearing every objective gives you that reward **once**, in your **Presents** (a kept event of the Event Catalog too): ${nameList(done)}.` : '');
 }
 function eventCoinLines(f) {
   const c = f && f.coins;

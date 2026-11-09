@@ -300,6 +300,26 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
     && l3.includes('Summon Rush! (732 players: 740 Jewels)') && l3.includes('Mean Maiden Battle Event (its «Defeat the Mean Maiden» quests; 3,931 players: Power Gem x30)')
     && /Waiting Event/.test(l3) && /original result/.test(l3)
     && !/\[Updated/.test(l3), `Events: riga dei bonus comunitari ${l3.slice(l3.indexOf('Community'), l3.indexOf('Community') + 900)}`);
+  check(!/fixed reward/.test(l3), 'Events: nessuna frase delle ricompense fisse senza eventi');
+  // fixed completion reward (user 10-11-2026, notice 61226): the same reward for every finisher, original as it is (no «not
+  // original» for it), in the same plain line; a completion reward alone keeps the line without the player-count sentences
+  const kw = { censusId: 'K', type: 'EQ', name: 'The Keyblade War', start: '2019-09-03', available: true, labels: ['completionReward'], quests: [q(true)],
+    communityBonus: { name: 'The Keyblade War Challenge Campaign', noticeId: 61226, kind: 'completion', count: null, stageIds: [5], ready: true,
+      rewards: [{ type: 3, id: 311905, num: 1, name: 'Spirit Lord Kyroo [SAB LV 10]' }, { type: 3, id: 311925, num: 1, name: 'NM Sir Kyroo [SAB LV 10]' }] } };
+  fx.entries.push(kw);
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  const f4 = n.eventNoticeFacts(path.join(dir, 'events.json'));
+  check(f4.challenge.bonus.paid.length === 4 && f4.challenge.bonus.paid.filter((x) => x.fixed).length === 1, `Events: ricompensa fissa nei fatti ${JSON.stringify(f4.challenge.bonus)}`);
+  const l4 = n.eventChallengeLines(f4).join(' '), fixedPart = l4.slice(l4.indexOf('Other events gave'));
+  check(l4.includes('Defeat Savage Vanguard (7,237 players') && /Other events gave a \*\*fixed reward\*\* to every player who completed all their challenges/.test(l4)
+    && fixedPart.includes('The Keyblade War Challenge Campaign (Spirit Lord Kyroo [SAB LV 10] x1, NM Sir Kyroo [SAB LV 10] x1)')
+    && /as in the original/.test(fixedPart) && /\*\*once\*\*/.test(fixedPart) && /Presents/.test(fixedPart) && !/not original/.test(fixedPart.split('.').slice(0, 2).join('.'))
+    && !/restored/i.test(l4), `Events: riga con ricompensa fissa ${fixedPart.slice(0, 500)}`);
+  const only = { ...fx, entries: fx.entries.filter((e) => !e.communityBonus || e.censusId === 'K') };
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(only));
+  const l5 = n.eventChallengeLines(n.eventNoticeFacts(path.join(dir, 'events.json'))).join(' ');
+  check(/\*\*Community goals\.\*\* Some events gave a \*\*fixed reward\*\*/.test(l5) && !/how many players around the world/.test(l5) && !/original result/.test(l5),
+    `Events: solo ricompensa fissa ${l5.slice(l5.indexOf('Community'), l5.indexOf('Community') + 400)}`);
   const ev = n.NOTICES.find((x) => x.title === 'Events');
   const t = ev ? ev.body.join(' ') : '';
   check(t.includes("Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.")

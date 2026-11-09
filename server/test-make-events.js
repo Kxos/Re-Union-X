@@ -1090,6 +1090,40 @@ const tests = {
     assert.throws(() => run({ ...bonus[1], result: [{ type: 2, id: 0, num: 730, name: 'Jewels' }] }), /result/);
     assert.throws(() => run({ ...bonus[0], questPrefix: 'Nothing' }), /quest/);
   },
+  // fixed completion rewards (user 10-11-2026, notice 61226: «Complete all of the challenges ... to receive every type of 1 Tier 10
+  // Subslot Medals»): kind 'completion', the same rewards for every finisher, no count; quests = the name prefixes of the counted
+  // quests. Ready when every prefix has a quest and all are served (label completionReward, entry label unchanged: original); a
+  // prefix with no quest (a part of the event not in our records) -> missing, not ready; an entry without quests (undated record)
+  // -> not ready, no stop; prefixes that match no quest of a record with quests, no rewards or an unknown kind stop the run
+  completion_reward_attached() {
+    const medals = [{ type: 3, id: 311905, num: 1, name: 'Spirit Lord Kyroo [SAB LV 10]' }, { type: 3, id: 311925, num: 1, name: 'NM Sir Kyroo [SAB LV 10]' }];
+    const recs = [record('E-C1', [quest(703001, 1, [501], { name: 'Battle vs. A' }), quest(703002, 1, [501], { name: 'Looking for B Pt. 1' }), quest(703003, 1, [501], { name: 'Extra' })]),
+      record('E-C2', [quest(703010, 1, [501], { name: 'Battle vs. A' }), quest(703011, 1, [999], { name: 'Looking for B Pt. 1' })], { start: '2019-05-01', end: '2019-05-07' }),
+      record('E-C3', [quest(703020, 1, [501], { name: 'Battle vs. A' })], { start: '2019-06-01', end: '2019-06-07' })];
+    const done = (cid, extra = {}) => ({ censusId: cid, name: 'The Keyblade War Challenge Campaign', noticeId: 61226, kind: 'completion', rewards: medals,
+      quests: ['Battle vs. A', 'Looking for B'], ...extra });
+    const out = me.buildEvents(recs, CONFIG, master(), undefined, {}, null, null, { bonus: [done('E-C1'), done('E-C2'), done('E-C3')] });
+    const c1 = entry(out, 'E-C1');
+    assert.deepStrictEqual(c1.communityBonus, { name: 'The Keyblade War Challenge Campaign', noticeId: 61226, kind: 'completion', count: null,
+      stageIds: c1.quests.slice(0, 2).map((q) => q.stageId), rewards: medals, ready: true });
+    assert.ok(c1.labels.includes('completionReward') && !c1.labels.includes('communityBonus'), JSON.stringify(c1.labels));
+    assert.strictEqual(c1.label, entry(build(recs), 'E-C1').label, 'an original reward: the entry label is not changed');
+    assert.ok(out.index.reasons.completionReward);
+    const c2 = entry(out, 'E-C2').communityBonus;
+    assert.deepStrictEqual([c2.ready, c2.stageIds.length], [false, 1], 'a counted quest not served: not ready');
+    const c3 = entry(out, 'E-C3').communityBonus;
+    assert.deepStrictEqual([c3.ready, c3.missing], [false, ['Looking for B']], 'a part of the event not in the record: not ready');
+    assert.ok(!entry(out, 'E-C3').labels.includes('completionReward'));
+    // an undated record (no quest at all in its entry): attached, not ready, no stop
+    const undated = me.buildEvents([record('E-C4', [quest(703030, 1, [501], { name: 'Battle vs. A' })], { start: null, end: null })], CONFIG, master(), undefined, {}, null, null,
+      { bonus: [done('E-C4')] });
+    const c4 = entry(undated, 'E-C4');
+    assert.deepStrictEqual([c4.quests.length, c4.communityBonus.ready, c4.communityBonus.missing], [0, false, ['Battle vs. A', 'Looking for B']], JSON.stringify(c4.communityBonus));
+    const run = (b) => me.buildEvents(recs, CONFIG, master(), undefined, {}, null, null, { bonus: [b] });
+    assert.throws(() => run(done('E-C1', { quests: ['Nothing'] })), /no quest named «Nothing\.\.\.»/);
+    assert.throws(() => run(done('E-C1', { rewards: [] })), /without rewards/);
+    assert.throws(() => run(done('E-C1', { kind: 'other' })), /unknown kind/);
+  },
   // fix round 1 (M3): a record's own boardSetKey that the board sets do not have stops the run (when board sets are given)
   record_set_key_known() {
     const m = { ...master(), ...BOARD_MASTER() };

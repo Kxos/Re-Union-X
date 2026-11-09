@@ -19,6 +19,8 @@
 // official result notice) pays its rewards once into the Presents (addPresent) when every objective 1..min(3, validSubmission) of
 // its stageIds is cleared, whether the event is in the Story week or kept from the Event Catalog; player.events.bonus
 // {censusId: {paidAt, noticeId}} keeps it once per event. payBonuses() (server.js: at login) pays an old save already complete.
+// A fixed completion reward (communityBonus.kind 'completion', user 10-11-2026: every player who completed all the challenges got
+// it, notice 61226) is paid the same way, with its own Present text.
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
 //   pruneKept (Event Catalog, Task 5), payBonuses.
 'use strict';
@@ -98,8 +100,9 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     const ev = state();
     ev.bonus ||= {};
     ev.bonus[e.censusId] = { paidAt: realNow(), noticeId: cb.noticeId || null };
-    for (const r of cb.rewards) addPresent(r.type, r.id, r.num, `Community goal bonus: ${cb.name || e.name || e.censusId}`);
-    log(`[event] ${e.censusId}: community goal bonus paid (${cb.rewards.map((r) => `${r.name || `type ${r.type} id ${r.id}`} x${r.num}`).join(', ')})`);
+    const what = cb.kind === 'completion' ? 'Completion reward' : 'Community goal bonus';
+    for (const r of cb.rewards) addPresent(r.type, r.id, r.num, `${what}: ${cb.name || e.name || e.censusId}`);
+    log(`[event] ${e.censusId}: ${what.toLowerCase()} paid (${cb.rewards.map((r) => `${r.name || `type ${r.type} id ${r.id}`} x${r.num}`).join(', ')})`);
     return true;
   }
   // every entry whose bonus is due (an old save complete before the bonus existed); -> how many paid (the caller saves when > 0)

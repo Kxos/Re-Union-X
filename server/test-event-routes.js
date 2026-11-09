@@ -257,6 +257,25 @@ const tests = {
     w3.ev.onStageClear(S2, [1, 2, 3]);
     assert.strictEqual((w3.player.events.bonus || {})['E-1'], undefined);
   },
+  // fixed completion reward (user 10-11-2026, notice 61226): communityBonus kind 'completion' pays its medals once, the same way,
+  // with its own Present text; replays and the login check pay nothing more
+  completion_reward_once() {
+    const ix = INDEX();
+    const medals = [{ type: 3, id: 311905, num: 1, name: 'Spirit Lord Kyroo [SAB LV 10]' }, { type: 3, id: 311925, num: 1, name: 'NM Sir Kyroo [SAB LV 10]' }];
+    ix.entries[1].communityBonus = { name: 'The Keyblade War Challenge Campaign', noticeId: 61226, kind: 'completion', count: null, stageIds: [S1, S2], rewards: medals, ready: true };
+    const presents = [];
+    const w = world({ index: ix });
+    w.ev = routesEvents({ ...w.opts, addPresent: (type, id, num, comment) => presents.push({ type, id, num, comment }) });
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.deepStrictEqual(presents, [], 'S2 not cleared yet');
+    w.ev.onStageClear(S2, [1, 2, 3]);
+    assert.deepStrictEqual(presents.map((p) => [p.type, p.id, p.num]), [[3, 311905, 1], [3, 311925, 1]]);
+    assert.ok(presents.every((p) => p.comment === 'Completion reward: The Keyblade War Challenge Campaign'), presents[0].comment);
+    w.ev.onStageClear(S2, [1, 2, 3]);
+    assert.strictEqual(w.ev.payBonuses(), 0);
+    assert.strictEqual(presents.length, 2, 'once per event');
+    assert.deepStrictEqual(Object.keys(w.player.events.bonus), [ix.entries[1].censusId]);
+  },
   // fix round 1 (I1): a reward the server cannot give now (a Spirit part with the pet off, canPay false) is not lost: it is kept in
   // player.pendingRewards once per stage / objective / position, and paid once by payPending when it can be given
   pending_reward_kept() {

@@ -61,7 +61,7 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
+const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
   'quizBoardFootage', 'quizBoardScreenshot'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
@@ -804,13 +804,29 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
   // stageIds (the counted served quests), rewards (the tier the original reached), ready}: routes-events.js pays it once into the
   // Presents when every objective of those quests is cleared. No count: waiting (no rewards); a counted quest not served: not ready.
   // Label communityBonus (declared: the original count was of all players) on a ready entry. A typo in the data stops the run.
+  // Fixed completion rewards (user 10-11-2026, same mechanism): kind 'completion', rewards [...] (no count, no tiers: every player
+  // who completed all the challenges got them, notice 61226), quests? [name prefixes] the counted quests named by the notice ->
+  // communityBonus {kind: 'completion', count: null, rewards, ready, missing?}. Ready when every prefix has a quest and every counted
+  // quest is served; label completionReward (an original reward: entry label unchanged). An entry with no quest at all (an undated
+  // record, quests []) is not ready (`missing` lists every prefix); a prefix list that matches none of its quests stops the run.
   for (const b of opts.bonus || []) {
     const e = out.index.entries.find((x) => x.censusId === b.censusId);
     if (!e) throw new Error(`events: community bonus ${b.censusId} is not a record`);
-    const counted = (e.quests || []).filter((q) => !b.questPrefix || String(q.name || '').startsWith(b.questPrefix));
-    if (!counted.length) throw new Error(`events: community bonus ${b.censusId}: no quest${b.questPrefix ? ` named «${b.questPrefix}...»` : ''}`);
+    const fixed = b.kind === 'completion';
+    if (b.kind && !fixed) throw new Error(`events: community bonus ${b.censusId}: unknown kind ${b.kind}`);
+    const named = (q) => String(q.name || '');
+    const prefixes = fixed && b.quests ? b.quests : null;
+    const counted = (e.quests || []).filter((q) => (prefixes ? prefixes.some((p) => named(q).startsWith(p)) : !b.questPrefix || named(q).startsWith(b.questPrefix)));
+    const noQuests = !(e.quests || []).length;
+    if (!counted.length && !(fixed && noQuests)) {
+      const what = prefixes ? ` named ${prefixes.map((p) => `«${p}...»`).join(', ')}` : b.questPrefix ? ` named «${b.questPrefix}...»` : '';
+      throw new Error(`events: community bonus ${b.censusId}: no quest${what}`);
+    }
     let rewards = [];
-    if (b.count !== null && b.count !== undefined) {
+    if (fixed) {
+      if (!(b.rewards || []).length) throw new Error(`events: community bonus ${b.censusId}: a completion reward without rewards`);
+      rewards = b.rewards.map((r) => ({ ...r }));
+    } else if (b.count !== null && b.count !== undefined) {
       if (b.perPlayer) {
         const p = b.perPlayer;
         rewards = [{ type: p.type, id: p.id, num: Math.ceil(b.count / p.roundUpTo) * p.roundUpTo, name: p.name }];
@@ -823,10 +839,14 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         throw new Error(`events: community bonus ${b.censusId}: the result of the notice ${JSON.stringify(b.result)} is not what its rule gives ${JSON.stringify(rewards)}`);
       }
     }
-    const waiting = !rewards.length, ready = !waiting && counted.every((q) => q.served);
-    e.communityBonus = { ...(b.name ? { name: b.name } : {}), noticeId: b.noticeId, count: waiting ? null : b.count, stageIds: [...new Set(counted.filter((q) => q.served).map((q) => q.stageId))], rewards, ready,
-      ...(b.questPrefix ? { questPrefix: b.questPrefix } : {}), ...(waiting ? { waiting: true } : {}) };
-    if (ready) { e.labels.push('communityBonus'); e.label = 'reconstructed'; used.add('communityBonus'); }
+    // the prefixes of the notice with no quest of the record (a part of the event not in our data)
+    const missing = prefixes ? prefixes.filter((p) => !counted.some((q) => named(q).startsWith(p))) : [];
+    const waiting = !rewards.length, ready = !waiting && counted.length > 0 && !missing.length && counted.every((q) => q.served);
+    e.communityBonus = { ...(b.name ? { name: b.name } : {}), noticeId: b.noticeId, ...(fixed ? { kind: 'completion' } : {}), count: waiting || fixed ? null : b.count,
+      stageIds: [...new Set(counted.filter((q) => q.served).map((q) => q.stageId))], rewards, ready,
+      ...(b.questPrefix && !fixed ? { questPrefix: b.questPrefix } : {}), ...(missing.length ? { missing } : {}), ...(waiting ? { waiting: true } : {}) };
+    if (ready && fixed) { e.labels.push('completionReward'); used.add('completionReward'); }
+    else if (ready) { e.labels.push('communityBonus'); e.label = 'reconstructed'; used.add('communityBonus'); }
   }
   // shared notices: the stage rows of the row they share (built once), no evStage row of their own
   for (const e of out.index.entries) {
