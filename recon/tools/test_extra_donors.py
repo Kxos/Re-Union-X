@@ -148,7 +148,8 @@ check(not {v[2] for v in list(ex.values()) + list(wh.values()) + list(rc.values(
 ev_anims = {k.rsplit('/', 1)[0] for k in ev2}
 check(all(d + '/' + d.rsplit('/', 1)[1] + '.lwf' in ev2 for d in ev_anims), 'events2 animation without its LWF row')
 ev_fams = {int(k.split('/')[3]) for k in ev2}
-check(len(ev_fams) == 48 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
+# 48 families + the 5 Keyblade War masters 286-290 (Events Part 5 Task 2, user-approved 10-11)
+check(len(ev_fams) == 53 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
 # declared transparent pieces (user decisions; label column BLANK-DECLARED, events2_export.py): only these slots
 with open(xd.EVENTS2_TABLE, encoding='utf-8') as fh:
     declared = {ln.split('\t')[0] for ln in fh if not ln.startswith('#') and ln.count('\t') >= 4
