@@ -17,6 +17,9 @@ assert.strictEqual(b.length, 1);
 assert.deepStrictEqual(b[0].embeds.map((e) => e.title), ['B', 'Sub']);
 assert.strictEqual(b[0].embeds[0].author.name, 'IMPORTANT · 11/10');
 assert.ok(b[0].embeds.every((e) => !e.description.includes('###')));
+// the website link is also at the end of the post (phones open it scrolled to the bottom)
+assert.ok(b[0].embeds[1].description.endsWith('**[Read this notice on the website](https://re-union-x.github.io/Re-Union-X/notices/#b)**'));
+assert.ok(!b[0].embeds[0].description.includes('Read this notice'));
 assert.strictEqual(b[0].content, 'New text.');
 assert.strictEqual(noticeMessages({ title: 'Story Quests 526-979', kind: 'IMPORTANT', date: '1/1', body: 'x' })[0].embeds[0].url,
   'https://re-union-x.github.io/Re-Union-X/notices/#story-quests-526-979');

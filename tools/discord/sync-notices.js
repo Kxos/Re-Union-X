@@ -84,7 +84,10 @@ function noticeMessages(n) {
       embeds.push(e);
     });
   });
-  embeds[embeds.length - 1].footer = { text: 'Re-Union X · in-game Notices · tap the title to read it on the website' };
+  // The link is also at the end: on a phone the post opens scrolled to the bottom (user, 10-11).
+  const last = embeds[embeds.length - 1];
+  last.description = (last.description === '​' ? '' : last.description + '\n\n') + `**[Read this notice on the website](${noticeUrl(n.title)})**`;
+  last.footer = { text: 'Re-Union X · in-game Notices' };
   const msgs = [];
   let cur = [], size = 0;
   for (const e of embeds) {

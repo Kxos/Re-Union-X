@@ -4,7 +4,7 @@ name: Discord notices
 on:
   push:
     branches: [main]
-    paths: [docs/NOTICES.md]
+    paths: [docs/NOTICES.md, tools/discord/sync-notices.js]
   workflow_dispatch:
 concurrency: discord-notices
 permissions:
