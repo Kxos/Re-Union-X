@@ -77,6 +77,12 @@ Task 3 closes both.
 
 ## Builder's calls (to confirm at review)
 
+**User decisions (10 November 2026).** All five calls are approved, with one addition to call 1: before a generated map
+is used, the original map is searched in every source we hold (JP 4.3.1, WW 1.1.3, the donor data, the restored room
+packs); only when none exists does the quest get a reconstructed map (`wikiRoom`, declared not original). **The Keyblade
+War (I-247) joins Part 5**: date EV-0929 to 2019-09-03, build part 3 «The Ultimate Test» per Union, and pay the Keyblade
+War Challenge completion reward (notice 61226, the six Kyroo SAB 10 medals) counting only the player's own Union version.
+
 1. **Maps of the data-hole quests.**
    - A quest gets a JP 4.3.1 map when one map holds exactly the enemy names, counts and target of its khuxwiki page or JP table row, at the quest's level. Label `jpTwinMap`. This is the `laterRun` rule of Part 2.
    - Otherwise it gets a generated map: the story room of its world (khuxwiki `room` / `world`) with the enemy groups placed by `gen_story_maps.py`, as the Special quests. Label `wikiRoom`, declared as not original.
