@@ -139,11 +139,15 @@ async function main() {
     return;
   }
 
-  const hook = String(process.env.DISCORD_WEBHOOK_URL || '').trim();
-  if (!hook) { console.log('discord: no webhook configured, nothing sent'); return; }
-  if (!/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/.test(hook)) {
-    throw new Error('DISCORD_WEBHOOK_URL is missing or is not a Discord webhook URL');
+  const raw = String(process.env.DISCORD_WEBHOOK_URL || '').trim().replace(/^["'<]+|["'>]+$/g, '');
+  if (!raw) { console.log('discord: no webhook configured, nothing sent'); return; }
+  const m = raw.match(/^https:\/\/(?:(?:ptb|canary)\.)?discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\/(\d+)\/([\w-]+)/);
+  if (!m) {
+    // never print the secret: only its shape
+    const shape = raw.replace(/[A-Za-z0-9_-]{6,}/g, (s) => `<${s.length}>`);
+    throw new Error(`DISCORD_WEBHOOK_URL is not a Discord webhook URL (shape: ${shape})`);
   }
+  const hook = `https://discord.com/api/webhooks/${m[1]}/${m[2]}`;   // drops a trailing /github, /slack or ?query
   const postAll = async (messages) => {
     const ids = [];
     for (const m of messages) ids.push((await api(hook, 'POST', '?wait=true', m)).id);
