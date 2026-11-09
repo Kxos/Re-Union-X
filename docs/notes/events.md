@@ -702,3 +702,42 @@ User decisions of 10 November 2026; everything up to the live master regen (dry 
 - **Not added:** the 2020-05-15 Moon Gems run (notice 65678). The donor master has its row (201584, 2020-05-15 07:00 to
   05-16 06:59:59 UTC, stage 742560 «[Surprise Event] Moon Gems», map 741710, banner of the other Surprise rows), but the
   event census has no row for it (the notice is filed as the Proud Leviathan update), so it has no census id yet.
+- **Added later (round g, below):** the 2020-05-15 Moon Gems run is EV-1532.
+
+## Surprise events and completion rewards, second follow-up (Part 4, Task 7, 10 November 2026)
+
+User decisions of 10 November 2026; everything up to the live master regen (dry run in `tmp\t7g`).
+- **Holiday Draw Tickets.** The official notices of the three runs (72001, 72216, 72706) all say «Complete the challenge and
+  receive 10 Holiday Draw Tickets!» (4 + 3 + 3 per run), as khuxwiki. The objectives of EV-1389 / EV-1398 / EV-1408 now pay
+  type 41 id 1 (our Holiday Draw Ticket, `drawTickets.holiday`) instead of the donor value type 41 id 41 (paid here as a
+  plain Draw Ticket). Record patch in `tmp\events\challenge\patch_surprise.py` (step 3, with the notice quote in each reward
+  `note`), so it survives a rebuild like the other Surprise patches.
+- **The 2020-05-15 Moon Gems run** is census row **EV-1532** (appended: no EV id moves; the notice 65678 was filed as the Proud
+  Leviathan update only) and a record in `short_2020.json` (step 4 of patch_surprise.py): donor row 201584 (2020-05-15 07:00 to
+  05-16 06:59:59 UTC), stage 742560 «[Surprise Event] Moon Gems» (equal to stage 741890 of EV-1036 but for its id), map 741710
+  (shared, same drops), Gift Shadow x1, Moon Gem x1 per objective; khuxwiki lists May 15, 2020. Its card is the banner of the
+  other Moon Gems runs (9ayfNxJF8): the new card and kept copy are byte-identical to theirs, no existing card changes, so no
+  imgVersion change (the version only renews URLs whose picture changed).
+- **Fixed completion rewards** use the community-goal mechanism: a `community_bonus.json` event with `kind: 'completion'`, the
+  same `rewards` for every finisher (no count, no tiers) and `quests` (the name prefixes of the counted quests). make-events.js
+  writes `communityBonus {kind: 'completion', count: null, rewards, ready, missing?}`: ready when every prefix has a quest and
+  all are served; label `completionReward` (an original reward: the entry label stays); paid once into the Presents
+  («Completion reward: ...»). The «Community goals» line of the Events notice (plain) lists them, worded as original.
+  - **The Keyblade War Challenge Campaign** (notice 61226, census EV-1009: «Complete all of the challenges by Jan. 20 to receive
+    every type of 1 Tier 10 Subslot Medals!», 3,847 winners): the six Kyroo [SAB LV 10] (Spirit / NM x Lord / Chef / Sir: our
+    medals 311905, 301908, 311913, 301916, 301920, 311925; khuxwiki «The Keyblade War» names the same six). Counted: the eleven
+    quests of The Keyblade War (khuxwiki: Battle vs. Master Aced, Looking for Master Gula Pt. 1-4, The Darkest Darklings, The
+    Worst Nightmare, The Ultimate Test Pt. 1-4, part 3 by Union). Attached to EV-0929, the only record of The Keyblade War
+    (parts 1-2, seven quests): **not ready** — the record has no start date (not listed) and part 3 is in no record.
+  - **JP 5th Anniversary KHUX & KHDR Campaign** (notice 68893, census EV-1266): WW content (WW notice in English with Pacific
+    times, rewards «Distributed to only KHUX» into the WW gift box). The challenge is the ten «Genie Jafar - n/10» quests of
+    donor row 202665 (Sep. 3-15, 2020: their objectives give exactly «up to 30 Draw Tickets, and 30 Gems»); that row has no
+    record yet (EV-1266 is a CELEB row), so the reward is kept in `pending` of community_bonus.json with its full list
+    (3,000 Jewels, Draw Ticket x50, M-type = Sir Kyroo upright / reversed LV 7 x10, LV 8 x6, LV 9 x3, LV 10 x1, Power / Speed /
+    Magic Gem x10, Sun and Moon Gem x1; the KHDR-only rewards left out) until its record is built.
+- **Checks kept:** the Mean Maiden bonus counts only its ten «Defeat the Mean Maiden» quests (test community_bonus_attached,
+  `questPrefix`; dry index: 10 of 15 quests); quests on a shared Surprise map must still have equal drops (test
+  surprise_map_shared, «other drops: still a clash»).
+- **Dry regen** (`tmp\t7g`): 2,181 of 3,071 quests served (2,180 of 3,070), 305 events (304); +1 stage row (4003301), +1 evStage
+  row (22627), the three Holiday stage rows change only `submissionItemId` (41 -> 1); no other row changes, no served quest
+  moves; event_ids.json +1 row, +1 entry, +1 check; 106 tables valid. No map import (741710 is served), no resource build.
