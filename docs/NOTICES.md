@@ -48,11 +48,11 @@ The **Event Quests** are back: the limited-time events of the original game, wit
 
 Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.
 
-Today **305 events** are served, with **2181 of their 3071 quests** (404 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+Today **307 events** are served, with **2210 of their 3071 quests** (404 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
 
 ### Challenge events
 
-The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **213 events** of 2018 to 2021 are served, with **1564 of their 2340 quests** (by year: 2018: 44 events, 453 quests; 2019: 45 events, 372 quests; 2020: 109 events, 675 quests; 2021: 15 events, 64 quests). The Event Catalog lists the others with the reason they are not here yet.
+The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **215 events** of 2018 to 2021 are served, with **1593 of their 2340 quests** (by year: 2018: 45 events, 465 quests; 2019: 46 events, 387 quests; 2020: 109 events, 677 quests; 2021: 15 events, 64 quests). The Event Catalog lists the others with the reason they are not here yet.
 
 **Surprise events** and **Time Missions** are back: today 52 Surprise events and 6 Time Missions events (**169 quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.
 
@@ -112,7 +112,7 @@ The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are co
 
 ### Event coins and boards
 
-**Event Coins** are back, with the **Event Boards**: today **41 Event Boards** in **7 board sets**, for 11 events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).
+**Event Coins** are back, with the **Event Boards**: today **41 Event Boards** in **7 board sets**, for 12 events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).
 
 Each **board set** (the boards of a month, shared by its events) has **one balance**, and Event Coins **never expire** (**not original**: the original game lost them when the event ended, as the board screen still says). Each cell and each finished board gives its reward **once**.
 
