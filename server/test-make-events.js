@@ -846,20 +846,23 @@ const tests = {
     assert.strictEqual(o2.stage.length, 5, 'stage rows once');
   },
   // a Surprise event (Part 4 Task 7): the donor master keeps ONE row of the whole day (08:00 UTC to 07:59:59 UTC, which starts at
-  // 01:00 Pacific in summer), the original ran a few times a day for 15-60 minutes; the record's `shortWindow` makes it a short
-  // event: open on the day its row starts only, label wholeDay. Without the mark the same row is a daily event (no days).
+  // 01:00 Pacific in summer), and every WW notice gave that whole Pacific day (12:00 a.m. to 11:59 p.m. PT); the record's
+  // `shortWindow` makes it a one-day event: open on the day its row starts only, oneDay (original: no wholeDay label). Without
+  // the mark the same row is a daily event (no days).
   short_window_record_whole_day() {
     const range = { validStageId: 1, stageId: [700201], validStageWidthId: 0, stageStartId: 0, stageEndId: 0 };
     const mk = (extra) => record('E-SW', [quest(700201, 1, [501], { evStageId: 900201, window: ['2020-05-06 08:00:00', '2020-05-07 07:59:59'] })], {
       start: '2020-05-06', end: '2020-05-07', evStage: [donorEv({ eventStageId: 900201, startTime: '2020-05-06 08:00:00', endTime: '2020-05-07 07:59:59', eventType: 3, stageRange: range })], ...extra });
-    const e = entry(build([mk({ shortWindow: 'ran 3 times a day for 15-60 minutes (notice); donor row of the whole day' })]), 'E-SW');
+    const e = entry(build([mk({ shortWindow: 'open for one whole Pacific day (notice); donor row of the whole day' })]), 'E-SW');
     assert.deepStrictEqual(e.days, ['2020-05-06'], 'the day its row starts, not the next one');
-    assert.ok(e.labels.includes('wholeDay'));
+    assert.strictEqual(e.oneDay, true, 'a one-day event');
+    assert.ok(!e.labels.includes('wholeDay'), 'its whole day is the original window: no wholeDay label');
     assert.strictEqual(e.rows.length, 1);
     assert.deepStrictEqual(e.rows[0].days, ['2020-05-06']);
     assert.deepStrictEqual(e.quests[0].days, undefined, 'a 24 h quest window adds no days of its own');
     const plain = entry(build([mk({})]), 'E-SW');
     assert.strictEqual(plain.days, undefined, 'unmarked: a daily event');
+    assert.strictEqual(plain.oneDay, undefined);
     assert.ok(!plain.labels.includes('wholeDay'));
     assert.strictEqual(plain.rows[0].days, undefined);
   },
@@ -1027,6 +1030,65 @@ const tests = {
     assert.strictEqual(out.maps.filter((m) => m.key === 745300).length, 1, 'the map is listed once');
     assert.strictEqual(entry(out, 'E-QC').quests[0].reason, 'mapKeyUsed', 'other drops: still a clash');
     assert.strictEqual(entry(out, 'E-QE').quests[0].reason, 'mapKeyUsed', 'a non-quiz quest on a quiz map: still a clash');
+  },
+  // Surprise events share their map (user 10-11-2026): every Surprise run used the same map (741710, Cave of Wonders: Treasure
+  // Room; 743840 for the Holiday Draw Tickets runs), so a quest of another `shortWindow` record shares the map key even when its
+  // objective rewards differ; each keeps its own stage row (objectives, rewards). The drops live in the shared map file, so other
+  // drops still clash; a record without the mark on that key still waits.
+  surprise_map_shared() {
+    const k = { map: { key: 741710, stageBinId: 741710, status: 'ok' } };
+    const sw = { shortWindow: 'one whole Pacific day (notice)' };
+    const gem = (id) => [objective(10, 'Complete without having to continue', { type: 5, id, num: 1 }), objective(10, 'Complete without having to continue', { type: 5, id, num: 1 }),
+      objective(10, 'Complete without having to continue', { type: 5, id, num: 1 })];
+    const a = record('E-SA', [quest(741990, 4, [501], { ...k, objectives: gem(50) })], { ...sw, start: '2020-03-05', end: '2020-03-06' });
+    const b = record('E-SB', [quest(741710, 4, [501], { map: { key: 741710, stageBinId: 0, status: 'ok' }, objectives: gem(52) })], { ...sw, start: '2020-02-02', end: '2020-02-03' });
+    const c = record('E-SC', [quest(742000, 4, [501], { ...k, drops: { enemies: [{ enemy: 501, rewardId: 999, rows: [] }], chests: [] } })], { ...sw, start: '2020-04-01', end: '2020-04-02' });
+    const d = record('E-SD', [quest(742010, 4, [501], k)], { start: '2020-05-01', end: '2020-05-07' });
+    const out = build([a, b, c, d]);
+    const qa = entry(out, 'E-SA').quests[0], qb = entry(out, 'E-SB').quests[0];
+    assert.ok(qa.served && qb.served, JSON.stringify([qa.why, qb.why]));
+    assert.notStrictEqual(qa.stageId, qb.stageId, 'each Surprise quest keeps its own stage row');
+    const rows = out.stage.filter((st) => st.stageBinId === 741710);
+    assert.deepStrictEqual(rows.map((st) => st.submissionItemId), [[50, 50, 50], [52, 52, 52]], 'its own objective rewards');
+    assert.strictEqual(out.maps.filter((m) => m.key === 741710).length, 1, 'the map is listed once');
+    assert.strictEqual(entry(out, 'E-SC').quests[0].reason, 'mapKeyUsed', 'other drops: still a clash');
+    assert.strictEqual(entry(out, 'E-SD').quests[0].reason, 'mapKeyUsed', 'a record without shortWindow: still a clash');
+  },
+  // community-goal bonus (user 10-11-2026): the private data (community_bonus.json events) names the tier the original reached;
+  // the entry gets communityBonus {noticeId, count, stageIds (its counted served quests), rewards, ready}. questPrefix narrows
+  // the counted quests; no count: waiting (no rewards); a counted quest not served: not ready; perPlayer: the Jewels rounded up
+  community_bonus_attached() {
+    const gems = (n) => [{ type: 5, id: 48, num: n, name: 'Power Gem' }];
+    const tiers = [{ min: 5000, max: null, rewards: gems(30) }, { min: 1, max: 4999, rewards: gems(1) }];
+    const recs = [record('E-B1', [quest(702001, 1, [501], { name: 'Defeat X - 1/2' }), quest(702002, 1, [501], { name: 'Defeat X - 2/2' }), quest(702003, 1, [501], { name: 'Get a Part' })]),
+      record('E-B2', [quest(702010, 1, [501])], { start: '2019-05-01', end: '2019-05-07' }),
+      record('E-B3', [quest(702020, 1, [501]), quest(702021, 1, [999])], { start: '2019-06-01', end: '2019-06-07' }),
+      record('E-B4', [quest(702030, 1, [501])], { start: '2019-07-01', end: '2019-07-07' })];
+    const bonus = [{ censusId: 'E-B1', noticeId: 63815, count: 7237, tiers, questPrefix: 'Defeat X' },
+      { censusId: 'E-B2', noticeId: 62688, count: 732, perPlayer: { type: 2, id: 0, name: 'Jewels', roundUpTo: 10 }, result: [{ type: 2, id: 0, num: 740, name: 'Jewels' }] },
+      { censusId: 'E-B3', noticeId: 1, count: 100, tiers },
+      { censusId: 'E-B4', noticeId: 2, count: null, tiers }];
+    const out = me.buildEvents(recs, CONFIG, master(), undefined, {}, null, null, { bonus });
+    const b1 = entry(out, 'E-B1');
+    assert.deepStrictEqual(b1.communityBonus, { noticeId: 63815, count: 7237, stageIds: b1.quests.slice(0, 2).map((q) => q.stageId), rewards: gems(30), ready: true,
+      questPrefix: 'Defeat X' });
+    assert.ok(b1.labels.includes('communityBonus'), JSON.stringify(b1.labels));
+    assert.ok(out.index.reasons.communityBonus);
+    assert.deepStrictEqual(entry(out, 'E-B2').communityBonus.rewards, [{ type: 2, id: 0, num: 740, name: 'Jewels' }], 'Jewels rounded up to ten');
+    const b3 = entry(out, 'E-B3').communityBonus;
+    assert.strictEqual(b3.ready, false, 'a counted quest not served: not ready');
+    assert.deepStrictEqual(b3.rewards, gems(1));
+    assert.ok(!entry(out, 'E-B3').labels.includes('communityBonus'));
+    const b4 = entry(out, 'E-B4').communityBonus;
+    assert.deepStrictEqual([b4.waiting, b4.ready, b4.rewards], [true, false, []], 'no final count: waiting');
+    // without the data nothing is attached
+    assert.strictEqual(entry(build(recs), 'E-B1').communityBonus, undefined);
+    // a typo stops the run: an unknown census id, a count in no tier, a result that the rule does not give, no counted quest
+    const run = (b) => me.buildEvents(recs, CONFIG, master(), undefined, {}, null, null, { bonus: [b] });
+    assert.throws(() => run({ censusId: 'E-ZZ', noticeId: 1, count: 1, tiers }), /E-ZZ/);
+    assert.throws(() => run({ censusId: 'E-B2', noticeId: 1, count: 0, tiers }), /tier/);
+    assert.throws(() => run({ ...bonus[1], result: [{ type: 2, id: 0, num: 730, name: 'Jewels' }] }), /result/);
+    assert.throws(() => run({ ...bonus[0], questPrefix: 'Nothing' }), /quest/);
   },
   // fix round 1 (M3): a record's own boardSetKey that the board sets do not have stops the run (when board sets are given)
   record_set_key_known() {

@@ -212,6 +212,51 @@ const tests = {
     w2.ev.onStageClear(S3, [1]);
     assert.strictEqual(w2.player.pendingBoosters.length, 2, 'still two, once each');
   },
+  // community-goal bonus (user 10-11-2026): an entry with communityBonus {ready, stageIds, rewards} (make-events.js) pays its
+  // rewards once into the Presents (addPresent) when every objective (1..min(3, validSubmission)) of its stageIds is cleared;
+  // player.events.bonus {censusId: {paidAt}} keeps it once per event: a replay or a login check pays nothing more. Not ready:
+  // nothing. A past event (kept from the Event Catalog) pays as well. An old save already complete is paid by payBonuses (login).
+  community_bonus_once() {
+    const ix = INDEX();
+    const rewards = [{ type: 5, id: 48, num: 30, name: 'Power Gem' }, { type: 5, id: 49, num: 30, name: 'Speed Gem' }];
+    ix.entries[0].communityBonus = { noticeId: 63815, count: 7237, stageIds: [S1, S2], rewards, ready: true };
+    ix.entries[1].communityBonus = { noticeId: 1, count: 100, stageIds: [S3], rewards, ready: false };
+    ix.entries[2].communityBonus = { noticeId: 2, count: 9000, stageIds: [PAST], rewards, ready: true };
+    const presents = [];
+    const w = world({ index: ix });
+    w.ev = routesEvents({ ...w.opts, addPresent: (type, id, num, comment) => presents.push({ type, id, num, comment }) });
+    assert.strictEqual(w.ev.payBonuses(), 0, 'nothing cleared');
+    assert.strictEqual(w.player.events, undefined, 'a check that pays nothing does not write the save');
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.deepStrictEqual(presents, [], 'S2 not cleared yet');
+    w.ev.onStageClear(S2, [1, 2]);
+    assert.deepStrictEqual(presents, [], 'objective 3 of S2 missing');
+    w.ev.onStageClear(S2, [3]);
+    assert.deepStrictEqual(presents.map((p) => [p.type, p.id, p.num]), [[5, 48, 30], [5, 49, 30]]);
+    assert.ok(/Community goal/.test(presents[0].comment), presents[0].comment);
+    assert.deepStrictEqual(Object.keys(w.player.events.bonus), ['E-1']);
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    w.ev.onStageClear(S2, [1, 2, 3]);
+    assert.strictEqual(w.ev.payBonuses(), 0);
+    assert.strictEqual(presents.length, 2, 'once per event');
+    w.ev.onStageClear(S3, [1]);
+    assert.strictEqual(presents.length, 2, 'not ready: nothing');
+    w.ev.onStageClear(PAST, [1, 2, 3]);
+    assert.strictEqual(presents.length, 4, 'a past (kept) event pays too');
+    assert.deepStrictEqual(Object.keys(w.player.events.bonus).sort(), ['E-0', 'E-1']);
+    // an old save complete before the bonus existed: paid at login, once
+    const p2 = [];
+    const w2 = world({ index: ix, player: { name: 'Old', events: { kept: null, cleared: { [S1]: [1, 2, 3], [S2]: [1, 2, 3] } } } });
+    w2.ev = routesEvents({ ...w2.opts, addPresent: (type, id, num) => p2.push({ type, id, num }) });
+    assert.strictEqual(w2.ev.payBonuses(), 1);
+    assert.strictEqual(w2.ev.payBonuses(), 0);
+    assert.strictEqual(p2.length, 2);
+    // without addPresent (old wiring) nothing is paid nor recorded
+    const w3 = world({ index: ix });
+    w3.ev.onStageClear(S1, [1, 2, 3]);
+    w3.ev.onStageClear(S2, [1, 2, 3]);
+    assert.strictEqual((w3.player.events.bonus || {})['E-1'], undefined);
+  },
   // fix round 1 (I1): a reward the server cannot give now (a Spirit part with the pet off, canPay false) is not lost: it is kept in
   // player.pendingRewards once per stage / objective / position, and paid once by payPending when it can be given
   pending_reward_kept() {
@@ -263,7 +308,7 @@ function wiring() {
       questAp: [0, 5, 90], start: '2015-01-01', end: '2099-12-31' }], reasons: {} }));
   fs.writeFileSync(process.env.KHUX_RAID_MODELS, JSON.stringify({ '0007': { fight: true, start: true, escape: true, put_down: true } }));
   fs.writeFileSync(process.env.KHUX_EVENT_INDEX, JSON.stringify({ catalog: { evStageId: 20000, stageIds: [970000], useAp: [0] }, entries: [{ censusId: 'E-1', evStageId: 29901, start: '2015-01-01', end: '2099-12-31', stageIds: [S1], available: true,
-    quests: [quest(S1)] }], reasons: {} }));
+    quests: [quest(S1)], communityBonus: { noticeId: 63815, count: 7237, stageIds: [S1], rewards: [{ type: 5, id: 48, num: 30, name: 'Power Gem' }], ready: true } }], reasons: {} }));
   // the event quest's stage row, appended to the master stage table as read (the map key 1010: the Prologue's POI, for the drops)
   const readFile = fs.readFileSync;
   fs.readFileSync = (f, ...a) => {
@@ -297,9 +342,13 @@ function wiring() {
     assert.strictEqual(p.freeStone, stone + 10, 'objective 1 once');
     assert.strictEqual(p.money, money + 100, 'first clear once');
     assert.deepStrictEqual(p.events.cleared[S1], [1, 2, 3]);
+    // the community-goal bonus of the entry: in the Presents, once
+    const bonusOf = () => (p.presents || []).filter((x) => x.resourceType === 5 && x.resourceId === 48 && x.number === 30 && /Community goal/.test(x.comment));
+    assert.strictEqual(bonusOf().length, 1, 'community bonus in the Presents');
     call(t.respondStageStart, { stageId: S1, userKeybladeId: 0 });
     call(t.respondStageClear, { getEnemyDropItems: [], getMaterials: [], clearMissionIds: [1, 2, 3], getPoint: { lux: 0 } });
     assert.deepStrictEqual([p.freeStone, p.money, p.raidSpherePoint || 0], [stone + 10, money + 100, coins], 'objectives_once: second clear pays nothing');
+    assert.strictEqual(bonusOf().length, 1, 'community bonus once');
     assert.deepStrictEqual(call(t.respondStageEvent, { eventCategory: 2 }).events[3].stages[0].clearMissionIds, [1, 2, 3]);
     console.log('ok wiring_stage_clear');
   } finally {

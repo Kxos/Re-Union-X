@@ -180,12 +180,14 @@ const EVENT_SHORT = {
   noCoinSource: ['rewards', 'Event boards', 'Not handed out yet: no quest pays their Event Coins', 'later'],
   boosterLater: ['rewards', 'Boosters', 'A Booster reward comes with the Boosters (a later update); the other rewards are paid', 'later'],
   noBoardSet: ['rewards', 'Event Coins', 'No board set named for them: logged, not paid', 'removed'],
+  communityBonus: ['rewards', 'Community goal', 'Clear every objective: the bonus the original event reached, once, in your Presents', 'bonus'],
   quizBoard: ['values', 'Quiz board', 'Redrawn from the khuxwiki text of the question', 'replaced'],
   wholeDay: ['rules', 'Opening time', 'Its whole original day (was a short window)', 'bonus'],
   dramaOff: ['rules', 'Scenes', 'The original scenes are not shown yet', 'later'],
 };
 const EVENT_LABEL = { wikiAp: 'AP', donorKept: 'later game data', wikiLowConfidence: 'a wiki value', noWikiPage: 'no wiki page', mapIncomplete: 'map', eventCoins: 'Event Coins',
-  wholeDay: 'opening time', dramaOff: 'scenes', boardsLater: 'event boards', noCoinSource: 'event boards', boosterLater: 'Boosters', noBoardSet: 'Event Coins', quizBoard: 'quiz board' };
+  wholeDay: 'opening time', dramaOff: 'scenes', boardsLater: 'event boards', noCoinSource: 'event boards', boosterLater: 'Boosters', noBoardSet: 'Event Coins', quizBoard: 'quiz board',
+  communityBonus: 'community goal' };
 const EVENT_GROUPS = [['values', 'Quest data', 'tleg', ''], ['rewards', 'Rewards', 'camp', ' rw'], ['rules', 'Rules', 'weekday', ' ru'], ['other', 'Other', 'replaced', ' ot']];
 // every label in use: the event's and its quests' (served or not), in the order of EVENT_SHORT, unknown ones last
 const codesOf = (e) => {

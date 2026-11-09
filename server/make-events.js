@@ -23,8 +23,11 @@
 //   enemy lands. A record with no served quest has no evStage row (entry available false);
 // - a record whose quest is a raid or Special stage (our ranges 970000-989999, a stageKind 2 row of the master on the same map
 //   key, an Eggcognito target) is skipped with a reason: make-raid / make-special serve it;
-// - short windows (a donor evStage row under shortWindowHours, or every row of a record marked `shortWindow`: the Surprise events,
-//   whose donor row is the whole day) open for their whole original Pacific day: entry `days`, label wholeDay.
+// - short windows (a donor evStage row under shortWindowHours) open for their whole original Pacific day: entry `days`, label
+//   wholeDay (not original). Every row of a record marked `shortWindow` (the Surprise events: one donor row of the whole day, and
+//   every WW notice gave that whole Pacific day) is open on the day it starts: entry `days` and oneDay, original (no label);
+// - Surprise events share their map key (741710 / 743840) between `shortWindow` records, each with its own stage row; and the
+//   community-goal bonus of an event (private community_bonus.json, KHUX_EVENT_BONUS) goes into entry.communityBonus.
 // Ids come from server/event_ids.json (versioned, append-only, as raid_ids.json): rows {censusId: r}, entries
 // {"<censusId>/+<offset of its donor stage id from the record's anchor>": n}, checks {censusId: {keys, hash}}; evStage = evStageBase + r,
 // stage = stageBase + n. The anchor (a donor stage id per record, frozen at its first numbering) lives in the private sidecar
@@ -58,7 +61,7 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
+const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
   'quizBoardFootage', 'quizBoardScreenshot'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
@@ -96,9 +99,9 @@ function daysOf([from, to]) {
 }
 const isShort = ([from, to], hours) => utcMs(to) - utcMs(from) < hours * 3600000;
 // A donor row of a short-window event (Part 4 Task 7): a window under shortWindowHours, or any row of a record marked
-// `shortWindow` (the Surprise events: the original ran a few times a day for 15-60 minutes, the donor master keeps one row of
-// the whole day). Such a row is open on the Pacific days of its window; a long row of a shortWindow record on the day it starts
-// only (a 24 h row from 08:00 UTC starts at 01:00 Pacific in summer and would touch the next day).
+// `shortWindow` (the Surprise events: every WW notice gave one whole Pacific day, «12:00 a.m. to 11:59 p.m. (PT)», and the donor
+// master keeps that one row of the day). Such a row is open on the Pacific days of its window; a long row of a shortWindow record
+// on the day it starts only (a 24 h row from 08:00 UTC starts at 01:00 Pacific in summer and would touch the next day).
 const shortWindowRow = (rec, r, hours) => !!(r && r.startTime && r.endTime && (isShort([r.startTime, r.endTime], hours) || rec.shortWindow));
 const shortDaysOf = (r, hours) => (isShort([r.startTime, r.endTime], hours) ? daysOf([r.startTime, r.endTime]) : [ptDate(utcMs(r.startTime))]);
 
@@ -518,12 +521,20 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       continue;
     }
     const labels = new Set();
-    // short windows of the donor rows: open the whole Pacific day
+    // short windows of the donor rows: open the whole Pacific day (label wholeDay, not original). A `shortWindow` record whose rows
+    // are all whole days (the Surprise events) was open that whole Pacific day in the original too: oneDay, no label
     const shortDays = new Set();
+    let cutWindow = false;
     for (const r of rec.evStage || []) {
-      if (shortWindowRow(rec, r, config.shortWindowHours)) shortDaysOf(r, config.shortWindowHours).forEach((d) => shortDays.add(d));
+      if (!shortWindowRow(rec, r, config.shortWindowHours)) continue;
+      shortDaysOf(r, config.shortWindowHours).forEach((d) => shortDays.add(d));
+      if (isShort([r.startTime, r.endTime], config.shortWindowHours)) cutWindow = true;
     }
-    if (shortDays.size) { entry.days = [...shortDays].sort(); labels.add('wholeDay'); }
+    if (shortDays.size) {
+      entry.days = [...shortDays].sort();
+      if (rec.shortWindow && !cutWindow) entry.oneDay = true;
+      else labels.add('wholeDay');
+    }
 
     // a raid or Special quest: the whole record is left to make-raid / make-special
     const raidish = (rec.quests || []).map((q) => {
@@ -619,13 +630,17 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // quiz answer maps (Part 4 Task 6, coordinator ruling): every original quiz run sent its stages to the same answer maps
       // (720510 / 720520 / 720530, 740260-740262), so a quiz stage of another quiz record shares the map key when the drops are equal
       const quizShare = !!(prior && quiz && prior.quiz && prior.dropsKey === dropsKey);
-      if (prior && prior.censusId !== rec.censusId && !quizShare) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
+      // Surprise event maps (user 10-11-2026): every Surprise run used the same map (741710; 743840 for the Holiday Draw Tickets),
+      // so a quest of another `shortWindow` record shares the map key whatever its objective rewards (each keeps its own stage row);
+      // the drops are in the shared map file, so they must still be equal (the check below)
+      const surpriseShare = !!(prior && rec.shortWindow && prior.shortWindow);
+      if (prior && prior.censusId !== rec.censusId && !quizShare && !surpriseShare) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
       if (prior && prior.dropsKey !== dropsKey) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
         drops: q.drops || null, served: false };
-      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz }); put(out.maps, mapItem); }
+      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz, shortWindow: !!rec.shortWindow }); put(out.maps, mapItem); }
       const newRewards = [];
       if (maps) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
@@ -783,6 +798,36 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       used.add(l);
     }
   }
+  // community-goal bonus (user rule 10-11-2026): some 2020 events paid every player who cleared ALL their objectives a bonus sized
+  // by how many players did it worldwide. opts.bonus (private community_bonus.json events: censusId, noticeId, count, tiers
+  // [{min, max, rewards}] or perPlayer {type, id, name, roundUpTo}, result?, questPrefix?) -> entry.communityBonus {noticeId, count,
+  // stageIds (the counted served quests), rewards (the tier the original reached), ready}: routes-events.js pays it once into the
+  // Presents when every objective of those quests is cleared. No count: waiting (no rewards); a counted quest not served: not ready.
+  // Label communityBonus (declared: the original count was of all players) on a ready entry. A typo in the data stops the run.
+  for (const b of opts.bonus || []) {
+    const e = out.index.entries.find((x) => x.censusId === b.censusId);
+    if (!e) throw new Error(`events: community bonus ${b.censusId} is not a record`);
+    const counted = (e.quests || []).filter((q) => !b.questPrefix || String(q.name || '').startsWith(b.questPrefix));
+    if (!counted.length) throw new Error(`events: community bonus ${b.censusId}: no quest${b.questPrefix ? ` named «${b.questPrefix}...»` : ''}`);
+    let rewards = [];
+    if (b.count !== null && b.count !== undefined) {
+      if (b.perPlayer) {
+        const p = b.perPlayer;
+        rewards = [{ type: p.type, id: p.id, num: Math.ceil(b.count / p.roundUpTo) * p.roundUpTo, name: p.name }];
+      } else {
+        const t = (b.tiers || []).find((x) => b.count >= x.min && (x.max === null || x.max === undefined || b.count <= x.max));
+        if (!t) throw new Error(`events: community bonus ${b.censusId}: count ${b.count} is in no tier`);
+        rewards = t.rewards.map((r) => ({ ...r }));
+      }
+      if (b.result && JSON.stringify(b.result) !== JSON.stringify(rewards)) {
+        throw new Error(`events: community bonus ${b.censusId}: the result of the notice ${JSON.stringify(b.result)} is not what its rule gives ${JSON.stringify(rewards)}`);
+      }
+    }
+    const waiting = !rewards.length, ready = !waiting && counted.every((q) => q.served);
+    e.communityBonus = { ...(b.name ? { name: b.name } : {}), noticeId: b.noticeId, count: waiting ? null : b.count, stageIds: [...new Set(counted.filter((q) => q.served).map((q) => q.stageId))], rewards, ready,
+      ...(b.questPrefix ? { questPrefix: b.questPrefix } : {}), ...(waiting ? { waiting: true } : {}) };
+    if (ready) { e.labels.push('communityBonus'); e.label = 'reconstructed'; used.add('communityBonus'); }
+  }
   // shared notices: the stage rows of the row they share (built once), no evStage row of their own
   for (const e of out.index.entries) {
     if (!e.sharedWith) continue;
@@ -896,7 +941,16 @@ function patch(masterDir, opts = {}) {
   // the drama ids available in our resources (quiz boards, quizDramas): opts.dramas, else the list file KHUX_EVENT_DRAMAS, else
   // config.availableDramas; none: a quizDramas entry stops the run
   const dramas = opts.dramas || (process.env.KHUX_EVENT_DRAMAS ? readJson(process.env.KHUX_EVENT_DRAMAS) : config.availableDramas) || null;
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas });
+  // the community-goal bonus data (private): opts.bonus, else KHUX_EVENT_BONUS, else community_bonus.json in the folder above the
+  // records folder (tmp/events/community_bonus.json next to tmp/events/records); none: no bonus
+  let bonus = opts.bonus;
+  if (bonus === undefined && !opts.records) {
+    const file = process.env.KHUX_EVENT_BONUS || path.join(path.dirname(anchorsPathOf(process.env.KHUX_EVENT_SRC)), '..', 'community_bonus.json');
+    const data = readJson(file, null);
+    if (!data) console.warn(`events: no community bonus data (${file}): no community-goal bonus`);
+    bonus = data ? data.events || [] : [];
+  }
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas, bonus });
   const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward,
     sphere: out.sphere, sphereArray: out.sphereArray, sphereMasu: out.sphereMasu };
   const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));

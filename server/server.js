@@ -396,6 +396,8 @@ function respondLogin(res) {
   startSession(); // revisione del master fissa fino al prossimo login
   // event quest rewards kept because they could not be given (a Spirit part with the pet off, routes-events.js): paid once now if possible
   try { if (player.created && eventRoutes().payPending()) console.log('[event] kept rewards paid at login'); } catch (e) { console.log(`[event] payPending: ${e.message}`); }
+  // community-goal bonuses due on a save complete before they existed (routes-events.js payBonuses): once per event
+  try { if (player.created && eventRoutes().payBonuses()) console.log('[event] community goal bonus paid at login'); } catch (e) { console.log(`[event] payBonuses: ${e.message}`); }
   if (player.created) savePlayer();
   const body = {
     ret: ret(),
@@ -4583,6 +4585,8 @@ function eventRoutes() {
     addEventCoins: (setKey, n) => eventBoards().addCoins(setKey, n), // Event Coins (type 15) into the entry's board set
     // a Spirit part (33) with the pet off is kept in player.pendingRewards, paid at a later login with the pet on (payPending)
     canPay: (type) => type !== 33 || PET_ENABLED,
+    // the community-goal bonus of an event (routes-events.js, user rule 10-11-2026): into the Presents, once per event
+    addPresent: (type, id, num, comment) => addPresent(type, id, num, comment),
   });
 }
 // Event Coins and Event Boards (type 4, routes-event-boards.js): the sets of events.json boardSets, available while a feeder

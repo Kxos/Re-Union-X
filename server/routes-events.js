@@ -1,7 +1,7 @@
 // Event quest routes (Events Part 1, plan docs/superpowers/plans/2026-11-06-events-part1-framework.md Task 4): the event cards
 // of the Events tab (/stage/event category 2, after the raids: server.js lists [...raid().events(), ...events, ...]) and the
 // rewards of an event quest clear. The factory takes everything from server.js; state lives in player.events only:
-//   player.events = {kept: censusId | null, cleared: {stageId: [missionIds]}}
+//   player.events = {kept: censusId | null, cleared: {stageId: [missionIds]}, bonus?: {censusId: {paidAt, noticeId}}}
 // Absent in older saves: the tab lists the served events with nothing cleared, and listing never writes the save.
 // Rewards (spec, «Rewards»): the objective rewards and the first-clear items of the stage row (submission*, validClearGetItem,
 // make-events.js) once per quest, paid here (server.js skips its own payment for event stages); drops on every clear by the
@@ -15,8 +15,12 @@
 // Rewards the server cannot give now (fix round 1, I1: canPay(type, id) false, e.g. a Spirit part, type 33, with the pet off) are
 // not lost: kept once per stage / objective (0: first clear) / position in player.pendingRewards [{stageId, objective, slot, type,
 // id, num}], and paid once by payPending() when they can be given (server.js: at login).
+// Community-goal bonus (user rule 10-11-2026): an entry with communityBonus {ready, stageIds, rewards} (make-events.js, from the
+// official result notice) pays its rewards once into the Presents (addPresent) when every objective 1..min(3, validSubmission) of
+// its stageIds is cleared, whether the event is in the Story week or kept from the Event Catalog; player.events.bonus
+// {censusId: {paidAt, noticeId}} keeps it once per event. payBonuses() (server.js: at login) pays an old save already complete.
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
-//   pruneKept (Event Catalog, Task 5).
+//   pruneKept (Event Catalog, Task 5), payBonuses.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -32,7 +36,7 @@ const EVENT_TYPE = CONFIG.eventType; // eventType of an index entry without one 
 const STAGE_FIRST = CONFIG.stageBase, STAGE_LAST = CONFIG.stageMax; // stage ids of the event quests
 const COIN_TYPE = 15; // Event Coins: into the entry's board set (addEventCoins)
 
-function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, canPay = null, webBase, log = console.log }) {
+function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, canPay = null, addPresent = null, webBase, log = console.log }) {
   // read-only view of player.events (an older save has none: nothing kept, nothing cleared); state() creates it to write
   const view = () => player.events || { kept: null, cleared: {} };
   const state = () => {
@@ -81,6 +85,26 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     return ready.length;
   }
 
+  // the community-goal bonus of an entry (communityBonus ready): paid once into the Presents when every objective of its counted
+  // quests is cleared; -> true when paid now. Without addPresent (an older wiring) nothing is paid nor recorded.
+  const bonusDone = (cb) => {
+    const cleared = view().cleared || {};
+    return (cb.stageIds || []).length > 0 && cb.stageIds.every((id) => special.stageDone({ clearMissionIds: cleared[id] || [] }, (stageRow(id) || {}).validSubmission || 0));
+  };
+  function payBonus(e) {
+    const cb = e && e.communityBonus;
+    if (!addPresent || !cb || !cb.ready || !(cb.rewards || []).length) return false;
+    if (((player.events || {}).bonus || {})[e.censusId] || !bonusDone(cb)) return false;
+    const ev = state();
+    ev.bonus ||= {};
+    ev.bonus[e.censusId] = { paidAt: realNow(), noticeId: cb.noticeId || null };
+    for (const r of cb.rewards) addPresent(r.type, r.id, r.num, `Community goal bonus: ${cb.name || e.name || e.censusId}`);
+    log(`[event] ${e.censusId}: community goal bonus paid (${cb.rewards.map((r) => `${r.name || `type ${r.type} id ${r.id}`} x${r.num}`).join(', ')})`);
+    return true;
+  }
+  // every entry whose bonus is due (an old save complete before the bonus existed); -> how many paid (the caller saves when > 0)
+  const payBonuses = () => entries().filter((e) => payBonus(e)).length;
+
   // From respondStageClear, after its objective rules (Lux objectives, all-together flag): cleared = the objective ids of this
   // clear. Pays the first-clear items (first clear of this quest) and the objectives never paid before; the caller saves.
   // false for any other stage.
@@ -119,6 +143,8 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
     }
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
+    // the community-goal bonus of every entry that counts this quest
+    for (const e of entries()) if (((e.communityBonus || {}).stageIds || []).includes(id)) payBonus(e);
     return true;
   }
 
@@ -219,7 +245,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       endTime: serverTimeAt(clock.weekEnd(realNow())), newStageId: 0, isLock: 0, complete: 0 }];
   }
 
-  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries, pendingBoosters, payPending };
+  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries, pendingBoosters, payPending, payBonuses };
 }
 
 module.exports = routesEvents;
