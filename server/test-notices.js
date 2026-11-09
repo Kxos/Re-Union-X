@@ -236,6 +236,36 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
   const fake = n.eventNoticeFacts('nope.json');
   check(fake === null, 'Events: senza events.json niente conteggi');
 }
+{
+  // Events Part 4 Task 6: challenge events (census EQ, KEY, QUIZ), quiz boards, Boosters later, Spirit parts kept, Demon Tide frame;
+  // counts from events.json (fixture) and the quiz board plan (recon/tools/quiz_dramas.json)
+  const fs = require('fs'), os = require('os'), path = require('path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-evn-'));
+  const q = (served, labels = []) => ({ served, labels });
+  const fx = { entries: [
+    { censusId: 'A', type: 'EQ', start: '2018-05-01', available: true, labels: [], quests: [q(true), q(true, ['boosterLater']), q(false)] },
+    { censusId: 'B', type: 'KEY', start: '2019-07-01', available: true, labels: [], quests: [q(true)] },
+    { censusId: 'C', type: 'QUIZ', start: '2018-08-15', available: true, labels: [], quests: [q(true, ['quizBoard']), q(true, ['quizBoardFootage']), q(false)] },
+    { censusId: 'D', type: 'EQ', start: '2020-01-01', available: false, labels: [], quests: [q(false)] },
+    { censusId: 'G', type: 'GEM', start: '2017-01-01', available: true, labels: [], quests: [q(true, ['boosterLater'])] }], boardSets: {} };
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  const f = n.eventNoticeFacts(path.join(dir, 'events.json'));
+  check(f && f.challenge && f.challenge.events === 3 && f.challenge.served === 5 && f.challenge.quests === 8 && f.challenge.quiz === 2
+    && f.challenge.boosters === 2 && f.challenge.from === '2018' && f.challenge.to === '2019', `Events: fatti delle sfide ${JSON.stringify(f && f.challenge)}`);
+  const lines = n.eventChallengeLines(f).join(' ');
+  check(/## Challenge events/.test(lines) && lines.includes('**3 events**') && lines.includes('**5 of their 8 quests**')
+    && lines.includes('**2 quiz quests**') && /\*\*2\*\* served quests/.test(lines), `Events: righe delle sfide ${lines.slice(0, 300)}`);
+  const plan = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'recon', 'tools', 'quiz_dramas.json'), 'utf8')).stages;
+  const bySrc = (src) => Object.values(plan).filter((x) => x.source === src).length;
+  check(lines.includes(`${bySrc('reconstructed')} are redrawn`) && lines.includes(`${bySrc('original_screenshot')} come from screenshots`)
+    && lines.includes(`${bySrc('footage_redraw')} are redrawn from videos`) && /typing errors/.test(lines), 'Events: fonti delle tavole dei quiz dal piano');
+  check(/Booster/.test(lines) && /Spirit part/.test(lines) && /later login/.test(lines), 'Events: Booster e parti dello Spirit');
+  const ev = n.NOTICES.find((x) => x.title === 'Events');
+  const t = ev ? ev.body.join(' ') : '';
+  check(t.includes("Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.")
+    && /Ifrit/.test(t) && /Jack in the Box/.test(t) && /## Challenge events/.test(t), 'Events: nemici della parte 4 e riquadro dei tentacoli');
+  fs.rmSync(dir, { recursive: true, force: true });
+}
 // every inline script of the Notices page must compile, in-game popup and site copy alike (06-11: a missing «;» after the
 // #slug opener broke the whole popup: no notice could be opened)
 for (const web of [false, true]) {

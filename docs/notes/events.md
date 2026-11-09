@@ -575,3 +575,44 @@ Final state (rev 288, resources 108; plan `docs/superpowers/plans/2026-11-08-eve
 
 - **Booster only.** A quest is held as `boosterOnly` when all its objective and first-clear rewards are Boosters. Drops are not
   counted: a quest with drops and only a Booster objective is held too (review ruling, behaviour kept).
+
+## Challenge events (Part 4, Task 6 preparation, 10 November 2026)
+
+Everything up to the live master regen; the regen, resources 109 and the bench follow.
+- **Record corrections** (private, from the card verification `tmp\events\t5p4\verify_nobanner.json`). The records are rebuilt
+  with `build_challenge.py` (same builder, inputs of today), so only labels and `eventEnemyRows` follow the Task 3 enemy rows.
+  - EV-0990 is the WW «Daily Gem Event! (12/23)»: census.py `NOTICE_FIX` gives notice 60751, so it gets its donor rows
+    200852..200860, 27 donor quests and 9 cards from banner 98XLNkmVW. Its raid row 10263 goes to the raids (rowsMoved RAID).
+  - EV-1163: the census khuxwiki match «High Score Challenge #61» (HSC, Part 8) is dropped (`wikiMatchDropped`).
+  - The six «Chasm of Challenges: new quest» lines carry `scheduleLineOf` (the EV-1300 row they announce), so they are never
+    built twice.
+  - `short_2020.json` (Surprise events, Time Missions) is written into the sibling folder `tmp\events\records_later` until
+    Task 7: `KHUX_EVENT_SRC` reads every `*.json` of the records folder, so a config exclusion was not needed.
+- **Enemies.** The 15 approved challenge models are `approved: true` in `event_enemy_families.json`. 25, 135, 156 and 157 are
+  complete with the generator's standard rules (`events2_export.py` SKIP, like 65). `extra_donors_events2.tsv` has 48 families.
+  `make_jp_enemies.py` reports 314 complete, 0 incomplete. `build_event_enemies.py` adds 105 rows that waited for these models.
+  The 12 models still missing stay held.
+- **Maps and rooms.** The dry regen lists 1,467 candidate maps. The import (against the dry master, which has the new enemy rows)
+  takes 1,449. 15 are left out for DB_0000_01_00 and 3 for STG absent. The rooms list grows from 162 to 208.
+  rooms_gen has 272 complete rooms, 5 more: AG_0003_12_00, BC_0007_00_00, DB_0029_01_00, DB_0030_00_00 and DB_0030_02_00
+  (543 files). `stage_gen\files\stage` holds the imported maps.
+- **Quiz boards.** `recon/tools/make_quiz_dramas.py` gives each quiz stage its own drama and board ids. The plan
+  `recon/tools/quiz_dramas.json` has 75 stages and 78 boards: dramas 1906101..1906178, pictures 39401..39478.
+  - It writes `img/light/SEQ/<drama>.l`: the JP quiz script with the picture id (int 13) changed.
+  - It writes the boards `img/light/NPC/<picture>.png` (private) and a generated transparent `30300.png`.
+  - It writes `stage_gen\event_dramas.json` for `KHUX_EVENT_DRAMAS`. build-resources.ps1 runs it before btf_fix.
+  - `event_config.json` quizDramas has 85 quest keys (EV-0763 included). Labels: quizBoard (khuxwiki text), quizBoardFootage,
+    quizBoardScreenshot.
+- **Cards.** `make_event_banners.py --all-rows --extra extra_part4_staging.json` on the dry index wrote 479 cards; the 138 old
+  ones are byte-identical. make_special_banners `--section event` wrote 439 kept copies. imgVersion is 7.
+- **Event Catalog.** Game-year tabs like the Raid Catalog's. The Story week's year opens first, and only its cards load.
+  Real index: 324 events, 57.5 KB.
+- **Dry regen** (copy of server/ at the repository's depth `tmp\t6r`, records copied; nothing live written):
+  - 1,982 of 2,896 event quests served (634 of 798 before); 244 events with a served quest.
+  - Challenge records: 2018 423 served, 2019 295, 2020 532, 2021 56 (1,306 of 2,272 quests).
+  - Not served: mapUnusable 597, enemyMissing 167, mapKeyUsed 88, wikiEmpty 38, objectiveMismatch 18, boosterOnly 5,
+    rewardTypeUnknown 1.
+  - Quizzes: 23 served (EV-0538 14, EV-0910 7, EV-0763 2). EV-0624 has 9 quests held as mapKeyUsed: EV-0538 builds the
+    shared quiz maps 720510/720530 first. EV-0484 and EV-0500 are enemyMissing (WW check: no khuxwiki page of the run).
+  - 106 of 106 tables valid. Changed tables: stage, evStage, reward, enemy, enemyAttack.
+  - Every stage and evStage id served before is unchanged. Only 4000021 and 4000027 change (their board drama).

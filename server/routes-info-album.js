@@ -76,9 +76,37 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
   const coins = { sets: Object.keys(sets).length, boards: Object.values(sets).reduce((n, s) => n + (s.boardIds || []).length, 0),
     withBoards: on.filter((e) => e.boardSet && sets[e.boardSet]).length, heldEvents: held.length,
     heldMonths: [...new Set(held.map((e) => e.boardSetKey.slice(0, 7)))].sort().map((k) => usMonth(k)) };
+  // Events Part 4 Task 6: the challenge, keyblade and quiz events (census EQ, KEY, QUIZ): served events and quests, quiz quests
+  // served with their board, served quests with a Booster reward recorded for later (any event type)
+  const chAll = all.filter((e) => CHALLENGE_TYPES.includes(e.type)), chOn = chAll.filter((e) => e.available);
+  const chQuests = chAll.flatMap((e) => e.quests || []), servedQ = quests.filter((q) => q.served);
+  const chYears = chOn.map((e) => String(e.start || '').slice(0, 4)).filter(Boolean).sort();
+  const challenge = { events: chOn.length, served: chQuests.filter((q) => q.served).length, quests: chQuests.length,
+    from: chYears[0] || null, to: chYears[chYears.length - 1] || null,
+    quiz: servedQ.filter((q) => (q.labels || []).some((l) => /^quizBoard/.test(l))).length,
+    boosters: servedQ.filter((q) => (q.labels || []).includes('boosterLater')).length };
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
-    first: starts[0] || null, last: starts[starts.length - 1] || null, coins,
+    first: starts[0] || null, last: starts[starts.length - 1] || null, coins, challenge,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
+}
+// Events Part 4 Task 6: the census types of the challenge events, and the quiz board plan (sources of the boards)
+const CHALLENGE_TYPES = ['EQ', 'KEY', 'QUIZ'];
+function quizBoardSources(file = path.join(__dirname, '..', 'recon', 'tools', 'quiz_dramas.json')) {
+  const out = { reconstructed: 0, original_screenshot: 0, footage_redraw: 0 };
+  try { for (const x of Object.values(JSON.parse(fs.readFileSync(file, 'utf8')).stages || {})) out[x.source] = (out[x.source] || 0) + 1; } catch { /* no plan */ }
+  return out;
+}
+function eventChallengeLines(f) {
+  const c = f && f.challenge, b = quizBoardSources();
+  const span = c && c.from ? (c.from === c.to ? ` of ${c.from}` : ` of ${c.from} to ${c.to}`) : '';
+  return ['## Challenge events',
+    c && c.events
+      ? `The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **${c.events} events**${span} are served, with **${c.served} of their ${c.quests} quests**. The Event Catalog lists the others with the reason they are not here yet.`
+      : 'The **challenge and battle events** (Keyblade Challenges and quizzes included) are listed in the Event Catalog; none of their quests is served yet.',
+    `The **quiz** events asked their question on a picture board before the quest, and no original board survives in the game files, so every board is **reconstructed**: ${b.reconstructed} are redrawn in the original style from the question text recorded on the community wiki (obvious typing errors of the wiki corrected), ${b.original_screenshot} come from screenshots of the original boards and ${b.footage_redraw} are redrawn from videos of the original game.`
+      + (c && c.quiz ? ` Today **${c.quiz} quiz quests** are served with their board; the others wait, mostly for a map file that is incomplete.` : ''),
+    `${c && c.boosters ? `**${c.boosters}** served quest${c.boosters === 1 ? '' : 's'} paid a **Booster** among ${c.boosters === 1 ? 'its' : 'their'} rewards. ` : 'Some quests paid a **Booster** among their rewards. '}The Boosters do not exist on this server yet: a Booster reward is **recorded** when you complete its objective and given when the Boosters come in a later update; the other rewards are paid as usual. A quest whose only reward was a Booster waits for them.`,
+    'A **Spirit part** reward earned while your Spirit cannot receive it is **kept**, once, and given at a later login.'];
 }
 function eventCoinLines(f) {
   const c = f && f.coins;
@@ -349,6 +377,7 @@ const NOTICES = [
     body: ['The **Event Quests** are back: the limited-time events of the original game, with their original maps, enemies, objectives and rewards wherever their files survive. They are in **Quests > Events**, after the raids.',
       'Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.',
       ...eventNoticeLines(eventNoticeFacts()),
+      ...eventChallengeLines(eventNoticeFacts()),
       '## Gem quests',
       'The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **Monthly Gem Quests**, the **Gem Drop** and **Daily Gem** events, each one with its own card and dates. Where an original quest record did not survive, the quest is rebuilt from the community wiki and from the same quest of a later run (marked in the Event Catalog). The **Gem Boards** were played on the Avatar Boards and come with the Event Boards in a later update; their notices had no banner, so the Event Catalog shows **No card in the original** for them.',
       'Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.',
@@ -369,6 +398,10 @@ const NOTICES = [
       'The flames of **Lexaeus**\' special attack are **recoloured orange** (**not original**): the original orange flames were lost, so the surviving green ones are tinted to match videos of the original game. The spores of **Ribbitoad**\'s special attack are a pink dot from another original effect (**reconstructed**). One thin web thread of **Wicked Spider**\'s attack is still missing and is left out (**not original**).',
       '**Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).',
       'The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is rebuilt in the same way from the game\'s own files, special attack included. Two parts are **reconstructed**: it vanishes in the **Shadow\'s smoke cloud** (its own defeat animation did not survive), and its ground shadow is the **standard one** (its own file is an empty stub).',
+      // Events Part 4 Task 3 / 6 (user approvals 10-11, review rounds 1-2)
+      'The challenge events bring **15 more** enemies rebuilt in the same way and checked on their animations: **Ifrit, Leviathan, Demon Tide, Savage Vanguard, Savage Vanguard Ω, Hocus Pocus, Brilliant Opera, Sorcerous Reaper, Submarine Carp, Metal Giant, Festive Fireworks, Living Bone, Raging Reindeer, Bag O\' Gifts** and **Jack in the Box**. A few pieces of Ifrit\'s attacks come from the **Ifrit of Dark Road**, the same creature (**reconstructed**).',
+      "Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.",
+      'Some pictures of the special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are lost: during their special attack they keep their standing pose (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.',
       ...eventCoinLines(eventNoticeFacts()),
       '## SP Chip & Dale',
       'The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), a reward of some event quests, is back. Its data comes from the community wiki; its picture is the community render of the original Medal (**reconstructed**: the original file was not found).',
@@ -717,4 +750,4 @@ function albumData(owned, medalRows, maxGuilt) {
   };
 }
 
-module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines, eventNoticeFacts };
+module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines, eventNoticeFacts, eventChallengeLines };

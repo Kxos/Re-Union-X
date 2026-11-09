@@ -48,7 +48,17 @@ The **Event Quests** are back: the limited-time events of the original game, wit
 
 Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.
 
-Today **95 events** are served, with **634 of their 798 quests** (116 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+Today **244 events** are served, with **1982 of their 2896 quests** (346 events are in the data so far, from September 2017 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+
+### Challenge events
+
+The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **152 events** of 2018 to 2021 are served, with **1365 of their 2165 quests**. The Event Catalog lists the others with the reason they are not here yet.
+
+The **quiz** events asked their question on a picture board before the quest, and no original board survives in the game files, so every board is **reconstructed**: 65 are redrawn in the original style from the question text recorded on the community wiki (obvious typing errors of the wiki corrected), 5 come from screenshots of the original boards and 5 are redrawn from videos of the original game. Today **23 quiz quests** are served with their board; the others wait, mostly for a map file that is incomplete.
+
+**1** served quest paid a **Booster** among its rewards. The Boosters do not exist on this server yet: a Booster reward is **recorded** when you complete its objective and given when the Boosters come in a later update; the other rewards are paid as usual. A quest whose only reward was a Booster waits for them.
+
+A **Spirit part** reward earned while your Spirit cannot receive it is **kept**, once, and given at a later login.
 
 ### Gem quests
 
@@ -90,15 +100,21 @@ The flames of **Lexaeus**' special attack are **recoloured orange** (**not origi
 
 The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is rebuilt in the same way from the game's own files, special attack included. Two parts are **reconstructed**: it vanishes in the **Shadow's smoke cloud** (its own defeat animation did not survive), and its ground shadow is the **standard one** (its own file is an empty stub).
 
+The challenge events bring **15 more** enemies rebuilt in the same way and checked on their animations: **Ifrit, Leviathan, Demon Tide, Savage Vanguard, Savage Vanguard Ω, Hocus Pocus, Brilliant Opera, Sorcerous Reaper, Submarine Carp, Metal Giant, Festive Fireworks, Living Bone, Raging Reindeer, Bag O' Gifts** and **Jack in the Box**. A few pieces of Ifrit's attacks come from the **Ifrit of Dark Road**, the same creature (**reconstructed**).
+
+Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.
+
+Some pictures of the special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are lost: during their special attack they keep their standing pose (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.
+
 ### Event coins and boards
 
-**Event Coins** are back, with the **Event Boards**: today **41 Event Boards** in **7 board sets**, for 10 events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).
+**Event Coins** are back, with the **Event Boards**: today **41 Event Boards** in **7 board sets**, for 11 events. The quest list of these events has the **Event Boards** button. Event Coins come from objectives (**once**) and from enemy drops (at every clear, also for a kept event).
 
 Each **board set** (the boards of a month, shared by its events) has **one balance**, and Event Coins **never expire** (**not original**: the original game lost them when the event ended, as the board screen still says). Each cell and each finished board gives its reward **once**.
 
 One board set is listed at a time: the set of the **last event quest you started** (only a quest of an event whose Event Boards are available counts), otherwise the newest set of your Story week, otherwise the set of your **kept event**. The Event Coins shown on the boards are that set's balance; the other sets keep theirs.
 
-In the original game every cell of an Event Board paid a reward. A board with a cell that cannot be paid here yet (mostly a **Booster**) is **not served**, nor is a board that opens after it: it comes back whole with the Boosters in a later update. The sets of **February 2019, April 2019, June 2019, October 2019 and December 2019** have no board left (14 events): those events are served **without Event Boards**, and the Event Coins they pay are **kept** in the balance of their set, which is not shown until its boards arrive.
+In the original game every cell of an Event Board paid a reward. A board with a cell that cannot be paid here yet (mostly a **Booster**) is **not served**, nor is a board that opens after it: it comes back whole with the Boosters in a later update. The sets of **February 2019, April 2019, June 2019, October 2019 and December 2019** have no board left (24 events): those events are served **without Event Boards**, and the Event Coins they pay are **kept** in the balance of their set, which is not shown until its boards arrive.
 
 **Raid Coins** are unchanged: raids pay and spend them as before.
 
@@ -112,11 +128,21 @@ The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), 
 
 Where a quest or event is not exactly as in the original game, the Event Catalog marks it with one of these notes:
 
+- AP from the khuxwiki page of this run: the surviving game data (a later snapshot) gives another AP.
+
+- The original scenes before or after this quest are not shown yet.
+
+- The original question board of this quiz is not in the surviving game files: it was redrawn in the original style from the question text recorded on khuxwiki.
+
+- A reward of this quest was a Booster, which does not exist on this server yet: it is recorded for you when you complete its objective, and given when the Boosters come (a later update). The other rewards are paid as usual.
+
 - The Event Coin rewards of this event are paid into the balance of its event boards: one balance per board set, shared by the events of the set, and the coins never expire.
 
 - The event boards of this event are not served yet: in the original every cell of a board paid a reward for its Event Coins, and every board of this set has a cell (or a board reward) that does not exist here yet, mostly a Booster. The boards come back whole in a later update, with the Boosters; until then its quests are served as a plain list, and the Event Coins they pay are kept in the balance of the set (they never expire) for when its boards are served.
 
-- AP from the khuxwiki page of this run: the surviving game data (a later snapshot) gives another AP.
+- The original question board of this quiz is not in the surviving game files: it comes from a screenshot of the original game (khuxwiki), scaled to the game screen, with the SKIP button of the screenshot removed.
+
+- The original question board of this quiz is not in the surviving game files: it was redrawn from footage of the original game, with the same text and layout.
 
 - The event boards of this event are not handed out yet: none of the quests that paid their Event Coins can be served yet, so the boards could not be filled.
 
@@ -126,15 +152,13 @@ Where a quest or event is not exactly as in the original game, the Event Catalog
 
 - No khuxwiki page exists for this quest: its values come from the later game data only, without a second source.
 
-- The original scenes before or after this quest are not shown yet.
-
 - Map enemy changed to the WW enemy (khuxwiki): the Japanese map file of this quest places a different enemy than the worldwide quest had, so that one enemy was replaced by the worldwide one (same place, count, level and drops).
 
 - One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.
 
-- The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.
-
 - Quest rebuilt from the khuxwiki page: no master row of the original is known
+
+- The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.
 
 ## Raid Bosses
 
