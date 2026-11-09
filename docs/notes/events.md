@@ -839,3 +839,26 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   the line's date; the others get `openFrom` (their own donor row's Pacific day, EV-0929 740905 / 740910 on 2019-09-20), read by
   event-calendar.js. The bonus check counts the stage being cleared (server.js writes its playStatus after `onStageClear`). JP-twin
   map sharing is limited to `dataHole` records, as `binShare`.
+
+## Maps and rooms for the Org XIII events and The Keyblade War (Events Part 5, Task 4, 10 November 2026)
+
+- **Level-shifted twins.** `import_event_stages.py` reads an `event_maps.json` item with `fromKey` from the files of that JP map
+  (any copy, enemy swaps keyed by `fromKey`) and writes them under the item's own key (its stage id): every enemy record level and
+  STG [11] + `levelShift.delta` (at least 1); ids, positions, drops and uids stay; the JP folder never changes. The report entry
+  carries `fromKey`, `levelShift`, `levelShifted: true`; a JP map whose levels are not all `from` is left out (cause `level shift`).
+  Test: `test_import_event_stages.py` (Marluxia I, JP 68710 Lv 25 -> 4003322 Lv 20).
+- **Generated maps in the build.** `build-resources.ps1` runs `gen_story_maps.py` with the `events` key on
+  `server\game_data\event_gen_maps.json` after `make_quiz_dramas.py`: maps into `$sg\files\stage` (beside the Special maps; stage
+  ids 4000000+ never touch an old key), report `<KHUX_EVENT_MAPS>\gen_report.json` (default `stage_gen\event_stages`), POI merged
+  into `server\game_data\stage_poi.json` as the Special maps; `-DryRun` keeps report and POI inside the dry copy. Order for a live
+  run: master regen (writes the list) -> resources build (maps + report) -> master regen again (serves them).
+- **Explicit enemy ids.** The private builder pins `wikiEnemyIds` / `targets[0].id` only from evidence (CROSSCHECK.md «Explicit
+  enemy ids»): the EV-0333 Daily XIII replay of the same member and level whose JP map holds the same names, counts and target
+  (Larxene V / XII on 69650 / 69720, Xemnas III, VI, X, XII, XIII), and the Task 2 row 1701242 (Xemnas XI). 55 generated-map
+  quests have no evidence; 40 of them stay `enemyAmbiguous`.
+- **Rooms.** The event rooms list grows 208 -> 213; `make_jp_rooms.py --story-only` builds 4 new rooms (CD_0001_00_00,
+  DB_0017_01_00, DB_0023_01_01, KG_0000_01_00; 575 files in the static `rooms_gen` pack, so a full resource version is needed).
+- **Dry result** (`tmp\t5r`): import 1,726 of 1,812 maps (17 rooms not served, 3 STG absent, 66 part 0 absent); 17 generated maps
+  (validate_maps 0 errors); 2,498 of 3,570 quests served (2,210 before, none lost). Org XIII 2016-17 186/242, 2018-19 65/186, 2020
+  30/38, EV-0929 6/7, The Keyblade War 0/20 (5 boss maps imported but held `worldMismatch`: KG room vs quest world 13; 15 maps
+  without part 0). The 592 new files in `stage_gen\files\stage` leave every old file byte-identical (md5).

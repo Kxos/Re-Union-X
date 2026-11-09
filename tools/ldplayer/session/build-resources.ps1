@@ -215,6 +215,30 @@ if ($LASTEXITCODE) { throw 'make_shop_art fallito' }
 # into BTF. Writes the drama list stage_gen\event_dramas.json that the master run reads (KHUX_EVENT_DRAMAS)
 python -I recon\tools\make_quiz_dramas.py --out "$sg\files" --list "$sg\event_dramas.json"
 if ($LASTEXITCODE) { throw 'make_quiz_dramas fallito' }
+# Generated maps of the event quests with no original map in any source (Events Part 5 Task 4, docs/notes/events.md «Generator
+# rules for the Org XIII events»; label wikiRoom, declared not original): gen_story_maps.py config key `events` on the list that
+# the master run writes (server\game_data\event_gen_maps.json), the same rules as the Special maps, written into the generated pack
+# beside them ($sg\files\stage, files mappoi_stg<stage id>; stage ids 4000000+ are never an old map key). The report goes to
+# <KHUX_EVENT_MAPS>\gen_report.json (default stage_gen\event_stages), which make-events.js reads: a generated-map quest is served
+# at the next master run only once its stageId is listed there (so the resources carry its map first). The POI (reward row 1, the
+# data-hole quests have no drop rows) is merged into server\game_data\stage_poi.json, as the Special maps. -DryRun: report and POI
+# into $sg only (nothing outside the dry copy is written).
+if (Test-Path server\game_data\event_gen_maps.json) {
+  if ($DryRun) { $evMaps = "$sg\event_stages"; $evPoi = "$sg\event_gen_poi.json" }
+  else {
+    $evMaps = if ($env:KHUX_EVENT_MAPS) { $env:KHUX_EVENT_MAPS } else { "$D\stage_gen\event_stages" }
+    $evPoi = 'server\game_data\stage_poi.json'
+  }
+  New-Item -ItemType Directory -Force $evMaps | Out-Null
+  $evCfg = [ordered]@{
+    rooms = 'recon/tools/story_rooms.json'; template = "$D\stage_gen\files\stage\mappoi_stg01040_00.bin"; cls_dir = "$D\maps_x"
+    enemies = 'server/master_data/enemy.json'; rooms_check = "$D\stage_gen\rooms_check.json"; extra_cls_dir = "$D\rooms_gen\files"
+    out = "$sg\files\stage"; report = "$evMaps\gen_report.json"; poi = $evPoi; events = 'server/game_data/event_gen_maps.json'
+  }
+  $evCfg | ConvertTo-Json | Set-Content -Encoding utf8 "$sg\event_gen_cfg.json"
+  python -I recon\tools\gen_story_maps.py "$sg\event_gen_cfg.json"
+  if ($LASTEXITCODE) { throw 'gen_story_maps (event maps) fallito' }
+}
 # LWF del risultato delle estrazioni (raisedraw_gen\files, pacchetto statico: vedi sotto) importati PRIMA di
 # import_jp_coco: i suoni dei loro eventi (x10 draw 509000390, popup del Nova 509000740, I-152) li cerca
 # jp_sound_effects.py, che deve vedere le cartelle gia' scritte anche partendo da raisedraw_gen vuoto. Le

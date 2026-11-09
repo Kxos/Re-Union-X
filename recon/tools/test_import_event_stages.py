@@ -151,6 +151,34 @@ try:
     ies.run(items, files, set(), set(ids), rewards, out, rooms_out=rl)
     lst = json.load(open(rl, encoding='utf-8'))
     assert lst['rooms'] == sorted(rooms) and lst['by_room'][sorted(rooms)[0]] == [740140], lst
+    # level-shifted twin (Part 5 Task 4): Marluxia I = JP 68710 (Lv 25) at Lv 20, copied under its own key with every enemy
+    # level and STG [11] shifted; the JP map itself (another item) stays byte for byte; a wrong `from` leaves it out
+    FK, OWN = 68710, 4003322
+    stl, pl = mapfile.load_stage(files, FK)
+    ids_l = {e['enemyId'] for p in pl for e in p['enemies']}
+    rooms_l = {p['room'] for p in pl}
+    rw_l = {e['reward'] for p in pl for e in p['enemies']} | {c['reward'] for p in pl for c in p['chests']}
+    it_l = {'stageId': OWN, 'key': OWN, 'fromKey': FK, 'levelShift': {'from': 25, 'to': 20, 'delta': -5}, 'name': 'shifted'}
+    rep_l = ies.run([it_l, {'stageId': 9, 'key': FK, 'name': 'jp'}], files, rooms_l, ids_l, rw_l, out)
+    sl, sj = rep_l['stages']
+    assert sl['status'] == 'imported' and sl['levelShifted'] is True and sl['fromKey'] == FK and sl['key'] == OWN, sl
+    assert sj['status'] == 'imported' and not sj.get('levelShifted'), sj
+    got = sorted(n for n in os.listdir(os.path.join(out, 'stage')) if str(OWN) in n)
+    assert got == ies.file_names(OWN, len(pl)), got
+    rd = lambda n: open(os.path.join(out, 'stage', n), 'rb').read()
+    s_new, p_new = mapfile.load_stage({(OWN, None): rd(got[0]), **{(OWN, k): rd(n) for k, n in enumerate(got[1:])}}, OWN)
+    assert s_new['card_level_bonus'] == 20 and stl['card_level_bonus'] == 25, (s_new['card_level_bonus'], stl['card_level_bonus'])
+    old_e = [e for p in pl for e in p['enemies']]
+    new_e = [e for p in p_new for e in p['enemies']]
+    assert [e['level'] for e in new_e] == [e['level'] - 5 for e in old_e] and {e['level'] for e in new_e} == {20}
+    assert [{k: v for k, v in e.items() if k != 'level'} for e in new_e] == [{k: v for k, v in e.items() if k != 'level'} for e in old_e]
+    for k, n in zip([None] + list(range(len(pl))), ies.file_names(FK, len(pl))):
+        assert rd(n) == open(files[(FK, k)], 'rb').read(), 'JP map unchanged ' + n
+    poi_l = json.load(open(os.path.join(out, 'stage_poi_events.json'), encoding='utf-8'))
+    assert poi_l[str(OWN)] == poi_l[str(FK)], 'same POI under the own key'
+    bad = ies.run([dict(it_l, levelShift={'from': 30, 'to': 20, 'delta': -10})], files, rooms_l, ids_l, rw_l, out)['stages'][0]
+    assert bad['status'] == 'skipped' and bad['cause'] == 'level shift' and not bad.get('levelShifted'), bad
+    assert os.listdir(os.path.join(out, 'stage')) == []
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')

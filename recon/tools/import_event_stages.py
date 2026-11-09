@@ -29,6 +29,12 @@ the WW 2016 bundle (--b2016), byte for byte (`copies` in the stage's report); th
 name index only (--index2018) and is listed in `tried`. A stage left out gets `cause` (summary by_cause: STG absent, part N
 absent, rooms not served, ...), a missing one `tried` (what each copy holds). --rooms-out: the rooms of every map that could
 be read (imported or left out for its rooms), for make_jp_rooms.py (--event-rooms), which then builds them with --story-only.
+Level-shifted twins (Events Part 5 Task 4; make-events.js map items with `fromKey` and `levelShift {from, to, delta}`): the same
+JP layout used at the quest's own level (user 10-11-2026, label levelShifted). The files of `fromKey` (the JP map, any copy as
+above; enemy swaps keyed by fromKey too) are copied under the item's own key (its stage id) with every enemy record's level and
+STG [11] (the quest level of the card) shifted by delta (never below 1); positions, ids, drops and uids stay. The JP folder is
+never changed. The report entry carries `fromKey`, `levelShift` and `levelShifted: true` (make-events.js serves such a quest
+only then); a JP map whose levels are not all `from` is left out (status skipped, cause 'level shift').
 --stage-dir: also copy the imported files into this folder (the resource staging, stage_gen/files/stage). The POI is not
 merged here: make-events.js (master run) reads report.json + stage_poi_events.json, serves only the imported stages whose
 reward rows it can write, and merges their POI into server/game_data/stage_poi.json in the same run.
@@ -91,6 +97,27 @@ def patch_swaps(raw, swaps):
         out.append(nb)
     del stg
     return [bytes(x) for x in out], done
+
+
+def shift_levels(raw, ls):
+    """raw [STG bytes, part bytes...], ls {from, to, delta} -> (new raw, None) or (None, why): every enemy record level and STG [11]
+    + delta (at least 1); the JP levels must all be ls['from'] (the layout found at that level), else nothing is shifted"""
+    delta, frm = int(ls['delta']), int(ls['from'])
+    stg = bytearray(raw[0])
+    card = struct.unpack_from('<i', stg, 44)[0]
+    out, levels = [], set()
+    for k, b in enumerate(raw[1:]):
+        p = mapfile.parse_map(bytes(b), k)
+        nb = bytearray(b)
+        base = p['ends']['enemies'] - 0x20 * len(p['enemies'])
+        for i, e in enumerate(p['enemies']):
+            levels.add(e['level'])
+            struct.pack_into('<i', nb, base + 0x20 * i + 20, max(1, e['level'] + delta))
+        out.append(bytes(nb))
+    if levels - {frm} or card != frm:
+        return None, 'level shift: JP levels %s, card %s, expected %s' % (sorted(levels), card, frm)
+    struct.pack_into('<i', stg, 44, max(1, card + delta))
+    return [bytes(stg)] + out, None
 
 
 def poi_of(parts):
@@ -162,7 +189,7 @@ def cause_of(why):
         return 'part %s absent' % m.group(2) if m.group(2) else 'STG absent'
     for pre, c in (('rooms not served', 'rooms not served'), ('enemies not in the master', 'enemies not in the master'),
                    ('old format', 'old format'), ('incoherent', 'incoherent'), ('enemy swap', 'enemy swap finds no record'),
-                   ('map key twice', 'map key twice'), ('copies differ', 'copies differ')):
+                   ('map key twice', 'map key twice'), ('copies differ', 'copies differ'), ('level shift', 'level shift')):
         if (why or '').startswith(pre):
             return c
     return 'other'
@@ -234,12 +261,26 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
                            'cause': 'map key twice'})
             continue
         seen.add(it['key'])
-        fk, src, tried, conflict = pick_files(it['key'], copies, indexes)
+        # a level-shifted twin reads the files of its JP map (fromKey) and is written under its own key (docstring)
+        src_key = it['fromKey'] if it.get('fromKey') is not None else it['key']
+        fk, src, tried, conflict = pick_files(src_key, copies, indexes)
         if conflict:
             res, raw = {'stageId': it['stageId'], 'key': it['key'], 'censusId': it.get('censusId'), 'name': it.get('name'),
                         'status': 'missing', 'why': 'copies differ: ' + conflict}, None
         else:
-            res, raw = check_item(it, fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(it['key'])))
+            res, raw = check_item(dict(it, key=src_key), fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(src_key)))
+            res['key'] = it['key']
+        if src_key != it['key']:
+            res['fromKey'] = src_key
+            if it.get('levelShift'):
+                res['levelShift'] = it['levelShift']
+                if raw:
+                    raw, why = shift_levels(raw, it['levelShift'])
+                    if raw:
+                        res['levelShifted'] = True
+                    else:
+                        res.pop('poi', None)
+                        res['status'], res['why'] = 'skipped', why
         if any(v != 'jp431' for v in src.values()):
             res['copies'] = {n: v for n, v in sorted(src.items()) if v != 'jp431'}
         if res['status'] != 'imported':
