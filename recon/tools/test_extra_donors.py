@@ -149,7 +149,13 @@ ev_anims = {k.rsplit('/', 1)[0] for k in ev2}
 check(all(d + '/' + d.rsplit('/', 1)[1] + '.lwf' in ev2 for d in ev_anims), 'events2 animation without its LWF row')
 ev_fams = {int(k.split('/')[3]) for k in ev2}
 check(len(ev_fams) == 36 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
-blank = {(int(k.split('/')[3]), k.split('/')[4]) for k, v in ev2.items() if v[2] == 'events2-blank'}
+# declared transparent pieces (user decisions; label column BLANK-DECLARED, events2_export.py): only these slots
+with open(xd.EVENTS2_TABLE, encoding='utf-8') as fh:
+    declared = {ln.split('\t')[0] for ln in fh if not ln.startswith('#') and ln.count('\t') >= 4
+                and ln.split('\t')[2] == 'events2-blank' and ln.rstrip('\n').split('\t')[4].startswith('BLANK-DECLARED')}
+blank = {(int(k.split('/')[3]), k.split('/')[4]) for k, v in ev2.items() if v[2] == 'events2-blank' and k not in declared}
+check(declared <= {'lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038312e706e67.png'},
+      'declared blank pieces outside the user decisions: %s' % sorted(declared))
 check({f for f, _ in blank} <= {282, 1032, 1033, 1034, 1607}
       and {an for _, an in blank} <= {'wait', 'move', 'atk1_o', 'knockback', 'dead'},
       'blank pieces outside the accepted partial models: %s' % sorted(blank))

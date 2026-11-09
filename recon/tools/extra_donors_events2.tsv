@@ -1,7 +1,7 @@
 # Event enemy models approved by the user on the rendered review (Events Part 2, 07-11-2026; events2_export.py
 # from the private reconstruction manifest; read by make_jp_enemies.py --events2, whole animations, override
 # priority). Columns: published path, source <container>:<path>, rule, declared WxH, label of the reconstruction
-# rule. Only names and paths. 48 families, 11213 rows.
+# rule. Only names and paths. 48 families, 11222 rows.
 lwf/character/enemy/96/atk1_o/atk1_o.lwf	jp431:lwf/character/enemy/96/atk1_o/atk1_o.00250948.lwf	events2-jp	0x0	lwf
 lwf/character/enemy/96/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720312e706e67.png	b2016:lwf/drama/2170401/2170401_e38393e38383e38388e3839ee38383e38397203239322e706e67.png	events2-recon	28x24	SIBLING-PIECE
 lwf/character/enemy/96/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp431:lwf/character/enemy/96/knockback/knockback_e38393e38383e38388e3839ee38383e383972031302e706e67.00250950.png	events2-copy	44x47	stesso
@@ -503,6 +503,9 @@ lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720312e70
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp431:lwf/raid/demo/start_1004/start_1004_e38393e38383e38388e3839ee38383e383972031352e706e67.00001409.png	events2-copy	23x23	P4-GLOBAL-RUN
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031312e706e67.png	jp431:lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031312e706e67.png	events2-jp	127x140	jp
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp431:lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031322e706e67.png	events2-jp	165x201	jp
+lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031332e706e67.png	jp431:lwf/character/raid/1004/atk2/atk2_e38393e38383e38388e3839ee38383e383972031332e706e67.00001487.png	events2-copy	52x33	RAID-TWIN
+lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031342e706e67.png	jp431:lwf/character/raid/1004/atk2/atk2_e38393e38383e38388e3839ee38383e383972031342e706e67.00001488.png	events2-copy	53x33	RAID-TWIN
+lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031352e706e67.png	jp431:lwf/character/raid/1004/atk2/atk2_e38393e38383e38388e3839ee38383e383972031352e706e67.00001489.png	events2-copy	50x36	RAID-TWIN
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031362e706e67.png	jp431:lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031362e706e67.png	events2-jp	529x314	jp
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031372e706e67.png	events2:rescale/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031372e706e67.png	events2-rescale	18x67	RUN; 12x44 rescaled
 lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031382e706e67.png	jp431:lwf/character/enemy/245/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031382e706e67.png	events2-jp	89x56	jp
@@ -3378,6 +3381,7 @@ lwf/character/enemy/1529/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720372
 lwf/character/enemy/1529/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720382e706e67.png	jp431:lwf/character/enemy/1529/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720382e706e67.png	events2-jp	85x107	jp
 lwf/character/enemy/1529/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720392e706e67.png	jp431:lwf/character/enemy/1529/atk1_o/atk1_o_e38393e38383e38388e3839ee38383e3839720392e706e67.png	events2-jp	100x59	jp
 lwf/character/enemy/1529/atkSp/atkSp.lwf	jp431:lwf/character/enemy/1529/atkSp/atkSp.lwf	events2-jp	0x0	lwf
+lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720312e706e67.png	events2:rescale/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720312e706e67.png	events2-rescale	11x11	SHARED-CLIP; 5x5 rescaled
 lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp431:lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	events2-jp	30x54	jp
 lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031312e706e67.png	jp431:lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031312e706e67.png	events2-jp	30x54	jp
 lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031322e706e67.png	jp431:lwf/character/enemy/1529/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031322e706e67.png	events2-jp	30x54	jp
@@ -9133,6 +9137,7 @@ lwf/character/enemy/1613/atkSp/atkSp_6566665f6d61736b335f332e706e67.png	jp431:lw
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720312e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720312e706e67.png	events2-jp	106x100	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	events2-jp	111x111	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130302e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031342e706e67.png	events2-recon	54x54	P4-SELF-SIZE
+lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130312e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031372e706e67.png	events2-recon	118x118	SELF-ROLE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130322e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031362e706e67.png	events2-recon	65x65	P4-SELF-SIZE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130332e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130332e706e67.png	events2-jp	204x139	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130342e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e38397203130342e706e67.png	events2-jp	197x147	jp
@@ -9209,10 +9214,13 @@ lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034312
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034322e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031362e706e67.png	events2-recon	65x65	P4-SELF-SIZE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034332e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972033322e706e67.png	events2-recon	93x83	P4-SELF-SIZE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034342e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034342e706e67.png	events2-jp	59x73	jp
+lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034352e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	events2-recon	111x111	OWN-RUN
+lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034362e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031372e706e67.png	events2-recon	118x118	SELF-ROLE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034372e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034372e706e67.png	events2-jp	64x66	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034382e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034382e706e67.png	events2-jp	93x83	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034392e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034312e706e67.png	events2-recon	59x73	P4-SELF-SIZE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720352e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720352e706e67.png	events2-jp	165x127	jp
+lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035302e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972031302e706e67.png	events2-copy	111x111	OWN-RUN
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035312e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035312e706e67.png	events2-jp	95x92	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035322e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035322e706e67.png	events2-jp	60x59	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035332e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972035332e706e67.png	events2-jp	142x116	jp
@@ -9246,6 +9254,7 @@ lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972037382
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972037392e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972034312e706e67.png	events2-copy	170x141	doppione
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720382e706e67.png	jp431:lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e3839720382e706e67.png	events2-jp	93x83	jp
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038302e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972034322e706e67.png	events2-copy	141x140	doppione
+lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038312e706e67.png	events2:blank/37x37.png	events2-blank	37x37	BLANK-DECLARED
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038322e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972031392e706e67.png	events2-recon	204x139	P4-SELF-SIZE
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038332e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972032302e706e67.png	events2-copy	160x147	doppione
 lwf/character/enemy/1613/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972038342e706e67.png	jp431:lwf/character/enemy/1613/knockback/knockback_e38393e38383e38388e3839ee38383e383972032302e706e67.png	events2-copy	160x147	doppione

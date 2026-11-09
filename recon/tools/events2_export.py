@@ -12,7 +12,9 @@ repo, the files the table needs in the container `events2` (extra_donors.ROOTS):
     size; 212 of them) rescaled to EXACTLY the declared size (LANCZOS on premultiplied alpha, as dedup-rescale; the review
     renders drew them at the declared size), rule events2-rescale;
   * blank/<W>x<H>.png: a fully transparent piece for a slot still missing in a mandatory animation of an accepted partial
-    model (PARTIAL: user decisions of the review rounds), rule events2-blank, declared in the Notices;
+    model (PARTIAL: user decisions of the review rounds), rule events2-blank, declared in the Notices; also a manifest row
+    of category 'blank' (rule BLANK-DECLARED: a piece lost in every dump that the user chose not to draw, e.g. 1613
+    Leviathan atkSp 81, 10-11), in any animation;
   * copy/<...>: frozen copies of generated files used as sources (raid_gen 1531, enemy_x 5075), so a later regeneration
     of those packages cannot change an approved model; also the Round 11 tint pictures (copy/r11_tint/, 1585 atkSp,
     rule events2-tint, category 4: a declared recolour of a cat 3 piece, user-approved 08-11, in the Notices).
@@ -147,6 +149,14 @@ def plan(man):
                     rel = 'blank/%s.png' % wh
                     jobs.append(('blank', None, rel, tuple(r['wh'])))
                     rows.append((pre + t, 'events2', rel, 'events2-blank', wh, 'hole (accepted partial model)'))
+                    st['blank'] += 1
+                    continue
+                if r.get('cat') == 'blank':
+                    # declared transparent piece (user decision, e.g. 1613 Leviathan atkSp 81 on 10-11: a piece lost in
+                    # every dump, not drawn instead of being invented; manifest rule BLANK-DECLARED, in the Notices)
+                    rel = 'blank/%s.png' % wh
+                    jobs.append(('blank', None, rel, tuple(r['wh'])))
+                    rows.append((pre + t, 'events2', rel, 'events2-blank', wh, label(r['rule'])))
                     st['blank'] += 1
                     continue
                 lab = label(r['rule']) + ('; replaces the standard pick' if r.get('replaced') else '')

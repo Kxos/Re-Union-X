@@ -348,7 +348,7 @@
    "name": "Leviathan",
    "model": "new",
    "approved": true,
-   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py); atkSp completed 10-11 (user-approved, tmp/events_enemies/review/challenge/atksp3.html): bubbles 46/101 = own knockback 17, burst 45/50 = own atkSp 10, water glints 81 (lost in every dump) = transparent piece (rule BLANK-DECLARED, declared in the Notices)."
   },
   "1631": {
    "name": "Demon Tide",
@@ -444,7 +444,7 @@
    "name": "Metal Giant",
    "model": "new",
    "approved": true,
-   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py); atkSp completed 10-11 (user-approved, tmp/events_enemies/review/challenge/atksp3.html): spark 1 = the spark of the shared orange spark-particle clip (burst effect eff_10443, 2016 bundle; rule SHARED-CLIP, category 3, declared in the Notices)."
   },
   "95": {
    "name": "Circus Balloon",
@@ -500,7 +500,7 @@
    "name": "Jack in the Box",
    "model": "new",
    "approved": true,
-   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py); atkSp completed 10-11 (user-approved, tmp/events_enemies/review/challenge/atksp3.html): fireballs 13-15 from the raid boss Jack in the Box (JP 4.3.1 raid/1004/atk2, same Flash file; rule RAID-TWIN)."
   }
  }
 }
