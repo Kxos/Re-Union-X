@@ -104,7 +104,7 @@ The challenge events bring **15 more** enemies rebuilt in the same way and check
 
 Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.
 
-Some pictures of the special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are lost: during their special attack they keep their standing pose (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.
+The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are complete: **Jack in the Box**'s fireballs come from the raid version of the same boss; **Metal Giant**'s sparks use the spark picture of a particle effect the original game shares across many attacks, because its own picture was lost (**reconstructed**); the small water glints at the foot of **Leviathan**'s waterspout are not drawn, because that picture exists in no surviving copy of the game (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.
 
 ### Event coins and boards
 
