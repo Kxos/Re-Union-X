@@ -209,6 +209,12 @@ foreach ($k in $alias.Keys) {
 # the Gold Ticket texts 106140420-424 and Star7_Ticket_39 are the originals again, originals.tsv section 14)
 python recon\tools\make_shop_art.py "$sg\files" server\game_data
 if ($LASTEXITCODE) { throw 'make_shop_art fallito' }
+# Quiz boards of the event quiz quests (Events Part 4 Task 6, docs/notes/events.md «Quiz boards»): own drama img/light/SEQ/<id>.l
+# (the JP quiz script with the stage's picture id) and board img/light/NPC/<picture>.png per quiz stage (plan
+# recon\tools\quiz_dramas.json, private user-approved boards), plus the transparent hold picture 30300; btf_fix turns the boards
+# into BTF. Writes the drama list stage_gen\event_dramas.json that the master run reads (KHUX_EVENT_DRAMAS)
+python -I recon\tools\make_quiz_dramas.py --out "$sg\files" --list "$sg\event_dramas.json"
+if ($LASTEXITCODE) { throw 'make_quiz_dramas fallito' }
 # LWF del risultato delle estrazioni (raisedraw_gen\files, pacchetto statico: vedi sotto) importati PRIMA di
 # import_jp_coco: i suoni dei loro eventi (x10 draw 509000390, popup del Nova 509000740, I-152) li cerca
 # jp_sound_effects.py, che deve vedere le cartelle gia' scritte anche partendo da raisedraw_gen vuoto. Le

@@ -973,6 +973,25 @@ const tests = {
     const ok = me.buildEvents(recs(), cfg, master(), undefined, {}, null, null, { dramas: [1990001] });
     assert.ok(entry(ok, 'E-QD').quests[0].served);
   },
+  // Part 4 Task 6: the label of a quiz board follows its source (quizDramas label): a board redrawn from footage or taken from a
+  // screenshot of the original has its own label; reconstructed true without a label is quizBoard; an original-only entry has none.
+  // A label that is not a quiz board label stops the run
+  quiz_board_label_by_source() {
+    const qz = (id) => quest(id, 1, [501], { drama: { before: 1, after: 0, beforeIds: [1900501], afterIds: [] } });
+    const recs = () => [record('E-QL', [qz(700720), qz(700721), qz(700722), qz(700723)], { type: 'QUIZ' })];
+    const cfg = { ...CONFIG, quizDramas: { 'E-QL/+0': { ids: [1990011], reconstructed: true }, 'E-QL/+1': { ids: [1990012], reconstructed: true, label: 'quizBoardFootage' },
+      'E-QL/+2': { ids: [1990013, 1990014], reconstructed: true, label: 'quizBoardScreenshot' }, 'E-QL/+3': [1990015] } };
+    const out = me.buildEvents(recs(), cfg, master(), undefined, {}, null, null, { dramas: [1990011, 1990012, 1990013, 1990014, 1990015] });
+    const qs = entry(out, 'E-QL').quests;
+    assert.ok(qs.every((x) => x.served), JSON.stringify(qs.map((x) => x.why)));
+    const quizLabels = (x) => x.labels.filter((l) => l.startsWith('quizBoard'));
+    assert.deepStrictEqual(qs.map(quizLabels), [['quizBoard'], ['quizBoardFootage'], ['quizBoardScreenshot'], []]);
+    assert.ok(out.index.reasons.quizBoardFootage && out.index.reasons.quizBoardScreenshot, 'label texts in the index');
+    assert.deepStrictEqual(out.stage.map((st) => st.beforeDramaId), [[1990011], [1990012], [1990013, 1990014], [1990015]]);
+    assert.ok(qs.every((x) => !x.drama), 'no scene left off on a quiz with its board');
+    const bad = { ...CONFIG, quizDramas: { 'E-QL/+0': { ids: [1990011], label: 'wikiAp' } } };
+    assert.throws(() => me.buildEvents(recs(), bad, master(), undefined, {}, null, null, { dramas: [1990011] }), /wikiAp/);
+  },
   // fix round 1 (M3): a record's own boardSetKey that the board sets do not have stops the run (when board sets are given)
   record_set_key_known() {
     const m = { ...master(), ...BOARD_MASTER() };

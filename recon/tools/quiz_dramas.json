@@ -1,0 +1,1005 @@
+{
+ "_doc": "Own drama and board picture ids of the event quiz stages (recon/tools/make_quiz_dramas.py; Events Part 4 Task 6): donor stage id -> records, board source, boards [{drama, picture, file}]. Append-only. Ids only: the boards are private (user-approved, tmp/events/quiz/boards_final).",
+ "stages": {
+  "724110": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906101,
+     "picture": 39401,
+     "file": "724110.png"
+    }
+   ]
+  },
+  "724120": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906102,
+     "picture": 39402,
+     "file": "724120.png"
+    }
+   ]
+  },
+  "724130": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906103,
+     "picture": 39403,
+     "file": "724130.png"
+    }
+   ]
+  },
+  "724140": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906104,
+     "picture": 39404,
+     "file": "724140.png"
+    }
+   ]
+  },
+  "724150": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906105,
+     "picture": 39405,
+     "file": "724150.png"
+    }
+   ]
+  },
+  "724160": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906106,
+     "picture": 39406,
+     "file": "724160.png"
+    }
+   ]
+  },
+  "724170": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906107,
+     "picture": 39407,
+     "file": "724170.png"
+    }
+   ]
+  },
+  "724180": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906108,
+     "picture": 39408,
+     "file": "724180.png"
+    }
+   ]
+  },
+  "724190": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906109,
+     "picture": 39409,
+     "file": "724190.png"
+    }
+   ]
+  },
+  "724200": {
+   "records": [
+    "EV-0484"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906110,
+     "picture": 39410,
+     "file": "724200.png"
+    }
+   ]
+  },
+  "724210": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906111,
+     "picture": 39411,
+     "file": "724210.png"
+    }
+   ]
+  },
+  "724220": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906112,
+     "picture": 39412,
+     "file": "724220.png"
+    }
+   ]
+  },
+  "724230": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906113,
+     "picture": 39413,
+     "file": "724230.png"
+    }
+   ]
+  },
+  "724240": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906114,
+     "picture": 39414,
+     "file": "724240.png"
+    }
+   ]
+  },
+  "724250": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906115,
+     "picture": 39415,
+     "file": "724250.png"
+    }
+   ]
+  },
+  "724260": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906116,
+     "picture": 39416,
+     "file": "724260.png"
+    }
+   ]
+  },
+  "724270": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906117,
+     "picture": 39417,
+     "file": "724270.png"
+    }
+   ]
+  },
+  "724280": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906118,
+     "picture": 39418,
+     "file": "724280.png"
+    }
+   ]
+  },
+  "724290": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906119,
+     "picture": 39419,
+     "file": "724290.png"
+    }
+   ]
+  },
+  "724300": {
+   "records": [
+    "EV-0484",
+    "EV-0500"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906120,
+     "picture": 39420,
+     "file": "724300.png"
+    }
+   ]
+  },
+  "731310": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906121,
+     "picture": 39421,
+     "file": "731310.png"
+    }
+   ]
+  },
+  "731320": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906122,
+     "picture": 39422,
+     "file": "731320.png"
+    }
+   ]
+  },
+  "731330": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906123,
+     "picture": 39423,
+     "file": "731330.png"
+    }
+   ]
+  },
+  "731340": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906124,
+     "picture": 39424,
+     "file": "731340.png"
+    }
+   ]
+  },
+  "731350": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906125,
+     "picture": 39425,
+     "file": "731350.png"
+    }
+   ]
+  },
+  "731360": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906126,
+     "picture": 39426,
+     "file": "731360.png"
+    }
+   ]
+  },
+  "731370": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906127,
+     "picture": 39427,
+     "file": "731370.png"
+    }
+   ]
+  },
+  "731380": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906128,
+     "picture": 39428,
+     "file": "731380.png"
+    }
+   ]
+  },
+  "731390": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906129,
+     "picture": 39429,
+     "file": "731390.png"
+    }
+   ]
+  },
+  "731400": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906130,
+     "picture": 39430,
+     "file": "731400.png"
+    }
+   ]
+  },
+  "731410": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906131,
+     "picture": 39431,
+     "file": "731410.png"
+    }
+   ]
+  },
+  "731420": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906132,
+     "picture": 39432,
+     "file": "731420.png"
+    }
+   ]
+  },
+  "731430": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906133,
+     "picture": 39433,
+     "file": "731430.png"
+    }
+   ]
+  },
+  "731440": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906134,
+     "picture": 39434,
+     "file": "731440.png"
+    }
+   ]
+  },
+  "731450": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906135,
+     "picture": 39435,
+     "file": "731450.png"
+    }
+   ]
+  },
+  "731460": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906136,
+     "picture": 39436,
+     "file": "731460.png"
+    }
+   ]
+  },
+  "731470": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906137,
+     "picture": 39437,
+     "file": "731470.png"
+    }
+   ]
+  },
+  "731480": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906138,
+     "picture": 39438,
+     "file": "731480.png"
+    }
+   ]
+  },
+  "731490": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906139,
+     "picture": 39439,
+     "file": "731490.png"
+    }
+   ]
+  },
+  "731500": {
+   "records": [
+    "EV-0538"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906140,
+     "picture": 39440,
+     "file": "731500.png"
+    }
+   ]
+  },
+  "737610": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906141,
+     "picture": 39441,
+     "file": "737610.png"
+    }
+   ]
+  },
+  "737611": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906142,
+     "picture": 39442,
+     "file": "737611.png"
+    }
+   ]
+  },
+  "737612": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906143,
+     "picture": 39443,
+     "file": "737612.png"
+    }
+   ]
+  },
+  "737613": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906144,
+     "picture": 39444,
+     "file": "737613.png"
+    }
+   ]
+  },
+  "737614": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906145,
+     "picture": 39445,
+     "file": "737614.png"
+    }
+   ]
+  },
+  "737615": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906146,
+     "picture": 39446,
+     "file": "737615.png"
+    }
+   ]
+  },
+  "737616": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906147,
+     "picture": 39447,
+     "file": "737616.png"
+    }
+   ]
+  },
+  "737617": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906148,
+     "picture": 39448,
+     "file": "737617.png"
+    }
+   ]
+  },
+  "737618": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906149,
+     "picture": 39449,
+     "file": "737618.png"
+    }
+   ]
+  },
+  "737619": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906150,
+     "picture": 39450,
+     "file": "737619.png"
+    }
+   ]
+  },
+  "737620": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906151,
+     "picture": 39451,
+     "file": "737620.png"
+    }
+   ]
+  },
+  "737621": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906152,
+     "picture": 39452,
+     "file": "737621.png"
+    }
+   ]
+  },
+  "737622": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906153,
+     "picture": 39453,
+     "file": "737622.png"
+    }
+   ]
+  },
+  "737623": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906154,
+     "picture": 39454,
+     "file": "737623.png"
+    }
+   ]
+  },
+  "737624": {
+   "records": [
+    "EV-0624"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906155,
+     "picture": 39455,
+     "file": "737624.png"
+    }
+   ]
+  },
+  "740270": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906156,
+     "picture": 39456,
+     "file": "740270.png"
+    }
+   ]
+  },
+  "740271": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906157,
+     "picture": 39457,
+     "file": "740271.png"
+    }
+   ]
+  },
+  "740272": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906158,
+     "picture": 39458,
+     "file": "740272.png"
+    }
+   ]
+  },
+  "740273": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906159,
+     "picture": 39459,
+     "file": "740273.png"
+    }
+   ]
+  },
+  "740274": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906160,
+     "picture": 39460,
+     "file": "740274.png"
+    }
+   ]
+  },
+  "740275": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906161,
+     "picture": 39461,
+     "file": "740275.png"
+    }
+   ]
+  },
+  "740276": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906162,
+     "picture": 39462,
+     "file": "740276.png"
+    }
+   ]
+  },
+  "740277": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906163,
+     "picture": 39463,
+     "file": "740277.png"
+    }
+   ]
+  },
+  "740278": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906164,
+     "picture": 39464,
+     "file": "740278.png"
+    }
+   ]
+  },
+  "740279": {
+   "records": [
+    "EV-0763"
+   ],
+   "source": "reconstructed",
+   "boards": [
+    {
+     "drama": 1906165,
+     "picture": 39465,
+     "file": "740279.png"
+    }
+   ]
+  },
+  "740870": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "original_screenshot",
+   "boards": [
+    {
+     "drama": 1906166,
+     "picture": 39466,
+     "file": "740870.png"
+    }
+   ]
+  },
+  "740871": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "footage_redraw",
+   "boards": [
+    {
+     "drama": 1906167,
+     "picture": 39467,
+     "file": "740871.png"
+    }
+   ]
+  },
+  "740872": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "footage_redraw",
+   "boards": [
+    {
+     "drama": 1906168,
+     "picture": 39468,
+     "file": "740872.png"
+    }
+   ]
+  },
+  "740873": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "footage_redraw",
+   "boards": [
+    {
+     "drama": 1906169,
+     "picture": 39469,
+     "file": "740873.png"
+    }
+   ]
+  },
+  "740874": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "footage_redraw",
+   "boards": [
+    {
+     "drama": 1906170,
+     "picture": 39470,
+     "file": "740874.png"
+    }
+   ]
+  },
+  "740875": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "original_screenshot",
+   "boards": [
+    {
+     "drama": 1906171,
+     "picture": 39471,
+     "file": "740875.png"
+    }
+   ]
+  },
+  "740876": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "original_screenshot",
+   "boards": [
+    {
+     "drama": 1906172,
+     "picture": 39472,
+     "file": "740876.png"
+    }
+   ]
+  },
+  "740877": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "footage_redraw",
+   "boards": [
+    {
+     "drama": 1906173,
+     "picture": 39473,
+     "file": "740877.png"
+    }
+   ]
+  },
+  "740878": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "original_screenshot",
+   "boards": [
+    {
+     "drama": 1906174,
+     "picture": 39474,
+     "file": "740878.png"
+    }
+   ]
+  },
+  "740879": {
+   "records": [
+    "EV-0910"
+   ],
+   "source": "original_screenshot",
+   "boards": [
+    {
+     "drama": 1906175,
+     "picture": 39475,
+     "file": "740879_1.png"
+    },
+    {
+     "drama": 1906176,
+     "picture": 39476,
+     "file": "740879_2.png"
+    },
+    {
+     "drama": 1906177,
+     "picture": 39477,
+     "file": "740879_3.png"
+    },
+    {
+     "drama": 1906178,
+     "picture": 39478,
+     "file": "740879_4.png"
+    }
+   ]
+  }
+ }
+}

@@ -57,7 +57,12 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard'];
+const GENERATED_LABELS = ['wholeDay', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
+  'quizBoardFootage', 'quizBoardScreenshot'];
+// the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
+// reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
+// (quizBoardScreenshot)
+const QUIZ_BOARD_LABELS = ['quizBoard', 'quizBoardFootage', 'quizBoardScreenshot'];
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText. Part 4 Task 4: boosterOnly (every
 // reward a Booster), rewardTypeUnknown (a reward type not in payableTypes / payableDropTypes), quizTextMissing (a quiz quest whose
 // board drama is not listed in quizDramas), objectiveMismatch (the private record's khuxwiki objective text contradicts the donor
@@ -391,8 +396,9 @@ const questSig = (q, mapKey) => JSON.stringify([mapKey, q.worldId, q.level, q.ap
   (q.objectives || []).map((o) => [o.code, o.dataType, o.idType, o.id, o.num, (o.reward || {}).type || 0, (o.reward || {}).id || 0, (o.reward || {}).num || 0]),
   (q.firstClear || []).map((x) => [x.type, x.id || 0, x.num || 1]), (q.enemies || []).map((e) => [e.id, e.level, e.count]), q.restrictions || {}, q.drops || null,
   [(q.drama || {}).beforeIds || [], (q.drama || {}).afterIds || []], q.combined ? 1 : 0]);
-// quizDramas entry of a quest key: {ids, reconstructed} | null (a bare list: ids). dramas: the drama ids available in our
-// resources (buildEvents opts.dramas); a listed id not among them, or no such list, stops the run (fix round 1, M2)
+// quizDramas entry of a quest key: {ids, reconstructed, label} | null (a bare list: ids). dramas: the drama ids available in our
+// resources (buildEvents opts.dramas); a listed id not among them, or no such list, stops the run (fix round 1, M2). label: the
+// board's label (QUIZ_BOARD_LABELS; default quizBoard when reconstructed, none for a bare list), another one stops the run
 function quizDramaOf(config, key, dramas) {
   const v = (config.quizDramas || {})[key];
   if (!v) return null;
@@ -401,7 +407,10 @@ function quizDramaOf(config, key, dramas) {
   if (!dramas) throw new Error(`events: quizDramas ${key} lists dramas but no list of available dramas was given (KHUX_EVENT_DRAMAS / config.availableDramas)`);
   const off = ids.filter((id) => !dramas.has(id));
   if (off.length) throw new Error(`events: quizDramas ${key}: drama ${off.join(', ')} is not among the available dramas`);
-  return { ids, reconstructed: !Array.isArray(v) && !!v.reconstructed };
+  const reconstructed = !Array.isArray(v) && !!v.reconstructed;
+  const label = Array.isArray(v) ? null : (v.label || (reconstructed ? 'quizBoard' : null));
+  if (label && !QUIZ_BOARD_LABELS.includes(label)) throw new Error(`events: quizDramas ${key}: label ${label} is not a quiz board label (${QUIZ_BOARD_LABELS.join(', ')})`);
+  return { ids, reconstructed, label };
 }
 
 // records, config (event_config.json), master {stage, evStage, enemy, reward?, sphere tables?, item tables?} without our own rows,
@@ -575,7 +584,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         if (!entry.stageIds.includes(sid)) entry.stageIds.push(sid);
         apMin = apMin === null ? q.ap : Math.min(apMin, q.ap);
         if (paid.boosters.length) { item.boosters = paid.boosters.map((x) => ({ ...x })); item.labels.push('boosterLater'); }
-        if (quizDrama && quizDrama.reconstructed) item.labels.push('quizBoard');
+        if (quizDrama && quizDrama.label) item.labels.push(quizDrama.label);
         item.labels.forEach((l) => { labels.add(l); used.add(l); });
         const offIds = quizDrama ? [] : dr.beforeIds || [];
         if ((dr.before && !quizDrama) || dr.after) { item.drama = { beforeIds: offIds, afterIds: dr.afterIds || [] }; labels.add('dramaOff'); }
