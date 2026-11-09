@@ -1,5 +1,5 @@
 {
- "_doc": "Event quest enemies our master lacks (Events Part 1, Task 2b, 6 Nov 2026): displayId -> name, model (new = every mandatory animation complete in the JP 4.3.1 data with the versioned copy tables; missing = textures or animations still not found, never replaced by another enemy), approved (the user saw the rendered animations). make_jp_enemies.py builds only the approved ones (--event-all: every one, for renders and deep_donors.py). review: user decision on the rendered sheets. Events Part 2 (07-11-2026): 36 models + 96 Circus Clown approved on the rendered review (17 of the pilot, 19 of the gem quests); partial = accepted with missing pieces; std_dead = standard smoke dead. 185 Enraged Elk has no own model and no entry: its event rows show the served story model 184 (server/make-event-enemies.js DISPLAY_AS, user decision 07-11).",
+ "_doc": "Event quest enemies our master lacks (Events Part 1, Task 2b, 6 Nov 2026): displayId -> name, model (new = every mandatory animation complete in the JP 4.3.1 data with the versioned copy tables; missing = textures or animations still not found, never replaced by another enemy), approved (the user saw the rendered animations). make_jp_enemies.py builds only the approved ones (--event-all: every one, for renders and deep_donors.py). review: user decision on the rendered sheets. Events Part 2 (07-11-2026): 36 models + 96 Circus Clown approved on the rendered review (17 of the pilot, 19 of the gem quests); partial = accepted with missing pieces; std_dead = standard smoke dead. 185 Enraged Elk has no own model and no entry: its event rows show the served story model 184 (server/make-event-enemies.js DISPLAY_AS, user decision 07-11). Events Part 4 (10-11-2026): 15 challenge models approved on the rendered review (1031, 1035, 135, 1529, 156, 1567, 157, 1613, 1640, 245, 25; round 2 1616, 1622, 1623, 1631); 12 still missing (approved false, not built).",
  "families": {
   "65": {
    "name": "Cloudy Sunrise",
@@ -340,27 +340,27 @@
   },
   "1616": {
    "name": "Ifrit",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 22 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3, review round 2), rendered review tmp/events_enemies/review/challenge/round2.html; served from extra_donors_events2.tsv (events2_export.py); round 2: atk1_o 5-18 own run, atkSp 20 from the JP 5.0.1 Dark Road Ifrit (raid twin)."
   },
   "1613": {
    "name": "Leviathan",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 16 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "1631": {
    "name": "Demon Tide",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 12 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3, review round 2), rendered review tmp/events_enemies/review/challenge/round2.html; served from extra_donors_events2.tsv (events2_export.py); atkSp frame syokusyu000015 (lost in every copy) = frame 14 held (rule FRAME-HOLD, category 3c, user choice 10-11, declared in the Notices)."
   },
   "1622": {
    "name": "Savage Vanguard",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 13 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3, review round 2), rendered review tmp/events_enemies/review/challenge/round2.html; served from extra_donors_events2.tsv (events2_export.py); round 2: atkSp slot 10 from knockback 7."
   },
   "1639": {
    "name": "Nimble Reaper",
@@ -376,21 +376,21 @@
   },
   "1035": {
    "name": "Hocus Pocus",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "1567": {
    "name": "Brilliant Opera",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "1640": {
    "name": "Sorcerous Reaper",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "1643": {
    "name": "Upright Warlock",
@@ -406,9 +406,9 @@
   },
   "1623": {
    "name": "Savage Vanguard Ω",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3, review round 2), rendered review tmp/events_enemies/review/challenge/round2.html; served from extra_donors_events2.tsv (events2_export.py); round 2: atkSp slots 10 and 5 from knockback 7 and 2 (atkSp complete)."
   },
   "1638": {
    "name": "Vile Reaper",
@@ -424,9 +424,9 @@
   },
   "1031": {
    "name": "Submarine Carp",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "1574": {
    "name": "Weapon Master",
@@ -442,9 +442,9 @@
   },
   "1529": {
    "name": "Metal Giant",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   },
   "95": {
    "name": "Circus Balloon",
@@ -456,9 +456,9 @@
   },
   "25": {
    "name": "Festive Fireworks",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; complete with the generator's standard rules (JP 4.3.1 / 2016 copies with byte-identical LWFs), not in the events2 table"
   },
   "1601": {
    "name": "Jewel Princess",
@@ -468,9 +468,9 @@
   },
   "135": {
    "name": "Living Bone",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; complete with the generator's standard rules (JP 4.3.1 / 2016 copies with byte-identical LWFs), not in the events2 table"
   },
   "1583": {
    "name": "Raccoon Dog Rookie",
@@ -486,21 +486,21 @@
   },
   "156": {
    "name": "Raging Reindeer",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; complete with the generator's standard rules (JP 4.3.1 / 2016 copies with byte-identical LWFs), not in the events2 table"
   },
   "157": {
    "name": "Bag O' Gifts",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; complete with the generator's standard rules (JP 4.3.1 / 2016 copies with byte-identical LWFs), not in the events2 table"
   },
   "245": {
    "name": "Jack in the Box",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 3 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py)"
   }
  }
 }

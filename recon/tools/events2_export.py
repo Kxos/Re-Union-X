@@ -37,6 +37,10 @@ D = r'D:\Progetto_Restauro_KH_UX'
 MANIFEST = os.path.join(D, 'tmp', 'events_enemies', 'manifest.json')
 ENEMY = 'lwf/character/enemy'
 SKIP = {65: 'complete with the standard rules', 185: 'no own model: event rows show 184'}
+# Events Part 4 (10-11-2026): challenge models the generator completes with its standard rules (JP 4.3.1 files or 2016 copies
+# with byte-identical LWFs; Task 3 report): approved on the rendered review, no recipe rows needed (their manifest rows hold
+# only the review assembly, with holes the standard rules fill)
+SKIP.update({f: 'complete with the standard rules (Part 4 challenge)' for f in (25, 135, 156, 157)})
 # accepted partial models (user review rounds 07-11: 1033 and 1034 OK in round 1, 1032 and 282 in round 2, 1607 in round 4)
 PARTIAL = {282, 1032, 1033, 1034, 1607}
 MANDATORY = ('wait', 'move', 'atk1_o', 'knockback', 'dead')
