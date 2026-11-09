@@ -11,7 +11,7 @@
  "eventType": 3,
  "boardEventType": 1,
  "servedEventTypes": [1, 3],
- "imgVersion": 6,
+ "imgVersion": 7,
  "shortWindowHours": 12,
  "serve": {
   "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
