@@ -1167,6 +1167,18 @@ const tests = {
     assert.strictEqual(qs[1].reason, 'objectiveMismatch');
     assert.strictEqual(qs[1].why, REAL_CONFIG.reasonText.objectiveMismatch);
   },
+  // I-251 (user 10-11): an objective decided for the donor carries objectiveResolved, not objectiveMismatch, in the private
+  // record: the quest is served with the donor code / num / reward exactly as recorded (the note is not a hold)
+  objective_resolved_is_served() {
+    const decided = quest(701110, 1, [501], { objectiveResolved: ['1: donor «Complete within 4 turns» kept over wiki «Complete within 3 turns» (code 7, num 4; I-251 group C)'],
+      objectives: [{ ...objective(7, 'Complete within 4 turns', { type: 2, id: 0, num: 500 }), num: 4 }] });
+    const out = build([record('E-R', [decided])]);
+    const q = entry(out, 'E-R').quests[0];
+    assert.ok(q.served, JSON.stringify(q));
+    assert.ok(!q.reason, q.reason);
+    const row = out.stage.find((s) => s.stageId === q.stageId);
+    assert.deepStrictEqual([row.submissionRequire[0], row.submissionNum[0], row.submissionRewardType[0], row.submissionItemNum[0]], [7, 4, 2, 500]);
+  },
   // the id ranges: a run that needs more numbers than the range holds stops with the range and the count
   id_range_overflow() {
     const cfg = { ...CONFIG, stageMax: CONFIG.stageBase + 2 };

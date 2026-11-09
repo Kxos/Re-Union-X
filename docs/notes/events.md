@@ -773,6 +773,32 @@ Final state (rev 293, resources 110 + a `-Quick` pack with map 743840; plan
 - **Notice.** «Events» section «Challenge events»: counts by year from `events.json`, quiz boards and their sources, Boosters later,
   Surprise events (whole day, original) and Time Missions (not original), community goals and completion rewards.
 - **Open:** I-247 .. I-252; map 743840 bench look (I-249); the Part 3 open points still stand.
+
+## I-251: khuxwiki / donor objective conflicts decided (10 November 2026)
+
+User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied in the private importer so a rerun reproduces them:
+- **Precedence rule (new).** A donor stage used by ONE run only is that run's own game data: the donor value wins over a khuxwiki
+  transcription unless a contemporary notice or banner contradicts it. The old order (notice > khuxwiki > donor) stays for stages
+  reused by later runs, decided case by case. Written as a comment where it is applied (private pilot `build.py`, `P4_OBJ_DECIDED`).
+- **Decided for the donor (20 quests).** Group A (wiki copy errors: EV-1236 Heartless of Speed / Magic, EV-0853 Lady Luck (3),
+  EV-0450 Mean Maiden 9/10), group C (single-use stages: EV-0513 Coco 4/10 and 10/10, EV-0522 #2, EV-0584 Equipment Cost Challenge
+  Returns x7, EV-0641 10/10, EV-0670 1/10, EV-0795 #4, EV-0904 Shiva 10/10, EV-0917 Titan 10/10) and DAY 10 (stage 730200, Moogle
+  O' Glory in the 2018, 2019 and 2020 runs: the series' 7-keyblade rotation). The record keeps the donor objective and reward and
+  carries `objectiveResolved` (a note) instead of `objectiveMismatch` (a hold); make-events.js needs no change
+  (`test-make-events.js` `objective_resolved_is_served`).
+- **Page pin fixes (separate change, `P4_PAGE_PIN`).** EV-0948 (October 2019) used the «(November 2019)» pages of EV-0968: now
+  the bare «Big Bonus Challenge n/7» pages (Savage Vanguard, within 4 turns, as the donor and notice 58881). EV-1300 Round 3
+  stages 355200-355203 used the «(Round 2)» pages: now the «(Round 3)» pages (Sun Gem / Moon Gem, Round 3 targets). EV-0483 720470
+  now uses the (06/11/2018) page (Queen Bee, Defeat 13); 720460 has no page. Group B (11 quests) needs no objective decision after
+  these pins.
+- **Rerun without drift.** The builders read «our master» frozen as the Task 6 records saw it (private `our_master_snapshot.json`):
+  a rerun against the live master no longer marks the event enemy rows as ours. `KHUX_CHALLENGE_OUT` writes a rerun to a scratch
+  folder; zero drift was proven before the I-251 changes. A private check (`tmp\events\i251\check_i251.py`) proves the values.
+- **Dry regen** (scratch copies, live files untouched): `objectiveMismatch` 18 -> 0. The released quests' maps were never imported, so
+  the served totals stay 305 events / 2,181 quests until `import_event_stages.py` runs; with the maps imported on the dry index:
+  307 events / 2,210 quests (+29: 26 of the 30 and EV-1300 355200-355202). Still held: EV-0450 722690, EV-0853 740643 (JP map
+  incomplete), EV-0522 729920 (room DB_0000_01_00 not served), EV-0483 720460 (no khuxwiki page, enemies unconfirmed).
+  event_ids.json unchanged. Live order: regen, `import_event_stages.py`, regen, bench.
 - **Lessons for Part 5.** Never run `make_jp_enemies.py --ids` (it pruned enemy_gen and a master regen during the rebuild served only
   393 quests); a builder rerun against a master that already has the new enemy rows shrinks the missing list; read the original
   notices before trusting the plan's window rules (the Surprise «15-60 minutes» was wrong); a shared map is allowed when the drops
