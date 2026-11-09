@@ -393,6 +393,8 @@ function respondLogin(res) {
   // libcocos2dcpp.so: il server originale ci controllava l'integrita' del client.
   // La risposta deve contenere systemLogin e data; poi i link (LINK_FIELDS).
   startSession(); // revisione del master fissa fino al prossimo login
+  // event quest rewards kept because they could not be given (a Spirit part with the pet off, routes-events.js): paid once now if possible
+  try { if (player.created && eventRoutes().payPending()) console.log('[event] kept rewards paid at login'); } catch (e) { console.log(`[event] payPending: ${e.message}`); }
   if (player.created) savePlayer();
   const body = {
     ret: ret(),
@@ -4579,6 +4581,8 @@ function eventRoutes() {
     stageState: (id) => ({ score: player.stageScores?.[id] || 0, playStatus: id in (player.stageScores || {}) ? STAGE_CLEARED : 0 }),
     grantItem, grantObjective: grantObjectiveReward,
     addEventCoins: (setKey, n) => eventBoards().addCoins(setKey, n), // Event Coins (type 15) into the entry's board set
+    // a Spirit part (33) with the pet off is kept in player.pendingRewards, paid at a later login with the pet on (payPending)
+    canPay: (type) => type !== 33 || PET_ENABLED,
   });
 }
 // Event Coins and Event Boards (type 4, routes-event-boards.js): the sets of events.json boardSets, available while a feeder

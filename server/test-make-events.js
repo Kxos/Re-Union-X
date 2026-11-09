@@ -898,7 +898,7 @@ const tests = {
     assert.strictEqual(out.stage.length, 0);
     // the list names the first quest only: that one is served with the drama, the other still waits
     const cfg = { ...CONFIG, quizDramas: { 'E-Q/+0': { ids: [1990001], reconstructed: true } } };
-    const o2 = build([rec()], undefined, cfg);
+    const o2 = me.buildEvents([rec()], cfg, master(), undefined, {}, null, null, { dramas: [1990001] });
     const qs = entry(o2, 'E-Q').quests;
     assert.deepStrictEqual(qs.map((x) => x.reason || null), [null, 'quizTextMissing']);
     assert.strictEqual(o2.stage.length, 1);
@@ -940,6 +940,45 @@ const tests = {
     assert.strictEqual(entry(out, 'E-O8').quests[0].sharedWith, 'E-P9');
     assert.deepStrictEqual(out.index.entries.map((e) => e.censusId), ['E-O8', 'E-P9'], 'index in record order');
     assert.strictEqual(out.stage.length, 1);
+  },
+  // fix round 1 (I2): the same quest paying Event Coins in two records of different board sets is not shared (its coins would
+  // go to one set only): the later one waits, mapKeyUsed
+  shared_quest_coins_same_set_only() {
+    const k = { map: { key: 745200, stageBinId: 745200, status: 'ok' } };
+    const a = record('E-SA', [quest(700860, 1, [501], k)], { boardSetKey: '2099-01' });
+    const b = record('E-SB', [quest(700860, 1, [501], k)], { boardSetKey: '2099-02', start: '2019-05-01', end: '2019-05-07' });
+    const c = record('E-SC', [quest(700860, 1, [501], k)], { boardSetKey: '2099-01', start: '2019-06-01', end: '2019-06-07' });
+    const out = build([a, b, c]);
+    assert.strictEqual(entry(out, 'E-SB').quests[0].reason, 'mapKeyUsed');
+    assert.strictEqual(entry(out, 'E-SC').quests[0].sharedWith, 'E-SA', 'same set: shared');
+    // without Event Coins the sets do not matter
+    const noCoin = (r) => { r.quests[0].objectives[1] = objective(10, 'Complete without having to continue', { type: 2, id: 0, num: 5 }); return r; };
+    const o2 = build([noCoin(record('E-SA', [quest(700860, 1, [501], k)], { boardSetKey: '2099-01' })), noCoin(record('E-SB', [quest(700860, 1, [501], k)], { boardSetKey: '2099-02', start: '2019-05-01' }))]);
+    assert.strictEqual(entry(o2, 'E-SB').quests[0].sharedWith, 'E-SA');
+  },
+  // fix round 1 (M1): two Booster first-clear items stay two (each with its position)
+  booster_positions_kept() {
+    const q = quest(700870, 1, [501], { firstClear: [{ type: 34, id: 1, num: 1, booster: { name: 'P Booster +10%' } }, { type: 34, id: 2, num: 1, booster: { name: 'P Booster +10%' } }] });
+    const item = entry(build([record('E-BP', [q])]), 'E-BP').quests[0];
+    assert.ok(item.served);
+    assert.deepStrictEqual(item.boosters, [{ objective: 0, slot: 0, emblemName: 'P Booster +10%' }, { objective: 0, slot: 1, emblemName: 'P Booster +10%' }]);
+  },
+  // fix round 1 (M2): a drama id of quizDramas that is not among the available dramas stops the run
+  quiz_drama_must_exist() {
+    const qz = quest(700710, 1, [501], { drama: { before: 1, after: 0, beforeIds: [1900501], afterIds: [] } });
+    const cfg = { ...CONFIG, quizDramas: { 'E-QD/+0': { ids: [1990001], reconstructed: true } } };
+    const recs = () => [record('E-QD', [JSON.parse(JSON.stringify(qz))], { type: 'QUIZ' })];
+    assert.throws(() => me.buildEvents(recs(), cfg, master(), undefined, {}, null, null, { dramas: [1990002] }), /1990001/);
+    assert.throws(() => me.buildEvents(recs(), cfg, master(), undefined, {}, null, null, {}), /available dramas/);
+    const ok = me.buildEvents(recs(), cfg, master(), undefined, {}, null, null, { dramas: [1990001] });
+    assert.ok(entry(ok, 'E-QD').quests[0].served);
+  },
+  // fix round 1 (M3): a record's own boardSetKey that the board sets do not have stops the run (when board sets are given)
+  record_set_key_known() {
+    const m = { ...master(), ...BOARD_MASTER() };
+    assert.throws(() => me.buildEvents([record('E-K', [quest(700880, 1, [501])], { boardSetKey: '2099-77' })], CONFIG, m, undefined, {}, null, boardSets()), /2099-77/);
+    // without board sets the key is kept as it is (coins accrue to it)
+    assert.strictEqual(entry(build([record('E-K', [quest(700880, 1, [501])], { boardSetKey: '2099-77' })]), 'E-K').boardSetKey, '2099-77');
   },
   // a challenge event paying Event Coins (type 15): with the boardSetKey of the month's set the quest is built and its coins go
   // to that set; without one it is labelled noBoardSet (coins logged, not paid)

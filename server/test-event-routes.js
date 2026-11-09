@@ -27,7 +27,7 @@ function world(opts = {}) {
   w.player = opts.player || { name: 'Prova' };
   w.index = opts.index || INDEX();
   w.tables = { stage: [stageRow(S1), stageRow(S2), stageRow(S3, { validSubmission: 1 }), stageRow(PAST)] };
-  w.ev = routesEvents({
+  w.ev = routesEvents(w.opts = {
     player: w.player, savePlayer: () => { w.saves++; }, masterRows: (t) => w.tables[t] || [], eventIndex: () => w.index, storyWeek: () => w.week, realNow: () => w.now,
     serverTimeAt: fmt, clock: { weekEnd: (ms) => ms + 7000, dayEnd: (ms) => ms + 1000 }, webBase: 'http://x', log: (m) => w.logs.push(m),
     stageState: (id) => ({ score: w.scores[id] || 0, playStatus: id in w.scores ? 3 : 0 }),
@@ -202,6 +202,43 @@ const tests = {
     w.ev.onStageClear(S1, [1]);
     assert.strictEqual(w.player.pendingBoosters.length, 1, 'never twice');
     assert.ok(w.logs.some((l) => /Booster/.test(l)), 'logged');
+    // fix round 1 (M1): two Booster first-clear items (objective 0) stay two, by their position
+    const ix2 = INDEX();
+    ix2.entries[1].quests[0].boosters = [{ objective: 0, slot: 0, emblemName: 'P Booster +10%' }, { objective: 0, slot: 1, emblemName: 'P Booster +10%' }];
+    const w2 = world({ index: ix2 });
+    w2.ev.onStageClear(S3, [1]);
+    assert.deepStrictEqual(w2.player.pendingBoosters.map((b) => [b.objective, b.slot]), [[0, 0], [0, 1]]);
+    delete w2.player.events.cleared[S3];
+    w2.ev.onStageClear(S3, [1]);
+    assert.strictEqual(w2.player.pendingBoosters.length, 2, 'still two, once each');
+  },
+  // fix round 1 (I1): a reward the server cannot give now (a Spirit part with the pet off, canPay false) is not lost: it is kept in
+  // player.pendingRewards once per stage / objective / position, and paid once by payPending when it can be given
+  pending_reward_kept() {
+    const w = world();
+    let petOn = false;
+    w.ev = routesEvents({ ...w.opts, canPay: (type) => type !== 33 || petOn });
+    w.tables.stage[0] = stageRow(S1, { submissionRewardType: [2, 33, 3], submissionItemId: [0, 402003, 90011], submissionItemNum: [10, 1, 1],
+      validClearGetItem: 1, clearGetItemType: [33], clearGetItemId: [402010], clearGetItemNum: [1] });
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.deepStrictEqual(w.objectives.map((o) => o.n), [1, 3], 'objective 2 not paid now');
+    assert.deepStrictEqual(w.grants, [], 'the Spirit part first-clear item not paid now');
+    assert.deepStrictEqual(w.player.pendingRewards, [{ stageId: S1, objective: 0, slot: 0, type: 33, id: 402010, num: 1 }, { stageId: S1, objective: 2, slot: 0, type: 33, id: 402003, num: 1 }]);
+    delete w.player.events.cleared[S1];
+    w.ev.onStageClear(S1, [2]);
+    assert.strictEqual(w.player.pendingRewards.length, 2, 'once each');
+    assert.strictEqual(w.ev.payPending(), 0, 'still cannot pay');
+    petOn = true;
+    assert.strictEqual(w.ev.payPending(), 2);
+    assert.deepStrictEqual(w.grants, [{ type: 33, id: 402010, num: 1 }, { type: 33, id: 402003, num: 1 }]);
+    assert.deepStrictEqual(w.player.pendingRewards, []);
+    assert.strictEqual(w.ev.payPending(), 0, 'paid once');
+    // without canPay (the old wiring) every type is paid as before
+    const plain = world();
+    plain.tables.stage[0] = w.tables.stage[0];
+    plain.ev.onStageClear(S1, [2]);
+    assert.deepStrictEqual(plain.objectives.map((o) => o.n), [2]);
+    assert.strictEqual(plain.player.pendingRewards, undefined);
   },
 };
 

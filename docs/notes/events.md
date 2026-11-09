@@ -570,3 +570,8 @@ Final state (rev 288, resources 108; plan `docs/superpowers/plans/2026-11-08-eve
 - **Incomplete records.** The 106 quests with the record map status «STG header absent» (98) / «part 2 absent» (8) use 60 map keys:
   no other copy holds the missing files (55 keys have no file at all in any copy; 740260/740262 have parts 00-01 of 3). Survey of
   every copy tried: private `tmp\events\maps\INCOMPLETE.md`. They stay unserved (`mapUnusable`).
+
+## Generator rules for the challenge events (Events Part 4, Task 4, 10 November 2026)
+
+- **Booster only.** A quest is held as `boosterOnly` when all its objective and first-clear rewards are Boosters. Drops are not
+  counted: a quest with drops and only a Booster objective is held too (review ruling, behaviour kept).

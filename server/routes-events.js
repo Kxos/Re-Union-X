@@ -11,7 +11,10 @@
 // Boosters (Events Part 4 Task 4): an objective (or first-clear item) whose reward was a Booster pays nothing here (make-events.js
 // writes type 0 in the stage row and names the Booster in the index quest, boosters [{objective, emblemName}], objective 0 = first
 // clear); its clear records the Booster once in player.pendingBoosters [{emblemName, stageId, objective}] (absent in older saves =
-// empty), for Part 6 to grant.
+// empty), for Part 6 to grant; a first-clear Booster carries its position (slot), so two stay two.
+// Rewards the server cannot give now (fix round 1, I1: canPay(type, id) false, e.g. a Spirit part, type 33, with the pet off) are
+// not lost: kept once per stage / objective (0: first clear) / position in player.pendingRewards [{stageId, objective, slot, type,
+// id, num}], and paid once by payPending() when they can be given (server.js: at login).
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
 //   pruneKept (Event Catalog, Task 5).
 'use strict';
@@ -29,7 +32,7 @@ const EVENT_TYPE = CONFIG.eventType; // eventType of an index entry without one 
 const STAGE_FIRST = CONFIG.stageBase, STAGE_LAST = CONFIG.stageMax; // stage ids of the event quests
 const COIN_TYPE = 15; // Event Coins: into the entry's board set (addEventCoins)
 
-function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, webBase, log = console.log }) {
+function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, canPay = null, webBase, log = console.log }) {
   // read-only view of player.events (an older save has none: nothing kept, nothing cleared); state() creates it to write
   const view = () => player.events || { kept: null, cleared: {} };
   const state = () => {
@@ -53,11 +56,29 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
   // the Boosters of an event quest (index quest boosters) and the ones recorded for Part 6; reading never writes the save
   const boostersOf = (stageId) => { const id = Number(stageId), e = entryOfStage(id); return ((e && (e.quests || []).find((q) => q.stageId === id)) || {}).boosters || []; };
   const pendingBoosters = () => (Array.isArray(player.pendingBoosters) ? player.pendingBoosters : []);
+  const slotOf = (x) => x.slot || 0;
   function recordBooster(stageId, b) {
     const list = Array.isArray(player.pendingBoosters) ? player.pendingBoosters : (player.pendingBoosters = []);
-    if (list.some((x) => x.stageId === stageId && x.objective === b.objective)) return;
-    list.push({ emblemName: b.emblemName, stageId, objective: b.objective });
+    if (list.some((x) => x.stageId === stageId && x.objective === b.objective && slotOf(x) === slotOf(b))) return;
+    list.push({ emblemName: b.emblemName, stageId, objective: b.objective, ...(b.objective === 0 ? { slot: slotOf(b) } : {}) });
     log(`[event] ${stageId}: ${b.objective ? `objective ${b.objective}` : 'first-clear item'} is a Booster (${b.emblemName}): recorded for the Boosters (Part 6)`);
+  }
+  // a reward that cannot be given now: kept once (stage, objective, position), paid by payPending
+  const payable = (type, id) => !canPay || canPay(type, id);
+  function recordPending(stageId, objective, slot, type, id, num) {
+    const list = Array.isArray(player.pendingRewards) ? player.pendingRewards : (player.pendingRewards = []);
+    if (list.some((x) => x.stageId === stageId && x.objective === objective && x.slot === slot)) return;
+    list.push({ stageId, objective, slot, type, id, num });
+    log(`[event] ${stageId}: ${objective ? `objective ${objective}` : 'first-clear item'} (type ${type} id ${id}) cannot be given now: kept for later`);
+  }
+  // pays every kept reward that can be given now, once; -> how many (the caller saves when > 0)
+  function payPending() {
+    const list = Array.isArray(player.pendingRewards) ? player.pendingRewards : [];
+    const ready = list.filter((x) => payable(x.type, x.id));
+    if (!ready.length) return 0;
+    player.pendingRewards = list.filter((x) => !ready.includes(x));
+    for (const x of ready) { grantItem(x.type, x.id, x.num); log(`[event] ${x.stageId}: kept reward type ${x.type} id ${x.id} paid`); }
+    return ready.length;
   }
 
   // From respondStageClear, after its objective rules (Lux objectives, all-together flag): cleared = the objective ids of this
@@ -81,6 +102,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       for (const b of boosters.filter((x) => x.objective === 0)) recordBooster(id, b);
       for (let i = 0; i < (row.validClearGetItem || 0); i++) {
         const type = row.clearGetItemType[i];
+        if (!payable(type, row.clearGetItemId[i])) { recordPending(id, 0, i, type, row.clearGetItemId[i], row.clearGetItemNum[i]); continue; }
         pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]), row.clearGetItemNum[i]);
       }
     }
@@ -92,6 +114,8 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     for (const n of fresh) {
       const b = boosters.find((x) => x.objective === n);
       if (b) { recordBooster(id, b); continue; }
+      const t = row.submissionRewardType?.[n - 1];
+      if (!payable(t, row.submissionItemId?.[n - 1])) { recordPending(id, n, 0, t, row.submissionItemId[n - 1], row.submissionItemNum?.[n - 1]); continue; }
       pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
     }
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
@@ -195,7 +219,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       endTime: serverTimeAt(clock.weekEnd(realNow())), newStageId: 0, isLock: 0, complete: 0 }];
   }
 
-  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries, pendingBoosters };
+  return { events, catalogEvents, onStageClear, isEventStage, keep, unkeep, catalogCtx, pruneKept, keptEntry, entryOfStage, boardSetOf, currentEntries, pendingBoosters, payPending };
 }
 
 module.exports = routesEvents;

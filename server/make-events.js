@@ -353,7 +353,7 @@ const payableOf = (config) => (config.payableTypes ? { types: new Set(config.pay
   booster: Number.isInteger(config.boosterType) ? config.boosterType : BOOSTER_TYPE } : null);
 // copy of the quest with our item ids in its first-clear items, objective rewards and drop rows (resolve null: ids kept). payable
 // (payableOf): a Booster (reward.booster, objective.booster or the booster type) is taken out of the copy, its objective pays
-// nothing here (reward null: type 0 in the stage row), and listed in boosters [{objective (0: first clear), emblemName}] for
+// nothing here (reward null: type 0 in the stage row), and listed in boosters [{objective (0: first clear, with slot), emblemName}] for
 // player.pendingBoosters (Part 6 grants it); any other type outside payable.types (objectives, first clear) or payable.drop (drop
 // and chest rows) is listed in unknownTypes: the caller holds the quest, so the type never reaches a row of the client.
 function remapItems(q, resolve, payable = null) {
@@ -363,9 +363,9 @@ function remapItems(q, resolve, payable = null) {
   const isBooster = (d, o) => !!((o && o.booster) || (d && (d.booster || (payable && d.type === payable.booster))));
   const nameOf = (d, o) => ((o && o.booster) || (d && d.booster) || {}).name || (d && d.name) || 'Booster';
   const check = (d, set, where) => { if (payable && d && d.type && !set.has(d.type)) unknown.push(`${where} type ${d.type}`); };
-  c.firstClear = (c.firstClear || []).filter((x) => {
+  c.firstClear = (c.firstClear || []).filter((x, slot) => {
     if (!payable || !isBooster(x)) return true;
-    boosters.push({ objective: 0, emblemName: nameOf(x) });
+    boosters.push({ objective: 0, slot, emblemName: nameOf(x) }); // slot: its position among the first-clear items (two stay two)
     return false;
   }).map((x) => { check(x, payable && payable.types, 'first-clear item'); return res(x, missing); });
   c.objectives = (c.objectives || []).map((o, i) => {
@@ -391,12 +391,16 @@ const questSig = (q, mapKey) => JSON.stringify([mapKey, q.worldId, q.level, q.ap
   (q.objectives || []).map((o) => [o.code, o.dataType, o.idType, o.id, o.num, (o.reward || {}).type || 0, (o.reward || {}).id || 0, (o.reward || {}).num || 0]),
   (q.firstClear || []).map((x) => [x.type, x.id || 0, x.num || 1]), (q.enemies || []).map((e) => [e.id, e.level, e.count]), q.restrictions || {}, q.drops || null,
   [(q.drama || {}).beforeIds || [], (q.drama || {}).afterIds || []], q.combined ? 1 : 0]);
-// quizDramas entry of a quest key: {ids, reconstructed} | null (a bare list: ids)
-function quizDramaOf(config, key) {
+// quizDramas entry of a quest key: {ids, reconstructed} | null (a bare list: ids). dramas: the drama ids available in our
+// resources (buildEvents opts.dramas); a listed id not among them, or no such list, stops the run (fix round 1, M2)
+function quizDramaOf(config, key, dramas) {
   const v = (config.quizDramas || {})[key];
   if (!v) return null;
   const ids = Array.isArray(v) ? v : v.ids;
   if (!Array.isArray(ids) || !ids.length || !ids.every(Number.isInteger)) throw new Error(`events: quizDramas ${key} has no list of drama ids`);
+  if (!dramas) throw new Error(`events: quizDramas ${key} lists dramas but no list of available dramas was given (KHUX_EVENT_DRAMAS / config.availableDramas)`);
+  const off = ids.filter((id) => !dramas.has(id));
+  if (off.length) throw new Error(`events: quizDramas ${key}: drama ${off.join(', ')} is not among the available dramas`);
   return { ids, reconstructed: !Array.isArray(v) && !!v.reconstructed };
 }
 
@@ -404,7 +408,9 @@ function quizDramaOf(config, key) {
 // ids (event_ids.json), anchors, maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}}
 // of import_event_stages.py), boardSets (null: no event board; else the board sets {sets} of KHUX_EVENT_BOARDS)
 // -> {evStage, stage, reward, sphere, sphereArray, sphereMasu, poi, maps, ids, boardReport, index: {entries, reasons, boardSets}}
-function buildEvents(records, config, master, ids, anchors = {}, maps = null, boardSets = null) {
+// opts: {dramas} the drama ids available in our resources (a list or a Set; checked against quizDramas)
+function buildEvents(records, config, master, ids, anchors = {}, maps = null, boardSets = null, opts = {}) {
+  const dramas = opts.dramas ? new Set(opts.dramas) : null;
   checkRanges(master, config);
   const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
   // board sets: census id -> set key (sets[].censusIds); every board numbered (append-only), rows kept for the sets handed out
@@ -424,6 +430,10 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // a challenge event's own boardSetKey (Part 4, the month's set, cited in the record): the board sets may not say otherwise
       if (rec.boardSetKey && setOf.has(rec.censusId) && setOf.get(rec.censusId) !== rec.boardSetKey) {
         throw new Error(`events: ${rec.censusId} has boardSetKey ${rec.boardSetKey} but the board sets list it under ${setOf.get(rec.censusId)}`);
+      }
+      // ... nor lack it (fix round 1, M3: a typo would send the coins to a balance no board ever reads)
+      if (rec.boardSetKey && !sets.some((st) => st.setKey === rec.boardSetKey)) {
+        throw new Error(`events: ${rec.censusId} has boardSetKey ${rec.boardSetKey}, which is not a set of the board sets (KHUX_EVENT_BOARDS)`);
       }
     }
   }
@@ -548,13 +558,17 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       if (paid.unknownTypes.length) { item.reason = 'rewardTypeUnknown'; item.why = `${textOf('rewardTypeUnknown')} (${paid.unknownTypes.join('; ')})`; continue; }
       if (paid.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${paid.missing.join('; ')})`; continue; }
       q = paid.q;
+      // «Booster only»: no objective or first-clear reward but Boosters. Drops are not counted (fix round 1, M5: a quest with drops
+      // and only a Booster objective is held too; docs/notes/events.md)
       const otherRewards = (q.objectives || []).filter((o) => (o.reward || {}).type).length + (q.firstClear || []).length;
       if (paid.boosters.length && !otherRewards) { item.reason = 'boosterOnly'; item.why = textOf('boosterOnly'); continue; }
       // a quiz quest asks its question on a board shown in its before drama: served only with that drama (config quizDramas)
       const dr = q.drama || {};
       const quiz = quizTypes.has(rec.type) && !!(dr.before || (dr.beforeIds || []).length);
-      const quizDrama = quiz ? quizDramaOf(config, key) : null;
+      const quizDrama = quiz ? quizDramaOf(config, key, dramas) : null;
       // the bookkeeping of a served quest (its own stage row, or the row of the same quest in an earlier record)
+      const coins = [...(q.objectives || []).map((o) => o.reward || {}), ...(q.firstClear || []), ...((q.drops || {}).enemies || []).flatMap((e) => e.rows || []),
+        ...((q.drops || {}).chests || []).flatMap((e) => e.rows || [])].some((x) => x.type === COIN_TYPE);
       const markServed = (sid) => {
         item.served = true; item.status = 'served';
         if (sid !== stageId) item.stageId = sid;
@@ -565,8 +579,6 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         item.labels.forEach((l) => { labels.add(l); used.add(l); });
         const offIds = quizDrama ? [] : dr.beforeIds || [];
         if ((dr.before && !quizDrama) || dr.after) { item.drama = { beforeIds: offIds, afterIds: dr.afterIds || [] }; labels.add('dramaOff'); }
-        const coins = [...(q.objectives || []).map((o) => o.reward || {}), ...(q.firstClear || []), ...((q.drops || {}).enemies || []).flatMap((e) => e.rows || []),
-          ...((q.drops || {}).chests || []).flatMap((e) => e.rows || [])].some((x) => x.type === COIN_TYPE);
         // Event Coins go to the entry's board set (boardSetKey); without one they are logged, not paid (noBoardSet)
         if (coins) labels.add(entry.boardSetKey ? 'eventCoins' : 'noBoardSet');
       };
@@ -574,7 +586,10 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // objectives are paid once, as any quest's
       const sig = questSig(q, mapKey);
       const twin = hasStage(q0) ? builtQuests.get(q0.stageId) : null;
-      if (twin && twin.censusId !== rec.censusId && twin.sig === sig && !quiz) {
+      // a quest paying Event Coins is shared only between entries of the same board set (fix round 1, I2: its coins go to the set
+      // of the entry that built it); otherwise the later one waits (mapKeyUsed below)
+      const sameSet = !coins || (twin && (twin.setKey || null) === (entry.boardSetKey || null));
+      if (twin && twin.censusId !== rec.censusId && twin.sig === sig && !quiz && sameSet) {
         item.sharedWith = twin.censusId;
         markServed(twin.stageId);
         continue;
@@ -637,7 +652,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
         ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });
-      if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig });
+      if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig, setKey: entry.boardSetKey || null });
       markServed(stageId);
     }
     // the entry's board set: handed out when it has a built board and this entry a served quest
@@ -859,7 +874,10 @@ function patch(masterDir, opts = {}) {
   const anchorsFile = opts.anchorsFile || (opts.records ? path.join(gameData, 'event_anchors.json') : anchorsPathOf(process.env.KHUX_EVENT_SRC));
   const config = opts.config || loadConfig();
   const maps = opts.maps !== undefined ? opts.maps : (opts.records ? null : loadMaps(MAPS_DIR));
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets);
+  // the drama ids available in our resources (quiz boards, quizDramas): opts.dramas, else the list file KHUX_EVENT_DRAMAS, else
+  // config.availableDramas; none: a quizDramas entry stops the run
+  const dramas = opts.dramas || (process.env.KHUX_EVENT_DRAMAS ? readJson(process.env.KHUX_EVENT_DRAMAS) : config.availableDramas) || null;
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas });
   const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward,
     sphere: out.sphere, sphereArray: out.sphereArray, sphereMasu: out.sphereMasu };
   const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));
