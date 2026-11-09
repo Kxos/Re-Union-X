@@ -114,7 +114,7 @@ for k, v in wh.items():
 # 31 approved 23-10 + 4 dead.lwf of event quest families (Events Part 1 Task 2b: 226, 1522, 1530, 1566), approved by the
 # user on the rendered sheets 06-11 (label «Events Task 2b, user-approved 06-11»); a pending one would say «pending user review»
 # + 5 std-dead (Events Part 2, user-approved 07-11: 1568, 1570, 1572, 1573 and 96 Circus Clown)
-check(len(anims) == 40, 'whole copies: %d animations (40)' % len(anims))
+check(len(anims) == 41, 'whole copies: %d animations (41)' % len(anims))
 std = {d for d, rows in anims.items() if rows[0][1][2] == 'std-dead'}
 check(std == {'lwf/character/enemy/%d/dead' % f for f in (96, 1568, 1570, 1572, 1573)}, 'std-dead copies: %s' % sorted(std))
 check(all(v[1].startswith('lwf/character/enemy/1/dead/') and v[3].startswith('std-dead (user-approved 07-11)')
@@ -148,7 +148,7 @@ check(not {v[2] for v in list(ex.values()) + list(wh.values()) + list(rc.values(
 ev_anims = {k.rsplit('/', 1)[0] for k in ev2}
 check(all(d + '/' + d.rsplit('/', 1)[1] + '.lwf' in ev2 for d in ev_anims), 'events2 animation without its LWF row')
 ev_fams = {int(k.split('/')[3]) for k in ev2}
-check(len(ev_fams) == 36 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
+check(len(ev_fams) == 48 and not ev_fams & {65, 185}, 'events2 families: %d %s' % (len(ev_fams), sorted(ev_fams & {65, 185})))
 # declared transparent pieces (user decisions; label column BLANK-DECLARED, events2_export.py): only these slots
 with open(xd.EVENTS2_TABLE, encoding='utf-8') as fh:
     declared = {ln.split('\t')[0] for ln in fh if not ln.startswith('#') and ln.count('\t') >= 4

@@ -13,7 +13,11 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      # Runs are queued (concurrency), so each one starts from the newest main: it then sees the message ids the
+      # previous run saved and never posts a notice twice.
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 20
