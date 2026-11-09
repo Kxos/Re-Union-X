@@ -18,7 +18,8 @@ Cards: one per card id (card_ids: the entry's id and every built original evStag
 to 640x140 (make_raid_banners.card) from, in order: the row's donor banner key (bannerKey of events.json, git-ignored; fetched
 by --fetch as row_<key>.png, or any file *_<key>.png already in D or D/notices_extra), the --extra file of that id, and for the
 entry's own id only its first notice whose banner file is in D. A card id with none keeps no card: the server then serves
-0.png of event_img, or 404.
+0.png of event_img, or 404. --all-rows: also the rows not built yet (Part 4 Task 5: the cards of a whole year are made and shown
+to the user before its quests are served; give a staging --index and --out so nothing served changes before the approval).
 After a change of the cards bump imgVersion in server/event_config.json (EVENT_IMG_VERSION), then the master revision.
 """
 import argparse
@@ -66,13 +67,13 @@ def banner_key(notice, shared):
 
 def wanted(index, notices, ids=None):
     """[(evStageId, noticeId, key)] of the entries of the index (every noticeId; key None when the notice is not in the
-    list or shows no banner of its own)"""
+    list or shows no banner of its own); an entry without a card (NO_CARD) is left out"""
     by_id = {int(n['id']): n for n in notices if str(n.get('id', '')).isdigit()}
     shared = shared_keys(notices)
     out = []
     for e in index.get('entries', []):
         ev = e.get('evStageId')
-        if not ev or (ids is not None and ev not in ids):
+        if not ev or (ids is not None and ev not in ids) or e.get('noQuests') in NO_CARD:
             continue
         for nid in e.get('noticeIds') or []:
             n = by_id.get(int(nid))
@@ -84,15 +85,20 @@ def file_name(nid, key):
     return 'row_%s.png' % key if nid is None else '%d_%s.png' % (nid, key)
 
 
-def card_ids(index, ids=None):
-    """the card ids of the index in order: each entry's id, then its built original evStage rows (rows, available).
+NO_CARD = ('board', 'notice')
+
+
+def card_ids(index, ids=None, all_rows=False):
+    """the card ids of the index in order: each entry's id, then its built original evStage rows (rows, available; with
+    all_rows every row that has an id, built or not: cards made and reviewed ahead of the serve, Events Part 4 Task 5).
     An entry with noQuests 'board' (an announcement notice whose quests were only on the event boards: no quest and no
     evStage row of its own, e.g. EV-0579) had no card in the original: its id is left out (the Event Catalog shows the
-    «No card in the original» box; user decision 08-11)"""
+    «No card in the original» box; user decision 08-11). The same for noQuests 'notice' (an information notice of the
+    challenge records, Part 4: not a playable event, not in the Event Catalog)"""
     out = []
     for e in index.get('entries', []):
-        own = [] if e.get('noQuests') == 'board' else [e.get('evStageId')]
-        for ev in own + [r.get('evStageId') for r in e.get('rows') or [] if r.get('available')]:
+        own = [] if e.get('noQuests') in NO_CARD else [e.get('evStageId')]
+        for ev in own + [r.get('evStageId') for r in e.get('rows') or [] if all_rows or r.get('available')]:
             if ev and ev not in out and (ids is None or ev in ids):
                 out.append(ev)
     return out
@@ -108,10 +114,10 @@ def row_keys(index):
     return out
 
 
-def wanted_rows(index, ids=None):
+def wanted_rows(index, ids=None, all_rows=False):
     """[(card id, None, key)] of the card ids with a donor banner key (fetch() names them row_<key>.png)"""
     keys = row_keys(index)
-    return [(ev, None, keys[ev]) for ev in card_ids(index, ids) if ev in keys]
+    return [(ev, None, keys[ev]) for ev in card_ids(index, ids, all_rows) if ev in keys]
 
 
 def key_file(dest, key):
@@ -178,18 +184,20 @@ def _get(url):
         return r.read()
 
 
-def build(index, notices, banners, out, ids=None, extra=None):
+def build(index, notices, banners, out, ids=None, extra=None, all_rows=False):
     """writes out/<card id>.png for every card id of the index (card_ids); returns (done {card id: file}, missing [(card id,
     censusId)]). The file: the row's donor banner key (row_keys, Part 2 Task 5), else extra {card id: file name in banners}
-    (a banner found by hand: another notice of the event, a later run, a wiki file), else for the entry's own id the first
-    notice of the entry whose banner file is in banners"""
+    (a banner found by hand: another notice of the event, a later run, a wiki file; null: no card, the entry's notices show
+    no banner of its own), else for the entry's own id the first notice of the entry whose banner file is in banners"""
     os.makedirs(out, exist_ok=True)
     files = {}
     for ev, nid, key in wanted(index, notices, ids):
         if key and ev not in files and os.path.exists(os.path.join(banners, file_name(nid, key))):
             files[ev] = file_name(nid, key)
     for ev, f in (extra or {}).items():
-        if os.path.exists(os.path.join(banners, f)):
+        if not f:
+            files.pop(int(ev), None)   # null: the notice's banner is not the event's own (Part 4 Task 5): no card
+        elif os.path.exists(os.path.join(banners, f)):
             files[int(ev)] = f
     for ev, key in row_keys(index).items():
         f = file_name(None, key) if os.path.exists(os.path.join(banners, file_name(None, key))) else key_file(banners, key)
@@ -200,7 +208,7 @@ def build(index, notices, banners, out, ids=None, extra=None):
         for ev in [e.get('evStageId')] + [r.get('evStageId') for r in e.get('rows') or []]:
             census.setdefault(ev, e.get('censusId'))
     done, missing = {}, []
-    for ev in card_ids(index, ids):
+    for ev in card_ids(index, ids, all_rows):
         if ev not in files:
             missing.append((ev, census.get(ev)))
             continue
@@ -216,19 +224,22 @@ def main(argv=None):
     ap.add_argument('--banners', required=True, help='folder of the downloaded notice banners (private)')
     ap.add_argument('--index', default=os.path.join(REPO, 'server', 'game_data', 'events.json'))
     ap.add_argument('--out', default=os.path.join(REPO, 'server', 'game_data', 'event_img'))
-    ap.add_argument('--extra', help='JSON {evStageId: file in --banners}: banners found by hand (private, never in the repo)')
+    ap.add_argument('--extra', help='JSON {evStageId: file in --banners, or null for no card}: banners found by hand (private, '
+                    'never in the repo)')
     ap.add_argument('--ids', help='only these evStageIds: A-B,C')
+    ap.add_argument('--all-rows', action='store_true', help='also the original evStage rows not built yet (cards reviewed ahead '
+                    'of the serve; use a staging --index and --out until the user approves them)')
     a = ap.parse_args(argv)
     index = json.load(open(a.index, encoding='utf-8'))
     notices = json.load(open(a.notices, encoding='utf-8-sig'))
     ids = mrb.parse_ids(a.ids) if a.ids else None
     if a.fetch:
-        fetched, cached, failed, gave_up = fetch(wanted_rows(index, ids) + wanted(index, notices, ids), a.banners)
+        fetched, cached, failed, gave_up = fetch(wanted_rows(index, ids, a.all_rows) + wanted(index, notices, ids), a.banners)
         print('event banners: %d fetched, %d already here, %d failed%s %s' % (
             len(fetched), len(cached), len(failed), ' (gave up after two failures)' if gave_up else '', failed[:12]))
         return 1 if failed else 0
     extra = json.load(open(a.extra, encoding='utf-8')) if a.extra else None
-    done, missing = build(index, notices, a.banners, a.out, ids, extra)
+    done, missing = build(index, notices, a.banners, a.out, ids, extra, a.all_rows)
     print('event banners: %d cards written, %d cards without a banner: %s -> %s' % (len(done), len(missing), missing[:40], a.out))
     return 0
 

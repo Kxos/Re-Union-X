@@ -79,6 +79,9 @@ try:
     assert d2[20003] == 'hand.png' and d2[20001] == '51518_9c3xN7ln4R.png' and m2 == [(20004, 'EV-D')], (d2, m2)
     assert Image.open(os.path.join(t, 'o3', '20003.png')).size == (640, 140)
     assert meb.build(index, notices, dest, os.path.join(t, 'o2'), {20002})[0] == {20002: '51523_9cbFN5Ie4.png'}
+    # extra null (Part 4 Task 5): the notice's banner is not the event's own -> no card, reported missing
+    d7, m7 = meb.build(index, notices, dest, os.path.join(t, 'o7'), None, {'20001': None})
+    assert 20001 not in d7 and (20001, 'EV-A') in m7 and not os.path.exists(os.path.join(t, 'o7', '20001.png')), (d7, m7)
     # one card per original evStage row (Part 2 Task 5): each built row from its donor banner key (fetched as row_<key>.png, a
     # file of that key already in the folder or in notices_extra is reused); the row key wins over extra and the notice
     rindex = {'entries': [{'censusId': 'EV-R', 'evStageId': 20001, 'noticeIds': [51518], 'rows': [
@@ -92,6 +95,12 @@ try:
     assert meb.card_ids(bindex) == [20015], meb.card_ids(bindex)
     db, mb = meb.build(bindex, notices, dest, os.path.join(t, 'ob'))
     assert 20181 not in db and not os.path.exists(os.path.join(t, 'ob', '20181.png')) and not mb, (db, mb)
+    # an information notice of the challenge records (noQuests 'notice', Part 4) has no card either, and its notice is not fetched
+    nindex = {'entries': [{'censusId': 'EV-0445', 'evStageId': 20300, 'noticeIds': [51518], 'noQuests': 'notice'}]}
+    assert meb.card_ids(nindex) == [] and meb.wanted(nindex, notices) == [], 'notice: no card'
+    # all_rows (Part 4 Task 5): the rows not built yet get their card too (review ahead of the serve)
+    assert meb.card_ids(rindex, all_rows=True) == [20001, 20051, 20052, 20053, 20003], meb.card_ids(rindex, all_rows=True)
+    assert meb.wanted_rows(rindex, all_rows=True) == [(20001, None, 'rowK1'), (20051, None, 'rowK2'), (20052, None, 'rowK3')]
     wr = meb.wanted_rows(rindex)
     assert wr == [(20001, None, 'rowK1'), (20051, None, 'rowK2')], wr
     os.makedirs(os.path.join(dest, 'notices_extra'), exist_ok=True)
