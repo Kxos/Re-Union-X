@@ -276,6 +276,78 @@ const tests = {
     assert.strictEqual(presents.length, 2, 'once per event');
     assert.deepStrictEqual(Object.keys(w.player.events.bonus), [ix.entries[1].censusId]);
   },
+  // ---- Events Part 5 Task 3 ----
+  // a stage IX objective pair paying two avatar parts (types 18 / 19 of the original row, served as 20 by make-events.js): both
+  // paid on the first clear into player.avatarParts (server.js grantItem type 20), a replay leaves the parts unchanged
+  avatar_pair_reward_once() {
+    const w = world();
+    const grant = (type, id) => { if (type === 20 && id) w.player.avatarParts = [...new Set([...(w.player.avatarParts || []), id])]; else w.grants.push({ type, id }); };
+    w.ev = routesEvents({ ...w.opts, grantItem: grant, grantObjective: (stage, n) => grant(stage.submissionRewardType[n - 1], stage.submissionItemId[n - 1]) });
+    w.tables.stage[0] = stageRow(S1, { validSubmission: 3, submissionRewardType: [20, 20, 2], submissionItemId: [40083, 41083, 0], submissionItemNum: [1, 1, 20], validClearGetItem: 0,
+      clearGetItemType: [], clearGetItemId: [], clearGetItemNum: [] });
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    assert.deepStrictEqual(w.player.avatarParts, [40083, 41083], 'the ♂ and the ♀ part, as the row lists them');
+    const parts = w.player.avatarParts;
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    w.ev.onStageClear(S1, [2]);
+    assert.strictEqual(w.player.avatarParts, parts, 'a replay adds nothing (the list is not even rewritten)');
+    assert.deepStrictEqual(w.player.avatarParts, [40083, 41083]);
+    assert.deepStrictEqual(w.grants, [{ type: 2, id: 0 }], 'the Jewels of objective 3 once');
+  },
+  // a rerun sharing the stage row of an earlier run (make-events.js sharedWith): its objectives are paid once in all, whichever
+  // record the player clears it from (the same stage id)
+  rerun_shared_objectives_once() {
+    const ix = INDEX();
+    ix.entries.push({ censusId: 'E-3', evStageId: 29903, start: '2019-04-08', end: '2019-04-14', stageIds: [S1], available: true, quests: [quest(S1, { sharedWith: 'E-1' })] });
+    const w = world({ index: ix });
+    assert.strictEqual(w.ev.entryOfStage(S1).censusId, 'E-1', 'the entry that built the row');
+    w.ev.onStageClear(S1, [1, 3]);
+    const paid = w.objectives.length;
+    w.ev.onStageClear(S1, [1, 3]);
+    assert.strictEqual(w.objectives.length, paid, 'cleared again from the rerun: nothing');
+    assert.ok(w.ev.events().filter((c) => c.stages.some((s) => s.stageId === S1)).every((c) => c.stages.find((s) => s.stageId === S1).clearMissionIds.join() === '1,3'),
+      'both cards show the objectives done');
+  },
+  // The Keyblade War part 3: a quest of another Union (index quest `union`) is not listed for the player; the completion reward
+  // counts the common quests and the player's own Union version only (byUnion), and only when that Union is ready (readyUnions)
+  union_quests_and_completion() {
+    const ix = INDEX();
+    ix.entries[0].quests = [quest(S1), quest(S2, { union: 1 }), quest(S3, { union: 2 })];
+    ix.entries[0].stageIds = [S1, S2, S3];
+    ix.entries[0].communityBonus = { name: 'KW', noticeId: 61226, kind: 'completion', count: null, stageIds: [S1], rewards: [{ type: 3, id: 311905, num: 1 }], ready: false,
+      byUnion: { 1: [S2], 2: [S3], 3: [], 4: [], 5: [] }, readyUnions: [1, 2] };
+    ix.entries[1].quests = [];
+    ix.entries[1].stageIds = [];
+    const presents = [];
+    const w = world({ index: ix, player: { name: 'U', unionId: 2 } });
+    w.ev = routesEvents({ ...w.opts, addPresent: (type, id, num, comment) => presents.push({ type, id, num, comment }) });
+    assert.deepStrictEqual(w.ev.events().map((c) => c.stages.map((s) => s.stageId)), [[S1, S3]], 'only the own Union version');
+    w.ev.onStageClear(S1, [1, 2, 3]);
+    w.ev.onStageClear(S2, [1, 2, 3]);
+    assert.deepStrictEqual(presents, [], 'another Union\'s version does not count');
+    w.ev.onStageClear(S3, [1]);
+    assert.deepStrictEqual(presents.map((p) => p.id), [311905], 'common + own Union done (S3 has one objective)');
+    // a player of a Union whose version is not served: never paid
+    const w5 = world({ index: ix, player: { name: 'L', unionId: 5 } });
+    const p5 = [];
+    w5.ev = routesEvents({ ...w5.opts, addPresent: (type, id, num) => p5.push(id) });
+    for (const s of [S1, S2, S3]) w5.ev.onStageClear(s, [1, 2, 3]);
+    assert.deepStrictEqual(p5, []);
+    assert.deepStrictEqual(w5.ev.events().map((c) => c.stages.map((s) => s.stageId)), [[S1]]);
+  },
+  // I-253 item 2: a counted quest with no objectives (validSubmission 0) is done once cleared (playStatus), so its bonus can be paid
+  bonus_quest_without_objectives() {
+    const ix = INDEX();
+    ix.entries[0].communityBonus = { noticeId: 9, kind: 'completion', count: null, stageIds: [S1], rewards: [{ type: 2, id: 0, num: 5 }], ready: true };
+    const presents = [];
+    const w = world({ index: ix });
+    w.ev = routesEvents({ ...w.opts, addPresent: (type, id, num) => presents.push(num) });
+    w.tables.stage[0] = stageRow(S1, { validSubmission: 0 });
+    assert.strictEqual(w.ev.payBonuses(), 0, 'not cleared');
+    w.scores[S1] = 100;
+    w.ev.onStageClear(S1, []);
+    assert.deepStrictEqual(presents, [5]);
+  },
   // fix round 1 (I1): a reward the server cannot give now (a Spirit part with the pet off, canPay false) is not lost: it is kept in
   // player.pendingRewards once per stage / objective / position, and paid once by payPending when it can be given
   pending_reward_kept() {

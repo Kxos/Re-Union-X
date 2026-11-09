@@ -14,11 +14,17 @@
  "imgVersion": 9,
  "shortWindowHours": 12,
  "serve": {
-  "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784"],
+  "censusIds": ["EV-0753", "EV-0760", "EV-0761", "EV-0763", "EV-0764", "EV-0765", "EV-0772", "EV-0775", "EV-0776", "EV-0777", "EV-0781", "EV-0783", "EV-0784",
+   "EV-0081", "EV-0097", "EV-0122", "EV-0139", "EV-0156", "EV-0182", "EV-0202", "EV-0219", "EV-0232", "EV-0248", "EV-0270", "EV-0295", "EV-0333", "EV-0340", "EV-0346",
+   "EV-0441", "EV-0467", "EV-0488", "EV-0512", "EV-0536", "EV-0561", "EV-0570", "EV-0592", "EV-0621", "EV-0622", "EV-0647", "EV-0648", "EV-0678", "EV-0679", "EV-0714", "EV-0741",
+   "EV-1103", "EV-1273", "EV-0913", "EV-0941"],
+  "censusIdsNote": "Events Part 5 (Org XIII events and The Keyblade War, records orgxiii_2016_17 / 2018_19 / 2020 and keyblade_war_2019): EV-0081..EV-0346 the 2016-17 monthly runs (donor stage rows), EV-0441..EV-0741 the NEW XIII runs, EV-1103 / EV-1273 Challenge Organization XIII 2020, EV-0913 / EV-0941 The Keyblade War Pt. 1 (schedule line dating EV-0929) and Pt. 3.",
   "types": ["GEM", "COIN", "EQ", "KEY", "QUIZ"]
  },
  "payableNote": "Events Part 4 Task 4 (make-events.js remapItems). payableTypes: the reward types of an objective or a first-clear item that server.js grantItem pays (2 Jewels, 3 medal, 4 munny, 5 material, 7 title, 11 Lux, 13 keyblade, 14 Avatar Coin, 15 Event Coins, 16 Raid Coin, 20 avatar part, 26 Skip Ticket, 28 Skip Ticket+, 33 Spirit part, 40 Platinum Ticket, 41 Draw Ticket, 42 Draw Points); payableDropTypes: the types of an original drop or chest row (3 medal, 5 material, 8 and 9 chest contents the client pays, as in our story reward rows, 15 Event Coins). boosterType 34: a Booster, not paid here (label boosterLater, player.pendingBoosters for Part 6; a quest whose only rewards are Boosters: boosterOnly). Any other type: the quest is not served (rewardTypeUnknown) and the type never reaches a row of the client.",
  "payableTypes": [2, 3, 4, 5, 7, 11, 13, 14, 15, 16, 20, 26, 28, 33, 40, 41, 42],
+ "rewardTypeAliasesNote": "Events Part 5 Task 3 (make-events.js aliasRewardTypes): reward types of the original rows that the server pays as another type. 18 (an avatar set, e.g. Organization XIII Coat 331 / 332) and 19 (a style avatar part, e.g. Marluxia Style 40083 / 41083) are avatarParts rows: served as 20 (avatar part), the type the client shows in an objective list and grantItem adds once to player.avatarParts (the Special quests serve their sets and styles the same way, the ♂ part on one objective and the ♀ part on the other, as the original rows list them). The id must be in the avatarParts table (else rewardItemMissing).",
+ "rewardTypeAliases": {"18": 20, "19": 20},
  "payableDropTypes": [3, 5, 8, 9, 15],
  "boosterType": 34,
  "quizTypes": ["QUIZ"],
@@ -128,7 +134,9 @@
   "rewardTypeUnknown": "A reward of this quest is of a kind this server cannot give yet, so the quest is not served: it comes back when that reward can be given.",
   "quizTextMissing": "This quiz quest asked its question on a picture board shown before the quest; that board is not in the surviving game files and has not been rebuilt yet, so the quest is not served.",
   "objectiveMismatch": "The khuxwiki page and the surviving game data give different objectives for this quest, so it is held back until the right ones are confirmed.",
-  "notice": "An information notice of the original game, not an event: it had no quests of its own."
+  "notice": "An information notice of the original game, not an event: it had no quests of its own.",
+  "objectiveUnmapped": "An objective of this quest is known only from its text, and no surviving game data proves its code, so the quest is held back: it is never served with a guessed objective.",
+  "scheduleLine": "A second notice of an event that is listed under its own row: it had no quests of its own."
  },
  "labelPhrases": {
   "wikiQuest": "wikiQuest",
@@ -136,9 +144,17 @@
   "wiki value applied, low confidence": "wikiLowConfidence",
   "map incomplete": "mapIncomplete",
   "no khuxwiki page": "noWikiPage",
-  "stage row of a later run": "laterRun"
+  "stage row of a later run": "laterRun",
+  "wikiRoom": "wikiRoom",
+  "jpTwinMap": "jpTwinMap",
+  "levelShifted": "levelShifted",
+  "unionTwin": "unionTwin"
  },
  "reconstructedWhy": {
+  "wikiRoom": "No original map of this quest survives in any source we hold (the Japanese and worldwide game files, the donated data, the restored rooms): its map was generated in the room the khuxwiki page names, with the enemies and the target of the page at the quest's level. Not original.",
+  "jpTwinMap": "The map of this quest is the Japanese map of the same quest, found by its content (the same enemies, counts, target and rooms at the quest's level): the worldwide map file of this run is lost.",
+  "levelShifted": "The map of this quest is a Japanese map with the same layout used at another level in the original; here its enemies fight at this quest's own level (khuxwiki), every enemy shifted by the same amount. The original map of this level is lost.",
+  "unionTwin": "In the original each Union had its own version of this quest; only one version survives in the game data. This Union's version was rebuilt from it (the same AP, level, restrictions and objectives, which khuxwiki gives identically for every Union) with the target of this Union's map file. You see only your own Union's version, and only it counts for the completion reward.",
   "donorKept": "The quest keeps the values of the later game data; the khuxwiki page describes an earlier run of the same quest (2018), so it was not used for this one.",
   "wikiLowConfidence": "One value of this quest comes from the khuxwiki page and could not be confirmed by a second source.",
   "mapIncomplete": "The map file of this quest is incomplete in the data we have: the missing parts are reported, never invented.",

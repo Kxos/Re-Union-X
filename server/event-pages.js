@@ -46,6 +46,8 @@ const PLAIN_REASONS = {
   rewardTypeUnknown: 'A reward of this quest is of a kind this server cannot give yet: the quest comes back when it can.',
   quizTextMissing: 'The picture board with the question of this quiz is not in the surviving game files: the quest comes back when its board is rebuilt.',
   objectiveMismatch: 'Its objectives differ between the khuxwiki page and the surviving game data: it is held back until they are confirmed.',
+  // Part 5 Task 3
+  objectiveUnmapped: 'An objective of this quest is known only from its text: it is held back until the surviving game data proves it, never served with a guessed one.',
 };
 function whyPlain(why, reason) {
   if (PLAIN_REASONS[reason]) return PLAIN_REASONS[reason];
@@ -87,14 +89,17 @@ function statusOf(e, ctx) {
 const keptOf = (entries, ctx) => entries.find((e) => rowState(e, ctx) === 'kept');
 // «Replaces: <kept event>» over a Keep button; hidden on the kept row, which gets it back when another event is kept (kxRow)
 const replacesLine = (st, kept) => (st.button === null ? ''
-  : `<div class="rp"${st.button === 1 && kept ? '' : ' style="display:none"'}>${st.button === 1 && kept ? `Replaces: ${esc(kept.name || kept.censusId)}` : ''}</div>`);
+  : `<div class="rp"${st.button === 1 && kept ? '' : ' style="display:none"'}>${st.button === 1 && kept ? `Replaces: ${esc(catName(kept))}` : ''}</div>`);
 // every served quest with its objectives done (ctx.stageDone, the crown rule of the Special and Raid Catalogs)
 const doneOf = (e, ctx) => !!ctx.stageDone && servedOf(e).length > 0 && servedOf(e).every((q) => ctx.stageDone(q.stageId));
 // an informative notice, not a playable event (user 08-11): no quest of its own, no original card (noQuests 'board', the signal
 // that also leaves its card out in make_event_banners.py card_ids) and no evStage row with a card. Not in the catalogue, no page
 // (e.g. EV-0579 «New Event Coins Available in October!»: its boards are reached through the playable events of their set).
 // Part 4 Task 4: noQuests 'notice' too (an information notice of the challenge records, notice_row_not_listed)
-const informative = (e) => ['board', 'notice'].includes(e.noQuests) && !(e.quests || []).length && !(e.rows || []).some((r) => r.available);
+// Part 5 Task 3: a second notice of an event (scheduleLineOf, make-events.js reason scheduleLine) is listed under its event only
+const informative = (e) => (['board', 'notice'].includes(e.noQuests) || !!e.scheduleLineOf) && !(e.quests || []).length && !(e.rows || []).some((r) => r.available);
+// the name of an event in the Event Catalog: catalogName (make-events.js, the original banner names the event otherwise), else its name
+const catName = (e) => e.catalogName || e.name || e.censusId;
 const entriesOf = (index) => ((index && index.entries) || []).filter((e) => e && e.censusId && e.evStageId && e.start && !informative(e))
   .slice().sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.evStageId - b.evStageId));
 // an entry by its id or by the id of one of its original evStage rows (Part 2 Task 5: the Details of a row card)
@@ -140,7 +145,7 @@ function catalogPage(index, ctx = {}) {
     const st = statusOf(e, ctx), href = detailHref(e.evStageId), m = e.start.slice(0, 7), served = servedOf(e).length, all = (e.quests || []).length;
     const label = m !== lastM ? `<div class="ml" data-m="${m}">${monthYear(`${m}-01`)}</div>` : '';
     lastM = m;
-    const line = `${dateLine(e)} · ${served === all ? plural(all, 'quest') : `${served} of ${plural(all, 'quest')} served`}`, name = esc(e.name || e.censusId), y = e.start.slice(0, 4);
+    const line = `${dateLine(e)} · ${served === all ? plural(all, 'quest') : `${served} of ${plural(all, 'quest')} served`}`, name = esc(catName(e)), y = e.start.slice(0, 4);
     // one minimal row (Part 4 Task 4, catalog_size_budget: about 340 events): the row opens its page (ROWS_JS, from data-eid), the
     // name is the link, the missing card box and the Keep handler are functions of the page; the rows are sent packed, as the
     // Raid Catalog's (catalog-pages.js packCatalog), and the cards load from data-src once the rows are built (kxImgs)
@@ -241,7 +246,7 @@ const boosterLine = (q) => ((q.boosters || []).length ? `<small>${(q.boosters ||
 function detailPage(index, evStageId, ctx = {}) {
   const entries = entriesOf(index), e = entryOfId(entries, Number(evStageId));
   if (!e) return null;
-  const st = statusOf(e, ctx), kept = keptOf(entries, ctx), title = e.name || e.censusId;
+  const st = statusOf(e, ctx), kept = keptOf(entries, ctx), title = catName(e);
   const button = st.button === null ? '' : `<div>${keepButton(e.evStageId, st.button, ' onclick="var b=this;return kxKeep(b,function(){b.style.display=\'none\';})"')}</div>`;
   const quests = e.quests || [];
   const kv = [['Dates', dateRange(e)], ['Game year', GAME_YEARS[gameYearOf(e.start)].name],

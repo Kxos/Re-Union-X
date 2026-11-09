@@ -45,6 +45,14 @@
 // and a donor 1 served as config.eventType (3). A member of a set not handed out gets the label boardsLater (no board built: its
 // rewards do not exist here yet) or noCoinSource (boards, but no quest of the set is served). events.json boardSets {[setKey]:
 // {boardIds, chains, censusIds}} lists the sets handed out (server: Part 3 Task 5).
+// Org XIII events (Part 5 Task 3, plan docs/superpowers/plans/2026-11-10-events-part5-orgxiii.md): a quest with map.source
+// 'generate' gets its own generated map (genMapOf: stageBinId = its own stage id, game_data/event_gen_maps.json for
+// recon/tools/gen_story_maps.py config key `events`, label wikiRoom; served once the generated-maps report lists it), 'jpTwin' a JP
+// 4.3.1 map of the same quest (label jpTwinMap; levelShifted with map.levelShifted, served once the import applied the shift); an
+// objective with code null holds its quest (objectiveUnmapped); scheduleLineOf records get no row (scheduleLine); datesOf dates
+// another record (applyDatesOf); reward types 18 / 19 are paid as avatar parts (rewardTypeAliases); unionQuests mark the Union of
+// a quest (index quest `union`); stagesOf lists another record's built quests on this record's card; a record's completionReward
+// joins the bonus list (mergeCompletion, per Union with questUnion); catalogName renames the Event Catalog row.
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
 //
 //   node server/make-events.js [master folder]
@@ -62,7 +70,7 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
-  'quizBoardFootage', 'quizBoardScreenshot'];
+  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
 // (quizBoardScreenshot)
@@ -70,13 +78,21 @@ const QUIZ_BOARD_LABELS = ['quizBoard', 'quizBoardFootage', 'quizBoardScreenshot
 // reason of a record or quest not built (Events Part 2): text in event_config.json reasonText. Part 4 Task 4: boosterOnly (every
 // reward a Booster), rewardTypeUnknown (a reward type not in payableTypes / payableDropTypes), quizTextMissing (a quiz quest whose
 // board drama is not listed in quizDramas), objectiveMismatch (the private record's khuxwiki objective text contradicts the donor
-// code: held, Task 1 ruling), notice (an information notice of the records, noQuests 'notice': no row, no catalogue row)
+// code: held, Task 1 ruling), notice (an information notice of the records, noQuests 'notice': no row, no catalogue row).
+// Part 5 Task 3: objectiveUnmapped (an objective known only as text, code null: held, never a stopgap code; plan Global
+// Constraints «Nothing half-served»), scheduleLine (a second notice of an event, scheduleLineOf: no row, no card, no catalogue row)
 const REASONS = ['shared', 'board', 'coin', 'undated', 'wikiEmpty', 'rewardItemMissing', 'notSelected',
   'enemyMissing', 'mapUnusable', 'mapKeyUsed', 'rewardRowsMissing', 'raidSpecial', 'worldMismatch',
-  'boosterOnly', 'rewardTypeUnknown', 'quizTextMissing', 'objectiveMismatch', 'notice'];
+  'boosterOnly', 'rewardTypeUnknown', 'quizTextMissing', 'objectiveMismatch', 'notice', 'objectiveUnmapped', 'scheduleLine'];
 // flags the private builder writes in a quest label (Task 1): this generator decides them itself (payableTypes, quizDramas,
-// objectiveMismatch), so they carry no label of their own
-const RECORD_FLAGS = ['boosterLater', 'boosterOnly', 'quizTextMissing', 'rewardTypeUnknown', 'objectiveMismatch'];
+// objectiveMismatch), so they carry no label of their own. objectiveResolved (I-251): a note, the donor objective is served as recorded
+const RECORD_FLAGS = ['boosterLater', 'boosterOnly', 'quizTextMissing', 'rewardTypeUnknown', 'objectiveMismatch', 'objectiveResolved'];
+// Union ids of the client (userDetail.unionId 1-5, docs/notes/mappe_storia.md Q555: Ursus 1, Anguis 2, Unicornis 3, Vulpes 4,
+// Leopardus 5): the Union quests of a record (unionQuests {quest name: {Union: donor stage id}}, The Keyblade War part 3)
+const UNION_IDS = Object.freeze({ Ursus: 1, Anguis: 2, Unicornis: 3, Vulpes: 4, Leopardus: 5 });
+const unionIdOf = (name, where) => { const u = UNION_IDS[name]; if (!u) throw new Error(`events: ${where}: unknown Union «${name}»`); return u; };
+// Generated maps (Part 5 Task 3, plan call 1): enemies per group at most, as make-special.js GROUP_MAX
+const GEN_GROUP_MAX = 5;
 const COIN_TYPE = 15, BOOSTER_TYPE = 34;
 const DAY = 86400000;
 const PT_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -423,12 +439,129 @@ function quizDramaOf(config, key, dramas) {
   return { ids, reconstructed, label };
 }
 
+// datesOf (Part 5 Task 3, user decision 10-11-2026): a schedule line that dates another record (EV-0913 «The Keyblade War Pt. 1»
+// dates EV-0929 from 2019-09-03, gem.json untouched). -> a copy of the records where the target starts on datesOf.start (when it has
+// no start or a later one) and, with no end of its own, ends on the Pacific day its last donor row ends (datesOf.end when given);
+// the target keeps datesFrom = the census id of the line. A target not among the records stops the run.
+function applyDatesOf(records) {
+  const lines = records.filter((r) => r.datesOf);
+  if (!lines.length) return records;
+  const out = records.slice();
+  for (const line of lines) {
+    const d = line.datesOf, i = out.findIndex((r) => r.censusId === d.censusId);
+    if (i < 0) throw new Error(`events: ${line.censusId} datesOf ${d.censusId}, which is not in the records`);
+    if (!d.start) throw new Error(`events: ${line.censusId} datesOf ${d.censusId} without a start`);
+    const t = { ...out[i], datesFrom: line.censusId };
+    if (!t.start || d.start < t.start) t.start = d.start;
+    if (!t.end) {
+      const ends = donorRowsOf(t).filter((r) => r.endTime).map((r) => ptDate(utcMs(r.endTime))).sort();
+      const last = ends.length ? ends[ends.length - 1] : null;
+      t.end = d.end || (last && last >= t.start ? last : null);
+    }
+    out[i] = t;
+  }
+  return out;
+}
+
+// Reward types the server pays as another type (event_config.json rewardTypeAliases {"18": 20, "19": 20}, Part 5 Task 3): the
+// avatar sets (18) and style avatar parts (19) of the original rows are avatarParts rows, paid as type 20 (an avatar part, the type
+// the client shows in an objective list: the Special quests serve their sets and styles as 20, ♂ and ♀ on two objectives, and
+// grantItem adds the id to player.avatarParts once). -> a copy of the quest with the aliased types in its objectives and first-clear
+// items (drops never carry them)
+function aliasRewardTypes(q, aliases) {
+  if (!aliases || !Object.keys(aliases).length) return q;
+  const as = (d) => (d && d.type && aliases[String(d.type)] ? { ...d, type: aliases[String(d.type)], origType: d.type } : d);
+  const hit = [...(q.objectives || []).map((o) => o.reward), ...(q.firstClear || [])].some((d) => d && aliases[String(d.type)]);
+  if (!hit) return q;
+  return { ...q, objectives: (q.objectives || []).map((o) => (o.reward ? { ...o, reward: as(o.reward) } : o)), firstClear: (q.firstClear || []).map(as) };
+}
+
+// Generated map of a quest with no original map (map.source 'generate', Part 5 Task 3, plan call 1, user 10-11-2026: every source
+// searched first, map.searched): the khuxwiki enemies (wikiEnemies {name: count}, the target counted once among them) in the
+// khuxwiki room of the quest's world, placed by recon/tools/gen_story_maps.py (config key `events`, the rules of the Special
+// quests). Names -> enemy ids by the rule of make-special.js mapEnemyId (event rows never answer: target 1xxxx, others 8xxxx,
+// else the smallest id); an objective on an enemy id (idType 1) puts that id on the map for as many members of its name as the
+// objective counts (the objective counts that id). Enemies are never substituted: a name with no row -> missing.
+// look {byName(name) -> [ids] sorted, nameOf(id)}. -> {entry (event_gen_maps.json, gen_story_maps «special» list shape), enemies
+// (record shape, for the stage row and the checks), targets, missing: [names]}
+function genMapOf(q, stageId, look) {
+  const target = ((q.targets || [])[0] || {}).name || null;
+  const counts = new Map(Object.entries(q.wikiEnemies || {}).map(([n, c]) => [n, Number(c) || 0]));
+  const missing = [];
+  const mapId = (name, isTarget) => {
+    const ids = look.byName(name);
+    return ids.find((i) => (isTarget ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000)) || ids[0] || 0;
+  };
+  if (!target) missing.push('the target (no name)');
+  if (target && counts.has(target)) counts.set(target, Math.max(0, counts.get(target) - 1));
+  // objective enemies: name -> {id, n}
+  const objOf = new Map();
+  for (const o of q.objectives || []) {
+    if (o.idType !== 1 || !Number.isInteger(o.id)) continue;
+    const name = look.nameOf(o.id);
+    if (!name) continue; // not in the master: enemyIdsOf lists it (enemyMissing)
+    const k = [...counts.keys()].find((n) => n.toLowerCase() === name.toLowerCase()) || name;
+    const prev = objOf.get(k);
+    objOf.set(k, { id: o.id, n: Math.max(prev ? prev.n : 0, Math.max(1, Number(o.num) || 1)) });
+    if (!counts.has(k)) counts.set(k, 0);
+  }
+  const members = [];
+  for (const [name, n0] of counts) {
+    const ob = objOf.get(name);
+    const n = Math.max(n0, ob ? ob.n : 0);
+    const own = ob ? Math.min(n, ob.n) : 0;
+    const rest = n - own;
+    const id = rest > 0 ? mapId(name, false) : 0;
+    if (rest > 0 && !id) { missing.push(name); continue; }
+    for (let k = 0; k < own; k++) members.push({ name, enemyId: ob.id });
+    for (let k = 0; k < rest; k++) members.push({ name, enemyId: id });
+  }
+  const targetId = target ? mapId(target, true) : 0;
+  if (target && !targetId) missing.push(target);
+  // groups: the members in record order, at most GEN_GROUP_MAX per group, same enemy id merged ({name, enemyId, n, reward 1: the
+  // no-drop row, the data-hole quests have no drop rows})
+  const groups = [];
+  for (let i = 0; i < members.length; i += GEN_GROUP_MAX) {
+    const g = [];
+    for (const m of members.slice(i, i + GEN_GROUP_MAX)) {
+      const last = g[g.length - 1];
+      if (last && last.enemyId === m.enemyId) last.n++;
+      else g.push({ name: m.name, enemyId: m.enemyId, n: 1, reward: 1 });
+    }
+    groups.push(g);
+  }
+  const room = (q.wikiRooms || [])[0] || ((q.room || [])[0] || {}).name || null;
+  const entry = { stageId, world: q.worldId, name: q.name, room, roomCodes: room ? ((q.wikiRoomCodes || {})[room] || []) : [], target, targetId, level: q.level || 1,
+    enemies: groups, treasures: [], rooms: 1 };
+  const enemies = [...groups.flat().map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
+    ...(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : [])];
+  return { entry, enemies, targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)] };
+}
+
+// Completion rewards of the records (Part 5 Task 3: EV-0941 completionReward, The Keyblade War Challenge Campaign, notice 61226):
+// merged into the bonus list (opts.bonus, the private community_bonus.json) entry with the same censusId and noticeId, or added;
+// the record's census id goes into alsoIn (its quests are counted too) and its questUnion {quest name: null | {Union: donor stage
+// id}} with it (unionRule: only the player's own Union version counts). Only selected records.
+function mergeCompletion(bonus, records, selected) {
+  const out = (bonus || []).map((b) => ({ ...b }));
+  for (const rec of records) {
+    const cr = rec.completionReward;
+    if (!cr || !selected(rec)) continue;
+    let b = out.find((x) => x.censusId === cr.censusId && x.noticeId === cr.noticeId);
+    if (!b) { b = { ...cr }; out.push(b); }
+    b.alsoIn = [...new Set([...(b.alsoIn || []), rec.censusId])];
+    if (cr.questUnion) b.questUnion = cr.questUnion;
+  }
+  return out;
+}
+
 // records, config (event_config.json), master {stage, evStage, enemy, reward?, sphere tables?, item tables?} without our own rows,
 // ids (event_ids.json), anchors, maps (null: no map check, unit tests; else {status: Map(mapKey -> {status, why}), poi: {mapKey: poi}}
 // of import_event_stages.py), boardSets (null: no event board; else the board sets {sets} of KHUX_EVENT_BOARDS)
 // -> {evStage, stage, reward, sphere, sphereArray, sphereMasu, poi, maps, ids, boardReport, index: {entries, reasons, boardSets}}
 // opts: {dramas} the drama ids available in our resources (a list or a Set; checked against quizDramas)
-function buildEvents(records, config, master, ids, anchors = {}, maps = null, boardSets = null, opts = {}) {
+function buildEvents(records0, config, master, ids, anchors = {}, maps = null, boardSets = null, opts = {}) {
+  const records = applyDatesOf(records0);
   const dramas = opts.dramas ? new Set(opts.dramas) : null;
   checkRanges(master, config);
   const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
@@ -475,7 +608,25 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
   const builtQuests = new Map(); // donor stage id -> {stageId, censusId, sig}: the same quest in a later record is served by that row
   const reasonText = config.reasonText || {};
   const textOf = (r) => { if (!reasonText[r]) throw new Error(`events: reason ${r} has no reasonText in event_config.json`); return reasonText[r]; };
-  const out = { evStage: [], stage: [], reward: [], sphere: [], sphereArray: [], sphereMasu: [], poi: {}, maps: [], ids: allIds, anchors: allAnchors, skipped: [],
+  // name lookups of the generated maps (genMapOf): the master's enemy rows without the event rows (make-event-enemies.js: an event
+  // row never answers a name lookup; opts.eventEnemyIds in the tests), built on first use
+  let genLook = null;
+  const lookGen = () => {
+    if (genLook) return genLook;
+    const evIds = opts.eventEnemyIds ? new Set(opts.eventEnemyIds) : require('./make-event-enemies').eventIds();
+    const byName = new Map();
+    for (const e of master.enemy || []) {
+      if (evIds.has(e.enemyId) || !e.name) continue;
+      const k = String(e.name).trim().toLowerCase();
+      if (!byName.has(k)) byName.set(k, []);
+      byName.get(k).push(e.enemyId);
+    }
+    for (const v of byName.values()) v.sort((a, b) => a - b);
+    genLook = { byName: (n) => byName.get(String(n).trim().toLowerCase()) || [], nameOf: (id) => names.get(id) || null };
+    return genLook;
+  };
+  const aliases = config.rewardTypeAliases || null;
+  const out = { evStage: [], stage: [], reward: [], sphere: [], sphereArray: [], sphereMasu: [], poi: {}, maps: [], genMaps: [], ids: allIds, anchors: allAnchors, skipped: [],
     boardReport: eb ? eb.report : null, index: { entries: [], reasons: {}, boardSets: {} } };
   const used = new Set();
   const builtMaps = new Map(); // map key -> our stage id built on it in this run
@@ -512,8 +663,16 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     else if (rec.boardSetKey) entry.boardSetKey = rec.boardSetKey;
     if (rec.sharedWith) entry.sharedWith = rec.sharedWith;
     if (rec.noQuests) entry.noQuests = rec.noQuests;
+    // Part 5 Task 3: the Event Catalog name of a record whose catalogue row the original banner names otherwise (EV-1089, banner
+    // «Challenge Organization XIII Pt.1»; event_ids.json keys unchanged), and the record a datesOf line dated
+    if (rec.catalogName) entry.catalogName = rec.catalogName;
+    if (rec.datesFrom) entry.datesFrom = rec.datesFrom;
+    // a second notice of an event (scheduleLineOf, Part 5 call 4: EV-0648 / EV-0678 beside EV-0647 / EV-0679, EV-0913 beside EV-0929):
+    // never a row, a card or a catalogue row of its own (one card per event); its quests, if any, are the other record's
+    const lineOf = rec.scheduleLineOf ? (typeof rec.scheduleLineOf === 'object' ? rec.scheduleLineOf.censusId : rec.scheduleLineOf) : null;
+    if (lineOf) entry.scheduleLineOf = lineOf;
     // a record that builds no quest of its own: noQuests (board, coin, undated), a shared notice (built with the other row), no date
-    const noBuild = rec.noQuests || (rec.sharedWith ? 'shared' : (!rec.start ? 'undated' : null));
+    const noBuild = rec.noQuests || (lineOf ? 'scheduleLine' : rec.sharedWith ? 'shared' : (!rec.start ? 'undated' : null));
     if (noBuild) {
       entry.reason = noBuild;
       entry.why = textOf(noBuild);
@@ -549,10 +708,28 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     let apMin = null;
     const donorRows = donorRowsOf(rec);
     const srcOf = new Map(); // index quest -> its record quest
+    // the Union of a quest (unionQuests: donor stage id -> Union id), the player's own Union version only (routes-events.js)
+    const unionOfStage = new Map();
+    for (const [qname, byUnion] of Object.entries(rec.unionQuests || {})) {
+      for (const [u, sid] of Object.entries(byUnion || {})) unionOfStage.set(sid, unionIdOf(u, `${rec.censusId} unionQuests «${qname}»`));
+    }
     for (const q0 of rec.quests || []) {
-      const key = questKey(rec, q0, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key], mapKey = mapKeyOf(q0);
+      const key = questKey(rec, q0, allAnchors[rec.censusId]), stageId = config.stageBase + allIds.entries[key];
+      // a quest with no original map in any source (map.source 'generate', Part 5 call 1): its own generated map, stageBinId = its
+      // own stage id (as make-special.js); a JP 4.3.1 map of the same quest found by content (map.source 'jpTwin'): label jpTwinMap,
+      // and levelShifted when the same layout is used at the quest's own level (map.levelShifted, user 10-11-2026)
+      // A levelShifted map is a copy of the JP file with every enemy level shifted: it gets its own key (its own stage id, the JP
+      // file in fromKey for recon/tools/import_event_stages.py), since the JP file itself may be the own map of another quest at its
+      // original level (Demyx II 66950, the Daily XIII maps)
+      const srcMap = (q0.map || {}).source, gen = srcMap === 'generate', shifted = !!(q0.map || {}).levelShifted;
+      const mapKey = gen || shifted ? stageId : mapKeyOf(q0);
+      const fromKey = shifted ? mapKeyOf(q0) : null;
       const qLabels = labelIds(q0.label, config.labelPhrases);
-      const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(mapKey)], names);
+      const ensure = (l) => { if (!qLabels.includes(l)) qLabels.push(l); };
+      if (gen) { ensure('wikiRoom'); const k = qLabels.indexOf('mapIncomplete'); if (k >= 0) qLabels.splice(k, 1); }
+      if (srcMap === 'jpTwin') ensure('jpTwinMap');
+      if ((q0.map || {}).levelShifted) ensure('levelShifted');
+      const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(fromKey || mapKey)], names);
       if (swapped) qLabels.push('wwEnemy');
       // AP of the khuxwiki page of this run over the surviving stage row (private builder rule, conflict recorded in the record)
       if ((q0.conflicts || []).some((c) => c.kind === 'ap' && c.resolution === 'khuxwiki')) qLabels.push('wikiAp');
@@ -560,14 +737,37 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       const wiki = qLabels.includes('wikiQuest');
       const { row: donorRow, guess: rowGuess } = rowOfQuest(donorRows, q0);
       const item = { key, donorStageId: q.stageId, donorRow: donorRow ? donorRow.eventStageId : null, ...(rowGuess ? { rowGuess: true } : {}), stageId, name: q.displayName || q.name, ap: q.ap, level: q.level, window: q.window || null, served: false, status: NOT_SERVED,
-        why: null, labels: qLabels, mapKey, mapStatus: (q.map || {}).status || null };
+        why: null, labels: qLabels, mapKey, mapStatus: gen ? 'generated' : (q.map || {}).status || null };
       if (q.window && isShort(q.window, config.shortWindowHours)) item.days = daysOf(q.window);
+      if (unionOfStage.has(q0.stageId)) item.union = unionOfStage.get(q0.stageId);
+      if ((q0.map || {}).levelShifted) { const ls = q0.map.levelShifted; item.levelShift = { from: ls.from, to: ls.to, delta: ls.delta }; }
       entry.quests.push(item);
       srcOf.set(item, q0);
       qLabels.forEach((l) => used.add(l));
       if (raidish) { item.reason = 'raidSpecial'; item.why = 'raid or Special quest'; continue; }
       // a quest rebuilt from the wiki page only: with no map key or no enemy id there is nothing to build
       if (wiki && (!Number.isInteger(mapKey) || !(q.enemies || []).some((e) => Number.isInteger(e.id)))) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
+      // an objective known only as text (code null): held with its text, never a stopgap code (plan Global Constraints)
+      const unmapped = (q.objectives || []).filter((o) => o.code === null || o.code === undefined);
+      if (unmapped.length) { item.reason = 'objectiveUnmapped'; item.why = `${textOf('objectiveUnmapped')} (${unmapped.map((o) => `«${o.text || '?'}»`).join('; ')})`; continue; }
+      let genEntry = null;
+      if (gen) {
+        // no world: no room to generate the map in
+        if (!Number.isInteger(q.worldId)) { item.reason = 'wikiEmpty'; item.why = textOf('wikiEmpty'); continue; }
+        // the JP table names a «variant» target (亜種: the Ω form, Part 5 Task 2) where the record keeps the plain khuxwiki name: the
+        // plain row would be another enemy (plan: a variant is its own enemy, never substituted); held until the record names the Ω row
+        const tname = ((q.targets || [])[0] || {}).name || '';
+        const jpT = String((q.jpTable || {}).target || '');
+        if (/variant/i.test(jpT) && !/Ω/.test(tname)) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${tname} variant (JP table «${jpT}»: the Ω form, not named in the record)`; continue; }
+        const g = genMapOf(q, stageId, lookGen());
+        if (g.missing.length) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${g.missing.join(', ')}`; continue; }
+        // «Collect all materials» needs materials on the map: the khuxwiki pages give none for a generated map, so the objective
+        // could never be met as the original (nothing half-served)
+        const chests = (q.objectives || []).filter((o) => o.code === 18);
+        if (chests.length) { item.reason = 'mapUnusable'; item.why = `map not usable: a generated map has no materials for «${chests[0].text}» (no treasure on the khuxwiki page)`; continue; }
+        genEntry = g.entry;
+        q = { ...q, enemies: g.enemies, targets: g.targets };
+      }
       // an enemy or target without an integer id cannot be looked up: on an unusable map the map is the cause, else it is listed by name
       const noId = wiki ? [] : [...new Set([...(q.enemies || []), ...(q.targets || [])].filter((e) => !Number.isInteger(e.id)).map((e) => `${e.name || 'unnamed'} (no id)`))];
       const missing = [...enemyIdsOf(q).filter((id) => Number.isInteger(id) && !enemies.has(id)), ...noId];
@@ -581,7 +781,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // a quest whose khuxwiki objective text contradicts the donor code (private record, Task 1 ruling): held until confirmed
       if ((q0.objectiveMismatch || []).length) { item.reason = 'objectiveMismatch'; item.why = textOf('objectiveMismatch'); continue; }
       // rewards (Part 4 Task 4): our item ids, a type we cannot pay holds the quest (never passed to the client), Boosters later
-      const paid = remapItems(q, resolveItem, payable);
+      const paid = remapItems(aliasRewardTypes(q, aliases), resolveItem, payable);
       if (paid.unknownTypes.length) { item.reason = 'rewardTypeUnknown'; item.why = `${textOf('rewardTypeUnknown')} (${paid.unknownTypes.join('; ')})`; continue; }
       if (paid.missing.length) { item.reason = 'rewardItemMissing'; item.why = `${textOf('rewardItemMissing')} (${paid.missing.join('; ')})`; continue; }
       q = paid.q;
@@ -623,9 +823,18 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       }
       const clash = byMap.get(mapKey);
       if (clash) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of stage ${clash.stageId}`; continue; }
+      // a generated map (genMapOf): listed in event_gen_maps.json (recon/tools/gen_story_maps.py, config key `events`), served or
+      // not; with the map report (live run) served only once gen_story_maps.py has written it (maps.generated, its report): a stage
+      // row never points at a map file the resources do not have. Its POI (no drops: reward row 1) is written by gen_story_maps.py
+      if (gen) {
+        put(out.genMaps, { ...genEntry, censusId: rec.censusId });
+        if (maps && !(maps.generated || new Set()).has(stageId)) {
+          item.reason = 'mapUnusable'; item.why = 'map not usable: generated map not built yet (recon/tools/gen_story_maps.py, config key events)'; continue;
+        }
+      }
       // difficulty variants of one record share a donor map (same stageBinId, map and POI written once: the POI holds only the
       // uid -> reward rows of the map file, the level of a variant is its stage row's addLevel); another record or other drops: not served
-      const prior = builtMaps.get(mapKey);
+      const prior = gen ? null : builtMaps.get(mapKey);
       const dropsKey = JSON.stringify(q.drops || null);
       // quiz answer maps (Part 4 Task 6, coordinator ruling): every original quiz run sent its stages to the same answer maps
       // (720510 / 720520 / 720530, 740260-740262), so a quiz stage of another quiz record shares the map key when the drops are equal
@@ -634,18 +843,29 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       // so a quest of another `shortWindow` record shares the map key whatever its objective rewards (each keeps its own stage row);
       // the drops are in the shared map file, so they must still be equal (the check below)
       const surpriseShare = !!(prior && rec.shortWindow && prior.shortWindow);
-      if (prior && prior.censusId !== rec.censusId && !quizShare && !surpriseShare) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
+      // a JP twin map (Part 5 Task 3, map.source 'jpTwin': the map of the same quest, same enemies, counts, target and level) may be the
+      // own map of another record's quest (the Daily XIII maps): one map file for both, so the drops must be equal (the check below)
+      const twinShare = !!(prior && (srcMap === 'jpTwin' || prior.jpTwin));
+      // a record rebuilt from the surviving stage rows of the 2016-17 data hole (rec.dataHole, Part 5): the original stage row of a
+      // quest loaded another stage's map (its stageBinId: the Daily XIII quests of EV-0333 on the maps of the monthly runs, user
+      // 10-11-2026), so it shares that map file; the drops must be equal (the check below). Other records keep the Part 4 rule
+      const donorBin = (q0.map || {}).stageBinId;
+      const binShare = !!(prior && rec.dataHole && !gen && !shifted && Number.isInteger(donorBin) && donorBin === mapKey && donorBin !== q0.stageId);
+      if (prior && prior.censusId !== rec.censusId && !quizShare && !surpriseShare && !twinShare && !binShare) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is the map of event stage ${prior.stageId} too`; continue; }
       if (prior && prior.dropsKey !== dropsKey) { item.reason = 'mapKeyUsed'; item.why = `map key ${mapKey} is shared with event stage ${prior.stageId} but the drops differ`; continue; }
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
-        drops: q.drops || null, served: false };
-      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz, shortWindow: !!rec.shortWindow }); put(out.maps, mapItem); }
+        drops: q.drops || null, served: false, ...(item.levelShift ? { levelShift: item.levelShift, fromKey } : {}) };
+      if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz, shortWindow: !!rec.shortWindow, jpTwin: srcMap === 'jpTwin' }); if (!gen) put(out.maps, mapItem); }
       const newRewards = [];
-      if (maps) {
+      if (maps && !gen) {
         // the original map file (recon/tools/import_event_stages.py report): not imported -> not served
         const st = maps.status.get(mapKey);
         if (!st || st.status !== 'imported') { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
+        // the same JP layout at the quest's own level (levelShift, event_maps.json): the import must have applied the shift to the
+        // copied map (report levelShifted), else the enemies would fight at the JP level
+        if (item.levelShift && !st.levelShifted) { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: level shift ${item.levelShift.from} -> ${item.levelShift.to} not applied by recon/tools/import_event_stages.py`; continue; }
         // the map's rooms must be of the quest's world (roomWorlds by room prefix; a prefix missing there is another world).
         // neutralRooms {prefix: home world}: fits its home world, or any world when another room of the map is of the quest's
         // world. worldExceptions {mapKey: why}: maps checked by hand (EV-0282, EV-0293: donor world kept on another world's rooms)
@@ -669,7 +889,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
       }
       // last, so the quiz quests held for their board are otherwise ready (the quiz boards task draws those first)
       if (quiz && !quizDrama) { item.reason = 'quizTextMissing'; item.why = textOf('quizTextMissing'); continue; }
-      if (maps) {
+      if (maps && !gen) {
         for (const [r, d] of newRewards) { const row = rewardRowOf(r, d.rows); ownRewards.set(r, { row, key: d.key }); put(out.reward, row); }
         out.poi[String(mapKey)] = maps.poi[String(mapKey)];
       }
@@ -677,7 +897,7 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
 
       const r = q.restrictions || {};
       const ref = refs.of(q.worldId);
-      const room = (q.room || [])[0] || {};
+      const room = genEntry ? { name: genEntry.room } : (q.room || [])[0] || {};
       const before = quizDrama ? quizDrama.ids : [];
       put(out.stage, { ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: q.name, mapName: room.name || ref.mapName, useAp: q.ap,
         chapterId: Math.floor(stageId / 1000), worldId: q.worldId, onlyDrama: 0, stageKind: STAGE_KIND, noPartner: r.noPartner || 0,
@@ -686,8 +906,25 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
         ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });
-      if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig, setKey: entry.boardSetKey || null });
+      if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig, setKey: entry.boardSetKey || null, item });
       markServed(stageId);
+    }
+    // stagesOf (Part 5 Task 3, The Keyblade War Pt. 3, EV-0941): quests of another record that the original row of this one also
+    // listed (its stage range held parts 1-2 of EV-0929). They are built once, by that record; here they are listed on this record's
+    // card with sharedWith (their objectives are paid once, by stage). A quest the other record does not serve is not listed.
+    if (rec.stagesOf && !raidish) {
+      const so = rec.stagesOf;
+      for (const sid of so.stageIds || []) {
+        const t = builtQuests.get(sid);
+        if (!t || t.censusId !== so.censusId) continue;
+        const { row: dr } = rowOfQuest(donorRows, { stageId: sid });
+        const src = t.item;
+        const item = { key: src.key, donorStageId: sid, donorRow: dr ? dr.eventStageId : null, stageId: t.stageId, name: src.name, ap: src.ap, level: src.level, window: null,
+          served: true, status: 'served', why: null, labels: [], mapKey: src.mapKey, mapStatus: src.mapStatus, sharedWith: t.censusId, stagesOf: true };
+        entry.quests.push(item);
+        if (!entry.stageIds.includes(t.stageId)) entry.stageIds.push(t.stageId);
+        apMin = apMin === null ? src.ap : Math.min(apMin, src.ap);
+      }
     }
     // the entry's board set: handed out when it has a built board and this entry a served quest
     if (entry.boardSetKey && !raidish && entry.stageIds.length && builtBoards(entry.boardSetKey).length) {
@@ -809,15 +1046,39 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
   // communityBonus {kind: 'completion', count: null, rewards, ready, missing?}. Ready when every prefix has a quest and every counted
   // quest is served; label completionReward (an original reward: entry label unchanged). An entry with no quest at all (an undated
   // record, quests []) is not ready (`missing` lists every prefix); a prefix list that matches none of its quests stops the run.
-  for (const b of opts.bonus || []) {
+  // Part 5 Task 3: a completion reward may count quests of other records too (alsoIn: the record whose completionReward was merged,
+  // mergeCompletion) and per Union (questUnion {quest name prefix: {Union: donor stage id}}: only the player's own Union version
+  // counts, user 10-11-2026) -> communityBonus also gets byUnion {unionId: [served stage ids of its own versions]} and readyUnions
+  // [unionIds whose quests are all served]; ready = every Union ready (routes-events.js pays a player of a ready Union).
+  for (const b of mergeCompletion(opts.bonus, records, selected)) {
     const e = out.index.entries.find((x) => x.censusId === b.censusId);
     if (!e) throw new Error(`events: community bonus ${b.censusId} is not a record`);
     const fixed = b.kind === 'completion';
     if (b.kind && !fixed) throw new Error(`events: community bonus ${b.censusId}: unknown kind ${b.kind}`);
     const named = (q) => String(q.name || '');
     const prefixes = fixed && b.quests ? b.quests : null;
-    const counted = (e.quests || []).filter((q) => (prefixes ? prefixes.some((p) => named(q).startsWith(p)) : !b.questPrefix || named(q).startsWith(b.questPrefix)));
-    const noQuests = !(e.quests || []).length;
+    // the quests counted: this entry's and those of the alsoIn entries (a quest listed twice, stagesOf, counted once)
+    const pool = [];
+    for (const x of [e, ...(b.alsoIn || []).filter((c) => c !== e.censusId).map((c) => out.index.entries.find((y) => y.censusId === c)).filter(Boolean)]) {
+      for (const q of x.quests || []) if (!pool.some((p) => p.stageId === q.stageId)) pool.push(q);
+    }
+    const qu = (fixed && b.questUnion) || null;
+    const isUnionPrefix = (p) => !!(qu && qu[p] && typeof qu[p] === 'object');
+    const common = prefixes ? prefixes.filter((p) => !isUnionPrefix(p)) : null;
+    const byUnion = {}, unionMissing = {};
+    if (qu) {
+      for (const u of Object.values(UNION_IDS)) { byUnion[u] = []; unionMissing[u] = []; }
+      for (const p of (prefixes || []).filter(isUnionPrefix)) {
+        for (const [uname, sid] of Object.entries(qu[p])) {
+          const u = unionIdOf(uname, `community bonus ${b.censusId} questUnion «${p}»`);
+          const q = pool.find((x) => x.donorStageId === sid && named(x).startsWith(p));
+          if (q) byUnion[u].push(q); else unionMissing[u].push(p);
+        }
+      }
+    }
+    const unionQuests = Object.values(byUnion).flat();
+    const counted = [...pool.filter((q) => (common ? common.some((p) => named(q).startsWith(p)) : !b.questPrefix || named(q).startsWith(b.questPrefix))), ...unionQuests];
+    const noQuests = !pool.length;
     if (!counted.length && !(fixed && noQuests)) {
       const what = prefixes ? ` named ${prefixes.map((p) => `«${p}...»`).join(', ')}` : b.questPrefix ? ` named «${b.questPrefix}...»` : '';
       throw new Error(`events: community bonus ${b.censusId}: no quest${what}`);
@@ -841,11 +1102,20 @@ function buildEvents(records, config, master, ids, anchors = {}, maps = null, bo
     }
     // the prefixes of the notice with no quest of the record (a part of the event not in our data)
     const missing = prefixes ? prefixes.filter((p) => !counted.some((q) => named(q).startsWith(p))) : [];
-    const waiting = !rewards.length, ready = !waiting && counted.length > 0 && !missing.length && counted.every((q) => q.served);
+    const waiting = !rewards.length;
+    let ready = !waiting && counted.length > 0 && !missing.length && counted.every((q) => q.served);
+    let unionPart = {};
+    if (qu) {
+      const commonQ = counted.filter((q) => !unionQuests.includes(q));
+      const commonOk = !waiting && !missing.length && commonQ.every((q) => q.served);
+      const readyUnions = Object.keys(byUnion).map(Number).filter((u) => commonOk && !unionMissing[u].length && byUnion[u].length > 0 && byUnion[u].every((q) => q.served));
+      ready = readyUnions.length === Object.keys(UNION_IDS).length;
+      unionPart = { byUnion: Object.fromEntries(Object.entries(byUnion).map(([u, qs]) => [u, qs.filter((q) => q.served).map((q) => q.stageId)])), readyUnions };
+    }
     e.communityBonus = { ...(b.name ? { name: b.name } : {}), noticeId: b.noticeId, ...(fixed ? { kind: 'completion' } : {}), count: waiting || fixed ? null : b.count,
-      stageIds: [...new Set(counted.filter((q) => q.served).map((q) => q.stageId))], rewards, ready,
+      stageIds: [...new Set(counted.filter((q) => q.served && !unionQuests.includes(q)).map((q) => q.stageId))], rewards, ready, ...unionPart,
       ...(b.questPrefix && !fixed ? { questPrefix: b.questPrefix } : {}), ...(missing.length ? { missing } : {}), ...(waiting ? { waiting: true } : {}) };
-    if (ready && fixed) { e.labels.push('completionReward'); used.add('completionReward'); }
+    if ((ready || (unionPart.readyUnions || []).length) && fixed) { e.labels.push('completionReward'); used.add('completionReward'); }
     else if (ready) { e.labels.push('communityBonus'); e.label = 'reconstructed'; used.add('communityBonus'); }
   }
   // shared notices: the stage rows of the row they share (built once), no evStage row of their own
@@ -899,10 +1169,17 @@ function writeIds(file, ids) {
 // The map import of recon/tools/import_event_stages.py (private, D:\Progetto_Restauro_KH_UX\stage_gen\event_stages; KHUX_EVENT_MAPS
 // overrides it): report.json (status per map key) and stage_poi_events.json. Absent: every quest is «map not usable».
 const MAPS_DIR = process.env.KHUX_EVENT_MAPS || path.join('D:', path.sep, 'Progetto_Restauro_KH_UX', 'stage_gen', 'event_stages');
+// Generated maps (Part 5 Task 3): the report of recon/tools/gen_story_maps.py run with the `events` key (its entries with event
+// true and a stageId; KHUX_EVENT_GEN_REPORT overrides <dir>/gen_report.json). Absent: no generated-map quest is served.
+const GEN_REPORT = (dir) => process.env.KHUX_EVENT_GEN_REPORT || path.join(dir, 'gen_report.json');
 function loadMaps(dir) {
+  const gen = readJson(GEN_REPORT(dir), null);
+  const generated = new Set((Array.isArray(gen) ? gen : []).filter((r) => r && r.event && Number.isInteger(r.stageId)).map((r) => r.stageId));
   const rep = readJson(path.join(dir, 'report.json'), null);
-  if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {} }; }
-  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [] }])), poi: readJson(path.join(dir, 'stage_poi_events.json'), {}) };
+  if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {}, generated }; }
+  // levelShifted: the import applied the level shift of the map item (event_maps.json levelShift) to the copied map
+  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [], levelShifted: !!s.levelShifted }])),
+    poi: readJson(path.join(dir, 'stage_poi_events.json'), {}), generated };
 }
 // The records: a file (a list of records) or a folder (every *.json except the anchors file, sorted by name, concatenated).
 // The anchors sidecar is next to the file, or inside the folder.
@@ -991,12 +1268,14 @@ function patch(masterDir, opts = {}) {
   fs.writeFileSync(path.join(gameData, 'events.json'), JSON.stringify({ entries: out.index.entries, reasons: out.index.reasons, ...(out.index.catalog ? { catalog: out.index.catalog } : {}),
     boardSets: out.index.boardSets, own }, null, 1));
   fs.writeFileSync(path.join(gameData, 'event_maps.json'), JSON.stringify(out.maps, null, 1));
+  // the generated maps (Part 5 Task 3): the list of recon/tools/gen_story_maps.py, config key `events` (the «special» list shape)
+  fs.writeFileSync(path.join(gameData, 'event_gen_maps.json'), JSON.stringify(out.genMaps, null, 1));
   // anchors first (only grow: allocateIds never changes one), so ids are never written with keys whose anchor is not saved
   if (JSON.stringify(readJson(anchorsFile, {})) !== JSON.stringify(out.anchors)) fs.writeFileSync(anchorsFile, JSON.stringify(out.anchors, null, 1) + '\n');
   writeIds(idsFile, out.ids);
   const e = out.index.entries, qs = e.flatMap((x) => x.quests);
   console.log(`events: ${e.length} entries, ${e.filter((x) => x.available).length} with a served quest; ${qs.filter((q) => q.served).length} of ${qs.length} quests served, `
-    + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage, +${out.reward.length} reward, ${own.poi.length} POI keys`);
+    + `${qs.filter((q) => !q.served).length} ${NOT_SERVED}; +${out.stage.length} stage, +${out.evStage.length} evStage, +${out.reward.length} reward, ${own.poi.length} POI keys, ${out.genMaps.length} generated maps listed`);
   const byReason = {};
   for (const q of qs.filter((x) => !x.served)) byReason[q.reason || 'other'] = (byReason[q.reason || 'other'] || 0) + 1;
   const entryReasons = {};
@@ -1020,4 +1299,5 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED };
+module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
+  applyDatesOf, aliasRewardTypes, genMapOf, mergeCompletion, loadMaps, UNION_IDS };

@@ -20,7 +20,8 @@
 // its stageIds is cleared, whether the event is in the Story week or kept from the Event Catalog; player.events.bonus
 // {censusId: {paidAt, noticeId}} keeps it once per event. payBonuses() (server.js: at login) pays an old save already complete.
 // A fixed completion reward (communityBonus.kind 'completion', user 10-11-2026: every player who completed all the challenges got
-// it, notice 61226) is paid the same way, with its own Present text.
+// it, notice 61226) is paid the same way, with its own Present text. Part 5 Task 3: per Union (communityBonus.byUnion, readyUnions:
+// only the player's own Union version counts) and a quest of another Union (index quest `union`) is not listed for the player.
 //   events (list), catalogEvents (the Event Catalog banner), onStageClear (rewards), isEventStage, keep / unkeep / catalogCtx /
 //   pruneKept (Event Catalog, Task 5), payBonuses.
 'use strict';
@@ -89,13 +90,23 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
 
   // the community-goal bonus of an entry (communityBonus ready): paid once into the Presents when every objective of its counted
   // quests is cleared; -> true when paid now. Without addPresent (an older wiring) nothing is paid nor recorded.
+  // A counted quest is done when its objectives 1..min(3, validSubmission) are cleared, or, with no objective, when it was cleared
+  // (playStatus of stageState; I-253 item 2: a counted quest without objectives could never pay before). Per Union (Part 5 Task 3,
+  // The Keyblade War completion reward, user 10-11-2026): communityBonus.byUnion {unionId: [stage ids]} adds the quests of the
+  // player's own Union only (player.unionId), and the reward is due only when that Union's quests are all served (readyUnions).
+  const ownUnion = () => Number(player.unionId) || 0;
+  const unionIds = (cb) => (cb.byUnion ? (cb.byUnion[ownUnion()] || []) : []);
   const bonusDone = (cb) => {
     const cleared = view().cleared || {};
-    return (cb.stageIds || []).length > 0 && cb.stageIds.every((id) => special.stageDone({ clearMissionIds: cleared[id] || [] }, (stageRow(id) || {}).validSubmission || 0));
+    const ids = [...(cb.stageIds || []), ...unionIds(cb)];
+    if (cb.byUnion && !unionIds(cb).length) return false;
+    return ids.length > 0 && ids.every((id) => special.stageDone({ clearMissionIds: cleared[id] || [], playStatus: (stageState(id) || {}).playStatus || 0 },
+      (stageRow(id) || {}).validSubmission || 0));
   };
+  const bonusReady = (cb) => (cb.byUnion ? (cb.readyUnions || []).includes(ownUnion()) : !!cb.ready);
   function payBonus(e) {
     const cb = e && e.communityBonus;
-    if (!addPresent || !cb || !cb.ready || !(cb.rewards || []).length) return false;
+    if (!addPresent || !cb || !bonusReady(cb) || !(cb.rewards || []).length) return false;
     if (((player.events || {}).bonus || {})[e.censusId] || !bonusDone(cb)) return false;
     const ev = state();
     ev.bonus ||= {};
@@ -147,7 +158,10 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
     }
     ev.cleared[id] = [...new Set([...done, ...fresh])].sort((a, b) => a - b);
     // the community-goal bonus of every entry that counts this quest
-    for (const e of entries()) if (((e.communityBonus || {}).stageIds || []).includes(id)) payBonus(e);
+    for (const e of entries()) {
+      const cb = e.communityBonus || {};
+      if ((cb.stageIds || []).includes(id) || unionIds(cb).includes(id)) payBonus(e);
+    }
     return true;
   }
 
@@ -233,9 +247,13 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
         complete: stages.length && stages.every((s) => special.stageDone(s, objectives(s.stageId))) ? 1 : 0,
       };
     };
+    // a quest of another Union (index quest `union`, make-events.js: The Keyblade War part 3, one version per Union) is not listed:
+    // each player sees only their own Union's version (the server builds the list, the client shows what it gets); a card left
+    // with no quest is not listed
+    const own = (qs) => qs.filter((q) => !q.union || q.union === ownUnion());
     const kept = keptEntry(realMs);
-    return [...(kept ? keptCards(kept, realMs).map((c) => card(kept, c.row, c.quests, true)) : []),
-      ...calendar.currentCards(eventIndex(), storyWeek(), realMs).map((c) => card(c.entry, c.row, c.quests))];
+    return [...(kept ? keptCards(kept, realMs).map((c) => ({ ...c, quests: own(c.quests) })).filter((c) => c.quests.length).map((c) => card(kept, c.row, c.quests, true)) : []),
+      ...calendar.currentCards(eventIndex(), storyWeek(), realMs).map((c) => ({ ...c, quests: own(c.quests) })).filter((c) => c.quests.length).map((c) => card(c.entry, c.row, c.quests))];
   }
 
   // The Event Catalog banner (index.catalog of make-events.js: eventType 0, Details -> /web/event/catalog, a tap opens its Training

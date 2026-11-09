@@ -35,6 +35,10 @@ const quest = (stageId, worldId, enemies, extra = {}) => ({
   restrictions: { disableContinue: 0, holdKeyblade: 0, noPartner: 0, hardmodeRequire: 0, hardmodeName: 'strDummy', hardmodeComparison: 1, hardmodeNum: 0 },
   drama: { before: 0, after: 0, beforeIds: [], afterIds: [] }, map: { key: stageId, stageBinId: 0, status: 'ok' }, window: ['2019-04-01 07:00:00', '2019-04-08 06:59:59'],
   label: 'original', ...extra });
+// a data-hole quest with no original map (Part 5 Task 3): khuxwiki enemies by name (the target counted once), room and world
+const genQuest = (stageId, extra = {}) => quest(stageId, 1, [501], { level: 30, targets: [{ id: null, name: 'Foe A', source: 'khuxwiki' }], enemies: [], wikiEnemies: { 'Foe B': 7, 'Foe A': 1 },
+  wikiRooms: ['Fountain Square'], wikiRoomCodes: { 'Fountain Square': ['DB_0000_00_00'] }, room: [],
+  map: { key: stageId, stageBinId: 0, status: 'incomplete: STG header absent', source: 'generate' }, label: 'original, map incomplete; wikiRoom', ...extra });
 const donorEv = (extra = {}) => ({ eventStageId: 900001, startTime: '2019-04-01 07:00:00', endTime: '2019-04-08 06:59:59', eventCategory: 3, eventType: 1, ...extra });
 const record = (censusId, quests, extra = {}) => ({ censusId, name: `Event ${censusId}`, start: '2019-04-01', end: '2019-04-07', type: 'EQ', notices: [11], evStage: [donorEv()], quests, ...extra });
 
@@ -403,8 +407,11 @@ const tests = {
     // the old key alone still filters
     const old = build(recs, undefined, { ...CONFIG, onlyCensusIds: ['E-2'] });
     assert.deepStrictEqual(old.index.entries.map((e) => e.censusId), ['E-2']);
-    // the real config: 13 pilot ids, the GEM type (Part 2), the COIN type (Part 3) and the challenge types EQ, KEY, QUIZ (Part 4)
-    assert.strictEqual(REAL_CONFIG.serve.censusIds.length, 13);
+    // the real config: 13 pilot ids, the GEM type (Part 2), the COIN type (Part 3), the challenge types EQ, KEY, QUIZ (Part 4) and
+    // the 35 Org XIII / Keyblade War ids (Part 5)
+    assert.strictEqual(REAL_CONFIG.serve.censusIds.length, 13 + 35);
+    assert.strictEqual(new Set(REAL_CONFIG.serve.censusIds).size, REAL_CONFIG.serve.censusIds.length, 'no id twice');
+    for (const id of ['EV-0081', 'EV-0346', 'EV-0441', 'EV-0741', 'EV-1103', 'EV-1273', 'EV-0913', 'EV-0941']) assert.ok(REAL_CONFIG.serve.censusIds.includes(id), id);
     assert.deepStrictEqual(REAL_CONFIG.serve.types, ['GEM', 'COIN', 'EQ', 'KEY', 'QUIZ']);
     assert.ok(!('onlyCensusIds' in REAL_CONFIG));
   },
@@ -1178,6 +1185,208 @@ const tests = {
     assert.ok(!q.reason, q.reason);
     const row = out.stage.find((s) => s.stageId === q.stageId);
     assert.deepStrictEqual([row.submissionRequire[0], row.submissionNum[0], row.submissionRewardType[0], row.submissionItemNum[0]], [7, 4, 2, 500]);
+  },
+  // ---- Events Part 5 Task 3 (Org XIII events, The Keyblade War) ----
+  // an objective known only as text (code null, no proven code): the quest is held with the text, no stage row, never a stopgap code
+  wiki_objective_unmapped_held() {
+    const q = quest(702001, 1, [501], { objectives: [objective(null, 'Clear within 75 seconds', { type: 2, id: 0, num: 5 }), objective(10, 'Complete without having to continue', { type: 2, id: 0, num: 5 })] });
+    const out = build([record('E-U', [q, quest(702002, 1, [501])])]);
+    const [held, ok] = entry(out, 'E-U').quests;
+    assert.strictEqual(held.reason, 'objectiveUnmapped');
+    assert.ok(held.why.startsWith(REAL_CONFIG.reasonText.objectiveUnmapped) && held.why.includes('«Clear within 75 seconds»'), held.why);
+    assert.ok(!out.stage.some((s) => s.stageId === held.stageId), 'no stage row');
+    assert.ok(ok.served);
+    assert.ok(!JSON.stringify(out.stage).includes('Clear within 75'), 'the text reaches no row');
+  },
+  // a quest with no original map (map.source 'generate'): stageBinId = its own stage id, one event_gen_maps.json entry (the
+  // gen_story_maps «special» list shape) with its level and enemy groups, label wikiRoom (map incomplete dropped: not its map)
+  wiki_room_map_listed() {
+    const g = genQuest(702100);
+    const out = me.buildEvents([record('E-W', [g])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    const q = entry(out, 'E-W').quests[0];
+    assert.ok(q.served, JSON.stringify(q));
+    const row = out.stage.find((s) => s.stageId === q.stageId);
+    assert.strictEqual(row.stageBinId, q.stageId, 'stageBinId = own stage id');
+    assert.strictEqual(row.mapName, 'Fountain Square');
+    assert.ok(q.labels.includes('wikiRoom') && !q.labels.includes('mapIncomplete'), JSON.stringify(q.labels));
+    assert.ok(entry(out, 'E-W').labels.includes('wikiRoom') && out.index.reasons.wikiRoom);
+    assert.deepStrictEqual(out.genMaps, [{ stageId: q.stageId, world: 1, name: 'Quest 702100', room: 'Fountain Square', roomCodes: ['DB_0000_00_00'], target: 'Foe A', targetId: 501,
+      level: 30, enemies: [[{ name: 'Foe B', enemyId: 502, n: 5, reward: 1 }], [{ name: 'Foe B', enemyId: 502, n: 2, reward: 1 }]], treasures: [], rooms: 1, censusId: 'E-W' }]);
+    assert.deepStrictEqual(out.maps, [], 'not in event_maps.json (nothing to import)');
+    // an objective on an enemy id puts that id on the map for as many members as it counts
+    const o = genQuest(702101, { objectives: [{ ...objective(4, 'Defeat Foe B x 3', { type: 2, id: 0, num: 5 }), idType: 1, id: 503, num: 3 }] });
+    const m = master();
+    m.enemy.push({ enemyId: 503, name: 'Foe B' });
+    const out2 = me.buildEvents([record('E-W2', [o])], CONFIG, m, undefined, {}, null, null, { eventEnemyIds: [503] });
+    assert.deepStrictEqual(out2.genMaps[0].enemies, [[{ name: 'Foe B', enemyId: 503, n: 3, reward: 1 }, { name: 'Foe B', enemyId: 502, n: 2, reward: 1 }], [{ name: 'Foe B', enemyId: 502, n: 2, reward: 1 }]]);
+    // live run (maps given): served only once gen_story_maps.py has written the map (its report), listed either way
+    const live = me.buildEvents([record('E-W', [genQuest(702100)])], CONFIG, master(), undefined, {}, { status: new Map(), poi: {}, generated: new Set() }, null, { eventEnemyIds: [] });
+    const lq = entry(live, 'E-W').quests[0];
+    assert.deepStrictEqual([lq.served, lq.reason, live.genMaps.length], [false, 'mapUnusable', 1]);
+    assert.match(lq.why, /generated map not built yet/);
+    const built = me.buildEvents([record('E-W', [genQuest(702100)])], CONFIG, master(), undefined, {}, { status: new Map(), poi: {}, generated: new Set([lq.stageId]) }, null, { eventEnemyIds: [] });
+    assert.ok(entry(built, 'E-W').quests[0].served);
+    assert.deepStrictEqual(built.poi, {}, 'its POI comes from gen_story_maps.py');
+    // «Collect all materials» on a generated map (no treasure known): held
+    const mat = genQuest(702102, { objectives: [objective(18, 'Collect all materials', { type: 2, id: 0, num: 5 })] });
+    const out3 = me.buildEvents([record('E-W3', [mat])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual([entry(out3, 'E-W3').quests[0].reason, out3.genMaps.length], ['mapUnusable', 0]);
+  },
+  // a generated-map quest naming an enemy not in the master (an event row never answers a name lookup): enemyMissing with the
+  // name, no event_gen_maps.json entry, no stage row
+  wiki_room_enemy_missing_held() {
+    const g = genQuest(702200, { wikiEnemies: { 'Foe A': 1, 'Foe Z': 2 } });
+    const out = me.buildEvents([record('E-M', [g])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    const q = entry(out, 'E-M').quests[0];
+    assert.deepStrictEqual([q.served, q.reason], [false, 'enemyMissing']);
+    assert.match(q.why, /Foe Z/);
+    assert.deepStrictEqual([out.genMaps.length, out.stage.length], [0, 0]);
+    // the event row of a name is not taken (never substituted)
+    const ev = me.buildEvents([record('E-M', [genQuest(702200)])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [502] });
+    assert.match(entry(ev, 'E-M').quests[0].why, /Foe B/);
+    // the JP table names a «variant» target (the Ω form) where the record keeps the plain name: held, never the plain row
+    const vr = me.buildEvents([record('E-M', [genQuest(702200, { jpTable: { target: 'Foe A variant' } })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual([entry(vr, 'E-M').quests[0].reason, vr.genMaps.length], ['enemyMissing', 0]);
+    assert.match(entry(vr, 'E-M').quests[0].why, /Foe A variant/);
+  },
+  // a JP 4.3.1 map of the same quest (map.source 'jpTwin'): served on its map key, label jpTwinMap; the same layout at another level
+  // (map.levelShifted): label levelShifted, event_maps.json carries the shift, and a live run serves it only once the import applied it
+  jp_twin_map_served() {
+    const twin = quest(702300, 1, [501], { map: { key: 69610, stageBinId: 0, status: 'ok', source: 'jpTwin', jpTwinOf: 702300 }, label: 'original; jpTwinMap' });
+    const shifted = quest(702301, 1, [501], { map: { key: 68710, stageBinId: 0, status: 'ok', source: 'jpTwin', jpTwinOf: 702301, levelShifted: { from: 25, to: 20, delta: -5, alternatives: [], why: 'x' } },
+      label: 'original; jpTwinMap; levelShifted' });
+    const out = build([record('E-J', [twin, shifted])]);
+    const [a, b] = entry(out, 'E-J').quests;
+    assert.ok(a.served && b.served);
+    assert.strictEqual(out.stage.find((s) => s.stageId === a.stageId).stageBinId, 69610);
+    assert.deepStrictEqual(a.labels, ['jpTwinMap']);
+    assert.deepStrictEqual([...b.labels].sort(), ['jpTwinMap', 'levelShifted']);
+    // the shifted copy has its own key (its stage id; the JP file in fromKey): the JP file may be another quest's own map
+    assert.strictEqual(out.stage.find((s) => s.stageId === b.stageId).stageBinId, b.stageId);
+    const mi = out.maps.find((x) => x.key === b.stageId);
+    assert.deepStrictEqual([mi.levelShift, mi.fromKey], [{ from: 25, to: 20, delta: -5 }, 68710]);
+    assert.ok(out.index.reasons.jpTwinMap && out.index.reasons.levelShifted);
+    // the twin map is the own map of another record's quest (the Daily XIII maps): shared when the drops are equal, else mapKeyUsed
+    const own = record('E-J2', [quest(702310, 1, [501], { map: { key: 69610, stageBinId: 69610, status: 'ok' } }), quest(702311, 1, [501], { map: { key: 69620, stageBinId: 69620, status: 'ok' } })],
+      { start: '2019-06-01', end: '2019-06-07' });
+    const twin2 = quest(702302, 1, [501], { map: { key: 69620, stageBinId: 0, status: 'ok', source: 'jpTwin' }, label: 'original; jpTwinMap', drops: { enemies: [{ rewardId: 5, rows: [{ type: 3, id: 9, num: 1, odds: 100 }] }], chests: [] } });
+    const sh = build([record('E-J', [twin, twin2]), own]);
+    const o = entry(sh, 'E-J2').quests;
+    assert.deepStrictEqual([o[0].served, o[0].stageId !== a.stageId], [true, true], 'own stage row on the shared map');
+    assert.strictEqual(sh.stage.find((s) => s.stageId === o[0].stageId).stageBinId, 69610);
+    assert.deepStrictEqual([o[1].served, o[1].reason], [false, 'mapKeyUsed'], 'drops differ');
+    const st = (shiftedDone) => new Map([[69610, { status: 'imported', why: '', rooms: [] }], [b.stageId, { status: 'imported', why: '', rooms: [], levelShifted: shiftedDone }]]);
+    const live = me.buildEvents([record('E-J', [twin, shifted])], CONFIG, master(), undefined, {}, { status: st(false), poi: {} });
+    assert.deepStrictEqual(entry(live, 'E-J').quests.map((q) => q.served), [true, false]);
+    assert.match(entry(live, 'E-J').quests[1].why, /level shift 25 -> 20/);
+    const done = me.buildEvents([record('E-J', [twin, shifted])], CONFIG, master(), undefined, {}, { status: st(true), poi: {} });
+    assert.deepStrictEqual(entry(done, 'E-J').quests.map((q) => q.served), [true, true]);
+  },
+  // reward types 18 (avatar set) and 19 (style avatar part) of the original rows: served as 20 (avatar part), each id as listed
+  // (♂ on objective 1, ♀ on objective 2); an id not in avatarParts holds the quest (rewardItemMissing)
+  avatar_pair_reward_once() {
+    const m = { ...master(), avatarParts: [{ avatarPartsId: 40083, name: 'Marluxia Style', gender: 1 }, { avatarPartsId: 41083, name: 'Marluxia Style', gender: 2 }, { avatarPartsId: 331, name: 'Organization XIII Coat', gender: 1 }] };
+    const ix = quest(702400, 1, [501], { label: 'original; rewardTypeUnknown', objectives: [objective(10, 'a', { type: 19, id: 40083, num: 1 }), objective(10, 'b', { type: 19, id: 41083, num: 1 }),
+      objective(10, 'c', { type: 18, id: 331, num: 1 })] });
+    const bad = quest(702401, 1, [501], { objectives: [objective(10, 'a', { type: 19, id: 49999, num: 1 })] });
+    const out = me.buildEvents([record('E-A', [ix, bad])], CONFIG, m);
+    const [q, b] = entry(out, 'E-A').quests;
+    assert.ok(q.served, JSON.stringify(q));
+    const row = out.stage.find((s) => s.stageId === q.stageId);
+    assert.deepStrictEqual([row.submissionRewardType, row.submissionItemId, row.submissionItemNum], [[20, 20, 20], [40083, 41083, 331], [1, 1, 1]]);
+    assert.strictEqual(b.reason, 'rewardItemMissing');
+    // without the alias the type is unknown (never passed to the client)
+    const raw = me.buildEvents([record('E-A', [ix])], { ...CONFIG, rewardTypeAliases: {} }, m);
+    assert.strictEqual(entry(raw, 'E-A').quests[0].reason, 'rewardTypeUnknown');
+    assert.deepStrictEqual(REAL_CONFIG.rewardTypeAliases, { 18: 20, 19: 20 });
+  },
+  // a second notice of an event (scheduleLineOf, EV-0648 beside EV-0647): no evStage row, no card, no catalogue row
+  schedule_line_no_row() {
+    const out = build([record('E-L2', [], { scheduleLineOf: { censusId: 'E-1', why: 'x' } }), ...records()]);
+    const e = entry(out, 'E-L2');
+    assert.deepStrictEqual([e.reason, e.scheduleLineOf, e.available], ['scheduleLine', 'E-1', false]);
+    assert.strictEqual(e.why, REAL_CONFIG.reasonText.scheduleLine);
+    assert.strictEqual(out.evStage.length, 2, 'only the two playable records');
+    assert.ok(!(e.rows || []).length);
+    const listed = require('./event-pages').entriesOf(out.index).map((x) => x.censusId);
+    assert.ok(!listed.includes('E-L2') && listed.includes('E-1'), JSON.stringify(listed));
+    // a bare census id works too
+    assert.strictEqual(entry(build([record('E-L3', [], { scheduleLineOf: 'E-1' }), ...records()]), 'E-L3').reason, 'scheduleLine');
+  },
+  // a rerun with the same quest (same donor stage, same values): one stage row, the later record sharedWith the first (its
+  // objectives are paid once, by stage: test-event-routes rerun_shared_objectives_once)
+  rerun_shared_objectives_once() {
+    const recs = [record('E-R1', [quest(702500, 1, [501])]), record('E-R2', [quest(702500, 1, [501])], { start: '2019-06-01', end: '2019-06-07' })];
+    const out = build(recs);
+    const [a, b] = [entry(out, 'E-R1').quests[0], entry(out, 'E-R2').quests[0]];
+    assert.strictEqual(out.stage.length, 1);
+    assert.deepStrictEqual([a.served, b.served, b.sharedWith, b.stageId], [true, true, 'E-R1', a.stageId]);
+    assert.ok(entry(out, 'E-R2').available, 'the rerun has its own card');
+  },
+  // a data-hole record (rec.dataHole, the 2016-17 runs) whose original stage row loaded the map of another record's quest (its
+  // stageBinId: the Daily XIII quests of EV-0333 on the monthly maps) shares that map with its own stage row when the drops are
+  // equal; a record that is not a data-hole record keeps the Part 4 rule (mapKeyUsed)
+  data_hole_shares_donor_map() {
+    const monthly = record('E-H1', [quest(702800, 1, [501])]);
+    const daily = (extra = {}) => record('E-H2', [quest(702810, 1, [501], { map: { key: 702800, stageBinId: 702800, status: 'ok' } })], { start: '2019-06-01', end: '2019-06-07', ...extra });
+    const out = build([monthly, daily({ dataHole: 'x' })]);
+    const [m, d] = [entry(out, 'E-H1').quests[0], entry(out, 'E-H2').quests[0]];
+    assert.deepStrictEqual([d.served, d.stageId !== m.stageId], [true, true]);
+    assert.strictEqual(out.stage.find((s) => s.stageId === d.stageId).stageBinId, 702800);
+    assert.strictEqual(entry(build([monthly, daily()]), 'E-H2').quests[0].reason, 'mapKeyUsed');
+  },
+  // datesOf (EV-0913 dates EV-0929 from 2019-09-03): the target starts then and, with no end, ends on the Pacific day its donor row
+  // ends; the line itself is a schedule line (no row). objectiveResolved in a record label is a note, not a label phrase
+  dates_of_applied() {
+    const target = record('E-D', [quest(702600, 1, [501], { label: 'original; objectiveResolved' })], { start: null, end: null,
+      evStage: [donorEv({ startTime: '2019-09-20 07:00:00', endTime: '2019-10-04 06:59:59' })] });
+    const line = record('E-D0', [], { start: '2019-09-03', end: null, scheduleLineOf: { censusId: 'E-D' }, datesOf: { censusId: 'E-D', start: '2019-09-03' } });
+    const out = build([line, target]);
+    const e = entry(out, 'E-D');
+    assert.deepStrictEqual([e.start, e.end, e.available, e.datesFrom], ['2019-09-03', '2019-10-03', true, 'E-D0']);
+    assert.deepStrictEqual(e.rows.map((r) => [r.start, r.end]), [['2019-09-03', '2019-10-03']]);
+    assert.strictEqual(entry(out, 'E-D0').reason, 'scheduleLine');
+    assert.strictEqual(target.start, null, 'the input record is not changed');
+    assert.throws(() => build([record('E-D1', [], { datesOf: { censusId: 'E-NONE', start: '2019-09-03' } })]), /E-NONE, which is not in the records/);
+  },
+  // catalogName (EV-1089, banner «Challenge Organization XIII Pt.1»): the Event Catalog row and page use it, the entry keeps its name
+  catalog_name_in_catalog() {
+    const out = build([record('E-C', [quest(702700, 1, [501])], { catalogName: 'Challenge Organization XIII Pt.1' })]);
+    const e = entry(out, 'E-C');
+    assert.deepStrictEqual([e.name, e.catalogName], ['Event E-C', 'Challenge Organization XIII Pt.1']);
+    const pages = require('./event-pages');
+    const html = pages.expandCatalog ? pages.expandCatalog(pages.catalogPage(out.index, {})) : pages.catalogPage(out.index, {});
+    assert.ok(html.includes('Challenge Organization XIII Pt.1') && !html.includes('Event E-C'), 'catalogue row');
+  },
+  // The Keyblade War part 3 (EV-0941): unionQuests give each quest its Union (index quest `union`), stagesOf lists the other
+  // record's built quests on its card (sharedWith), the record's completionReward joins the bonus list (merged with the private
+  // community_bonus.json entry) and counts per Union: byUnion / readyUnions
+  union_quests_and_completion() {
+    const pt12 = record('E-K2', [quest(740900, 1, [501], { name: 'Battle vs. A' }), quest(740905, 1, [501], { name: 'The Darklings' })], { type: 'GEM' });
+    const ut = (sid, name, enemy = 501) => quest(sid, 1, [enemy], { name, label: sid % 5 === 1 ? 'original' : 'unionTwin; enemies missing: 1' });
+    const unions = ['Ursus', 'Anguis', 'Unicornis', 'Vulpes', 'Leopardus'];
+    const uq = Object.fromEntries(unions.map((u, i) => [u, 740911 + i]));
+    const pt3 = record('E-K3', unions.map((u, i) => ut(740911 + i, 'The Ultimate Test Pt. 1', i === 4 ? 999 : 501)), {
+      evStage: [donorEv({ eventStageId: 900819, stageRange: { validStageWidthId: 1, stageStartId: 740900, stageEndId: 740930 } })], start: '2019-04-08', end: '2019-04-14',
+      unionQuests: { 'The Ultimate Test Pt. 1': uq }, stagesOf: { censusId: 'E-K2', stageIds: [740900, 740905, 740910] },
+      completionReward: { censusId: 'E-K2', noticeId: 61226, kind: 'completion', name: 'Campaign', rewards: [{ type: 3, id: 311905, num: 1 }],
+        quests: ['Battle vs. A', 'The Darklings', 'The Ultimate Test Pt. 1'], questUnion: { 'Battle vs. A': null, 'The Darklings': null, 'The Ultimate Test Pt. 1': uq } } });
+    const bonus = [{ censusId: 'E-K2', noticeId: 61226, kind: 'completion', name: 'Campaign', rewards: [{ type: 3, id: 311905, num: 1 }], quests: ['Battle vs. A', 'The Darklings', 'The Ultimate Test Pt. 1'] }];
+    const out = me.buildEvents([pt12, pt3], CONFIG, master(), undefined, {}, null, null, { bonus });
+    const k3 = entry(out, 'E-K3');
+    assert.deepStrictEqual(k3.quests.filter((q) => !q.sharedWith).map((q) => q.union), [1, 2, 3, 4, 5]);
+    assert.ok(k3.quests[1].labels.includes('unionTwin') && out.index.reasons.unionTwin);
+    const shared = k3.quests.filter((q) => q.sharedWith);
+    const k2 = entry(out, 'E-K2');
+    assert.deepStrictEqual(shared.map((q) => [q.stageId, q.sharedWith]), k2.quests.map((q) => [q.stageId, 'E-K2']), 'the built quests of E-K2 (740910 not in it)');
+    assert.strictEqual(out.stage.length, 2 + 4, 'shared quests built once; Leopardus not served (enemy 999)');
+    assert.ok(k3.rows[0].stageIds.includes(k2.quests[0].stageId), 'on the card of E-K3');
+    const cb = k2.communityBonus;
+    assert.deepStrictEqual(cb.stageIds, k2.quests.map((q) => q.stageId), 'common quests');
+    assert.deepStrictEqual(cb.byUnion, Object.fromEntries([1, 2, 3, 4, 5].map((u) => [u, u === 5 ? [] : [k3.quests[u - 1].stageId]])));
+    assert.deepStrictEqual([cb.ready, cb.readyUnions], [false, [1, 2, 3, 4]], 'Leopardus not ready: its quest is not served');
+    assert.ok(k2.labels.includes('completionReward'));
+    assert.throws(() => me.buildEvents([pt12, { ...pt3, unionQuests: { x: { Nowhere: 740911 } } }], CONFIG, master()), /unknown Union «Nowhere»/);
   },
   // the id ranges: a run that needs more numbers than the range holds stops with the range and the count
   id_range_overflow() {

@@ -301,6 +301,8 @@ const tests = {
     assert.ok(d.includes(pages.whyPlain(REASON_TEXT.quizTextMissing, 'quizTextMissing')) && /question/i.test(pages.whyPlain(REASON_TEXT.quizTextMissing, 'quizTextMissing')));
     assert.ok(/Booster/.test(pages.whyPlain(REASON_TEXT.boosterOnly, 'boosterOnly')));
     assert.ok(/reward/i.test(pages.whyPlain('', 'rewardTypeUnknown')));
+    // Part 5 Task 3: an objective known only as text (objectiveUnmapped), in plain words without the builder's note
+    assert.ok(/objective/i.test(pages.whyPlain('x («Clear within 75 seconds»)', 'objectiveUnmapped')) && !/75/.test(pages.whyPlain('x («Clear within 75 seconds»)', 'objectiveUnmapped')));
   },
 };
 

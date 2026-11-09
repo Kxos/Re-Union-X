@@ -803,3 +803,33 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   393 quests); a builder rerun against a master that already has the new enemy rows shrinks the missing list; read the original
   notices before trusting the plan's window rules (the Surprise «15-60 minutes» was wrong); a shared map is allowed when the drops
   are equal; banner art and notices decide reward mixes over the wiki.
+
+## Generator rules for the Org XIII events and The Keyblade War (Events Part 5, Task 3, 10 November 2026)
+
+`server/make-events.js` (plan `docs/superpowers/plans/2026-11-10-events-part5-orgxiii.md`, report
+`.superpowers/sdd/2026-11-10-events-part5-orgxiii/task-3-report.md`):
+- **Objectives.** An objective with `code: null` holds its quest (`objectiveUnmapped`, the text in `why`); no stopgap code, no
+  text-to-code mapper (Task 1 found none: the 2016-17 runs are donor stage rows).
+- **Generated maps** (`map.source 'generate'`, label `wikiRoom`). stageBinId = the quest's own stage id. Enemies from `wikiEnemies`
+  (target counted once) by the make-special.js name rule (event rows never answer); an objective on an enemy id puts that id on
+  the map for as many members as it counts. Unknown name, or a JP «variant» target the record names without Ω: `enemyMissing`, no
+  entry. «Collect all materials» on a generated map: held (`mapUnusable`). Every other candidate goes into
+  `game_data/event_gen_maps.json` (gen_story_maps.py config key `events`, the «special» list shape plus `roomCodes`, `censusId`).
+  Served only when the gen_story_maps.py report (`<KHUX_EVENT_MAPS>/gen_report.json` or `KHUX_EVENT_GEN_REPORT`) lists its stageId
+  with `event: true`.
+- **JP twins** (`map.source 'jpTwin'`, label `jpTwinMap`) are served on the JP key and may share it with another record's quest
+  (equal drops). A `levelShifted` twin (label `levelShifted`) gets its own key (its stage id) with `fromKey` = the JP file and
+  `levelShift {from, to, delta}` in `event_maps.json`; it is served only when the import report marks that key `levelShifted: true`
+  (contract for `import_event_stages.py`, Task 4: copy `fromKey` to the stage id and shift every enemy level).
+- **Data-hole records** (`rec.dataHole`): a quest whose original stage row loaded another stage's map (`map.stageBinId`, the Daily
+  XIII quests on the monthly maps) shares that map (equal drops). Other records keep the Part 4 rule.
+- **Second notices.** `scheduleLineOf` -> reason `scheduleLine`: no row, no card, no catalogue row. `datesOf` dates the target
+  (EV-0913 -> EV-0929 from 2019-09-03; with no end, the Pacific day its last donor row ends: 2019-10-03).
+- **Rewards.** `rewardTypeAliases {18: 20, 19: 20}`: avatar sets and style parts are paid as avatar parts (type 20), each id as the
+  row lists it (the ♂ part on one objective, the ♀ part on the other, as the Special quests), once.
+- **Unions** (The Keyblade War Pt. 3). `unionQuests` give each index quest its `union` (1 Ursus, 2 Anguis, 3 Unicornis, 4 Vulpes,
+  5 Leopardus); routes-events.js lists only the player's own Union version. `stagesOf` lists EV-0929's built quests on the EV-0941
+  card (`sharedWith`). The record's `completionReward` joins the bonus list: `communityBonus.byUnion` / `readyUnions`, paid to a
+  player when the common quests and their own Union's quests are done. I-253 item 2 fixed: a counted quest without objectives
+  counts once cleared (playStatus).
+- **Catalogue.** `catalogName` renames the Event Catalog row and page (EV-1089 «Challenge Organization XIII Pt.1»).

@@ -11,10 +11,11 @@ config: {"stages": stage_dec.json di thethiny, "quests": wiki\\quests.json,
          "rooms_check": rooms_check.json di check_rooms.py / "exclude_rooms": [...] (stanze incomplete,
          trattate come assenti),
          "special": server/game_data/special_maps.json (optional: Special quests, see below),
+         "events": server/game_data/event_gen_maps.json (optional: event quests with no original map, see below),
          "special_rooms": recon/tools/special_rooms.json (optional: room name -> folder for the Special quests only),
          "extra_cls_dir": folder map/<stanza>/<stanza>_cls.bin of those rooms when they are not in cls_dir (optional:
          not listed in the stable room choice, so the other quests keep their room)}
-"stages" and "quests" may be left out for a run with only "special" (or zoo/tour) maps.
+"stages" and "quests" may be left out for a run with only "special" / "events" (or zoo/tour) maps.
 
 Special quests (cfg['special'], written by server/make-special.js): a JSON list
 [{stageId, world (worldId), name, room, target, targetId, level, enemies: [[{name, enemyId, n, reward}] per group],
@@ -23,6 +24,11 @@ treasures: [], rooms: 1}]. One MAP part per stage with the same placement rules 
 mappoi_stg<stageId>.bin + _00.bin and the POI. enemyId (when given) is used as is (the objectives count that id),
 reward goes into the enemy record (drop rows of make-special.js, 1 when the quest has none), targetReward into the target's record,
 level into every enemy record of the stage and into STG [11] (the quest level of the card, as in the story stages).
+Event quests with no original map (cfg['events'], written by server/make-events.js as server/game_data/event_gen_maps.json,
+Events Part 5 Task 3, label wikiRoom): the same list shape and the same rules as "special" (one part, groups along the distance,
+target at the farthest point, level in STG [11] and every enemy record). Extra keys: "roomCodes" (the khuxwiki room codes of the
+room: the first one with a collision file is the room, else the room name as a Special entry) and "censusId" (not used here).
+Their report entries carry "event": true (make-events.js serves a generated-map quest only once its stageId is in that report).
 Training map (an entry with "training": true, the stage of the Special Catalog banner, spec 7 of
 docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (group [{name, enemyId, n, reward}]) and
 "chests" (reward row of each chest). Two paths from the start (build_training): the start is the middle of the longest
@@ -1208,14 +1214,18 @@ for s in sorted(stages, key=lambda r: r['stageBinId']):
     report.append({'mission': num, 'stageId': sid, 'name': s['name'], 'room': first_room, 'folder': folder,
                    'exact_room': first_room in rooms, 'enemies': len(ens), 'chests': len(chests),
                    'unknown_enemies': sorted(set(missing))})
-# Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above.
-if cfg.get('special'):
-    special_rooms = json.load(open(cfg['special_rooms'], encoding='utf-8')) if cfg.get('special_rooms') else {}
-    for sp in json.load(open(cfg['special'], encoding='utf-8')):
+# Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above. Event quests with no
+# original map (cfg['events'], docstring): the same list and the same rules, the room by its khuxwiki codes first.
+special_rooms = json.load(open(cfg['special_rooms'], encoding='utf-8')) if cfg.get('special_rooms') else {}
+generated = [(sp, False) for sp in (json.load(open(cfg['special'], encoding='utf-8')) if cfg.get('special') else [])]
+generated += [(sp, True) for sp in (json.load(open(cfg['events'], encoding='utf-8')) if cfg.get('events') else [])]
+if generated:
+    for sp, is_event in generated:
         sid = sp['stageId']
         # «Underground Waterway x4» (rooms played several times in the catalogue) -> the room name
         room_name = re.sub(r'\s+x\d+$', '', sp.get('room') or sp['name'])
-        folder = special_rooms.get(room_name) or room_folder(room_name, sp['world'])
+        coded = next((c for c in sp.get('roomCodes', []) if c not in EXCL and os.path.exists(cls_path(c))), None) if is_event else None
+        folder = coded or special_rooms.get(room_name) or room_folder(room_name, sp['world'])
         groups = [{'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId'))
                                for x in (g if isinstance(g, list) else [g])], 'target': False, 'room': room_name}
                   for g in sp.get('enemies', [])]
@@ -1241,11 +1251,12 @@ if cfg.get('special'):
         open(os.path.join(out, 'mappoi_stg%05d_00.bin' % sid), 'wb').write(part)
         poi_add(sid, 0, ens, chests)
         names = [m[0] for g in groups for m in g['members'] if not m[3]]
-        report.append({'mission': 0, 'stageId': sid, 'name': sp['name'], 'room': room_name, 'folder': folder,
-                       'exact_room': room_name in rooms or room_name in special_rooms, 'enemies': len(ens), 'chests': len(chests), 'special': True,
-                       'drops': sum(e[6] != 1 for e in ens),
-                       'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name})})
-        print('special', sid, folder, len(ens), 'nemici')
+        report.append(dict({'mission': 0, 'stageId': sid, 'name': sp['name'], 'room': room_name, 'folder': folder,
+                            'exact_room': bool(coded) or room_name in rooms or room_name in special_rooms, 'enemies': len(ens), 'chests': len(chests),
+                            'drops': sum(e[6] != 1 for e in ens),
+                            'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name})},
+                           **({'event': True, 'censusId': sp.get('censusId')} if is_event else {'special': True})))
+        print('event' if is_event else 'special', sid, folder, len(ens), 'nemici')
 # Missioni «zoo» per provare i nemici: tutti gli enemyId di zoo_enemies, zoo_per_stage per
 # missione, in aree da 5 nella stanza zoo_room; stageId 990001.. (righe nel master con
 # KHUX_ZOO=1 in make-game-tables.js). All'avvio il campo carica la grafica di tutti.
