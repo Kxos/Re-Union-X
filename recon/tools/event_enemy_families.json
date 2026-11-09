@@ -501,6 +501,36 @@
    "model": "new",
    "approved": true,
    "review": "user-approved 10-11 (Events Part 4 Task 3), rendered review tmp/events_enemies/review/challenge/index.html; served from extra_donors_events2.tsv (events2_export.py); atkSp completed 10-11 (user-approved, tmp/events_enemies/review/challenge/atksp3.html): fireballs 13-15 from the raid boss Jack in the Box (JP 4.3.1 raid/1004/atk2, same Flash file; rule RAID-TWIN)."
+  },
+  "286": {
+   "name": "Master Aced",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 5 Task 2, 10-11): The Keyblade War Pt. 3 «The Ultimate Test» (EV-0941), 4 quests; own JP 4.3.1 LWFs, pictures from the story master and effect clips; rendered review tmp/events_enemies/review/orgxiii/index.html"
+  },
+  "287": {
+   "name": "Master Invi",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 5 Task 2, 10-11): The Keyblade War Pt. 3 «The Ultimate Test» (EV-0941), 3 quests; own JP 4.3.1 LWFs, pictures from the story master and effect clips; rendered review tmp/events_enemies/review/orgxiii/index.html"
+  },
+  "288": {
+   "name": "Master Ira",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 5 Task 2, 10-11): The Keyblade War Pt. 3 «The Ultimate Test» (EV-0941), 3 quests; own JP 4.3.1 LWFs, pictures from the story master and effect clips; rendered review tmp/events_enemies/review/orgxiii/index.html"
+  },
+  "289": {
+   "name": "Master Ava",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 5 Task 2, 10-11): The Keyblade War Pt. 3 «The Ultimate Test» (EV-0941), 3 quests; own JP 4.3.1 LWFs, pictures from the story master and effect clips; rendered review tmp/events_enemies/review/orgxiii/index.html"
+  },
+  "290": {
+   "name": "Master Gula",
+   "model": "missing",
+   "approved": false,
+   "review": "pending (Events Part 5 Task 2, 10-11): The Keyblade War Pt. 3 «The Ultimate Test» (EV-0941), 3 quests; own JP 4.3.1 LWFs, pictures from the story master and effect clips; rendered review tmp/events_enemies/review/orgxiii/index.html"
   }
  }
 }
