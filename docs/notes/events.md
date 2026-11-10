@@ -935,3 +935,16 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   - *Dry result.* 2,750 of 3,570 quests served (2,714 before, none lost): challenge_2020 538 -> 556 (+18), The Keyblade War
     1 -> 19; import 1,862 of 1,862 (8 layout twins); 16 new files in `stage_gen\files\stage`, every old file byte-identical;
     validate_maps 0 errors on the 8 twins and the 19 KW maps.
+- **User decisions 4 and 5, part 1 (10 November 2026).**
+  - *Same-run evidence for non-target rows.* A generated-map quest of the 2016-17 runs gets `wikiEnemyIds[name]` only when the
+    same run's surviving original maps (own JP maps or JP twins of the same stages) use exactly one row for that name as a
+    non-target (private builder, evidence in `wikiEnemyIdsWhy`); 8 quests pinned (Marluxia II, IV, V, VI, VII, IX, X; Xaldin VI
+    Invisible only). Targets keep the 1xxxx band rule or a footage pin.
+  - *Xigbar XIII (decision 5).* The JP replay of this stage (711050, Waterfront Park, warp portals, Black Copter Fleet) is used under
+    the quest's own key with the WW target: the footage target card reads «Armored Archer LV 250, 298 Lux», the lux curve of 10024
+    at Lv 250 (24: 2, 15024: 0). `map.layoutTwin.label` names the Notice label (`jpReplayLayoutTwin`, make-events.js); drops are
+    the twin map's reward rows (62252, donor reward table).
+  - *Dry result.* 2,758 of 3,570 quests served (2,750 before, none lost): Org XIII 2016-17 186 -> 194 (7 Marluxia generated
+    maps, Xigbar XIII). validate_maps: the 7 generated maps 0 errors; 702930 keeps the «exit to part 0» errors of its JP map 711050.
+  - *Not done yet.* Multi-room generated maps (wiki «x3/x4/x5» rooms and named areas, groups per room, chests), Xigbar III own
+    maze, Xigbar IX on 711040 (Dark Plant row unproven); 34 quests still `enemyAmbiguous`.

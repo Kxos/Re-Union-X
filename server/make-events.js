@@ -70,7 +70,7 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
-  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin'];
+  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin', 'jpReplayLayoutTwin'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
 // (quizBoardScreenshot)
@@ -792,7 +792,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       // copied under the quest's own key with the enemy id of that run replaced by this run's own row (recon/tools/import_event_stages.py
       // enemySwaps). Layout reconstructed, enemy row original: label seriesLayoutTwin; served only once the import marks it layoutTwin
       const lt = (q0.map || {}).layoutTwin || null;
-      if (lt) ensure('seriesLayoutTwin');
+      if (lt) ensure(lt.label || 'seriesLayoutTwin'); // jpReplayLayoutTwin: the JP replay map of the same stage (Org XIII 2016-17)
       const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(fromKey || mapKey)], names);
       if (swapped) qLabels.push('wwEnemy');
       // AP of the khuxwiki page of this run over the surviving stage row (private builder rule, conflict recorded in the record)
