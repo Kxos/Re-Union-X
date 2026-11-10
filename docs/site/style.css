@@ -223,7 +223,7 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
   .ded-ring{width:60px;height:60px}.ded-name{font-size:22px}.ded-quote{font-size:15px}}
 /* credits intro line */
 .credits-intro{position:relative;max-width:620px;margin:6px auto 22px;padding:18px 20px 16px;text-align:center;
-  font:700 18px/1.55 var(--font);color:var(--text);letter-spacing:.2px}
+  font:600 18px/1.55 var(--font-body);color:#fff;letter-spacing:.1px;-webkit-font-smoothing:antialiased}
 .credits-intro::before,.credits-intro::after{content:"";position:absolute;left:12%;right:12%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(95,224,240,.75),transparent)}
 .credits-intro::before{top:0}.credits-intro::after{bottom:0}
