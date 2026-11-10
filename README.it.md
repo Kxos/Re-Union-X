@@ -131,8 +131,13 @@ Questo restauro si regge sul lavoro di chi ha conservato e documentato il gioco 
   moltiplicatori, condizioni degli speciali, galleria degli asset).
 - **KHUX Wiki** ([khuxwiki.com](https://www.khuxwiki.com/)) e **KH Wiki** ([khwiki.com](https://www.khwiki.com/)) —
   missioni, medaglie, speciali, eventi e immagini usati come riferimento.
-- **ReLux Team** — ricerche su eventi, raid, Union Cross e campagne del gioco, calcolatori fatti dai giocatori e
-  indicazioni sui riferimenti della community, che guidano il restauro delle modalita' a evento.
+- **ReLux Team** — ricerche su eventi, raid, Union Cross e campagne del gioco, l'archivio e l'indice delle notizie
+  ufficiali, calcolatori fatti dai giocatori e indicazioni sui riferimenti della community, che guidano il restauro
+  delle modalita' a evento.
+  - **LuxHollow** — sviluppatore principale di ReLux e sostegno costante a questo progetto. Il suo pacchetto compagno
+    ci ha dato un'istantanea tarda del master worldwide: calendario, righe delle quest e dei nemici degli eventi
+    2018-2021 (Org XIII, The Keyblade War, eventi sfida) e il riferimento per stagioni e tabelloni del Coliseum,
+    Union Cross, PvP, classifiche, tabelloni degli eventi e Booster.
 - **SmellyOctopus** ([YouTube](https://www.youtube.com/@SmellyOctopus)) — grazie per aver insegnato a tanti di noi a
   essere giocatori F2P consapevoli e per averci tenuto compagnia all'epoca con video pieni di gioia. Quei video di
   KHUX oggi ci aiutano moltissimo come riferimento e fonte di informazioni per il restauro.

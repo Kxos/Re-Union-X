@@ -79,6 +79,9 @@ h3.sq:before{content:"";display:inline-block;width:14px;height:14px;background:v
 .checks li:before{content:"";flex:none;width:18px;height:18px;border-radius:4px;border:2px solid var(--sq);
   background:linear-gradient(135deg,transparent 45%,var(--sq) 45% 60%,transparent 60%)}
 .credits .tag{min-width:150px}
+.credits li.sub{padding-left:40px;background:rgba(0,0,0,.12)}
+.credits li.sub .tag{min-width:122px}
+.credits li.sub .tag::before{content:"\21B3\00A0"}
 
 /* buttons: blue like BACK, orange like Sort / Swap Gear */
 .btns{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0 4px}
