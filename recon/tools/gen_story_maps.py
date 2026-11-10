@@ -1390,6 +1390,11 @@ def build_event_areas(sp):
             kind = lay.get('targetKind') if is_t else (kinds[i] if i < len(kinds) else None)
             if kind:
                 struct.pack_into('<i', rec, 0x18, int(kind))
+            # team polygon of a normal group from the original layout ('polys', 4 points per group, as JP 706830: the guard teams
+            # carry their zone; zeros otherwise, as before)
+            polys = lay.get('polys') or []
+            if not is_t and i < len(polys) and polys[i]:
+                struct.pack_into('<8i', rec, 0x24, *[v for p in polys[i] for v in p])
             if is_t:
                 if lay.get('arena'):
                     struct.pack_into('<8i', rec, 0x24, *[v for p in lay['arena'] for v in p])

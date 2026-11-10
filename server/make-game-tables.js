@@ -401,6 +401,10 @@ if (enemies && fs.existsSync(namesFile)) {
   // nemici delle missioni 526-979 (make-enemy-oltre.js): cloni delle basi, ora col displayId servito, o grafica della
   // famiglia se servita; prima di abilita', comparsa e make-story-oltre.js (obiettivi «Defeat X»)
   enemyOltre.addRows(enemies, { ...enemyOltre.defaultSources(), drawn, sourcesOut: enemyOltre.SOURCES_PATH });
+  // original moves of the rows copied from another creature (guest allies, family clones; private file, I-261)
+  const motion = require('./enemy-motion-fix');
+  const movesSrc = motion.readOriginalMoves();
+  const movesRestored = motion.applyOriginalMoves(enemies, movesSrc);
   // abilita' dei nemici: enemyAttack della 5.0.1 ha 13 righe, i nemici veri ne citano centinaia (skillId,
   // urgencySkillId): le mancanti da enemy-attack-fix.js addMissing
   const attPath = path.join(OUT, 'enemyAttack.json');
@@ -411,11 +415,20 @@ if (enemies && fs.existsSync(namesFile)) {
     const atts = JSON.parse(fs.readFileSync(attBasePath, 'utf8'));
     attacksAdded += atkFix.addMissing(atts, enemies);
     // righe originali (stati alterati, potenza, buff) dai dati di thethiny: enemy-attack-fix.js
-    atkFix.applyEnemyAttacks(atts, atkFix.readOrig());
+    atkFix.applyEnemyAttacks(atts, atkFix.readOrig(undefined,
+      [...require('./make-event-enemies').attackRows(), ...motion.attackRows(movesSrc)]));
     fs.writeFileSync(attPath, JSON.stringify(atts));
     // contatori e assorbimento dei nemici 526-979 (enemy-mechanics.js, I-207), con gli attacchi gia' completi
     const mech = require('./enemy-mechanics');
     console.log('enemy-mechanics:', JSON.stringify(mech.applyMechanics(enemies, atts, mech.readTable())));
+    // the original rows win over the counters rebuilt from the wiki (donor 10249/10271/160110233: same values, real moves)
+    motion.applyOriginalMoves(enemies, movesSrc);
+    // special-attack moves (attackMotion 2) of models without atkSp: own moves or plain copies (enemy-motion-fix.js, I-261)
+    // safety net only on request (KHUX_ENEMY_PLAIN_SP=1): the real fix is the missing atkSp textures (I-261)
+    const plainOn = /^(1|on|true|yes)$/i.test(String(process.env.KHUX_ENEMY_PLAIN_SP || ''));
+    const atkSp = motion.atkSpModels(namesFile, ENEMY_GEN);
+    console.log(motion.summary(movesRestored, plainOn ? motion.applyMotionFix(enemies, atts, atkSp) : { plain: [], added: [] }),
+      `; rows with a special attack their model lacks: ${motion.missingMotions(enemies, atts, atkSp).length}`);
     fs.writeFileSync(attPath, JSON.stringify(atts)); // con le righe nuove delle mosse a 0
   }
   // effetto di comparsa: lwf/character/enemy/show_effect_fla/show_effect<showSwf>/ (nelle
