@@ -260,6 +260,16 @@ function inStageRange(row, stageId) {
   if ((r.stageId || []).includes(stageId)) return true;
   return !!r.validStageWidthId && r.stageStartId <= stageId && stageId <= r.stageEndId;
 }
+// «Name - %d/3» (the Time Missions, short rows of 3 quests): the client puts in %d the place of the stage in its served row. Rows
+// grouped into one served row (short rows of every hour) would show «15/3», so the place in the stage's own donor row is written
+// into the name (list index, else offset in the range, + 1); a name without %d, or a stage outside its row, stays as it is.
+function ordinalName(name, row, stageId) {
+  if (typeof name !== 'string' || !name.includes('%d') || !row) return name;
+  const r = row.stageRange || {};
+  let n = (r.stageId || []).indexOf(stageId) + 1;
+  if (!n && r.validStageWidthId && r.stageStartId <= stageId && stageId <= r.stageEndId) n = stageId - r.stageStartId + 1;
+  return n ? name.replace('%d', String(n)) : name;
+}
 // -> {row, guess}: guess true when the quest matches no row (the first row is taken; patch() warns)
 function rowOfQuest(rows, q) {
   if (!rows.length) return { row: null, guess: false };
@@ -1065,7 +1075,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       const ref = refs.of(q.worldId);
       const room = genEntry ? { name: genEntry.room } : (q.room || [])[0] || {};
       const before = quizDrama ? quizDrama.ids : [];
-      put(out.stage, { ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: q.name, mapName: room.name || ref.mapName, useAp: q.ap,
+      put(out.stage, { ...JSON.parse(JSON.stringify(ref)), stageId, stageBinId: mapKey, id: stageId, name: ordinalName(q.name, donorRow, q0.stageId), mapName: room.name || ref.mapName, useAp: q.ap,
         chapterId: Math.floor(stageId / 1000), worldId: q.worldId, onlyDrama: 0, stageKind: STAGE_KIND, noPartner: r.noPartner || 0,
         validBeforeDrama: before.length, beforeDramaId: [...before], beforeDramaType: before.map(() => 0), validAfterDrama: 0, afterDramaId: [], afterDramaType: [], branchType: 0,
         disableContinue: r.disableContinue || 0, addLevel: q.addLevel || 0, holdKeyblade: r.holdKeyblade || 0, hardmodeRequire: r.hardmodeRequire || 0,
@@ -1467,5 +1477,5 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, mapRestoreLabels, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
+module.exports = { buildEvents, ordinalName, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, mapRestoreLabels, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
   applyDatesOf, aliasRewardTypes, genMapOf, mergeCompletion, loadMaps, UNION_IDS };

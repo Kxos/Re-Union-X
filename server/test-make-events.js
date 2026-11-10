@@ -1550,6 +1550,16 @@ const tests = {
     assert.ok(k2.labels.includes('completionReward'));
     assert.throws(() => me.buildEvents([pt12, { ...pt3, unionQuests: { x: { Nowhere: 740911 } } }], CONFIG, master()), /unknown Union «Nowhere»/);
   },
+  // «Target Battle - %d/3»: the place in the quest's own donor row, not in the grouped served row (Time Missions showed 15/3)
+  ordinal_name_in_donor_row() {
+    const range = { stageRange: { validStageId: 0, stageId: [], validStageWidthId: 1, stageStartId: 742132, stageEndId: 742134 } };
+    assert.strictEqual(me.ordinalName('Target Battle - %d/3', range, 742134), 'Target Battle - 3/3');
+    const list = { stageRange: { validStageId: 3, stageId: [9, 7, 8], validStageWidthId: 0 } };
+    assert.strictEqual(me.ordinalName('Heat Saber - %d/3', list, 7), 'Heat Saber - 2/3');
+    assert.strictEqual(me.ordinalName('Target Battle - %d/3', range, 1), 'Target Battle - %d/3');
+    assert.strictEqual(me.ordinalName('Plain name', range, 742133), 'Plain name');
+    assert.strictEqual(me.ordinalName('X - %d/3', null, 742133), 'X - %d/3');
+  },
   // the id ranges: a run that needs more numbers than the range holds stops with the range and the count
   id_range_overflow() {
     const cfg = { ...CONFIG, stageMax: CONFIG.stageBase + 2 };
