@@ -413,6 +413,13 @@
    "group": "CLOSED",
    "hash": "72e384944f082e46",
    "name": "I-256 · Gigas Shadow base row 1021: HP differs between our master and the donated table"
+  },
+  "I-257": {
+   "thread": "1569694833189330987",
+   "msg": "1569694833189330987",
+   "group": "OPEN",
+   "hash": "ffa01a6cd8de5d8b",
+   "name": "I-257 · Unplayable first rows of five served events whose Event Catalog card is that row's…"
   }
  }
 }
