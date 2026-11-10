@@ -1109,6 +1109,8 @@ Results:
 | Vexen IV (2 areas, back exit) | Entrance back exit returns to Frozen Forest, forward again, target Defender on contact |
 | Vexen XI (4 areas, back exits) | C -> B -> A -> Entrance, target Wayward Wardrobe on contact; in C the way to the exit (4363, 1266; original 4401, 1266) goes below the fallen log |
 | Vexen XII (hpFromFootage) | little-HP Neoshadow 2016120033 at Lv 300 shows one bar, no chip (10,861 HP); the map holds 4 of them with the target, so «Defeat Neoshadow with little HP x 4» can be met |
+| Marluxia II / IV / VI targets | run rows 16MM10233: Magic Lv 30 82 Lux, Power Lv 50 102 Lux, Speed Lv 70 119 Lux (rows give 82.6 / 102.7 / 119.6) |
+| Wandering Spook look | user: a grey cloak in the wait animation; 21 downscaled pieces came from the grey recolour 5069, replaced by own purple frames (I-258) |
 | First clear / replay | Larxene IX first clear +20 Jewels, replay +0; a run with no objective met pays nothing (Xigbar II) |
 
 Bench notes: walk with a held drag (`Swipe` 3-5 s) toward the arrows, single taps move a few steps; the real target has the red
