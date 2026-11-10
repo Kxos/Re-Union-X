@@ -1054,3 +1054,33 @@ Staging only; the served `event_img` folder is unchanged until the user approves
   Two flags, both checked and harmless: EV-0941 (notice 58489 carries its 2021 «Updated» date) and EV-1273 (umbrella notice
   69374 «JP 5th Anniversary Events and Campaign!»; the row banner itself reads «CHALLENGE ORGANIZATION XIII»).
 - Review page (private): `tmp\events\orgxiii\cards.html`, grouped by year.
+
+## Org XIII events served on the bench (Events Part 5, Task 6, 11 November 2026)
+
+Local bench only (nothing published; the public play package is decided with the user later).
+- **Master regen** (HANDOFF command, `KHUX_EVENT_ENEMIES=1`, `KHUX_EVENT_GEN_REPORT=tmp\events\p5d7\gen\event_stages\gen_report.json`;
+  dry anchors and `server/event_ids.json` copied from `tmp\t5r` first, both supersets of the live files): 439 entries, **2,777 of
+  3,570 quests served** (live before: 2,210), 36 generated maps listed. `events.json` byte-identical to the dry run. Tables changed:
+  only stage, evStage, reward, enemy, enemyAttack (md5); no served stage or evStage id moved, none lost. The event row 2140000285
+  (Lexaeus VII CAUTION Shadow) and its attacks 285020 / 285021 are in the master. 106 tables valid on the server.
+- **Cards.** `make_event_banners.py --all-rows --extra tmp\events\t5p4\extra_part4_staging.json`: 638 cards, the 605 served ones
+  unchanged, the 33 new ones byte-identical to the approved staging; `make_special_banners.py --section event`: 608 kept copies
+  (76 new files, 0 changed, catalogue banner unchanged). imgVersion stays 9.
+- **Resources 111** (full build, 2,015 s; 5.18 GiB in 41 parts): `gen_story_maps.py` in the build wrote the 36 event maps; its
+  report and the 113 map files are byte-identical to `tmp\events\p5d7\gen`. A second regen with the build's report gives the same
+  master (only the `enemy_display_orig.json` cache gained 170 missing keys, no row changed). Installed with `update-resources.ps1`
+  (660 s), master revision **295** in the four session scripts.
+- **Saves** (from `maxpower`, `tmp\events\p5t6\mksaves.js`: story quests above LIMIT removed, Shop rotation `gacha.rot` set so the
+  Shop week holds the date): `org17` (LIMIT 540, week 2017-01-12..18: Xemnas XIII Event), `org18` (LIMIT 780, rot k 3, week
+  2018-08-09..15: Axel NEW XIII), `org20` (LIMIT 940, rot k 1, week 2020-09-10..16: Challenge Organization XIII). The rotation
+  week is counted from the real week: remake the saves in a later week.
+- **Smoke (no battle), screenshots `D:\Progetto_Restauro_KH_UX\screenshots\t6p_*.png`.** org17: Events tab shows the «Xemnas is
+  Here!» card; quest list (Xemnas I, target Possessors LV 50, 102 Lux), keyblade and friend screens, the generated map 4003348
+  (DG_0100_02_00) loads with its TARGET marker, Give Up back to the list. Event Catalog: new cards in the Launch year (Marluxia,
+  Larxene, Xemnas, Xigbar...), entry page and quest table open. org18: «CHALLENGE AXEL!!» card, Axel LV 500 boss card. org20:
+  «Japanese ver. 5th Anniversary CHALLENGE ORGANIZATION XIII» card, Larxene 1/12 list. No crash.
+- **Seen, to check:** (1) on org20 the Time Missions SP card (22459, Part 4, unchanged file, served 200) is drawn as the black
+  heart placeholder in the Events tab; (2) the Xemnas I quest thumbnail shows a Daybreak Town fountain while its generated map is
+  DG_0100_02_00 (thumbnail = donor thumbId).
+- **Battle checks: the user's** (list in HANDOFF): Lexaeus VII CAUTION, the 14 multi-area quests, Larxene little-HP decoys,
+  Marluxia run-row targets, the hpFromFootage rows.
