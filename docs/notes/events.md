@@ -1084,3 +1084,32 @@ Local bench only (nothing published; the public play package is decided with the
   DG_0100_02_00 (thumbnail = donor thumbId).
 - **Battle checks: the user's** (list in HANDOFF): Lexaeus VII CAUTION, the 14 multi-area quests, Larxene little-HP decoys,
   Marluxia run-row targets, the hpFromFootage rows.
+
+### Battle checks on the bench (11 November 2026, master rev 295 / resources 111 + -Quick map rebuilds)
+
+Played by hand on the bench (field and battle speed at max, maxpower deck). Two generator bugs found and fixed:
+- **Guarded exits moved away** (commit bf964fb): `build_event_areas` moved an exit EXIT_KEEP (200) units from the enemy that
+  stands on it in the original map, so Lexaeus IV could be crossed without fighting. The original exit is now kept when an
+  enemy guards it (a doubt is logged), and `validate_maps.py` reports an enemy within TRIG of an exit as a warning («la
+  sorveglia»), not an error. Benched: Lexaeus IV and VII, both guards fought, target in area 3.
+- **Target battle not starting on contact** (commit cb09da1): generated event maps gave the target team a 120 x 80 arena polygon
+  (map record +0x24); the battle only started inside it, so a target that walked out of it never triggered. Original maps mostly
+  use a zero polygon (JP 4.3.1: 3,379 zero vs 2,187 non-zero boss strips) and start the battle on contact. Event maps now write a
+  zero polygon unless the layout gives one; Special maps keep theirs. Benched: Larxene IX target battle starts on contact.
+
+Results:
+| Check | Result |
+|---|---|
+| Lexaeus IV / VII (3 areas) | transitions, guards fought, target in area 3 |
+| Lexaeus VII Shadow 2140000285 | Shadow look, Lv 175, 4 gauges as footage; CAUTION not seen (the team kills it in one turn; CAUTION needs HP < 20,000) |
+| Larxene XI | normal Gigas Shadow Lv 180 «4 chips +5» (= 184,000 HP as footage), little-HP decoy one bar, all 3 objectives |
+| Larxene IX (3 areas) | transitions, Wizard 2 gauges, target on contact (after cb09da1) |
+| Xigbar II (5 areas, one room) | every transition, target Gummi Hammer in area 5 on contact |
+| Vexen IV (2 areas, back exit) | Entrance back exit returns to Frozen Forest, forward again, target Defender on contact |
+| First clear / replay | Larxene IX first clear +20 Jewels, replay +0; a run with no objective met pays nothing (Xigbar II) |
+
+Bench notes: walk with a held drag (`Swipe` 3-5 s) toward the arrows, single taps move a few steps; the real target has the red
+TARGET label (enemy id 10000 + base), same-name normal enemies wander too; in Larxene IX area 3 the back exit lies under the
+target arrow. Time objectives were not judged (the hand-driven bench is far slower than a player).
+Still to check: CAUTION with a weaker deck, Vexen XI, Marluxia targets (attribute icon, Lux per hit), the hpFromFootage gauges
+of Vexen III/XII and the Daily XIII quests.
