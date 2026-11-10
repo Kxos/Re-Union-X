@@ -199,6 +199,19 @@ try:
         vra = json.load(open(os.path.join(tmp, 'va.json'), encoding='utf-8')) if os.path.exists(os.path.join(tmp, 'va.json')) else {}
         for sid in (EVA, EVB):
             check(vra.get(str(sid), {}).get('errors') == [], 'validate_maps areas map %d: no errors (%s)' % (sid, vra.get(str(sid)) or va.stderr[-400:]))
+        # a door of an original map at the room's edge (outside the walkable component): snapped to the nearest walkable pixel of the
+        # entry's component, noted; facings 0 of the originals -> 1 / 2 (validate_maps)
+        edge = dict(eva, stageId=EVB, areas=[dict(eva['areas'][0], layout=dict(eva['areas'][0]['layout'], exit=[1790, 980]))] + [
+            dict(eva['areas'][1], layout=dict(eva['areas'][1]['layout'], arriveFacing=0))] + eva['areas'][2:])
+        json.dump([edge], open(os.path.join(tmp, 'eventsa.json'), 'w'))
+        re_ = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfga.json')],
+                             capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(re_.returncode == 0, 'edge door run exit %d: %s' % (re_.returncode, re_.stderr[-600:]))
+        if os.path.exists(fa(EVB, '_00')):
+            ee = mapfile.parse_map(open(fa(EVB, '_00'), 'rb').read())['exits'][0]
+            check(ee['x'] < 1790 and ee['arrive_facing'] in (1, 2), 'door snapped inside, arrival facing 1/2 (%s)' % ee)
+            rep_e = {x['stageId']: x for x in json.load(open(os.path.join(tmp, 'reporta.json'), encoding='utf-8'))}
+            check(any('snapped' in d for d in rep_e.get(EVB, {}).get('doubts', [])), 'report: door snapped (%s)' % rep_e.get(EVB))
         # a layout point not reachable from the area's entry: error
         bad = dict(eva, areas=[dict(eva['areas'][0], layout=dict(eva['areas'][0]['layout'], groups=[[5, 5]]))] + eva['areas'][1:])
         json.dump([bad], open(os.path.join(tmp, 'eventsa.json'), 'w'))

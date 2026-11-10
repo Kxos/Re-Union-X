@@ -1267,7 +1267,8 @@ def apply_layout(folder, sp):
 # different rooms, JP 69670 / 300510 / 720430, and not on a room repeated «x3» / «x5», JP 706830 / 69720). Per-area layout (all
 # optional, read on original maps of the same room by the private builder; every point must be reachable from the area's entry):
 # start [x, y] (area 0), arrive [x, y] (entry of area k > 0), exit [x, y] (forward door), back [x, y] + backArrive [x, y] (door of
-# the way back and the arrival next to the previous area's forward door), exitAngle / backAngle, arriveFacing / startFacing, groups
+# the way back and the arrival next to the previous area's forward door), exitAngle / backAngle, arriveFacing / backArriveFacing
+# (1 or 2; the originals' 0 -> the side rule of build_multi, validate_maps wants 1 or 2) / startFacing, groups
 # [[x, y] | null per normal group], target [[x, y] target, then its escorts], arena, chests [[x, y]...]. Without them: area 0 starts
 # at the room's walk start, area k > 0 is entered next to its walk start (the back door), the forward door is the farthest point
 # from the entry, groups along the walking distance, the target at the farthest point, chests as build_part. An exit closer than
@@ -1303,7 +1304,18 @@ def build_event_areas(sp):
         pc = _pc_all[folders_[k]]
         lab0 = pc(*entry[k])
         assert lab0, 'stage %s: area %d entry %s not walkable in %s' % (sid, k, entry[k], folders_[k])
-        lay = lays[k]
+        lay = dict(lays[k])
+        # a door of an original map sits at the room's edge, often outside the walkable component (free space > reach_radius):
+        # snapped to the nearest pixel of the entry's component, as door_px does for the story doors (noted when moved)
+        for x in ('exit', 'back'):
+            if lay.get(x) and not (0 <= lay[x][1] < pc.lab.shape[0] and 0 <= lay[x][0] < pc.lab.shape[1] and pc.lab[lay[x][1], lay[x][0]] == lab0):
+                import numpy as np
+                ys, xs = np.nonzero(pc.lab == lab0)
+                j = int(np.argmin((xs - lay[x][0]) ** 2 + (ys - lay[x][1]) ** 2))
+                q = (int(xs[j]), int(ys[j]))
+                doubts.append('area %d: %s door %s snapped to the walkable %s (%d units)' % (k, x, tuple(lay[x]), q, round(dd(q, lay[x]))))
+                lay[x] = list(q)
+        lays[k] = lay
         pp = [tp(lay.get(x)) for x in ('exit', 'back') if lay.get(x)] + [tuple(p) for p in (lay.get('groups') or []) if p]
         pp += [tuple(p) for p in (lay.get('target') or [])] + [tuple(p) for p in (lay.get('chests') or [])]
         for p in pp:
@@ -1374,6 +1386,8 @@ def build_event_areas(sp):
             if p and any(dd(p, e) < EXIT_KEEP for e in ens):
                 cand = [q for q in dist if all(dd(q, e) >= EXIT_KEEP for e in ens) and dd(q, entry[k]) >= 200
                         and all(dd(q, o) >= 200 for o in ex_pts if o != p)]
+                # not back towards the entry where a point as far from it exists
+                cand = [c for c in cand if dd(c, entry[k]) >= 0.9 * dd(p, entry[k])] or cand
                 if cand:
                     q = min(cand, key=lambda c: (dd(c, p), c))
                     doubts.append('area %d: %s exit moved from %s to %s (an enemy within %d)' % (k, nm_, p, q, EXIT_KEEP))
@@ -1410,18 +1424,18 @@ def build_event_areas(sp):
             a = entry[k + 1]
             ang = lay.get('exitAngle', exit_angle(f, pts[k], fwd[k], cents[k]))
             ex.append((fwd[k][0], fwd[k][1], ang, rem[k + 1], tk - (k + 1) + 1, a[0], a[1], k + 1,
-                       lays[k + 1].get('arriveFacing', face(k + 1, a))))
+                       lays[k + 1]['arriveFacing'] if lays[k + 1].get('arriveFacing') in (1, 2) else face(k + 1, a)))
         if back and k > 0:
             a = barr[k - 1]
             ang = lay.get('backAngle', exit_angle(f, pts[k], bdoor[k], cents[k]))
             ex.append((bdoor[k][0], bdoor[k][1], ang, int(round(dd(a, fwd[k - 1]))) + rem[k], tk - (k - 1) + 1, a[0], a[1], k - 1,
-                       lay.get('backArriveFacing', face(k - 1, a))))
+                       lay['backArriveFacing'] if lay.get('backArriveFacing') in (1, 2) else face(k - 1, a)))
         parts.append(mr_body(f, ex, recs, ens, chests))
         if k == tk:
             target_id = ens[struct.unpack_from('<i', recs[-1], 0)[0]][2]
         poi_add(sid, k, ens, chests)
         tot_a, tot_e, tot_c = tot_a + len(recs), tot_e + len(ens), tot_c + len(chests)
-    hdr = struct.pack('<16i', 4674643, 16, R, entry[0][0], entry[0][1], lays[0].get('startFacing', 2), target_id, 1, tot_a, tot_e,
+    hdr = struct.pack('<16i', 4674643, 16, R, entry[0][0], entry[0][1], lays[0]['startFacing'] if lays[0].get('startFacing') in (0, 1, 2) else 2, target_id, 1, tot_a, tot_e,
                       0, level, tk, 0, tot_c, 0)
     return hdr, parts, {'parts': R, 'folders': folders_, 'groups_per_room': [len(p[0]) for p in placed],
                         'chests_per_room': [len(p[2]) for p in placed], 'doubts': doubts}, tot_e, tot_c
