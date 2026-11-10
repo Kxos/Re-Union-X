@@ -652,8 +652,9 @@ def build_part_mr(folder, dist, groups, nchests, exits, uid, has_target):
     return mr_body(folder, exits, areas, ens, chests), areas, ens, chests, uid
 
 
-def mr_body(folder, exits, areas, ens, chests):
-    """MAP part with an exits block (several parts): header of the template, exits, areas, enemies, chests, no objects."""
+def mr_body(folder, exits, areas, ens, chests, npcs=()):
+    """MAP part with an exits block (several parts): header of the template, exits, areas, enemies, chests, objects (npcs:
+    (x, y, id) map objects of type 4, the portals of PORTAL_ROOMS; without them the old empty block, byte for byte)."""
     body = bytearray(tmpl[:0x34])
     nm = folder.encode()
     body[0x0c:0x0c + 16] = nm + b'\0' * (16 - len(nm))
@@ -674,9 +675,23 @@ def mr_body(folder, exits, areas, ens, chests):
     B = len(body)
     body += struct.pack('<i', 0)
     C = len(body)
-    body += b'\0' * 64
+    if npcs:
+        # as the originals: count, 0x20 per object (x, y, id, short type 4, 0, facing 1, 0, talk 0, talk2 0, 0), no padding
+        body += struct.pack('<i', len(npcs))
+        for x, y, i in npcs:
+            body += struct.pack('<3i4h3i', x, y, i, 4, 0, 1, 0, 0, 0, 0)
+    else:
+        body += b'\0' * 64
     struct.pack_into('<3i', body, 0x28, A - 0x34, B - 0x34, C - 0x34)
     return bytes(body)
+
+
+# Corridor of Darkness rooms: the JP 4.3.1 maps put the purple portal 5528 on (almost) every exit (DG_0100_02_00 613 of 624,
+# DG_0200_27_00 213 of 214, DG_0100_01_00 99 of 107; median offset +5, -10) and the white portal 5529 about 150 left of the
+# arrival point (-163, -10 the most common, 65% of the arrivals). Generated parts of these rooms get them the same way (user 11-11:
+# the exits showed only the blue arrow, no vortex)
+PORTAL_ROOMS = {'DG_0100_01_00', 'DG_0100_02_00', 'DG_0200_27_00'}
+PORTAL_EXIT, PORTAL_ARRIVAL = 5528, 5529
 
 
 def norm(s):
@@ -1368,6 +1383,13 @@ def build_event_areas(sp):
             struct.pack_into('<2i', rec, 0, len(ens), len(members))
             struct.pack_into('<i', rec, 0x14, uid)
             uid += 1
+            # team kind (record +0x18, default 1): 1 + bit 1 CAUTION (label over the enemy on the field, red-purple swirl, the team
+            # strikes first) + bit 2 hidden; khuxwiki {{caution}} teams are 2 / 4 in the JP story maps (bench 11-11). layout
+            # 'kinds' gives one value per normal group, 'targetKind' the target team's
+            kinds = lay.get('kinds') or []
+            kind = lay.get('targetKind') if is_t else (kinds[i] if i < len(kinds) else None)
+            if kind:
+                struct.pack_into('<i', rec, 0x18, int(kind))
             if is_t:
                 if lay.get('arena'):
                     struct.pack_into('<8i', rec, 0x24, *[v for p in lay['arena'] for v in p])
@@ -1440,7 +1462,15 @@ def build_event_areas(sp):
             ang = lay.get('backAngle', exit_angle(f, pts[k], bdoor[k], cents[k]))
             ex.append((bdoor[k][0], bdoor[k][1], ang, int(round(dd(a, fwd[k - 1]))) + rem[k], tk - (k - 1) + 1, a[0], a[1], k - 1,
                        lay['backArriveFacing'] if lay.get('backArriveFacing') in (1, 2) else face(k - 1, a)))
-        parts.append(mr_body(f, ex, recs, ens, chests))
+        npcs = []
+        if f in PORTAL_ROOMS:
+            npcs = [(e[0] + 5, e[1] - 10, PORTAL_EXIT) for e in ex]
+            # forward arrivals walk out to the right (portal left of the point), back arrivals to the left (portal right of it)
+            if k > 0:
+                npcs.append((entry[k][0] - 163, entry[k][1] - 10, PORTAL_ARRIVAL))
+            if back and k < R - 1 and barr[k]:
+                npcs.append((barr[k][0] + 163, barr[k][1] - 10, PORTAL_ARRIVAL))
+        parts.append(mr_body(f, ex, recs, ens, chests, npcs))
         if k == tk:
             target_id = ens[struct.unpack_from('<i', recs[-1], 0)[0]][2]
         poi_add(sid, k, ens, chests)

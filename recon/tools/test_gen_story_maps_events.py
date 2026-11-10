@@ -151,7 +151,7 @@ try:
         eva = dict(base, stageId=EVA, room='Corridor (1)', roomCodes=[R27], censusId='EV-TEST', rooms=3, targetArea=2, backExits=False,
                    layoutSource='test 706830', enemies=[[B(1)], [B(2)]], targetWith=[B(1)], areas=[
                        {'room': 'Corridor (1)', 'roomCodes': [R27], 'enemies': [[B(1)]], 'chests': 1,
-                        'layout': {'start': [432, 988], 'exit': [1308, 952], 'groups': [[1296, 1014]], 'chests': [[668, 902]]}},
+                        'layout': {'start': [432, 988], 'exit': [1308, 952], 'groups': [[1296, 1014]], 'chests': [[668, 902]], 'kinds': [2]}},
                        {'room': 'Corridor (2)', 'roomCodes': [R27], 'enemies': [[B(2)]], 'chests': 0,
                         'layout': {'arrive': [475, 978], 'exit': [1500, 980]}},
                        {'room': 'Corridor (3)', 'roomCodes': [R27], 'enemies': [], 'chests': 0,
@@ -189,6 +189,11 @@ try:
             last = ps[2]['enemies']
             check([(e['enemyId'], e['x'], e['y'], e['level']) for e in last] == [(10001, 1270, 1070, 120), (80001, 1200, 1100, 120)], 'target team at the layout points (%s)' % last)
             check(ps[2]['teams'][0]['boss'] and not ps[1]['teams'][0]['boss'], 'only the target team is the boss team')
+            # team kind (+0x18): layout kinds [2] = CAUTION (JP 706830: both guard teams 2), the default stays 1
+            # Corridor of Darkness (DG_0200_27_00): purple portal 5528 on the exit (+5, -10), white 5529 left of the arrival (-163, -10)
+            check([(x['id'], x['x'], x['y'], x['type']) for x in ps[0]['npcs']] == [(5528, 1313, 942, 4)]
+                  and [(x['id'], x['x'], x['y']) for x in ps[1]['npcs'] if x['id'] == 5529] == [(5529, 312, 968)], 'portals (%s, %s)' % (ps[0]['npcs'], ps[1]['npcs']))
+            check(ps[0]['teams'][0]['f6'] == 2 and ps[2]['teams'][0]['f6'] == 1, 'team kinds: caution guard 2, target 1 (%s, %s)' % (ps[0]['teams'][0]['f6'], ps[2]['teams'][0]['f6']))
             # no arena polygon (all zeros), as the originals JP 706830 / 69720 / 720430 / 300510: the target battle starts on
             # contact; a small box made the battle start only inside it, and a target walking towards the player left it (bench)
             check(ps[2]['teams'][0]['polygon'] == [(0, 0)] * 4, 'target team without arena polygon (%s)' % ps[2]['teams'][0]['polygon'])
