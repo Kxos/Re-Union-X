@@ -964,3 +964,27 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
     Larxene XI 502280 (Lv 180) = 12 normal Gigas 1021 + 2 little-HP decoys and the target 2016121021 (the objective «Defeat 3
     Gigas Shadows that have little HP» counts the target). Dry: 2,763 of 3,570 served (+1, none lost); validate_maps 22 generated
     maps 0 errors.
+- **Multi-area generated maps (11 November 2026, dry).** Plan step «multi-room generator for event entries».
+  - *Structure from khuxwiki.* The pages of 14 generated-map quests list the map as several areas: «Corridor of Darkness x5»
+    (Xigbar II, IV, VI, VIII, X, XII), «x4» (Xigbar III), «x3» (Lexaeus I, IV, VII, X), «Corridor of Darkness B + A» with
+    «A (Top)», «A (Bottom)», «A (3)» (Larxene IX), «Frozen Forest + Entrance» (Vexen IV), «Frozen Forest C / B / A + Entrance»
+    (Vexen XI), with the groups and chests of each area. «xN» is N parts of the same room: Lexaeus XIII (same run, khuxwiki
+    «x3») is JP 706830, three parts of DG_0200_27_00 with one enemy each; Larxene XII (khuxwiki (1)-(3)) is JP 69720, three parts
+    of DG_0100_02_00. Rooms of the khuxwiki pictures: «Frozen Forest (3)» = BC_0012_02_00 (Vexen III, V, X, XII JP maps),
+    «Frozen Forest» = BC_0012_00_00 (Vexen I, IV thumbs), so «(2)» = BC_0012_01_00 (the third variant, by elimination);
+    Entrance = BC_0011_00_00 (Vexen XIII JP map); Larxene IX starts in its thumb room DG_0100_01_00 (B), A = DG_0100_02_00.
+  - *Record and generator.* The private Org XIII builder (block 11h) writes `genAreas {areas: [{label, room, groups, chests,
+    layout}], backExits, source, why}`; make-events.js `genAreasOf` turns it into `entry.areas` (ids by the one-room rule, per-name
+    counts checked against the page, one target group whose other members fight in the target's team; label `wikiAreas`, Notice
+    text in event_config.json); gen_story_maps.py `build_event_areas` writes one MAP part per area, chained by forward exits
+    (the way back only between different rooms, as the originals 69670 / 300510 / 720430; none on a repeated room, as 706830 /
+    69720), exit field 4 and the route left as the original multi-part maps. Layout points come from original maps of the same
+    rooms: start, doors and arrivals as the files (doors at the room edge snapped to the walkable area, 25-57 units), team spots of
+    non-boss teams of those maps spread over the area, the target team on a boss team spot. An exit closer than 200 to an enemy is
+    moved (706830 has its portal on the enemy's spot; validate_maps rejects an enemy within 96 of an exit). Not rebuilt: Xigbar's
+    warp portals inside an area (JP 711020 / 711040 have them as exits to the same part, WW positions unknown), the «hidden» flag of
+    Vexen XI's Darkballs, the Wandering Spook hit countdown.
+  - *Dry result.* All 14 quests stay held: 13 `enemyAmbiguous` (non-target names with several rows and no same-run evidence) and
+    Lexaeus X `enemyMissing` (Ringmaster has no non-event row). Their maps were built only for the review page, with provisional
+    rows (14 maps, 2-5 parts, validate_maps 0 errors, 0 warnings). Served list unchanged: 22 generated maps byte-identical,
+    2,763 of 3,570 quests served.
