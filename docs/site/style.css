@@ -81,12 +81,15 @@ h3.sq:before{content:"";display:inline-block;width:14px;height:14px;background:v
 .credits .tag{min-width:150px}
 .credits li{align-items:flex-start}
 .credits .tag{margin-top:3px}
-.members{display:grid;gap:8px;margin-top:10px}
-.member{display:block;background:var(--inner);border:1px solid var(--panel-edge);border-radius:10px;padding:9px 12px}
-.mhead{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:3px}
-.mname{font-family:var(--font);font-weight:800;color:var(--cyan);font-size:16px}
-.mrole{font-family:var(--font);font-size:12px;font-weight:700;color:#06182b;background:var(--key);border-radius:999px;padding:1px 10px}
-.mtext{display:block;font-size:15px;line-height:1.55;color:var(--muted)}
+.members{display:grid;gap:8px;margin-top:12px;padding-top:10px;border-top:2px dotted rgba(143,179,192,.45)}
+.mttl{display:block;font:700 11px/1 var(--font);letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.member{display:flex;align-items:flex-start;gap:12px;background:rgba(6,24,43,.45);border:1px solid rgba(54,166,230,.55);border-radius:12px;padding:11px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.mav{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:3px dashed var(--cyan);font:800 18px/1 var(--font);color:#fff}
+.mbody{display:block;min-width:0}
+.mhead{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:4px}
+.mname{font-family:var(--font);font-weight:800;color:#fff;font-size:17px}
+.mrole{font-family:var(--font);font-size:11.5px;font-weight:700;letter-spacing:.6px;color:var(--cyan);background:rgba(95,224,240,.1);border:1px solid rgba(95,224,240,.45);border-radius:999px;padding:1px 10px}
+.mtext{display:block;font-size:15px;line-height:1.6;color:var(--muted)}
 
 /* buttons: blue like BACK, orange like Sort / Swap Gear */
 .btns{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0 4px}
