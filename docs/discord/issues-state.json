@@ -434,6 +434,13 @@
    "group": "IN PROGRESS",
    "hash": "17d5bcc4ba7bfffc",
    "name": "I-260 · Generated event maps: no CAUTION teams and no Corridor of Darkness portals"
+  },
+  "I-261": {
+   "thread": "1569824440190246916",
+   "msg": "1569824440190246916",
+   "group": "IN PROGRESS",
+   "hash": "b1cdf09bad11b293",
+   "name": "I-261 · Enemy special attacks: copied moves and missing atkSp animations"
   }
  }
 }
