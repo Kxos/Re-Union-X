@@ -206,3 +206,5 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
   .parts .pn{text-align:left;grid-column:2;grid-row:1}
   .parts .pl{grid-column:1/3}
 }
+.thanks{display:block;margin-top:10px;padding:10px 14px;border-radius:12px;background:rgba(95,224,240,.08);border:1px solid rgba(95,224,240,.35);color:var(--text);font-style:italic;line-height:1.6}
+.thanks::before{content:"\2726\00A0";color:var(--key);font-style:normal}

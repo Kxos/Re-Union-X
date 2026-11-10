@@ -127,6 +127,9 @@ This restoration stands on the work of people who preserved and documented the g
   [KHUx-Recomp](https://github.com/thethiny/KHUx-Recomp) (static recompilation and decompile of the 1.0.1 client),
   [Modding-Database](https://github.com/thethiny/Modding-Database). Most of what this project does builds on the
   formats he documented.
+  **Without thethiny this project would most likely never have got off the ground.** His tools opened the game's
+  data, his server showed that bringing it back was possible, and his public work gave us the map we followed from
+  the very first day. We are deeply, truly grateful.
 - **Roboloid** and **Ultimadei** — the [Roboloid KHUχ database](https://roboloid.github.io/khux/) (medal data,
   multipliers, special attack conditions, asset gallery).
 - **KHUX Wiki** ([khuxwiki.com](https://www.khuxwiki.com/)) and **KH Wiki** ([khwiki.com](https://www.khwiki.com/)) —

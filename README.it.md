@@ -127,6 +127,9 @@ Questo restauro si regge sul lavoro di chi ha conservato e documentato il gioco 
   [KHUx-Recomp](https://github.com/thethiny/KHUx-Recomp) (ricompilazione statica e decompilato del client 1.0.1),
   [Modding-Database](https://github.com/thethiny/Modding-Database). Gran parte di cio' che questo progetto fa si basa
   sui formati che ha documentato.
+  **Senza thethiny questo progetto probabilmente non sarebbe mai nato.** I suoi strumenti hanno aperto i dati del
+  gioco, il suo server ha dimostrato che riportarlo in vita era possibile e il suo lavoro pubblico ci ha dato la
+  mappa che seguiamo dal primo giorno. Gliene siamo profondamente, sinceramente grati.
 - **Roboloid** e **Ultimadei** — il [database KHUχ di Roboloid](https://roboloid.github.io/khux/) (dati delle medaglie,
   moltiplicatori, condizioni degli speciali, galleria degli asset).
 - **KHUX Wiki** ([khuxwiki.com](https://www.khuxwiki.com/)) e **KH Wiki** ([khwiki.com](https://www.khwiki.com/)) —
