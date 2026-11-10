@@ -236,3 +236,13 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
 #sec-credits .credits-intro .gold{font-weight:700}
 #sec-credits .ded-quote .gold{color:#ffd47a}
 #sec-credits .rows.credits .x{color:#dcebf3}
+/* credits: community thanks */
+.community-thanks{position:relative;margin:18px 0 6px;padding:22px 26px 18px;text-align:center;border-radius:14px;
+  background:radial-gradient(ellipse at top,rgba(255,190,80,.14),transparent 60%),linear-gradient(160deg,#0f3d63,#0a2a48);
+  border:1px solid rgba(255,207,107,.55);box-shadow:0 0 0 1px rgba(10,47,85,.8),0 0 22px rgba(255,190,80,.12)}
+.ct-heart{display:block;margin:0 auto 6px;font-size:26px;line-height:1;color:#ffcf6b;text-shadow:0 0 14px rgba(255,190,80,.5)}
+.ct-title{margin:6px 0 10px;font:800 22px/1.1 var(--font);color:#fff;letter-spacing:.4px}
+.community-thanks p{max-width:640px;margin:0 auto 10px;font-size:15.5px;line-height:1.6;color:var(--text)}
+.community-thanks i{color:var(--cyan)}
+.community-thanks .ct-sign{margin:12px auto 0;font:700 15px/1.4 var(--font);color:#ffcf6b;letter-spacing:.3px}
+@media (max-width:640px){.community-thanks{padding:18px 14px 14px}.ct-title{font-size:20px}.community-thanks p{font-size:15px}}
