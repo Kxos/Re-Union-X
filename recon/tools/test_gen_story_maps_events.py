@@ -75,7 +75,12 @@ try:
         check(not os.path.exists(f(sid, '_01')), 'one part only (%d)' % sid)
     if all(os.path.exists(f(s, p)) for s in (SP, EV) for p in ('', '_00')):
         check(open(f(SP), 'rb').read() == open(f(EV), 'rb').read(), 'STG of the events entry = STG of the special entry')
-        check(open(f(SP, '_00'), 'rb').read() == open(f(EV, '_00'), 'rb').read(), 'part of the events entry = part of the special entry')
+        msp, mev = (mapfile.parse_map(open(f(s, '_00'), 'rb').read()) for s in (SP, EV))
+        strip = lambda m: {**m, 'teams': [{k: v for k, v in t.items() if k != 'polygon'} for t in m['teams']]}  # noqa: E731
+        check(strip(msp) == strip(mev), 'part of the events entry = part of the special entry, but the target arena')
+        bev = [t for t in mev['teams'] if t['boss']]
+        check(bev and bev[0]['polygon'] == [(0, 0)] * 4 and any(q != (0, 0) for q in [t for t in msp['teams'] if t['boss']][0]['polygon']),
+              'events entry: target team without arena polygon (Special maps keep theirs): %s' % (bev and bev[0]['polygon']))
         h = struct.unpack('<16i', open(f(EV), 'rb').read()[:64])
         check(h[6] == 10001 and h[11] == 120, 'STG target 10001, level 120 (got %d, %d)' % (h[6], h[11]))
         m = mapfile.parse_map(open(f(EV, '_00'), 'rb').read())
@@ -184,6 +189,9 @@ try:
             last = ps[2]['enemies']
             check([(e['enemyId'], e['x'], e['y'], e['level']) for e in last] == [(10001, 1270, 1070, 120), (80001, 1200, 1100, 120)], 'target team at the layout points (%s)' % last)
             check(ps[2]['teams'][0]['boss'] and not ps[1]['teams'][0]['boss'], 'only the target team is the boss team')
+            # no arena polygon (all zeros), as the originals JP 706830 / 69720 / 720430 / 300510: the target battle starts on
+            # contact; a small box made the battle start only inside it, and a target walking towards the player left it (bench)
+            check(ps[2]['teams'][0]['polygon'] == [(0, 0)] * 4, 'target team without arena polygon (%s)' % ps[2]['teams'][0]['polygon'])
             uids = [x['uid'] for p in ps for x in p['enemies'] + p['chests']] + [t['uid'] for p in ps for t in p['teams']]
             check(len(uids) == len(set(uids)), 'uids unique over the parts')
         if all(os.path.exists(fa(EVB, p)) for p in ('', '_00', '_01')):

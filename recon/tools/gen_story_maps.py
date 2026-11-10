@@ -340,7 +340,7 @@ def member_reward(m):
     return rw
 
 
-def build_part(folder, start, dist, groups, nchests, level=1, layout=None):
+def build_part(folder, start, dist, groups, nchests, level=1, layout=None, zero_arena=False):
     """layout (optional, an event entry's «layout», see apply_layout): fixed centres of the normal groups ("groups", in order;
     a null keeps the rule), fixed member positions of the target team ("target": target first, then its escorts) and the
     arena polygon ("arena"); without it every position follows the rules below, byte for byte as before"""
@@ -380,6 +380,10 @@ def build_part(folder, start, dist, groups, nchests, level=1, layout=None):
         uid += 1
         if is_t and layout.get('arena'):
             struct.pack_into('<8i', rec, 0x24, *[v for p in layout['arena'] for v in p])
+        elif is_t and zero_arena:
+            # event maps: no arena polygon (all zeros), as most originals (JP 69720 / 720430 / 706830): the target battle starts
+            # on contact; with a small box it started only inside the box, and a target walking towards the player left it
+            struct.pack_into('<8i', rec, 0x24, *[0] * 8)
         elif is_t and lay_t:
             # no arena in the layout: a 120 x 80 arena around the target (its escorts may stand apart, as in the footage)
             x0, x1, y0, y1 = lay_t[0][0] - 60, lay_t[0][0] + 60, lay_t[0][1] - 40, lay_t[0][1] + 40
@@ -1367,9 +1371,10 @@ def build_event_areas(sp):
             if is_t:
                 if lay.get('arena'):
                     struct.pack_into('<8i', rec, 0x24, *[v for p in lay['arena'] for v in p])
+                # else no arena polygon (all zeros), as the originals of these rooms (JP 706830 / 69720 / 720430 / 300510): the
+                # target battle starts on contact (a 120 x 80 box made it start only inside the box: bench, Larxene IX / XI)
                 else:
-                    x0, x1, y0, y1 = cx - 60, cx + 60, cy - 40, cy + 40
-                    struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
+                    struct.pack_into('<8i', rec, 0x24, *[0] * 8)
             for j, (eid, rw) in enumerate(members):
                 if is_t and j < len(lay_t):
                     x, y = lay_t[j]
@@ -1490,7 +1495,8 @@ if generated:
             groups.append(tgt)
         else:
             start, dist, lay = apply_layout(folder, sp) if is_event else (*walk_grid(folder), None)
-            part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1), lay)
+            part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1), lay,
+                                                  zero_arena=is_event)
         # the target group is placed last (arena), the target first in it (then its targetWith escorts)
         target_id = ens[struct.unpack_from('<i', areas[-1], 0)[0]][2]
         # STG [11] = quest level, as every story stage (import_orig_stages.py: [11] = wiki Lv = enemy record level): the
