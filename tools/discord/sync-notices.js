@@ -120,7 +120,7 @@ const hash = (x) => crypto.createHash('sha256').update(JSON.stringify(x)).digest
 function plan(notices) {
   return notices.slice().reverse().map((n) => {
     const messages = noticeMessages(n);
-    return { title: n.title, kind: n.kind, hash: hash(messages), messages };
+    return { title: n.title, kind: n.kind, date: n.date, hash: hash(messages), messages };
   });
 }
 
@@ -132,6 +132,13 @@ function actions(want, have) {
   });
   for (const h of have) if (!want.find((w) => w.title === h.title)) out.push({ old: h, act: 'gone' });
   return out;
+}
+
+// An older state entry has no date: it is recorded quietly the first time, never announced.
+function bumped(old, w) { return Boolean(old && old.date && w.date && old.date !== w.date); }
+function bumpMessage(w) {
+  return { content: `🔄 **Updated** · ${w.date} — the notice above has new information. [Read it on the website](<${noticeUrl(w.title)}>)`,
+    allowed_mentions: { parse: [] } };
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -190,7 +197,11 @@ async function main() {
     notices: [...want.map((w) => done.get(w.title)).filter(Boolean), ...have.filter((h) => !want.find((w) => w.title === h.title) && done.has(h.title))] }, null, 1) + '\n');
 
   for (const t of todo) {
-    if (t.act === 'keep') continue;
+    if (t.act === 'keep') {
+      // older state entries have no date yet: record it now (no message), so the next date change is announced
+      if (!t.old.date && t.w.date) { done.set(t.w.title, { ...t.old, date: t.w.date }); save(); }
+      continue;
+    }
     if (t.act === 'gone') {
       // a webhook cannot delete a forum post: its messages are deleted and the empty post can be removed by hand
       for (const id of t.old.ids) await api(hook, 'DELETE', `/messages/${id}?thread_id=${t.old.thread}`);
@@ -201,7 +212,7 @@ async function main() {
       const first = { ...w.messages[0], thread_name: w.title.slice(0, 100) };
       if (tags[w.kind]) first.applied_tags = [String(tags[w.kind])];
       const msg = await api(hook, 'POST', '?wait=true', first);
-      const rec = { title: w.title, hash: '', thread: msg.channel_id, ids: [msg.id] };
+      const rec = { title: w.title, hash: '', date: w.date, thread: msg.channel_id, ids: [msg.id] };
       done.set(w.title, rec); save();
       for (const m of w.messages.slice(1)) { rec.ids.push((await api(hook, 'POST', `?wait=true&thread_id=${rec.thread}`, m)).id); save(); }
       rec.hash = w.hash; save();
@@ -217,11 +228,16 @@ async function main() {
       await api(hook, 'DELETE', `/messages/${rec.ids.pop()}?thread_id=${rec.thread}`);
       done.set(w.title, rec); save();
     }
-    rec.hash = w.hash; done.set(w.title, rec); save();
+    // A notice that became more recent (its date changed) gets a short reply: edits alone do not move a forum post,
+    // a new message does, so the post goes back on top and its followers are notified. Typo fixes keep the date and stay quiet.
+    if (bumped(t.old, w)) {
+      await api(hook, 'POST', `?wait=true&thread_id=${rec.thread}`, bumpMessage(w));
+    }
+    rec.hash = w.hash; rec.date = w.date; done.set(w.title, rec); save();
   }
   save();
   console.log(`discord: synced ${want.length} notices (${todo.filter((t) => t.act !== 'keep').length} changed)`);
 }
 
 if (require.main === module) main().catch((e) => { console.error(e.message); process.exit(1); });
-module.exports = { parseNotices, sections, chunk, noticeMessages, plan, actions };
+module.exports = { parseNotices, sections, chunk, noticeMessages, plan, actions, bumped, bumpMessage };

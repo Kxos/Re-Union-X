@@ -61,3 +61,15 @@ for (const w of real) {
   for (const m of w.messages) assert.ok(m.embeds.length <= 10 && m.embeds.every((e) => e.description.length <= 4096 && (e.title || '').length <= 256));
 }
 console.log('test-sync-notices: OK');
+
+// bump reply: only when the notice's date changes, never for an entry without a recorded date
+{
+  const { bumped, bumpMessage } = require('./sync-notices.js');
+  const assert2 = require('assert');
+  assert2.strictEqual(bumped({ date: '10/16' }, { date: '11/10' }), true);
+  assert2.strictEqual(bumped({ date: '11/10' }, { date: '11/10' }), false);
+  assert2.strictEqual(bumped({}, { date: '11/10' }), false);
+  const m = bumpMessage({ title: 'Raid Bosses', date: '11/10' });
+  assert2.ok(m.content.includes('11/10') && m.content.includes('#raid-bosses'));
+  console.log('bump OK');
+}
