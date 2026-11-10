@@ -1,31 +1,35 @@
-# Posts the changes of docs/ISSUES.md (new issues, status changes, edits) to the Discord channel #github.
-# Needs the repository secret DISCORD_GITHUB_WEBHOOK (the channel's webhook URL, without the /github suffix).
+# Mirrors docs/ISSUES.md into the Discord forum #issues: one post per issue, its tag = the issue's status.
+# Needs the repository secret DISCORD_BOT_TOKEN (the project's bot; a webhook cannot change tags of a post).
 name: Discord issues
 on:
   push:
     branches: [main]
-    paths: [docs/ISSUES.md]
+    paths: [docs/ISSUES.md, tools/discord/sync-issues.js]
   workflow_dispatch:
-    inputs:
-      before:
-        description: 'Compare from this commit (default: the commit before the newest one)'
-        required: false
-        default: 'HEAD~1'
 concurrency: discord-issues
 permissions:
-  contents: read
+  contents: write
 jobs:
-  post:
+  sync:
     runs-on: ubuntu-latest
     steps:
+      # Runs are queued (concurrency), so each one starts from the newest main and sees the ids the previous run saved.
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Post issue changes
+      - name: Sync issues
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_GITHUB_WEBHOOK }}
-          BEFORE: ${{ github.event.before || inputs.before }}
-        run: node tools/discord/post-issues.js "$BEFORE" "$GITHUB_SHA"
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+        run: node tools/discord/sync-issues.js
+      - name: Save post ids
+        if: always()
+        run: |
+          [ -f docs/discord/issues-state.json ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add docs/discord/issues-state.json
+          git diff --cached --quiet || git commit -m "Discord issues: post ids [skip ci]"
+          git pull --rebase -q && git push -q
