@@ -958,3 +958,9 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
     a target pinned to the id of an enemy objective counts among that objective's members (the JP twins Larxene I / IV place
     «Defeat 5 ... little HP» as 4 run rows + the run-row target), so `genMapOf` places one member fewer. Vexen's 170420xxx rows are
     not this run's rows and are not used. Dry: 2,762 of 3,570 served (+4, none lost); validate_maps 21 generated maps 0 errors.
+  - *Larxene XI (user 10-11, dry).* I-256 closed: the footage measures a normal Gigas Shadow at 200,000 HP at Lv 100 and
+    184,000 at Lv 180, our 1021 curve exactly (the donated 70,000 is the 2018 variant 1801101021). HP gauge rule: one gauge = 20,000
+    HP; the bar shows the top gauge, and the extra gauges are chips beside the level badge, at most 4 drawn and the rest as «+N».
+    Larxene XI 502280 (Lv 180) = 12 normal Gigas 1021 + 2 little-HP decoys and the target 2016121021 (the objective «Defeat 3
+    Gigas Shadows that have little HP» counts the target). Dry: 2,763 of 3,570 served (+1, none lost); validate_maps 22 generated
+    maps 0 errors.
