@@ -410,8 +410,8 @@
   "I-256": {
    "thread": "1569646838380888187",
    "msg": "1569646838380888187",
-   "group": "OPEN",
-   "hash": "3a631728f9b8776c",
+   "group": "CLOSED",
+   "hash": "72e384944f082e46",
    "name": "I-256 · Gigas Shadow base row 1021: HP differs between our master and the donated table"
   }
  }
