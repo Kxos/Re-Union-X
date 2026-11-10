@@ -136,8 +136,9 @@ try:
         check(r4.returncode != 0 and 'layout read on room XX_0000_00_00' in r4.stderr, 'layout of another room: error (%s)' % r4.stderr[-300:])
     # multi-area entry (make-events.js genAreasOf): one MAP part per area, chained by forward exits; per-area layout (start of area 0,
     # arrival of the next areas, forward exit, group centres, target team, chests) as in the original maps of the same room
-    # (JP 706830: DG_0200_27_00 x3, one enemy per part); an exit closer than 200 to an enemy of its part is moved (validate_maps:
-    # error < 96, warning < 200); backExits adds the way back (two rooms, no layout: the generator's rules)
+    # (JP 706830: DG_0200_27_00 x3, one enemy per part); an exit of the original layout with an enemy of the layout on it stays where
+    # it is: the enemy guards the exit (JP 706830, you must fight it to go on; validate_maps: a warning); only an exit the generator
+    # chose itself is moved away from the enemies; backExits adds the way back (two rooms, no layout: the generator's rules)
     R27 = 'DG_0200_27_00'
     if os.path.exists(os.path.join(CLS, 'map', R27, R27 + '_cls.bin')):
         B = lambda n: {'name': 'Shadow', 'enemyId': 80001, 'n': n, 'reward': 1}  # noqa: E731
@@ -178,7 +179,7 @@ try:
             e0 = ps[0]['enemies'][0]
             check((e0['x'], e0['y']) == (1296, 1014), 'group at the layout centre (%s)' % e0)
             ex = ps[0]['exits'][0]
-            check(((ex['x'] - 1296) ** 2 + (ex['y'] - 1014) ** 2) ** 0.5 >= 200, 'exit moved >= 200 from the enemy (%s)' % ex)
+            check((ex['x'], ex['y']) == (1308, 952), 'exit of the original layout kept, guarded by its enemy (%s)' % ex)
             check([(c['x'], c['y']) for c in ps[0]['chests']] == [(668, 902)], 'chest at the layout point')
             last = ps[2]['enemies']
             check([(e['enemyId'], e['x'], e['y'], e['level']) for e in last] == [(10001, 1270, 1070, 120), (80001, 1200, 1100, 120)], 'target team at the layout points (%s)' % last)
@@ -191,7 +192,8 @@ try:
             check([p['room'] for p in pb] == [two, R27], 'rooms of the two areas')
         repa = {x['stageId']: x for x in json.load(open(os.path.join(tmp, 'reporta.json'), encoding='utf-8'))}
         check(repa.get(EVA, {}).get('parts') == 3 and repa[EVA].get('folders') == [R27] * 3 and repa[EVA].get('event') is True
-              and repa[EVA].get('layout') == 'test 706830' and any('exit moved' in d for d in repa[EVA].get('doubts', [])), 'report: parts, folders, layout, exit moved (%s)' % repa.get(EVA))
+              and repa[EVA].get('layout') == 'test 706830' and not any('exit moved' in d for d in repa[EVA].get('doubts', []))
+              and any('guards the exit' in d for d in repa[EVA].get('doubts', [])), 'report: parts, folders, layout, guarded exit (%s)' % repa.get(EVA))
         pa = json.load(open(poi, encoding='utf-8'))
         check(sorted({x['map'] for x in pa.get(str(EVA), {}).get('enemies', [])}) == [0, 1, 2], 'POI per part')
         va = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'validate_maps.py'), outa, CLS, '--json', os.path.join(tmp, 'va.json')],

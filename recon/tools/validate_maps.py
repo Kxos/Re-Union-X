@@ -12,13 +12,14 @@ Errori (E) per stage:
 - parte: magia MAP, +0x20 = 0, X (+0x24) = 4 + 36 n uscite, offset A/B/C coerenti con le sezioni;
 - uscite: parte di destinazione esistente e diversa, punto d'uscita percorribile nella propria
   stanza, arrivo percorribile nella stanza di destinazione e a piu' di 96 da ogni uscita della
-  destinazione (altrimenti si riparte subito), nessun nemico entro 96 dall'uscita;
+  destinazione (altrimenti si riparte subito);
 - tutte le parti raggiungibili dalla parte di partenza seguendo le uscite;
 - aree: [0]+[1] dentro l'elenco nemici della parte;
 - uid unici fra le parti (aree, nemici, forzieri) - riportati a parte gli uid area duplicati;
 - STG [8] aree, [9] nemici, [14] forzieri, [15] oggetti = somme sulle parti; esattamente un'area
   bersaglio ([4] & 1) e il suo primo nemico = STG [6].
-Avvisi (W): nemici entro 200 da un'uscita, STG [12] diverso dalla parte del bersaglio.
+Avvisi (W): nemici entro 200 da un'uscita (entro 96: il nemico sorveglia l'uscita, va battuto per proseguire, come JP 706830),
+STG [12] diverso dalla parte del bersaglio.
 
 Raggiungibilita' dentro la stanza (errori "irraggiungibile", opzioni --radius R, --tol T):
 la bitmap CLS ha 1 bit per unita' di mappa (W x H = dimensioni della stanza in unita'), quindi la
@@ -374,7 +375,9 @@ def check(sid):
             for e in p['enemies']:
                 dd = ((e[0] - x) ** 2 + (e[1] - y) ** 2) ** 0.5
                 if dd <= TRIG:
-                    E.append('parte %d: nemico uid %d a %.0f dall\'uscita' % (k, e[7], dd))
+                    # the enemy guards the exit: it must be fought to go on, as in the originals (JP 706830, Lexaeus: the portal on
+                    # the enemy's spot); a warning, not an error
+                    W.append('parte %d: nemico uid %d a %.0f dall\'uscita (la sorveglia)' % (k, e[7], dd))
                 elif dd < 200:
                     W.append('parte %d: nemico uid %d a %.0f dall\'uscita' % (k, e[7], dd))
     # raggiungibilita'

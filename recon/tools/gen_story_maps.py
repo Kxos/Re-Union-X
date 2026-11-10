@@ -1380,9 +1380,14 @@ def build_event_areas(sp):
                 ens.append((x, y, eid, 1, 1, level, rw, uid))
                 uid += 1
             recs.append(bytes(rec))
-        # an exit next to an enemy of its part: moved (docstring)
+        # an exit next to an enemy of its part: moved (docstring), unless both come from the original layout: there the enemy
+        # guards the exit and must be fought to go on (JP 706830, Lexaeus: the portal sits on the enemy's spot)
         for nm_, arr in (('fwd', fwd), ('back', bdoor)):
             p = arr[k]
+            if p and lay.get('exit' if nm_ == 'fwd' else 'back') and tuple(lay['exit' if nm_ == 'fwd' else 'back']) == tuple(p) and any(dd(p, e) < EXIT_KEEP for e in ens):
+                g = min(ens, key=lambda e: dd(p, e))
+                doubts.append('area %d: %s exit %s kept as the original: the enemy at %s guards the exit (%d units)' % (k, nm_, tuple(p), (g[0], g[1]), round(dd(p, g))))
+                continue
             if p and any(dd(p, e) < EXIT_KEEP for e in ens):
                 cand = [q for q in dist if all(dd(q, e) >= EXIT_KEEP for e in ens) and dd(q, entry[k]) >= 200
                         and all(dd(q, o) >= 200 for o in ex_pts if o != p)]
