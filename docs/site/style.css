@@ -227,7 +227,12 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
 .credits-intro::before,.credits-intro::after{content:"";position:absolute;left:12%;right:12%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(95,224,240,.75),transparent)}
 .credits-intro::before{top:0}.credits-intro::after{bottom:0}
-.credits-intro em{font-style:normal;color:var(--cyan)}
+
 .ci-star{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:0 10px;background:var(--inner);
   color:var(--key);font-size:15px;line-height:18px}
 @media (max-width:640px){.credits-intro{font-size:16px;padding:16px 8px 14px}}
+/* credits: gold highlights */
+#sec-credits .gold{font-weight:700;color:#ffcf6b;text-shadow:0 0 10px rgba(255,190,80,.18)}
+#sec-credits .credits-intro .gold{font-weight:700}
+#sec-credits .ded-quote .gold{color:#ffd47a}
+#sec-credits .rows.credits .x{color:#dcebf3}
