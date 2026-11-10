@@ -1012,7 +1012,8 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   - *Dry result.* 14 more quests served: **2,777 of 3,570** (Org XIII 2016-17 199 -> 213, none lost); 36 generated maps
     (22 one-room unchanged byte for byte, 14 multi-area), validate_maps 0 errors (maps_x and rooms_gen; the 2 known «long route»
     warnings 4003337, 4003344). Review page private `tmp\events\p5d6\maps_review\index.html` (the real maps with their rows).
-- **Task 4 closing review (11 November 2026, dry).** Private check `tmp\events\p5d7eview_t4.py` over the 486 Part 5 quests
+- **Task 4 closing review (11 November 2026, dry).** Private check `tmp\events\p5d7
+eview_t4.py` over the 486 Part 5 quests
   (433 served, 36 on generated maps): every generated map uses master ids only (no placeholder), every served label has its
   Notice text, every layout twin / rebuilt part / shifted level carries its label, `wikiRoom` / `wikiAreas` / `enemiesInferred` /
   `hpFromFootage` / `enemyRowRebuilt` present exactly where the record calls for them, the gen report matches the generated
@@ -1106,10 +1107,12 @@ Results:
 | Larxene IX (3 areas) | transitions, Wizard 2 gauges, target on contact (after cb09da1) |
 | Xigbar II (5 areas, one room) | every transition, target Gummi Hammer in area 5 on contact |
 | Vexen IV (2 areas, back exit) | Entrance back exit returns to Frozen Forest, forward again, target Defender on contact |
+| Vexen XI (4 areas, back exits) | C -> B -> A -> Entrance, target Wayward Wardrobe on contact; in C the way to the exit (4363, 1266; original 4401, 1266) goes below the fallen log |
+| Vexen XII (hpFromFootage) | little-HP Neoshadow 2016120033 at Lv 300 shows one bar, no chip (10,861 HP); the map holds 4 of them with the target, so «Defeat Neoshadow with little HP x 4» can be met |
 | First clear / replay | Larxene IX first clear +20 Jewels, replay +0; a run with no objective met pays nothing (Xigbar II) |
 
 Bench notes: walk with a held drag (`Swipe` 3-5 s) toward the arrows, single taps move a few steps; the real target has the red
 TARGET label (enemy id 10000 + base), same-name normal enemies wander too; in Larxene IX area 3 the back exit lies under the
 target arrow. Time objectives were not judged (the hand-driven bench is far slower than a player).
-Still to check: CAUTION with a weaker deck, Vexen XI, Marluxia targets (attribute icon, Lux per hit), the hpFromFootage gauges
-of Vexen III/XII and the Daily XIII quests.
+Still to check: CAUTION with a weaker deck, Marluxia targets (attribute icon, Lux per hit), the hpFromFootage gauges of
+Vexen III, Larxene I/IV/VIII and the Daily XIII quests.
