@@ -1,0 +1,31 @@
+# Posts the changes of docs/ISSUES.md (new issues, status changes, edits) to the Discord channel #github.
+# Needs the repository secret DISCORD_GITHUB_WEBHOOK (the channel's webhook URL, without the /github suffix).
+name: Discord issues
+on:
+  push:
+    branches: [main]
+    paths: [docs/ISSUES.md]
+  workflow_dispatch:
+    inputs:
+      before:
+        description: 'Compare from this commit (default: the commit before the newest one)'
+        required: false
+        default: 'HEAD~1'
+concurrency: discord-issues
+permissions:
+  contents: read
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Post issue changes
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_GITHUB_WEBHOOK }}
+          BEFORE: ${{ github.event.before || inputs.before }}
+        run: node tools/discord/post-issues.js "$BEFORE" "$GITHUB_SHA"
