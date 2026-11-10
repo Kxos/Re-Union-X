@@ -919,3 +919,19 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
     170 -> 171 (its room quest), The Keyblade War 0 -> 1. 137 new files in `stage_gen\files\stage`, all 9,078 old files
     byte-identical (md5). validate_maps: 52 of 59 new maps clean; 7 DB_0000_01_00 maps keep the «exit not walkable» errors of
     their original JP files (9 of 51 served original maps on the same DB rooms have them too).
+- **User decisions 2 and 7, Keyblade War drops (10 November 2026).**
+  - *Lexaeus IX (decision 2).* Target 11023 (HP 875,000 at Lv 225) proven on the footage: the Behemoth survives 836,558 shown
+    damage and falls at 890,632, so 1023 (437,500) is excluded. The pin was already 11023; the record now carries this evidence.
+  - *Same-series layout twins (decision 7).* EV-1287 Defeat Dragon Maleficent 1-10/10 and EV-1288 Defeat Ramuh 1-8/10 (Sept 2020)
+    lost their maps (STG header absent). Each uses the map of another run of the same series (742530 May 2020; 743750 / 743754
+    Nov 2020: same room, the target alone, map level 1, every difficulty on one map) with this run's own enemy row (2009T01561 /
+    2009T01564 of the donated master, private event enemy rows with their attacks 1561051-1561056, 1561017, 1564060-1564061).
+    Record `map.layoutTwin {fromKey, swaps, why}` -> make-events.js lists the own key with `fromKey`, `enemySwaps`, `layoutTwin`
+    -> `import_event_stages.py` copies the twin under the own key with the enemy id replaced (STG [6] too) and reports
+    `layoutTwin: true`; served only then. Label `seriesLayoutTwin` (layout reconstructed, enemy row original). Ramuh 9-10/10 held
+    (twin of another series).
+  - *The Keyblade War drops.* The Union quests and those whose fight part was absent at build time had no drop rows: the Org XIII
+    builder now reads the drops from the map the import serves (own parts + the dedup-stub source part): reward 1905913 on all 18.
+  - *Dry result.* 2,750 of 3,570 quests served (2,714 before, none lost): challenge_2020 538 -> 556 (+18), The Keyblade War
+    1 -> 19; import 1,862 of 1,862 (8 layout twins); 16 new files in `stage_gen\files\stage`, every old file byte-identical;
+    validate_maps 0 errors on the 8 twins and the 19 KW maps.

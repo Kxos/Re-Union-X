@@ -217,6 +217,21 @@ try:
     assert rd('mappoi_stg740280_00.bin') == open(files[(KT, 0)], 'rb').read()
     no_t = ies.run([dict(it_t, partSources=None)], files, rooms_t, ids_t, rw_t, out)['stages'][0]
     assert no_t['status'] == 'missing' and no_t['cause'] == 'STG absent', no_t
+    # same-series layout twin (user decision 7): Defeat Dragon Maleficent 1/10 (Sept 2020, own map 743430 lost) on the May 2020 map
+    # 742530 with the run row 2009001561 in place of 2005001561 (STG target and card too); the JP folder is never changed
+    KL, FL, RUN, OLD = 743430, 742530, 2009001561, 2005001561
+    _, pl2 = mapfile.load_stage(files, FL)
+    rooms_l2 = {p['room'] for p in pl2}
+    rw_l2 = {e['reward'] for p in pl2 for e in p['enemies']} | {c['reward'] for p in pl2 for c in p['chests']}
+    it_lt = {'stageId': 14, 'key': KL, 'name': 'layout twin', 'fromKey': FL, 'layoutTwin': True, 'enemySwaps': [{'from': OLD, 'to': RUN}],
+             'enemies': [{'enemyId': RUN}]}
+    lt = ies.run([it_lt], files, rooms_l2, {RUN}, rw_l2, out)['stages'][0]
+    assert lt['status'] == 'imported' and lt['layoutTwin'] and lt['fromKey'] == FL and lt['enemies'] == {str(RUN): 1} and 'differs' not in lt, lt
+    stg_lt, p_lt = mapfile.load_stage({(KL, None): rd('mappoi_stg743430.bin'), (KL, 0): rd('mappoi_stg743430_00.bin')}, KL)
+    assert stg_lt['target_enemy'] == RUN and [e['enemyId'] for p in p_lt for e in p['enemies']] == [RUN]
+    assert mapfile.parse_stg(open(files[(FL, None)], 'rb').read())['target_enemy'] == OLD, 'JP map unchanged'
+    bad_lt = ies.run([dict(it_lt, enemySwaps=[{'from': 1, 'to': RUN}])], files, rooms_l2, {RUN, OLD}, rw_l2, out)['stages'][0]
+    assert bad_lt['status'] == 'skipped' and not bad_lt.get('layoutTwin'), bad_lt
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')

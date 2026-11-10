@@ -42,6 +42,10 @@ copy of another stage's part. Part 'stg' with source part null is the STG header
 gets that file, byte for byte, under the client name of the missing part; a part the copy holds is never replaced. The report
 entry lists what was filled in `partSources` {client name: {from, reconstructed, basis}} (reconstructed: the source is the nearest
 of several equivalent candidates, not proven unique; declared in the Notice), the summary in `partSources` / `reconstructedParts`.
+Same-series layout twins (Events Part 5, user decision 7, 10-11-2026; map items with `fromKey`, `layoutTwin: true` and
+`enemySwaps [{from, to}]`, from the records' map.layoutTwin): the files of `fromKey` (the JP map of another run of the same quest
+series) are copied under the item's own key with the enemy id of that run replaced by this run's own row (patch_swaps: only the id,
+STG [6] / [10] too); a swap that finds no record leaves the map out. The report entry carries `fromKey` and `layoutTwin: true`.
 --stage-dir: also copy the imported files into this folder (the resource staging, stage_gen/files/stage). The POI is not
 merged here: make-events.js (master run) reads report.json + stage_poi_events.json, serves only the imported stages whose
 reward rows it can write, and merges their POI into server/game_data/stage_poi.json in the same run.
@@ -308,10 +312,14 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
             res, raw = {'stageId': it['stageId'], 'key': it['key'], 'censusId': it.get('censusId'), 'name': it.get('name'),
                         'status': 'missing', 'why': 'copies differ: ' + conflict}, None
         else:
-            res, raw = check_item(dict(it, key=src_key), fk, rooms, enemy_ids, reward_ids, (swaps or {}).get(str(src_key)))
+            # enemy swaps: the config's (mapEnemySwaps, by the file read) and the item's own (a same-series layout twin, enemySwaps)
+            item_swaps = list((swaps or {}).get(str(src_key)) or []) + list(it.get('enemySwaps') or [])
+            res, raw = check_item(dict(it, key=src_key), fk, rooms, enemy_ids, reward_ids, item_swaps or None)
             res['key'] = it['key']
         if src_key != it['key']:
             res['fromKey'] = src_key
+            if it.get('layoutTwin') and raw:
+                res['layoutTwin'] = True
             if it.get('levelShift'):
                 res['levelShift'] = it['levelShift']
                 if raw:

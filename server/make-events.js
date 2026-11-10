@@ -70,7 +70,7 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
-  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt'];
+  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
 // (quizBoardScreenshot)
@@ -787,6 +787,12 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       if (gen) { ensure('wikiRoom'); const k = qLabels.indexOf('mapIncomplete'); if (k >= 0) qLabels.splice(k, 1); }
       if (srcMap === 'jpTwin') ensure('jpTwinMap');
       if ((q0.map || {}).levelShifted) ensure('levelShifted');
+      // a same-series layout twin (Events Part 5, user decision 7, 10-11-2026; map.layoutTwin {fromKey, swaps [{from, to}], why}): the
+      // quest's own map file is lost; the JP map of another run of the same series (same room, enemies and target, map level 1) is
+      // copied under the quest's own key with the enemy id of that run replaced by this run's own row (recon/tools/import_event_stages.py
+      // enemySwaps). Layout reconstructed, enemy row original: label seriesLayoutTwin; served only once the import marks it layoutTwin
+      const lt = (q0.map || {}).layoutTwin || null;
+      if (lt) ensure('seriesLayoutTwin');
       const swapped = swapEnemies(q0, (config.mapEnemySwaps || {})[String(fromKey || mapKey)], names);
       if (swapped) qLabels.push('wwEnemy');
       // AP of the khuxwiki page of this run over the surviving stage row (private builder rule, conflict recorded in the record)
@@ -922,6 +928,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
         drops: q.drops || null, served: false, ...(item.levelShift ? { levelShift: item.levelShift, fromKey } : {}),
+        ...(lt ? { fromKey: lt.fromKey, enemySwaps: lt.swaps || [], layoutTwin: true } : {}),
         // map parts the JP dump dropped as dedup stubs, taken from their source part (recon/tools/import_event_stages.py partSources)
         ...((q.map || {}).partSources ? { partSources: q.map.partSources } : {}) };
       if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz, shortWindow: !!rec.shortWindow, jpTwin: srcMap === 'jpTwin' }); if (!gen) put(out.maps, mapItem); }
@@ -932,6 +939,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         if (!st || st.status !== 'imported') { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: ${st ? `${st.status}, ${st.why}` : 'not imported (recon/tools/import_event_stages.py)'}`; continue; }
         // the same JP layout at the quest's own level (levelShift, event_maps.json): the import must have applied the shift to the
         // copied map (report levelShifted), else the enemies would fight at the JP level
+        if (lt && !st.layoutTwin) { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: layout twin of ${lt.fromKey} not applied by recon/tools/import_event_stages.py`; continue; }
         if (item.levelShift && !st.levelShifted) { item.reason = 'mapUnusable'; item.why = mapItem.why = `map not usable: level shift ${item.levelShift.from} -> ${item.levelShift.to} not applied by recon/tools/import_event_stages.py`; continue; }
         // the map's rooms must be of the quest's world (roomWorlds by room prefix; a prefix missing there is another world).
         // neutralRooms {prefix: home world}: fits its home world, or any world when another room of the map is of the quest's
@@ -1248,7 +1256,7 @@ function loadMaps(dir) {
   if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {}, generated }; }
   // levelShifted: the import applied the level shift of the map item (event_maps.json levelShift) to the copied map
   // partSources: the parts filled from their JP dedup-stub source ({client name: {from, reconstructed, basis}}, mapRestoreLabels)
-  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [], levelShifted: !!s.levelShifted,
+  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [], levelShifted: !!s.levelShifted, layoutTwin: !!s.layoutTwin,
     ...(s.partSources ? { partSources: s.partSources } : {}) }])),
     poi: readJson(path.join(dir, 'stage_poi_events.json'), {}), generated };
 }

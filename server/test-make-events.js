@@ -1319,6 +1319,24 @@ const tests = {
     assert.deepStrictEqual(q.map((x) => [x.served, x.labels]), [[true, ['mapPartShared']], [true, ['roomTilesRebuilt']], [true, []]], JSON.stringify(q));
     assert.ok(out.index.reasons.mapPartShared && out.index.reasons.roomTilesRebuilt && REAL_CONFIG.reconstructedWhy.mapHeaderRebuilt);
   },
+  // user decision 7 (10-11-2026): a same-series layout twin (map.layoutTwin): own map key, the JP file in fromKey and the run's enemy
+  // swap in event_maps.json; label seriesLayoutTwin; a live run serves it only once the import marks the copy layoutTwin
+  series_layout_twin() {
+    const lt = { fromKey: 742530, swaps: [{ from: 2005001561, to: 501 }], why: 'x' };
+    const q1 = quest(743430, 1, [501], { map: { key: 743430, stageBinId: 0, status: 'incomplete: STG header absent', layoutTwin: lt }, label: 'original' });
+    const q2 = quest(743431, 1, [501], { map: { key: 743430, stageBinId: 743430, status: 'incomplete: STG header absent', layoutTwin: lt }, label: 'original', addLevel: 9 });
+    const out = build([record('E-LT', [q1, q2])]);
+    const [a, b] = entry(out, 'E-LT').quests;
+    assert.deepStrictEqual([a.served, b.served, a.labels, b.labels], [true, true, ['seriesLayoutTwin'], ['seriesLayoutTwin']]);
+    const mi = out.maps.find((x) => x.key === 743430);
+    assert.deepStrictEqual([mi.fromKey, mi.enemySwaps, mi.layoutTwin], [742530, lt.swaps, true]);
+    assert.ok(out.index.reasons.seriesLayoutTwin);
+    const st = (done) => ({ status: new Map([[743430, { status: 'imported', why: '', rooms: [], layoutTwin: done }]]), poi: {} });
+    assert.deepStrictEqual(entry(me.buildEvents([record('E-LT', [q1, q2])], CONFIG, master(), undefined, {}, st(true)), 'E-LT').quests.map((q) => q.served), [true, true]);
+    const no = entry(me.buildEvents([record('E-LT', [q1])], CONFIG, master(), undefined, {}, st(false)), 'E-LT').quests[0];
+    assert.deepStrictEqual([no.served, no.reason], [false, 'mapUnusable']);
+    assert.match(no.why, /layout twin of 742530/);
+  },
   // a JP 4.3.1 map of the same quest (map.source 'jpTwin'): served on its map key, label jpTwinMap; the same layout at another level
   // (map.levelShifted): label levelShifted, event_maps.json carries the shift, and a live run serves it only once the import applied it
   jp_twin_map_served() {
