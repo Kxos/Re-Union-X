@@ -70,7 +70,7 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
-  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted'];
+  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
 // (quizBoardScreenshot)
@@ -132,6 +132,19 @@ function labelIds(text, phrases) {
   for (const f of RECORD_FLAGS) rest = rest.split(f).join(';');
   const left = rest.replace(/\boriginal\b/g, ';').replace(/enemies missing: \d+/g, ';').split(/[;,]/).map((s) => s.trim()).filter(Boolean);
   if (left.length) throw new Error(`events: quest label «${left.join('; ')}» has no labelPhrases entry in event_config.json`);
+  return out;
+}
+
+// Labels of an imported map restored beyond its own files (Events Part 5, user decision 6, 10-11-2026), for the Notices:
+//   * a part or STG filled from its JP dedup-stub source (import report partSources): an exact byte copy of the data the game shared
+//     (reconstructed false) -> mapPartShared (original data); a nearest candidate (reconstructed true) -> partSourceLabels[basis]
+//     of event_config.json, default mapPartRebuilt;
+//   * a room of the map that the room build completed with rebuilt tiles (event_config.json rebuiltRooms {room: label}).
+function mapRestoreLabels(st, config) {
+  const out = [];
+  const add = (l) => { if (l && !out.includes(l)) out.push(l); };
+  for (const v of Object.values((st && st.partSources) || {})) add(v.reconstructed ? ((config.partSourceLabels || {})[v.basis] || 'mapPartRebuilt') : 'mapPartShared');
+  for (const rm of (st && st.rooms) || []) add((config.rebuiltRooms || {})[rm]);
   return out;
 }
 
@@ -929,6 +942,8 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         if (off.length && !(String(mapKey) in (config.worldExceptions || {}))) {
           item.reason = 'worldMismatch'; item.why = mapItem.why = `rooms of another world than ${q.worldId}: ${[...new Set(off)].join(', ')}`; continue;
         }
+        // map data restored from the JP dedup stubs and rooms completed by the room build: declared (mapRestoreLabels)
+        for (const l of mapRestoreLabels(st, config)) if (!qLabels.includes(l)) { qLabels.push(l); used.add(l); }
         // reward rows of the map's enemies and chests: the master's, or the original rows of the record's drops (written here); else not served
         const known = dropRows(q), missing = [];
         for (const r of poiRewards(maps.poi[String(mapKey)] || {})) {
@@ -1232,7 +1247,9 @@ function loadMaps(dir) {
   const rep = readJson(path.join(dir, 'report.json'), null);
   if (!rep) { console.warn(`events: no map import report in ${dir} (recon/tools/import_event_stages.py): no event quest is served`); return { status: new Map(), poi: {}, generated }; }
   // levelShifted: the import applied the level shift of the map item (event_maps.json levelShift) to the copied map
-  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [], levelShifted: !!s.levelShifted }])),
+  // partSources: the parts filled from their JP dedup-stub source ({client name: {from, reconstructed, basis}}, mapRestoreLabels)
+  return { status: new Map((rep.stages || []).map((s) => [s.key, { status: s.status, why: s.why || '', rooms: s.rooms || [], levelShifted: !!s.levelShifted,
+    ...(s.partSources ? { partSources: s.partSources } : {}) }])),
     poi: readJson(path.join(dir, 'stage_poi_events.json'), {}), generated };
 }
 // The records: a file (a list of records) or a folder (every *.json except the anchors file, sorted by name, concatenated).
@@ -1353,5 +1370,5 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
+module.exports = { buildEvents, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, mapRestoreLabels, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
   applyDatesOf, aliasRewardTypes, genMapOf, mergeCompletion, loadMaps, UNION_IDS };

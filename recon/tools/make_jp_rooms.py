@@ -184,6 +184,32 @@ def merged_dir(rel_dir):
 # modifiche: il nome a +0x10 e tutti i livelli/immagini/oggetti citano gia' SR_0009_00_00, quindi tessere e lwf
 # sono quelli di 00_00 (come le stanze alias del BMI, es. DB_0021_*) e la stanza risulta 'graphics_of'.
 INFO_ALIAS = {'SR_0009_01_00': 'SR_0009_00_00'}
+# Dedup-rule rebuild (Events Part 5, user decision 6, 10-11-2026; audit tmp\events\mapaudit_parts1_4\FINDINGS.md): the JP 4.3.1
+# extraction did not write its dedup stub records («same data as record N»), so a tile the game stored once and shared can be
+# absent. DB_0000_01_00 (Daybreak Town plaza variant, 30 event quests) lacks base1 tiles 013/026/039/052: the last column of rows
+# 1-4, a band that is fully transparent in the other 12 columns and in DB_0000_00_00 at the same indexes. They are rebuilt as a
+# transparent 256x256 tile (the same file every transparent tile becomes: the 45-byte placeholder), listed in the room report
+# (rebuilt_tiles) and declared in the Notices (server/event_config.json rebuiltRooms -> label roomTilesRebuilt). Rebuilt, not original.
+DEDUP_TILES = {
+    'DB_0000_01_00': {'layer': 'base1', 'tiles': (13, 26, 39, 52),
+                      'why': 'dedup stubs of a transparent tile: rows 1-4 transparent in all other columns and in DB_0000_00_00'},
+}
+TRANSPARENT_SRC = os.path.join(D, 'tmp', 'rooms_dedup_tiles', 'transparent_256.png')
+
+
+def dedup_tile_names():
+    """{client name: room} of the tiles DEDUP_TILES rebuilds"""
+    return {'map/{0}/{0}_{1}/{0}_{1}_{2:03d}.png'.format(room, v['layer'], i): room
+            for room, v in DEDUP_TILES.items() for i in v['tiles']}
+
+
+def transparent_source():
+    """path of a fully transparent 256x256 PNG (written once), the source of the rebuilt dedup tiles"""
+    if not os.path.exists(TRANSPARENT_SRC):
+        from PIL import Image
+        os.makedirs(os.path.dirname(TRANSPARENT_SRC), exist_ok=True)
+        Image.new('RGBA', (TILE, TILE), (0, 0, 0, 0)).save(TRANSPARENT_SRC)
+    return TRANSPARENT_SRC
 
 
 def source(name):
@@ -300,6 +326,12 @@ def plan_room(room):
     r['required'] = len(fatal)
     if n != room:
         r['graphics_of'] = n
+    rebuilt = sorted(m for m in miss if m in dedup_tile_names())   # dedup-rule rebuild (DEDUP_TILES)
+    if rebuilt:
+        for m in rebuilt:
+            todo[m] = transparent_source()
+            miss.remove(m)
+        r['rebuilt_tiles'] = rebuilt
     if miss:
         r.update(status='scartata', why='file obbligatori assenti (tessere o .bin): %d' % len(miss), missing_fatal=miss[:20])
         return r, {}
@@ -428,6 +460,7 @@ def main():
     rep = {'merged': a.merged, 'out': OUT_FILES, 'story_only': a.story_only, 'rooms': len(results), 'by_status': by,
            'files': len(jobs), 'bytes': size, 'write_stats': stats, 'errors': errors,
            'lwf_textures_filled': [{'name': m, 'from': p} for m, p in FILLED],
+           'rebuilt_tiles': {r['room']: r['rebuilt_tiles'] for r in results if r.get('rebuilt_tiles') and r['status'] != 'scartata'},
            'story_rooms': len(story),'story_not_in_merged': missing_story,
            'story_by_status': {s: sorted(r['room'] for r in st_rooms if r['status'] == s)
                                for s in sorted({r['status'] for r in st_rooms})},

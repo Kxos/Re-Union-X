@@ -201,6 +201,22 @@ try:
     assert rd('mappoi_stg740911.bin') == open(files[(KS, None)], 'rb').read()
     no = ies.run([dict(it_s, partSources=None)], files, rooms_s, ids_s, rw_s, out)['stages'][0]
     assert no['status'] == 'missing' and no['cause'] == 'part 0 absent' and 'partSources' not in no, no
+    # whole-STG dedup stub (user decision 6, 10-11-2026): EV-0761 740280 has its part 0 but no STG in the dump; its STG is the byte
+    # copy of mappoi_stg740281.bin (part 'stg', source part null). Filled byte for byte; without the entry the STG stays absent
+    KT, SRT = 740280, 740281
+    assert (KT, None) not in files and (KT, 0) in files and (SRT, None) in files
+    st_t, pt = mapfile.load_stage({**files, (KT, None): files[(SRT, None)]}, KT)
+    ids_t = {e['enemyId'] for p in pt for e in p['enemies']}
+    rooms_t = {p['room'] for p in pt}
+    rw_t = {e['reward'] for p in pt for e in p['enemies']} | {c['reward'] for p in pt for c in p['chests']}
+    it_t = {'stageId': 13, 'key': KT, 'name': 'stg stub', 'partSources': {'stg': {'key': SRT, 'part': None, 'reconstructed': False, 'basis': 'stgStub'}}}
+    st_r = ies.run([it_t], files, rooms_t, ids_t, rw_t, out)['stages'][0]
+    assert st_r['status'] == 'imported' and st_r['partSources'] == {'mappoi_stg740280.bin': {
+        'from': 'mappoi_stg740281.bin', 'reconstructed': False, 'basis': 'stgStub'}}, st_r
+    assert rd('mappoi_stg740280.bin') == open(files[(SRT, None)], 'rb').read()
+    assert rd('mappoi_stg740280_00.bin') == open(files[(KT, 0)], 'rb').read()
+    no_t = ies.run([dict(it_t, partSources=None)], files, rooms_t, ids_t, rw_t, out)['stages'][0]
+    assert no_t['status'] == 'missing' and no_t['cause'] == 'STG absent', no_t
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')

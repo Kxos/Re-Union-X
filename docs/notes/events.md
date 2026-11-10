@@ -890,3 +890,32 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   - *Target ids from the footage.* The target card shows «Lux» at the quest level, which is the row's lux curve: Gargoyle Knight
     10015, Fat Bandit 10002, Cerberus 10112, Behemoth 11023 (1023 has the same lux at Lv 225: not excluded) pinned in the records.
   - *Dry result.* 10 generated maps, validate_maps 0 errors; 2,609 of 3,570 quests served (unchanged).
+- **User decisions 1, 3, 6 (10 November 2026).**
+  - *Marluxia XII run row (decision 1).* The original footage and khuxwiki show both Wandering Spooks of Organization XIII No. 11
+    Marluxia XII as Speed; our 160110233 is Power. The run's own row 161210233 (Speed) exists only in the donated table: it is an
+    event enemy row (private event_enemies.json, added in place; the full private builder rerun would drop Task 2 rows) and the
+    record pins it for the target and the second Spook (`targets[0].id`, `wikiEnemyIds`). No stand-in (160310233 not used).
+  - *The Keyblade War world (decision 3).* The donor stage rows of The Ultimate Test (740911/916/921/926) say worldId 13 with
+    thumbId 100 (= KG_0000_01_00), and the donor world table names world 13 «KG» (our `roomWorlds` numbers KG 15): the 19 maps are
+    `worldExceptions` entries, the evidence noted per key. The 18 other quests are now held `rewardRowsMissing` (reward 1905913:
+    only the 740926 record carries its drop rows).
+  - *Parts 1-4 maps from the JP dedup stubs (decision 6, I-254).* The map audit's 42 stub files (39 parts: Time Trial EV-0450
+    rounds 1-9, Boss Time Attack EV-0478, KH Pop Quiz answer map 720520 part 2, EV-0763 740260/740262, Brainteaser 740878; 3 STG
+    headers: 740280/740282 <- 740281, 735820 <- 735810) go through `partSources`: the part `stg` (source part null) is the STG
+    header itself (`import_event_stages.py`, test 740280). The record builders read the same table (private
+    `tmp\events\maps\dedup_stubs.json`), so the 68 quests carry their enemies, target and drops. 735820: five headers of the same
+    event fit and differ only in field [7] (a running counter): the first is used, `reconstructed: true`, basis `stgCandidate`.
+  - *Room DB_0000_01_00.* Its base1 tiles 013/026/039/052 (last column, rows 1-4: a band transparent in every other column and in
+    DB_0000_00_00) were dropped as dedup stubs: `make_jp_rooms.py` `DEDUP_TILES` rebuilds them from a transparent 256x256 tile (the
+    45-byte placeholder of every transparent tile), listed in the room report (`rebuilt_tiles`). 134 new files in the static
+    `rooms_gen` pack: **the next resource version must be a FULL build**.
+  - *Labels (make-events.js `mapRestoreLabels`).* From the import report: an exact stub copy -> `mapPartShared` (original data);
+    a nearest candidate -> `partSourceLabels[basis]` (`stgCandidate` -> `mapHeaderRebuilt`), else `mapPartRebuilt`; a map on a room
+    of `rebuiltRooms` (DB_0000_01_00) -> `roomTilesRebuilt`. All declared in the Notice.
+  - *Dry result* (`tmp\t5r`). Import 1,854 of 1,854 maps (111 with a part or header from its source, 29 reconstructed); 10
+    generated maps (Marluxia XII now on 161210233; validate_maps 0 errors); 2,714 of 3,570 quests served (2,609 before, none lost).
+    Parts 1-4 record files: 2,217 (live 2,210 + EV-0929 6 + EV-0723/+6 of Part 5) -> 2,320: +98 (68 stub maps, 30 room quests)
+    and 5 EV-0576 listings of the same DB maps; Org XIII 2018-19
+    170 -> 171 (its room quest), The Keyblade War 0 -> 1. 137 new files in `stage_gen\files\stage`, all 9,078 old files
+    byte-identical (md5). validate_maps: 52 of 59 new maps clean; 7 DB_0000_01_00 maps keep the «exit not walkable» errors of
+    their original JP files (9 of 51 served original maps on the same DB rooms have them too).

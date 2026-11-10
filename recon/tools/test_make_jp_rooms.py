@@ -55,6 +55,25 @@ with tempfile.TemporaryDirectory() as t:
     except SystemExit:
         pass
 
+# dedup-rule rebuild (Events Part 5, user decision 6): DB_0000_01_00 base1 013/026/039/052 come from one transparent 256x256 PNG,
+# which the conversion turns into the 45-byte placeholder of every transparent tile; no other tile is listed
+names = mjr.dedup_tile_names()
+check(sorted(names) == ['map/DB_0000_01_00/DB_0000_01_00_base1/DB_0000_01_00_base1_%03d.png' % i for i in (13, 26, 39, 52)],
+      'dedup tiles: %s' % sorted(names))
+with tempfile.TemporaryDirectory() as t:
+    src0 = mjr.TRANSPARENT_SRC
+    mjr.TRANSPARENT_SRC = os.path.join(t, 'tr.png')
+    try:
+        src = mjr.transparent_source()
+        from PIL import Image
+        im = Image.open(src)
+        check(im.size == (256, 256) and im.convert('RGBA').getextrema()[3] == (0, 0), 'transparent 256x256 source')
+        dst = os.path.join(t, 'out', 'x_013.png')
+        nm, how, size = mjr.convert(('map/DB_0000_01_00/DB_0000_01_00_base1/DB_0000_01_00_base1_013.png', src, dst))
+        check(how == 'scritto' and open(dst, 'rb').read() == mjr.PLACEHOLDER, 'rebuilt tile = placeholder: %s %s' % (how, size))
+    finally:
+        mjr.TRANSPARENT_SRC = src0
+
 if errors:
     print('FAIL')
     for e in errors:

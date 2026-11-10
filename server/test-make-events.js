@@ -576,7 +576,11 @@ const tests = {
     assert.match(q[5].why, /ZZ_0001_00_00/, 'a prefix missing from roomWorlds is another world');
     assert.ok(entry(out, 'W-8').quests[0].served, 'a map listed in worldExceptions is served');
     assert.ok(REAL_CONFIG.reasonText.worldMismatch && REAL_CONFIG.roomWorlds.DB === 1 && REAL_CONFIG.neutralRooms.DG === 1);
-    assert.deepStrictEqual(Object.keys(REAL_CONFIG.worldExceptions).sort(), ['360010', '360030'], 'EV-0282 and EV-0293 (ruling 07-11)');
+    const kw = Object.keys(REAL_CONFIG.worldExceptions).filter((k) => !['360010', '360030'].includes(k));
+    assert.deepStrictEqual(Object.keys(REAL_CONFIG.worldExceptions).filter((k) => ['360010', '360030'].includes(k)).sort(), ['360010', '360030'], 'EV-0282 and EV-0293 (ruling 07-11)');
+    // The Keyblade War Pt. 3 (user decision 3, 10-11-2026): the donor stage rows say world 13 on KG_0000_01_00 (donor world 13 = KG)
+    assert.deepStrictEqual(kw.map(Number).sort(), [...Array(20).keys()].map((i) => 740911 + i).filter((k) => k !== 740927), 'KW 19 maps (740927 has no STG)');
+    assert.ok(kw.every((k) => /donor stage row 7409\d\d worldId 13/.test(REAL_CONFIG.worldExceptions[k])), 'evidence noted');
     // the catalogue says it in plain words
     assert.match(require('./event-pages').whyPlain(q[0].why), /another world/);
   },
@@ -1294,6 +1298,26 @@ const tests = {
     assert.ok(out.index.reasons.mapPartRebuilt, 'label text');
     assert.deepStrictEqual(out.maps.find((x) => x.key === 723510).partSources, ps);
     assert.ok(!('partSources' in out.maps.find((x) => x.key === b.stageId || x.stageId === b.stageId)));
+  },
+  // user decision 6 (10-11-2026): a map restored beyond its own files is declared. Import report partSources: an exact copy ->
+  // mapPartShared, a nearest candidate -> partSourceLabels[basis] (stgCandidate -> mapHeaderRebuilt) else mapPartRebuilt; a room
+  // of rebuiltRooms -> its label (DB_0000_01_00 -> roomTilesRebuilt). Every label has its text
+  map_restore_labels() {
+    const ex = { 'mappoi_stg722810_00.bin': { from: 'mappoi_stg722900_00.bin', reconstructed: false, basis: 'dedupStub' } };
+    const hd = { 'mappoi_stg735820.bin': { from: 'mappoi_stg735810.bin', reconstructed: true, basis: 'stgCandidate' } };
+    const lb = { 'mappoi_stg723510_00.bin': { from: 'mappoi_stg723590_00.bin', reconstructed: true, basis: 'nearestLobby' } };
+    const st = (rooms, partSources) => ({ status: 'imported', rooms, ...(partSources ? { partSources } : {}) });
+    assert.deepStrictEqual(me.mapRestoreLabels(st(['DG_0100_02_00'], ex), REAL_CONFIG), ['mapPartShared']);
+    assert.deepStrictEqual(me.mapRestoreLabels(st(['DB_0004_00_00'], hd), REAL_CONFIG), ['mapHeaderRebuilt']);
+    assert.deepStrictEqual(me.mapRestoreLabels(st(['DB_0004_00_00'], lb), REAL_CONFIG), ['mapPartRebuilt']);
+    assert.deepStrictEqual(me.mapRestoreLabels(st(['DB_0000_01_00', 'DB_0000_00_00']), REAL_CONFIG), ['roomTilesRebuilt']);
+    assert.deepStrictEqual(me.mapRestoreLabels(st(['DB_0004_00_00']), REAL_CONFIG), []);
+    const maps = { status: new Map([[701301, st(['DB_0004_00_00'], ex)], [701302, st(['DB_0000_01_00'])], [701303, st(['DB_0004_00_00'])]]), poi: {} };
+    const qq = (id) => quest(id, 1, [501], { map: { key: id, status: 'ok' } });
+    const out = me.buildEvents([record('MR-1', [qq(701301), qq(701302), qq(701303)], { type: 'GEM' })], CONFIG, master(), undefined, undefined, maps);
+    const q = entry(out, 'MR-1').quests;
+    assert.deepStrictEqual(q.map((x) => [x.served, x.labels]), [[true, ['mapPartShared']], [true, ['roomTilesRebuilt']], [true, []]], JSON.stringify(q));
+    assert.ok(out.index.reasons.mapPartShared && out.index.reasons.roomTilesRebuilt && REAL_CONFIG.reconstructedWhy.mapHeaderRebuilt);
   },
   // a JP 4.3.1 map of the same quest (map.source 'jpTwin'): served on its map key, label jpTwinMap; the same layout at another level
   // (map.levelShifted): label levelShifted, event_maps.json carries the shift, and a live run serves it only once the import applied it

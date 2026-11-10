@@ -38,7 +38,7 @@ only then); a JP map whose levels are not all `from` is left out (status skipped
 Part sources (Events Part 5 Task 4 follow-up; map items with `partSources {part: {key, part, reconstructed, basis}}`, from the
 records' map.partSources): the JP 4.3.1 extraction did not write its dedup stub records (a 4-byte record meaning «the same data
 as record N», [local reference data] MANIFEST_jp.md), so a part whose STG is present can be missing although the game had it as a byte
-copy of another stage's part. A copy that lacks part N of the item's map (its fromKey when set) but holds the named source part
+copy of another stage's part. Part 'stg' with source part null is the STG header itself (user decision 6, 10-11-2026). A copy that lacks part N of the item's map (its fromKey when set) but holds the named source part
 gets that file, byte for byte, under the client name of the missing part; a part the copy holds is never replaced. The report
 entry lists what was filled in `partSources` {client name: {from, reconstructed, basis}} (reconstructed: the source is the nearest
 of several equivalent candidates, not proven unique; declared in the Notice), the summary in `partSources` / `reconstructedParts`.
@@ -189,18 +189,27 @@ def pick_files(key, copies, indexes=None):
     return out, src, tried, None
 
 
+def _client_name(key, part):
+    """client name of part `part` of map `key` (None: the STG header)"""
+    return file_names(key, 0)[0] if part is None else file_names(key, part + 1)[-1]
+
+
 def fill_parts(key, copies, sources):
     """copies [(label, files)], sources {part: {key, part, reconstructed?, basis?}} -> (copies with every absent part of `key`
-    that a copy can fill from its own source part added, byte for byte; {client name: {from, reconstructed, basis, copy}})"""
+    that a copy can fill from its own source part added, byte for byte; {client name: {from, reconstructed, basis, copy}}).
+    The part 'stg' (source part null) is the STG header (user decision 6, 10-11-2026: whole-STG dedup stubs, EV-0761 740280/740282
+    <- 740281, EV-0588 735820 <- 735810)."""
     out, used = [], {}
+    pnum = lambda p: None if p in ('stg', None) else int(p)  # noqa: E731
+    order = lambda x: -1 if pnum(x[0]) is None else pnum(x[0])  # noqa: E731
     for label, fs in copies:
         add = {}
-        for p, src in sorted((sources or {}).items(), key=lambda x: int(x[0])):
-            k, sk = (key, int(p)), (int(src['key']), int(src['part']))
+        for p, src in sorted((sources or {}).items(), key=order):
+            k, sk = (key, pnum(p)), (int(src['key']), pnum(src.get('part')))
             if k not in fs and sk in fs:
                 add[k] = fs[sk]
-                name = file_names(key, int(p) + 1)[-1]
-                used.setdefault(name, {'from': file_names(sk[0], sk[1] + 1)[-1], 'reconstructed': bool(src.get('reconstructed')),
+                name = _client_name(key, k[1])
+                used.setdefault(name, {'from': _client_name(*sk), 'reconstructed': bool(src.get('reconstructed')),
                                        'basis': src.get('basis'), 'copy': label})
         out.append((label, {**fs, **add} if add else fs))
     return out, used
