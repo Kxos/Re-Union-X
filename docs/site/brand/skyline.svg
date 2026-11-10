@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 240" preserveAspectRatio="xMidYMax slice">
+  <!-- hand-drawn twilight rooftops: a clock tower with spires among pointed roofs (not taken from any game asset) -->
+  <g fill="#3a2c86" opacity=".55">
+    <path d="M0 240V170l40-30 40 30v-20l30-40 30 40v30l50-35 50 35v-50l22-50 22 50v50l60-40 60 40V240z"/>
+    <path d="M1060 240v-80l45-35 45 35v-30l28-55 28 55v40l55-40 55 40v-20l35-45 35 45v40l40-30 40 30 34-28V240z"/>
+  </g>
+  <!-- clock tower -->
+  <g fill="#2a1d6e">
+    <path d="M720 240V120H704V98L728 40L752 98V120H766V70H752V56L800 2L848 56V70H834V120H848V98L872 40L896 98V120H880V240Z"/>
+    <path d="M660 240v-90h-14l18-52 18 52h-14v90zM932 240v-90h-14l18-52 18 52h-14v90z"/>
+  </g>
+  <circle cx="800" cy="104" r="20" fill="#ffd27a" opacity=".85"/>
+  <circle cx="800" cy="104" r="15" fill="none" stroke="#7a5a1a" stroke-width="2"/>
+  <path d="M800 104V93M800 104l8 4" stroke="#7a5a1a" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- front roofs -->
+  <g fill="#1a1250">
+    <path d="M0 240v-45l55-45 55 45v-10l40-55 40 55v15l70-50 70 50v-5l32-60 32 60v40l48-30 48 30V240z"/>
+    <path d="M540 240v-60l50-42 50 42v60zM960 240v-60l50-42 50 42v60z"/>
+    <path d="M1060 240v-45l60-48 60 48v-15l36-62 36 62v20l64-46 64 46v-10l40-55 40 55v10l50-38 50 38V240z"/>
+  </g>
+  <!-- lit windows -->
+  <g fill="#ffcf6b">
+    <rect x="70" y="205" width="7" height="10" rx="2"/><rect x="160" y="198" width="7" height="10" rx="2" opacity=".7"/>
+    <rect x="262" y="210" width="7" height="10" rx="2"/><rect x="352" y="196" width="7" height="10" rx="2" opacity=".6"/>
+    <rect x="430" y="214" width="7" height="10" rx="2"/><rect x="584" y="200" width="7" height="10" rx="2" opacity=".8"/>
+    <rect x="736" y="160" width="7" height="12" rx="2" opacity=".7"/><rect x="857" y="160" width="7" height="12" rx="2" opacity=".7"/>
+    <rect x="1004" y="204" width="7" height="10" rx="2"/><rect x="1112" y="206" width="7" height="10" rx="2" opacity=".7"/>
+    <rect x="1210" y="196" width="7" height="10" rx="2"/><rect x="1330" y="212" width="7" height="10" rx="2" opacity=".6"/>
+    <rect x="1430" y="200" width="7" height="10" rx="2"/><rect x="1540" y="214" width="7" height="10" rx="2" opacity=".8"/>
+  </g>
+</svg>

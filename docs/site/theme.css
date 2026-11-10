@@ -1,0 +1,139 @@
+/* Re-Union X theme layer: «Daybreak Town at twilight».
+   A twilight sky with stars and hand-drawn rooftops behind the header, game-like blue panels
+   with gold accents. CSS and hand-drawn SVG only (no game assets). Loaded after style.css. */
+:root{
+  --gold:#ffcf6b;--gold-deep:#e9a23b;--night:#070a24;--night-2:#0d1240;--violet:#5a3fae;
+  --panel-top:#0e5ca8;--panel-bot:#0a4482;--edge:#3aa0ff;
+}
+
+/* ---- sky ---- */
+body{position:relative;background-color:var(--night);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='18' cy='30' r='1.1' opacity='.7'/%3E%3Ccircle cx='96' cy='12' r='.8' opacity='.5'/%3E%3Ccircle cx='160' cy='54' r='1.3' opacity='.8'/%3E%3Ccircle cx='60' cy='98' r='.9' opacity='.45'/%3E%3Ccircle cx='200' cy='130' r='1' opacity='.6'/%3E%3Ccircle cx='128' cy='170' r='.8' opacity='.4'/%3E%3Ccircle cx='30' cy='196' r='1.2' opacity='.65'/%3E%3C/g%3E%3Cpath d='M120 100l2 5 5 2-5 2-2 5-2-5-5-2 5-2z' fill='%239fe6ff' opacity='.22'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,#1a1250 0,#120c3c 420px,var(--night-2) 900px,var(--night) 1600px);
+  background-repeat:repeat,no-repeat;background-attachment:fixed,scroll}
+body::before{content:"";position:absolute;left:0;right:0;top:0;height:206px;z-index:-1;pointer-events:none;
+  background:
+    url("brand/skyline.svg") center bottom/auto 118px repeat-x,
+    radial-gradient(70% 80% at 50% 100%,rgba(255,170,120,.6),transparent 70%),
+    linear-gradient(180deg,#0a1440 0%,#17298c 30%,#4a3cad 58%,#9a5aa6 80%,#e08a90 100%)}
+body::after{content:"";position:absolute;left:0;right:0;top:206px;height:90px;z-index:-1;pointer-events:none;
+  background:linear-gradient(#1a1250,rgba(26,18,80,0))}
+
+/* ---- header ---- */
+.top{padding-top:30px}
+.brand{gap:18px;margin-bottom:62px}
+.logo{width:74px;height:74px;filter:drop-shadow(0 0 14px rgba(95,224,240,.55)) drop-shadow(0 3px 0 #04182c)}
+h1{font-size:44px;text-shadow:0 3px 0 #1a1250,0 0 24px rgba(160,200,255,.35)}
+h1 span{color:var(--gold);text-shadow:0 3px 0 #5a3a10,0 0 18px rgba(255,190,80,.5)}
+.sub{color:#d6defa;font-size:15.5px;letter-spacing:.3px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+
+/* ---- tabs ---- */
+.tabs a{border-color:#3a86d8;background:linear-gradient(#2468b8,#123f80);border-radius:16px 16px 0 0}
+.tabs a.on{border-color:#ffe2a0;background:linear-gradient(#4aaaff,#1a6dd0 60%,#0f53ad);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 -3px 16px rgba(255,207,107,.35)}
+.tabs a.on::after{content:"";position:absolute;left:18%;right:18%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--gold)}
+.tabs a{position:relative}
+
+/* ---- panels ---- */
+.frame{border:3px solid var(--edge);border-radius:18px;background:linear-gradient(180deg,var(--panel-top),var(--panel-bot) 240px,#093b72);
+  box-shadow:0 0 0 2px #0a2f55,0 0 0 5px rgba(255,207,107,.18),0 14px 40px rgba(0,0,10,.65)}
+.js .frame{border-top-left-radius:8px}
+.ttl{display:flex;align-items:center;gap:12px;font-size:29px;letter-spacing:.4px}
+.ttl::before{content:"";flex:none;width:22px;height:22px;background:var(--gold);
+  clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 6px rgba(255,190,80,.7))}
+.inner{border:2px solid rgba(95,190,255,.65);border-radius:12px;
+  background:linear-gradient(180deg,rgba(14,58,94,.96),rgba(10,40,70,.97));box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.card{border-radius:12px;border:1px solid rgba(95,190,255,.45);border-left:4px solid var(--cyan);
+  background:linear-gradient(135deg,#124673,#0d3559)}
+h3.sq{display:flex;align-items:center;border-bottom:0;padding-bottom:8px;position:relative;letter-spacing:.3px}
+h3.sq::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--cyan),rgba(95,224,240,.25) 45%,transparent)}
+h3.sq:before{width:12px;height:12px;transform:rotate(45deg);border-radius:2px;margin-right:12px;box-shadow:0 0 8px rgba(47,208,232,.6)}
+b.k,.k{color:var(--gold)}
+.note{color:#b9cfe0}
+
+/* rows */
+.rows{border:1px solid rgba(95,190,255,.6);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#184c62,#143f55)}
+.rows li{border-bottom:1px dashed rgba(143,179,192,.45);transition:background .15s}
+.rows li:hover{background:rgba(95,224,240,.06)}
+.tag{border-radius:7px}
+.t-update{background:linear-gradient(#8fb34a,#6f8c30)}
+.t-important{background:linear-gradient(#e6466a,#c22a48)}
+.t-info{background:linear-gradient(#4f90e0,#336fc0)}
+.t-event{background:linear-gradient(#45d6e2,#25aebb)}
+.t-campaign{background:linear-gradient(#9a52d6,#7634b2)}
+.checks li:before{border-radius:50%}
+
+/* buttons */
+.btn{border-radius:12px}
+.btn-orange{border-color:#ffe2a8}
+
+/* status meter */
+.meter{border-radius:999px;border:1px solid rgba(95,190,255,.6);background:linear-gradient(#0c2d50,#081f3a)}
+.mf{background:linear-gradient(#ffe08a,#e9a23b)}
+.mv{color:var(--gold)}
+
+/* gallery / embed */
+.grid button{border:2px solid rgba(95,190,255,.7);border-radius:12px;transition:transform .15s,box-shadow .15s}
+.grid button:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.45),0 0 0 2px rgba(255,207,107,.5)}
+.embed{border-radius:12px;border-color:rgba(95,190,255,.7)}
+
+/* footer */
+.legal{margin-top:18px;padding-top:22px;position:relative;color:#9aaccf}
+.legal::before{content:"";position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,207,107,.6),transparent)}
+.legal a{color:#9fe6ff}
+
+/* ---- home: hero, numbers, how it works, feature cards ---- */
+.hero{position:relative;display:flex;align-items:center;gap:22px;padding:20px 24px;border-radius:14px;overflow:hidden;
+  background:radial-gradient(ellipse at 15% 50%,rgba(95,224,240,.18),transparent 55%),radial-gradient(ellipse at 90% 0%,rgba(255,190,80,.16),transparent 50%),linear-gradient(150deg,#14498a,#1c1f66);
+  border:1px solid rgba(95,224,240,.55);box-shadow:0 0 22px rgba(95,224,240,.12)}
+.hero-emblem{flex:none;width:112px;height:112px;filter:drop-shadow(0 0 16px rgba(95,224,240,.45))}
+.hero-body{min-width:0}
+.hero-kicker{display:inline-block;font:800 11px/1 var(--font);letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.hero-title{margin:6px 0 8px;font:800 26px/1.2 var(--font);color:#fff;text-shadow:0 2px 0 var(--panel-dark)}
+.hl-gold{color:var(--gold);text-shadow:0 0 14px rgba(255,190,80,.35)}
+.hero-text{margin:0;font-size:15.5px;line-height:1.6;color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:12px;text-align:center;
+  background:linear-gradient(#133f66,#0c2b4a);border:1px solid rgba(255,207,107,.35)}
+.stat-n{font:800 28px/1 var(--font);color:var(--gold);text-shadow:0 0 12px rgba(255,190,80,.3)}
+.stat-l{font-size:12.5px;line-height:1.3;color:#b9cfe0;letter-spacing:.3px}
+.how{display:flex;align-items:stretch;gap:8px;margin:0 0 18px}
+.how-step{flex:1;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:12px;background:rgba(10,42,72,.75);border:1px dashed rgba(95,224,240,.45);font-size:13.5px;line-height:1.45;color:var(--text)}
+.how-step b{font:800 15px/1.2 var(--font);color:var(--cyan)}
+.how-ico{font-size:20px;line-height:1}
+.how-arrow{align-self:center;font-size:20px;color:var(--gold)}
+.feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:0 0 14px}
+.fcard{position:relative;display:flex;flex-direction:column;gap:4px;padding:12px 14px 13px;border-radius:12px;font-size:13.5px;line-height:1.45;color:var(--text);
+  background:linear-gradient(#174a5c,#11394a);border:1px solid rgba(127,154,58,.75);border-left:5px solid #8fbf3f}
+.fcard > b{font:800 16px/1.2 var(--font);color:#fff}
+.fbadge{align-self:flex-start;font:800 10.5px/1 var(--font);letter-spacing:1.5px;padding:4px 8px;border-radius:999px;color:#10220a;background:#9fd14a}
+.fcard.wip{grid-column:1/-1;flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 12px;
+  border-color:rgba(216,50,79,.75);border-left-color:#e8445f;background:linear-gradient(#3a2236,#2a1a2c)}
+.fcard.wip .fbadge{background:#e8445f;color:#fff}
+.wip-note{padding:10px 14px;border-radius:10px;background:rgba(255,174,59,.08);border:1px solid rgba(255,174,59,.35)}
+
+@media (max-width:700px){
+  body::before{height:166px;background-size:auto 84px,auto,auto}
+  body::after{top:166px}
+  .brand{margin-bottom:48px}
+  .logo{width:54px;height:54px}
+  h1{font-size:30px}
+  .ttl{font-size:23px}.ttl::before{width:18px;height:18px}
+  .hero{flex-direction:column;align-items:flex-start;padding:16px}.hero-emblem{width:76px;height:76px}.hero-title{font-size:21px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .how{flex-direction:column}.how-arrow{transform:rotate(90deg);align-self:center}
+}
+
+/* credits intro: the star sits in a gap of the top line, no background box */
+.ci-star{background:none;padding:0}
+.credits-intro::before{background:linear-gradient(90deg,transparent,rgba(95,224,240,.75) 38%,transparent 46%,transparent 54%,rgba(95,224,240,.75) 62%,transparent)}
+
+/* crisp small labels: the rounded display font blurs below ~18px on Windows, so tabs, tags, badges,
+   kickers and pills use the system UI font (titles and buttons keep the rounded font) */
+.tabs,.tabs a,.tag,.fbadge,.mrole,.mttl,.ded-kicker,.hero-kicker,.ded-links a,.more summary,.names i,.stat-l,.how-step b,.fcard > b,.mname{
+  font-family:var(--font-body)}
+.tabs a{font-weight:700;letter-spacing:.2px;text-shadow:0 1px 0 #06213f}
+.tag{font-weight:700;letter-spacing:.4px;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.fbadge,.ded-kicker,.hero-kicker,.mttl{font-weight:700}
+.how-step b,.fcard > b,.mname{font-weight:700}

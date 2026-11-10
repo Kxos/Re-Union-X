@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Re-Union X</title>
 <meta name="description" content="Re-Union X: a non-commercial fan restoration of Kingdom Hearts Union χ[Cross]. The original 4.3.1 client, unmodified, talks to a server written from scratch. Story quests 1-979 and every worldwide raid are playable again.">
-<meta name="theme-color" content="#0b4f8f">
+<meta name="theme-color" content="#1a1250">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Re-Union X">
 <meta property="og:description" content="Fan restoration of Kingdom Hearts Union χ: the original client and a new server. Story quests 1-979 and every worldwide raid are playable again. Status, how to help, how to play.">
@@ -20,7 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
-<link rel="stylesheet" href="site/style.css?v=13">
+<link rel="stylesheet" href="site/style.css?v=14">
+<link rel="stylesheet" href="site/theme.css?v=1">
 <script>document.documentElement.className += ' js';</script>
 </head>
 <body>
@@ -57,19 +58,40 @@
 <section class="frame" id="sec-home" data-section="home">
   <h2 class="ttl">The project</h2>
   <div class="inner">
-    <div class="card">
-      <p class="lead">Kingdom Hearts Union χ closed its servers in <b class="k">May 2021</b>. The app that is still in the stores is only a theater mode: the game itself is gone.</p>
-      <p><b class="k">Re-Union X</b> brings it back as a game you can play on your own computer. The <b class="k">original 4.3.1 Android client</b> runs <b class="k">unmodified</b>; everything it used to ask the official servers is answered by a <b class="k">new server written from scratch</b>, from what the client itself tells us and from data preserved by the community.</p>
+    <div class="hero">
+      <img class="hero-emblem" src="site/brand/emblem.svg" alt="" width="112" height="112">
+      <div class="hero-body">
+        <span class="hero-kicker">Fan restoration</span>
+        <p class="hero-title">The world of Union&nbsp;χ, <span class="hl-gold">back in your hands</span>.</p>
+        <p class="hero-text">Kingdom Hearts Union χ closed its servers in <b class="k">May 2021</b>. The app still in the stores is only a theater mode: the game itself is gone. <b class="k">Re-Union X</b> brings it back as a game you can play on your own computer.</p>
+      </div>
     </div>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-n">979</span><span class="stat-l">story quests</span></div>
+      <div class="stat"><span class="stat-n">245</span><span class="stat-l">enemy families</span></div>
+      <div class="stat"><span class="stat-n">194</span><span class="stat-l">worldwide raids</span></div>
+      <div class="stat"><span class="stat-n">4.3.1</span><span class="stat-l">original client, unmodified</span></div>
+    </div>
+
+    <div class="how">
+      <div class="how-step"><span class="how-ico" aria-hidden="true">📱</span><b>Original client</b><span>The last Android release runs exactly as it shipped.</span></div>
+      <span class="how-arrow" aria-hidden="true">⇄</span>
+      <div class="how-step"><span class="how-ico" aria-hidden="true">🛠️</span><b>New server</b><span>Written from scratch, answering everything the official servers used to.</span></div>
+      <span class="how-arrow" aria-hidden="true">⇄</span>
+      <div class="how-step"><span class="how-ico" aria-hidden="true">🤝</span><b>Community data</b><span>Rebuilt from what the client tells us and what players preserved.</span></div>
+    </div>
+
     <h3 class="sq">Where we are</h3>
-    <ul class="rows">
-      <li><span class="tag t-update">WORKS</span><span class="x">Story quests <b class="k">1-979</b> with the original maps, cutscenes and music</span></li>
-      <li><span class="tag t-update">WORKS</span><span class="x">Medals, Level Up, Evolve, Shop with the original banners, Moogle Shop, missions</span></li>
-      <li><span class="tag t-update">WORKS</span><span class="x">All <b class="k">245</b> enemy families have their look again: <b class="k">209</b> fully original, <b class="k">36</b> restored by reconstruction</span></li>
-      <li><span class="tag t-update">WORKS</span><span class="x">Raids: all <b class="k">194</b> worldwide raids of 2016-2021 (solo), every boss restored, with the original banners and notices and a <b class="k">Raid Catalog</b></span></li>
-      <li><span class="tag t-important">MISSING</span><span class="x">Events, Coliseum, Union Cross and PvP</span></li>
-    </ul>
-    <p class="note">Honest status: this is a <b class="k">work in progress</b>. It runs on an Android emulator for Windows, the setup is still long and technical, and you should expect bugs and crashes.</p>
+    <div class="feat">
+      <div class="fcard ok"><span class="fbadge">WORKS</span><b>Story</b><span>Quests <b class="k">1-979</b> with the original maps, cutscenes and music</span></div>
+      <div class="fcard ok"><span class="fbadge">WORKS</span><b>Medals &amp; Shop</b><span>Level Up, Evolve, original banners, Moogle Shop, missions</span></div>
+      <div class="fcard ok"><span class="fbadge">WORKS</span><b>Enemies</b><span><b class="k">209</b> fully original, <b class="k">36</b> restored by reconstruction</span></div>
+      <div class="fcard ok"><span class="fbadge">WORKS</span><b>Raids</b><span>All <b class="k">194</b> raids of 2016-2021 (solo) with a <b class="k">Raid Catalog</b></span></div>
+      <div class="fcard wip"><span class="fbadge">MISSING</span><b>Still to come</b><span>Events, Coliseum, Union Cross and PvP</span></div>
+    </div>
+
+    <p class="note wip-note"><span aria-hidden="true">⚠️</span> Honest status: this is a <b class="k">work in progress</b>. It runs on an Android emulator for Windows, the setup is still long and technical, and you should expect bugs and crashes.</p>
     <div class="btns">
       <a class="btn btn-orange" href="#status">Full status</a>
       <a class="btn btn-orange" href="#help">How to help</a>
