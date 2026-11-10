@@ -29,7 +29,8 @@ Events Part 5 Task 3, label wikiRoom): the same list shape and the same rules as
 target at the farthest point, level in STG [11] and every enemy record). Extra keys: "roomCodes" (the khuxwiki room codes of the
 room: the first one with a collision file is the room, else the room name as a Special entry) and "censusId" (not used here);
 optional "layout" (start, normal-group centres, target-team points, arena: read on an original map of the same room or on the
-original footage; apply_layout checks room and reachability) and "targetWith" (members fighting in the target's own team).
+original footage; apply_layout checks room and reachability) and "targetWith" (members fighting in the target's own team);
+"areas" (two or more: a quest whose khuxwiki map has several areas, one MAP part per area, build_event_areas).
 Their report entries carry "event": true (make-events.js serves a generated-map quest only once its stageId is in that report).
 Training map (an entry with "training": true, the stage of the Special Catalog banner, spec 7 of
 docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (group [{name, enemyId, n, reward}]) and
@@ -644,6 +645,11 @@ def build_part_mr(folder, dist, groups, nchests, exits, uid, has_target):
         x, y = spots[(k * 7919) % len(spots)]
         chests.append((x, y, 81, 15, uid))
         uid += 1
+    return mr_body(folder, exits, areas, ens, chests), areas, ens, chests, uid
+
+
+def mr_body(folder, exits, areas, ens, chests):
+    """MAP part with an exits block (several parts): header of the template, exits, areas, enemies, chests, no objects."""
     body = bytearray(tmpl[:0x34])
     nm = folder.encode()
     body[0x0c:0x0c + 16] = nm + b'\0' * (16 - len(nm))
@@ -666,7 +672,7 @@ def build_part_mr(folder, dist, groups, nchests, exits, uid, has_target):
     C = len(body)
     body += b'\0' * 64
     struct.pack_into('<3i', body, 0x28, A - 0x34, B - 0x34, C - 0x34)
-    return bytes(body), areas, ens, chests, uid
+    return bytes(body)
 
 
 def norm(s):
@@ -1253,6 +1259,174 @@ def apply_layout(folder, sp):
     return s0, geodesic(pc, set(dist), s0), lay
 
 
+# ---------------------------------------------------------------- event quests with several areas
+# make-events.js genAreasOf (Events Part 5, multi-room generator): entry["areas"] = [{room (khuxwiki area label), roomCodes,
+# enemies (normal groups), chests, layout?}] in page order, "targetArea" (the last area), "targetWith" (the target's team),
+# "backExits", "layoutSource". One MAP part per area, chained as the original multi-part maps of the same rooms: a forward exit in
+# every area but the last, arriving at the next area's entry; the way back only with backExits (the originals have it between two
+# different rooms, JP 69670 / 300510 / 720430, and not on a room repeated «x3» / «x5», JP 706830 / 69720). Per-area layout (all
+# optional, read on original maps of the same room by the private builder; every point must be reachable from the area's entry):
+# start [x, y] (area 0), arrive [x, y] (entry of area k > 0), exit [x, y] (forward door), back [x, y] + backArrive [x, y] (door of
+# the way back and the arrival next to the previous area's forward door), exitAngle / backAngle, arriveFacing / startFacing, groups
+# [[x, y] | null per normal group], target [[x, y] target, then its escorts], arena, chests [[x, y]...]. Without them: area 0 starts
+# at the room's walk start, area k > 0 is entered next to its walk start (the back door), the forward door is the farthest point
+# from the entry, groups along the walking distance, the target at the farthest point, chests as build_part. An exit closer than
+# EXIT_KEEP to an enemy of its part is moved to the nearest point at least EXIT_KEEP from every enemy and 200 from the entry
+# (validate_maps: an enemy within 96 of an exit is an error, within 200 a warning; JP 706830 has its portal on the enemy's spot):
+# noted in the report doubts. Exit field4 = parts left from the destination to the target + 1 and dist = the straight-line route
+# left to the target, as the original multi-part maps (706830, 713290). uids global over the parts (area, members, then chests).
+EXIT_KEEP = 200
+
+
+def build_event_areas(sp):
+    sid, areas = sp['stageId'], sp['areas']
+    R, level = len(areas), sp.get('level', 1)
+    tk = sp.get('targetArea', R - 1)
+    assert tk == R - 1, 'stage %s: the target must be in the last area (targetArea %s of %d)' % (sid, tk, R)
+    back = bool(sp.get('backExits'))
+    folders_ = []
+    for a in areas:
+        f = next((c for c in a.get('roomCodes', []) if c not in EXCL and os.path.exists(cls_path(c))), None)
+        assert f, 'stage %s: area «%s» has no room with a collision file (%s)' % (sid, a.get('room'), a.get('roomCodes'))
+        folders_.append(f)
+    lays = [a.get('layout') or {} for a in areas]
+    for k, lay in enumerate(lays):
+        assert not lay.get('room') or lay['room'] == folders_[k], 'stage %s: area %d layout read on room %s, the area resolves to %s' % (sid, k, lay['room'], folders_[k])
+    grids = [walk_grid(f) for f in folders_]
+    pts = [set(d) for _, d in grids]
+    cents = [centroid(p) for p in pts]
+    doubts = []
+    tp = lambda v: tuple(v) if v else None  # noqa: E731
+    entry = [tp(lays[0].get('start')) or grids[0][0]] + [tp(lays[k].get('arrive')) or arrival_near(grids[k][0], pts[k], folders_[k]) for k in range(1, R)]
+    dists = []
+    for k in range(R):
+        pc = _pc_all[folders_[k]]
+        lab0 = pc(*entry[k])
+        assert lab0, 'stage %s: area %d entry %s not walkable in %s' % (sid, k, entry[k], folders_[k])
+        lay = lays[k]
+        pp = [tp(lay.get(x)) for x in ('exit', 'back') if lay.get(x)] + [tuple(p) for p in (lay.get('groups') or []) if p]
+        pp += [tuple(p) for p in (lay.get('target') or [])] + [tuple(p) for p in (lay.get('chests') or [])]
+        for p in pp:
+            assert pc(*p) == lab0, 'stage %s: area %d layout point %s not reachable from the entry %s in %s' % (sid, k, p, entry[k], folders_[k])
+        dists.append(geodesic(pc, pts[k], entry[k]))
+    # doors: forward door of k < R-1, back door of k > 0 (backExits), arrival back into k-1 next to its forward door
+    fwd = [(tp(lays[k].get('exit')) or max(dists[k], key=lambda p: (dists[k][p], -p[1]))) if k < R - 1 else None for k in range(R)]
+    bdoor = [(tp(lays[k].get('back')) or grids[k][0]) if back and k > 0 else None for k in range(R)]
+    barr = [(tp(lays[k + 1].get('backArrive')) or arrival_near(fwd[k], pts[k], folders_[k])) if back and k < R - 1 else None for k in range(R)]
+    uid, parts, placed = 1, [], []
+    for k in range(R):
+        f, dist, lay = folders_[k], dists[k], lays[k]
+        ex_pts = [p for p in (fwd[k], bdoor[k]) if p]
+        pool = dict(dist)
+        for r in KEEP_OUT:
+            pool = {p: v for p, v in dist.items() if all(dd(p, e) >= r for e in ex_pts)}
+            if len(pool) >= 12:
+                break
+        pool = pool or dict(dist)
+        far = max(pool, key=lambda p: (pool[p], -p[1]))
+        maxd = pool[far] or 1
+        by_d = sorted(pool, key=lambda p: pool[p])
+        normal = [{'members': [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId')) for x in g]} for g in areas[k].get('enemies', [])]
+        order = [(g, False) for g in normal]
+        if k == tk:
+            order.append(({'members': [(sp['target'], 1, sp.get('targetReward', 1), sp.get('targetId'))]
+                           + [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId')) for x in sp.get('targetWith', [])]}, True))
+        lay_g, lay_t = list(lay.get('groups') or []), [tuple(p) for p in lay.get('target') or []]
+        recs, ens = [], []
+        for i, (g, is_t) in enumerate(order):
+            if is_t:
+                cx, cy = lay_t[0] if lay_t else far
+            elif i < len(lay_g) and lay_g[i]:
+                cx, cy = lay_g[i]
+            else:
+                want = maxd * (i + 1) / (len(order) + 0.5)
+                cx, cy = min(by_d, key=lambda p: abs(pool[p] - want))
+            near = sorted(pool, key=lambda p: ((p[0] - cx) ** 2 + (p[1] - cy) ** 2, p))
+            members = []
+            for m in g['members']:
+                eid = (m[3] if len(m) > 3 and m[3] else None) or enemy_id(m[0], is_t and not members)
+                members += [(eid, member_reward(m))] * m[1]
+            if not members:
+                continue
+            rec = bytearray(ARENA if is_t else NORMAL)
+            struct.pack_into('<2i', rec, 0, len(ens), len(members))
+            struct.pack_into('<i', rec, 0x14, uid)
+            uid += 1
+            if is_t:
+                if lay.get('arena'):
+                    struct.pack_into('<8i', rec, 0x24, *[v for p in lay['arena'] for v in p])
+                else:
+                    x0, x1, y0, y1 = cx - 60, cx + 60, cy - 40, cy + 40
+                    struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
+            for j, (eid, rw) in enumerate(members):
+                if is_t and j < len(lay_t):
+                    x, y = lay_t[j]
+                elif not is_t and j == 0 and i < len(lay_g) and lay_g[i]:
+                    x, y = cx, cy
+                else:
+                    x, y = near[min(j * 3, len(near) - 1)]
+                ens.append((x, y, eid, 1, 1, level, rw, uid))
+                uid += 1
+            recs.append(bytes(rec))
+        # an exit next to an enemy of its part: moved (docstring)
+        for nm_, arr in (('fwd', fwd), ('back', bdoor)):
+            p = arr[k]
+            if p and any(dd(p, e) < EXIT_KEEP for e in ens):
+                cand = [q for q in dist if all(dd(q, e) >= EXIT_KEEP for e in ens) and dd(q, entry[k]) >= 200
+                        and all(dd(q, o) >= 200 for o in ex_pts if o != p)]
+                if cand:
+                    q = min(cand, key=lambda c: (dd(c, p), c))
+                    doubts.append('area %d: %s exit moved from %s to %s (an enemy within %d)' % (k, nm_, p, q, EXIT_KEEP))
+                    arr[k] = q
+        used = {(e[0], e[1]) for e in ens}
+        chests = []
+        for c in lay.get('chests') or []:
+            if len(chests) < areas[k].get('chests', 0):
+                chests.append((c[0], c[1], 81, 15, uid))
+                uid += 1
+        spots = [p for p in by_d[len(by_d) // 4:] if p not in used and p != entry[k]]
+        for j in range(len(chests), areas[k].get('chests', 0)):
+            if not spots:
+                break
+            x, y = spots[(j * 7919) % len(spots)]
+            chests.append((x, y, 81, 15, uid))
+            uid += 1
+        placed.append((recs, ens, chests))
+    # target point, route left (straight lines, as build_multi) and parts left to the target
+    t_recs, t_ens, _ = placed[tk]
+    tpos = t_ens[struct.unpack_from('<i', t_recs[-1], 0)[0]][:2]
+    rem = [0] * R            # rem[j]: route from the entry of area j to the target
+    rem[tk] = int(round(dd(entry[tk], tpos)))
+    for j in range(tk - 1, -1, -1):
+        rem[j] = int(round(dd(entry[j], fwd[j]))) + rem[j + 1]
+    face = lambda k, p: 1 if cents[k][0] < p[0] else 2  # noqa: E731
+    tot_a = tot_e = tot_c = 0
+    target_id = None
+    for k in range(R):
+        f, lay = folders_[k], lays[k]
+        recs, ens, chests = placed[k]
+        ex = []
+        if k < R - 1:
+            a = entry[k + 1]
+            ang = lay.get('exitAngle', exit_angle(f, pts[k], fwd[k], cents[k]))
+            ex.append((fwd[k][0], fwd[k][1], ang, rem[k + 1], tk - (k + 1) + 1, a[0], a[1], k + 1,
+                       lays[k + 1].get('arriveFacing', face(k + 1, a))))
+        if back and k > 0:
+            a = barr[k - 1]
+            ang = lay.get('backAngle', exit_angle(f, pts[k], bdoor[k], cents[k]))
+            ex.append((bdoor[k][0], bdoor[k][1], ang, int(round(dd(a, fwd[k - 1]))) + rem[k], tk - (k - 1) + 1, a[0], a[1], k - 1,
+                       lay.get('backArriveFacing', face(k - 1, a))))
+        parts.append(mr_body(f, ex, recs, ens, chests))
+        if k == tk:
+            target_id = ens[struct.unpack_from('<i', recs[-1], 0)[0]][2]
+        poi_add(sid, k, ens, chests)
+        tot_a, tot_e, tot_c = tot_a + len(recs), tot_e + len(ens), tot_c + len(chests)
+    hdr = struct.pack('<16i', 4674643, 16, R, entry[0][0], entry[0][1], lays[0].get('startFacing', 2), target_id, 1, tot_a, tot_e,
+                      0, level, tk, 0, tot_c, 0)
+    return hdr, parts, {'parts': R, 'folders': folders_, 'groups_per_room': [len(p[0]) for p in placed],
+                        'chests_per_room': [len(p[2]) for p in placed], 'doubts': doubts}, tot_e, tot_c
+
+
 # Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above. Event quests with no
 # original map (cfg['events'], docstring): the same list and the same rules, the room by its khuxwiki codes first.
 special_rooms = json.load(open(cfg['special_rooms'], encoding='utf-8')) if cfg.get('special_rooms') else {}
@@ -1261,6 +1435,20 @@ generated += [(sp, True) for sp in (json.load(open(cfg['events'], encoding='utf-
 if generated:
     for sp, is_event in generated:
         sid = sp['stageId']
+        if is_event and len(sp.get('areas') or []) > 1:
+            # several areas (make-events.js genAreasOf): one part per area, build_event_areas
+            hdr, parts, info, ne, nc = build_event_areas(sp)
+            open(os.path.join(out, 'mappoi_stg%05d.bin' % sid), 'wb').write(hdr)
+            for k, p in enumerate(parts):
+                open(os.path.join(out, 'mappoi_stg%05d_%02d.bin' % (sid, k)), 'wb').write(p)
+            names = [x['name'] for a in sp['areas'] for g in a.get('enemies', []) for x in g if not x.get('enemyId')]
+            report.append(dict({'mission': 0, 'stageId': sid, 'name': sp['name'], 'room': sp['areas'][0]['room'], 'folder': info['folders'][0],
+                                'exact_room': True, 'enemies': ne, 'chests': nc, 'drops': 0, 'event': True, 'censusId': sp.get('censusId'),
+                                'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name}),
+                                'rooms': [a['room'] for a in sp['areas']]}, **info,
+                               **({'layout': sp['layoutSource']} if sp.get('layoutSource') else {})))
+            print('event', sid, '+'.join(info['folders']), ne, 'nemici', len(parts), 'parti')
+            continue
         # «Underground Waterway x4» (rooms played several times in the catalogue) -> the room name
         room_name = re.sub(r'\s+x\d+$', '', sp.get('room') or sp['name'])
         coded = next((c for c in sp.get('roomCodes', []) if c not in EXCL and os.path.exists(cls_path(c))), None) if is_event else None

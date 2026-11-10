@@ -1258,6 +1258,45 @@ const tests = {
     const out3 = me.buildEvents([record('E-W3', [mat])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
     assert.deepStrictEqual([entry(out3, 'E-W3').quests[0].reason, out3.genMaps.length], ['mapUnusable', 0]);
   },
+  // multi-area generated map (Events Part 5, multi-room generator): the record's genAreas (khuxwiki areas in order, groups per
+  // area, chests per area, the room code of each area, optional per-area layout) -> entry.areas for gen_story_maps.py; the ids of
+  // each name follow the flat rule (here 502 for Foe B, 501 for the target); the target group's other members fight in its team
+  // (targetWith); label wikiAreas; per-name counts must equal the page's wikiEnemies
+  wiki_areas_map_listed() {
+    const ga = { areas: [
+      { label: 'Corridor (1)', room: 'DG_0200_27_00', groups: [{ members: [{ name: 'Foe B', n: 3 }] }], chests: 1, layout: { start: [432, 988], exit: [1500, 980] } },
+      { label: 'Corridor (2)', room: 'DG_0200_27_00', groups: [{ members: [{ name: 'Foe B', n: 2 }] }, { members: [{ name: 'Foe B', n: 1 }] }], chests: 0 },
+      { label: 'Corridor (3)', room: 'DG_0200_27_00', groups: [{ target: true, members: [{ name: 'Foe A', n: 1 }, { name: 'Foe B', n: 1 }] }], chests: 0, layout: { arrive: [475, 978], target: [[1270, 1070]] } }],
+    backExits: false, source: 'JP 706830', why: 'w' };
+    const out = me.buildEvents([record('E-A', [genQuest(702300, { genAreas: ga })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    const q = entry(out, 'E-A').quests[0];
+    assert.ok(q.served, JSON.stringify(q));
+    assert.ok(q.labels.includes('wikiAreas') && q.labels.includes('wikiRoom'), JSON.stringify(q.labels));
+    assert.ok(out.index.reasons.wikiAreas, 'wikiAreas text in the reasons (event_config.json reconstructedWhy)');
+    const e = out.genMaps[0];
+    assert.deepStrictEqual([e.rooms, e.room, e.roomCodes, e.target, e.targetId, e.targetArea, e.backExits, e.layoutSource], [3, 'Corridor (1)', ['DG_0200_27_00'], 'Foe A', 501, 2, false, 'JP 706830']);
+    const B = (n) => ({ name: 'Foe B', enemyId: 502, n, reward: 1 });
+    assert.deepStrictEqual(e.areas, [
+      { room: 'Corridor (1)', roomCodes: ['DG_0200_27_00'], enemies: [[B(3)]], chests: 1, layout: { start: [432, 988], exit: [1500, 980] } },
+      { room: 'Corridor (2)', roomCodes: ['DG_0200_27_00'], enemies: [[B(2)], [B(1)]], chests: 0 },
+      { room: 'Corridor (3)', roomCodes: ['DG_0200_27_00'], enemies: [], chests: 0, layout: { arrive: [475, 978], target: [[1270, 1070]] } }]);
+    assert.deepStrictEqual(e.targetWith, [B(1)]);
+    assert.deepStrictEqual(e.enemies, [[B(3)], [B(2)], [B(1)]], 'flat list of the normal groups (entry shape kept)');
+    // the page's counts and the areas' counts differ: held (enemyMissing, the difference in why), no entry
+    const bad = me.buildEvents([record('E-A2', [genQuest(702301, { genAreas: ga, wikiEnemies: { 'Foe B': 8, 'Foe A': 1 } })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    const bq = entry(bad, 'E-A2').quests[0];
+    assert.deepStrictEqual([bq.served, bq.reason, bad.genMaps.length], [false, 'enemyMissing', 0]);
+    assert.match(bq.why, /genAreas.*Foe B 7.*8/);
+    // no target group, or two: held
+    const noT = { ...ga, areas: ga.areas.map((a, k) => (k === 2 ? { ...a, groups: [{ members: [{ name: 'Foe A', n: 1 }, { name: 'Foe B', n: 1 }] }] } : a)) };
+    const nt = me.buildEvents([record('E-A3', [genQuest(702302, { genAreas: noT })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.match(entry(nt, 'E-A3').quests[0].why, /genAreas: 0 target groups/);
+    // an ambiguous name stays held as in the one-room maps
+    const m = master();
+    m.enemy = [{ enemyId: 501, name: 'Foe A', hp: [1] }, { enemyId: 502, name: 'Foe B', hp: [1] }, { enemyId: 30502, name: 'Foe B', hp: [9] }];
+    const amb = me.buildEvents([record('E-A4', [genQuest(702303, { genAreas: ga })])], CONFIG, m, undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual([entry(amb, 'E-A4').quests[0].reason, amb.genMaps.length], ['enemyAmbiguous', 0]);
+  },
   // a generated-map quest naming an enemy not in the master (an event row never answers a name lookup): enemyMissing with the
   // name, no event_gen_maps.json entry, no stage row
   wiki_room_enemy_missing_held() {

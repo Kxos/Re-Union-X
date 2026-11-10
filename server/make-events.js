@@ -70,7 +70,7 @@ const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
 const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
-  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin', 'jpReplayLayoutTwin'];
+  'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin', 'jpReplayLayoutTwin', 'wikiAreas'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
 // (quizBoardScreenshot)
@@ -554,6 +554,7 @@ function genMapOf(q, stageId, look) {
   const tId = target ? mapId(target, true) : 0;
   const targetId = tId > 0 ? tId : 0;
   if (target && !tId) missing.push(target);
+  if (q.genAreas) return genAreasOf(q, stageId, { target, targetId, members, missing, ambiguous });
   // genLayout (Part 5 Task 4 follow-up 2, user 10-11-2026): the start and the placement read on an original map of the same room or
   // on the original footage ({room, start, groups, target, arena, targetWith {name: n}, source, why}). targetWith: members that
   // fight in the target's own team (taken out of the normal groups, entry.targetWith); the rest goes to gen_story_maps.py as
@@ -596,6 +597,74 @@ function genMapOf(q, stageId, look) {
   const enemies = [...groups.flat().concat(tWith).map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
     ...(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : [])];
   return { entry, enemies, targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)], ambiguous };
+}
+
+// Multi-area generated map (Events Part 5, multi-room generator, 11-11-2026): a quest whose khuxwiki page lists its map as several
+// areas («Corridor of Darkness x5», «Frozen Forest C/B/A + Entrance», enemy rows «Corridor of Darkness (3)») carries genAreas
+// {areas: [{label, room (room code), groups: [{members: [{name, n}], target}], chests, layout?}], backExits, source, why} (private
+// Org XIII builder, from the khuxwiki page and the original maps of the same rooms). The ids of a name are those of the flat rule
+// above (genMapOf members: objective ids first, then the name's row), handed out over the areas in page order; the per-name counts
+// of the areas must equal the page's wikiEnemies (else held, enemyMissing with the difference). Exactly one group is the target's:
+// its first member of the target's name is the target, the others fight in its team (targetWith). -> the genMapOf result with
+// entry.areas [{room (area label), roomCodes [code], enemies (groups), chests, layout?}], targetArea, backExits, layoutSource, rooms
+// = the number of areas (recon/tools/gen_story_maps.py build_event_areas: one MAP part per area).
+function genAreasOf(q, stageId, { target, targetId, members, missing, ambiguous }) {
+  const ga = q.genAreas;
+  const queue = new Map();
+  for (const m of members) { if (!queue.has(m.name)) queue.set(m.name, []); queue.get(m.name).push(m.enemyId); }
+  const merge = (list) => {
+    const g = [];
+    for (const m of list) {
+      const last = g[g.length - 1];
+      if (last && last.enemyId === m.enemyId) last.n += m.n;
+      else g.push({ name: m.name, enemyId: m.enemyId, n: m.n, reward: 1 });
+    }
+    return g;
+  };
+  // per-name counts of the areas (the target counted apart) vs the page
+  const inAreas = new Map();
+  const tGroups = [];
+  ga.areas.forEach((a, k) => (a.groups || []).forEach((g) => {
+    if (g.target) tGroups.push(k);
+    let tSeen = !g.target;
+    for (const x of g.members || []) {
+      const n = (Number(x.n) || 0) - (!tSeen && x.name === target ? 1 : 0);
+      if (!tSeen && x.name === target) tSeen = true;
+      inAreas.set(x.name, (inAreas.get(x.name) || 0) + Math.max(0, n));
+    }
+  }));
+  const res = (entry) => ({ entry, enemies: entry ? [...entry.enemies.flat(), ...entry.targetWith].map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false }))
+    .concat(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : []) : [],
+  targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)], ambiguous });
+  // a name with no row or several rows: held for that cause (the counts below need every id)
+  if (missing.length || ambiguous.length) return res(null);
+  if (tGroups.length !== 1) missing.push(`genAreas: ${tGroups.length} target groups (one expected)`);
+  const page = new Map([...queue].map(([n, ids]) => [n, ids.length]));
+  for (const n of new Set([...page.keys(), ...inAreas.keys()])) {
+    if ((page.get(n) || 0) !== (inAreas.get(n) || 0)) missing.push(`genAreas: ${n} ${inAreas.get(n) || 0} in the areas, ${page.get(n) || 0} on the page`);
+  }
+  if (missing.length) return res(null);
+  const take = (name, n) => Array.from({ length: n }, () => ({ name, enemyId: queue.get(name).shift(), n: 1 }));
+  let targetWith = [];
+  const areas = ga.areas.map((a) => {
+    const groups = [];
+    for (const g of a.groups || []) {
+      let list = [];
+      let tSeen = !g.target;
+      for (const x of g.members || []) {
+        let n = Number(x.n) || 0;
+        if (!tSeen && x.name === target) { tSeen = true; n -= 1; }
+        list = list.concat(take(x.name, n));
+      }
+      if (g.target) targetWith = merge(list);
+      else if (list.length) groups.push(merge(list));
+    }
+    return { room: a.label, roomCodes: [a.room], enemies: groups, chests: Number(a.chests) || 0, ...(a.layout ? { layout: a.layout } : {}) };
+  });
+  const entry = { stageId, world: q.worldId, name: q.name, room: areas[0].room, roomCodes: areas[0].roomCodes, target, targetId, level: q.level || 1,
+    enemies: areas.flatMap((a) => a.enemies), treasures: [], rooms: areas.length, areas, targetArea: tGroups[0], targetWith,
+    backExits: !!ga.backExits, layoutSource: ga.source || null };
+  return res(entry);
 }
 
 // Completion rewards of the records (Part 5 Task 3: EV-0941 completionReward, The Keyblade War Challenge Campaign, notice 61226):
@@ -789,6 +858,8 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       const qLabels = labelIds(q0.label, config.labelPhrases);
       const ensure = (l) => { if (!qLabels.includes(l)) qLabels.push(l); };
       if (gen) { ensure('wikiRoom'); const k = qLabels.indexOf('mapIncomplete'); if (k >= 0) qLabels.splice(k, 1); }
+      // several areas from the khuxwiki page, laid out on original maps of the same rooms where they survive (genAreasOf)
+      if (gen && q0.genAreas) ensure('wikiAreas');
       if (srcMap === 'jpTwin') ensure('jpTwinMap');
       if ((q0.map || {}).levelShifted) ensure('levelShifted');
       // a same-series layout twin (Events Part 5, user decision 7, 10-11-2026; map.layoutTwin {fromKey, swaps [{from, to}], why}): the

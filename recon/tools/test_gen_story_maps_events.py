@@ -134,6 +134,77 @@ try:
         r4 = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfg3.json')],
                             capture_output=True, text=True, encoding='utf-8', errors='replace')
         check(r4.returncode != 0 and 'layout read on room XX_0000_00_00' in r4.stderr, 'layout of another room: error (%s)' % r4.stderr[-300:])
+    # multi-area entry (make-events.js genAreasOf): one MAP part per area, chained by forward exits; per-area layout (start of area 0,
+    # arrival of the next areas, forward exit, group centres, target team, chests) as in the original maps of the same room
+    # (JP 706830: DG_0200_27_00 x3, one enemy per part); an exit closer than 200 to an enemy of its part is moved (validate_maps:
+    # error < 96, warning < 200); backExits adds the way back (two rooms, no layout: the generator's rules)
+    R27 = 'DG_0200_27_00'
+    if os.path.exists(os.path.join(CLS, 'map', R27, R27 + '_cls.bin')):
+        B = lambda n: {'name': 'Shadow', 'enemyId': 80001, 'n': n, 'reward': 1}  # noqa: E731
+        EVA, EVB = 4009994, 4009993
+        eva = dict(base, stageId=EVA, room='Corridor (1)', roomCodes=[R27], censusId='EV-TEST', rooms=3, targetArea=2, backExits=False,
+                   layoutSource='test 706830', enemies=[[B(1)], [B(2)]], targetWith=[B(1)], areas=[
+                       {'room': 'Corridor (1)', 'roomCodes': [R27], 'enemies': [[B(1)]], 'chests': 1,
+                        'layout': {'start': [432, 988], 'exit': [1308, 952], 'groups': [[1296, 1014]], 'chests': [[668, 902]]}},
+                       {'room': 'Corridor (2)', 'roomCodes': [R27], 'enemies': [[B(2)]], 'chests': 0,
+                        'layout': {'arrive': [475, 978], 'exit': [1500, 980]}},
+                       {'room': 'Corridor (3)', 'roomCodes': [R27], 'enemies': [], 'chests': 0,
+                        'layout': {'arrive': [445, 988], 'target': [[1270, 1070], [1200, 1100]]}}])
+        two = sorted(d for d in os.listdir(os.path.join(CLS, 'map')) if d.startswith('DB_') and d.endswith('_00_00'))[0]
+        evb = dict(base, stageId=EVB, room='Room A', roomCodes=[two], censusId='EV-TEST', rooms=2, targetArea=1, backExits=True,
+                   layoutSource=None, enemies=[[B(2)], [B(1)]], targetWith=[], areas=[
+                       {'room': 'Room A', 'roomCodes': [two], 'enemies': [[B(2)]], 'chests': 1},
+                       {'room': 'Room B', 'roomCodes': [R27], 'enemies': [[B(1)]], 'chests': 0}])
+        outa = os.path.join(tmp, 'stagea')
+        json.dump([eva, evb], open(os.path.join(tmp, 'eventsa.json'), 'w'))
+        cfga = dict(cfg, out=outa, report=os.path.join(tmp, 'reporta.json'), events=os.path.join(tmp, 'eventsa.json'))
+        cfga.pop('special')
+        json.dump(cfga, open(os.path.join(tmp, 'cfga.json'), 'w'))
+        ra = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfga.json')],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(ra.returncode == 0, 'areas run exit %d: %s' % (ra.returncode, ra.stderr[-800:]))
+        fa = lambda sid, part='': os.path.join(outa, 'mappoi_stg%d%s.bin' % (sid, part))  # noqa: E731
+        if all(os.path.exists(fa(EVA, p)) for p in ('', '_00', '_01', '_02')):
+            s = mapfile.parse_stg(open(fa(EVA), 'rb').read())
+            ps = [mapfile.parse_map(open(fa(EVA, '_%02d' % k), 'rb').read(), k) for k in range(3)]
+            check((s['parts'], s['start_part'], tuple(s['start']), s['target_enemy'], s['card_level_bonus'], s['field12']) == (3, 0, (432, 988), 10001, 120, 2),
+                  'STG: 3 parts, start of area 0 from the layout, target 10001, level 120, target part 2 (%s)' % s)
+            check((s['enemies_total'], s['chests_total'], s['teams_total']) == (5, 1, 3), 'STG totals: 5 enemies, 1 chest, 3 teams (%s)' % s)
+            check([p['room'] for p in ps] == [R27] * 3, 'one part per area, room of each area')
+            check([[(e['dest_part'], e['field4']) for e in p['exits']] for p in ps] == [[(1, 2)], [(2, 1)], []],
+                  'forward exits only, field4 = parts left to the target + 1 (as JP 706830): %s' % [p['exits'] for p in ps])
+            check((ps[0]['exits'][0]['arrive_x'], ps[0]['exits'][0]['arrive_y']) == (475, 978) and (ps[1]['exits'][0]['arrive_x'], ps[1]['exits'][0]['arrive_y']) == (445, 988),
+                  'arrival = the next area\'s layout arrive')
+            e0 = ps[0]['enemies'][0]
+            check((e0['x'], e0['y']) == (1296, 1014), 'group at the layout centre (%s)' % e0)
+            ex = ps[0]['exits'][0]
+            check(((ex['x'] - 1296) ** 2 + (ex['y'] - 1014) ** 2) ** 0.5 >= 200, 'exit moved >= 200 from the enemy (%s)' % ex)
+            check([(c['x'], c['y']) for c in ps[0]['chests']] == [(668, 902)], 'chest at the layout point')
+            last = ps[2]['enemies']
+            check([(e['enemyId'], e['x'], e['y'], e['level']) for e in last] == [(10001, 1270, 1070, 120), (80001, 1200, 1100, 120)], 'target team at the layout points (%s)' % last)
+            check(ps[2]['teams'][0]['boss'] and not ps[1]['teams'][0]['boss'], 'only the target team is the boss team')
+            uids = [x['uid'] for p in ps for x in p['enemies'] + p['chests']] + [t['uid'] for p in ps for t in p['teams']]
+            check(len(uids) == len(set(uids)), 'uids unique over the parts')
+        if all(os.path.exists(fa(EVB, p)) for p in ('', '_00', '_01')):
+            pb = [mapfile.parse_map(open(fa(EVB, '_%02d' % k), 'rb').read(), k) for k in range(2)]
+            check([[e['dest_part'] for e in p['exits']] for p in pb] == [[1], [0]], 'backExits: the way back from area 1 (%s)' % [p['exits'] for p in pb])
+            check([p['room'] for p in pb] == [two, R27], 'rooms of the two areas')
+        repa = {x['stageId']: x for x in json.load(open(os.path.join(tmp, 'reporta.json'), encoding='utf-8'))}
+        check(repa.get(EVA, {}).get('parts') == 3 and repa[EVA].get('folders') == [R27] * 3 and repa[EVA].get('event') is True
+              and repa[EVA].get('layout') == 'test 706830' and any('exit moved' in d for d in repa[EVA].get('doubts', [])), 'report: parts, folders, layout, exit moved (%s)' % repa.get(EVA))
+        pa = json.load(open(poi, encoding='utf-8'))
+        check(sorted({x['map'] for x in pa.get(str(EVA), {}).get('enemies', [])}) == [0, 1, 2], 'POI per part')
+        va = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'validate_maps.py'), outa, CLS, '--json', os.path.join(tmp, 'va.json')],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+        vra = json.load(open(os.path.join(tmp, 'va.json'), encoding='utf-8')) if os.path.exists(os.path.join(tmp, 'va.json')) else {}
+        for sid in (EVA, EVB):
+            check(vra.get(str(sid), {}).get('errors') == [], 'validate_maps areas map %d: no errors (%s)' % (sid, vra.get(str(sid)) or va.stderr[-400:]))
+        # a layout point not reachable from the area's entry: error
+        bad = dict(eva, areas=[dict(eva['areas'][0], layout=dict(eva['areas'][0]['layout'], groups=[[5, 5]]))] + eva['areas'][1:])
+        json.dump([bad], open(os.path.join(tmp, 'eventsa.json'), 'w'))
+        rb = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfga.json')],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(rb.returncode != 0 and 'not reachable' in rb.stderr, 'unreachable layout point: error (%s)' % rb.stderr[-300:])
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
