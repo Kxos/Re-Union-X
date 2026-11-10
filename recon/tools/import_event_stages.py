@@ -35,6 +35,13 @@ above; enemy swaps keyed by fromKey too) are copied under the item's own key (it
 STG [11] (the quest level of the card) shifted by delta (never below 1); positions, ids, drops and uids stay. The JP folder is
 never changed. The report entry carries `fromKey`, `levelShift` and `levelShifted: true` (make-events.js serves such a quest
 only then); a JP map whose levels are not all `from` is left out (status skipped, cause 'level shift').
+Part sources (Events Part 5 Task 4 follow-up; map items with `partSources {part: {key, part, reconstructed, basis}}`, from the
+records' map.partSources): the JP 4.3.1 extraction did not write its dedup stub records (a 4-byte record meaning «the same data
+as record N», [local reference data] MANIFEST_jp.md), so a part whose STG is present can be missing although the game had it as a byte
+copy of another stage's part. A copy that lacks part N of the item's map (its fromKey when set) but holds the named source part
+gets that file, byte for byte, under the client name of the missing part; a part the copy holds is never replaced. The report
+entry lists what was filled in `partSources` {client name: {from, reconstructed, basis}} (reconstructed: the source is the nearest
+of several equivalent candidates, not proven unique; declared in the Notice), the summary in `partSources` / `reconstructedParts`.
 --stage-dir: also copy the imported files into this folder (the resource staging, stage_gen/files/stage). The POI is not
 merged here: make-events.js (master run) reads report.json + stage_poi_events.json, serves only the imported stages whose
 reward rows it can write, and merges their POI into server/game_data/stage_poi.json in the same run.
@@ -182,6 +189,23 @@ def pick_files(key, copies, indexes=None):
     return out, src, tried, None
 
 
+def fill_parts(key, copies, sources):
+    """copies [(label, files)], sources {part: {key, part, reconstructed?, basis?}} -> (copies with every absent part of `key`
+    that a copy can fill from its own source part added, byte for byte; {client name: {from, reconstructed, basis, copy}})"""
+    out, used = [], {}
+    for label, fs in copies:
+        add = {}
+        for p, src in sorted((sources or {}).items(), key=lambda x: int(x[0])):
+            k, sk = (key, int(p)), (int(src['key']), int(src['part']))
+            if k not in fs and sk in fs:
+                add[k] = fs[sk]
+                name = file_names(key, int(p) + 1)[-1]
+                used.setdefault(name, {'from': file_names(sk[0], sk[1] + 1)[-1], 'reconstructed': bool(src.get('reconstructed')),
+                                       'basis': src.get('basis'), 'copy': label})
+        out.append((label, {**fs, **add} if add else fs))
+    return out, used
+
+
 def cause_of(why):
     """short cause of a stage left out (report summary by_cause)"""
     m = re.match(r'(STG assente|parte (\d+) assente)', why or '')
@@ -263,7 +287,14 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
         seen.add(it['key'])
         # a level-shifted twin reads the files of its JP map (fromKey) and is written under its own key (docstring)
         src_key = it['fromKey'] if it.get('fromKey') is not None else it['key']
-        fk, src, tried, conflict = pick_files(src_key, copies, indexes)
+        filled = {}
+        if it.get('partSources'):
+            item_copies, filled = fill_parts(src_key, copies, it['partSources'])
+        else:
+            item_copies = copies
+        fk, src, tried, conflict = pick_files(src_key, item_copies, indexes)
+        # only the filled parts the picked files really use (a part the copy holds is never replaced)
+        filled = {n: v for n, v in filled.items() if src.get(n) == v['copy']}
         if conflict:
             res, raw = {'stageId': it['stageId'], 'key': it['key'], 'censusId': it.get('censusId'), 'name': it.get('name'),
                         'status': 'missing', 'why': 'copies differ: ' + conflict}, None
@@ -281,6 +312,8 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
                     else:
                         res.pop('poi', None)
                         res['status'], res['why'] = 'skipped', why
+        if filled:
+            res['partSources'] = {n: {k: v for k, v in x.items() if k != 'copy'} for n, x in sorted(filled.items())}
         if any(v != 'jp431' for v in src.values()):
             res['copies'] = {n: v for n, v in sorted(src.items()) if v != 'jp431'}
         if res['status'] != 'imported':
@@ -314,6 +347,9 @@ def run(items, files, rooms, enemy_ids, reward_ids, out, swaps=None, others=None
                        'rooms': sorted(by_room), 'by_room': {r: sorted(k) for r, k in sorted(by_room.items())}}, f, indent=1)
     rep = {'summary': {'items': len(items), 'by_status': by, 'by_cause': causes, 'files': len(os.listdir(sdir)),
                        'copies_used': sorted(s['key'] for s in stages if s.get('copies')),
+                       'partSources': sorted(s['key'] for s in stages if s.get('partSources')),
+                       'reconstructedParts': sorted(s['key'] for s in stages if any(
+                           x['reconstructed'] for x in (s.get('partSources') or {}).values())),
                        'differs': [s['stageId'] for s in stages if s.get('differs')],
                        'swapped': [s['stageId'] for s in stages if s.get('swapped')],
                        'rewards_missing': sorted({r for s in stages if s['status'] == 'imported' for r in s.get('rewards_missing', [])})},
@@ -363,6 +399,8 @@ def main(argv=None):
               s['items'], s['by_status'], s['files'], sdir, s['swapped'], s['differs'], s['rewards_missing']))
     print('left out by cause: %s; parts from another original copy: %s; rooms list: %s' % (
         s['by_cause'], s['copies_used'] or 'none', a.rooms_out))
+    print('parts filled from their part source (dedup stubs): %d maps, of which reconstructed (nearest candidate): %d' % (
+        len(s['partSources']), len(s['reconstructedParts'])))
     for st in rep['stages']:
         if st['status'] != 'imported':
             print('  %s %s (%s): %s %s' % (st['stageId'], st['key'], st.get('name'), st['status'], st.get('why')))

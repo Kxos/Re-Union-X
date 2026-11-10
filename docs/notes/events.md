@@ -862,3 +862,20 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   (validate_maps 0 errors); 2,498 of 3,570 quests served (2,210 before, none lost). Org XIII 2016-17 186/242, 2018-19 65/186, 2020
   30/38, EV-0929 6/7, The Keyblade War 0/20 (5 boss maps imported but held `worldMismatch`: KG room vs quest world 13; 15 maps
   without part 0). The 592 new files in `stage_gen\files\stage` leave every old file byte-identical (md5).
+- **Follow-up (user gate, 10 November 2026).**
+  - *Part sources (dedup stubs).* The JP 4.3.1 extraction did not write its dedup stub records (4 bytes: «same data as record N»),
+    so a part whose STG is present can be missing although the game had it as a byte copy of another part. A record's
+    `map.partSources {part: {key, part, reconstructed, basis, why}}` goes into the `event_maps.json` item; `import_event_stages.py`
+    fills an absent part from the named source part of the same copy, byte for byte (never a part the copy holds), and reports it
+    (`partSources` per stage, summary `partSources` / `reconstructedParts`). The Keyblade War 14 maps (the only part with the
+    STG's target: proven) and the Org XIII 2018-19 part 0 lobby of 107 quests: 37 with the only lobby of a stage with the same start
+    point, 70 with the nearest of several equivalent same-event lobbies (`reconstructed: true`, record phrase «map part rebuilt» ->
+    label `mapPartRebuilt`, declared in the Notice). Test: `test_import_event_stages.py` (740911 part 0 from 740920_00).
+  - *Rooms of the generated maps.* The donor stage row's thumbId names the quest's start room (room * 10000 + variant * 100 + sub);
+    the record's `thumbRoomCodes` come before the khuxwiki room-name codes in the `event_gen_maps.json` entry (make-events.js).
+    The khuxwiki «Corridor of Darkness» now also matches DG_0100 / DG_0200_27 (reference/world_schema/areas.json); 7 Org XIII
+    2016-17 quests use their exact JP map (Larxene V/XII, Xemnas III/VI/X/XII/XIII; the EV-0333 replay maps). Other candidates that
+    lookup adds are not used until the user rules on them.
+  - *Dry result.* Import 1,795 of 1,815 maps (69 with a part from its source, 28 of them rebuilt lobbies); 10 generated maps
+    (validate_maps 0 errors); 2,609 of 3,570 quests served. Org XIII 2016-17 186/242 (10 generated), 2018-19 170/186, The Keyblade
+    War 0/20 (19 maps imported, held `worldMismatch`). 193 new files in `stage_gen\files\stage`, every old file byte-identical (md5).

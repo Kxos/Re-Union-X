@@ -1227,6 +1227,9 @@ const tests = {
     const built = me.buildEvents([record('E-W', [genQuest(702100)])], CONFIG, master(), undefined, {}, { status: new Map(), poi: {}, generated: new Set([lq.stageId]) }, null, { eventEnemyIds: [] });
     assert.ok(entry(built, 'E-W').quests[0].served);
     assert.deepStrictEqual(built.poi, {}, 'its POI comes from gen_story_maps.py');
+    // the room of the donor stage row's thumbId (thumbRoomCodes, Task 4 follow-up) comes before the khuxwiki room-name codes
+    const th = me.buildEvents([record('E-W4', [genQuest(702103, { thumbRoomCodes: ['DG_0100_02_00', 'DB_0000_00_00'] })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual(th.genMaps[0].roomCodes, ['DG_0100_02_00', 'DB_0000_00_00']);
     // «Collect all materials» on a generated map (no treasure known): held
     const mat = genQuest(702102, { objectives: [objective(18, 'Collect all materials', { type: 2, id: 0, num: 5 })] });
     const out3 = me.buildEvents([record('E-W3', [mat])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
@@ -1267,6 +1270,18 @@ const tests = {
     assert.ok(entry(pinned, 'E-AM').quests[0].served, JSON.stringify(entry(pinned, 'E-AM').quests[0]));
     assert.deepStrictEqual([pinned.genMaps[0].targetId, pinned.genMaps[0].enemies[0][0].enemyId], [30501, 30502], 'explicit ids win');
     assert.ok(/several versions/.test(require('./event-pages').whyPlain(q.why, 'enemyAmbiguous')));
+  },
+  // map parts the JP dump dropped as dedup stubs (Task 4 follow-up, map.partSources): the map item carries them for the import;
+  // a part taken from the nearest of several candidates is labelled mapPartRebuilt (record phrase «map part rebuilt»)
+  part_sources_listed() {
+    const ps = { 0: { key: 723590, part: 0, reconstructed: true, basis: 'nearestLobby' } };
+    const q = quest(723510, 1, [501], { map: { key: 723510, stageBinId: 0, status: 'incomplete: part 0 absent', source: 'JP 4.3.1 stage/', partSources: ps }, label: 'original; map part rebuilt' });
+    const out = build([record('E-PS', [q, quest(723511, 1, [501])])]);
+    const [a, b] = entry(out, 'E-PS').quests;
+    assert.deepStrictEqual(a.labels, ['mapPartRebuilt']);
+    assert.ok(out.index.reasons.mapPartRebuilt, 'label text');
+    assert.deepStrictEqual(out.maps.find((x) => x.key === 723510).partSources, ps);
+    assert.ok(!('partSources' in out.maps.find((x) => x.key === b.stageId || x.stageId === b.stageId)));
   },
   // a JP 4.3.1 map of the same quest (map.source 'jpTwin'): served on its map key, label jpTwinMap; the same layout at another level
   // (map.levelShifted): label levelShifted, event_maps.json carries the shift, and a live run serves it only once the import applied it

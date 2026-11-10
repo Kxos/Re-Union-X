@@ -550,7 +550,10 @@ function genMapOf(q, stageId, look) {
     groups.push(g);
   }
   const room = (q.wikiRooms || [])[0] || ((q.room || [])[0] || {}).name || null;
-  const entry = { stageId, world: q.worldId, name: q.name, room, roomCodes: room ? ((q.wikiRoomCodes || {})[room] || []) : [], target, targetId, level: q.level || 1,
+  // thumbRoomCodes (Part 5 Task 4 follow-up): the room of the donor stage row's thumbId (room*10000 + variant*100 + sub, the quest's
+  // start room) comes before the khuxwiki room-name codes
+  const roomCodes = [...new Set([...(q.thumbRoomCodes || []), ...(room ? ((q.wikiRoomCodes || {})[room] || []) : [])])];
+  const entry = { stageId, world: q.worldId, name: q.name, room, roomCodes, target, targetId, level: q.level || 1,
     enemies: groups, treasures: [], rooms: 1 };
   const enemies = [...groups.flat().map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
     ...(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : [])];
@@ -884,7 +887,9 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       // every candidate goes into event_maps.json (the list import_event_stages.py imports), served or not
       const mapItem = prior ? prior.mapItem : { stageId, key: mapKey, mapStatus: item.mapStatus, censusId: rec.censusId, world: q.worldId, name: q.name, rooms: q.room || [], level: q.level, addLevel: q.addLevel || 0,
         targets: (q.targets || []).map((t) => t.id), enemies: (q.enemies || []).map((e) => ({ name: e.name, enemyId: e.id, level: e.level, n: e.count, reward: e.reward, rooms: e.rooms || [], target: !!e.target })),
-        drops: q.drops || null, served: false, ...(item.levelShift ? { levelShift: item.levelShift, fromKey } : {}) };
+        drops: q.drops || null, served: false, ...(item.levelShift ? { levelShift: item.levelShift, fromKey } : {}),
+        // map parts the JP dump dropped as dedup stubs, taken from their source part (recon/tools/import_event_stages.py partSources)
+        ...((q.map || {}).partSources ? { partSources: q.map.partSources } : {}) };
       if (!prior) { builtMaps.set(mapKey, { stageId, censusId: rec.censusId, dropsKey, mapItem, quiz, shortWindow: !!rec.shortWindow, jpTwin: srcMap === 'jpTwin' }); if (!gen) put(out.maps, mapItem); }
       const newRewards = [];
       if (maps && !gen) {

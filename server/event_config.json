@@ -149,10 +149,12 @@
   "wikiRoom": "wikiRoom",
   "jpTwinMap": "jpTwinMap",
   "levelShifted": "levelShifted",
+  "map part rebuilt": "mapPartRebuilt",
   "unionTwin": "unionTwin"
  },
  "reconstructedWhy": {
-  "wikiRoom": "No original map of this quest survives in any source we hold (the Japanese and worldwide game files, the donated data, the restored rooms): its map was generated in the room the khuxwiki page names, with the enemies and the target of the page at the quest's level. Not original.",
+  "wikiRoom": "No original map of this quest survives in any source we hold (the Japanese and worldwide game files, the donated data, the restored rooms): its map was generated in the quest's original room (the room of its surviving stage data, else the room the khuxwiki page names), with the enemies and the target of the page at the quest's level. Not original.",
+  "mapPartRebuilt": "One part of this quest's map (the empty lobby before the fight) is missing from the surviving Japanese files, which kept only one copy of the parts the game shared between quests. It was taken from another quest of the same event that starts the player at the same point in the same room; several nearly identical lobbies fit, and the nearest one was used. The fight itself is on the original map. Rebuilt, not original.",
   "jpTwinMap": "The map of this quest is the Japanese map of the same quest, found by its content (the same enemies, counts, target and rooms at the quest's level): the worldwide map file of this run is lost.",
   "levelShifted": "The map of this quest is a Japanese map with the same layout used at another level in the original; here its enemies fight at this quest's own level (khuxwiki), every enemy shifted by the same amount. The original map of this level is lost.",
   "unionTwin": "In the original each Union had its own version of this quest; only one version survives in the game data. This Union's version was rebuilt from it (the same AP, level, restrictions and objectives, which khuxwiki gives identically for every Union) with the target of this Union's map file. You see only your own Union's version, and only it counts for the completion reward.",

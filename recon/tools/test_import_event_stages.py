@@ -179,6 +179,28 @@ try:
     bad = ies.run([dict(it_l, levelShift={'from': 30, 'to': 20, 'delta': -10})], files, rooms_l, ids_l, rw_l, out)['stages'][0]
     assert bad['status'] == 'skipped' and bad['cause'] == 'level shift' and not bad.get('levelShifted'), bad
     assert os.listdir(os.path.join(out, 'stage')) == []
+    # part sources (Task 4 follow-up, dedup stubs): The Ultimate Test 740911 has its STG but no part 0 in the dump; part 0 is the
+    # byte copy of 740920_00 (same Master). Filled byte for byte, reported; a part the copy holds is never replaced; without the
+    # entry the map stays incomplete
+    KS, SRC = 740911, 740920
+    assert (KS, None) in files and (KS, 0) not in files and (SRC, 0) in files
+    _, ps = mapfile.load_stage(files, SRC)
+    ids_s = {e['enemyId'] for p in ps for e in p['enemies']}
+    rooms_s = {p['room'] for p in ps}
+    rw_s = {e['reward'] for p in ps for e in p['enemies']} | {c['reward'] for p in ps for c in p['chests']}
+    it_s = {'stageId': 11, 'key': KS, 'name': 'stub', 'partSources': {'0': {'key': SRC, 'part': 0, 'reconstructed': False, 'basis': 'dedupStub'}}}
+    rep_s = ies.run([it_s, {'stageId': 12, 'key': SRC, 'name': 'src',
+                            'partSources': {'0': {'key': KS, 'part': 0, 'reconstructed': True}}}], files, rooms_s, ids_s, rw_s, out)
+    ss, sv = rep_s['stages']
+    assert ss['status'] == 'imported' and ss['partSources'] == {'mappoi_stg740911_00.bin': {
+        'from': 'mappoi_stg740920_00.bin', 'reconstructed': False, 'basis': 'dedupStub'}}, ss
+    assert sv['status'] == 'imported' and 'partSources' not in sv, sv
+    assert rep_s['summary']['partSources'] == [KS] and rep_s['summary']['reconstructedParts'] == []
+    rd = lambda n: open(os.path.join(out, 'stage', n), 'rb').read()
+    assert rd('mappoi_stg740911_00.bin') == open(files[(SRC, 0)], 'rb').read() == rd('mappoi_stg740920_00.bin')
+    assert rd('mappoi_stg740911.bin') == open(files[(KS, None)], 'rb').read()
+    no = ies.run([dict(it_s, partSources=None)], files, rooms_s, ids_s, rw_s, out)['stages'][0]
+    assert no['status'] == 'missing' and no['cause'] == 'part 0 absent' and 'partSources' not in no, no
 finally:
     shutil.rmtree(t, ignore_errors=True)
 print('OK: test_import_event_stages')
