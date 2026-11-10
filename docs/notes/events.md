@@ -1040,8 +1040,17 @@ Staging only; the served `event_img` folder is unchanged until the user approves
 - **imgVersion stays 9.** The whole dry index rebuilt with `--all-rows` gives 638 cards. The 605 cards already served are
   byte-identical, so no served picture changes. 20095 (EV-1530, undated) is not remade by the Part 4 extras file; its live card
   stays as it is.
-- **EV-1103.** The record has two original rows. Row 201232 is the Jafar «Big Bonus Challenge» (I-248, not built). Row 201231 is
-  «Challenge Organization XIII Pt.2 - No.I ~ No.VI -», built, card 22663. The Events tab lists only 22663. The Event Catalog draws
-  the entry's own id, which is the Jafar banner. Four Part 4 entries already behave this way (EV-0478, EV-1032, EV-1086, EV-1249).
-  This is a question for the user.
+- **EV-1103.** The record has two original rows. Row 201232 is the Jafar «Big Bonus Challenge» («Defeat Jafar 1/7..7/7» and a
+  Bonus Quest, not built: the second-phase forms «Jafar (Cobra)» / «Jafar (Genie)» have no enemy id; tracked in I-257, not
+  I-248, which is the 5th-anniversary «Genie Jafar» row 202665). Row 201231 is «Challenge Organization XIII Pt.2 - No.I ~ No.VI -»,
+  built, card 22663. The Events tab lists only 22663. The Event Catalog draws the entry's own id, which is the Jafar banner. Four
+  Part 4 entries already behave this way (EV-0478, EV-1032, EV-1086, EV-1249).
+- **User decisions (10 November 2026).** The 33 cards are approved. EV-1103 and the four Part 4 entries keep the ORIGINAL
+  first-row card in the Event Catalog even though that row is not playable yet (event-pages.js unchanged): the goal is to make
+  every part playable (I-257), and the testers wait until the events are complete. EV-0913 keeps one card (the EV-0929 «Part 1 &
+  2» card).
+- **Card cross-check (Task 6 step A).** `tmp\events\p5t6\cardcheck.py` (private): all 33 staged cards equal a fresh build; each
+  banner belongs to one of its entry's notices, notice date = start, member / run name in the notice title or the row's quests.
+  Two flags, both checked and harmless: EV-0941 (notice 58489 carries its 2021 «Updated» date) and EV-1273 (umbrella notice
+  69374 «JP 5th Anniversary Events and Campaign!»; the row banner itself reads «CHALLENGE ORGANIZATION XIII»).
 - Review page (private): `tmp\events\orgxiii\cards.html`, grouped by year.
