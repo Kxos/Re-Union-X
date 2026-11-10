@@ -1223,6 +1223,13 @@ const tests = {
     m.enemy.push({ enemyId: 503, name: 'Foe B' });
     const out2 = me.buildEvents([record('E-W2', [o])], CONFIG, m, undefined, {}, null, null, { eventEnemyIds: [503] });
     assert.deepStrictEqual(out2.genMaps[0].enemies, [[{ name: 'Foe B', enemyId: 503, n: 3, reward: 1 }, { name: 'Foe B', enemyId: 502, n: 2, reward: 1 }], [{ name: 'Foe B', enemyId: 502, n: 2, reward: 1 }]]);
+    // the target pinned to the objective's own id counts among that objective's members (Larxene VIII: 4 little-HP decoys + target)
+    const ot = genQuest(702106, { wikiEnemies: { 'Foe A': 6 }, targets: [{ id: 504, name: 'Foe A' }], wikiEnemyIds: { 'Foe A': 501 },
+      objectives: [{ ...objective(4, 'Defeat Foe A with little HP x 3', { type: 2, id: 0, num: 5 }), idType: 1, id: 504, num: 3 }] });
+    const m2 = master();
+    m2.enemy.push({ enemyId: 504, name: 'Foe A' });
+    const out2b = me.buildEvents([record('E-W7', [ot])], CONFIG, m2, undefined, {}, null, null, { eventEnemyIds: [504] });
+    assert.deepStrictEqual([out2b.genMaps[0].targetId, out2b.genMaps[0].enemies], [504, [[{ name: 'Foe A', enemyId: 504, n: 2, reward: 1 }, { name: 'Foe A', enemyId: 501, n: 3, reward: 1 }]]]);
     // live run (maps given): served only once gen_story_maps.py has written the map (its report), listed either way
     const live = me.buildEvents([record('E-W', [genQuest(702100)])], CONFIG, master(), undefined, {}, { status: new Map(), poi: {}, generated: new Set() }, null, { eventEnemyIds: [] });
     const lq = entry(live, 'E-W').quests[0];

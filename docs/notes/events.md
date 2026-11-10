@@ -948,3 +948,13 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
     maps, Xigbar XIII). validate_maps: the 7 generated maps 0 errors; 702930 keeps the «exit to part 0» errors of its JP map 711050.
   - *Not done yet.* Multi-room generated maps (wiki «x3/x4/x5» rooms and named areas, groups per room, chests), Xigbar III own
     maze, Xigbar IX on 711040 (Dark Plant row unproven); 34 quests still `enemyAmbiguous`.
+  - *Footage verification (user 10-11, dry).* The private footage check (original footage of the Marluxia and Larxene runs) pins the
+    target rows of the generated Marluxia quests (the run rows 16MM10233, MM = quest number, imported from the donated table) and
+    serves Larxene II, III, VIII, X (XIII pinned to 11023). Non-target names never hit on footage keep their same-run row with the
+    label `enemiesInferred`. The donated «little HP» run rows 2016120001 / 2016120033 / 2016121021 have HP 10, which the footage
+    contradicts: their HP is the smallest value compatible with the footage at the measured level (Gigas Shadow 9,583 at Lv 100,
+    Neoshadow 5,130 at Lv 150; Shadow only has an upper bound, so it takes the Neoshadow ratio), scaled over the levels as
+    k x curveAt(base row) (make-enemy-oltre.js); every quest that fights them has the label `hpFromFootage`. Generator rule:
+    a target pinned to the id of an enemy objective counts among that objective's members (the JP twins Larxene I / IV place
+    «Defeat 5 ... little HP» as 4 run rows + the run-row target), so `genMapOf` places one member fewer. Vexen's 170420xxx rows are
+    not this run's rows and are not used. Dry: 2,762 of 3,570 served (+4, none lost); validate_maps 21 generated maps 0 errors.

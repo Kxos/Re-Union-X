@@ -536,10 +536,14 @@ function genMapOf(q, stageId, look) {
     if (!counts.has(k)) counts.set(k, 0);
   }
   const members = [];
+  // the target pinned to the objective's own enemy id is one of the members that objective counts (Larxene I / IV JP maps: «Defeat
+  // 5 Shadows that have little HP» = 4 run rows + the run-row target; Events Part 5, user 10-11-2026): one member fewer is placed
+  const tPin = ((q.targets || [])[0] || {}).id;
   for (const [name, n0] of counts) {
     const ob = objOf.get(name);
-    const n = Math.max(n0, ob ? ob.n : 0);
-    const own = ob ? Math.min(n, ob.n) : 0;
+    const obN = ob ? ob.n - (Number.isInteger(tPin) && tPin === ob.id && name.toLowerCase() === String(target || '').toLowerCase() ? 1 : 0) : 0;
+    const n = Math.max(n0, obN);
+    const own = ob ? Math.min(n, obN) : 0;
     const rest = n - own;
     const id = rest > 0 ? mapId(name, false) : 0;
     if (id === -1) continue;
