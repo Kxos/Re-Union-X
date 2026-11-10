@@ -408,7 +408,7 @@ def index_lwfs(cache=None, roots=SCAN_ROOTS):
     return idx
 
 
-def family_needs(fams, workdir):
+def family_needs(fams, workdir, anims=None):
     """as tmp\\deep_scan\\scripts\\need.py: per family and mandatory animation (+ move) that is not complete and has
     its JP LWF: survivors (fill_tex, original sources only) and missing textures, with declared sizes. The versioned tables
     of make_jp_enemies.py, without extra_donors_deep.tsv."""
@@ -426,7 +426,7 @@ def family_needs(fams, workdir):
         jp_all = {an: M.listing(os.path.join(jd, an)) for an in sorted(os.listdir(jd))
                   if os.path.isdir(os.path.join(jd, an))} if os.path.isdir(jd) else {}
         fam = {}
-        for an in M.MANDATORY + ['move']:
+        for an in (anims or M.MANDATORY + ['move']):
             st, files, note, c = M.plan_anim(rel, an, jp_all)
             if files is not None:
                 continue
@@ -532,12 +532,17 @@ def main(argv=None):
     ap.add_argument('--cache', default=os.path.join(D, 'tmp', 'deep_donors_cache'),
                     help='cache folder (LWF index, signatures, dry run)')
     ap.add_argument('--fams', help='only these families (tests)')
+    ap.add_argument('--anims', help='animations to search (default the mandatory ones + move); e.g. atkSp for the '
+                    'optional special attacks of served families (I-261): then --out must be a proposal file, not the table')
     ap.add_argument('--validate', action='store_true', help='also the self/hide validation (slower)')
     ap.add_argument('--report', help='json with rows, rejects and validation (default <cache>\\deep_report.json)')
     a = ap.parse_args(argv)
     os.makedirs(a.cache, exist_ok=True)
     fams = [int(x) for x in a.fams.split(',')] if a.fams else None
-    need = family_needs(fams, a.cache)
+    anims = a.anims.split(',') if a.anims else None
+    if anims and os.path.abspath(a.out) == os.path.abspath(os.path.join(HERE, 'extra_donors_deep.tsv')):
+        ap.error('--anims writes a proposal: give --out outside the versioned table')
+    need = family_needs(fams, a.cache, anims)
     print('families', len(need), flush=True)
     idx = index_lwfs(os.path.join(a.cache, 'lwf_index.pkl'))
     print('LWFs indexed', len(idx), flush=True)
