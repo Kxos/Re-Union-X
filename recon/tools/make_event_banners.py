@@ -73,7 +73,7 @@ def wanted(index, notices, ids=None):
     out = []
     for e in index.get('entries', []):
         ev = e.get('evStageId')
-        if not ev or (ids is not None and ev not in ids) or e.get('noQuests') in NO_CARD:
+        if not ev or (ids is not None and ev not in ids) or no_card(e):
             continue
         for nid in e.get('noticeIds') or []:
             n = by_id.get(int(nid))
@@ -88,16 +88,23 @@ def file_name(nid, key):
 NO_CARD = ('board', 'notice')
 
 
+def no_card(e):
+    """an entry without a card of its own: noQuests in NO_CARD, or a second notice of an event (scheduleLineOf, Events Part 5
+    call 4: EV-0648 / EV-0678 / EV-0913 beside EV-0647 / EV-0679 / EV-0929; one card per event, never two)"""
+    return e.get('noQuests') in NO_CARD or bool(e.get('scheduleLineOf'))
+
+
 def card_ids(index, ids=None, all_rows=False):
     """the card ids of the index in order: each entry's id, then its built original evStage rows (rows, available; with
     all_rows every row that has an id, built or not: cards made and reviewed ahead of the serve, Events Part 4 Task 5).
     An entry with noQuests 'board' (an announcement notice whose quests were only on the event boards: no quest and no
     evStage row of its own, e.g. EV-0579) had no card in the original: its id is left out (the Event Catalog shows the
     «No card in the original» box; user decision 08-11). The same for noQuests 'notice' (an information notice of the
-    challenge records, Part 4: not a playable event, not in the Event Catalog)"""
+    challenge records, Part 4: not a playable event, not in the Event Catalog), and for a second notice (scheduleLineOf,
+    Part 5): its rows, if any, are the main event's"""
     out = []
     for e in index.get('entries', []):
-        own = [] if e.get('noQuests') in NO_CARD else [e.get('evStageId')]
+        own = [] if no_card(e) else [e.get('evStageId')]
         for ev in own + [r.get('evStageId') for r in e.get('rows') or [] if all_rows or r.get('available')]:
             if ev and ev not in out and (ids is None or ev in ids):
                 out.append(ev)

@@ -1021,3 +1021,27 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   II 10126, VIII 10126, X 10138; Lexaeus IV 10144, VII 10108; Lux read where the card shows it, else the attribute icon); Xaldin
   V's 6 Armored Knights had 80017 from the 8xxxx band rule with no footage: now the base row 17 (same strength at Lv 125) with
   `enemiesInferred`; the silent target fallback above. After the fixes the check reports nothing; served count unchanged.
+
+## Cards of the Org XIII events and The Keyblade War (Events Part 5, Task 5, 11 November 2026)
+
+Staging only; the served `event_img` folder is unchanged until the user approves the cards and Task 6 serves the quests.
+- **Banners.** `make_event_banners.py --fetch --all-rows` on the Part 5 entries of the dry index (`tmp\t5r`) downloaded 47 notice
+  and row banners privately into `reference\event_banners_ww`; every other own image of the 35 notices (avatar previews, the
+  Revival member pictures, the second notices' images) was fetched too as evidence for the review (98 files in all).
+- **Cards.** 33 new cards, none missing:
+  - 2018-04..2020 and the Keyblade War Pt. 3 (18 cards): the banner of the original evStage row (donor `bannerKey`);
+  - 2016-11..2017-12 (15 cards, the data hole: no donor row): the first own banner of the event's notice («13th of Each Month XIII
+    Event, Number N, <member> is Here!», «DAILY XIII EVENT» for the XIII Revival). Each one was checked: it names the member and
+    the run.
+- **Second notices get no card** (tool fix, test in `test_make_event_banners.py`). `card_ids` and `wanted` now skip an entry with
+  `scheduleLineOf`, as make-events.js and the Event Catalog already did. Before, EV-0648, EV-0678 and EV-0913 would have had
+  cards made from their notices: two «XIII Falling Price Deal» shop banners and «The Keyblade War Part 1». The served EV-0929
+  card «Part 1 & 2» covers the Part 1 dates.
+- **imgVersion stays 9.** The whole dry index rebuilt with `--all-rows` gives 638 cards. The 605 cards already served are
+  byte-identical, so no served picture changes. 20095 (EV-1530, undated) is not remade by the Part 4 extras file; its live card
+  stays as it is.
+- **EV-1103.** The record has two original rows. Row 201232 is the Jafar «Big Bonus Challenge» (I-248, not built). Row 201231 is
+  «Challenge Organization XIII Pt.2 - No.I ~ No.VI -», built, card 22663. The Events tab lists only 22663. The Event Catalog draws
+  the entry's own id, which is the Jafar banner. Four Part 4 entries already behave this way (EV-0478, EV-1032, EV-1086, EV-1249).
+  This is a question for the user.
+- Review page (private): `tmp\events\orgxiii\cards.html`, grouped by year.

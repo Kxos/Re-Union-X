@@ -98,6 +98,15 @@ try:
     # an information notice of the challenge records (noQuests 'notice', Part 4) has no card either, and its notice is not fetched
     nindex = {'entries': [{'censusId': 'EV-0445', 'evStageId': 20300, 'noticeIds': [51518], 'noQuests': 'notice'}]}
     assert meb.card_ids(nindex) == [] and meb.wanted(nindex, notices) == [], 'notice: no card'
+    # a second notice of an event (scheduleLineOf, Part 5 call 4: EV-0648 beside EV-0647) has no card: one card per event,
+    # its row is the main event's; the main entry keeps its card
+    sindex = {'entries': [{'censusId': 'EV-0647', 'evStageId': 20400, 'noticeIds': [51518],
+                           'rows': [{'evStageId': 20400, 'bannerKey': 'rowK1', 'available': True}]},
+                          {'censusId': 'EV-0648', 'evStageId': 20401, 'noticeIds': [51523], 'scheduleLineOf': 'EV-0647'}]}
+    assert meb.card_ids(sindex, all_rows=True) == [20400], meb.card_ids(sindex, all_rows=True)
+    assert meb.wanted(sindex, notices) == [(20400, 51518, '9c3xN7ln4R')], 'schedule line: its notice is not fetched'
+    ds, ms = meb.build(sindex, notices, dest, os.path.join(t, 'os'), all_rows=True)
+    assert 20401 not in ds and not ms and not os.path.exists(os.path.join(t, 'os', '20401.png')), (ds, ms)
     # all_rows (Part 4 Task 5): the rows not built yet get their card too (review ahead of the serve)
     assert meb.card_ids(rindex, all_rows=True) == [20001, 20051, 20052, 20053, 20003], meb.card_ids(rindex, all_rows=True)
     assert meb.wanted_rows(rindex, all_rows=True) == [(20001, None, 'rowK1'), (20051, None, 'rowK2'), (20052, None, 'rowK3')]
