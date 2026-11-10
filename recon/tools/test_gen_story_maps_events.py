@@ -94,6 +94,46 @@ try:
     vr = json.load(open(os.path.join(tmp, 'v.json'), encoding='utf-8')) if os.path.exists(os.path.join(tmp, 'v.json')) else {}
     for sid in (EV, EV2):
         check(vr.get(str(sid), {}).get('errors') == [], 'validate_maps %d: no errors (%s)' % (sid, vr.get(str(sid)) or v.stderr[-400:]))
+    # layout + targetWith (Task 4 follow-up 2): start and target team at fixed points (here: EV's target spot as the start, EV's
+    # start and its first enemy as the target team), one Shadow fighting in the target's team; a layout of another room: error
+    if os.path.exists(f(EV, '_00')):
+        stg0 = mapfile.parse_stg(open(f(EV), 'rb').read())
+        m0 = mapfile.parse_map(open(f(EV, '_00'), 'rb').read())
+        tgt = m0['enemies'][-1]
+        lay = {'room': m0['room'], 'start': [tgt['x'], tgt['y']], 'groups': [None],
+               'target': [list(stg0['start']), [m0['enemies'][0]['x'], m0['enemies'][0]['y']]], 'source': 'test'}
+        EV3, EV4 = 4009996, 4009995
+        ev3 = dict(base, stageId=EV3, roomCodes=[m0['room']], censusId='EV-TEST', layout=lay,
+                   targetWith=[{'name': 'Shadow', 'enemyId': 80001, 'n': 1, 'reward': 1}])
+        out3 = os.path.join(tmp, 'stage3')
+        json.dump([ev3], open(os.path.join(tmp, 'events3.json'), 'w'))
+        cfg3 = dict(cfg, out=out3, report=os.path.join(tmp, 'report3.json'), events=os.path.join(tmp, 'events3.json'))
+        cfg3.pop('special')
+        json.dump(cfg3, open(os.path.join(tmp, 'cfg3.json'), 'w'))
+        r3 = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfg3.json')],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(r3.returncode == 0, 'layout run exit %d: %s' % (r3.returncode, r3.stderr[-800:]))
+        f3 = lambda part='': os.path.join(out3, 'mappoi_stg%d%s.bin' % (EV3, part))  # noqa: E731
+        if os.path.exists(f3('_00')):
+            s3 = mapfile.parse_stg(open(f3(), 'rb').read())
+            m3 = mapfile.parse_map(open(f3('_00'), 'rb').read())
+            check(tuple(s3['start']) == tuple(lay['start']), 'layout start in the STG (%s)' % (s3['start'],))
+            check(s3['target_enemy'] == 10001, 'STG target = the target, not its escort (%s)' % s3['target_enemy'])
+            last = [e for e in m3['enemies'] if e.get('team') == len(m3['teams']) - 1]
+            check([(e['enemyId'], e['x'], e['y']) for e in last] == [(10001, *lay['target'][0]), (80001, *lay['target'][1])],
+                  'target team at the layout points, target first then its escort (%s)' % last)
+            check(len(m3['enemies']) == 7, '5 Shadows of the groups + 1 escort + the target: %d' % len(m3['enemies']))
+            rep3 = json.load(open(os.path.join(tmp, 'report3.json'), encoding='utf-8'))
+            check(rep3[0].get('layout') == 'test', 'report: layout source')
+            v3 = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'validate_maps.py'), out3, CLS, '--json', os.path.join(tmp, 'v3.json')],
+                                capture_output=True, text=True, encoding='utf-8', errors='replace')
+            vr3 = json.load(open(os.path.join(tmp, 'v3.json'), encoding='utf-8')) if os.path.exists(os.path.join(tmp, 'v3.json')) else {}
+            check(vr3.get(str(EV3), {}).get('errors') == [], 'validate_maps layout map: no errors (%s)' % (vr3.get(str(EV3)) or v3.stderr[-400:]))
+        ev4 = dict(ev3, stageId=EV4, layout=dict(lay, room='XX_0000_00_00'))
+        json.dump([ev4], open(os.path.join(tmp, 'events3.json'), 'w'))
+        r4 = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'gen_story_maps.py'), os.path.join(tmp, 'cfg3.json')],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+        check(r4.returncode != 0 and 'layout read on room XX_0000_00_00' in r4.stderr, 'layout of another room: error (%s)' % r4.stderr[-300:])
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

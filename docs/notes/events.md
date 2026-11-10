@@ -879,3 +879,14 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
   - *Dry result.* Import 1,795 of 1,815 maps (69 with a part from its source, 28 of them rebuilt lobbies); 10 generated maps
     (validate_maps 0 errors); 2,609 of 3,570 quests served. Org XIII 2016-17 186/242 (10 generated), 2018-19 170/186, The Keyblade
     War 0/20 (19 maps imported, held `worldMismatch`). 193 new files in `stage_gen\files\stage`, every old file byte-identical (md5).
+- **Follow-up 2 (user review of the generated maps, 10 November 2026).**
+  - *Start and placement.* A record's `genLayout {room, start, groups, target, arena, targetWith {name: n}, source, why}` keeps the
+    start and the placement of an original map of the same event and room (positions read from the JP 4.3.1 file, the quest's own
+    enemies placed on them) or points measured on the original footage. make-events.js moves the `targetWith` members out of the
+    normal groups into the entry's `targetWith` (they fight in the target's own team) and passes `layout`; gen_story_maps.py
+    (`apply_layout`) refuses a layout of another room or a point not reachable from the start, and without a layout every map is
+    byte-identical to before. Applied: Xaldin V (start on the bridge, target + 6 Armored Knights in one team: JP 704130, Xaldin
+    III), Lexaeus V/VI/IX (JP 706720, Lexaeus II), Marluxia XII (footage: target above the start, the second Spook in its team below).
+  - *Target ids from the footage.* The target card shows «Lux» at the quest level, which is the row's lux curve: Gargoyle Knight
+    10015, Fat Bandit 10002, Cerberus 10112, Behemoth 11023 (1023 has the same lux at Lv 225: not excluded) pinned in the records.
+  - *Dry result.* 10 generated maps, validate_maps 0 errors; 2,609 of 3,570 quests served (unchanged).

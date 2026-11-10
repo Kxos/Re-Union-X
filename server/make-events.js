@@ -537,6 +537,22 @@ function genMapOf(q, stageId, look) {
   const tId = target ? mapId(target, true) : 0;
   const targetId = tId > 0 ? tId : 0;
   if (target && !tId) missing.push(target);
+  // genLayout (Part 5 Task 4 follow-up 2, user 10-11-2026): the start and the placement read on an original map of the same room or
+  // on the original footage ({room, start, groups, target, arena, targetWith {name: n}, source, why}). targetWith: members that
+  // fight in the target's own team (taken out of the normal groups, entry.targetWith); the rest goes to gen_story_maps.py as
+  // entry.layout (apply_layout). No genLayout -> the entry is as before.
+  const lay = q.genLayout || null;
+  const tWith = [];
+  for (const [name, n] of Object.entries((lay && lay.targetWith) || {})) {
+    for (let k = 0; k < (Number(n) || 0); k++) {
+      const i = members.map((m) => m.name).lastIndexOf(name);
+      if (i < 0) { missing.push(`${name} (genLayout.targetWith: not among the quest's enemies)`); break; }
+      const [m] = members.splice(i, 1);
+      const last = tWith[tWith.length - 1];
+      if (last && last.enemyId === m.enemyId) last.n++;
+      else tWith.push({ name, enemyId: m.enemyId, n: 1, reward: 1 });
+    }
+  }
   // groups: the members in record order, at most GEN_GROUP_MAX per group, same enemy id merged ({name, enemyId, n, reward 1: the
   // no-drop row, the data-hole quests have no drop rows})
   const groups = [];
@@ -555,7 +571,12 @@ function genMapOf(q, stageId, look) {
   const roomCodes = [...new Set([...(q.thumbRoomCodes || []), ...(room ? ((q.wikiRoomCodes || {})[room] || []) : [])])];
   const entry = { stageId, world: q.worldId, name: q.name, room, roomCodes, target, targetId, level: q.level || 1,
     enemies: groups, treasures: [], rooms: 1 };
-  const enemies = [...groups.flat().map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
+  if (lay) {
+    entry.layout = { room: lay.room, start: lay.start, groups: lay.groups || [], target: lay.target || [], source: lay.source || null };
+    if (lay.arena) entry.layout.arena = lay.arena;
+    entry.targetWith = tWith;
+  }
+  const enemies = [...groups.flat().concat(tWith).map((m) => ({ id: m.enemyId, name: m.name, level: q.level, count: m.n, reward: 1, target: false })),
     ...(targetId ? [{ id: targetId, name: target, level: q.level, count: 1, reward: 1, target: true }] : [])];
   return { entry, enemies, targets: targetId ? [{ id: targetId, name: target }] : [], missing: [...new Set(missing)], ambiguous };
 }

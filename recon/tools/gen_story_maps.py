@@ -27,7 +27,9 @@ level into every enemy record of the stage and into STG [11] (the quest level of
 Event quests with no original map (cfg['events'], written by server/make-events.js as server/game_data/event_gen_maps.json,
 Events Part 5 Task 3, label wikiRoom): the same list shape and the same rules as "special" (one part, groups along the distance,
 target at the farthest point, level in STG [11] and every enemy record). Extra keys: "roomCodes" (the khuxwiki room codes of the
-room: the first one with a collision file is the room, else the room name as a Special entry) and "censusId" (not used here).
+room: the first one with a collision file is the room, else the room name as a Special entry) and "censusId" (not used here);
+optional "layout" (start, normal-group centres, target-team points, arena: read on an original map of the same room or on the
+original footage; apply_layout checks room and reachability) and "targetWith" (members fighting in the target's own team).
 Their report entries carry "event": true (make-events.js serves a generated-map quest only once its stageId is in that report).
 Training map (an entry with "training": true, the stage of the Special Catalog banner, spec 7 of
 docs/superpowers/specs/2026-10-30-special-tab-design.md): extra keys "dummy" (group [{name, enemyId, n, reward}]) and
@@ -337,7 +339,11 @@ def member_reward(m):
     return rw
 
 
-def build_part(folder, start, dist, groups, nchests, level=1):
+def build_part(folder, start, dist, groups, nchests, level=1, layout=None):
+    """layout (optional, an event entry's «layout», see apply_layout): fixed centres of the normal groups ("groups", in order;
+    a null keeps the rule), fixed member positions of the target team ("target": target first, then its escorts) and the
+    arena polygon ("arena"); without it every position follows the rules below, byte for byte as before"""
+    layout = layout or {}
     far = max(dist, key=lambda p: (dist[p], -p[1]))
     maxd = dist[far] or 1
     by_d = sorted(dist, key=lambda p: dist[p])
@@ -345,9 +351,14 @@ def build_part(folder, start, dist, groups, nchests, level=1):
     normal = [g for g in groups if not g['target']]
     target = [g for g in groups if g['target']] or [None]
     order = [(g, False) for g in normal] + [(target[0], True)]
+    lay_g, lay_t = list(layout.get('groups') or []), [tuple(p) for p in layout.get('target') or []]
     for i, (g, is_t) in enumerate(order):
-        if is_t:
+        if is_t and lay_t:
+            cx, cy = lay_t[0]
+        elif is_t:
             cx, cy = far
+        elif i < len(lay_g) and lay_g[i]:
+            cx, cy = lay_g[i]
         else:
             want = maxd * (i + 1) / (len(order) + 0.5)
             cx, cy = min(by_d, key=lambda p: abs(dist[p] - want))
@@ -366,7 +377,13 @@ def build_part(folder, start, dist, groups, nchests, level=1):
         # uid dell'area, unico come nelle mappe vere (il modello aveva 7 per tutte, uguale a un nemico)
         struct.pack_into('<i', rec, 0x14, uid)
         uid += 1
-        if is_t:
+        if is_t and layout.get('arena'):
+            struct.pack_into('<8i', rec, 0x24, *[v for p in layout['arena'] for v in p])
+        elif is_t and lay_t:
+            # no arena in the layout: a 120 x 80 arena around the target (its escorts may stand apart, as in the footage)
+            x0, x1, y0, y1 = lay_t[0][0] - 60, lay_t[0][0] + 60, lay_t[0][1] - 40, lay_t[0][1] + 40
+            struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
+        elif is_t:
             box = [p for p in near[:40] if abs(p[1] - cy) <= 60 and abs(p[0] - cx) <= 300]
             xs = [p[0] for p in box] or [cx]
             ys = [p[1] for p in box] or [cy]
@@ -377,7 +394,7 @@ def build_part(folder, start, dist, groups, nchests, level=1):
                 y0, y1 = cy - 20, cy + 20
             struct.pack_into('<8i', rec, 0x24, x1, y0, x1, y1, x0, y1, x0, y0)
         for k, (eid, rw) in enumerate(members):
-            x, y = near[min(k * 3, len(near) - 1)]
+            x, y = lay_t[k] if is_t and k < len(lay_t) else near[min(k * 3, len(near) - 1)]
             ens.append((x, y, eid, 1, 1, level, rw, uid))
             uid += 1
         areas.append(bytes(rec))
@@ -1214,6 +1231,28 @@ for s in sorted(stages, key=lambda r: r['stageBinId']):
     report.append({'mission': num, 'stageId': sid, 'name': s['name'], 'room': first_room, 'folder': folder,
                    'exact_room': first_room in rooms, 'enemies': len(ens), 'chests': len(chests),
                    'unknown_enemies': sorted(set(missing))})
+def apply_layout(folder, sp):
+    """An event entry's «layout» (make-events.js genMapOf, from the record's genLayout: the start and the placement read on an
+    original map of the same room or on the original footage): {room, start: [x, y], groups: [[x, y] | null per normal group],
+    target: [[x, y] target, then its targetWith escorts], arena: [4 x [x, y]] (optional), source}. The room must be the room
+    the entry resolves to (a layout read on another room is an error), and every point must be reachable from the start (the
+    start's pixel component, as validate_maps.py). -> (start, dist, layout): dist = walking distance from that start to the room's
+    grid points (the chests and the groups the layout leaves out keep their rules). No layout -> walk_grid as before."""
+    start, dist = walk_grid(folder)
+    lay = sp.get('layout')
+    if not lay:
+        return start, dist, None
+    assert lay.get('room') == folder, 'stage %s: layout read on room %s, the entry resolves to %s' % (sp['stageId'], lay.get('room'), folder)
+    pc = _pc_all[folder]
+    s0 = tuple(lay['start'])
+    pts = [s0] + [tuple(p) for p in (lay.get('groups') or []) if p] + [tuple(p) for p in (lay.get('target') or [])]
+    lab0 = pc(*s0)
+    assert lab0, 'stage %s: layout start %s not walkable in %s' % (sp['stageId'], s0, folder)
+    for p in pts:
+        assert pc(*p) == lab0, 'stage %s: layout point %s not reachable from the start %s in %s' % (sp['stageId'], p, s0, folder)
+    return s0, geodesic(pc, set(dist), s0), lay
+
+
 # Special quests (cfg['special'], docstring): one part per stage, as the one-room story quests above. Event quests with no
 # original map (cfg['events'], docstring): the same list and the same rules, the room by its khuxwiki codes first.
 special_rooms = json.load(open(cfg['special_rooms'], encoding='utf-8')) if cfg.get('special_rooms') else {}
@@ -1231,6 +1270,9 @@ if generated:
                   for g in sp.get('enemies', [])]
         # the target carries a drop row of the entry too (targetReward, make-special.js); absent -> row 1 as before
         groups.append({'members': [(sp['target'], 1, sp.get('targetReward', 1), sp.get('targetId'))], 'target': True, 'room': room_name})
+        # targetWith (event entries, make-events.js genMapOf from the record's genLayout): members that fight in the target's own
+        # team (one «Begin Target Battle» with the target), after the target in its group
+        groups[-1]['members'] += [(x['name'], x.get('n', 1), x.get('reward', 1), x.get('enemyId')) for x in sp.get('targetWith', [])]
         if sp.get('training'):
             # two paths: target (path A) and dummy + chests (path B), docstring
             tgt = groups.pop()
@@ -1240,9 +1282,10 @@ if generated:
             groups.append(dummy)
             groups.append(tgt)
         else:
-            start, dist = walk_grid(folder)
-            part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1))
-        target_id = ens[-1][2]                      # the target group is placed last (arena)
+            start, dist, lay = apply_layout(folder, sp) if is_event else (*walk_grid(folder), None)
+            part, areas, ens, chests = build_part(folder, start, dist, groups, len(sp.get('treasures', [])), sp.get('level', 1), lay)
+        # the target group is placed last (arena), the target first in it (then its targetWith escorts)
+        target_id = ens[struct.unpack_from('<i', areas[-1], 0)[0]][2]
         # STG [11] = quest level, as every story stage (import_orig_stages.py: [11] = wiki Lv = enemy record level): the
         # client shows it on the quest card («LV») and the enemies fight at it; [11] 1 showed LV 1 (MOG, bench 30-10)
         hdr = struct.pack('<16i', 4674643, 16, 1, start[0], start[1], 2, target_id, 1, len(areas), len(ens),
@@ -1255,7 +1298,8 @@ if generated:
                             'exact_room': bool(coded) or room_name in rooms or room_name in special_rooms, 'enemies': len(ens), 'chests': len(chests),
                             'drops': sum(e[6] != 1 for e in ens),
                             'unknown_enemies': sorted({n for n in names if n.lower().strip() not in by_name})},
-                           **({'event': True, 'censusId': sp.get('censusId')} if is_event else {'special': True})))
+                           **({'event': True, 'censusId': sp.get('censusId')} if is_event else {'special': True}),
+                           **({'layout': sp['layout'].get('source')} if is_event and sp.get('layout') else {})))
         print('event' if is_event else 'special', sid, folder, len(ens), 'nemici')
 # Missioni «zoo» per provare i nemici: tutti gli enemyId di zoo_enemies, zoo_per_stage per
 # missione, in aree da 5 nella stanza zoo_room; stageId 990001.. (righe nel master con

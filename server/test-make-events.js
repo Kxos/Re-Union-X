@@ -1230,6 +1230,18 @@ const tests = {
     // the room of the donor stage row's thumbId (thumbRoomCodes, Task 4 follow-up) comes before the khuxwiki room-name codes
     const th = me.buildEvents([record('E-W4', [genQuest(702103, { thumbRoomCodes: ['DG_0100_02_00', 'DB_0000_00_00'] })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
     assert.deepStrictEqual(th.genMaps[0].roomCodes, ['DG_0100_02_00', 'DB_0000_00_00']);
+    // genLayout (Task 4 follow-up 2): start + placement of an original map of the same room; targetWith members leave the normal
+    // groups for the target's team; the layout reaches the entry (no genLayout: no layout/targetWith keys, as above)
+    const lay = { room: 'DB_0000_00_00', start: [100, 200], groups: [[300, 400]], target: [[500, 600], [520, 640]], targetWith: { 'Foe B': 3 }, source: 'JP 1', why: 'w' };
+    const gl = me.buildEvents([record('E-W5', [genQuest(702104, { genLayout: lay })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual(gl.genMaps[0].enemies, [[{ name: 'Foe B', enemyId: 502, n: 4, reward: 1 }]]);
+    assert.deepStrictEqual(gl.genMaps[0].targetWith, [{ name: 'Foe B', enemyId: 502, n: 3, reward: 1 }]);
+    assert.deepStrictEqual(gl.genMaps[0].layout, { room: 'DB_0000_00_00', start: [100, 200], groups: [[300, 400]], target: [[500, 600], [520, 640]], source: 'JP 1' });
+    assert.ok(entry(gl, 'E-W5').quests[0].served);
+    assert.ok(!('layout' in th.genMaps[0]) && !('targetWith' in th.genMaps[0]));
+    // a targetWith name that is not among the quest's enemies: enemyMissing
+    const glBad = me.buildEvents([record('E-W6', [genQuest(702105, { genLayout: { ...lay, targetWith: { 'Foe Q': 1 } } })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
+    assert.deepStrictEqual([entry(glBad, 'E-W6').quests[0].served, entry(glBad, 'E-W6').quests[0].reason], [false, 'enemyMissing']);
     // «Collect all materials» on a generated map (no treasure known): held
     const mat = genQuest(702102, { objectives: [objective(18, 'Collect all materials', { type: 2, id: 0, num: 5 })] });
     const out3 = me.buildEvents([record('E-W3', [mat])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
