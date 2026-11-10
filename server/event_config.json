@@ -152,12 +152,14 @@
   "map part rebuilt": "mapPartRebuilt",
   "unionTwin": "unionTwin",
   "enemiesInferred": "enemiesInferred",
-  "hpFromFootage": "hpFromFootage"
+  "hpFromFootage": "hpFromFootage",
+  "enemyRowRebuilt": "enemyRowRebuilt"
  },
  "reconstructedWhy": {
   "wikiRoom": "No original map of this quest survives in any source we hold (the Japanese and worldwide game files, the donated data, the restored rooms): its map was generated in the quest's original room (the room of its surviving stage data, else the room the khuxwiki page names), with the enemies and the target of the page at the quest's level. Not original.",
   "enemiesInferred": "Some enemies of this quest could not be checked on the original footage (they were never hit, or fell to one special attack): their version was taken from the other quests of the same event, where it was measured. Inferred from the same run, not verified on footage.",
   "hpFromFootage": "In the surviving game data the enemies «with little HP» of this event have 10 HP, which the original footage contradicts (they survive hits of several thousand). Their HP was estimated from the footage (the smallest value that fits the damage and the HP bar seen there) and scaled across levels like the normal version of the same enemy. HP estimated from footage, not original data.",
+  "enemyRowRebuilt": "One enemy of this quest (a Shadow shown with CAUTION in the original footage) is a version our game data lacked: no Shadow row we hold matches it. Its row was rebuilt from donated worldwide game data (its strength, Lux, attacks and countdown at every level), under a new id of its own because the donated id belongs to another enemy here, and it shows the Shadow model. The original footage confirms it (HP gauges and Lux per hit). Rebuilt from donated data, verified on footage.",
   "wikiAreas": "The map of this quest spanned several areas (khuxwiki lists them, with the enemies and chests of each area). Its map file is lost, so the areas were rebuilt in that order, in the rooms of the quest's surviving stage data and of the khuxwiki pictures, joined by exits; start points, exits and enemy spots were taken from original maps of the same rooms where they survive, otherwise placed by the generator. The warp portals inside the areas (Xigbar's maze) are not rebuilt. Rebuilt, not original.",
   "jpReplayLayoutTwin": "The worldwide map file of this quest is lost. The Japanese version replayed this very stage later on a map that survives (the same room and placement), with another target: that map is used with the worldwide target of this quest, read on the original footage. Layout reconstructed, enemy rows original.",
   "seriesLayoutTwin": "The map file of this quest is lost. The same quest series ran again in another month on a map that survives (the same room, the same single enemy and target, every difficulty on the same map): that layout is used, with the enemy of this run, the original enemy row of these quests (its own strength at each difficulty). Layout reconstructed, enemy original.",

@@ -1306,9 +1306,26 @@ const tests = {
     assert.deepStrictEqual([q.served, q.reason], [false, 'enemyMissing']);
     assert.match(q.why, /Foe Z/);
     assert.deepStrictEqual([out.genMaps.length, out.stage.length], [0, 0]);
-    // the event row of a name is not taken (never substituted)
+    // the event row of a name is not taken (never substituted): a name whose only rows are event rows is held as enemyAmbiguous with
+    // those rows (Lexaeus X Ringmaster 97, Events Part 5 11-11-2026: it was reported «not in the master» although the row exists),
+    // and an explicit id of the record (wikiEnemyIds) serves it
     const ev = me.buildEvents([record('E-M', [genQuest(702200)])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [502] });
-    assert.match(entry(ev, 'E-M').quests[0].why, /Foe B/);
+    const evq = entry(ev, 'E-M').quests[0];
+    assert.deepStrictEqual([evq.served, evq.reason, ev.genMaps.length], [false, 'enemyAmbiguous', 0]);
+    assert.ok(evq.why.includes('Foe B: event rows only, an explicit id is needed: 502') && !/not in the master/.test(evq.why), evq.why);
+    const evPin = me.buildEvents([record('E-M', [genQuest(702200, { wikiEnemyIds: { 'Foe B': 502 } })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [502] });
+    assert.ok(entry(evPin, 'E-M').quests[0].served, JSON.stringify(entry(evPin, 'E-M').quests[0]));
+    assert.deepStrictEqual(evPin.genMaps[0].enemies[0][0].enemyId, 502, 'the pinned event row');
+    // a target whose only rows are event rows: the same
+    const evT = me.buildEvents([record('E-M', [genQuest(702200)])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [501] });
+    assert.deepStrictEqual(entry(evT, 'E-M').quests[0].reason, 'enemyAmbiguous');
+    assert.match(entry(evT, 'E-M').quests[0].why, /Foe A: event rows only/);
+    // the target band (1xxxx) holds only event rows: no fallback to another row of the name (Lexaeus X: 160110233 was taken silently)
+    const mB = master();
+    mB.enemy.push({ enemyId: 10501, name: 'Foe A' }, { enemyId: 160110501, name: 'Foe A' });
+    const evB = me.buildEvents([record('E-M', [genQuest(702200)])], CONFIG, mB, undefined, {}, null, null, { eventEnemyIds: [10501] });
+    assert.deepStrictEqual([entry(evB, 'E-M').quests[0].reason, evB.genMaps.length], ['enemyAmbiguous', 0]);
+    assert.match(entry(evB, 'E-M').quests[0].why, /Foe A: event rows only, an explicit id is needed: 10501, 501, 160110501/);
     // the JP table names a «variant» target (the Ω form) where the record keeps the plain name: held, never the plain row
     const vr = me.buildEvents([record('E-M', [genQuest(702200, { jpTable: { target: 'Foe A variant' } })])], CONFIG, master(), undefined, {}, null, null, { eventEnemyIds: [] });
     assert.deepStrictEqual([entry(vr, 'E-M').quests[0].reason, vr.genMaps.length], ['enemyMissing', 0]);

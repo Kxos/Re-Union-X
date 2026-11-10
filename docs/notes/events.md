@@ -988,3 +988,36 @@ User decisions (evidence table private `tmp\events\i251\DECISIONS.md`), applied 
     Lexaeus X `enemyMissing` (Ringmaster has no non-event row). Their maps were built only for the review page, with provisional
     rows (14 maps, 2-5 parts, validate_maps 0 errors, 0 warnings). Served list unchanged: 22 generated maps byte-identical,
     2,763 of 3,570 quests served.
+  - *Served on footage rows (11 November 2026, dry, user approval 10-11).* The private footage check of the 14 quests (HP gauge
+    chips, Lux per hit, kill / survive sums, target cards) gives their rows (private builder block 11i): a measured name takes its
+    confirmed row; a name never fought, or whose base and 30xxx rows the footage cannot separate, takes the base row (every measured
+    non-target of these runs is the base row) and is listed in the record's `enemiesInferred` (label `enemiesInferred`, per quest
+    in the Notices). Every non-target name of the 14 is pinned, none is left to the 8xxxx band rule. Special cases: Xigbar VIII's
+    Shadow is 20001 (3 gauges, 1 Lux, survives ~35k at Lv 200); Lexaeus VII's «CAUTION» Shadow fits none of our Shadow rows but
+    the donated row 285 «Shadow» (Lux 10, 61,639 HP at Lv 175: 4 gauges, 3-4 Lux per hit), whose id is an Armored Knight in our
+    master: it is imported as a private event row under a **new id 2140000285** (range 2,140,000,000 + donor id, reserved for
+    donated rows rebuilt under a new id: above every id of our master, the donated and the JP tables, below 2^31), stats, Lux,
+    attacks and countdown as donated, displayId 1 (the Shadow look; the donated displayId 285 draws the Armored Knight here); label
+    `enemyRowRebuilt` (Notice text in event_config.json). The data has no separate «caution» field: the donated row carries a
+    countdown attack (validUrgency 1), kept as is; whether the client shows CAUTION is checked on the bench (Task 6). Lexaeus X:
+    Ringmaster 97 (8 gauges, Power, 50,675 -> 4 Lux; 10097 contradicted) and the target Wandering Spook 160410233 (card «LV 250,
+    298 Lux» with the Power icon: the target-band curve with Power; 10233 is Magic; 160410233 / 160710233 / 161010233 /
+    161310233 are identical rows).
+  - *make-events.js fix (Lexaeus X).* `genMapOf` looks names up without the event rows (an event row never answers a name lookup),
+    so a name whose only rows are event rows (Ringmaster 97 / 10097 / 1609197...) was reported «enemies not in the master» although
+    the row exists. Now such a name is held as `enemyAmbiguous` with the line «event rows only, an explicit id is needed: ...» until
+    the record pins it, and a target whose 1xxxx band holds only event rows no longer falls back silently to another row of the
+    name (Lexaeus X had taken 160110233, the Marluxia I run row with another curve). Test: test-make-events.js
+    `wiki_room_enemy_missing_held`.
+  - *Dry result.* 14 more quests served: **2,777 of 3,570** (Org XIII 2016-17 199 -> 213, none lost); 36 generated maps
+    (22 one-room unchanged byte for byte, 14 multi-area), validate_maps 0 errors (maps_x and rooms_gen; the 2 known «long route»
+    warnings 4003337, 4003344). Review page private `tmp\events\p5d6\maps_review\index.html` (the real maps with their rows).
+- **Task 4 closing review (11 November 2026, dry).** Private check `tmp\events\p5d7eview_t4.py` over the 486 Part 5 quests
+  (433 served, 36 on generated maps): every generated map uses master ids only (no placeholder), every served label has its
+  Notice text, every layout twin / rebuilt part / shifted level carries its label, `wikiRoom` / `wikiAreas` / `enemiesInferred` /
+  `hpFromFootage` / `enemyRowRebuilt` present exactly where the record calls for them, the gen report matches the generated
+  entries one to one (exact room, no unknown enemy, enemy counts). Found and fixed: 9 generated-map targets came from the 1xxxx
+  band rule without a pin: now pinned on the footage target cards (Xemnas I 10071, IX 10057; Vexen VII 10035, XI 10019; Xigbar
+  II 10126, VIII 10126, X 10138; Lexaeus IV 10144, VII 10108; Lux read where the card shows it, else the attribute icon); Xaldin
+  V's 6 Armored Knights had 80017 from the 8xxxx band rule with no footage: now the base row 17 (same strength at Lv 125) with
+  `enemiesInferred`; the silent target fallback above. After the fixes the check reports nothing; served count unchanged.

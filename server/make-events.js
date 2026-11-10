@@ -500,7 +500,7 @@ function aliasRewardTypes(q, aliases) {
 // quests). Names -> enemy ids by the rule of make-special.js mapEnemyId (event rows never answer: target 1xxxx, others 8xxxx,
 // else the smallest id); an objective on an enemy id (idType 1) puts that id on the map for as many members of its name as the
 // objective counts (the objective counts that id). Enemies are never substituted: a name with no row -> missing.
-// look {byName(name) -> [ids] sorted, nameOf(id)}. -> {entry (event_gen_maps.json, gen_story_maps «special» list shape), enemies
+// look {byName(name) -> [ids] sorted (no event rows), eventByName?(name) -> the event rows of the name (reported only), nameOf(id), statsOf(id)}. -> {entry (event_gen_maps.json, gen_story_maps «special» list shape), enemies
 // (record shape, for the stage row and the checks), targets, missing: [names]}
 function genMapOf(q, stageId, look) {
   const target = ((q.targets || [])[0] || {}).name || null;
@@ -516,9 +516,21 @@ function genMapOf(q, stageId, look) {
     const pinned = isTarget ? ((q.targets || [])[0] || {}).id : explicit[name];
     if (Number.isInteger(pinned)) return pinned;
     const ids = look.byName(name);
-    const band = ids.filter((i) => (isTarget ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000));
+    const inBand = (i) => (isTarget ? i >= 10000 && i < 20000 : i >= 80000 && i < 90000);
+    const band = ids.filter(inBand);
+    // the band's rows are event rows only (Lexaeus X target Wandering Spook: 10233 is an event row; the fallback took 160110233, the
+    // Marluxia I run row, silently): never a fallback to the name's other rows, held with both lists until the record names the id
+    const evBand = !band.length && look.eventByName ? look.eventByName(name).filter(inBand) : [];
+    if (evBand.length) { ambiguous.push({ name, ids: [...evBand, ...ids], eventOnly: true }); return -1; }
     const cand = band.length ? band : ids;
-    if (!cand.length) return 0;
+    // a name whose only rows are event rows (Lexaeus X Ringmaster 97 / 10097: Events Part 5, 11-11-2026): it IS in the master, but an
+    // event row never answers a name lookup, so it needs an explicit id; held as enemyAmbiguous with those rows (eventOnly), never
+    // reported «not in the master» (the old message, which hid the row) and never picked
+    if (!cand.length) {
+      const ev = look.eventByName ? look.eventByName(name) : [];
+      if (ev.length) { ambiguous.push({ name, ids: ev, eventOnly: true }); return -1; }
+      return 0;
+    }
     if (new Set(cand.map((i) => look.statsOf(i))).size > 1) { ambiguous.push({ name, ids: cand }); return -1; }
     return cand[0];
   };
@@ -744,16 +756,18 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
     if (genLook) return genLook;
     const evIds = opts.eventEnemyIds ? new Set(opts.eventEnemyIds) : require('./make-event-enemies').eventIds();
     const byName = new Map();
+    const evByName = new Map(); // the event rows of a name: only to report them (genMapOf eventOnly), never an answer
     for (const e of master.enemy || []) {
-      if (evIds.has(e.enemyId) || !e.name) continue;
+      if (!e.name) continue;
+      const to = evIds.has(e.enemyId) ? evByName : byName;
       const k = String(e.name).trim().toLowerCase();
-      if (!byName.has(k)) byName.set(k, []);
-      byName.get(k).push(e.enemyId);
+      if (!to.has(k)) to.set(k, []);
+      to.get(k).push(e.enemyId);
     }
-    for (const v of byName.values()) v.sort((a, b) => a - b);
+    for (const v of [...byName.values(), ...evByName.values()]) v.sort((a, b) => a - b);
     const rowOf = new Map((master.enemy || []).map((e) => [e.enemyId, e]));
     const statsOf = (id) => { const e = rowOf.get(id) || {}; return JSON.stringify([e.hp, e.attack, e.defense, e.baseLv, e.validGrowth]); };
-    genLook = { byName: (n) => byName.get(String(n).trim().toLowerCase()) || [], nameOf: (id) => names.get(id) || null, statsOf };
+    genLook = { byName: (n) => byName.get(String(n).trim().toLowerCase()) || [], eventByName: (n) => evByName.get(String(n).trim().toLowerCase()) || [], nameOf: (id) => names.get(id) || null, statsOf };
     return genLook;
   };
   const aliases = config.rewardTypeAliases || null;
@@ -904,7 +918,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         if (g.missing.length) { item.reason = 'enemyMissing'; item.why = `enemies not in the master: ${g.missing.join(', ')}`; continue; }
         if (g.ambiguous.length) {
           item.reason = 'enemyAmbiguous';
-          item.why = `${textOf('enemyAmbiguous')} (${g.ambiguous.map((a) => `${a.name}: ${a.ids.join(', ')}`).join('; ')})`; continue;
+          item.why = `${textOf('enemyAmbiguous')} (${g.ambiguous.map((a) => `${a.name}: ${a.eventOnly ? 'event rows only, an explicit id is needed: ' : ''}${a.ids.join(', ')}`).join('; ')})`; continue;
         }
         // «Collect all materials» needs materials on the map: the khuxwiki pages give none for a generated map, so the objective
         // could never be met as the original (nothing half-served)
