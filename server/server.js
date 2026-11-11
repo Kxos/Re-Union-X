@@ -63,6 +63,9 @@ const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_E
 // ---------------------------------------------------------------------------
 const HTTP_PORT = Number(process.env.KHUX_HTTP_PORT || 80);
 const HTTPS_PORT = Number(process.env.KHUX_HTTPS_PORT || 443);
+// KHUX_BIND_HOST: indirizzo su cui ascoltano HTTP, HTTPS, DNS e Photon (127.0.0.1 nell'app Android: niente porte aperte
+// sulla Wi-Fi); predefinito 0.0.0.0, tutte le interfacce
+const BIND_HOST = process.env.KHUX_BIND_HOST || '0.0.0.0';
 const CERT_DIR = path.join(__dirname, 'certs');
 const LOG_DIR = process.env.KHUX_LOG_DIR || path.join(__dirname, 'logs'); // KHUX_LOG_DIR: pacchetto di gioco (cartella logs del giocatore)
 const LOG_FILE = path.join(LOG_DIR, 'requests.ndjson');
@@ -5424,8 +5427,8 @@ function start() {
   else console.log(`master                   : ${served} tabelle valide`);
   console.log();
 
-  http.createServer(handler('http')).listen(HTTP_PORT, '0.0.0.0', () => {
-    console.log(`in ascolto su http://0.0.0.0:${HTTP_PORT}`);
+  http.createServer(handler('http')).listen(HTTP_PORT, BIND_HOST, () => {
+    console.log(`in ascolto su http://${BIND_HOST}:${HTTP_PORT}`);
   }).on('error', (e) => console.error('HTTP non avviato:', e.message));
 
   const key = path.join(CERT_DIR, 'server.key');
@@ -5448,8 +5451,8 @@ function start() {
         },
       },
       handler('https')
-    ).listen(HTTPS_PORT, '0.0.0.0', () => {
-      console.log(`in ascolto su https://0.0.0.0:${HTTPS_PORT}`);
+    ).listen(HTTPS_PORT, BIND_HOST, () => {
+      console.log(`in ascolto su https://${BIND_HOST}:${HTTPS_PORT}`);
     }).on('tlsClientError', (e, sock) => {
       const sni = sock.servername || '-';
       console.log(`\x1b[31m[tls:errore]\x1b[0m ${sni}  ${e.code || ''} ${e.message}`);
@@ -5467,7 +5470,7 @@ function start() {
     if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
       console.log(`DNS disattivato: KHUX_PUBLIC_URL deve contenere un IP, non "${ip}"`);
     } else {
-      startDns({ ip, hijack: HIJACK, upstream: DNS_UPSTREAM, port: DNS_PORT, logFile: DNS_LOG_FILE });
+      startDns({ ip, hijack: HIJACK, upstream: DNS_UPSTREAM, port: DNS_PORT, host: BIND_HOST, logFile: DNS_LOG_FILE });
     }
   }
 }

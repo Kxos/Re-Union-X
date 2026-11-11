@@ -110,7 +110,7 @@ const NO_HIJACK = (process.env.KHUX_NO_HIJACK ?? 'cache.sqex-bridge.jp').split('
  * @param {string} opts.upstream  resolver a cui inoltrare il resto
  * @param {string} opts.logFile   file NDJSON delle query
  */
-function startDns({ ip, hijack, upstream = '1.1.1.1', port = 53, logFile, block = BLOCK }) {
+function startDns({ ip, hijack, upstream = '1.1.1.1', port = 53, host = '0.0.0.0', logFile, block = BLOCK }) {
   const sock = dgram.createSocket('udp4');
   let seq = 0;
 
@@ -181,8 +181,8 @@ function startDns({ ip, hijack, upstream = '1.1.1.1', port = 53, logFile, block 
     if (e.code === 'EADDRINUSE') console.error('  porta 53 gia' + "'" + ' occupata');
   });
 
-  sock.bind(port, '0.0.0.0', () => {
-    console.log(`DNS in ascolto su 0.0.0.0:${port}  (dirotta: ${hijack.join(', ')} -> ${ip}; il resto a ${upstream})`);
+  sock.bind(port, host, () => {
+    console.log(`DNS in ascolto su ${host}:${port}  (dirotta: ${hijack.join(', ')} -> ${ip}; il resto a ${upstream})`);
   });
 
   return sock;

@@ -134,7 +134,8 @@ function makeMulti(ctx) {
         }
       });
       sock.on('error', (e) => log('Photon UDP non avviato:', e.message));
-      sock.bind(PHOTON_PORT, '0.0.0.0', () => log(`in ascolto su udp://0.0.0.0:${PHOTON_PORT} (Photon, solo log)`));
+      const host = process.env.KHUX_BIND_HOST || '0.0.0.0';
+      sock.bind(PHOTON_PORT, host, () => log(`in ascolto su udp://${host}:${PHOTON_PORT} (Photon, solo log)`));
       return sock;
     },
   };

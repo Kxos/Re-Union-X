@@ -50,6 +50,7 @@ KHUX_PUBLIC_URL="https://192.168.1.198" node server/server.js
 | `KHUX_PUBLIC_URL` | `https://127.0.0.1` | **The machine's IP on the LAN**, not localhost: it is what the phone must be able to reach |
 | `KHUX_HTTP_PORT` | `80` | |
 | `KHUX_HTTPS_PORT` | `443` | active only if the certificates exist |
+| `KHUX_BIND_HOST` | `0.0.0.0` | address the HTTP, HTTPS, DNS and Photon listeners bind to; `127.0.0.1` keeps them off the network (Android app) |
 | `KHUX_DNS` | active | `0` to disable the resolver |
 | `KHUX_DNS_PORT` | `53` | |
 | `KHUX_DNS_UPSTREAM` | `1.1.1.1` | where to forward what we do not hijack |
