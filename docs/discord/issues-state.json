@@ -466,9 +466,16 @@
   "I-265": {
    "thread": "1570465128460198080",
    "msg": "1570465128460198080",
-   "group": "OPEN",
-   "hash": "bfecf1c2300a09d4",
+   "group": "TO VERIFY",
+   "hash": "702351376e553001",
    "name": "I-265 · Avatar Boards: the Filter button crashes the game"
+  },
+  "I-266": {
+   "thread": "1570471321152921712",
+   "msg": "1570471321152921712",
+   "group": "TO VERIFY",
+   "hash": "935fc59c5c508021",
+   "name": "I-266 · Tutorial: the guided Shop step points to a normal banner and the new player is stuck"
   }
  }
 }
