@@ -5,441 +5,441 @@
    "thread": "1569614642962235445",
    "msg": "1569614642962235445",
    "group": "OPEN",
-   "hash": "e764da42c90a50b1",
+   "hash": "36e55e966d6e9cb3",
    "name": "I-013 · Balance"
   },
   "I-014": {
    "thread": "1569614646388850712",
    "msg": "1569614646388850712",
    "group": "OPEN",
-   "hash": "4fd401a11a9fbdde",
+   "hash": "a15ad4982023188e",
    "name": "I-014 · Missing cutscenes and dialogues"
   },
   "I-015": {
    "thread": "1569614649396170786",
    "msg": "1569614649396170786",
    "group": "OPEN",
-   "hash": "c261938f98785903",
+   "hash": "5baa4f2b3f9f7863",
    "name": "I-015 · Profile message"
   },
   "I-018": {
    "thread": "1569614654169153538",
    "msg": "1569614654169153538",
    "group": "OPEN",
-   "hash": "ba872768e3c4fd40",
+   "hash": "ec5843fa737b7cdf",
    "name": "I-018 · Buttons never tested"
   },
   "I-022": {
    "thread": "1569614659340992534",
    "msg": "1569614659340992534",
    "group": "OPEN",
-   "hash": "eb9c901d9847250d",
+   "hash": "b9ab5ad0b19f5db9",
    "name": "I-022 · Sell"
   },
   "I-025": {
    "thread": "1569614663908335627",
    "msg": "1569614663908335627",
    "group": "OPEN",
-   "hash": "e17e2a9a1bb1a199",
+   "hash": "b017c63ba4efbf35",
    "name": "I-025 · COMPLETE ribbon of the card simpler than the painted original"
   },
   "I-026": {
    "thread": "1569614666718519379",
    "msg": "1569614666718519379",
    "group": "TO VERIFY",
-   "hash": "39961679004e5f47",
+   "hash": "0b6ae8ed328ff8d7",
    "name": "I-026 · «Unlocked an Avatar Board!» popup"
   },
   "I-029": {
    "thread": "1569614669843402783",
    "msg": "1569614669843402783",
    "group": "OPEN",
-   "hash": "dde53fe3213eb740",
+   "hash": "f72ac47271470413",
    "name": "I-029 · Community requests for information"
   },
   "I-031": {
    "thread": "1569614674088169543",
    "msg": "1569614674088169543",
    "group": "OPEN",
-   "hash": "b347284c18f817bc",
+   "hash": "249789c1b2c8a969",
    "name": "I-031 · Death notice in the tutorial never captured"
   },
   "I-033": {
    "thread": "1569614676864536617",
    "msg": "1569614676864536617",
    "group": "OPEN",
-   "hash": "1cb1667260bd924a",
+   "hash": "38a1406b41f894da",
    "name": "I-033 · Generated special attacks"
   },
   "I-038": {
    "thread": "1569614686431744081",
    "msg": "1569614686431744081",
    "group": "OPEN",
-   "hash": "c532b858a7543d44",
+   "hash": "51f00eb3a2a45b45",
    "name": "I-038 · Unequip"
   },
   "I-043": {
    "thread": "1569614688801783922",
    "msg": "1569614688801783922",
    "group": "OPEN",
-   "hash": "b4d334a472384516",
+   "hash": "7902997230652a1e",
    "name": "I-043 · Red cursor of the slot to replace too wide; exchange onto a medal with a Spirit Special…"
   },
   "I-056": {
    "thread": "1569614691758514177",
    "msg": "1569614691758514177",
    "group": "OPEN",
-   "hash": "b34745cc0286ce25",
+   "hash": "aaba1babc38ce11e",
    "name": "I-056 · Union Cross"
   },
   "I-059": {
    "thread": "1569614694765961252",
    "msg": "1569614694765961252",
    "group": "OPEN",
-   "hash": "30c4d59901e1d03a",
+   "hash": "9eed27a2cf81f2fb",
    "name": "I-059 · Colosseum not playable"
   },
   "I-102": {
    "thread": "1569614697496449075",
    "msg": "1569614697496449075",
    "group": "OPEN",
-   "hash": "ccf2fadb16855f70",
+   "hash": "d81ca8ded0be1752",
    "name": "I-102 · Moogle Shop style"
   },
   "I-117": {
    "thread": "1569614699786534926",
    "msg": "1569614699786534926",
    "group": "OPEN",
-   "hash": "31b59437cabd381d",
+   "hash": "ed344652586d6513",
    "name": "I-117 · Original layouts and textures from the JP 4.3.1 data"
   },
   "I-120": {
    "thread": "1569614702428950539",
    "msg": "1569614702428950539",
    "group": "OPEN",
-   "hash": "c01f9c776ea575c8",
+   "hash": "9bc46aff3c9f81e3",
    "name": "I-120 · Coliseum PvP"
   },
   "I-126": {
    "thread": "1569614704849190983",
    "msg": "1569614704849190983",
    "group": "ON HOLD",
-   "hash": "976d32e9a8005f4b",
+   "hash": "123a810aff4ef525",
    "name": "I-126 · Blue Fairy source"
   },
   "I-128": {
    "thread": "1569614707118055460",
    "msg": "1569614707118055460",
    "group": "OPEN",
-   "hash": "193da6e64976292d",
+   "hash": "b5e8a3aafc949a93",
    "name": "I-128 · Device date «End of Service» after 29/6/2021"
   },
   "I-129": {
    "thread": "1569614710586867783",
    "msg": "1569614710586867783",
    "group": "OPEN",
-   "hash": "1cca1a5a73256cf3",
+   "hash": "5e184c2cd40f7686",
    "name": "I-129 · Fake clock, months with twin May 2021"
   },
   "I-130": {
    "thread": "1569614729901514843",
    "msg": "1569614729901514843",
    "group": "OPEN",
-   "hash": "a0da42f34a6686a4",
+   "hash": "d391c2685f0e35d2",
    "name": "I-130 · Fake clock"
   },
   "I-131": {
    "thread": "1569614732703571968",
    "msg": "1569614732703571968",
    "group": "OPEN",
-   "hash": "07a7f467ac8864a5",
+   "hash": "47d06069260390dc",
    "name": "I-131 · Fake clock"
   },
   "I-132": {
    "thread": "1569614735274680383",
    "msg": "1569614735274680383",
    "group": "OPEN",
-   "hash": "3c559c8dd1f49b31",
+   "hash": "03f74797492b330f",
    "name": "I-132 · Fake clock with KHUX_SERVER_TIME"
   },
   "I-139": {
    "thread": "1569614738172678175",
    "msg": "1569614738172678175",
    "group": "OPEN",
-   "hash": "b8ae9306b678f61f",
+   "hash": "7ef256ec0e534b02",
    "name": "I-139 · Banner catalog"
   },
   "I-140": {
    "thread": "1569614740878135297",
    "msg": "1569614740878135297",
    "group": "OPEN",
-   "hash": "08968698a0ac2b59",
+   "hash": "1a73450558410d26",
    "name": "I-140 · «Only draws Epic Medals» filter"
   },
   "I-141": {
    "thread": "1569614743784783965",
    "msg": "1569614743784783965",
    "group": "OPEN",
-   "hash": "883c01141c1ae304",
+   "hash": "1f69208a2567c500",
    "name": "I-141 · B0612"
   },
   "I-142": {
    "thread": "1569614746704019518",
    "msg": "1569614746704019518",
    "group": "ON HOLD",
-   "hash": "da8b357c43eea5b3",
+   "hash": "5aecda441e60c502",
    "name": "I-142 · B0370 and B0418 «Blue Fairy Deal»"
   },
   "I-143": {
    "thread": "1569614750130643096",
    "msg": "1569614750130643096",
    "group": "OPEN",
-   "hash": "1e432ca97bfd504f",
+   "hash": "61839c1981cb613e",
    "name": "I-143 · Home"
   },
   "I-145": {
    "thread": "1569614753062457412",
    "msg": "1569614753062457412",
    "group": "OPEN",
-   "hash": "9f71528acbee1d42",
+   "hash": "e195f8051ad1bebf",
    "name": "I-145 · Shop minor doubts"
   },
   "I-146": {
    "thread": "1569614755696611399",
    "msg": "1569614755696611399",
    "group": "OPEN",
-   "hash": "b5ef842d8ba1e936",
+   "hash": "0001b1775940ab30",
    "name": "I-146 · Medal skills"
   },
   "I-151": {
    "thread": "1569614773283201102",
    "msg": "1569614773283201102",
    "group": "OPEN",
-   "hash": "9a92c84492a3d2ae",
+   "hash": "1c7c1152338bc931",
    "name": "I-151 · List guarantees that go up a star"
   },
   "I-159": {
    "thread": "1569614776009629781",
    "msg": "1569614776009629781",
    "group": "OPEN",
-   "hash": "a7fc52c52fd7b9da",
+   "hash": "86f0b8c897b48876",
    "name": "I-159 · Images with a numbered name without a source"
   },
   "I-161": {
    "thread": "1569614779608338543",
    "msg": "1569614779608338543",
    "group": "OPEN",
-   "hash": "4d860c5d80722b5a",
+   "hash": "23969965b76d675d",
    "name": "I-161 · SN++ «adjusted» 302008-302012"
   },
   "I-162": {
    "thread": "1569614782858919988",
    "msg": "1569614782858919988",
    "group": "OPEN",
-   "hash": "effb533404f6d6db",
+   "hash": "00352e3976e6c312",
    "name": "I-162 · Original 6★ without evolution to the 7★"
   },
   "I-164": {
    "thread": "1569614786575077467",
    "msg": "1569614786575077467",
    "group": "ON HOLD",
-   "hash": "abf4825917742094",
+   "hash": "a8cc0695e372441d",
    "name": "I-164 · Balance of the game resources"
   },
   "I-166": {
    "thread": "1569614789510959185",
    "msg": "1569614789510959185",
    "group": "ON HOLD",
-   "hash": "bb4e50821ef4d10f",
+   "hash": "b674e91c2b0973d6",
    "name": "I-166 · Event Boosters"
   },
   "I-168": {
    "thread": "1569614792078135327",
    "msg": "1569614792078135327",
    "group": "TO VERIFY",
-   "hash": "596cbe7260b6249a",
+   "hash": "f0f734d2ff8bffd6",
    "name": "I-168 · Limited campaign with SN++ - FF7R Aerith 7★ to a new player"
   },
   "I-169": {
    "thread": "1569614794661826751",
    "msg": "1569614794661826751",
    "group": "ON HOLD",
-   "hash": "e8377b865018efe2",
+   "hash": "a71d555a44919be2",
    "name": "I-169 · Subslot Medals missing"
   },
   "I-170": {
    "thread": "1569614797228482571",
    "msg": "1569614797228482571",
    "group": "OPEN",
-   "hash": "9dc421a9b0da841e",
+   "hash": "c9319a2331281caf",
    "name": "I-170 · Replace with the originals what we generated"
   },
   "I-191": {
    "thread": "1569614799682150441",
    "msg": "1569614799682150441",
    "group": "OPEN",
-   "hash": "f3445e02f317f2a0",
+   "hash": "29a7bd7352c21dd3",
    "name": "I-191 · Active banners on the home screen"
   },
   "I-192": {
    "thread": "1569614816786518017",
    "msg": "1569614816786518017",
    "group": "ON HOLD",
-   "hash": "e69f2ceb7d84f3b9",
+   "hash": "eb645f6fc664728e",
    "name": "I-192 · Beginner's Guide WebView to redo"
   },
   "I-207": {
    "thread": "1569614827037524039",
    "msg": "1569614827037524039",
    "group": "OPEN",
-   "hash": "77c5fd92e4e443f8",
+   "hash": "4ead7814c7b9e666",
    "name": "I-207 · Enemy special mechanics missing"
   },
   "I-227": {
    "thread": "1569614829906427927",
    "msg": "1569614829906427927",
    "group": "ON HOLD",
-   "hash": "be528b093c470a94",
+   "hash": "cd1c496467f43b11",
    "name": "I-227 · Event Raid Board cells left off"
   },
   "I-238": {
    "thread": "1569614832498507817",
    "msg": "1569614832498507817",
    "group": "ON HOLD",
-   "hash": "aaa1906c1bd8cc33",
+   "hash": "9ce09613b8b1e4e3",
    "name": "I-238 · JP raid boards from the evidence, not generic"
   },
   "I-239": {
    "thread": "1569614835199647815",
    "msg": "1569614835199647815",
    "group": "ON HOLD",
-   "hash": "1200210a7d29cf14",
+   "hash": "2a0842b22220085e",
    "name": "I-239 · JP raid banners without Details"
   },
   "I-242": {
    "thread": "1569614838051639307",
    "msg": "1569614838051639307",
    "group": "TO VERIFY",
-   "hash": "94d2f74767059fb0",
+   "hash": "f688a3c0414eb2c1",
    "name": "I-242 · Medal Gallery"
   },
   "I-243": {
    "thread": "1569615903711039489",
    "msg": "1569615903711039489",
    "group": "ON HOLD",
-   "hash": "572242bcb721671e",
+   "hash": "034a9eddb374c3b2",
    "name": "I-243 · JP raids that repeat a WW raid"
   },
   "I-244": {
    "thread": "1569615906575749203",
    "msg": "1569615906575749203",
    "group": "ON HOLD",
-   "hash": "dc5507b200c463a3",
+   "hash": "467cfa41a3b6b524",
    "name": "I-244 · Raid Catalog: Japan only as a section"
   },
   "I-245": {
    "thread": "1569615909541249058",
    "msg": "1569615909541249058",
    "group": "IN PROGRESS",
-   "hash": "955c311966f60dfd",
+   "hash": "a064f1721067db89",
    "name": "I-245 · Events: non-raid event quests"
   },
   "I-246": {
    "thread": "1569615912628387954",
    "msg": "1569615912628387954",
    "group": "OPEN",
-   "hash": "a600b2d1f098c7bc",
+   "hash": "7d09cd0d6663e66e",
    "name": "I-246 · Served enemy graphics may draw leftover placeholder pieces"
   },
   "I-247": {
    "thread": "1569615915467804713",
    "msg": "1569615915467804713",
    "group": "OPEN",
-   "hash": "01f3e7ce38d94c50",
+   "hash": "3ded9dc0d8124966",
    "name": "I-247 · The Keyblade War: date and part 3"
   },
   "I-248": {
    "thread": "1569615917976125491",
    "msg": "1569615917976125491",
    "group": "OPEN",
-   "hash": "eef1028c405bd573",
+   "hash": "048759ce3f4bb768",
    "name": "I-248 · «Genie Jafar» quests of the WW 5th-anniversary event"
   },
   "I-249": {
    "thread": "1569615920715010059",
    "msg": "1569615920715010059",
    "group": "OPEN",
-   "hash": "a4748c1a028489fd",
+   "hash": "b964bc64d87fbf2f",
    "name": "I-249 · Map 743840 (Beast's Castle: Fireplace, Holiday Draw Tickets Surprise runs EV-1389 / 1398 /…"
   },
   "I-250": {
    "thread": "1569615923566878734",
    "msg": "1569615923566878734",
    "group": "OPEN",
-   "hash": "4aa036f5e7e6e755",
+   "hash": "248ddcdb66a3ccb6",
    "name": "I-250 · 12 challenge enemy models still missing"
   },
   "I-252": {
    "thread": "1569615925936660504",
    "msg": "1569615925936660504",
    "group": "OPEN",
-   "hash": "4144202f861d2915",
+   "hash": "d15ac125973e5d4a",
    "name": "I-252 · Event enemy renders to recheck"
   },
   "I-253": {
    "thread": "1569615929019600941",
    "msg": "1569615929019600941",
    "group": "OPEN",
-   "hash": "b23ce38db9d8f2ab",
+   "hash": "36cc91dcf43e8ebe",
    "name": "I-253 · Events Part 4 review leftovers (latent, nothing affected in today's data)"
   },
   "I-254": {
    "thread": "1569615947264688129",
    "msg": "1569615947264688129",
    "group": "OPEN",
-   "hash": "03811bcb29d52467",
+   "hash": "b48420db0d6c27ee",
    "name": "I-254 · Events Parts 1-4: original maps recoverable for held quests"
   },
   "I-255": {
    "thread": "1569615950192312382",
    "msg": "1569615950192312382",
    "group": "OPEN",
-   "hash": "7d7e2ba7ea707d0c",
+   "hash": "c932a45005acce00",
    "name": "I-255 · Org XIII 2016-17: 53 quests with no original map, exact enemy ids unknown"
   },
   "I-256": {
    "thread": "1569646838380888187",
    "msg": "1569646838380888187",
    "group": "CLOSED",
-   "hash": "f99ee5444831670b",
+   "hash": "964ed952be9ede13",
    "name": "I-256 · Gigas Shadow base row 1021: HP differs between our master and the donated table"
   },
   "I-257": {
    "thread": "1569694833189330987",
    "msg": "1569694833189330987",
    "group": "OPEN",
-   "hash": "bd8c7a0a9f79dffb",
+   "hash": "2c5b8b7773659356",
    "name": "I-257 · Unplayable first rows of five served events whose Event Catalog card is that row's…"
   },
   "I-258": {
    "thread": "1569750260883132550",
    "msg": "1569750260883132550",
    "group": "CLOSED",
-   "hash": "f7844476fd6375c0",
+   "hash": "4dad9b203bef7d4d",
    "name": "I-258 · Wandering Spook (model 233): grey cloak pieces from a recoloured donor"
   },
   "I-260": {
    "thread": "1569774255606993039",
    "msg": "1569774255606993039",
    "group": "CLOSED",
-   "hash": "c5e9cdacb0d5a21a",
+   "hash": "7e45bedc09e67bf1",
    "name": "I-260 · Generated event maps: no CAUTION teams and no Corridor of Darkness portals"
   },
   "I-261": {
    "thread": "1569824440190246916",
    "msg": "1569824440190246916",
    "group": "IN PROGRESS",
-   "hash": "d189dc33d4646c48",
+   "hash": "aa9e0b1d66d265d1",
    "name": "I-261 · Enemy special attacks: copied moves and missing atkSp animations"
   }
  }
