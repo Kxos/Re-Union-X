@@ -142,3 +142,4 @@ b.k,.k{color:var(--gold)}
 .btn-discord{border-color:#c9ccff;background:linear-gradient(#7d86ff,#5865f2 55%,#4450d0);box-shadow:0 3px 0 #262c80,inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 0 #262c80}
 .btn-discord:active{box-shadow:0 1px 0 #262c80}
 .ct-btns{justify-content:center;margin:14px 0 0}
+.community-thanks .ct-sign{font-style:italic}
