@@ -30,6 +30,7 @@ check(list.findIndex((x) => x.drawMedalTypeId === 10) === 1 && list[0].drawMedal
   'tutorial plate second in the list, after the Catalog');
 check(tp && tp.sortId > list[0].sortId && list.slice(2).every((x) => x.sortId > tp.sortId), 'tutorial plate sortId between Catalog and banners');
 check(tp && tp.price === 300 && tp.lotCount === 1, 'plate price 300, single draw');
+check(tp && tp.bannerUrl === `/web/gacha/img/10-v${T.imgStyle}.png` && T.imgStyle >= 2, 'plate image URL versioned (client caches by URL)');
 
 // a normal plate keeps drawType 1
 const normal = gacha.gachaListData([{ drawMedalTypeId: 10500, rowId: 'B0500', name: 'X', payType: 1, lotCount: 10, prices: [3000],

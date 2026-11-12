@@ -1943,7 +1943,10 @@ function respondGachaWeb(res, url) {
   if (img) {
     if (img[2] && Number(img[2]) !== gacha.KEPT_STYLE) return html('not found', 404); // stile vecchio o sconosciuto
     // -v<N>: versione della grafica, solo per la piastra Catalog (bannerUrl di gacha.catalogRow), file 9001.png
-    if (img[3] && (Number(img[1]) !== gachaData.CATALOG_ID || Number(img[3]) !== gacha.CATALOG_PLATE_STYLE)) return html('not found', 404);
+    // e per la piastra del tutorial (gacha.TUTORIAL_BANNER.imgStyle, file 10.png): il client tiene in cache ogni URL
+    const vOk = (Number(img[1]) === gachaData.CATALOG_ID && Number(img[3]) === gacha.CATALOG_PLATE_STYLE)
+      || (Number(img[1]) === gacha.TUTORIAL_BANNER.drawMedalTypeId && Number(img[3]) === gacha.TUTORIAL_BANNER.imgStyle);
+    if (img[3] && !vOk) return html('not found', 404);
     const file = img[2] ? keptImageFile(Number(img[1])) : path.join(GACHA_IMG, `${Number(img[1])}.png`);
     if (!fs.existsSync(file)) return html('not found', 404);
     const b = fs.readFileSync(file);

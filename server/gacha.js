@@ -36,7 +36,10 @@ const CATALOG_PAY_TYPE = 3;
 // SECOND plate of the list (A54 12-11: first in the list, the arrow was on the Banner Catalog below it): so the plate
 // comes right after the Catalog (list sortId TUTORIAL_LIST_SORT, between the Catalog's 1 and the first banner's 10).
 const TUTORIAL_BANNER = Object.freeze({ drawMedalTypeId: 10, rowId: 'TUTORIAL', name: 'Jewel Draw', drawType: 5, payType: 1,
-  lotCount: 1, prices: Object.freeze([300]), totalLimit: 1, unlockQuest: 0, medalId: 33043, sortId: 9000 });
+  lotCount: 1, prices: Object.freeze([300]), totalLimit: 1, unlockQuest: 0, medalId: 33043, sortId: 9000,
+  // imgStyle: version in the plate URL (/web/gacha/img/10-v<N>.png, file 10.png). The client caches every banner image by
+  // URL, so a new picture needs a new URL: 2 = the original «Strengthen your equipment!» banner (12-11; 1 was our placeholder)
+  imgStyle: 2 });
 const TUTORIAL_LAST_QUEST = 34, TUTORIAL_LIST_SORT = 5;
 const tutorialOpen = (player, storyQuest) => storyQuest < TUTORIAL_LAST_QUEST && drawCount(player, TUTORIAL_BANNER) < 1;
 function tutorialRow() {
@@ -188,7 +191,7 @@ function plate(b, webBase, userLimitedCount, price, sortId, warrant = warrantFie
     validAdd: 0, drawMedalTypeId: b.drawMedalTypeId, drawType: b.drawType || 1, sortId, payType: b.payType, price,
     lotCount: b.lotCount, isDayLimited: b.dayLimit || b.vipFree || b.totalLimit ? 1 : 0, userLimitedCount,
     userWarrantDisplayOfTime: warrant.userWarrantDisplayOfTime,
-    name: b.name, description: b.name, bannerUrl: `${webBase}/web/gacha/img/${b.drawMedalTypeId}${kept ? `-kept${KEPT_STYLE}` : ''}.png`, // -kept: stessa immagine con il bollino «KEPT IN SHOP»
+    name: b.name, description: b.name, bannerUrl: `${webBase}/web/gacha/img/${b.drawMedalTypeId}${kept ? `-kept${KEPT_STYLE}` : b.imgStyle ? `-v${b.imgStyle}` : ''}.png`, // -kept: stessa immagine con il bollino «KEPT IN SHOP»
     warrantMedalIds: warrant.warrantMedalIds, drawTicketlimitDate: '2030-12-31 23:59:59',
   };
 }
