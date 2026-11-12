@@ -4,7 +4,7 @@
 // - ogni tabella dello schema (recon/out/master_types_ww431.json) diventa `[]`:
 //   valido per il client, che lo scarica e lo salva senza errori;
 // - `misc` riceve una riga per ogni id che il codice chiede al suo getter
-//   (recon/out/misc_ids_ww431.txt, da recon/tools/getter_ids.py), con value 0
+//   (recon/out/misc_ids_ww431.txt, dagli strumenti di ricerca privati), con value 0
 //   salvo i valori noti qui sotto. Senza queste righe il client va in crash
 //   appena ne legge una (prima: misc 804, nella registrazione del nome).
 //

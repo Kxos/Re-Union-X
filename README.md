@@ -86,7 +86,7 @@ server/                 Node.js server: REST API, DNS, generated master and game
 tools/ldplayer/         LDPlayer bench: startup, sessions (session/), tombstones
 recon/tools/            Analysis and resource-building tools (Python)
 recon/out/              Interface schemas: master table fields and types, response schemas
-                        (the Ghidra research scripts are kept private, outside the repository)
+                        (the client research scripts are kept private, outside the repository)
 recon/dl/ ext/ web/     Proprietary material — NOT versioned
 ```
 
@@ -104,16 +104,14 @@ recon/dl/ ext/ web/     Proprietary material — NOT versioned
 
 | Script | Function |
 |---|---|
-| `vtables.py`, `codeindex.py` | Research helpers that produced the interface schemas in `recon/out` |
-| `master_fields.py` | The phase C pipeline: fields of the master tables |
+| client research tools (private) | produced the interface, response and master schemas in `recon/out` |
 | `strings.py` | String extractor for binaries |
 | `demangle.py`, `scope_methods.py` | Research helpers on the names in the binary |
 | `elfinfo.py` | Architecture and endianness of an ELF |
 | `make_layouts.py` | Replacement CocoStudio layouts: copies of originals, scenes, built layouts, widget clones, armatures, texts |
 | `resource_pack.py`, `resource_merge.py` | BGAD package of the generated resources and merged index (with space reserve for the quick cycle) |
-| `import_ui_texts.py`, `ui_text_ids.py` | Original `text/ui` texts from the 4.4.0 IPA; ids of the texts used by the binary |
-| `widget_lookup.py`, `layout_tree.py`, `scene_tree.py` | Widget names the client looks up; layout and scene structure |
-| `action_case.py`, `batch_schema.py`, `who_refs.py` | Research helpers that produced the response schemas in `recon/out` |
+| `import_ui_texts.py` | Original `text/ui` texts from the 4.4.0 IPA |
+| `layout_tree.py`, `scene_tree.py` | Layout and scene structure |
 | `import_orig_stages.py`, `make_jp_rooms.py` | Original story stages and rooms from the JP 4.3.1 and 2016 data (quests 1-979) |
 | `import_jp_coco.py` | Original JP CocoStudio layouts in place of the generated ones (list `jp_coco_layouts.txt`) |
 | `make_jp_enemies.py`, `deep_donors.py` | Original enemy graphics; missing textures found by content in other files of the same creature |

@@ -47,5 +47,5 @@ type was then checked against what the client accepts from our server.
 
 ## 5. Tools
 
-`recon/tools/master_fields.py` and `recon/tools/master_types.py` produced these schemas (the inputs they
+The private client research tools produced these schemas (the inputs they
 need are kept private). The server reads only the outputs in `recon/out/`.

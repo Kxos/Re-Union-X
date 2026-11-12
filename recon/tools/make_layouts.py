@@ -9,8 +9,8 @@ D:\\Progetto_Restauro_KH_UX\\stage_gen\\files), dove finiscono cocostudio/publis
 Ogni voce di LAYOUTS dice come ottenere un layout mancante:
   ('copy', sorgente, {vecchio nome widget: nuovo})  copia di un layout esistente
   ('scene', [nodi])                                 scena SceneEditor con nodi vuoti
-I nomi dei widget che il codice cerca si ricavano con widget_lookup.py sul C delle
-funzioni che citano il layout (who_refs.py sulla stringa del percorso). Le immagini
+I nomi dei widget che il codice cerca si ricavano con gli strumenti di ricerca privati sul client
+(dalle stringhe del percorso del layout). Le immagini
 restano quelle della sorgente (texture gia' nelle risorse).
 """
 import json
@@ -321,7 +321,7 @@ LAYOUTS = {
     # arancione in alto a destra, finestra con l'elenco (CenterUI > Mshop_win > Area_Traits,
     # Area_Item, win_Traits, win_Item), «Select Medal» e i Munny posseduti in basso, il
     # moogle a destra (Moogle_Fla, lwf/mogshop/mog_wait). Nomi dalle stringhe del codice
-    # (func_strings.py) e dal decompilato.
+    # (strumenti di ricerca privati sul client).
     'MoogleShopScene_ver410.json': ('scene', [('CenterUI', 'publish/MoogleShop_Gen.json'),
                                               ('LeftUI', 'publish/MedalSell_Back.json', 0, 576)]),
     'MoogleShop_Gen.json': ('build', P('moogle_shop_root', 0, 0, 960, 640, [
@@ -905,7 +905,7 @@ LAYOUTS = {
     # userDetail.maxMedal). Cerca: NormalText_Window01, 4Line_Label (102610002/3 + 102610008,
     # resa XML), Button_Extension/Txt_Extension (102610007 «Increase Storage»), Button_Mix/Txt_Mix
     # (101300001 «Level Up»), Button_Sell/Txt_Sell (100100029 «Sell»); nomi letti dalle stringhe
-    # (widget_lookup.py non li decodifica tutti). Dal popup OK/Annulla originale, tre pulsanti.
+    # (gli strumenti di ricerca non li decodificano tutti). Dal popup OK/Annulla originale, tre pulsanti.
     'PopupNormal_MedalOver.json': ('copy', 'PopupNormal_Text_34_4Line_OkCancel.json',
                                    {'Button_OK': 'Button_Mix', 'Txt_OK': 'Txt_Mix',
                                     'Button_Close': 'Button_Sell', 'Txt_Cancel': 'Txt_Sell'}, False, [
@@ -1706,9 +1706,9 @@ TEXTS = {
     # Medal List (barra di aiuto in alto; modalita' vendita)
     100620045: 'Tap a Medal to see its details.',
     # Sell Medals: title of Txt_A_Ticket (next to 106130301 «Jewels»); its number is the sum of medal.sellTicket of the
-    # selection (client 4.3.1, [fn]) = the Draw Points the sale gives (Draw Points restored 03-11, ours)
+    # selection (client 4.3.1) = the Draw Points the sale gives (Draw Points restored 03-11, ours)
     106240301: 'Draw Points',
-    # Shop, payType 9 plate (Draw Points Deal): printf format of the points held next to icon 42 ([fn]; the other
+    # Shop, payType 9 plate (Draw Points Deal): printf format of the points held next to icon 42 (the other
     # currencies use 106140399 «%d»); missing everywhere -> crash when the plate is built (ours)
     106240303: '%d',
     # esito della vendita (Txt_Sell_Ok1; l'alternativa 100300009 e' «Complete!»)
@@ -2081,7 +2081,7 @@ def sell_popup(icon='MedalSellIcon', name='Txt_Medal_Name_Dlog', extra=(), icon_
     head = [
         # riquadro scuro dello slider, dietro panel_MaterialStock
         I('Slider_Base', -16, -34, 576, 154, 'Panel04.png', opts=GRID),
-        # nomi composti a pezzi sullo stack, non trovati da widget_lookup.py (func_strings.py)
+        # nomi composti a pezzi sullo stack, non trovati dagli strumenti di ricerca
         I(icon, icon_pos[0], icon_pos[1], 89, 109, 'Medal_S_00000001.png', s9=False, scale=icon_pos[2]),
         I('Name_Plate', 37, 187, 360, 36, 'Plate03.png', opts=PLATE3),
         L(name, 37, 187, 330, 32, '', 22),

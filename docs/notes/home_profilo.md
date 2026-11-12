@@ -94,8 +94,8 @@ bright town with windmills; **no `<id>.png`**, so our master rows 2-6/99 with `d
 should be `validParts 1, dataType [2]` or dropped). No `img/home/` anywhere. The JP folders have the base png, the LWF and
 its textures (the files with an `.000000NN` suffix are duplicate copies of the dump).
 
-**How the client picks (static analysis, ww431).** The home scene builder reads one row of `mypageBackground` by id: the
-`backgroundId` of `/mypage` (stored at login data +0x3c) when the session data exists, otherwise the fixed 150911; a
+**How the client picks (checked in the client, ww431).** The home scene builder reads one row of `mypageBackground` by id: the
+`backgroundId` of `/mypage` (kept with the login data) when the session data exists, otherwise the fixed 150911; a
 second scene (the one built by the other caller) always uses 150911. Lookup by id only: no caller reads the table by date,
 so `startTime`/`endTime` are parsed but not used by the client (the original server must have chosen the id by date).
 `validChild` was not seen used. `viewType` (int after the two times) = 100 switches the camera preset (zoom/scroll,
@@ -131,7 +131,7 @@ the client). Buttons never tested.
 
 Crashes without requests to the server (bench 14-10, same crash for the three cases): layouts not served,
 loaded without checking (like Emblem_Base, I-123).
-Names taken from the strings of the client (`func_strings.py`, `widget_lookup.py`); all
+Names taken from the strings of the client (private client research tools); all
 missing from names_v4, addnl and stage_gen. The JP 4.3.1 originals added to `jp_coco_layouts.txt`
 (the originals have all the widgets looked up):
 - **Transfer Unions** (I-107), real cause (bench 14-10): «Transfer Unions» is the **Union change**, not the account

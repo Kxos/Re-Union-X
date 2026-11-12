@@ -356,7 +356,7 @@ Patterns of the original (from the banners' texts and images) and comparison wit
   was **on top of** the enhancement with Chip/Dale, which remained fully available. So it is NOT the medal at the cap of
   `attackUpperNumber`/`defenseUpperNumber` (cap `addMaxAttack`/`addMaxDefense` of the master, `server/medal-guilt.js`):
   another way is needed to raise the base by +1000 while leaving Chip/Dale free (a field of the player's medal to
-  look for in the decompiled code, or distinct medals in the master: to verify). The probability is also missing («small
+  look for in the client, or distinct medals in the master: to verify). The probability is also missing («small
   chance» in the notes);
 - **maxed skill (62), partly reproducible** (user's decision of 17-10): ability of the list created at
   `level = maxLv` of `skill.json` instead of 1; it applies only to the abilities present in the master, which today has 12
@@ -794,7 +794,7 @@ does not restart».
   (Tier 6+ with 1-3 dots, Sephiroth [EX+] at 5 dots and boosted, Magic Mirror x3; Trait Medal #2 not reproduced).
 - D5 Frozen B0430/B0431 («Two 6 or 7★ Frozen Medals»): 6★ list slot with `up` (slot override «...;up»): rises to 7★
   with the probability of the normal slot (3%, reconstructed, written in the Details); at 7★ Supernova - Elsa enters too.
-- D8 (revision 141): an agent tried 7,067 ids on cache.sqex-bridge.jp (56500-62699 and 2016-18 windows) and
+- D8 (revision 141): an agent searched the archived official notices and
   recovered 72 KHUX notices in English (copy in `reference\banners\notices_recovered_d8.json`, matches in
   `notices_recovered_d8_matches.tsv`): 20 of the 30 banners without a notice now have one. The catalogue already matched
   except B0590 (Standard: one of 5 medals within 5, notice 57597), B0591 (VIP: Supernova+ - Key Art #21 within 10)
@@ -805,7 +805,7 @@ does not restart».
 <a id="pagine-stile"></a>
 ## Style of the Details, Draw Odds and Catalog pages (19-10, user's request)
 
-Original references in `D:\Progetto_Restauro_KH_UX\reference\shop_odds_details\` (NOTE.md: notice 46003 from Wayback
+Original references in `D:\Progetto_Restauro_KH_UX\reference\shop_odds_details\` (NOTE.md: an archived copy of notice 46003
 with the CSS, reddit screenshots of Draw Odds «6★Medals» and of the Boosted rows). `gacha.js page()`: background #043654, white
 spaced text, «■» titles #00d4ed, key sentences orange #ffa500 and yellow stars #ffcd4a, tables with white borders
 and header #365e76. Rates in a «Medal | Rarity | Probability» table (`oddsTable`, equal positions
@@ -914,11 +914,11 @@ about 2x featured odds, 5 instead of 3 Magic Mirrors, more Limited VIP Coins; no
 User decision 03-11: Draw Points restored with the original rules (notices 62950, 72831, 73873; research
 `D:\Progetto_Restauro_KH_UX\tmp\shop_june2021\FINDINGS.md`).
 
-- **Client 4.3.1** (Ghidra, khux-ww431): userPoint parser [fn] stores `limitedDrawTicket1/2/3` at 0x80/0x84/0x88;
-  the Shop plate [fn] switches on payType: 4/5/6 -> drawTicket1-3 (Star7_Ticket 37-39), 7/8/9 ->
-  limitedDrawTicket1/2/3 with `img/incentive/draw_Ticket_40/41/42.png` ([fn]); the held count is
-  printf(text, n) with **106240303** for icon 42 and 106140399 «%d» for the others ([fn]). Button texts of payType 9:
-  106180336-341 («Premium Ticket» in the IPA 4.4.0). Sell screen [fn]: medal fields 0x520 `sellJewel`, 0x524
+- **Client 4.3.1** (checked in the client): the `userPoint` block carries `limitedDrawTicket1/2/3`;
+  the Shop plate picks its currency by payType: 4/5/6 -> drawTicket1-3 (Star7_Ticket 37-39), 7/8/9 ->
+  limitedDrawTicket1/2/3 with `img/incentive/draw_Ticket_40/41/42.png`; the held count is
+  shown with text **106240303** for icon 42 and 106140399 «%d» for the others. Button texts of payType 9:
+  106180336-341 («Premium Ticket» in the IPA 4.4.0). Sell screen: uses the medal fields `sellJewel` and
   `sellTicket`; `Txt_A_Ticket_Label` = sum of sellTicket x copies of the selection (a gain, not the balance), title 106240301.
   So reward type 42 (IncentiveIcon_42) = the payType 9 currency.
 - **Earning**: `server/make-sell-ticket.js` (end of make-game-tables, idempotent) sets `sellTicket` = Tier (guiltValue) on
@@ -984,11 +984,11 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
 - Side note: `img/incentive/Star7_Ticket_37` (bronze, payType 4) is still the WW «仮» file; the JP final art exists only as
   `cocostudio/publish/Star7_Ticket_37.png` (same 83x83 size) and could be mapped in `originals.tsv` like draw_Ticket_42.
 - **Blocker of the 05-11 decision (bench agent, 05-11, not implemented)**: the client has no free currency slot for a
-  generic icon. The Shop plate ([fn], `tmp\extra_attack\out\dp\plate.c`) switches on `payType` and draws a
+  generic icon. The Shop plate switches on `payType` and draws a
   fixed file per value: 3 = paid Jewels (`Txt_Jewels` label, no ticket file), 4/5/6 = `img/incentive/Star7_Ticket_37/38/39`
   (Bronze/Silver/Gold, `drawTicket1-3`), 7/8/9 = `img/incentive/draw_Ticket_40/41/42` (Platinum, Draw Ticket and the
   seasonal currencies, Draw Points); any other payType draws no currency at all (no case), and the plate row has no field
-  for an icon of its own (the last argument of [fn] is the days-left value of the «Limited» label). Every file
+  for an icon of its own (the only other value it shows is the days left of the «Limited» label). Every file
   37-42 is an original currency's art, so «another currency with our generic icon» means giving one of them our icon:
   with 39 and 37 restored, the only candidates are Silver (payType 5, `Star7_Ticket_38`, already the JP final art) or payType
   3 (paid Jewels only, never earnable here, but drawn with the Jewel label and its own purchase flow, untested) or an
@@ -1009,7 +1009,7 @@ User decision 03-11: Draw Points restored with the original rules (notices 62950
   `GET /web/gacha/catalog` and opens the WebView frame, closing it returns to the same grey plate (`i135g_07_back`). In that
   session every WebView (login Notices, DAILY DEAL! Details too) drew an empty frame in the screenshots, so the catalogue
   page content itself was not seen again (it was on 05-11, `i135_07`). No Play Store, billing or browser.
-  Client hooks seen in the plate function ([fn]) and not used: the `ImageButton_LockMask` node and [fn]
+  Client hooks seen on the Shop plate and not used: the `ImageButton_LockMask` node and an open-condition check
   (a flag + id of the plate row checked against a list of the player: an open condition that greys the button, master
   data), both would need a master change; the list state is enough.
 
@@ -1049,12 +1049,10 @@ has an **«Original notice»** part, built the same way as the raid notices ([ra
   notes on the standing Daily/Small Deals); B0009 Zootopia -> 17892 (the avatar-board campaign, not a draw); B0577/B0578
   Ticket Draw -> 57071 (low: the notice of their Draw Tickets).
 - **Still without a notice (4)**: B0002-B0004 (launch week, Apr 7-14, 2016) and B0077 «Big Deal!!» (Jan 7-11, 2017).
-  Searched: the 2,604 archived WW texts and the D8 recoveries; live `cache.sqex-bridge.jp/api/information/detail/<id>?lang=en`
-  (sequential, 1.2 s) on ids 17000-17414, 23812-24100, 24549-24654, 25300-25420, 44010-44150, 57040-57110 (only
-  already-known KHUX notices; log `reference\shop_notices_extra\probe_log.tsv`); Wayback CDX of
-  `cache.sqex-bridge.jp/guest/information/17*` and `23*` and samples of the archived-only ids of those days (all other
-  games: ids are shared by every bridge game). The KHUX ids of January 2017 are the batch 23795-23811, none dated Jan 7.
-- Downloads (untrusted, parsed only, local): `reference\shop_notices_extra\` (`raw\`, `wayback\`, CDX lists,
+  Searched: the 2,604 archived WW texts, the D8 recoveries and the archived official notices of those days (only
+  already-known KHUX notices; details in the private notes). The KHUX ids of January 2017 are the batch 23795-23811,
+  none dated Jan 7.
+- Local copies (untrusted, parsed only, never in git): `reference\shop_notices_extra\` (`raw\`, archived copies,
   `notice_text_extra.json`); scripts in `tmp\shopnotices` (`fetch.py`, `html2text.py`, `buildmap.py` + `fix.json`
   that write `server/shop_notice_map.tsv`).
 - **To serve**: `node server/make-shop-notices.js` (already run 06-11 on this machine), then restart the server (new

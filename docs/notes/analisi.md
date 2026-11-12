@@ -1,18 +1,16 @@
 # Analysis tools: overview
 
 The protocol, the response schemas and the master table layouts used by the server were derived from the
-4.3.1 client and checked on the bench. The research tools for the client binary (including the Ghidra
-scripts, formerly `recon/ghidra/`) and the detailed analysis notes are kept private; this page lists only
+4.3.1 client and checked on the bench. The research tools for the client binary and the detailed analysis notes are kept private; this page lists only
 the public tools and what they produce.
 
 <a id="tools"></a>
 ## Python tools (`recon/tools/`, always `python -I`)
 
-- Protocol and schemas: `action_case.py`, `response_schema.py`, `batch_schema.py`, `request_ids.py`,
-  `getter_ids.py`, `master_types.py`, `master_fields.py`. Their outputs are the interface descriptions in
+- Protocol and schemas: produced by the private client research tools; their outputs are the interface descriptions in
   `recon/out/`: endpoints, response schemas (`api_responses_ww431.json`, `api_responses_auto_ww431.json`),
   master table names, fields and types (`master_fields_ww431.*`, `master_types_ww431.json`), `misc` ids.
-- Texts and widget names: `text_ids.py`, `ui_text_ids.py`, `widget_lookup.py`, `func_strings.py`.
+- Texts and widget names: found with the private client research tools.
 - Packs (the container decoding tools `bgad.py`, `bgad_extract.py`, `resource_index.py` and the key
   analysis tools are kept private, see `private_tools.py`): `bgad_names.py`, `bgi_check.py`,
   `resource_pack.py`, `resource_merge.py`, `resource_split.py`, `res_get.py`, `res_bulk.py`,
@@ -23,7 +21,7 @@ the public tools and what they produce.
   `smoke_pick.py`.
 - Resource generators: `make_layouts.py`, `make_textures.py`, `gen_sphere_armatures.py`,
   `make_enemy_moves.py`, `layout_tree.py`, `scene_tree.py`, `import_jp_coco.py` (original JP layouts
-  in place of the generated ones) and `jp_coco_widgets.py` ([risorse_layout](risorse_layout.md#jp-originali)).
+  in place of the generated ones, [risorse_layout](risorse_layout.md#jp-originali)).
 
 <a id="singleton"></a>
 ## Facts the server relies on

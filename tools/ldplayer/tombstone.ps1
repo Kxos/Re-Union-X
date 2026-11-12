@@ -18,7 +18,7 @@ foreach ($l in $t[0..4000]) {
         foreach ($k in 3, 5) {
             if (-not $matches[$k]) { continue }
             $v = [Convert]::ToInt64($matches[$k], 16)
-            if ($v -ge $lo -and $v -lt $hi) { "  {0} @{1} -> ghidra {2:x}" -f $sec, $matches[2], ($v - $lo + 0x100000) }
+            if ($v -ge $lo -and $v -lt $hi) { "  {0} @{1} -> image {2:x}" -f $sec, $matches[2], ($v - $lo + 0x100000) }
         }
     }
 }

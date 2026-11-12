@@ -425,7 +425,7 @@ function respondLogin(res) {
   // Draw Odds dello Shop (pulsante su ogni piastra, link odds): il client
   // accoda il drawMedalTypeId della piastra all'url (banco 16-10: GET /web/gacha/odds9001), da qui la «/»
   body.odds = `${WEB_BASE}/web/gacha/odds/`;
-  // Spirit Blind Box plates open the login link petOdds (client 4.3.1 [fn]), id appended like odds (to verify)
+  // Spirit Blind Box plates open the login link petOdds (client 4.3.1), id appended like odds (to verify)
   body.petOdds = `${WEB_BASE}/web/gacha/petodds/`;
   send(res, 200, body);
 }

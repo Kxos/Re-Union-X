@@ -46,8 +46,8 @@ Shared: `Info` = `raidId` uint64, `level`, `useAp`, `timeLeft` and `feverTime` (
 - The model is `raidDisplayId % 10000`. Part positions come from movies named in the model's LWF, so there is no hitbox table to serve.
 - <a id="weak-points"></a>**Weak points.** At fight load the client searches `parts1`-`parts6` under the `char` movie of the boss LWF and,
   for each one found, takes the part in slot N (filled from the parts by `weakness`) and looks up its `raidEnemy` row to size
-  the tap marker. An empty slot gives id 0, the lookup returns nothing and the client dereferences it: SIGSEGV, fault address
-  0x10 (bench, 2 November: Queen Bee, Queen Bee Ω, Lion Headliner). So every weak point of the model needs a part of that
+  the tap marker. An empty slot gives id 0, the lookup returns nothing and the client dereferences it: a null-pointer
+  crash (bench, 2 November: Queen Bee, Queen Bee Ω, Lion Headliner). So every weak point of the model needs a part of that
   weakness. A weak point is a `parts<N>` movie that holds a `center` or `attack` marker; `parts<N>` movies with only a picture
   (Jack in the Box, Darkside Ω `parts4`/`parts5`) are not found as weak points (26 of 26 smoked models agree with this rule).
   `check_raid_models.py` writes them as `slots`, and `make-raid.js` marks an entry `parts` (unavailable, `missingSlots`) when a
@@ -281,10 +281,7 @@ aid_level\FINDINGS.md` (weekly era from 2019-08-12: level changes nothing, as ou
 - **A fight lost past `timeLeft`** answers `raidTimeStatus` 2 (the boss has escaped) and `/raid/list` still plays the flee; a win past it stays 3. An entry that throws at `/raid/reward` is logged and lost, so the quest screen keeps working and nothing is paid twice.
 - **`/raid/member`**: `damage` is the sum of `parts[].damage` the client reported on that boss, kept in `player.raid.lastFight` after the boss is gone.
 - **A stored boss whose `stage` or `raidEnemy` rows are not served** is dropped with a log line at `/raid/list` and `/user/notice` (so the home's «Active request!» never offers it), since the client would crash on it.
-- **Banner.** `/web/raid/img/v<N>/<evStageId>.png` (`RAID_IMG_VERSION` in `routes-raid.js`, 2 since 3 November; bump it when the cards change, the client caches by URL, and it is in the master `evStage.bannerUrl` of `make-raid.js`, so regenerate the master too) from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404. The cards are the original weekly raid banners, written by `make_raid_banners.py`: 127 of 132 evStageIds from khuxwiki «Weekly_Raid_Event» (local `reference
-aid_banners`), the 5 weeks 2018-09-03 to 10-01 (not on that page) from the official notices with `--notices` (local `reference
-aid_banners\sqex_notices
-otices.json`): #44001 Merry-Go-Rowdy (8071), #44005 Closehanded Captain (8072), #44500 Gear Golem (8073), #44507 Merry-Go-Rowdy returns (8074), the notice images from archived copies of `cache.sqex-bridge.jp/img/<key>`; #44934 Green Trident Tail (8075) from the khuxwiki upload of 2018-10-01 (`Event_-_Green_Trident_Tail_Raid_Event_banner_KHUX.png`; the notice image could not be fetched). Each shows its week's dates or boss, checked against the boss cards `raid_boss_<model>`. No week shows `0.png` any more; no card is reconstructed. The 2020-07-20 card is Fortress Crab Ω, identical to official notice #67361.
+- **Banner.** `/web/raid/img/v<N>/<evStageId>.png` (`RAID_IMG_VERSION` in `routes-raid.js`, 2 since 3 November; bump it when the cards change, the client caches by URL, and it is in the master `evStage.bannerUrl` of `make-raid.js`, so regenerate the master too) from `game_data/raid_img`, else `0.png` (the plain plate of `make_special_banners.py`), else 404. The cards are the original weekly raid banners, written by `make_raid_banners.py`: 127 of 132 evStageIds from khuxwiki «Weekly_Raid_Event» (local `reference\raid_banners`), the 5 weeks 2018-09-03 to 10-01 (not on that page) from the official notices with `--notices` (local `reference\raid_banners\sqex_notices\notices.json`): #44001 Merry-Go-Rowdy (8071), #44005 Closehanded Captain (8072), #44500 Gear Golem (8073), #44507 Merry-Go-Rowdy returns (8074), the notice images from archived copies of `cache.sqex-bridge.jp/img/<key>`; #44934 Green Trident Tail (8075) from the khuxwiki upload of 2018-10-01 (`Event_-_Green_Trident_Tail_Raid_Event_banner_KHUX.png`; the notice image could not be fetched). Each shows its week's dates or boss, checked against the boss cards `raid_boss_<model>`. No week shows `0.png` any more; no card is reconstructed. The 2020-07-20 card is Fortress Crab Ω, identical to official notice #67361.
 
 ## Calendar (Part 2, Task 8: tests only, bench pending)
 
@@ -616,8 +613,8 @@ rewards) is private (`private\events\sources\raid_census\JP_ONLY.md`).
   of the official notice host: JP-RAID-23 (notice 24641), JP-RAID-25 (26469), JP-D-2017-05-22 (28549), JP-D-2017-07-17 (30537), JP-D-2018-01-02
   (35862), JP-D-2018-02-02 (key cited by reddit 7ujbx1, notice not found), JP-SHR-79 (36190), 83 (36817), 86 (37932, same key as 36190), 91 (38870),
   95 (key cited by reddit 8gzyzv, notice not found), 96 (40266), and JP-SHR-28 (24640) / JP-SHR-32 (25537) replace their wikiwiki copies. Sources: the JP notice banners
-  (first image of the notice, `cache.sqex-bridge.jp/img/<key>`), from Wayback copies (slow sweep with
-  `recon/tools/sqex_notice_sweep.py`) and from the live notices saved by the live-notice research (`notices_live\`); the
+  (first image of the notice), from archived copies of the notices and from the live notices saved by the live-notice
+  research (`notices_live\`); the
   khuxwiki upload of 2016-05-18 of the 2015-16 JP notice images (one pixel-identical to notice 15404's) and its «JP banner»
   files; the per-boss banners of the JP wiki page 超難度レイドイベント (boss, HP and 12-hour limit printed: JP-SHR-1, JP-SHR-2,
   the 17 Saturday-only 30M weekends; khuxwiki 150M Red Trident Tail banner for JP-SHR-78/85/92). 56 two-day 30M weekends have
@@ -870,13 +867,13 @@ Final results of the spike, 1 November (user):
 
 ## Bench smoke 2 Nov
 
-Task 8 Step 5, master rev 233, resources 93, save `raid2` (maxpower party). Every available raid model was forced with `save/raid_smoke.json` (one entry per model, lowest tier) and taken to the fight: 26 models tried, **23 load** (`0001`-`0005`, `0007`-`0010`, `0012`, `0014`, `1000`-`1004`, `1006`-`1010`, `9102`, `9103`), **3 crash** the client on fight load: `0015` Queen Bee, `0016` Queen Bee Omega, `1005` Lion Headliner (reproduced). All three crashes are the same SIGSEGV null pointer (`fault addr 0x10`, frames `af9e24`/`eff5bc`/`146c57c`) after `/raid/start` and before the battle HUD; other bosses on the same maps load, so the cause is in the three models' data.
+Task 8 Step 5, master rev 233, resources 93, save `raid2` (maxpower party). Every available raid model was forced with `save/raid_smoke.json` (one entry per model, lowest tier) and taken to the fight: 26 models tried, **23 load** (`0001`-`0005`, `0007`-`0010`, `0012`, `0014`, `1000`-`1004`, `1006`-`1010`, `9102`, `9103`), **3 crash** the client on fight load: `0015` Queen Bee, `0016` Queen Bee Omega, `1005` Lion Headliner (reproduced). All three crashes are the same null-pointer crash after `/raid/start` and before the battle HUD; other bosses on the same maps load, so the cause is in the three models' data.
 
 **Cause (found 2 November, [Weak points](#weak-points)):** the three models have more weak points than the 2016 rows have parts.
 Queen Bee and Queen Bee Ω: `parts1`-`parts5` (the July 2016 four-bee version), row with 1 part (the April 2016 version);
 Lion Headliner: `parts1`-`parts5`, row with 2 parts (R arm, L arm). The client looks up the `raidEnemy` row of the part in each
-weak point's slot; the empty slots give id 0, no row, null pointer. The crash frames are that lookup (master getter of the
-`raidEnemy` table, then a read at +0x10 of the missing row) inside the tap-marker constructor the fight calls per weak point.
+weak point's slot; the empty slots give id 0, no row, null pointer. The crash frames are that lookup (the `raidEnemy` row
+lookup, then a read of the missing row) inside the tap-marker constructor the fight calls per weak point.
 The original part rows of those versions are not known, so the three models are withheld (`why: parts`, 13 tier rows: Queen Bee
 4, Queen Bee Ω 2, Lion Headliner 7) until rows for the missing parts are found or the user chooses to reconstruct them. Master
 revision 234; bench: the stored Lion Headliner boss of `raid2` is dropped at `/user/notice`, the home shows no «Active request!»

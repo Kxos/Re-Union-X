@@ -6,7 +6,7 @@
 
 **Architecture:** One week only (`WW-W-2019-10-07`, Beginner, Trickmaster, Curious Room). Layouts and the boss model are real product work, kept. The server routes are a throwaway module behind an environment variable, deleted at the end. Answers go to a new public note; client internals stay private. Steps 2-7 of the design are planned in Part 2, from these answers.
 
-**Tech Stack:** Node server (`server/server.js`), Python importers (`recon/tools/`), Ghidra headless (private), LDPlayer bench instance 0.
+**Tech Stack:** Node server (`server/server.js`), Python importers (`recon/tools/`), private client research tools, LDPlayer bench instance 0.
 
 **Spec:** `docs/superpowers/specs/2026-11-01-raids-design.md`
 
@@ -41,7 +41,7 @@ Read-only. Private output, plus a public summary.
 **Interfaces:**
 - Produces: the list of routes with request and response fields; the table fields read for a raid; the layouts and LWFs each raid screen loads. Task 2 and Task 3 use them.
 
-- [ ] **Step 1: Find the raid routes and action numbers.** Known so far: 120 `/raid/reward` (`raidRewards[]`, entries carry `userTitles`), 123 raid clear (carries new titles), 240 `/raid/list` (`selfRaid`, `raids[]`). Ghidra headless on `tmp\extra_attack\ghproj`, as in `tmp\i218\guilt_icon.py`, with the response dispatcher in `tmp\i220\disp.txt`. Expected: every raid action with its route string and response parser.
+- [ ] **Step 1: Find the raid routes and action numbers.** Known so far: 120 `/raid/reward` (`raidRewards[]`, entries carry `userTitles`), 123 raid clear (carries new titles), 240 `/raid/list` (`selfRaid`, `raids[]`). Checked with the private client research tools. Expected: every raid action with its route string and response parser.
 
 - [ ] **Step 2: Answer from the code, for each: spawn and damage.** What tells the client a boss appeared after a quest (`/stage/clear` field?), what the raid start route sends and receives, where the boss's current HP comes from at the start of a fight, and whether it is server data or local. This is the persistence question: if the start response carries remaining HP, the fallback of the spec is available. Expected: a yes or no with the field name.
 

@@ -102,7 +102,7 @@ check(/\/web\/gacha\/petimg\/20775-kept\d+\.png$/.test(lk.find((x) => x.drawPetT
 const kimg = raw(t.respondGachaWeb, lk.find((x) => x.drawPetTypeId === 20775).bannerUrl.replace(/^https?:\/\/[^/]+/, ''));
 check(kimg.code === 200, `kept plate image served (${kimg.code})`);
 check(raw(t.respondGachaWeb, '/web/gacha/petimg/20775-kept999.png').code === 404, 'old/unknown kept style: 404');
-// master drawPetType: a row for every deal, all fields (client parser [fn])
+// master drawPetType: a row for every deal, all fields (the client requires every one)
 const rows = JSON.parse(fs.readFileSync(path.join(__dirname, 'tables', 'drawPetType.json'), 'utf8'));
 check(rows.length === 6 && rows.every((x) => x.drawType === 11 && Object.keys(x).length === 24 && Object.values(x).every((v) => typeof v === 'string' || v >= 0)), 'tables/drawPetType.json: 6 rows, 24 fields, integers >= 0');
 

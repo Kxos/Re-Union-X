@@ -61,7 +61,7 @@ No Union Cross, raids, Coliseum PvP or events yet.
 | RAM | 16 GB recommended | after several 2-4 GB downloads `Ld9BoxHeadless` grows to ~30 GB committed memory ([banco.md](notes/banco.md#ldplayer)) |
 | Administrator rights | only to change the Windows DNS server and, if needed, firewall rules | see [Network](#44-network-windows-dns-ip-firewall) |
 
-**Not needed for playing:** Java/JDK, Ghidra, Android Studio / `adb`, apktool, MuMu, a phone. Those were
+**Not needed for playing:** Java/JDK, Android Studio / `adb`, apktool, MuMu, a phone. Those were
 only for the research work (phase A/C), whose tools are kept private.
 
 ## Files you must dump yourself
@@ -443,7 +443,7 @@ about **the setup**: steps that today are impossible or very hard for someone ou
 Inventory of every hard-coded value that ties the play path to the author's PC (22 October 2026), as
 `file:line`. **Change?** = a player on another PC would have to change it (or reproduce it exactly).
 `<W>` = `D:\Progetto_Restauro_KH_UX`. Comment-only mentions (documentation of where an analysis lives) are
-not listed except where noted. The research tools (Ghidra scripts and the like) are kept private, outside
+not listed except where noted. The client research tools are kept private, outside
 the repository, and are not listed.
 
 ### Session scripts (`tools/ldplayer/`)

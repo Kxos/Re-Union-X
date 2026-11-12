@@ -16,8 +16,7 @@
 #                posizioni restano WW (la revisione WW servita e' piu' vecchia di quella vista nel Global)
 # «? Nome  # motivo» = da decidere: non si importa, compare solo nel rapporto.
 #
-# Controllo fatto il 13-10-2026 (jp_coco_widgets.py sul decompilato attorno ai caricatori,
-# widget_lookup.py; commenti di make_layouts.py; classi dei widget): per le righe attive
+# Controllo fatto il 13-10-2026 (strumenti di ricerca privati sul client attorno ai caricatori; commenti di make_layouts.py; classi dei widget): per le righe attive
 # l'originale ha i widget che il codice cerca, o il codice li controlla (null) prima di usarli.
 
 # --- Presents (I-035, I-096) ---
@@ -276,7 +275,7 @@ Chat_Post_BlockPanel.json
 Chat_Post_BlockList.json
 
 # --- Contatori dei nemici (I-207): numero del contatore sopra il nemico (attacchi, colpi, slot), azzeramento,
-# contrattacco. Il client controlla che il file esista e che i widget non siano nulli ([fn]) ---
+# contrattacco. Il client controlla che il file esista e che i widget non siano nulli ---
 ActMapSpEnmUI_Number.json
 ActMapSpEnmUI_CountReset.json
 ActMapSpEnmUI_CounterAtk.json

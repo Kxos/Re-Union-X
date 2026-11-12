@@ -37,7 +37,7 @@ never changed. The report entry carries `fromKey`, `levelShift` and `levelShifte
 only then); a JP map whose levels are not all `from` is left out (status skipped, cause 'level shift').
 Part sources (Events Part 5 Task 4 follow-up; map items with `partSources {part: {key, part, reconstructed, basis}}`, from the
 records' map.partSources): the JP 4.3.1 extraction did not write its dedup stub records (a 4-byte record meaning «the same data
-as record N», [local reference data] MANIFEST_jp.md), so a part whose STG is present can be missing although the game had it as a byte
+as record N», the JP data manifest), so a part whose STG is present can be missing although the game had it as a byte
 copy of another stage's part. Part 'stg' with source part null is the STG header itself (user decision 6, 10-11-2026). A copy that lacks part N of the item's map (its fromKey when set) but holds the named source part
 gets that file, byte for byte, under the client name of the missing part; a part the copy holds is never replaced. The report
 entry lists what was filled in `partSources` {client name: {from, reconstructed, basis}} (reconstructed: the source is the nearest

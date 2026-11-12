@@ -78,7 +78,7 @@ function drawPart(b, owned, petRows, elsewhere, rng = Math.random) {
   return { petPartsId: ids[Math.min(ids.length - 1, Math.floor(rng() * ids.length))], extended, left: ids.length - 1 };
 }
 
-// master drawPetType row (client 4.3.1, parser [fn]: every field mandatory, integers >= 0; the Shop plate reads
+// master drawPetType row (client 4.3.1: every field mandatory, integers >= 0; the Shop plate reads
 // it without a check, so every listed deal needs one). drawType 11 = the pet draw marker; payType 1 = Jewels (free+paid)
 const DRAW_TYPE_PET = 11;
 const PET_SORT_FIRST = 2; // after the Banner Catalog plate (sortId 1), before the medal banners (10, 20, ...)
@@ -94,7 +94,7 @@ function drawPetTypeRow(b, sortId = PET_SORT_FIRST) {
   };
 }
 
-// petGachaList element (parser [fn]: every key mandatory): totalCount / restCount = the «N/M left» counter
+// petGachaList element (client 4.3.1: every key mandatory): totalCount / restCount = the «N/M left» counter
 // (restCount 0 greys the button and the client sends nothing)
 // kept: the deal kept from the Catalog (outside its dates) gets the «KEPT IN SHOP» badge image, like the medal banners
 // (server.js keptImageFile, URL pet<id>-kept<KEPT_STYLE>.png)
@@ -105,7 +105,7 @@ function plate(b, webBase, sortId, owned, petRows, elsewhere, kept = false, kept
     bannerUrl: `${webBase}${kept ? imgUrl(b.drawPetTypeId).replace(/\.png$/, `-kept${keptStyle}.png`) : imgUrl(b.drawPetTypeId)}`, mypageBanner: 0, totalCount: all.length, restCount: all.filter((id) => !owned.has(id)).length };
 }
 
-// POST /gacha/petdraw response (apply at 0x7c8854): pet.userPetParts (drawn parts), effectNumbers (>= one per part; [0]
+// POST /gacha/petdraw response: pet.userPetParts (drawn parts), effectNumbers (>= one per part; [0]
 // picks the animation: 1 rare, other non-zero normal, 0 = crash), petGachaBonus (all keys mandatory; addType 1 = no bonus
 // popup), userData.userPoint / userDetail (full objects, from server.js)
 function drawResponse(part, partsType, getDatetime, userData) {

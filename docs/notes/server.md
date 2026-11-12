@@ -66,7 +66,7 @@ chain before action 251 or without a session; the errors stay `:251` for the who
 ## Response dispatcher and schemas
 
 - The client checks every response per action: a missing mandatory key or a wrong type = error 2.
-- Method for a new action: schema of the response (`recon/tools/action_case.py`, `response_schema.py`)
+- Method for a new action: schema of the response (private client research tools)
   -> `recon/out/api_responses_ww431.json` -> response in `server.js` -> test on the bench.
   `batch_schema.py` (plan/merge) generated `api_responses_auto_ww431.json` (168 candidate routes): the
   server uses it where a verified schema is missing.
@@ -273,12 +273,11 @@ node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # 
 - One-off crash right after an installation: on restart it goes through.
 
 <a id="resource-mode2"></a>
-### Incremental resources (`mode 2`, WW 4.3.1, read in Ghidra 12-11)
+### Incremental resources (`mode 2`, WW 4.3.1, checked in the client 12-11)
 
-Functions in `libcocos2dcpp.so` (project `recon/ghidra/project`): parser `[fn]` (reads `resource.mode`,
-`minVersion`, `versions`), list of versions `[fn]`, install `[fn]`, append `[fn]`, index
-check `[fn]`, saved revision/size `[fn]` (user data: `resource_revision` +0x1d0,
-`resource_size_64` +0x1d8, loader `[fn]`).
+The client reads `resource.mode`, `minVersion` and `versions` from the resource response, installs or appends the
+data, checks the index and keeps the installed revision and total size (`resource_revision`, `resource_size_64`) in
+its saved user data.
 
 - `mode` 0 = nothing, 1 = full, 2 = incremental; any other value = error. The job keeps `{kind, mode, minVersion,
   last}` with **last = minVersion + number of versions − 1**: that is the revision saved at the end.
@@ -412,15 +411,15 @@ The screens have their own APIs, described in the area files: medals
   "eventStageId":<id evento>,"showIcon":1,"bannerUrl":"","eventType":1,"status":1,
   "endTime":"2026-12-31 23:59:59","newStageId":<id>,"isLock":0,"complete":0}]`.
   `eventStageId` and the stages must exist in the master tables (id at 0 = crash): to be verified.
-- Bench 30-10 (rev 207-213, Special Catalog spike; static analysis in `D:\Progetto_Restauro_KH_UX\tmp\special_banner\out`):
-  - **Master `evStage` row** (parser 0xef9ab4): every field mandatory; `validStageId` = **count** of `stageId`
+- Bench 30-10 (rev 207-213, Special Catalog spike; checked in the client):
+  - **Master `evStage` row** (as the client reads it): every field mandatory; `validStageId` = **count** of `stageId`
     entries and `stageId` holds only those (max 5, like `validSetCloth`/`setCloth`); `startTime`, `endTime`,
     `endDispTime` **and `boardEndTime`** must be parsable dates ("" = «Master data error (200 ERROR)»).
-  - **Locked banners**: with `ret.functionFlags` bit 4 (envelope field, parser 0x77eb98; we send 0) an `isLock` 1
+  - **Locked banners**: with `ret.functionFlags` bit 4 (envelope field; we send 0) an `isLock` 1
     event is drawn darkened with a padlock and the tab shows the red «Unlock All» button (weekly pass). Tapping the
     locked banner or «Unlock All» sends `/payment/info`, `/user/shop`, `/shop/campaign` (we don't serve the last:
-    nothing opens). Details works on locked banners. The client never reads EvStage week*/benefit* (bench and Ghidra 30-10).
-  - **List filter** (`SceneAdventureSelect::initEventBanner` 0xd95fb0): only `isLock` 1 (hidden unless
+    nothing opens). Details works on locked banners. The client never reads EvStage week*/benefit* (bench and client check 30-10).
+  - **List filter** (Events tab banner list): only `isLock` 1 (hidden unless
     `functionFlags` bit 4) and events containing stage 95100/95200 are dropped; no master lookup,
     category, time or weekday check. `isLock` 2 = visible banner with the red «Available» plate.
   - **Tap** on a visible banner always opens that event's quest list (`eventType` 1/2/4 = board/raid modes,

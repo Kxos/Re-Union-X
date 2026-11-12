@@ -1094,7 +1094,7 @@ Played by hand on the bench (field and battle speed at max, maxpower deck). Two 
   enemy guards it (a doubt is logged), and `validate_maps.py` reports an enemy within TRIG of an exit as a warning («la
   sorveglia»), not an error. Benched: Lexaeus IV and VII, both guards fought, target in area 3.
 - **Target battle not starting on contact** (commit cb09da1): generated event maps gave the target team a 120 x 80 arena polygon
-  (map record +0x24); the battle only started inside it, so a target that walked out of it never triggered. Original maps mostly
+  (arena field of the team record in the map file); the battle only started inside it, so a target that walked out of it never triggered. Original maps mostly
   use a zero polygon (JP 4.3.1: 3,379 zero vs 2,187 non-zero boss strips) and start the battle on contact. Event maps now write a
   zero polygon unless the layout gives one; Special maps keep theirs. Benched: Larxene IX target battle starts on contact.
 

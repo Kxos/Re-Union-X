@@ -125,7 +125,7 @@ Tools (20-10):
 - Many buttons load `img/ui/<nome>_On.png` on tap: without it, crash (46 copied).
 - The template's ImageViews have 9-slice (border 50): for icons at natural size `s9=False`.
 - **9-slice + missing texture = crash** in GUIReader (setScale9Enabled recreates the Scale9Sprite on the missing
-  file, SIGSEGV at 0x2c, bench absmax). Without 9-slice the missing texture is tolerated. It was the
+  file, null-pointer crash, bench absmax). Without 9-slice the missing texture is tolerated. It was the
   `Countdown_panel` (Plate21) of `PopupNormal_Continue_Multi` (Continue, AP_Recovery, Ability_MAX)
   and `Win_Over` (Panel07) of `MedalInfo_ReleaseWindow`; same trap in the served originals
   `PassiveResult`, `DeckEdit_SubSlot_Select_Medal_ver260`, `StartDeckProud_*`, `ActionMap_Multi*`.
@@ -146,7 +146,7 @@ Tools (20-10):
   must have a label (e.g. `SpIcon_Open`) must be copied from one with the label (Result_Reward).
 - But01 buttons taller than 68: vertical 9-slice at half height (`TALL9`, capInsetsY 32); with`n  capInsetsY 0 the almost transparent first row stretches into a light band (PvP_SelectWindow).
 - Texts: the client reads `text/<categoria>/<id>.txt` (ui/drama/audio); a missing id =
-  crash. 856 constant ids cited (`ui_text_ids.py`, `layouts\ui_text_ids.tsv`); 2,332 originals
+  crash. 856 constant ids cited (`layouts\ui_text_ids.tsv`); 2,332 originals
   imported from the `misc` of the IPA 4.4.0 (`import_ui_texts.py`). Missing there too: 102850008,
   106260102, 1062402xx (filters, now «%d»/«%d+»), 106240301 «Draw Points» and 106240303 «%d» (Draw Points, 03-11), 101210001-003 (space in the
   English resources).
@@ -168,8 +168,8 @@ Tools (20-10):
 - Often used KHUX equivalents: `Panel04` (dark blue box), `Plate12`/`Plate13`, red `But16`,
   orange `But17`, `Win01`/`Win11`, `Win09` (9-slice with an elastic central zone),
   `Plate18`, `But06`.
-- Cycle for a missing screen: `func_strings.py` + `widget_lookup.py` (names looked up by the
-  code), `text_ids.py` (missing texts), layout in `make_layouts.py`, textures in
+- Cycle for a missing screen: the private client research tools (names looked up by the
+  code, missing texts), layout in `make_layouts.py`, textures in
   `make_textures.py`, test with `-Quick`, crashes with the recipe of [banco.md](banco.md#crash).
   `layout_tree.py` (tree of a UI 1.6 layout), `scene_tree.py` (SceneEditor scenes).
 
@@ -254,7 +254,7 @@ armatures, textures) and writes it into `stage_gen\files\cocostudio\publish\` ov
   of the latest version; no login, no guest, no `resource_data`.
 
 **Check of the widgets looked up by the client** (13-10): the widget names the client looks up in each layout were
-listed (private analysis; public helpers `widget_lookup.py`, `jp_coco_widgets.py` for names of ours absent from the
+listed (private analysis; private helpers for names of ours absent from the
 original), compared with `make_layouts.py` and the original classes. The remaining names belong to other screens or
 are optional (FaceBook_PhotoPanel, Count_Label, ImageButton_Buy1/LockMask, Button_Change, Button_Passive;
 Txt_Countdown only in multiplayer; «Count_Rare» is part of Plate_Count_Rare, present in the original).

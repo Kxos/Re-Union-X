@@ -4,7 +4,7 @@
 //
 // enemyAttack.attackMotion 2 plays lwf/character/enemy/<displayId>/atkSp/. Without that folder the client shows `wait`
 // in a normal fight (docs/notes/battaglia.md#nemici-jp), but the first strike of a CAUTION ambush (map team kind 2)
-// does not fire at all (Lexaeus VII Shadow, bench 11-11, client [fn]). The wrong moves were ours:
+// does not fire at all (Lexaeus VII Shadow, bench 11-11). The wrong moves were ours:
 //  - guest allies 2001-2024 (make-enemy-oltre.js, I-199) copy the moves of their template 2001 Hercules (200101);
 //  - family clones of make-enemy-oltre.js (story 526-979) copy the whole row of their base (Cerberus 112: 11201).
 // 1. applyOriginalMoves: the rows of the PRIVATE file (KHUX_ORIGINAL_MOVES, default

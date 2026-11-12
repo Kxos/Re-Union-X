@@ -86,7 +86,7 @@ server/                 Server Node.js: API REST, DNS, tabelle master e di gioco
 tools/ldplayer/         Banco su LDPlayer: avvio, sessioni (session/), tombstone
 recon/tools/            Strumenti di analisi e di costruzione delle risorse (Python)
 recon/out/              Schemi d'interfaccia: campi e tipi delle tabelle master, schemi delle risposte
-                        (gli script di ricerca per Ghidra restano privati, fuori dal repository)
+                        (gli script di ricerca sul client restano privati, fuori dal repository)
 recon/dl/ ext/ web/     Materiale proprietario — NON versionato
 ```
 
@@ -104,16 +104,14 @@ recon/dl/ ext/ web/     Materiale proprietario — NON versionato
 
 | Script | Funzione |
 |---|---|
-| `vtables.py`, `codeindex.py` | Strumenti di ricerca che hanno prodotto gli schemi d'interfaccia in `recon/out` |
-| `master_fields.py` | La pipeline della fase C: campi delle tabelle master |
+| strumenti di ricerca sul client (privati) | hanno prodotto gli schemi d'interfaccia, delle risposte e delle master in `recon/out` |
 | `strings.py` | Estrattore di stringhe da binari |
 | `demangle.py`, `scope_methods.py` | Strumenti di ricerca sui nomi presenti nel binario |
 | `elfinfo.py` | Architettura ed endianness di un ELF |
 | `make_layouts.py` | Layout CocoStudio sostitutivi: copie di originali, scene, layout costruiti, cloni di widget, armature, testi |
 | `resource_pack.py`, `resource_merge.py` | Pacchetto BGAD delle risorse generate e indice unito (con riserva di spazio per il ciclo rapido) |
-| `import_ui_texts.py`, `ui_text_ids.py` | Testi `text/ui` originali dall'IPA 4.4.0; id dei testi usati dal binario |
-| `widget_lookup.py`, `layout_tree.py`, `scene_tree.py` | Nomi dei widget cercati dal client; struttura di layout e scene |
-| `action_case.py`, `batch_schema.py`, `who_refs.py` | Strumenti di ricerca che hanno prodotto gli schemi delle risposte in `recon/out` |
+| `import_ui_texts.py` | Testi `text/ui` originali dall'IPA 4.4.0 |
+| `layout_tree.py`, `scene_tree.py` | Struttura di layout e scene |
 | `import_orig_stages.py`, `make_jp_rooms.py` | Stage e stanze originali della storia dai dati JP 4.3.1 e 2016 (missioni 1-979) |
 | `import_jp_coco.py` | Layout CocoStudio originali JP al posto di quelli generati (elenco `jp_coco_layouts.txt`) |
 | `make_jp_enemies.py`, `deep_donors.py` | Grafiche originali dei nemici; texture mancanti ritrovate per contenuto in altri file della stessa creatura |

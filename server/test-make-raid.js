@@ -1593,8 +1593,9 @@ const tests = {
     // the shipped config: every board of the research has a picture, and the JP files exist where the data is
     const real = REAL_CONFIG.boards.art, keys = BOARDS_KEYS();
     if (keys) assert.deepStrictEqual(keys.filter((k) => !real[k]), [], 'boards without a card picture');
-    const jp = process.env.KHUX_JP_DATA || path.join('D:', 'Progetto_Restauro_KH_UX', '[local reference data]', ' KHUx data shared', '[local reference data]', 'data', '[local reference data]', 'data', 'jp_final_4.3.1');
-    if (fs.existsSync(jp)) assert.deepStrictEqual(Object.values(real).filter((a) => a.jp && !fs.existsSync(path.join(jp, a.jp))), [], 'JP files');
+    const jp = process.env.KHUX_JP_DATA;
+    if (!jp) console.log('  (JP files not checked: KHUX_JP_DATA not set)');
+    else if (fs.existsSync(jp)) assert.deepStrictEqual(Object.values(real).filter((a) => a.jp && !fs.existsSync(path.join(jp, a.jp))), [], 'JP files');
     else console.log('  (JP files not checked: no JP data)');
   },
   cell_order() {
