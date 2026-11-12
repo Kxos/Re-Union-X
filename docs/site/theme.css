@@ -131,7 +131,7 @@ b.k,.k{color:var(--gold)}
 
 /* crisp small labels: the rounded display font blurs below ~18px on Windows, so tabs, tags, badges,
    kickers and pills use the system UI font (titles and buttons keep the rounded font) */
-.tabs,.tabs a,.tag,.fbadge,.mrole,.mttl,.ded-kicker,.hero-kicker,.ded-links a,.more summary,.names i,.stat-l,.how-step b,.fcard > b,.mname,.h-kicker,.h-name,.h-av,.tnm,.tav{
+.tabs,.tabs a,.tag,.fbadge,.mrole,.mttl,.ded-kicker,.hero-kicker,.ded-links a,.more summary,.names i,.stat-l,.how-step b,.fcard > b,.mname,.h-kicker,.h-name,.h-av,.tnm,.tav,.community-thanks .ct-sign{
   font-family:var(--font-body)}
 .tabs a{font-weight:700;letter-spacing:.2px;text-shadow:0 1px 0 #06213f}
 .tag{font-weight:700;letter-spacing:.4px;text-shadow:0 1px 0 rgba(0,0,0,.35)}
