@@ -20,6 +20,7 @@ for (const [name, html] of [['help', lp.helpPage()], ['credits', lp.creditsPage(
 check(lp.helpPage().includes('player.json'), 'help: no save section');
 check(lp.helpPage().includes('%LOCALAPPDATA%\\Re-Union X\\save'), 'help: save folder path lost its backslashes (bench 05-11)');
 check(lp.creditsPage().includes('Re-Union X Project'), 'credits: no project team');
+check(lp.TESTERS.length > 0 && lp.TESTERS.every((n) => lp.creditsPage().includes(n)) && !lp.TESTERS.includes('thethiny'), 'credits: testers missing');
 
 // the login links help and staff point to the pages
 const src = require('fs').readFileSync(require('path').join(__dirname, 'server.js'), 'utf8');

@@ -74,7 +74,7 @@ h3.sq:before{content:"";display:inline-block;width:14px;height:14px;background:v
 .tag{flex:none;display:inline-block;min-width:124px;text-align:center;font-size:13px;font-weight:700;line-height:1.3;padding:5px 8px;border-radius:3px;color:#fff;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.18);text-shadow:0 1px 0 rgba(0,0,0,.35)}
 .t-event{background:var(--t-event)}.t-campaign{background:var(--t-campaign)}.t-update{background:var(--t-update)}
-.t-important{background:var(--t-important)}.t-info{background:var(--t-info)}
+.t-important{background:var(--t-important)}.t-info{background:var(--t-info)}.t-testers{background:#9b59b6}
 .arrows li:after{content:"";flex:none;width:0;height:0;border-style:solid;border-width:8px 0 8px 13px;border-color:transparent transparent transparent var(--arrow)}
 .checks li:before{content:"";flex:none;width:18px;height:18px;border-radius:4px;border:2px solid var(--sq);
   background:linear-gradient(135deg,transparent 45%,var(--sq) 45% 60%,transparent 60%)}
@@ -246,3 +246,6 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
 .community-thanks i{color:var(--cyan)}
 .community-thanks .ct-sign{margin:12px auto 0;font:700 15px/1.4 var(--font);color:#ffcf6b;letter-spacing:.3px}
 @media (max-width:640px){.community-thanks{padding:18px 14px 14px}.ct-title{font-size:20px}.community-thanks p{font-size:15px}}
+/* Testers (Credits): the purple of the Discord tester role */
+.tnames{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tname{font-family:var(--font);font-weight:700;font-size:14.5px;color:#f1e2fb;background:rgba(155,89,182,.28);border:1px solid #c79be0;border-radius:999px;padding:2px 12px}

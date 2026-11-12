@@ -59,7 +59,7 @@ b.k,.k{color:var(--gold)}
 .tag{border-radius:7px}
 .t-update{background:linear-gradient(#8fb34a,#6f8c30)}
 .t-important{background:linear-gradient(#e6466a,#c22a48)}
-.t-info{background:linear-gradient(#4f90e0,#336fc0)}
+.t-info{background:linear-gradient(#4f90e0,#336fc0)}.t-testers{background:linear-gradient(#b57bd0,#9b59b6 55%,#7a3f94)}
 .t-event{background:linear-gradient(#45d6e2,#25aebb)}
 .t-campaign{background:linear-gradient(#9a52d6,#7634b2)}
 .checks li:before{border-radius:50%}

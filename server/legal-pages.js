@@ -84,21 +84,49 @@ function helpPage() {
   return page('<h1>Help</h1><p class="n">Re-Union X</p>' + sections.map(section).join(''));
 }
 
+// Credits in the game's own style (user 12-11): the blue of the game's pages, cyan section titles with the square, gold
+// key words, cards with the side bar of the catalogues, pills like the game's tags; the testers in the purple of their
+// Discord role. Same people as the site's Credits section, with no links (rules above).
+const TESTERS = ['aryna', 'Drybomber', 'LuxHollow', 'Luxe', 'Maria', 'Richard(GUSTU)']; // Trusted role, 12-11 (thethiny is above)
+const CREDITS_CSS = '<style>body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-serif;letter-spacing:.3px;padding:8px 14px 40px}'
+  + 'h1{font-size:24px;margin:8px 0 0;text-align:center;letter-spacing:1px}.sub{text-align:center;color:#b9cfdc;font-size:14px;margin:0 0 10px}'
+  + 'h2{color:#00d4ed;font-size:18px;margin:20px 0 6px}h2:before{content:"\\25A0  "}b.g{color:#ffcd4a}'
+  + '.intro{text-align:center;margin:6px auto 12px;max-width:640px;padding:10px 14px;border-top:1px solid #2f5d78;border-bottom:1px solid #2f5d78}'
+  + '.intro .st{display:block;color:#ffcd4a;font-size:20px;line-height:1}'
+  + '.ded{position:relative;margin:8px 0 6px;padding:14px 16px 12px;border:2px solid #ffe08a;border-radius:14px;'
+  + 'background:linear-gradient(#0b4f8f,#06283e);box-shadow:0 0 0 2px #043654,0 0 0 4px #b8860b}'
+  + '.ded .nm{font-size:26px;font-weight:bold;font-style:italic;margin:2px 0 4px;text-shadow:0 2px 0 #022238}'
+  + '.pill{display:inline-block;border-radius:12px;padding:0 12px;font-size:12px;font-weight:bold;letter-spacing:1.5px;line-height:1.8;color:#fff}'
+  + '.p-gold{background:linear-gradient(#ffcf6b,#e0a43a);color:#3a2400}.p-blue{background:linear-gradient(#45a6e2,#2a7fbf)}'
+  + '.p-purple{background:linear-gradient(#b57bd0,#9b59b6 55%,#7a3f94)}.p-pink{background:linear-gradient(#ff8fa8,#e0506f)}'
+  + '.row{padding:10px 0 10px 12px;border-left:5px solid #1a6fa8;border-bottom:1px solid #2f5d78}.row p{margin:4px 0 0}'
+  + '.row.t{border-left-color:#9b59b6}.names{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}'
+  + '.names span{border:1px solid #c79be0;background:#3b2152;color:#f1e2fb;border-radius:14px;padding:1px 12px;font-weight:bold;font-size:15px}'
+  + '.heart{margin:18px 0 6px;padding:14px 16px;text-align:center;border:2px solid #ff8fa8;border-radius:14px;background:linear-gradient(#0d4a70,#06283e)}'
+  + '.heart .h{color:#ff6f8f;font-size:30px;line-height:1}.heart .ttl{font-size:21px;font-weight:bold;font-style:italic;margin:4px 0}'
+  + '.heart .sign{color:#ffcf6b;font-style:italic;font-weight:bold;margin-top:8px}'
+  + '.n{color:#b9cfdc;font-size:14px}</style>';
+
 function creditsPage() {
-  const sections = [
-    ['Re-Union X Project', ['The restoration server, its tools and these pages were made by the Re-Union X Project team.']],
-    ['With the help of', [
-      ['thethiny', 'Tools and documentation of the game formats, server research and original data, on which most of this work builds.'],
-      ['Roboloid and Ultimadei', 'The KHUχ database: Medal data, multipliers and special attack conditions.'],
-      ['KHUX Wiki and KH Wiki', 'Quests, Medals, special attacks, events and images used as references.'],
-      ['ReLux Team', 'Research on events, raids, Union Cross and campaigns, and player-made calculators.'],
-      ['SmellyOctopus', 'Thank you for teaching so many of us to play free-to-play wisely, and for keeping us company back then with videos full of joy. Those videos are now a huge help as references for the restoration.'],
-      ['The community', 'Players who shared screenshots, videos, notes and memories of the game, and the testers of the restoration.']]],
-    ['The original game', [
-      'KINGDOM HEARTS Union χ[Cross] was developed and published by SQUARE ENIX. KINGDOM HEARTS and all its characters, images, music and texts belong to SQUARE ENIX and Disney.',
-      NOT_AFFILIATED]],
-  ];
-  return page('<h1>Credits</h1><p class="n">Re-Union X</p>' + sections.map(section).join(''));
+  const k = (s) => esc(s).replace(/\*([^*]+)\*/g, '<b class="g">$1</b>'); // *words* in gold
+  const row = (tag, text, cls = '', extra = '') => `<div class="row ${cls}"><span class="pill ${cls === 't' ? 'p-purple' : 'p-blue'}">${esc(tag)}</span>`
+    + `<p>${k(text)}</p>${extra}</div>`;
+  const body = '<h1>Credits</h1><p class="sub">Re-Union X</p>'
+    + `<div class="intro"><span class="st">&#10022;</span>${k('This restoration stands on the work of people who *preserved* and *documented* the game long before us.')}</div>`
+    + `<div class="ded"><span class="pill p-gold">SPECIAL THANKS</span><div class="nm">thethiny</div><p>${k('Without thethiny this project would most likely never have got off the ground. His tools *opened the game\'s data*, his server showed that *bringing it back was possible*, and his public work gave us the map we have followed since the very first day. *We are deeply, truly grateful.*')}</p></div>`
+    + `<h2>Re-Union X Project</h2><p>${k('The restoration server, its tools and these pages were made by the *Re-Union X Project* team.')}</p>`
+    + '<h2>With the help of</h2>'
+    + row('Roboloid & Ultimadei', 'The KHUχ database: *Medal data, multipliers and special attack conditions*.')
+    + row('KHUX Wiki & KH Wiki', '*Quests, Medals, special attacks and events* used as references.')
+    + row('ReLux Team', 'Research on the game\'s *events, raids, Union Cross and campaigns*, the archive of the official notices and player-made calculators. Lead developer *LuxHollow*: a steady support to this project.')
+    + row('SmellyOctopus', 'Thank you for teaching so many of us to *play free-to-play wisely*, and for keeping us company back then with *videos full of joy*. Those videos are now *a huge help* as references for the restoration.')
+    + row('Testers', 'They play the restoration first and *report what breaks*, so that everyone else finds it working.', 't',
+      `<div class="names">${TESTERS.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`)
+    + `<div class="heart"><div class="h">&#9829;</div><span class="pill p-pink">FROM THE HEART</span><div class="ttl">To our community</div><p>${k('Thank you to *every player who never let this game go*: to everyone who kept videos, screenshots and guides, shared what they remembered or simply asked “is it coming back?”. You are the reason this restoration keeps going, and *this game lives on because of you*.')}</p><div class="sign">May your heart be your guiding key.</div></div>`
+    + '<h2>The original game</h2>'
+    + `<p>${esc('KINGDOM HEARTS Union χ[Cross] was developed and published by SQUARE ENIX. KINGDOM HEARTS and all its characters, images, music and texts belong to SQUARE ENIX and Disney.')}</p><p class="n">${esc(NOT_AFFILIATED)}</p>`;
+  return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + CREDITS_CSS + '</head><body>' + body + '</body></html>';
 }
 
-module.exports = { agreementPage, licensePage, helpPage, creditsPage, NOT_AFFILIATED };
+module.exports = { agreementPage, licensePage, helpPage, creditsPage, NOT_AFFILIATED, TESTERS };
