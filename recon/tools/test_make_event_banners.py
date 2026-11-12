@@ -9,6 +9,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageChops  # noqa: E402
 import make_event_banners as meb  # noqa: E402
+meb.CACHE = 'https://img.example/img/'   # stand-in for the private KHUX_NOTICE_IMG_BASE
 import make_special_banners as msb  # noqa: E402
 
 HDR = 'https://img.example/img/HEADER1'

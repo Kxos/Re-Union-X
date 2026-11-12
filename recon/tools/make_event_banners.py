@@ -9,8 +9,8 @@
 --index: server/game_data/events.json (make-events.js); each entry names its SQUARE ENIX BRIDGE notice ids in `noticeIds`.
 --notices: the notice list of reference\\banners\\notices.json ([{"id", "imgs": [url, ...]}]). A notice shows the shared
 page header first (an image key present in many notices) and then its own banner; the banner is the first image key that
-is not a shared header (HEADER_SHARE: in more than this many notices). The keys are fetched from cache.sqex-bridge.jp
-(still live); the files are untrusted downloads: own folder, read only through Pillow.
+is not a shared header (HEADER_SHARE: in more than this many notices). The keys are fetched from the image base in
+KHUX_NOTICE_IMG_BASE (private setting, not in the repository); the files are untrusted downloads: own folder, read only through Pillow.
 --fetch is polite: one request every PAUSE seconds, files already in D are not fetched again, and after two failed
 requests in a row the run gives up (the rest is reported, never retried in a loop). D/sources.json lists
 {"noticeId", "key", "file", "url"} of every file fetched.
@@ -36,14 +36,14 @@ import make_raid_banners as mrb  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-CACHE = 'https://img.example/img/'
+CACHE = os.environ.get('KHUX_NOTICE_IMG_BASE', '')   # private setting: --fetch refuses to run without it
 HEADER_SHARE = 20
 PAUSE = 2.0
 KEY = re.compile(r'/img/([A-Za-z0-9_-]+)\s*$')
 
 
 def key_of(url):
-    """'https://img.example/img/9c3xN7ln4R ' -> '9c3xN7ln4R' (trailing blanks of the list stripped); None if not one"""
+    """'<image base>/img/9c3xN7ln4R ' -> '9c3xN7ln4R' (trailing blanks of the list stripped); None if not one"""
     m = KEY.search((url or '').strip())
     return m.group(1) if m else None
 
@@ -142,6 +142,8 @@ def key_file(dest, key):
 def fetch(items, dest, get=None, pause=PAUSE, sleep=time.sleep):
     """downloads the banners of items [(evStageId, noticeId, key)] to dest; get(url) -> bytes (default urllib).
     Returns (fetched [file], cached [file], failed [(noticeId, key, why)], gave_up bool)."""
+    if get is None and not CACHE:
+        raise SystemExit('--fetch needs KHUX_NOTICE_IMG_BASE (private setting)')
     os.makedirs(dest, exist_ok=True)
     get = get or _get
     man_path = os.path.join(dest, 'sources.json')

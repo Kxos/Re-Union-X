@@ -10,7 +10,7 @@ hand (local only, never in the repo, like reference\\special_banners). --index: 
 An entry takes the banner whose dates hold its census row start (else the one whose dates overlap its row most); an
 entry with no banner (rows outside the Weekly Raid Event and outside --notices) keeps 0.png, the plain plate.
 --notices: JSON list [{"file", "from", "to", "notice"}] of raid cards taken from the official notices (SQUARE ENIX BRIDGE
-notice id, cache.sqex-bridge.jp/img/<key>, archived copy): the weeks the wiki page does not list (the 5 pre-series raid
+notice id and image key): the weeks the wiki page does not list (the 5 pre-series raid
 weeks 2018-09-03 to 10-01). "file" is relative to --banners, dates ISO; they are added after the wiki rows. An item
 with "evStageId" is bound to that id and never matched by date (the 62 older WW event raids 2016-05 to 2018-09, whose
 one-off, weekend, monthly and daily runs overlap the weekly rows; card = the 640x140 image of the event's own notice).
