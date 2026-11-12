@@ -27,7 +27,13 @@ for ($t = 0; $t -lt 600 -and $quiet -lt 20; $t += 5) {
 . .\tools\ldplayer\bench_lib.ps1
 $res = 'D:\Progetto_Restauro_KH_UX\resource_data'
 $ver = Get-ChildItem $res -Directory | Where-Object Name -match '^\d+$' | Sort-Object { [int]$_.Name } | Select-Object -Last 1
-$wantData = (Get-ChildItem "$($ver.FullName)\data" | Measure-Object Length -Sum).Sum
+# dati installati = pezzi di tutta la catena (versioni incrementali: base.txt -> versione precedente)
+$wantData = 0; $n = [int]$ver.Name
+while ($true) {
+    $wantData += (Get-ChildItem "$res\$n\data" | Measure-Object Length -Sum).Sum
+    if (-not (Test-Path "$res\$n\base.txt")) { break }
+    $n = [int](Get-Content "$res\$n\base.txt" | Select-Object -First 1).Trim()
+}
 $wantIndex = (Get-ChildItem "$($ver.FullName)\index" | Measure-Object Length -Sum).Sum
 $r = '/data/data/com.square_enix.android_googleplay.khuxww/files/r'
 for ($t = 0; $t -lt 900; $t += 10) {

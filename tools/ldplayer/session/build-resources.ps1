@@ -31,7 +31,14 @@
 # -TestStraddle <nome>: solo per la prova al banco dei pezzi oltre 4 GiB (I-171, risorse_layout.md#pezzi): versione
 #   completa con un pezzo di zeri prima del generato, perche' il record <nome> del generato stia a cavallo dei 4 GiB.
 #   La versione dopo, senza -TestStraddle, torna sotto i 4 GiB (nuovo download completo).
-param([int]$Version, [switch]$Quick, [switch]$DryRun, [switch]$NoJp, [switch]$NoRooms, [switch]$NoEnemies, [switch]$NoRaisedraw, [switch]$NoCompact, [string]$TestStraddle)
+# -Append: versione incrementale (mode 2, docs/notes/server.md#resource-mode2). Gli stessi generatori di una versione
+#   completa, poi resource_delta.py confronta la build con l'ultima versione e resource_data\<N> riceve solo base.txt
+#   (la versione precedente), data\d0000 (i record cambiati o nuovi, in coda ai dati della catena) e l'indice completo.
+#   Chi ha la versione precedente scarica solo quel pezzo; chi parte da zero tutta la catena (mode 1). I nomi tolti
+#   restano e i record sostituiti restano nei dati come byte morti: una base completa nuova (-Version N) li toglie.
+#   Senza -Version: l'ultima + 1. -Quick e -DryRun non valgono su una versione incrementale.
+#   .\build-resources.ps1 -Append
+param([int]$Version, [switch]$Quick, [switch]$Append, [switch]$DryRun, [switch]$NoJp, [switch]$NoRooms, [switch]$NoEnemies, [switch]$NoRaisedraw, [switch]$NoCompact, [string]$TestStraddle)
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\buildlog.ps1"
 Assert-BuildPreflight
@@ -47,10 +54,29 @@ if ($DryRun) {
   $global:LASTEXITCODE = 0
   New-Item -ItemType Directory -Force "$sg\quest_thumbs" | Out-Null
 }
+$latestV = [int](Get-ChildItem "$D\resource_data" -Directory | Where-Object Name -match '^\d+$' |
+  Sort-Object { [int]$_.Name } | Select-Object -Last 1).Name
+# catena di una versione (base.txt -> versione precedente), dalla completa all'ultima: come resourceChain di server.js
+function Resource-Chain([int]$n) {
+  $c = @($n)
+  while (Test-Path "$D\resource_data\$n\base.txt") {
+    $b = [int](Get-Content "$D\resource_data\$n\base.txt" | Select-Object -First 1).Trim()
+    if ($b -ge $n -or -not (Test-Path "$D\resource_data\$b")) { throw "versione ${n}: base $b assente o non piu' vecchia" }
+    $n = $b; $c = @($n) + $c
+  }
+  , $c
+}
+if ($Append -and ($Quick -or $DryRun -or $TestStraddle)) { throw '-Append non va con -Quick, -DryRun o -TestStraddle' }
 if ($Quick) {
-  $Version = [int](Get-ChildItem "$D\resource_data" -Directory | Where-Object Name -match '^\d+$' |
-    Sort-Object { [int]$_.Name } | Select-Object -Last 1).Name
-} elseif (-not $Version) { throw 'serve -Version N oppure -Quick' }
+  $Version = $latestV
+  if (Test-Path "$D\resource_data\$Version\base.txt") { throw "la versione $Version e' incrementale (base.txt): -Quick e -DryRun non valgono, usa -Append" }
+} elseif ($Append) {
+  if (-not $latestV) { throw '-Append: nessuna versione da cui partire' }
+  if (-not $Version) { $Version = $latestV + 1 }
+  if ($Version -le $latestV) { throw "-Append: la versione $Version non e' dopo l'ultima ($latestV)" }
+  $prevV = $latestV
+  $prevChain = Resource-Chain $prevV
+} elseif (-not $Version) { throw 'serve -Version N, -Append oppure -Quick' }
 # controlli prima di ogni generatore (I-171): una versione completa non tocca una cartella esistente ne' (con la
 # compattazione) i pacchetti condivisi di $D\compact su cui conta il -Quick della versione installata
 if ($TestStraddle -and $Quick) { throw '-TestStraddle vale solo per una versione completa (-Version N), non con -Quick o -DryRun' }
@@ -428,7 +454,9 @@ function Compact-Stamp([string]$l) {
 if ($Quick) {
   $cLines = if (Test-Path "$v\compact.txt") { @(Get-Content "$v\compact.txt" | Where-Object { $_ }) } else { @() }
   $compact = @($cLines | ForEach-Object { ($_ -split "`t")[0] })
-} elseif ($NoCompact) {
+} elseif ($NoCompact -or $Append) {
+  # -Append: la build serve solo da confronto (resource_delta.py legge il contenuto dei record), senza toccare i
+  # pacchetti compattati condivisi di $cdir
   $compact = @()
 } else {
   $compact = @(@('obb', 'addnl', 'medal_gen') | Where-Object { $l = $_; $plist | Where-Object { $_[0] -eq $l } })
@@ -464,6 +492,8 @@ if ($Quick) {
   $genName = (Get-ChildItem "$v\data" | Sort-Object Name | Select-Object -Last 1).Name
   $dataSize = (Get-Item "$v\data\$genName").Length
   $mergeOpt = @('--fast-md5', '--index-size', (Get-Item "$v\index\misc.png").Length)
+} elseif ($Append) {
+  $mergeOpt = @()
 } else {
   # si costruisce in resource_data\_build_<N> (il server annuncia solo le cartelle numeriche) e si rinomina dopo i
   # controlli finali: un build fallito non lascia una versione nuova rotta che il server servirebbe
@@ -535,6 +565,39 @@ if ($Quick) {
 python -I recon\tools\medal_mixture_alias.py server\master_data\medal.json "$sg\mixture_alias.tsv"
 if ($LASTEXITCODE) { throw 'medal_mixture_alias fallito' }
 $mergeOpt += @('--alias', "$sg\mixture_alias.tsv")
+if ($Append) {
+  $lib = 'recon\ext\ww431\libcocos2dcpp.so'
+  # la build nuova come versione completa: indice unito (senza riempimento) e dati dei pacchetti in ordine
+  $packs = @(); $fullData = @(); foreach ($p in $plist) { $packs += @($p[1], $p[2]); $fullData += $p[2] -split ',' }
+  $fullIdx = "$sg\append_full.png"
+  python -I recon\tools\resource_merge.py --last-wins --fast-md5 @mergeOpt recon\tools $lib $key $fullIdx @packs
+  if ($LASTEXITCODE) { throw 'resource_merge della build completa fallito' }
+  # la versione precedente: il suo indice e i pezzi di tutta la sua catena, in ordine
+  $prevData = @(); foreach ($c in $prevChain) { $prevData += @(Get-ChildItem "$D\resource_data\$c\data" -File | Sort-Object Name | ForEach-Object FullName) }
+  $prevIdx = "$D\resource_data\$prevV\index\misc.png"
+  python -I recon\tools\resource_delta.py recon\tools $lib $key "$sg\delta.png" "$sg\delta.mp4" $prevIdx ($prevData -join ',') $fullIdx ($fullData -join ',')
+  if ($LASTEXITCODE -eq 2) { throw "niente di cambiato rispetto alla versione ${prevV}: nessuna versione nuova" }
+  if ($LASTEXITCODE) { throw 'resource_delta fallito' }
+  if ((Get-Item "$sg\delta.mp4").Length -ge 2147483648) { throw "pacchetto delle differenze da 2 GiB o piu' (il client lo rifiuta): serve una base completa (-Version N)" }
+  # in resource_data\_build_<N> e rinominata dopo i controlli, come una versione completa
+  $v = "$D\resource_data\_build_$Version"
+  if (Test-Path $v) { Remove-Item -Recurse -Force $v }
+  New-Item -ItemType Directory -Force "$v\data", "$v\index" | Out-Null
+  Copy-Item "$sg\delta.mp4" "$v\data\d0000"
+  Set-Content -Encoding ascii "$v\base.txt" $prevV
+  # indice di N + differenze in coda (l'ultimo vince): offset di N invariati, size = dati della catena + d0000
+  python -I recon\tools\resource_merge.py --last-wins recon\tools $lib $key "$v\index\misc.png" $prevIdx ($prevData -join ',') "$sg\delta.png" "$v\data\d0000"
+  if ($LASTEXITCODE) { throw 'resource_merge della versione incrementale fallito' }
+  # ogni nome della build completa ha lo stesso contenuto nella versione incrementale
+  python -I recon\tools\resource_delta.py check recon\tools $lib $key "$v\index\misc.png" (($prevData + "$v\data\d0000") -join ',') $fullIdx ($fullData -join ',')
+  if ($LASTEXITCODE) { throw 'la versione incrementale non legge gli stessi file della build completa' }
+  $total = ($prevData | ForEach-Object { (Get-Item $_).Length } | Measure-Object -Sum).Sum + (Get-Item "$v\data\d0000").Length
+  if ($total -gt 10 * [int64]2147483648) { throw "dati della catena oltre 20 GiB ($total byte): il client legge solo misc.mp4 .. misc.mp4.9; serve una base completa" }
+  Rename-Item $v "$Version"
+  "versione incrementale $Version pronta: base $prevV (catena $($prevChain -join ' > ') > $Version), pezzo di $((Get-Item "$D\resource_data\$Version\data\d0000").Length) byte, dati della catena $([math]::Round($total / 1GB, 2)) GiB"
+  Show-BuildSteps
+  return
+}
 $genLen = (Get-Item "$sg\gen.mp4").Length
 if ($genLen -gt $dataSize) { throw "pacchetto generato di $genLen byte oltre la riserva di ${dataSize}: serve una versione completa" }
 $fs = [IO.File]::Open("$sg\gen.mp4", 'Open', 'ReadWrite'); $fs.SetLength($dataSize); $fs.Close()

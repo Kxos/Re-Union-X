@@ -45,10 +45,10 @@ if ($TestPresents) { $env:KHUX_TEST_PRESENTS = '1' }
 if ($AllParts) { $env:KHUX_PET_ALL_PARTS = '1' }
 # -PetDraw: Spirit Blind Box (KHUX_PET_DRAW=1, server/pet-draw.js; needs resources 98+ for lwf/petdraw)
 if ($PetDraw) { $env:KHUX_PET_DRAW = '1' } else { Remove-Item Env:KHUX_PET_DRAW -ErrorAction SilentlyContinue }
-# dimensione dell'ultima versione delle risorse (cartella numerica piu' alta)
+# byte da scaricare: li calcola il server dalla revisione del gioco (versioni incrementali, mode 2); KHUX_RESOURCE_SIZE
+# solo per forzarli nelle prove
 $res = 'D:\Progetto_Restauro_KH_UX\resource_data'
-$last = Get-ChildItem $res -Directory | Where-Object Name -match '^\d+$' | Sort-Object { [int]$_.Name } | Select-Object -Last 1
-$env:KHUX_RESOURCE_SIZE = [string](Get-ChildItem "$($last.FullName)\data" | Measure-Object Length -Sum).Sum
+Remove-Item Env:KHUX_RESOURCE_SIZE -ErrorAction SilentlyContinue
 $env:KHUX_RESOURCE_DIR = $res
 $env:KHUX_RESOURCE_KEY = python -I "$repo\recon\tools\private_tools.py" key
 if ($LASTEXITCODE -or -not $env:KHUX_RESOURCE_KEY) { throw 'chiave delle risorse non disponibile: vedi recon/tools/private_tools.py' }

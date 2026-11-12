@@ -481,7 +481,11 @@ function respondResourceSize(res, req) {
   // e scarica solo le 106 tabelle, mai i pacchetti; prima annunciava i 4,28 GB delle risorse.
   const masterCurrent = Number(req?.masterRevision) >= sessionRevision();
   const resourcesCurrent = Number(req?.resourceRevision) >= latestResourceVersion();
-  const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : Number(process.env.KHUX_RESOURCE_SIZE || 0);
+  // resources to download: the bytes of the plan from the game's revision (mode 2 = only the appended packs);
+  // KHUX_RESOURCE_SIZE overrides it (bench tests)
+  const resourceBytes = () => (process.env.KHUX_RESOURCE_SIZE ? Number(process.env.KHUX_RESOURCE_SIZE)
+    : resourcePlanBytes(Number(req?.resourceRevision) || 0));
+  const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : resourceBytes();
   const state = writeResourceState(Number(req?.resourceRevision) || 0);
   if (!resourcesCurrent) resourcesPending = true;
   send(res, 200, { ret: ret(), size });
@@ -491,7 +495,7 @@ function respondResourceSize(res, req) {
   if (state && state.dataMissing && state.have < state.latest) {
     console.log('resources missing for the game (have ' + state.have + ', latest ' + state.latest + '): server exits');
     setTimeout(() => process.exit(3), 300);
-  } else if (state && state.have < state.latest && needsGitHub(state.latest)) {
+  } else if (state && state.have < state.latest && resourcePlan(state.have).versions.some(needsGitHub)) {
     // the pieces will come from GitHub: without internet (or with a refused token) the game would loop on error 52,
     // so the same way back, with «offline» or «denied» in the state for Re-Union X's message
     remote.reachable(remote.config()).then((how) => {
@@ -520,8 +524,11 @@ function writeResourceState(have, extra) {
   const file = process.env.KHUX_RESOURCE_STATE;
   if (!file) return null;
   const latest = latestResourceVersion();
-  // missing = neither on the phone nor in data.txt for GitHub (resource-remote.js)
-  const dataMissing = localNames(latest, 'data').length === 0 && remoteData(latest).length === 0;
+  // missing = a version the game must download (resourcePlan: the chain, or the part after its revision) has its pieces
+  // neither on the phone nor in data.txt for GitHub (resource-remote.js); a broken chain counts as missing
+  const plan = resourcePlan(have);
+  const dataMissing = latest > 0 && (!plan.mode
+    || plan.versions.some((v) => localNames(v, 'data').length === 0 && remoteData(v).length === 0));
   const state = { have, latest, dataMissing, offline: false, denied: false, ...extra, at: Date.now() };
   try {
     fs.writeFileSync(file + '.tmp', JSON.stringify(state));
@@ -884,23 +891,55 @@ function latestResourceVersion() {
   return v.length ? v[v.length - 1] : 0;
 }
 
-function respondResource(res) {
-  const versions = resourceVersions();
-  const body = { ret: ret() };
-  if (versions.length === 0) {
-    body.resource = { mode: 0, minVersion: 0, versions: [] };
-  } else {
-    // Solo l'ultima versione: ognuna delle nostre e' un pacchetto completo (la 4 = la 3
-    // + le mappe generate). Con mode 1 il client scarica i data di TUTTE le versioni
-    // elencate e li concatena: con 3 e 4 insieme misc.mp4 veniva di 4,6 GB, la
-    // dimensione non tornava con l'indice e compariva «Save error».
-    const last = versions[versions.length - 1];
-    body.resource = {
-      mode: 1, minVersion: last,
-      versions: [{ data: resourceFiles(last, 'data'), index: resourceFiles(last, 'index') }],
-    };
+// Incremental versions (mode 2, docs/notes/server.md#resource-mode2): RESOURCE_DIR/<N>/base.txt names the version N
+// builds on; <N>/data holds only the pieces appended after it, <N>/index the full index of N (offsets in the whole
+// concatenated stream). The chain of N is [full version, ..., N], oldest first; null when a base is missing or not older
+// (nothing to serve: a stream that does not match the index would give «Save error»).
+function resourceChain(version) {
+  const chain = [version];
+  for (let v = version; ;) {
+    let base;
+    try { base = fs.readFileSync(path.join(RESOURCE_DIR, String(v), 'base.txt'), 'utf8').trim(); } catch { return chain; }
+    if (!/^\d+$/.test(base) || Number(base) >= v || !fs.existsSync(path.join(RESOURCE_DIR, base))) {
+      console.log(`[risorse] versione ${v}: base «${base}» assente o non piu' vecchia, catena di ${version} rotta`);
+      return null;
+    }
+    v = Number(base);
+    chain.unshift(v);
   }
+}
+
+// What the game must download from its revision: mode 2 (only the versions after it) when the revision is in the chain of
+// the latest version, otherwise mode 1 with the whole chain (the game concatenates the data of every listed version).
+// The game keeps only the index of the last listed version: every entry carries that one (same file, never a second
+// download of an index nobody reads). {mode: 0} when there is nothing to serve.
+function resourcePlan(have) {
+  const latest = latestResourceVersion();
+  const chain = latest ? resourceChain(latest) : null;
+  if (!chain) return { mode: 0, minVersion: 0, versions: [] };
+  const at = chain.indexOf(Number(have));
+  const versions = at >= 0 && at < chain.length - 1 ? chain.slice(at + 1) : chain;
+  return { mode: versions === chain ? 1 : 2, minVersion: versions[0], versions };
+}
+
+function respondResource(res, req) {
+  const plan = resourcePlan(Number(req?.revision) || 0);
+  const index = plan.mode ? resourceFiles(plan.versions[plan.versions.length - 1], 'index') : [];
+  // Mode 1 lists the whole chain (one full version when there is no base.txt): with two FULL versions listed the game
+  // concatenated both (4.6 GB, size different from the index, «Save error»), so only the chain of the latest is listed.
+  const body = { ret: ret(), resource: { mode: plan.mode, minVersion: plan.minVersion,
+    versions: plan.versions.map((v) => ({ data: resourceFiles(v, 'data'), index })) } };
+  if (plan.mode) console.log(`[risorse] revisione ${Number(req?.revision) || 0}: mode ${plan.mode}, versioni ${plan.versions.join(', ')}`);
   send(res, 200, body);
+}
+
+/** bytes the game downloads from revision have: the data of the plan + the index */
+function resourcePlanBytes(have) {
+  const plan = resourcePlan(have);
+  if (!plan.mode) return 0;
+  const sum = (files) => files.reduce((n, f) => n + f.size, 0);
+  return plan.versions.reduce((n, v) => n + sum(resourceFiles(v, 'data')), 0)
+    + sum(resourceFiles(plan.versions[plan.versions.length - 1], 'index'));
 }
 
 function respondResourceEv(res) {
@@ -5207,7 +5246,7 @@ function handler(scheme) {
       if (kind === 'resourcesize') return respondResourceSize(res, entry.bodyDecoded);
       if (kind === 'master') return respondMaster(res);
       if (kind === 'masterfile') return respondMasterFile(req, res);
-      if (kind === 'resource') return respondResource(res);
+      if (kind === 'resource') return respondResource(res, entry.bodyDecoded);
       if (kind === 'resourceev') return respondResourceEv(res);
       if (kind === 'resourcefile') return respondResourceFile(req, res);
       if (kind === 'tutorialstatus') return respondTutorialStatus(res, entry.bodyDecoded);
@@ -5500,7 +5539,9 @@ function start() {
   // MD5 dei pacchetti di risorse calcolati subito, non alla prima richiesta del client;
   // solo l'ultima versione (l'unica annunciata): con tutte, a dozzine di GB, il server si
   // metteva in ascolto dopo minuti e il client andava in timeout («28 ERROR :251», curl 28)
-  for (const v of resourceVersions().slice(-1)) {
+  // the chain of the latest version (resourcePlan): base pieces and appended packs
+  const latest = latestResourceVersion();
+  for (const v of (latest && resourceChain(latest)) || []) {
     const n = resourceFiles(v, 'data').length + resourceFiles(v, 'index').length;
     console.log(`risorse versione ${v}: ${n} file pronti`);
   }
@@ -5639,7 +5680,7 @@ module.exports._test = {
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
-  writeResourceState, noteGameAtHome, resourceFiles, // server/test-resource-state.js, test-resource-remote.js (Re-Union X)
+  writeResourceState, noteGameAtHome, resourceFiles, resourceChain, resourcePlan, respondResource, // server/test-resource-state.js, test-resource-remote.js (Re-Union X)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js

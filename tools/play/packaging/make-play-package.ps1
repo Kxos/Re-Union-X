@@ -30,6 +30,17 @@ $bash = Find-GitTool 'bin\bash.exe'
 $openssl = Find-GitTool 'usr\bin\openssl.exe'
 function Step([string]$m) { Write-Host "== $m" }
 function Need([string]$p) { if (-not (Test-Path $p)) { throw "missing: $p" } }
+# catena delle risorse (versioni incrementali, base.txt -> versione precedente; server.js resourceChain): i pezzi di
+# ogni versione della catena, base.txt, e l'indice solo dell'ultima (il gioco tiene quello)
+function Resource-Chain([string]$root, [int]$n) {
+    $c = @($n)
+    while (Test-Path "$root\$n\base.txt") {
+        $b = [int](Get-Content "$root\$n\base.txt" | Select-Object -First 1).Trim()
+        if ($b -ge $n -or -not (Test-Path "$root\$b\data")) { throw "resources ${n}: base $b missing or not older" }
+        $n = $b; $c = @($n) + $c
+    }
+    , $c
+}
 
 # --- inputs
 Need $apk; Need $LdInstaller; Need $MaxSave; Need $ProudSave
@@ -42,6 +53,7 @@ if (-not $Resources) {
     if ($pending) { throw "a newer resource build is unfinished ($($pending.Name -join ', ')): pass -Resources explicitly" }
 }
 $resDir = "$resRoot\$Resources"; Need "$resDir\data"; Need "$resDir\index"
+$chain = Resource-Chain $resRoot $Resources
 
 if (Test-Path $Out) { throw "output folder exists, remove it first: $Out" }
 # the package holds the APK, the resources and the key: never inside the public repository
@@ -87,16 +99,19 @@ try {
     Remove-Item -Recurse -Force $tmpCerts -ErrorAction SilentlyContinue
 }
 
-Step "resources version $Resources"
-New-Item -ItemType Directory -Force "$d\resources\$Resources\data", "$d\resources\$Resources\index" | Out-Null
+Step "resources version $Resources (chain $($chain -join ' > '))"
 $sameVolume = ([IO.Path]::GetPathRoot((Resolve-Path $Out).Path)) -eq ([IO.Path]::GetPathRoot($resDir))
-foreach ($kind in 'data', 'index') {
-    foreach ($f in Get-ChildItem "$resDir\$kind" -File) {
-        $dst = "$d\resources\$Resources\$kind\$($f.Name)"
-        if ($sameVolume) { New-Item -ItemType HardLink -Path $dst -Target $f.FullName | Out-Null } else { Copy-Item $f.FullName $dst }
+foreach ($v in $chain) {
+    $kinds = if ($v -eq $Resources) { 'data', 'index' } else { , 'data' }
+    foreach ($kind in $kinds) {
+        New-Item -ItemType Directory -Force "$d\resources\$v\$kind" | Out-Null
+        foreach ($f in Get-ChildItem "$resRoot\$v\$kind" -File) {
+            $dst = "$d\resources\$v\$kind\$($f.Name)"
+            if ($sameVolume) { New-Item -ItemType HardLink -Path $dst -Target $f.FullName | Out-Null } else { Copy-Item $f.FullName $dst }
+        }
     }
+    if (Test-Path "$resRoot\$v\base.txt") { Copy-Item "$resRoot\$v\base.txt" "$d\resources\$v\base.txt" }
 }
-$size = (Get-ChildItem "$resDir\data" -File | Measure-Object Length -Sum).Sum
 
 Step 'game, LDPlayer installer, Node.js runtime, start save'
 New-Item -ItemType Directory -Force "$d\game", "$d\setup", "$d\guest" | Out-Null
@@ -116,7 +131,7 @@ $key = (python -I "$repo\recon\tools\private_tools.py" key).Trim()
 if ($LASTEXITCODE -or -not $key) { throw 'resource key not available (recon/tools/private_tools.py)' }
 $stamp = Get-Date -Format 'yyyy-MM-dd.HHmm'
 $envLines = @(
-    "KHUX_RESOURCE_KEY=$key", "KHUX_RESOURCE_SIZE=$size", "KHUX_REVISION=$Revision",
+    "KHUX_RESOURCE_KEY=$key", "KHUX_REVISION=$Revision",
     'KHUX_GACHA_SIZES=1,2,3,4,5,6,7,8,9,10', 'KHUX_PET=1', "RX_CA_HASH=$caHash", "RX_PACKAGE=$stamp", "RX_RESOURCES=$Resources")
 [IO.File]::WriteAllText("$d\package.env", ($envLines -join "`n") + "`n")
 [IO.File]::WriteAllText("$d\package.json", (@{ package = $stamp; resources = $Resources; revision = $Revision; ldplayer = '9.5.37.0' } | ConvertTo-Json))

@@ -18,7 +18,7 @@ fail() { echo "RX:ERROR $1 $2"; exit 1; }
 
 [ -f "$ENVFILE" ] || fail NODE "settings not found: $ENVFILE"
 set -a; . "$ENVFILE"; set +a
-for v in KHUX_RESOURCE_KEY KHUX_RESOURCE_SIZE KHUX_REVISION RX_CA_HASH; do
+for v in KHUX_RESOURCE_KEY KHUX_REVISION RX_CA_HASH; do
   eval "[ -n \"\${$v:-}\" ]" || fail SETUP "package.env lacks $v: rebuild the package"
 done
 

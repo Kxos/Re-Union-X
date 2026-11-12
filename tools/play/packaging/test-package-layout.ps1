@@ -34,7 +34,8 @@ Check ($inst -and $inst.VersionInfo.ProductVersion -match '^9\.5\.37') "LDPlayer
 if (Test-Path "$d\package.env") {
     $envText = Get-Content "$d\package.env" -Raw
     Check ($envText -match '(?m)^KHUX_RESOURCE_KEY=[0-9a-fA-F]{32,}\r?$') 'package.env: no hex KHUX_RESOURCE_KEY'
-    Check ($envText -match '(?m)^KHUX_RESOURCE_SIZE=\d+\r?$') 'package.env: no KHUX_RESOURCE_SIZE'
+    # the server computes the download size from the game's revision (incremental resources): no KHUX_RESOURCE_SIZE
+    Check ($envText -notmatch '(?m)^KHUX_RESOURCE_SIZE=') 'package.env: KHUX_RESOURCE_SIZE would override the size the server computes'
     Check ($envText -match '(?m)^RX_CA_HASH=[0-9a-f]{8}\r?$') 'package.env: no RX_CA_HASH'
     Check ($envText -notmatch "`r") 'package.env must use LF line endings (read by the guest shell)'
 }

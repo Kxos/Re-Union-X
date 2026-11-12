@@ -294,7 +294,33 @@ check `[fn]`, saved revision/size `[fn]` (user data: `resource_revision` +0x1d0,
   `versions: [{data: [the new pieces], index: [the full index of N+1]}]`, where the index offsets are absolute in the
   concatenated stream (old bytes included) and `size` = old total + new pieces. A fresh client gets `mode 1`,
   `minVersion` N, `versions: [N, N+1]`: the same pieces concatenated, the index of N+1. Replaced records stay in the
-  stream as dead bytes; a new complete base from time to time removes them. Not yet tried on the bench.
+  stream as dead bytes; a new complete base from time to time removes them.
+- Phone test 12-11 (Galaxy A54, PC server through `adb reverse`, real version 112): 113 = 112 + a 94-byte pack, then
+  114 = 113 + 124 bytes, each with `mode 2` and one version: the game downloaded only the pack and the index, no «Save
+  error», the changed button text («Shop 114») showed at home, and after a restart it did not download again.
+- **In use** (12-11):
+  - layout: `resource_data/<N>/base.txt` = the version N builds on; `<N>/data` = only the appended pieces; `<N>/index`
+    = the full index. Chain of N = `[full version, ..., N]` (`resourceChain`; a missing or not-older base = broken
+    chain = `mode 0` and `dataMissing` in the Re-Union X state).
+  - `GET /system/resource` reads `revision` from the request (`resourcePlan`): revision in the chain of the latest and
+    older than it → `mode 2`, `minVersion` = revision + 1, the versions after it; otherwise `mode 1` with the whole
+    chain (the game concatenates the data of every listed version, as it did with two full versions, 26-10). Every
+    entry carries the index of the last version (the client keeps only that one).
+  - `PUT /system/resourcesize` announces the bytes of that plan (pieces + index); `KHUX_RESOURCE_SIZE` only forces it
+    for tests, the packages no longer write it.
+  - build: `build-resources.ps1 -Append` runs the generators of a full version, merges them as a full index, and
+    `recon/tools/resource_delta.py` compares it with the latest version by **content** (resource_pack.py encrypts with a
+    random nonce, so equal bytes = same, otherwise both records are decrypted; cache in `khux_bgi_cache/plain.pkl`):
+    changed and new names go into one appended pack (`d0000`), then `resource_merge.py --last-wins` (index of N + chain
+    data + pack) and `resource_delta.py check` (every name of the full build reads the same content). Removed names
+    stay until a new full base (`-Version N`). `-Quick`/`-DryRun` refuse an incremental latest version.
+  - packages (Re-Union X `make-pkg.ps1`, Play `make-play-package.ps1`): the pieces and `base.txt` of every version of
+    the chain, the index only of the latest; Re-Union X's PkgSync keeps the folders of the chain.
+  - phone 12-11 with the real server code (PC server, `adb reverse`): game at 112, chain 112 > 113 > 114 → `mode 2`
+    with versions 113 and 114 in one answer, «Approx. 42.94 MB» (index + 218 bytes), the two pieces and **one** index
+    downloaded, «Shop 114» at home. Game data cleared, chain 111 > 112 (the 40 first pieces of the real 112 as «111»,
+    its last piece + its index as «112» with base.txt 111) → `mode 1` with versions 111 and 112, «Approx. 5.23 GB»,
+    42 files in ~6 min over USB, home with «Shop»: the game holds the real 112 byte for byte.
 
 <a id="startup-md5-cache"></a>
 ### Startup MD5 cache (slow guest, 05-11)
