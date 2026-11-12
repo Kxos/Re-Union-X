@@ -22,6 +22,7 @@ const path = require('path');
 const stream = require('stream');
 const crypto = require('crypto');
 const zlib = require('zlib');
+const remote = require('./resource-remote');   // pieces from GitHub (Re-Union X, KHUX_RESOURCE_REMOTE)
 
 const codec = require('./khux-codec');
 const { startDns } = require('./dns');
@@ -490,6 +491,15 @@ function respondResourceSize(res, req) {
   if (state && state.dataMissing && state.have < state.latest) {
     console.log('resources missing for the game (have ' + state.have + ', latest ' + state.latest + '): server exits');
     setTimeout(() => process.exit(3), 300);
+  } else if (state && state.have < state.latest && dataIsRemote(state.latest)) {
+    // the pieces will come from GitHub: without internet the game would loop on error 52, so the same way back,
+    // with «offline» in the state for Re-Union X («Connect to the internet...»)
+    remote.reachable(remote.config()).then((ok) => {
+      if (ok) return;
+      writeResourceState(state.have, { offline: true });
+      console.log('GitHub unreachable and the game needs the resources: server exits');
+      setTimeout(() => process.exit(3), 300);
+    });
   }
 }
 
@@ -506,13 +516,13 @@ function noteGameAtHome() {
   if (!resourcesPending) writeResourceState(latestResourceVersion());
 }
 
-function writeResourceState(have) {
+function writeResourceState(have, extra) {
   const file = process.env.KHUX_RESOURCE_STATE;
   if (!file) return null;
   const latest = latestResourceVersion();
-  let dataMissing = true;
-  try { dataMissing = fs.readdirSync(path.join(RESOURCE_DIR, String(latest), 'data')).length === 0; } catch { /* missing */ }
-  const state = { have, latest, dataMissing, at: Date.now() };
+  // missing = neither on the phone nor in data.txt for GitHub (resource-remote.js)
+  const dataMissing = localNames(latest, 'data').length === 0 && remoteData(latest).length === 0;
+  const state = { have, latest, dataMissing, offline: false, ...extra, at: Date.now() };
   try {
     fs.writeFileSync(file + '.tmp', JSON.stringify(state));
     fs.renameSync(file + '.tmp', file);
@@ -823,7 +833,25 @@ function fileMd5(file) {
   return md5Cache.get(k);
 }
 
+// data pieces of a version on the phone's disk; none -> from data.txt if the pieces come from GitHub
+function localNames(version, kind) {
+  try { return fs.readdirSync(path.join(RESOURCE_DIR, String(version), kind)).sort(); } catch { return []; }
+}
+
+function remoteData(version) {
+  return dataIsRemote(version) ? remote.remoteEntries(RESOURCE_DIR, version) : [];
+}
+
+function dataIsRemote(version) {
+  return Boolean(remote.config()) && localNames(version, 'data').length === 0;
+}
+
 function resourceFiles(version, kind) {
+  if (kind === 'data' && dataIsRemote(version)) {
+    return remoteData(version).map((e) => ({
+      url: `${SESSION_BASE}/resource/${version}/data/${encodeURIComponent(e.name)}`, md5: e.md5, size: e.size,
+    })).filter((f) => f.size > 0);
+  }
   const dir = path.join(RESOURCE_DIR, String(version), kind);
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).sort().map((name) => {
@@ -881,6 +909,13 @@ function respondResourceFile(req, res) {
     return res.end();
   }
   const file = path.join(RESOURCE_DIR, version, kind, name);
+  if (kind === 'data' && dataIsRemote(version)) {               // from the GitHub release, while it arrives
+    const list = remoteData(version);
+    const entry = list.find((e) => e.name === name);
+    if (!entry) { res.writeHead(404); return res.end(); }
+    const lastRemote = Number(version) === latestResourceVersion() && list[list.length - 1] === entry;
+    return remote.serveRemote(remote.config(), entry, res, (ok) => { if (ok && lastRemote) resourcesPending = false; });
+  }
   if (!fs.existsSync(file)) {
     res.writeHead(404);
     return res.end();
@@ -5591,7 +5626,7 @@ module.exports._test = {
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
-  writeResourceState, noteGameAtHome, // server/test-resource-state.js (Re-Union X)
+  writeResourceState, noteGameAtHome, resourceFiles, // server/test-resource-state.js, test-resource-remote.js (Re-Union X)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js

@@ -1,0 +1,150 @@
+// Resource pieces from a GitHub release (Re-Union X on the phone; Re-Union-X-App
+// docs/superpowers/specs/2026-11-12-risorse-da-github-design.md). The pkg on the phone has no resource data, only
+// resources/<N>/data.txt («format 1», then «<name> <bytes> <md5> <asset>» per piece, written by publish-pkg.py stage).
+// The server lists the pieces from it and streams each one from the release to the game while it arrives, without
+// keeping it; when GitHub drops in the middle it asks again with Range from the byte it reached and goes on with the
+// same answer to the game (the game checks the MD5).
+//   KHUX_RESOURCE_REMOTE=<owner>/<repo>@<tag>   KHUX_GITHUB_TOKEN=<read-only token>   KHUX_GITHUB_API (tests)
+// Like GitHubSource in the app: asset API with the token -> redirect followed WITHOUT the token. The token is never
+// logged.
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+const https = require('https');
+
+const TRIES = 5;
+
+function config() {
+  const r = process.env.KHUX_RESOURCE_REMOTE;
+  if (!r) return null;
+  const at = r.indexOf('@');
+  return {
+    repo: at < 0 ? r : r.slice(0, at),
+    tag: at < 0 ? 'pkg' : r.slice(at + 1),
+    token: process.env.KHUX_GITHUB_TOKEN || '',
+    api: (process.env.KHUX_GITHUB_API || 'https://api.github.com').replace(/\/$/, ''),
+  };
+}
+
+/** pieces of resources/<version>/data.txt: [{name, size, md5, asset}], [] if missing or broken */
+function remoteEntries(resourceDir, version) {
+  let text;
+  try { text = fs.readFileSync(path.join(resourceDir, String(version), 'data.txt'), 'utf8'); } catch { return []; }
+  const lines = text.split('\n');
+  if (lines[0].trim() !== 'format 1') return [];
+  const out = [];
+  for (const l of lines.slice(1)) {
+    const w = l.trim().split(' ');
+    if (w.length !== 4 || !/^\d+$/.test(w[1]) || !/^[0-9a-f]{32}$/.test(w[2])) continue;
+    out.push({ name: w[0], size: Number(w[1]), md5: w[2], asset: w[3] });
+  }
+  return out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+function get(url, headers, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const mod = url.startsWith('https:') ? https : http;
+    const req = mod.get(url, { headers: { 'User-Agent': 'ReUnionX-server', ...headers } }, resolve);
+    req.setTimeout(timeoutMs, () => req.destroy(new Error('timeout')));
+    req.on('error', reject);
+  });
+}
+
+function apiHeaders(cfg, accept) {
+  return { Authorization: 'Bearer ' + cfg.token, Accept: accept, 'X-GitHub-Api-Version': '2022-11-28' };
+}
+
+async function json(cfg, p) {
+  const res = await get(cfg.api + p, apiHeaders(cfg, 'application/vnd.github+json'), 15000);
+  const parts = [];
+  for await (const c of res) parts.push(c);
+  if (res.statusCode !== 200) throw new Error('GitHub ' + res.statusCode + ' for ' + p.split('?')[0]);
+  return JSON.parse(Buffer.concat(parts).toString('utf8'));
+}
+
+let ids = null;          // asset name -> id, once per server process
+async function assetIds(cfg) {
+  if (ids) return ids;
+  const rel = await json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
+  const m = new Map();
+  for (let page = 1; ; page++) {
+    const list = await json(cfg, `/repos/${cfg.repo}/releases/${rel.id}/assets?per_page=100&page=${page}`);
+    for (const a of list) m.set(a.name, a.id);
+    if (list.length < 100) break;
+  }
+  ids = m;
+  return ids;
+}
+
+/** GitHub answers (release readable with the token) within timeoutMs */
+async function reachable(cfg, timeoutMs = 8000) {
+  try {
+    await Promise.race([assetIds(cfg), new Promise((_, no) => setTimeout(() => no(new Error('timeout')), timeoutMs))]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** the asset from byte `from`: a readable response with exactly the bytes from there (skips them if Range is ignored) */
+async function open(cfg, asset, from) {
+  const id = (await assetIds(cfg)).get(asset);
+  if (id == null) throw new Error('the release has no ' + asset);
+  const a = await get(`${cfg.api}/repos/${cfg.repo}/releases/assets/${id}`, apiHeaders(cfg, 'application/octet-stream'), 20000);
+  let res = a;
+  if ([301, 302, 303, 307, 308].includes(a.statusCode)) {
+    a.resume();
+    const range = from > 0 ? { Range: 'bytes=' + from + '-' } : {};
+    res = await get(a.headers.location, { Accept: 'application/octet-stream', ...range }, 30000);   // no token here
+  } else if (from > 0) {
+    a.destroy();
+    throw new Error('no redirect for a resumed piece');
+  }
+  if (res.statusCode !== 200 && res.statusCode !== 206) { res.resume(); throw new Error('GitHub ' + res.statusCode + ' for ' + asset); }
+  return { stream: res, skip: res.statusCode === 200 ? from : 0 };
+}
+
+/**
+ * Streams the piece to the game's response; done(ok) once at the end. The Content-Length is the piece's size, the
+ * bytes go out in order; a drop from GitHub is resumed (up to TRIES) from the byte reached.
+ */
+function serveRemote(cfg, entry, res, done) {
+  res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': entry.size });
+  let sent = 0, tries = 0, finished = false, current = null;
+  const finish = (ok, why) => {
+    if (finished) return;
+    finished = true;
+    if (current) current.destroy();
+    if (ok) res.end(); else { console.log(`[risorse] ${entry.name} da GitHub: ${why}`); res.destroy(); }
+    done(ok);
+  };
+  res.on('close', () => { if (!res.writableFinished) finish(false, 'the game closed the connection'); });
+  const attempt = async () => {
+    let s;
+    try { s = await open(cfg, entry.asset, sent); } catch (e) { return retry(e.message); }
+    if (finished) return s.stream.destroy();
+    current = s.stream;
+    let skip = s.skip;
+    s.stream.on('data', (chunk) => {
+      if (skip > 0) { const k = Math.min(skip, chunk.length); skip -= k; chunk = chunk.subarray(k); }
+      if (!chunk.length || finished) return;
+      if (sent + chunk.length > entry.size) chunk = chunk.subarray(0, entry.size - sent);
+      sent += chunk.length;
+      if (!res.write(chunk)) { s.stream.pause(); res.once('drain', () => s.stream.resume()); }
+    });
+    s.stream.on('end', () => (sent >= entry.size ? finish(true) : retry('ended at ' + sent)));
+    s.stream.on('error', (e) => retry(e.message));
+    s.stream.on('aborted', () => retry('aborted at ' + sent));
+  };
+  const retry = (why) => {
+    if (finished) return;
+    if (current) { current.removeAllListeners(); current.on("error", () => {}); current.destroy(); current = null; }
+    if (++tries > TRIES) return finish(false, why);
+    console.log(`[risorse] ${entry.name} da GitHub: ${why}, riprendo da ${sent} (${tries}/${TRIES})`);
+    setTimeout(attempt, 1000 * tries);
+  };
+  attempt();
+}
+
+module.exports = { config, remoteEntries, reachable, serveRemote };
