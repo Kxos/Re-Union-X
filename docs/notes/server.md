@@ -748,7 +748,7 @@ Bench 14-10 (I-106, I-113, I-114). Module `server/routes-party-ranking.js`.
   `userColosseumRanking`/`userPvpRanking` int, `raidHelpNumber`). The right panel looks for the leader
   (`supportUserId` == `party.leaderUserId`) in `partyUserList`: it must be there. Leader not absent -> PartyTop_right1.
   Chat: separate HTTP service (not Photon), with `chatId` 0 and empty urls it does not start; ChatScene has no layout (crash
-  likely when tapping Chat). Bench 15-10: «Player's Party» with Leader, Members 1/30, Play Style, Approval, message and
+  likely when tapping Chat). Bench 15-10: «<author>'s Party» with Leader, Members 1/30, Play Style, Approval, message and
   buttons Edit/Recruit/Manage/Rankings/Search.
 - Party buttons (15-10, all tried on the bench, no crash):
   - Edit = `POST /party/update` (80) with the body of create; Leave (in Manage) = `POST /party/leave` (85); same
