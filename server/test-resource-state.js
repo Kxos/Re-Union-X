@@ -66,6 +66,26 @@ try {
   fs.mkdirSync(path.join(res, '112', 'data'));
   fs.writeFileSync(path.join(res, '112', 'data', 'd0000'), 'data');
   if (exitCode(0, withState) !== 0) errors.push('data present, old revision (first download): server exited');
+
+  // An up-to-date game does not send resourcesize at all (phone 12-11: straight from /tutorial/status to the home), so
+  // reaching the home (GET /user/start) is the signal that the game has the latest resources, unless in this session it
+  // declared an old revision and the last data piece has not been served whole yet.
+  const home = (script) => {
+    const child = 'console.log=()=>{};const fs=require("fs");const {PassThrough}=require("stream");' +
+      'const t=require(' + JSON.stringify(path.join(__dirname, 'server')) + ')._test;' +
+      'const have=()=>JSON.parse(fs.readFileSync(' + JSON.stringify(stateFile) + ',"utf8")).have;const out=[];' + script;
+    return execFileSync(process.execPath, ['-e', child], { env: withState }).toString().trim();
+  };
+  fs.writeFileSync(path.join(res, '112', 'data', 'd0001'), 'last');
+  if (home('t.noteGameAtHome();process.stdout.write(String(have()))') !== '112') errors.push('up-to-date game at home: state not 112');
+  const seq = home(
+    't.respondResourceSize({writeHead(){},end(){}},{resourceRevision:0,masterRevision:0});' +
+    't.noteGameAtHome();out.push(have());' +
+    'const serve=(n,next)=>{const r=new PassThrough();r.writeHead=()=>{};r.resume();r.on("finish",()=>setTimeout(next,30));' +
+    't.respondResourceFile({url:"/resource/112/data/"+n},r);};' +
+    'serve("d0000",()=>{t.noteGameAtHome();out.push(have());serve("d0001",()=>{t.noteGameAtHome();out.push(have());' +
+    'process.stdout.write(out.join(","));process.exit(0);});});');
+  if (seq !== '0,0,112') errors.push('download in progress counted as done: ' + seq);
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
 }

@@ -482,6 +482,7 @@ function respondResourceSize(res, req) {
   const resourcesCurrent = Number(req?.resourceRevision) >= latestResourceVersion();
   const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : Number(process.env.KHUX_RESOURCE_SIZE || 0);
   const state = writeResourceState(Number(req?.resourceRevision) || 0);
+  if (!resourcesCurrent) resourcesPending = true;
   send(res, 200, { ret: ret(), size });
   // Re-Union X gave the data to the game and the game lost it: nothing to download from here. Exit, so the :server
   // process of Re-Union X ends and the game, bound to it, goes back to Re-Union X, which downloads the data again.
@@ -496,6 +497,15 @@ function respondResourceSize(res, req) {
 // served and whether its data is on disk. Re-Union X deletes its copy of the data once the game has them
 // (Re-Union-X-App docs/superpowers/specs/2026-11-12-spazio-risorse-design.md). Written atomically; unset = nothing.
 // Returns the state written (null without the variable).
+// An up-to-date game does not send resourcesize at all (phone 12-11): it goes from /tutorial/status to the home. So
+// reaching the home (GET /user/start, noteGameAtHome) means the game has the latest resources, unless in this server
+// session it declared an old revision (resourcesPending) and the last data piece has not been served whole since.
+let resourcesPending = false;
+
+function noteGameAtHome() {
+  if (!resourcesPending) writeResourceState(latestResourceVersion());
+}
+
 function writeResourceState(have) {
   const file = process.env.KHUX_RESOURCE_STATE;
   if (!file) return null;
@@ -878,8 +888,12 @@ function respondResourceFile(req, res) {
   res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': fs.statSync(file).size });
   // pipeline e non pipe (I-136): un errore di lettura dopo i controlli (file tolto, illeggibile) chiude la risposta
   // invece di arrivare come eccezione asincrona non gestita e far cadere il server; chiude il file se il client se ne va
+  // the last data piece of the latest version served whole: the game has the download (noteGameAtHome)
+  const names = kind === 'data' && Number(version) === latestResourceVersion() ? fs.readdirSync(path.dirname(file)).sort() : [];
+  const last = names.length > 0 && names[names.length - 1] === name;
   stream.pipeline(fs.createReadStream(file), res, (err) => {
     if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') console.log(`[risorse] ${version}/${kind}/${name}: ${err.message}`);
+    if (!err && last) resourcesPending = false;
   });
 }
 
@@ -5135,6 +5149,7 @@ function handler(scheme) {
         ...parseBody(buf, req.headers),
       };
       logRequest(entry);
+      if (req.url.split('?')[0] === '/user/start') noteGameAtHome();   // Re-Union X (KHUX_RESOURCE_STATE)
       // chiusura dei periodi delle missioni prima di ogni altra elaborazione (spec 3.6)
       if (player.created) settleClock();
 
@@ -5576,7 +5591,7 @@ module.exports._test = {
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
-  writeResourceState, // server/test-resource-state.js (Re-Union X)
+  writeResourceState, noteGameAtHome, // server/test-resource-state.js (Re-Union X)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
