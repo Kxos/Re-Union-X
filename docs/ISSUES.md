@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-269**).
+a new issue takes the number after the last one used (last: **I-270**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -78,6 +78,7 @@ Last revision: 12 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-270 | OPEN | **Album: a medal's detail shows its abilities under the picture instead of its description** (tester report 12-11, BlueStacks 5, Sebastian; the tester's reference shows the original card: «The Little Mermaid (1989)» and the character text) | check which text the album card reads (medal description text id) and whether the served text tables have the medal descriptions | |
 | I-267 | OPEN | **Medal list: medals not yet found show as Sora A instead of the empty «?» medal** (tester report 12-11, BlueStacks 5, with a screenshot) | to reproduce on the bench: which list (Medals > list or the Medal Gallery I-242) and which id the server sends for a missing medal | |
 | I-242 | TO VERIFY (first version BENCHED 6 Nov, rev 274; second round: music generated and benched rev 274; entry block, variants and new cards not seen by the user) | **Medal Gallery** (user 06-11, not original): the Medal List Sort/Filter cannot get new filters (client-coded), so a server page `/web/medals/gallery` lists the **BGM Medals** (36 cards: 43 names / 78 rows, medal.bgm) and the **Full Art** Medals (55 artworks, 69 cards: 97 names / 142 rows, 14 marked Reconstructed) with picture, stars, attribute and owned / not owned, Filters by name, owned and attribute, artwork thumbnails. **Second round (user 06-11):** entry block with title, previews and button above the GAME YEAR tabs of the Banner Catalog; Medals with practically the same picture shown once with a «Variants:» line (24 groups by image comparison, `make_medal_gallery_groups.py`, `medal_gallery_groups.json`); track names (khuxwiki, 6 «sound match not verified») and a detail view with **Play the music** (the AKB banks are plain Ogg Vorbis, cut to `game_data/medal_bgm`, 23 tracks); larger pictures and new card layout (39 KB page). Bench 06-11 (rev 274): music plays but over the game BGM; the WebView has no bridge to the game and the sound engine ignores audio focus (analysis 06-11), so the detail and the Notice tell to lower BGM in Other > Settings. `make_medal_gallery_images.py` run 06-11 (pictures, large pictures, the 23 tracks in `game_data/medal_bgm`). **Not yet seen by the user:** the entry block, the «Variants:» lines, the new cards. | [medaglie](notes/medaglie.md#medal-gallery) | ccb6387, bench 06-11 (first version); tests + desktop preview 06-11 (second round) |
 | I-022 | OPEN | Sell: support medals plate alternates the price with an empty text: texts 101210001-003 are a space in the English resources (original «FOR SYNTHESIS»); the Sell scene is JP original now, the texts need an override (as 106180101 in `import_ui_texts.py`) | [medaglie](notes/medaglie.md#medal-list) | 9b83a55 |
