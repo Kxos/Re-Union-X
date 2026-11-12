@@ -236,7 +236,7 @@
    "thread": "1569614782858919988",
    "msg": "1569614782858919988",
    "group": "OPEN",
-   "hash": "00352e3976e6c312",
+   "hash": "7eff54d6179fd182",
    "name": "I-162 · Original 6★ without evolution to the 7★"
   },
   "I-164": {
@@ -278,7 +278,7 @@
    "thread": "1569614799682150441",
    "msg": "1569614799682150441",
    "group": "OPEN",
-   "hash": "29a7bd7352c21dd3",
+   "hash": "a55334b511807fe3",
    "name": "I-191 · Active banners on the home screen"
   },
   "I-192": {
@@ -476,6 +476,27 @@
    "group": "CLOSED",
    "hash": "370753b1b146ec8d",
    "name": "I-266 · Tutorial: the guided Shop step points to a normal banner and the new player is stuck"
+  },
+  "I-267": {
+   "thread": "1570491112450166846",
+   "msg": "1570491112450166846",
+   "group": "OPEN",
+   "hash": "3d9ccfb5dfcbf630",
+   "name": "I-267 · Medal list: medals not yet found show as Sora A instead of the empty «?» medal"
+  },
+  "I-268": {
+   "thread": "1570491115994357838",
+   "msg": "1570491115994357838",
+   "group": "OPEN",
+   "hash": "c45340f754848db5",
+   "name": "I-268 · Moogle Shop: the top corners of the Traits and Items tabs are cut off"
+  },
+  "I-269": {
+   "thread": "1570491120809414667",
+   "msg": "1570491120809414667",
+   "group": "OPEN",
+   "hash": "8d88f9e76321b078",
+   "name": "I-269 · Avatar: the player character holds the keyblade in a pose the tester never saw"
   }
  }
 }
