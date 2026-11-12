@@ -300,8 +300,10 @@ check `[fn]`, saved revision/size `[fn]` (user data: `resource_revision` +0x1d0,
   error», the changed button text («Shop 114») showed at home, and after a restart it did not download again.
 - **In use** (12-11):
   - layout: `resource_data/<N>/base.txt` = the version N builds on; `<N>/data` = only the appended pieces; `<N>/index`
-    = the full index. Chain of N = `[full version, ..., N]` (`resourceChain`; a missing or not-older base = broken
-    chain = `mode 0` and `dataMissing` in the Re-Union X state).
+    = the full index. Chain of N = `[full version, ..., N]` (`resourceChain`; a missing base, or one that is not
+    N−1, = broken chain = `mode 0` and `dataMissing` in the Re-Union X state). **Consecutive numbers**: the game saves
+    minVersion + count − 1, so with a gap (e.g. 114 > 120) it would stay below the latest and download the whole chain
+    at every start; `-Append` always builds latest + 1.
   - `GET /system/resource` reads `revision` from the request (`resourcePlan`): revision in the chain of the latest and
     older than it → `mode 2`, `minVersion` = revision + 1, the versions after it; otherwise `mode 1` with the whole
     chain (the game concatenates the data of every listed version, as it did with two full versions, 26-10). Every
