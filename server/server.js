@@ -481,7 +481,23 @@ function respondResourceSize(res, req) {
   const masterCurrent = Number(req?.masterRevision) >= sessionRevision();
   const resourcesCurrent = Number(req?.resourceRevision) >= latestResourceVersion();
   const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : Number(process.env.KHUX_RESOURCE_SIZE || 0);
+  writeResourceState(Number(req?.resourceRevision) || 0);
   send(res, 200, { ret: ret(), size });
+}
+
+// KHUX_RESOURCE_STATE (set by Re-Union X on the phone): which resource revision the game declared, the latest version
+// served and whether its data is on disk. Re-Union X deletes its copy of the data once the game has them
+// (Re-Union-X-App docs/superpowers/specs/2026-11-12-spazio-risorse-design.md). Written atomically; unset = nothing.
+function writeResourceState(have) {
+  const file = process.env.KHUX_RESOURCE_STATE;
+  if (!file) return;
+  const latest = latestResourceVersion();
+  let dataMissing = true;
+  try { dataMissing = fs.readdirSync(path.join(RESOURCE_DIR, String(latest), 'data')).length === 0; } catch { /* missing */ }
+  try {
+    fs.writeFileSync(file + '.tmp', JSON.stringify({ have, latest, dataMissing, at: Date.now() }));
+    fs.renameSync(file + '.tmp', file);
+  } catch (e) { console.log('resource state not written:', e.message); }
 }
 // byte dei master serviti (file .json di MASTER_DIR), per /system/resourcesize quando cambia solo il master
 function masterBytes() {
@@ -5550,6 +5566,7 @@ module.exports._test = {
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
+  writeResourceState, // server/test-resource-state.js (Re-Union X)
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js
