@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-261**).
+a new issue takes the number after the last one used (last: **I-265**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -67,6 +67,9 @@ Last revision: 10 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-262 | OPEN | **Outfits: «change outfit» does not move to the next default outfit** (tester report 12-11, always) | to reproduce on the bench | |
+| I-263 | OPEN | **Outfits: the default avatar pieces are missing for both genders** (tester report 12-11; maybe the same cause as I-262) | to reproduce on the bench | |
+| I-264 | OPEN | **Titles: with both titles set to «None» the home still shows «Budding Newbie»** (tester report 12-11, always) | server: title update with id 0 | |
 | I-015 | OPEN | Profile message: `adb input text` cannot fill the native EditBox; bench check with the real keyboard (user) still to do. Empty message -> «Nice to meet you!» (I-071) | [home_profilo](notes/home_profilo.md#profilo) | 63e716e |
 | I-018 | OPEN (partly) | Buttons never tested: title Restore Resources, Save User Data, x3; home arrows (= I-191, not built). Done: Other > Records/Help/Settings/Credits (I-108, I-110..I-112, closed), Shop jewel purchase (I-135 bench 05-11: «Jewels cannot be bought on this server», no crash), KHUX START (every bench start), Beginner's Guide (`/web/beginner`, 14-10), medal Share (bench 15-10), Other > Notices/Album/Party/Transfer/Legal (I-104..I-109) | [home_profilo](notes/home_profilo.md#home) | 640d345, 54c767a |
 
@@ -90,6 +93,7 @@ Last revision: 10 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-265 | OPEN | **Avatar Boards: the Filter button crashes the game** (tester report 12-11, always) | to reproduce on the bench (crash capture) | |
 | I-025 | OPEN | COMPLETE ribbon of the card simpler than the painted original | [bacheche](notes/bacheche.md#layout) | 51f60c4 |
 | I-026 | TO VERIFY | «Unlocked an Avatar Board!» popup: `BattleResult_LB_ver120` is now the JP original layout (I-117). Bench: a Lux level-up that unlocks a board shows it with English texts | [bacheche](notes/bacheche.md#popup-lb) | f38b818 |
 
