@@ -232,7 +232,7 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
   color:var(--key);font-size:15px;line-height:18px}
 @media (max-width:640px){.credits-intro{font-size:16px;padding:16px 8px 14px}}
 /* credits: gold highlights */
-#sec-credits .gold{font-weight:700;color:#ffcf6b;text-shadow:0 0 10px rgba(255,190,80,.18)}
+#sec-credits .gold{font-weight:700;color:#ffcf6b}
 #sec-credits .credits-intro .gold{font-weight:700}
 #sec-credits .ded-quote .gold{color:#ffd47a}
 #sec-credits .rows.credits .x{color:#dcebf3}
@@ -256,9 +256,9 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
 .tgrid{list-style:none;margin:0 auto;padding:0;max-width:620px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .tester{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;text-align:left;
   background:rgba(20,12,40,.55);border:1px solid rgba(199,155,224,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-.tav{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px/1 var(--font);color:#fff;
+.tav{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:700 15px/1 var(--font-body);color:#fff;
   background:linear-gradient(#b57bd0,#9b59b6 55%,#7a3f94);border:2px dashed #e6c8f7;box-shadow:0 0 10px rgba(155,89,182,.45)}
-.tnm{font:800 15px/1.2 var(--font);color:#f1e2fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tnm{font:700 15px/1.2 var(--font-body);color:#f1e2fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:640px){.testers-card{padding:18px 14px 16px}.tgrid{grid-template-columns:repeat(2,1fr)}.tnm{white-space:normal;overflow-wrap:anywhere}}
 /* Credits: thethiny's dedication in gold (the most important card) */
 .dedication.ded-gold{border-color:#ffcf6b;
@@ -269,7 +269,7 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
 .ded-gold .ded-ring circle:nth-of-type(2){stroke:#ffcf6b}
 .ded-gold .ded-ring text{fill:#fff3d6}
 .ded-gold .ded-kicker{color:#ffcf6b}
-.ded-gold .ded-name{font-size:28px;text-shadow:0 0 14px rgba(255,190,80,.35)}
+.ded-gold .ded-name{font-size:28px;color:#ffcf6b}
 .ded-gold .ded-links a{color:#ffdf9a;background:rgba(255,207,107,.08);border-color:rgba(255,207,107,.5)}
 .ded-gold .ded-links a:hover,.ded-gold .ded-links a:focus-visible{background:rgba(255,207,107,.22);color:#fff}
 /* Credits: the helpers, cards in the style of the dedication (cyan, smaller) */
@@ -283,10 +283,10 @@ h1,h2,h3,.ttl,.tab,.tabs,.tag,.btn,.big,.brand{font-family:var(--font)}
   border:1px solid rgba(95,224,240,.6);box-shadow:0 0 0 2px rgba(95,224,240,.07),0 4px 14px rgba(0,0,0,.25)}
 .helper.wide{grid-column:1/-1}
 .h-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.h-av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:800 19px/1 var(--font);color:#eef4f7;
+.h-av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 19px/1 var(--font-body);color:#eef4f7;
   background:#0b4f8f;border:3px dashed var(--cyan);box-shadow:0 0 10px rgba(95,224,240,.3)}
-.h-kicker{display:block;font:800 10.5px/1 var(--font);letter-spacing:2.5px;text-transform:uppercase;color:var(--key)}
-.h-name{margin:4px 0 0;font:800 18px/1.15 var(--font);color:#fff;letter-spacing:.3px}
+.h-kicker{display:block;font:700 11px/1 var(--font-body);letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
+.h-name{margin:4px 0 0;font:700 18px/1.15 var(--font-body);color:#ffcf6b;letter-spacing:.2px}
 .h-text{margin:0 0 8px;font-size:15px;line-height:1.55;color:#dcebf3}
 .helper .ded-links{margin-top:2px}
 .helper .members{margin-top:4px}
