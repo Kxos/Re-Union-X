@@ -1,8 +1,8 @@
-// Tutorial draw (tester report 12-11): the guided Shop step of the tutorial looks for the drawType 5 banner of the
-// original master (1.1.3 and the late WW master: «Jewel Draw» id 10, single draw, 300 Jewels). Without it the arrow
-// pointed at the first normal banner and a new player, short of Jewels, was stuck. Here: the plate is first in the
-// list with drawType 5 while the tutorial window is open and the draw has not been made, the draw guarantees
-// KH II King Mickey, and the master has the row.
+// Tutorial draw (tester report 12-11): the guided Shop step of the tutorial points its arrow at the SECOND plate of
+// the list (A54 12-11) and expects the drawType 5 «Jewel Draw» of the original masters (1.1.3 and the late WW master:
+// id 10, single draw, 300 Jewels). Without it the arrow was on a normal banner and a new player, short of Jewels, was
+// stuck. Here: while the tutorial window is open and the draw has not been made the plate is second (after the
+// Catalog) with drawType 5, the draw guarantees KH II King Mickey, and the master has the row.
 //   node server/test-tutorial-draw.js
 'use strict';
 const gacha = require('./gacha');
@@ -25,7 +25,10 @@ let list = gacha.gachaListData([], p, { ...opts(6), tutorial: gacha.tutorialOpen
 const tp = list.find((x) => x.drawMedalTypeId === 10);
 check(!!tp, 'plate listed during the tutorial');
 check(tp && tp.drawType === 5, 'plate has drawType 5');
-check(list.findIndex((x) => x.drawMedalTypeId === 10) === 0, 'tutorial plate first in the list');
+// the guide's arrow points at the second plate: the tutorial plate right after the Catalog, sortId between 1 and 10
+check(list.findIndex((x) => x.drawMedalTypeId === 10) === 1 && list[0].drawMedalTypeId === gacha.catalogRow().drawMedalTypeId,
+  'tutorial plate second in the list, after the Catalog');
+check(tp && tp.sortId > list[0].sortId && list.slice(2).every((x) => x.sortId > tp.sortId), 'tutorial plate sortId between Catalog and banners');
 check(tp && tp.price === 300 && tp.lotCount === 1, 'plate price 300, single draw');
 
 // a normal plate keeps drawType 1
