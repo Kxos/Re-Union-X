@@ -68,7 +68,7 @@ try {
   check(run('process.stdout.write(JSON.stringify(t.resourceChain(116)))') === null, 'chain with a gap (116 on 114)');
   fs.rmSync(path.join(res, '116'), { recursive: true });
 
-  // state for Re-Union X: data missing when a version of the download has no pieces (here the base)
+  // resource state: data missing when a version of the download has no pieces (here the base)
   const stateFile = path.join(dir, 'resource.state');
   const state = (have) => run('t.writeResourceState(' + have + ');process.stdout.write(require("fs").readFileSync(' +
     JSON.stringify(stateFile) + ',"utf8"))', { KHUX_RESOURCE_STATE: stateFile });

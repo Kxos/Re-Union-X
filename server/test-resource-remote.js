@@ -1,7 +1,6 @@
-// Resource pieces from GitHub (KHUX_RESOURCE_REMOTE): on the phone the pkg has no resource data, only
+// Resource pieces from GitHub (KHUX_RESOURCE_REMOTE): the local data folder has no resource data, only
 // resources/<N>/data.txt (name, bytes, md5, asset). The server lists the pieces from it and streams each one from the
-// GitHub release to the game, resuming with Range when GitHub drops (Re-Union-X-App,
-// docs/superpowers/specs/2026-11-12-risorse-da-github-design.md). A fake GitHub runs here.
+// GitHub release to the game, resuming with Range when GitHub drops. A fake GitHub runs here.
 //   node server/test-resource-remote.js
 'use strict';
 const fs = require('fs'); const os = require('os'); const path = require('path'); const http = require('http');
@@ -161,7 +160,7 @@ function child(script, env) {
   r = await child('await Promise.all([fetchPiece("d0000"),fetchPiece("d0001")]);', env);
   if (listHits !== 1) errors.push('asset list read ' + listHits + ' times for two requests at once');
 
-  // pieces still on the phone (an older pkg, or a release() cut halfway): served from there, the rest from GitHub
+  // pieces still on disk (an older package, or a release() cut halfway): served from there, the rest from GitHub
   fs.mkdirSync(path.join(res, '112', 'data'));
   fs.writeFileSync(path.join(res, '112', 'data', 'd0000'), pieces.d0000);
   ranges.length = 0;

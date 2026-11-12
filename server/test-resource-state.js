@@ -1,7 +1,6 @@
-// Resource state for Re-Union X (KHUX_RESOURCE_STATE): at every PUT /system/resourcesize the server writes which
+// Resource state file (KHUX_RESOURCE_STATE): at every PUT /system/resourcesize the server writes which
 // resource revision the game declared, the latest version it serves and whether that version's data is on disk.
-// Re-Union X deletes its copy of the data once the game has them (Re-Union-X-App,
-// docs/superpowers/specs/2026-11-12-spazio-risorse-design.md). Without the variable nothing is written.
+// Without the variable nothing is written.
 //   node server/test-resource-state.js
 'use strict';
 const fs = require('fs'); const os = require('os'); const path = require('path');
@@ -49,9 +48,9 @@ try {
   write(5, base);
   if (fs.existsSync(stateFile)) errors.push('state written without KHUX_RESOURCE_STATE');
 
-  // a game without the resources while the data is gone (Re-Union X gave it to the game, then the game lost it): the
-  // server answers resourcesize and then exits with code 3, so Re-Union X's :server process ends and the game, bound
-  // to it, goes back to Re-Union X (GameLink). Phone test 12-11: mode 0 -> crash at home; staying up -> error 52 loop.
+  // a game without the resources while the data is gone (the game lost it): the
+  // server answers resourcesize and then exits with code 3, so whatever started the server can fetch the
+  // data again. Test 12-11: mode 0 -> crash at home; staying up -> error 52 loop.
   const exitCode = (rev, env) => {
     const child = 'console.log=()=>{};const t=require(' + JSON.stringify(path.join(__dirname, 'server')) + ')._test;' +
       'let sent=false;t.respondResourceSize({writeHead(){},end(){sent=true;}},{resourceRevision:' + rev + ',masterRevision:0});' +
@@ -67,7 +66,7 @@ try {
   fs.writeFileSync(path.join(res, '112', 'data', 'd0000'), 'data');
   if (exitCode(0, withState) !== 0) errors.push('data present, old revision (first download): server exited');
 
-  // An up-to-date game does not send resourcesize at all (phone 12-11: straight from /tutorial/status to the home), so
+  // An up-to-date game does not send resourcesize at all (test 12-11: straight from /tutorial/status to the home), so
   // reaching the home (GET /user/start) is the signal that the game has the latest resources, unless in this session it
   // declared an old revision and the last data piece has not been served whole yet.
   const home = (script) => {

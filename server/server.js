@@ -22,7 +22,7 @@ const path = require('path');
 const stream = require('stream');
 const crypto = require('crypto');
 const zlib = require('zlib');
-const remote = require('./resource-remote');   // pieces from GitHub (Re-Union X, KHUX_RESOURCE_REMOTE)
+const remote = require('./resource-remote');   // pieces from GitHub (optional, KHUX_RESOURCE_REMOTE)
 
 const codec = require('./khux-codec');
 const { startDns } = require('./dns');
@@ -64,7 +64,7 @@ const { routePet, makePet, petBaseSlotMedal, setPetBaseSlotMedal, ENABLED: PET_E
 // ---------------------------------------------------------------------------
 const HTTP_PORT = Number(process.env.KHUX_HTTP_PORT || 80);
 const HTTPS_PORT = Number(process.env.KHUX_HTTPS_PORT || 443);
-// KHUX_BIND_HOST: indirizzo su cui ascoltano HTTP, HTTPS, DNS e Photon (127.0.0.1 nell'app Android: niente porte aperte
+// KHUX_BIND_HOST: indirizzo su cui ascoltano HTTP, HTTPS, DNS e Photon (127.0.0.1: niente porte aperte
 // sulla Wi-Fi); predefinito 0.0.0.0, tutte le interfacce
 const BIND_HOST = process.env.KHUX_BIND_HOST || '0.0.0.0';
 const CERT_DIR = path.join(__dirname, 'certs');
@@ -489,15 +489,15 @@ function respondResourceSize(res, req) {
   const state = writeResourceState(Number(req?.resourceRevision) || 0);
   if (!resourcesCurrent) resourcesPending = true;
   send(res, 200, { ret: ret(), size });
-  // Re-Union X gave the data to the game and the game lost it: nothing to download from here. Exit, so the :server
-  // process of Re-Union X ends and the game, bound to it, goes back to Re-Union X, which downloads the data again.
-  // Phone test 12-11: answering mode 0 crashed the game at home; staying up gave error 52 in a loop.
+  // the game lost its data and there is nothing to download from here: exit with code 3, so whatever started the
+  // server can fetch the data again. Test 12-11: answering mode 0 crashed the game at home; staying up gave error 52
+  // in a loop.
   if (state && state.dataMissing && state.have < state.latest) {
     console.log('resources missing for the game (have ' + state.have + ', latest ' + state.latest + '): server exits');
     setTimeout(() => process.exit(3), 300);
   } else if (state && state.have < state.latest && resourcePlan(state.have).versions.some(needsGitHub)) {
     // the pieces will come from GitHub: without internet (or with a refused token) the game would loop on error 52,
-    // so the same way back, with «offline» or «denied» in the state for Re-Union X's message
+    // so the same way back, with «offline» or «denied» in the state
     remote.reachable(remote.config()).then((how) => {
       if (how === 'ok') return;
       writeResourceState(state.have, how === 'denied' ? { denied: true } : { offline: true });
@@ -507,11 +507,10 @@ function respondResourceSize(res, req) {
   }
 }
 
-// KHUX_RESOURCE_STATE (set by Re-Union X on the phone): which resource revision the game declared, the latest version
-// served and whether its data is on disk. Re-Union X deletes its copy of the data once the game has them
-// (Re-Union-X-App docs/superpowers/specs/2026-11-12-spazio-risorse-design.md). Written atomically; unset = nothing.
+// KHUX_RESOURCE_STATE (optional state file): which resource revision the game declared, the latest version served and
+// whether its data is on disk. Written atomically; unset = nothing.
 // Returns the state written (null without the variable).
-// An up-to-date game does not send resourcesize at all (phone 12-11): it goes from /tutorial/status to the home. So
+// An up-to-date game does not send resourcesize at all (test 12-11): it goes from /tutorial/status to the home. So
 // reaching the home (GET /user/start, noteGameAtHome) means the game has the latest resources, unless in this server
 // session it declared an old revision (resourcesPending) and the last data piece has not been served whole since.
 let resourcesPending = false;
@@ -525,7 +524,7 @@ function writeResourceState(have, extra) {
   if (!file) return null;
   const latest = latestResourceVersion();
   // missing = a version the game must download (resourcePlan: the chain, or the part after its revision) has its pieces
-  // neither on the phone nor in data.txt for GitHub (resource-remote.js); a broken chain counts as missing
+  // neither on disk nor in data.txt for GitHub (resource-remote.js); a broken chain counts as missing
   const plan = resourcePlan(have);
   const dataMissing = latest > 0 && (!plan.mode
     || plan.versions.some((v) => localNames(v, 'data').length === 0 && remoteData(v).length === 0));
@@ -840,18 +839,18 @@ function fileMd5(file) {
   return md5Cache.get(k);
 }
 
-// data pieces of a version on the phone's disk
+// data pieces of a version on the local disk
 function localNames(version, kind) {
   try { return fs.readdirSync(path.join(RESOURCE_DIR, String(version), kind)).sort(); } catch { return []; }
 }
 
-// with the pieces from GitHub (KHUX_RESOURCE_REMOTE) the list is always data.txt; each piece is served from the phone
+// with the pieces from GitHub (KHUX_RESOURCE_REMOTE) the list is always data.txt; each piece is served from the local disk
 // when it is there whole (an older pkg, a deletion cut halfway), otherwise from the release
 function remoteData(version) {
   return remote.config() ? remote.remoteEntries(RESOURCE_DIR, version) : [];
 }
 
-/** the piece on the phone, whole (size of data.txt), or null */
+/** the piece on the local disk, whole (size of data.txt), or null */
 function localPiece(version, e) {
   const f = path.join(RESOURCE_DIR, String(version), 'data', e.name);
   try { return fs.statSync(f).size === e.size ? f : null; } catch { return null; }
@@ -963,7 +962,7 @@ function respondResourceFile(req, res) {
   // the last data piece of the latest version served whole: the game has the download (noteGameAtHome)
   let last = false;
   const list = kind === 'data' ? remoteData(version) : [];
-  if (list.length) {                                            // data.txt: from the phone if whole, else from GitHub
+  if (list.length) {                                            // data.txt: from disk if whole, else from GitHub
     const entry = list.find((e) => e.name === name);
     if (!entry) { res.writeHead(404); return res.end(); }
     last = Number(version) === latestResourceVersion() && list[list.length - 1] === entry;
@@ -5239,7 +5238,7 @@ function handler(scheme) {
         ...parseBody(buf, req.headers),
       };
       logRequest(entry);
-      if (req.url.split('?')[0] === '/user/start') noteGameAtHome();   // Re-Union X (KHUX_RESOURCE_STATE)
+      if (req.url.split('?')[0] === '/user/start') noteGameAtHome();   // KHUX_RESOURCE_STATE
       // chiusura dei periodi delle missioni prima di ogni altra elaborazione (spec 3.6)
       if (player.created) settleClock();
 
@@ -5683,7 +5682,7 @@ module.exports._test = {
   storyCtx, // server/test-raid-routes.js, server/test-raid-boards.js (the Shop week the raids follow)
   respondShopCampaign, // server/test-shop-campaign.js (Task 15)
   fileMd5, MD5_CACHE_FILE, // server/test-md5-cache.js (startup MD5 cache on disk)
-  writeResourceState, noteGameAtHome, resourceFiles, resourceChain, resourcePlan, respondResource, // server/test-resource-state.js, test-resource-remote.js (Re-Union X)
+  writeResourceState, noteGameAtHome, resourceFiles, resourceChain, resourcePlan, respondResource, // server/test-resource-state.js, test-resource-remote.js
   vipBenefits, // server/test-gacha-server.js (I-134)
   moogleshopBought, servedMasterRows, // server/test-moogleshop.js (I-021)
   route, respondAvatarUpdate, userAvatarData, userAvatarsData, userAvatarPartsData, // server/test-avatar-update.js

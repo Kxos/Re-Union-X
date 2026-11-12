@@ -1,11 +1,10 @@
-// Resource pieces from a GitHub release (Re-Union X on the phone; Re-Union-X-App
-// docs/superpowers/specs/2026-11-12-risorse-da-github-design.md). The pkg on the phone has no resource data, only
-// resources/<N>/data.txt («format 1», then «<name> <bytes> <md5> <asset>» per piece, written by publish-pkg.py stage).
+// Resource pieces from a GitHub release (optional, KHUX_RESOURCE_REMOTE). The local data folder may hold no resource
+// data, only resources/<N>/data.txt («format 1», then «<name> <bytes> <md5> <asset>» per piece).
 // The server lists the pieces from it and streams each one from the release to the game while it arrives, without
 // keeping it; when GitHub drops in the middle it asks again with Range from the byte it reached and goes on with the
 // same answer to the game (the game checks the MD5).
 //   KHUX_RESOURCE_REMOTE=<owner>/<repo>@<tag>   KHUX_GITHUB_TOKEN=<read-only token>   KHUX_GITHUB_API (tests)
-// Like GitHubSource in the app: asset API with the token -> redirect followed WITHOUT the token. The token is never
+// Asset API with the token -> redirect followed WITHOUT the token. The token is never
 // logged.
 'use strict';
 const fs = require('fs');
