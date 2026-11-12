@@ -272,6 +272,30 @@ node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # 
   (= sum of the data), otherwise «Save error». `recon/tools/resource_index.py` builds it.
 - One-off crash right after an installation: on restart it goes through.
 
+<a id="resource-mode2"></a>
+### Incremental resources (`mode 2`, WW 4.3.1, read in Ghidra 12-11)
+
+Functions in `libcocos2dcpp.so` (project `recon/ghidra/project`): parser `[fn]` (reads `resource.mode`,
+`minVersion`, `versions`), list of versions `[fn]`, install `[fn]`, append `[fn]`, index
+check `[fn]`, saved revision/size `[fn]` (user data: `resource_revision` +0x1d0,
+`resource_size_64` +0x1d8, loader `[fn]`).
+
+- `mode` 0 = nothing, 1 = full, 2 = incremental; any other value = error. The job keeps `{kind, mode, minVersion,
+  last}` with **last = minVersion + number of versions − 1**: that is the revision saved at the end.
+- The data pieces of **all** listed versions are queued in order; the index is taken **only from the last version**
+  (written to `misc.wav`, then renamed `misc.png`).
+- `mode 1`: deletes `misc.mp4`, `misc.mp4.1`…, writes the data from scratch; expected total = sum of the listed data.
+- `mode 2`: compares the **saved** `resource_size_64` with the **real** size of `misc.mp4` + parts on disk; if they
+  differ, error (state 3). Then **appends** the new data after the old bytes; if the append fails it **truncates** back
+  to the saved size (part by part, 2 GiB each) and saves that size again. Expected total = saved size + new data.
+- The index `size` record must equal that expected total (or be absent); then the client saves revision = last and
+  size = total.
+- Consequence: a version N+1 can be published as **"N unchanged + an appended pack"**: `mode 2`, `minVersion` N+1,
+  `versions: [{data: [the new pieces], index: [the full index of N+1]}]`, where the index offsets are absolute in the
+  concatenated stream (old bytes included) and `size` = old total + new pieces. A fresh client gets `mode 1`,
+  `minVersion` N, `versions: [N, N+1]`: the same pieces concatenated, the index of N+1. Replaced records stay in the
+  stream as dead bytes; a new complete base from time to time removes them. Not yet tried on the bench.
+
 <a id="startup-md5-cache"></a>
 ### Startup MD5 cache (slow guest, 05-11)
 
