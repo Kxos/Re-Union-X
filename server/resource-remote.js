@@ -63,9 +63,9 @@ async function json(cfg, p) {
   return JSON.parse(Buffer.concat(parts).toString('utf8'));
 }
 
-let ids = null;          // asset name -> id, once per server process
-async function assetIds(cfg) {
-  if (ids) return ids;
+let ids = null;          // asset name -> id, once per server process (read again if an asset is not in it)
+async function assetIds(cfg, fresh) {
+  if (ids && !fresh) return ids;
   const rel = await json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
   const m = new Map();
   for (let page = 1; ; page++) {
@@ -77,20 +77,25 @@ async function assetIds(cfg) {
   return ids;
 }
 
-/** GitHub answers (release readable with the token) within timeoutMs */
+/** GitHub answers now (release readable with the token) within timeoutMs: a real request every time, never the cache */
 async function reachable(cfg, timeoutMs = 8000) {
   try {
-    await Promise.race([assetIds(cfg), new Promise((_, no) => setTimeout(() => no(new Error('timeout')), timeoutMs))]);
+    const p = json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
+    await Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), timeoutMs))]);
     return true;
-  } catch {
+  } catch (e) {
+    console.log('[risorse] GitHub non raggiungibile: ' + e.message);
     return false;
   }
 }
 
+class NoAsset extends Error {}
+
 /** the asset from byte `from`: a readable response with exactly the bytes from there (skips them if Range is ignored) */
 async function open(cfg, asset, from) {
-  const id = (await assetIds(cfg)).get(asset);
-  if (id == null) throw new Error('the release has no ' + asset);
+  let id = (await assetIds(cfg)).get(asset);
+  if (id == null) id = (await assetIds(cfg, true)).get(asset);
+  if (id == null) throw new NoAsset('the release has no ' + asset);
   const a = await get(`${cfg.api}/repos/${cfg.repo}/releases/assets/${id}`, apiHeaders(cfg, 'application/octet-stream'), 20000);
   let res = a;
   if ([301, 302, 303, 307, 308].includes(a.statusCode)) {
@@ -110,20 +115,32 @@ async function open(cfg, asset, from) {
  * bytes go out in order; a drop from GitHub is resumed (up to TRIES) from the byte reached.
  */
 function serveRemote(cfg, entry, res, done) {
-  res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': entry.size });
-  let sent = 0, tries = 0, finished = false, current = null;
-  const finish = (ok, why) => {
+  // the 200 goes out only once GitHub has answered: an asset missing from the release is a 404 at once, a GitHub that
+  // never answers a 502, instead of a 200 that breaks later
+  let sent = 0, tries = 0, lastSent = 0, finished = false, current = null, headers = false;
+  const finish = (ok, why, code) => {
     if (finished) return;
     finished = true;
     if (current) current.destroy();
-    if (ok) res.end(); else { console.log(`[risorse] ${entry.name} da GitHub: ${why}`); res.destroy(); }
+    if (ok) res.end();
+    else {
+      console.log(`[risorse] ${entry.name} da GitHub: ${why}`);
+      if (!headers && code) { res.writeHead(code); res.end(); } else res.destroy();
+    }
     done(ok);
   };
   res.on('close', () => { if (!res.writableFinished) finish(false, 'the game closed the connection'); });
   const attempt = async () => {
     let s;
-    try { s = await open(cfg, entry.asset, sent); } catch (e) { return retry(e.message); }
+    try { s = await open(cfg, entry.asset, sent); } catch (e) {
+      if (e instanceof NoAsset) return finish(false, e.message, 404);
+      return retry(e.message);
+    }
     if (finished) return s.stream.destroy();
+    if (!headers) {
+      headers = true;
+      res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': entry.size });
+    }
     current = s.stream;
     let skip = s.skip;
     s.stream.on('data', (chunk) => {
@@ -140,7 +157,8 @@ function serveRemote(cfg, entry, res, done) {
   const retry = (why) => {
     if (finished) return;
     if (current) { current.removeAllListeners(); current.on("error", () => {}); current.destroy(); current = null; }
-    if (++tries > TRIES) return finish(false, why);
+    if (sent > lastSent) { tries = 0; lastSent = sent; }   // the attempt got somewhere: TRIES counts drops in a row
+    if (++tries > TRIES) return finish(false, why, 502);
     console.log(`[risorse] ${entry.name} da GitHub: ${why}, riprendo da ${sent} (${tries}/${TRIES})`);
     setTimeout(attempt, 1000 * tries);
   };

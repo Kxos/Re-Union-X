@@ -13,12 +13,16 @@ const errors = [];
 const md5 = (b) => crypto.createHash('md5').update(b).digest('hex');
 const pieces = { d0000: Buffer.alloc(300000, 7), d0001: crypto.randomBytes(500000) };
 const assets = { 'd0000.aaaaaaaaaaaa': { id: 1, body: pieces.d0000 }, 'd0001.bbbbbbbbbbbb': { id: 2, body: pieces.d0001 } };
-let dropNext = 0;            // asset id whose next blob answer stops halfway
+let dropNext = 0;            // asset id whose next blob answers stop early
+let drops = 0, dropBytes = 100000;   // how many answers stop, and after how many bytes
+let apiDown = false;         // the API answers 503 (offline after a first success)
 let tokenLeak = false;
 const ranges = [];
 
 const gh = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  if (u.pathname === '/down') { apiDown = true; res.writeHead(200); return res.end(); }
+  if (apiDown && u.pathname.startsWith('/repos/')) { res.writeHead(503); return res.end(); }
   if (u.pathname === '/repos/K/D/releases/tags/pkg') {
     if (req.headers.authorization !== 'Bearer secret') { res.writeHead(401); return res.end(); }
     res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ id: 7 }));
@@ -41,9 +45,9 @@ const gh = http.createServer((req, res) => {
     ranges.push(b[1] + ':' + from);
     const body = a.body.subarray(from);
     res.writeHead(r ? 206 : 200, { 'Content-Type': 'application/octet-stream', 'Content-Length': body.length });
-    if (dropNext === a.id) {
-      dropNext = 0;
-      res.write(body.subarray(0, 100000));
+    if (dropNext === a.id && drops > 0) {
+      if (--drops === 0) dropNext = 0;
+      res.write(body.subarray(0, dropBytes));
       return setTimeout(() => res.destroy(), 50);
     }
     return res.end(body);
@@ -89,10 +93,32 @@ function child(script, env) {
   if (tokenLeak) errors.push('token sent to the redirect host');
 
   // resume: GitHub drops after 100000 bytes, the server asks again from there
-  dropNext = 2; ranges.length = 0;
+  dropNext = 2; drops = 1; dropBytes = 100000; ranges.length = 0;
   r = await child('const p=await fetchPiece("d0001");out.md5=require("crypto").createHash("md5").update(p.body).digest("hex");out.len=p.body.length;', env);
   if (r.out.md5 !== md5(pieces.d0001)) errors.push('resume: wrong bytes ' + JSON.stringify(r.out));
   if (!ranges.includes('2:100000')) errors.push('resume: no Range from 100000: ' + ranges.join(','));
+
+  // many drops, each with progress (7 x 60000 bytes of 500000): still whole (tries reset on progress)
+  dropNext = 2; drops = 7; dropBytes = 60000;
+  r = await child('const p=await fetchPiece("d0001");out.md5=require("crypto").createHash("md5").update(p.body).digest("hex");', env);
+  if (r.out.md5 !== md5(pieces.d0001)) errors.push('many drops with progress: ' + JSON.stringify(r.out));
+  drops = 0; dropNext = 0;
+
+  // listed in data.txt but missing from the release -> 404 at once, not a 200 that breaks later
+  const brokenRes = path.join(dir, 'res-broken');
+  fs.mkdirSync(path.join(brokenRes, '112', 'index'), { recursive: true });
+  fs.writeFileSync(path.join(brokenRes, '112', 'index', 'misc.png'), 'idx');
+  fs.writeFileSync(path.join(brokenRes, '112', 'data.txt'), 'format 1\nd0000 10 ' + md5(Buffer.from('x')) + ' d0000.ffffffffffff\n');
+  const t0 = Date.now();
+  r = await child('const p=await fetchPiece("d0000");out.code=p.head&&p.head.c;', { ...env, KHUX_RESOURCE_DIR: brokenRes });
+  if (r.out.code !== 404) errors.push('asset missing from the release: ' + JSON.stringify(r.out));
+  if (Date.now() - t0 > 8000) errors.push('asset missing from the release: slow answer');
+
+  // reachable() asks GitHub every time: offline after a first success is seen
+  r = await child('const c=require(' + JSON.stringify(path.join(__dirname, 'resource-remote')) + ');const cfg=c.config();' +
+    'out.a=await c.reachable(cfg);await new Promise(o=>require("http").get(cfg.api+"/down",(x)=>{x.resume();x.on("end",o)}));out.b=await c.reachable(cfg);', env);
+  apiDown = false;
+  if (r.out.a !== true || r.out.b !== false) errors.push('reachable cached: ' + JSON.stringify(r.out));
 
   // unknown piece -> 404
   r = await child('const p=await fetchPiece("d9999");out.code=p.head&&p.head.c;', env);
