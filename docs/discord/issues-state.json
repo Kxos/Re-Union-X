@@ -441,6 +441,34 @@
    "group": "IN PROGRESS",
    "hash": "aa9e0b1d66d265d1",
    "name": "I-261 · Enemy special attacks: copied moves and missing atkSp animations"
+  },
+  "I-262": {
+   "thread": "1570465116141518889",
+   "msg": "1570465116141518889",
+   "group": "OPEN",
+   "hash": "7ad40f4aed4b0ccb",
+   "name": "I-262 · Outfits: «change outfit» does not move to the next default outfit"
+  },
+  "I-263": {
+   "thread": "1570465120574771220",
+   "msg": "1570465120574771220",
+   "group": "OPEN",
+   "hash": "1264c6abce1ca4ae",
+   "name": "I-263 · Outfits: the default avatar pieces are missing for both genders"
+  },
+  "I-264": {
+   "thread": "1570465125654331394",
+   "msg": "1570465125654331394",
+   "group": "OPEN",
+   "hash": "52b11ec5fc744abd",
+   "name": "I-264 · Titles: with both titles set to «None» the home still shows «Budding Newbie»"
+  },
+  "I-265": {
+   "thread": "1570465128460198080",
+   "msg": "1570465128460198080",
+   "group": "OPEN",
+   "hash": "bfecf1c2300a09d4",
+   "name": "I-265 · Avatar Boards: the Filter button crashes the game"
   }
  }
 }
