@@ -93,7 +93,9 @@ function postMessage(r, sha) {
 }
 
 const threadName = (r) => clip(`${r.id} · ${r.title}`, 100);
-const hash = (x) => crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex').slice(0, 16);
+// HASH_V: raise it to edit every post once (e.g. after a history rewrite changed the commit ids in the row links).
+const HASH_V = 2;
+const hash = (x) => crypto.createHash('sha256').update(HASH_V + JSON.stringify(x)).digest('hex').slice(0, 16);
 
 // Per issue: 'post' (new post), 'tag' (status group changed), 'edit' (text changed), 'keep'.
 // The link to the row changes with every commit, so the hash ignores it.
