@@ -120,7 +120,7 @@ function creditsPage() {
     + row('KHUX Wiki & KH Wiki', '*Quests, Medals, special attacks and events* used as references.')
     + row('ReLux Team', 'Research on the game\'s *events, raids, Union Cross and campaigns*, the archive of the official notices and player-made calculators. Lead developer *LuxHollow*: a steady support to this project.')
     + row('SmellyOctopus', 'Thank you for teaching so many of us to *play free-to-play wisely*, and for keeping us company back then with *videos full of joy*. Those videos are now *a huge help* as references for the restoration.')
-    + row('Testers', 'They play the restoration first and *report what breaks*, so that everyone else finds it working.', 't',
+    + row('Testers', 'They played every new piece of the restoration before anyone else and *reported what broke*, so that everyone else would find it working. Thank you!', 't',
       `<div class="names">${TESTERS.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`)
     + `<div class="heart"><div class="h">&#9829;</div><span class="pill p-pink">FROM THE HEART</span><div class="ttl">To our community</div><p>${k('Thank you to *every player who never let this game go*: to everyone who kept videos, screenshots and guides, shared what they remembered or simply asked “is it coming back?”. You are the reason this restoration keeps going, and *this game lives on because of you*.')}</p><div class="sign">May your heart be your guiding key.</div></div>`
     + '<h2>The original game</h2>'
