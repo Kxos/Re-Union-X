@@ -70,7 +70,7 @@ function stripBytesOf(b, catalog, nameOf) {
 
 // nameOf (Map medalId -> nome della tabella medal) attiva il controllo I-153; senza (prove sintetiche) come prima
 function masterRows(catalog, xmlSafe = WARRANT_XML_SAFE, nameOf = null) {
-  return [gacha.catalogRow(), ...catalog.banners.map((b, i) => {
+  return [gacha.tutorialRow(), gacha.catalogRow(), ...catalog.banners.map((b, i) => {
     const bytes = stripBytesOf(b, catalog, nameOf), warrant = warrantOf(b, xmlSafe, bytes);
     if (bytes > gacha.WARRANT_LIST_MAX && !b.guarantee.pityLabel) {
       console.log(`  ${b.rowId} ${b.name}: striscia della pity di ${bytes} byte senza pity_label in banner_overrides.tsv: «${PITY_LABEL_FALLBACK}»`);

@@ -1757,7 +1757,8 @@ function respondGachaList(res) {
   // I-153: nomi della tabella medal servita (un id per nome nella striscia, lunghezza oltre il limite del client)
   const nameOf = new Map(medalRows.map((r) => [r.medalId, r.name]));
   const data = gacha.gachaListData(gachaCatalog().banners, player, { realMs: realNow(), webBase: WEB_BASE, sizes: GACHA_SIZES, show: GACHA_SHOW,
-    ...ctx, exFor, catalog: gachaCatalog(), validCommentOf: (b) => comments.get(b.drawMedalTypeId), safeMedalId, nameOf });
+    ...ctx, exFor, catalog: gachaCatalog(), validCommentOf: (b) => comments.get(b.drawMedalTypeId), safeMedalId, nameOf,
+    tutorial: gacha.tutorialOpen(player, ctx.storyQuest) });
   if (migrate || player.gacha.listedCurrency !== listed) savePlayer();
   gachaLastListed = new Set(data.gachaList.map((x) => x.drawMedalTypeId));
   data.petGachaList = petPlates(ctx);
@@ -1780,7 +1781,9 @@ function respondGachaList(res) {
 function respondGachaDraw(res, body) {
   player.medals = player.medals || []; // salvataggio nuovo: l'elenco nasce alla prima medaglia
   const now = serverTime(), realMs = realNow(), ctx = storyCtx();
-  const banner = gachaData.bannerById(gachaCatalog().banners, body?.drawMedalTypeId);
+  // the tutorial draw (I-266): its own banner, outside the catalogue, while the tutorial window is open
+  const tutorialDraw = Number(body?.drawMedalTypeId) === gacha.TUTORIAL_BANNER.drawMedalTypeId && gacha.tutorialOpen(player, ctx.storyQuest);
+  const banner = tutorialDraw ? gacha.TUTORIAL_BANNER : gachaData.bannerById(gachaCatalog().banners, body?.drawMedalTypeId);
   const freeSlots = maxMedal() - stackedMedalList().length;
   let why = gacha.checkDraw(banner, player, body, { ...ctx, realMs, freeSlots, sizes: GACHA_SIZES, show: GACHA_SHOW, vip: vipActive(realMs) });
   if (!why && !GACHA_SHOW.has(banner.rowId) && !gachaShopList(ctx).includes(banner) && !gachaLastListed.has(banner.drawMedalTypeId)) why = `${banner.rowId} non e' nella lista dello Shop`;
@@ -1793,7 +1796,7 @@ function respondGachaDraw(res, body) {
   let draw;
   const boosted = gachaBoostedIndex();
   const boostedOf = (id, str, def) => boosted.get(`${id}:${str}:${def}`);
-  try { draw = gachaData.rollDraw(banner, expandFor(banner, ctx), Math.random, gacha.drawState(player, banner), { boostedOf }); } catch (e) {
+  try { draw = tutorialDraw ? { medalIds: [banner.medalId] } : gachaData.rollDraw(banner, expandFor(banner, ctx), Math.random, gacha.drawState(player, banner), { boostedOf }); } catch (e) {
     console.log(`  [gacha] estrazione impossibile, niente addebitato: ${e.message}`);
     return send(res, 200, { ret: ret() });
   }

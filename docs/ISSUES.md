@@ -2,7 +2,7 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-265**).
+a new issue takes the number after the last one used (last: **I-266**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
@@ -93,7 +93,7 @@ Last revision: 10 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
-| I-265 | OPEN | **Avatar Boards: the Filter button crashes the game** (tester report 12-11, always) | to reproduce on the bench (crash capture) | |
+| I-265 | TO VERIFY | **Avatar Boards: the Filter button crashes the game** (tester report 12-11, always; reproduced 12-11: the layout loader on a missing `SphereBoard_Filter_ver120`, as I-127). The JP 4.3.1 original is imported (`jp_coco_layouts.txt`), resources 113 | [risorse_layout](notes/risorse_layout.md#jp-originali) | |
 | I-025 | OPEN | COMPLETE ribbon of the card simpler than the painted original | [bacheche](notes/bacheche.md#layout) | 51f60c4 |
 | I-026 | TO VERIFY | «Unlocked an Avatar Board!» popup: `BattleResult_LB_ver120` is now the JP original layout (I-117). Bench: a Lux level-up that unlocks a board shows it with English texts | [bacheche](notes/bacheche.md#popup-lb) | f38b818 |
 
@@ -101,6 +101,7 @@ Last revision: 10 November 2026.
 
 | ID | Status | Title | Detail | Proof |
 |---|---|---|---|---|
+| I-266 | TO VERIFY | **Tutorial: the guided Shop step points to a normal banner and the new player is stuck** (tester report 12-11). The guide looks for the drawType 5 plate of the original masters («Jewel Draw» id 10, single draw, 300 Jewels; we served only drawType 1). Now served while the tutorial window is open (story before quest 34, until drawn once), first in the list, guaranteeing KH II King Mickey 3★ (user 12-11; the original draw table is not preserved); master revision 308 | `server/gacha.js` TUTORIAL_BANNER, `server/test-tutorial-draw.js` | |
 | I-139 | OPEN | Banner catalog: 24 rows `catalogOnly: 'INCOMPLETE'` (composition, price or number of medals not found in the sources) remain only in the WebView catalog («Banner Catalog only»); 3 Free Deal x1 without `rarityMix` (B0220, B0274, B0497). To complete with new sources (notices, videos) in `recon/tools/banner_overrides.tsv` | [shop](notes/shop.md#sp2) | 17-10 |
 | I-140 | OPEN | «Only draws Epic Medals» filter (~30 banners 2016-17) not reproduced: no per-medal data says which ones were «Epic»; the pool uses all the medals of the period (wider than the original), explained in the Notices (Differences) since 17-10. To fix when the list is found or to reconstruct from the notices | [shop](notes/shop.md#sp2) | 17-10 |
 | I-141 | OPEN | B0612: banner image taken from its VIP twin B0579 (the only one available in the sources): to replace if the original image is found | [shop](notes/shop.md#sp2) | 17-10 |

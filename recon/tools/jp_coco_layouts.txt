@@ -78,6 +78,9 @@ EquipSell_Medal_Step1_ver131.json
 SphereBoardScene_ver310.json
 # LB_Charge assente anche in JP (non 9-slice): targhetta invisibile, come nel nostro
 SphereBoard_Select_Icon_ver130.json     +absent-ok
+# Filter delle Avatar Boards (I-265, segnalazione di un tester 12-11): il popup SphereBoard_Filter_ver120 mancava
+# (caricatore dei layout su documento vuoto, crash al tocco di Filter, come I-127)
+SphereBoard_Filter_ver120.json
 SphereScene_ver310.json
 Sphere_Incentive.json                   need=Get,Txt_Incentive_Label,Txt_Price_Label
 Sphere_Incentive_ver240.json

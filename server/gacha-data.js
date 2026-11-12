@@ -442,11 +442,11 @@ function rollSkill(spec, slotIndex, skillRows, rng) {
 // scorrevole sotto il banner, stringa printf (niente % sciolti), visibile con warrantDisplayOfTime 1
 // e userWarrantDisplayOfTime 1 nella lista (spike del 16-10, prova 3). warrant = striscia della garanzia:
 // {display, number, validComment}; con display != 0 la striscia compare se 1 <= userWarrantDisplayOfTime <= display.
-function drawMedalTypeRow({ drawMedalTypeId, name, payType, price, sortId, bannerUrl, detailUrl, comment, warrant, benefitId = 0 }) {
+function drawMedalTypeRow({ drawMedalTypeId, name, payType, price, sortId, bannerUrl, detailUrl, comment, warrant, benefitId = 0, drawType = 1 }) {
   const w = { display: 1, number: 0, validComment: 1, ...warrant };
   const z = (n) => Array(n).fill(0);
   return {
-    drawMedalTypeId, drawType: 1, sortId, name, benefitId, payType, price,
+    drawMedalTypeId, drawType, sortId, name, benefitId, payType, price,
     validFluctuationPrice: 0, fluctuationPrice: z(5), tableId: 0, validLot: 0, lotName: ['', '', ''],
     lotCount: z(3), lotSsr: z(3), lotPsr: z(3), lotSr: z(3), lotPr: z(3), lotR: z(3), lotPn: z(3), lotN: z(3),
     tableIds: z(3), vipcoinNumber: 0, limitedvipcoinNumber: 0, validAdd: 0, addType: 0, addId: 0, addSkillType: 0,

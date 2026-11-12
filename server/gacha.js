@@ -28,6 +28,20 @@ const CATALOG_PLATE_URL = `/web/gacha/img/${gd.CATALOG_ID}-v${CATALOG_PLATE_STYL
 // never grants or sells paid Jewels), so its button stays grey and the Gold Ticket art (payType 6, Star7_Ticket_39) is
 // the original again. Before 05-11: payType 6 with our banner-list icon in place of Star7_Ticket_39.
 const CATALOG_PAY_TYPE = 3;
+// Tutorial draw (tester report 12-11, I-266): the guided Shop step of the tutorial looks for a drawType 5 plate. The original
+// masters (1.1.3 and the late WW one) have «Jewel Draw» id 10, drawType 5, single draw, 300 Jewels, sortId 9000 (and a
+// 3000 Jewel id 11, not needed by the guide). The draw table lived on the original server: user 12-11, it guarantees
+// KH II King Mickey (3★, 33043 here). Listed first while the tutorial window is open (story before quest 34, the
+// setClearQuest of tutorialMisc) and the draw has not been made (totalLimit 1).
+const TUTORIAL_BANNER = Object.freeze({ drawMedalTypeId: 10, rowId: 'TUTORIAL', name: 'Jewel Draw', drawType: 5, payType: 1,
+  lotCount: 1, prices: Object.freeze([300]), totalLimit: 1, unlockQuest: 0, medalId: 33043, sortId: 9000 });
+const TUTORIAL_LAST_QUEST = 34;
+const tutorialOpen = (player, storyQuest) => storyQuest < TUTORIAL_LAST_QUEST && drawCount(player, TUTORIAL_BANNER) < 1;
+function tutorialRow() {
+  return gd.drawMedalTypeRow({ drawMedalTypeId: TUTORIAL_BANNER.drawMedalTypeId, name: TUTORIAL_BANNER.name, drawType: 5,
+    payType: TUTORIAL_BANNER.payType, price: TUTORIAL_BANNER.prices[0], sortId: TUTORIAL_BANNER.sortId,
+    bannerUrl: `/web/gacha/img/${TUTORIAL_BANNER.drawMedalTypeId}.png`, detailUrl: '', comment: '' });
+}
 const SHOP_MAX = 20; // fino a 19 banner nella stessa settimana dell originale (2020-09-10); prima 8 (I-165)
 // payType 8: player.drawTickets[currency]; payType 9 Draw Points (Draw Points Deal): player.drawPoints, served as
 // userPoint.limitedDrawTicket3 (client 4.3.1: the payType 9 plate reads limitedDrawTicket3 with icon 42; points from selling
@@ -169,7 +183,7 @@ function catalogRow() {
 // (senza, JSON.stringify lo toglie e il client rifiuta la lista: «200 ERROR:75», I-138).
 function plate(b, webBase, userLimitedCount, price, sortId, warrant = warrantFields({}), kept = false) {
   return {
-    validAdd: 0, drawMedalTypeId: b.drawMedalTypeId, drawType: 1, sortId, payType: b.payType, price,
+    validAdd: 0, drawMedalTypeId: b.drawMedalTypeId, drawType: b.drawType || 1, sortId, payType: b.payType, price,
     lotCount: b.lotCount, isDayLimited: b.dayLimit || b.vipFree || b.totalLimit ? 1 : 0, userLimitedCount,
     userWarrantDisplayOfTime: warrant.userWarrantDisplayOfTime,
     name: b.name, description: b.name, bannerUrl: `${webBase}/web/gacha/img/${b.drawMedalTypeId}${kept ? `-kept${KEPT_STYLE}` : ''}.png`, // -kept: stessa immagine con il bollino «KEPT IN SHOP»
@@ -311,7 +325,7 @@ function drawsLeft(player, b, realMs) {
 // per la striscia della garanzia; validCommentOf(banner) = validComment della riga drawMedalType servita, safeMedalId =
 // ultimo ripiego per warrantMedalIds (guardWarrant), nameOf(medalId) = nome della riga medal servita (I-153: un id per
 // nome e lunghezza della striscia)
-function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, storyDay, shopFrom, shopTo, show, seasonal, pinned, exFor, catalog, validCommentOf, safeMedalId, nameOf }) {
+function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, storyDay, shopFrom, shopTo, show, seasonal, pinned, exFor, catalog, validCommentOf, safeMedalId, nameOf, tutorial = false }) {
   ticketsOf(player);
   const list = shopBanners(banners, { storyQuest, storyDay, shopFrom, shopTo, sizes, show, seasonal, pinned });
   gstate(player).listedCurrency = listedCurrency(list);
@@ -321,7 +335,8 @@ function gachaListData(banners, player, { realMs, webBase, sizes, storyQuest, st
   };
   // Catalog sortId 1, poi 10, 20, ... nell'ordine di shopBanners (i piu' recenti prima, spec 4.3).
   return {
-    gachaList: [catalogPlate(webBase), ...list.map((b, i) => plate(b, webBase, drawsLeft(player, b, realMs), priceFor(b, player), 10 * (i + 1),
+    gachaList: [...(tutorial ? [plate(TUTORIAL_BANNER, webBase, drawsLeft(player, TUTORIAL_BANNER, realMs), priceFor(TUTORIAL_BANNER, player), 0)] : []),
+      catalogPlate(webBase), ...list.map((b, i) => plate(b, webBase, drawsLeft(player, b, realMs), priceFor(b, player), 10 * (i + 1),
       warrantOfList(b), !!pinned && b.drawMedalTypeId === pinned.drawMedalTypeId))],
     petGachaList: [],
   };
@@ -894,6 +909,6 @@ function catalogPage(banners, ctx) {
 module.exports = {
   KIND_OPTS, niceRange, PAY_ICON, MEDAL_GALLERY_HREF,
   KEPT_STYLE, CATALOG_PLATE_STYLE, CATALOG_PAY_TYPE, PAY_ICON_KEYS, page, PIN_JS, esc,
-  SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, listedCurrency, catalogRow, catalogPlate,
+  TUTORIAL_BANNER, tutorialOpen, tutorialRow, SHOP_MAX, WALLET, shopLeaveWeeks, TICKET_CURRENCIES, ticketCurrency, ticketsOf, walletName, balance, priceFor, drawable, ticketUnlockQuest, shopBanners, listedCurrency, catalogRow, catalogPlate,
   dayLeft, drawsLeft, gachaListData, warrantFields, guardWarrant, warrantDedupe, warrantStripBytes, WARRANT_LIST_MAX, WARRANT_HARD_MAX, checkDraw, payDraw, drawState, drawResultFields, detailPage, oddsPage, catalogPage, gameYearOf, GAME_YEARS, payGroupOf, isVip, medalSearch, stateOf, RESTORED_QUEST, isFreeLike, isFreeDaily, pinnable, pinnedBanner,
 };
