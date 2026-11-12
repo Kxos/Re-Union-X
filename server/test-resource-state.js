@@ -48,6 +48,24 @@ try {
   fs.rmSync(stateFile);
   write(5, base);
   if (fs.existsSync(stateFile)) errors.push('state written without KHUX_RESOURCE_STATE');
+
+  // a game without the resources while the data is gone (Re-Union X gave it to the game, then the game lost it): the
+  // server answers resourcesize and then exits with code 3, so Re-Union X's :server process ends and the game, bound
+  // to it, goes back to Re-Union X (GameLink). Phone test 12-11: mode 0 -> crash at home; staying up -> error 52 loop.
+  const exitCode = (rev, env) => {
+    const child = 'console.log=()=>{};const t=require(' + JSON.stringify(path.join(__dirname, 'server')) + ')._test;' +
+      'let sent=false;t.respondResourceSize({writeHead(){},end(){sent=true;}},{resourceRevision:' + rev + ',masterRevision:0});' +
+      'setTimeout(()=>process.exit(sent?0:9),1500)';
+    try { execFileSync(process.execPath, ['-e', child], { env, stdio: 'ignore' }); return 0; } catch (e) { return e.status; }
+  };
+  const withState = { ...base, KHUX_RESOURCE_STATE: stateFile };
+  fs.rmSync(path.join(res, '112', 'data'), { recursive: true });
+  if (exitCode(0, withState) !== 3) errors.push('no data, old revision: server did not exit with 3');
+  if (exitCode(112, withState) !== 0) errors.push('no data, game up to date: server exited');
+  if (exitCode(0, base) !== 0) errors.push('no data, no KHUX_RESOURCE_STATE (PC): server exited');
+  fs.mkdirSync(path.join(res, '112', 'data'));
+  fs.writeFileSync(path.join(res, '112', 'data', 'd0000'), 'data');
+  if (exitCode(0, withState) !== 0) errors.push('data present, old revision (first download): server exited');
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
 }

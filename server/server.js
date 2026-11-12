@@ -481,23 +481,33 @@ function respondResourceSize(res, req) {
   const masterCurrent = Number(req?.masterRevision) >= sessionRevision();
   const resourcesCurrent = Number(req?.resourceRevision) >= latestResourceVersion();
   const size = masterCurrent && resourcesCurrent ? 0 : resourcesCurrent ? masterBytes() : Number(process.env.KHUX_RESOURCE_SIZE || 0);
-  writeResourceState(Number(req?.resourceRevision) || 0);
+  const state = writeResourceState(Number(req?.resourceRevision) || 0);
   send(res, 200, { ret: ret(), size });
+  // Re-Union X gave the data to the game and the game lost it: nothing to download from here. Exit, so the :server
+  // process of Re-Union X ends and the game, bound to it, goes back to Re-Union X, which downloads the data again.
+  // Phone test 12-11: answering mode 0 crashed the game at home; staying up gave error 52 in a loop.
+  if (state && state.dataMissing && state.have < state.latest) {
+    console.log('resources missing for the game (have ' + state.have + ', latest ' + state.latest + '): server exits');
+    setTimeout(() => process.exit(3), 300);
+  }
 }
 
 // KHUX_RESOURCE_STATE (set by Re-Union X on the phone): which resource revision the game declared, the latest version
 // served and whether its data is on disk. Re-Union X deletes its copy of the data once the game has them
 // (Re-Union-X-App docs/superpowers/specs/2026-11-12-spazio-risorse-design.md). Written atomically; unset = nothing.
+// Returns the state written (null without the variable).
 function writeResourceState(have) {
   const file = process.env.KHUX_RESOURCE_STATE;
-  if (!file) return;
+  if (!file) return null;
   const latest = latestResourceVersion();
   let dataMissing = true;
   try { dataMissing = fs.readdirSync(path.join(RESOURCE_DIR, String(latest), 'data')).length === 0; } catch { /* missing */ }
+  const state = { have, latest, dataMissing, at: Date.now() };
   try {
-    fs.writeFileSync(file + '.tmp', JSON.stringify({ have, latest, dataMissing, at: Date.now() }));
+    fs.writeFileSync(file + '.tmp', JSON.stringify(state));
     fs.renameSync(file + '.tmp', file);
   } catch (e) { console.log('resource state not written:', e.message); }
+  return state;
 }
 // byte dei master serviti (file .json di MASTER_DIR), per /system/resourcesize quando cambia solo il master
 function masterBytes() {
