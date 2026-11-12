@@ -17,6 +17,7 @@ let dropNext = 0;            // asset id whose next blob answers stop early
 let drops = 0, dropBytes = 100000;   // how many answers stop, and after how many bytes
 let apiDown = false;         // the API answers 503 (offline after a first success)
 let tokenLeak = false;
+let listHits = 0;            // requests for the asset list
 const ranges = [];
 
 const gh = http.createServer((req, res) => {
@@ -28,6 +29,7 @@ const gh = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ id: 7 }));
   }
   if (u.pathname === '/repos/K/D/releases/7/assets') {
+    listHits++;
     const list = u.searchParams.get('page') === '1' ? Object.entries(assets).map(([name, a]) => ({ name, id: a.id })) : [];
     res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(list));
   }
@@ -118,7 +120,7 @@ function child(script, env) {
   r = await child('const c=require(' + JSON.stringify(path.join(__dirname, 'resource-remote')) + ');const cfg=c.config();' +
     'out.a=await c.reachable(cfg);await new Promise(o=>require("http").get(cfg.api+"/down",(x)=>{x.resume();x.on("end",o)}));out.b=await c.reachable(cfg);', env);
   apiDown = false;
-  if (r.out.a !== true || r.out.b !== false) errors.push('reachable cached: ' + JSON.stringify(r.out));
+  if (r.out.a !== 'ok' || r.out.b !== 'offline') errors.push('reachable cached: ' + JSON.stringify(r.out));
 
   // unknown piece -> 404
   r = await child('const p=await fetchPiece("d9999");out.code=p.head&&p.head.c;', env);
@@ -146,6 +148,33 @@ function child(script, env) {
   if (r.code !== 0) errors.push('online: exit ' + r.code);
   s = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
   if (s.offline) errors.push('online: state offline');
+
+  // a drop right after the last byte: the piece is whole, no Range from its end
+  dropNext = 1; drops = 1; dropBytes = pieces.d0000.length; ranges.length = 0;
+  r = await child('const p=await fetchPiece("d0000");out.md5=require("crypto").createHash("md5").update(p.body).digest("hex");', env);
+  drops = 0; dropNext = 0;
+  if (r.out.md5 !== md5(pieces.d0000)) errors.push('drop after the last byte: ' + JSON.stringify(r.out));
+  if (ranges.includes('1:' + pieces.d0000.length)) errors.push('drop after the last byte: asked again from the end');
+
+  // two first requests at once: one asset list
+  listHits = 0;
+  r = await child('await Promise.all([fetchPiece("d0000"),fetchPiece("d0001")]);', env);
+  if (listHits !== 1) errors.push('asset list read ' + listHits + ' times for two requests at once');
+
+  // pieces still on the phone (an older pkg, or a release() cut halfway): served from there, the rest from GitHub
+  fs.mkdirSync(path.join(res, '112', 'data'));
+  fs.writeFileSync(path.join(res, '112', 'data', 'd0000'), pieces.d0000);
+  ranges.length = 0;
+  r = await child('const f=t.resourceFiles(112,"data");out.n=f.length;const a=await fetchPiece("d0000");const b=await fetchPiece("d0001");' +
+    'const h=(x)=>require("crypto").createHash("md5").update(x).digest("hex");out.a=h(a.body);out.b=h(b.body);', env);
+  if (r.out.n !== 2 || r.out.a !== md5(pieces.d0000) || r.out.b !== md5(pieces.d0001)) errors.push('mixed local/remote: ' + JSON.stringify(r.out));
+  if (ranges.some((x) => x.startsWith('1:'))) errors.push('local piece fetched from GitHub');
+  fs.rmSync(path.join(res, '112', 'data'), { recursive: true });
+
+  // GitHub refuses the token (revoked): state «denied», not «offline»
+  r = await child('t.respondResourceSize({writeHead(){},end(){}},{resourceRevision:0,masterRevision:0});await new Promise(o=>setTimeout(o,3000));', { ...env, KHUX_GITHUB_TOKEN: 'revoked' });
+  s = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+  if (r.code !== 3 || s.denied !== true || s.offline) errors.push('token refused: exit ' + r.code + ' ' + JSON.stringify(s));
 
   // without KHUX_RESOURCE_REMOTE (PC): no listing from data.txt
   r = await child('out.n=t.resourceFiles(112,"data").length;', { ...base });

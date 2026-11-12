@@ -59,33 +59,46 @@ async function json(cfg, p) {
   const res = await get(cfg.api + p, apiHeaders(cfg, 'application/vnd.github+json'), 15000);
   const parts = [];
   for await (const c of res) parts.push(c);
-  if (res.statusCode !== 200) throw new Error('GitHub ' + res.statusCode + ' for ' + p.split('?')[0]);
+  if (res.statusCode !== 200) {
+    const e = new Error('GitHub ' + res.statusCode + ' for ' + p.split('?')[0]);
+    e.status = res.statusCode;
+    throw e;
+  }
   return JSON.parse(Buffer.concat(parts).toString('utf8'));
 }
 
 let ids = null;          // asset name -> id, once per server process (read again if an asset is not in it)
-async function assetIds(cfg, fresh) {
-  if (ids && !fresh) return ids;
-  const rel = await json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
-  const m = new Map();
-  for (let page = 1; ; page++) {
-    const list = await json(cfg, `/repos/${cfg.repo}/releases/${rel.id}/assets?per_page=100&page=${page}`);
-    for (const a of list) m.set(a.name, a.id);
-    if (list.length < 100) break;
+let reading = null;      // the list being read: requests at the same time wait for the same one
+function assetIds(cfg, fresh) {
+  if (ids && !fresh) return Promise.resolve(ids);
+  if (!reading) {
+    reading = (async () => {
+      const rel = await json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
+      const m = new Map();
+      for (let page = 1; ; page++) {
+        const list = await json(cfg, `/repos/${cfg.repo}/releases/${rel.id}/assets?per_page=100&page=${page}`);
+        for (const a of list) m.set(a.name, a.id);
+        if (list.length < 100) break;
+      }
+      ids = m;
+      return ids;
+    })().finally(() => { reading = null; });
   }
-  ids = m;
-  return ids;
+  return reading;
 }
 
-/** GitHub answers now (release readable with the token) within timeoutMs: a real request every time, never the cache */
+/**
+ * Can the pieces come from GitHub now? A real request every time, never the cache. 'ok'; 'denied' when GitHub answers
+ * but refuses (token revoked or expired, release gone: 401/403/404); 'offline' when it does not answer in timeoutMs.
+ */
 async function reachable(cfg, timeoutMs = 8000) {
   try {
     const p = json(cfg, `/repos/${cfg.repo}/releases/tags/${encodeURIComponent(cfg.tag)}`);
     await Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), timeoutMs))]);
-    return true;
+    return 'ok';
   } catch (e) {
-    console.log('[risorse] GitHub non raggiungibile: ' + e.message);
-    return false;
+    console.log('[risorse] GitHub: ' + e.message);
+    return [401, 403, 404].includes(e.status) ? 'denied' : 'offline';
   }
 }
 
@@ -157,6 +170,7 @@ function serveRemote(cfg, entry, res, done) {
   const retry = (why) => {
     if (finished) return;
     if (current) { current.removeAllListeners(); current.on("error", () => {}); current.destroy(); current = null; }
+    if (sent >= entry.size) return finish(true);           // dropped after the last byte: the piece is whole
     if (sent > lastSent) { tries = 0; lastSent = sent; }   // the attempt got somewhere: TRIES counts drops in a row
     if (++tries > TRIES) return finish(false, why, 502);
     console.log(`[risorse] ${entry.name} da GitHub: ${why}, riprendo da ${sent} (${tries}/${TRIES})`);

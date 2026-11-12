@@ -491,13 +491,13 @@ function respondResourceSize(res, req) {
   if (state && state.dataMissing && state.have < state.latest) {
     console.log('resources missing for the game (have ' + state.have + ', latest ' + state.latest + '): server exits');
     setTimeout(() => process.exit(3), 300);
-  } else if (state && state.have < state.latest && dataIsRemote(state.latest)) {
-    // the pieces will come from GitHub: without internet the game would loop on error 52, so the same way back,
-    // with «offline» in the state for Re-Union X («Connect to the internet...»)
-    remote.reachable(remote.config()).then((ok) => {
-      if (ok) return;
-      writeResourceState(state.have, { offline: true });
-      console.log('GitHub unreachable and the game needs the resources: server exits');
+  } else if (state && state.have < state.latest && needsGitHub(state.latest)) {
+    // the pieces will come from GitHub: without internet (or with a refused token) the game would loop on error 52,
+    // so the same way back, with «offline» or «denied» in the state for Re-Union X's message
+    remote.reachable(remote.config()).then((how) => {
+      if (how === 'ok') return;
+      writeResourceState(state.have, how === 'denied' ? { denied: true } : { offline: true });
+      console.log('GitHub ' + how + ' and the game needs the resources: server exits');
       setTimeout(() => process.exit(3), 300);
     });
   }
@@ -522,7 +522,7 @@ function writeResourceState(have, extra) {
   const latest = latestResourceVersion();
   // missing = neither on the phone nor in data.txt for GitHub (resource-remote.js)
   const dataMissing = localNames(latest, 'data').length === 0 && remoteData(latest).length === 0;
-  const state = { have, latest, dataMissing, offline: false, ...extra, at: Date.now() };
+  const state = { have, latest, dataMissing, offline: false, denied: false, ...extra, at: Date.now() };
   try {
     fs.writeFileSync(file + '.tmp', JSON.stringify(state));
     fs.renameSync(file + '.tmp', file);
@@ -833,21 +833,30 @@ function fileMd5(file) {
   return md5Cache.get(k);
 }
 
-// data pieces of a version on the phone's disk; none -> from data.txt if the pieces come from GitHub
+// data pieces of a version on the phone's disk
 function localNames(version, kind) {
   try { return fs.readdirSync(path.join(RESOURCE_DIR, String(version), kind)).sort(); } catch { return []; }
 }
 
+// with the pieces from GitHub (KHUX_RESOURCE_REMOTE) the list is always data.txt; each piece is served from the phone
+// when it is there whole (an older pkg, a deletion cut halfway), otherwise from the release
 function remoteData(version) {
-  return dataIsRemote(version) ? remote.remoteEntries(RESOURCE_DIR, version) : [];
+  return remote.config() ? remote.remoteEntries(RESOURCE_DIR, version) : [];
 }
 
-function dataIsRemote(version) {
-  return Boolean(remote.config()) && localNames(version, 'data').length === 0;
+/** the piece on the phone, whole (size of data.txt), or null */
+function localPiece(version, e) {
+  const f = path.join(RESOURCE_DIR, String(version), 'data', e.name);
+  try { return fs.statSync(f).size === e.size ? f : null; } catch { return null; }
+}
+
+/** some pieces of the version must come from GitHub */
+function needsGitHub(version) {
+  return remoteData(version).some((e) => !localPiece(version, e));
 }
 
 function resourceFiles(version, kind) {
-  if (kind === 'data' && dataIsRemote(version)) {
+  if (kind === 'data' && remoteData(version).length) {
     return remoteData(version).map((e) => ({
       url: `${SESSION_BASE}/resource/${version}/data/${encodeURIComponent(e.name)}`, md5: e.md5, size: e.size,
     })).filter((f) => f.size > 0);
@@ -908,13 +917,20 @@ function respondResourceFile(req, res) {
     res.writeHead(404);
     return res.end();
   }
-  const file = path.join(RESOURCE_DIR, version, kind, name);
-  if (kind === 'data' && dataIsRemote(version)) {               // from the GitHub release, while it arrives
-    const list = remoteData(version);
+  let file = path.join(RESOURCE_DIR, version, kind, name);
+  // the last data piece of the latest version served whole: the game has the download (noteGameAtHome)
+  let last = false;
+  const list = kind === 'data' ? remoteData(version) : [];
+  if (list.length) {                                            // data.txt: from the phone if whole, else from GitHub
     const entry = list.find((e) => e.name === name);
     if (!entry) { res.writeHead(404); return res.end(); }
-    const lastRemote = Number(version) === latestResourceVersion() && list[list.length - 1] === entry;
-    return remote.serveRemote(remote.config(), entry, res, (ok) => { if (ok && lastRemote) resourcesPending = false; });
+    last = Number(version) === latestResourceVersion() && list[list.length - 1] === entry;
+    const here = localPiece(version, entry);
+    if (!here) return remote.serveRemote(remote.config(), entry, res, (ok) => { if (ok && last) resourcesPending = false; });
+    file = here;
+  } else if (kind === 'data' && Number(version) === latestResourceVersion()) {
+    const names = localNames(version, 'data');
+    last = names.length > 0 && names[names.length - 1] === name;
   }
   if (!fs.existsSync(file)) {
     res.writeHead(404);
@@ -923,9 +939,6 @@ function respondResourceFile(req, res) {
   res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': fs.statSync(file).size });
   // pipeline e non pipe (I-136): un errore di lettura dopo i controlli (file tolto, illeggibile) chiude la risposta
   // invece di arrivare come eccezione asincrona non gestita e far cadere il server; chiude il file se il client se ne va
-  // the last data piece of the latest version served whole: the game has the download (noteGameAtHome)
-  const names = kind === 'data' && Number(version) === latestResourceVersion() ? fs.readdirSync(path.dirname(file)).sort() : [];
-  const last = names.length > 0 && names[names.length - 1] === name;
   stream.pipeline(fs.createReadStream(file), res, (err) => {
     if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') console.log(`[risorse] ${version}/${kind}/${name}: ${err.message}`);
     if (!err && last) resourcesPending = false;
