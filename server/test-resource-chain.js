@@ -61,7 +61,12 @@ try {
   check(p.mode === 0 && p.versions.length === 0, 'broken chain served: ' + JSON.stringify(p));
   fs.writeFileSync(path.join(res, '115', 'base.txt'), '115');
   check(run('process.stdout.write(JSON.stringify(t.resourceChain(115)))') === null, 'chain with a base not older');
-  fs.rmSync(path.join(res, '115'), { recursive: true });
+  // a gap (base 113 for 115): the game saves minVersion + count - 1, so it would believe it has 114 < 115 and download
+  // the whole chain at every start; the numbers of a chain must be consecutive
+  fs.writeFileSync(path.join(res, '115', 'base.txt'), '114');
+  fs.renameSync(path.join(res, '115'), path.join(res, '116'));
+  check(run('process.stdout.write(JSON.stringify(t.resourceChain(116)))') === null, 'chain with a gap (116 on 114)');
+  fs.rmSync(path.join(res, '116'), { recursive: true });
 
   // state for Re-Union X: data missing when a version of the download has no pieces (here the base)
   const stateFile = path.join(dir, 'resource.state');
@@ -70,7 +75,7 @@ try {
   check(state(0).dataMissing === false && state(0).latest === 114, 'state with the chain: ' + JSON.stringify(state(0)));
   fs.rmSync(path.join(res, '112', 'data'), { recursive: true });
   check(state(0).dataMissing === true, 'base pieces gone, new game: not reported');
-  check(state(113).dataMissing === false, 'base pieces gone, game at 113 needs only 114: reported missing');
+  check(state(113).dataMissing === false, 'base pieces gone, game at 113 needs only 114: should not be reported missing');
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
 }

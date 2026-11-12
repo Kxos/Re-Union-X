@@ -10,7 +10,7 @@ copiano byte per byte (nome offuscato e cifratura non dipendono dalla posizione,
 stesso record (alias) restano su un solo record.
 Un record si confronta per contenuto: resource_pack.py cifra con un nonce casuale, quindi un file invariato del
 pacchetto generato ha byte diversi a ogni build. Byte uguali = invariato; altrimenti si decifrano i due record e conta il
-contenuto in chiaro (in cache: sha1 dei byte -> sha1 del contenuto, khux_bgi_cache/plain.pkl nella cartella temporanea,
+contenuto in chiaro (in cache: sha1 dei byte -> sha1 del contenuto, khux_bgi_cache/plain-1.pkl nella cartella temporanea; check non la usa,
 cosi' la versione dopo non ridecifra i record di questa). Un record che non si decifra conta come cambiato.
 Poi build-resources.ps1 -Append unisce con resource_merge.py --last-wins l'indice di N, i dati della catena e questo
 pacchetto: gli offset di N non cambiano e «size» = dati di N + pacchetto.
@@ -38,7 +38,8 @@ from resource_compact import Concat, compact, index_bytes, read_bgi   # noqa: E4
 PAD = b'zz_pad/'
 
 
-CACHE = os.path.join(tempfile.gettempdir(), 'khux_bgi_cache', 'plain.pkl')
+# versione nel nome: un decodificatore cambiato non riusa i risultati di prima
+CACHE = os.path.join(tempfile.gettempdir(), 'khux_bgi_cache', 'plain-1.pkl')
 
 
 class Pack:
@@ -122,7 +123,8 @@ def delta(prev, full, lib, skey, out_png, out_mp4):
 
 def check(result, full, lib, skey):
     """differenze fra la versione risultante e la build completa: nomi mancanti o con byte diversi"""
-    got, want, cache = Pack(result, lib, skey), Pack(full, lib, skey), load_cache()
+    # senza la cache di delta(): una verifica indipendente decifra di nuovo
+    got, want, cache = Pack(result, lib, skey), Pack(full, lib, skey), {}
     out = []
     try:
         for n in want.names:
@@ -130,7 +132,6 @@ def check(result, full, lib, skey):
                 out.append('nome mancante: %s' % n.decode('utf-8', 'replace'))
             elif differs(got, want, n, cache):
                 out.append('record diverso: %s' % n.decode('utf-8', 'replace'))
-        save_cache(cache)
     finally:
         got.close()
         want.close()

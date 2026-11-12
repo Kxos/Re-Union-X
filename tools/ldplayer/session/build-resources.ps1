@@ -36,7 +36,7 @@
 #   (la versione precedente), data\d0000 (i record cambiati o nuovi, in coda ai dati della catena) e l'indice completo.
 #   Chi ha la versione precedente scarica solo quel pezzo; chi parte da zero tutta la catena (mode 1). I nomi tolti
 #   restano e i record sostituiti restano nei dati come byte morti: una base completa nuova (-Version N) li toglie.
-#   Senza -Version: l'ultima + 1. -Quick e -DryRun non valgono su una versione incrementale.
+#   La versione e' sempre l'ultima + 1 (consecutive: il gioco salva minVersion + numero di versioni - 1). -Quick e -DryRun non valgono su una versione incrementale.
 #   .\build-resources.ps1 -Append
 param([int]$Version, [switch]$Quick, [switch]$Append, [switch]$DryRun, [switch]$NoJp, [switch]$NoRooms, [switch]$NoEnemies, [switch]$NoRaisedraw, [switch]$NoCompact, [string]$TestStraddle)
 $ErrorActionPreference = 'Stop'
@@ -61,7 +61,7 @@ function Resource-Chain([int]$n) {
   $c = @($n)
   while (Test-Path "$D\resource_data\$n\base.txt") {
     $b = [int](Get-Content "$D\resource_data\$n\base.txt" | Select-Object -First 1).Trim()
-    if ($b -ge $n -or -not (Test-Path "$D\resource_data\$b")) { throw "versione ${n}: base $b assente o non piu' vecchia" }
+    if ($b -ne $n - 1 -or -not (Test-Path "$D\resource_data\$b")) { throw "versione ${n}: base $b assente o non la versione prima ($($n - 1)): il gioco conta versioni consecutive" }
     $n = $b; $c = @($n) + $c
   }
   , $c
@@ -72,8 +72,9 @@ if ($Quick) {
   if (Test-Path "$D\resource_data\$Version\base.txt") { throw "la versione $Version e' incrementale (base.txt): -Quick e -DryRun non valgono, usa -Append" }
 } elseif ($Append) {
   if (-not $latestV) { throw '-Append: nessuna versione da cui partire' }
-  if (-not $Version) { $Version = $latestV + 1 }
-  if ($Version -le $latestV) { throw "-Append: la versione $Version non e' dopo l'ultima ($latestV)" }
+  # consecutive: the game saves minVersion + count - 1 as its revision (server.js resourceChain)
+  if ($Version -and $Version -ne $latestV + 1) { throw "-Append: la versione dev'essere $($latestV + 1) (l'ultima + 1): il gioco conta versioni consecutive" }
+  $Version = $latestV + 1
   $prevV = $latestV
   $prevChain = Resource-Chain $prevV
 } elseif (-not $Version) { throw 'serve -Version N, -Append oppure -Quick' }

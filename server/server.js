@@ -893,15 +893,18 @@ function latestResourceVersion() {
 
 // Incremental versions (mode 2, docs/notes/server.md#resource-mode2): RESOURCE_DIR/<N>/base.txt names the version N
 // builds on; <N>/data holds only the pieces appended after it, <N>/index the full index of N (offsets in the whole
-// concatenated stream). The chain of N is [full version, ..., N], oldest first; null when a base is missing or not older
+// concatenated stream). The chain of N is [full version, ..., N], oldest first, consecutive; null when a base is missing
+// or is not N-1
 // (nothing to serve: a stream that does not match the index would give «Save error»).
 function resourceChain(version) {
   const chain = [version];
   for (let v = version; ;) {
     let base;
     try { base = fs.readFileSync(path.join(RESOURCE_DIR, String(v), 'base.txt'), 'utf8').trim(); } catch { return chain; }
-    if (!/^\d+$/.test(base) || Number(base) >= v || !fs.existsSync(path.join(RESOURCE_DIR, base))) {
-      console.log(`[risorse] versione ${v}: base «${base}» assente o non piu' vecchia, catena di ${version} rotta`);
+    // the base must be the version right before: the game saves minVersion + count - 1 as its revision, so a gap would
+    // leave it below the latest and it would download the whole chain again at every start
+    if (!/^\d+$/.test(base) || Number(base) !== v - 1 || !fs.existsSync(path.join(RESOURCE_DIR, base))) {
+      console.log(`[risorse] versione ${v}: base «${base}» assente o non la versione prima (${v - 1}), catena di ${version} rotta`);
       return null;
     }
     v = Number(base);

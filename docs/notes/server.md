@@ -310,7 +310,7 @@ check `[fn]`, saved revision/size `[fn]` (user data: `resource_revision` +0x1d0,
     for tests, the packages no longer write it.
   - build: `build-resources.ps1 -Append` runs the generators of a full version, merges them as a full index, and
     `recon/tools/resource_delta.py` compares it with the latest version by **content** (resource_pack.py encrypts with a
-    random nonce, so equal bytes = same, otherwise both records are decrypted; cache in `khux_bgi_cache/plain.pkl`):
+    random nonce, so equal bytes = same, otherwise both records are decrypted; cache in `khux_bgi_cache/plain-1.pkl`):
     changed and new names go into one appended pack (`d0000`), then `resource_merge.py --last-wins` (index of N + chain
     data + pack) and `resource_delta.py check` (every name of the full build reads the same content). Removed names
     stay until a new full base (`-Version N`). `-Quick`/`-DryRun` refuse an incremental latest version.

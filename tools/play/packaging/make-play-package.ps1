@@ -36,7 +36,7 @@ function Resource-Chain([string]$root, [int]$n) {
     $c = @($n)
     while (Test-Path "$root\$n\base.txt") {
         $b = [int](Get-Content "$root\$n\base.txt" | Select-Object -First 1).Trim()
-        if ($b -ge $n -or -not (Test-Path "$root\$b\data")) { throw "resources ${n}: base $b missing or not older" }
+        if ($b -ne $n - 1 -or -not (Test-Path "$root\$b\data")) { throw "resources ${n}: base $b missing or not $($n - 1) (the game counts consecutive versions)" }
         $n = $b; $c = @($n) + $c
     }
     , $c
