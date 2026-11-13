@@ -189,7 +189,7 @@ $('freset').onclick=function(e){e.preventDefault();dr.type='all';dr.tier='all';d
 $('fok').onclick=function(){if(!dr)return;var s=dr;s.p=cur.p;closeF();cur=s;render();};
 $('sum').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-x'))t=t.parentNode;var x=attr(t,'data-x');if(!x)return;e.preventDefault();
 if(x==='type'||x==='all')cur.type='all';if(x==='tier'||x==='all')cur.tier='all';if(x==='show'||x==='all')cur.show='all';if(x==='prog'||x==='all')cur.prog='all';if(x==='bd'||x==='all')cur.bd='all';if(x==='q'||x==='all')cur.q='';render();};
-$('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
+if($('yrs'))$('yrs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-yr'))t=t.parentNode;var y=attr(t,'data-yr');if(!y)return;yr=y;render();};
 $('tabs').onclick=function(e){var t=e.target;while(t&&!attr(t,'data-p'))t=t.parentNode;if(!t)return;cur.p=attr(t,'data-p');render();};
 $('secs').onclick=function(e){var t=e.target;while(t&&t!==this&&!attr(t,'data-sec'))t=t.parentNode;var s=attr(t,'data-sec');if(s)setSec(s);};
 var hs=location.hash.slice(1);
@@ -197,8 +197,8 @@ render();
 // BACK from a details page: #q<id> selects its section and year, then scrolls to it; #jp.2017 (mark, the WebView's back key)
 // the section and year. hs is read before the first render, which writes the address
 var h=hs&&document.getElementById(hs),m=/^(ww|jp)(?:\\.(\\d+))?$/.exec(hs);
-if(h&&attr(h,'data-sec')){setSec(attr(h,'data-sec'));if(attr(h,'data-y')){yr=attr(h,'data-y');render();}if(h.scrollIntoView)h.scrollIntoView();}
-else if(m){setSec(m[1]);if(m[2]){yr=m[2];render();}}
+if(h&&attr(h,'data-sec')){setSec(attr(h,'data-sec'));if(h.scrollIntoView)h.scrollIntoView();}
+else if(m){setSec(m[1]);}
 })();`;
 
 // item names of a row for FIND («Matches:»): bosses, tiers, type, board names, board rewards, without repeats (case aside)
@@ -235,14 +235,11 @@ function catalogPage(index, ctx = {}) {
   });
   const data = packCatalog(packed);
   const years = [...new Set(rows.map((r) => r.start.slice(0, 4)))];
-  // the two sections (user 06-11): the page opens on Worldwide; each section has its default year (the Shop year when it has raids)
+  // the two sections (user 06-11): the page opens on Worldwide with every year (no calendar-year chips since 13-11)
   const bySec = { ww: rows.filter((r) => !r.jp), jp: rows.filter((r) => r.jp) }, ww = bySec.ww;
   const yearsOf = (list) => [...new Set(list.map((r) => r.start.slice(0, 4)))];
-  const shopYear = String(ctx.shopFrom || '').slice(0, 4), defOf = (list) => (yearsOf(list).includes(shopYear) ? shopYear : 'all');
-  const defYear = defOf(ww);
   // the span under «All years»: the game's (YEAR_SPAN) for Worldwide, the years of its raids for Japan only (2015–2018)
   const spanOf = (list) => { const y = yearsOf(list); return y.length ? (y.length > 1 ? `${y[0]}–${y[y.length - 1]}` : y[0]) : YEAR_SPAN; };
-  const yearChip = (y, label, n) => `<button type="button" class="yc${y === defYear ? ' on' : ''}${y !== 'all' && !n ? ' hide' : ''}" data-yr="${y}">${label} <span class="yn">${n}</span></button>`;
   // tabs = the Shop's game years (special-pages.js; user 06-11): a tab only for a year with raids, no «Now» mark; data-nww / data-njp:
   // the raids of the section in that year (a tab without any is hidden in that section)
   const perYearOf = (list) => GAME_YEARS.map((g, i) => list.filter((r) => gameYearOf(r.start) === i).length);
@@ -275,12 +272,11 @@ function catalogPage(index, ctx = {}) {
     + `<div class="secs${bySec.jp.length ? '' : ' hide'}" id="secs">${SECTIONS.map(secTab).join('')}</div>${jpIntro}`
     + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, ww.length, ww.length, bySec.jp.length, ` id="span" data-ww="${YEAR_SPAN}" data-jp="${spanOf(bySec.jp)}"`)}`
     + `${GAME_YEARS.map((g, i) => (perYear[i] ? tab(i, g.name, g.sub, perSec.ww[i], perSec.ww[i], perSec.jp[i]) : '')).join('')}</div><div class="tabline"></div>`
-    + `<div class="yrs" id="yrs">${yearChip('all', 'All years', ww.length)}${years.map((y) => yearChip(y, y, ww.filter((r) => r.start.startsWith(y)).length)).join('')}</div>`
     + `<div class="sum" id="sum"><span class="n1">${plural(ww.length, 'raid')}</span> · no filters</div>`
     + '<div id="none" class="none" style="display:none"></div>'
-    + `<div id="rows" data-defy="${defYear}" data-defy-jp="${defOf(bySec.jp)}">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
+    + `<div id="rows" data-defy="all" data-defy-jp="all">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
     + (packed.length ? `<script id="kxrows" type="application/json">${data}</script><script>${UNPACK_JS}</script>` : '')
-    + filterSheet({ placeholder: 'Boss, board or reward name', hint: 'Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Mythril).', n: ww.length,
+    + filterSheet({ placeholder: 'Boss, board or reward name', hint: 'Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Moogle).', n: ww.length,
       groups: [['SHOW', `<div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`],
         ['PROGRESS', `<div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`],
         ['RAID BOARDS', `<div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`],

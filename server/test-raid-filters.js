@@ -40,14 +40,12 @@ function probe() {
       var chip = function (g, v) { return document.querySelector('.opts[data-g="' + g + '"] [data-v="' + v + '"]'); };
       var check = function (name, f, year, act, after) {
         document.querySelector('.sec[data-sec="' + f.sec + '"]').click();
-        var d = document.querySelector('.yc[data-yr="' + A($('rows'), f.sec === 'jp' ? 'data-defy-jp' : 'data-defy') + '"]'); if (d) d.click();
         $('fbtn').click(); $('freset').click();
         chip('type', f.type).click(); chip('tier', f.tier).click(); chip('show', f.show).click(); chip('prog', f.prog).click(); chip('bd', f.bd).click();
         $('fq').value = f.q; $('fq').oninput(); $('fok').click();
         document.querySelector('.tab[data-p="' + f.p + '"]').click();
-        if (year === 'all') document.querySelector('.yc[data-yr="all"]').click();
         if (act) { var ae = act(); if (ae) { out.fail++; out.failed.push({ name: name + ' [' + year + ']', err: [ae] }); return; } f = after; }
-        var err = [], sel = A(document.querySelector('.yc.on'), 'data-yr'), vis = 0, any = 0, inSel = 0;
+        var err = [], sel = 'all', vis = 0, any = 0, inSel = 0;
         R.forEach(function (r) {
           var m = matches(r, f), inYear = sel === 'all' || r.y === sel, v = shown(r.el);
           if (m) { any++; if (inYear) inSel++; }
@@ -62,11 +60,8 @@ function probe() {
           var p = A(t, 'data-p'), want = R.filter(function (r) { var g = {}; for (var k in f) g[k] = f[k]; g.p = p; return matches(r, g); }).length;
           if (+$('tc' + p).textContent !== want) err.push('tab ' + p + ' says ' + $('tc' + p).textContent + ', expected ' + want);
         });
-        [].forEach.call(document.querySelectorAll('.yc'), function (yc) {
-          var y = A(yc, 'data-yr'), n = R.filter(function (r) { return (y === 'all' || r.y === y) && matches(r, f); }).length;
-          if (+yc.querySelector('.yn').textContent !== n) err.push('year chip ' + y + ' says ' + yc.querySelector('.yn').textContent + ', expected ' + n);
-          if (y !== 'all' && !n && shown(yc)) err.push('year chip ' + y + ' shown without raids');
-        });
+        // no calendar-year chips since 13-11 (user: only the Raid Catalog had them): every year is listed
+        if (document.querySelector('.yc')) err.push('calendar-year chips are back');
         $('fbtn').click(); var fok = $('fok').textContent, nres = R.filter(function (r) { return matches(r, f); }).length; $('fx').click();
         if (fok !== 'Show ' + nres + ' result' + (nres === 1 ? '' : 's')) err.push('button «' + fok + '» vs ' + nres);
         [].forEach.call(document.querySelectorAll('.ml'), function (ml) {
@@ -108,11 +103,11 @@ function probe() {
       cases.push(['bd done + show removed', w({ bd: 'done', show: 'removed' })]);
       // a «×» on the Raid Boards tag clears that filter only
       cases.push(['bd tag ×', w({ bd: 'todo', prog: 'done' }), function () { var x = document.querySelector('#sum [data-x="bd"]'); if (!x) return 'no × on the Raid Boards tag'; x.click(); return null; }, w({ prog: 'done' })]);
-      cases.forEach(function (c) { ['default', 'all'].forEach(function (y) { try { check(c[0], c[1], y, c[2], c[3]); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
+      cases.forEach(function (c) { ['all'].forEach(function (y) { try { check(c[0], c[1], y, c[2], c[3]); } catch (e) { out.fail++; out.failed.push({ name: c[0] + ' [' + y + ']', err: ['exception: ' + e.message] }); } }); });
       // the sections keep their own filters and year; the intro box shows only in Japan only; the address names the section
       (function () {
         var serr = [], sec = function (x) { document.querySelector('.sec[data-sec="' + x + '"]').click(); };
-        sec('ww'); $('fbtn').click(); $('freset').click(); $('fok').click(); document.querySelector('.yc[data-yr="all"]').click();
+        sec('ww'); $('fbtn').click(); $('freset').click(); $('fok').click();
         sec('jp'); $('fbtn').click(); $('freset').click(); chip('show', 'can').click(); $('fok').click();
         if (!shown($('jpi'))) serr.push('JP intro hidden in Japan only');
         if (!/^#jp/.test(location.hash)) serr.push('address without the section: ' + location.hash);
@@ -120,7 +115,6 @@ function probe() {
         sec('ww');
         if (shown($('jpi'))) serr.push('JP intro shown on Worldwide');
         if (/Can be kept/.test($('sum').textContent)) serr.push('the JP filter leaked into Worldwide');
-        if (A(document.querySelector('.yc.on'), 'data-yr') !== 'all') serr.push('Worldwide year not kept');
         if (!/^#ww/.test(location.hash)) serr.push('address not back to ww: ' + location.hash);
         sec('jp');
         if (!/Can be kept/.test($('sum').textContent)) serr.push('JP filter lost after a round trip');
@@ -138,7 +132,7 @@ function probe() {
         var kerr = [], k0 = kept[0], ks = A(byId(k0), 'data-sec'), cx = can.filter(function (id) { return A(byId(id), 'data-sec') !== ks; }), c0 = cx.length ? cx[0] : can[0];
         document.querySelector('.sec[data-sec="' + ks + '"]').click();
         $('fbtn').click(); $('freset').click(); $('fok').click();
-        document.querySelector('.tab[data-p="all"]').click(); document.querySelector('.yc[data-yr="all"]').click();
+        document.querySelector('.tab[data-p="all"]').click();
         window.kxRow(c0, true);
         if (A(byId(c0), 'data-show') !== 'kept' || !/(^| )pinned( |$)/.test(byId(c0).className) || !/Kept in the raid list/.test(byId(c0).querySelector('.s').textContent)) kerr.push('kept row not gold');
         if (A(byId(c0).querySelector('.pk'), 'data-on') !== '0') kerr.push('kept row without Remove');
@@ -197,7 +191,7 @@ function hashProbe() {
     var on = function (s) { var e = document.querySelector(s + '.on'); return e ? e.getAttribute(s === '.sec' ? 'data-sec' : 'data-yr') : null; };
     var r = document.getElementById('q8301'), j = document.getElementById('jpi');
     var pre = document.createElement('pre'); pre.id = 'probe';
-    pre.textContent = JSON.stringify({ sec: on('.sec'), yr: on('.yc'), row: !!r && getComputedStyle(r).display !== 'none', intro: getComputedStyle(j).display !== 'none', hash: location.hash });
+    pre.textContent = JSON.stringify({ sec: on('.sec'), row: !!r && getComputedStyle(r).display !== 'none', intro: getComputedStyle(j).display !== 'none', hash: location.hash });
     document.body.appendChild(pre);
   });
 }
@@ -212,10 +206,10 @@ function runHash(hash, want) {
   } catch (e) { errors.push(`hash ${hash}: Edge failed (${e.message.split('\n')[0]})`); }
   try { fs.unlinkSync(file); } catch { /* gone */ }
 }
-runHash('#q8301', { sec: 'jp', yr: '2017', row: true, intro: true, hash: '#jp.2017' });
-runHash('#jp.2016', { sec: 'jp', yr: '2016', row: false, intro: true, hash: '#jp.2016' });
-runHash('#q8100', { sec: 'ww', yr: '2019', intro: false, hash: '#ww.2019' });
-runHash('', { sec: 'ww', yr: '2019', intro: false });
+runHash('#q8301', { sec: 'jp', row: true, intro: true, hash: '#jp' });
+runHash('#jp.2016', { sec: 'jp', row: true, intro: true, hash: '#jp' }); // an old address with a year: the section, every year
+runHash('#q8100', { sec: 'ww', intro: false, hash: '#ww' });
+runHash('', { sec: 'ww', intro: false });
 let real = null; try { real = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'raids.json'), 'utf8')); } catch { /* no local index */ }
 if (real) {
   const week = { shopFrom: '2019-10-17', shopTo: '2019-10-23' };

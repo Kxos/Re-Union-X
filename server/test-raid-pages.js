@@ -205,7 +205,7 @@ const tests = {
     assert.strictEqual(count(html, ' data-p="'), 1 + years.size);
     assert(html.includes('data-p="3" data-nww="2" data-njp="0"><b>Year 4</b><small>3rd 🎂 → 4th 🎂</small>') && html.includes('data-p="all" data-nww="5" data-njp="0"><b>All years</b><small id="span" data-ww="2016–2021" data-jp="2016–2021">2016–2021</small>'), 'Shop tab names');
     assert(!html.includes('class="now"'), 'no Now mark');
-    for (const y of ['2018', '2019', '2020']) assert(html.includes(`data-yr="${y}"`), `year ${y}`);
+    assert(!html.includes('data-yr='), 'no calendar-year chips (user 13-11)');
     assert(/<title>Raid Catalog<\/title>/.test(html));
     // the Filters sheet: FIND with the word-start rule, TYPE, TIER, SHOW; the «Matches:» line is the page script's
     assert(/id="fq"/.test(html) && /Matches the start of words/.test(html));
@@ -369,11 +369,10 @@ const tests = {
     assert(/<button type="button" class="sec" data-sec="jp">[\s\S]*?Japan only<\/span><span class="sn">2<\/span>/.test(secs), 'Japan only, 2 raids');
     assert(html.indexOf('id="secs"') < html.indexOf('id="tabs"'), 'the sections above the year tabs');
     // opened on Worldwide: the counts of the summary, «Show N results», «All years» and the year chips are the worldwide ones
-    assert(html.includes('<span class="n1">5 raids</span>') && html.includes('id="fok">Show 5 results') && html.includes('data-yr="all">All years <span class="yn">5</span>'), 'worldwide counts');
-    assert(/class="yc hide" data-yr="2016">2016 <span class="yn">0<\/span>/.test(html), 'a year with only Japanese raids hidden on Worldwide');
+    assert(html.includes('<span class="n1">5 raids</span>') && html.includes('id="fok">Show 5 results') && !html.includes('id="yrs"'), 'worldwide counts');
     assert(/data-p="0" data-nww="0" data-njp="1"/.test(html) && /class="tab hide" data-p="0"/.test(html), 'a game year with only Japanese raids: its tab hidden on Worldwide');
-    assert(/<div id="rows" data-defy="2019" data-defy-jp="all">/.test(html), 'default years per section (the Shop year when the section has raids in it)');
-    assert(/data-defy-jp="2016"/.test(catalog(ix, ctx({ index: ix, shopFrom: '2016-09-01', shopTo: '2016-09-07' }))), 'JP default year = the Shop year');
+    assert(/<div id="rows" data-defy="all" data-defy-jp="all">/.test(html), 'every year listed by default in both sections (no calendar-year chips, user 13-11)');
+    assert(/data-defy-jp="all"/.test(catalog(ix, ctx({ index: ix, shopFrom: '2016-09-01', shopTo: '2016-09-07' }))), 'JP: every year by default (no calendar-year chips)');
     assert(/id="span" data-ww="2016–2021" data-jp="2016–2017"/.test(html), 'the span under All years per section');
     // the Japan only intro: hidden on Worldwide, one line per rule
     const intro = (/<div class="rc rcl hide" id="jpi">([\s\S]*?)<\/p><\/div>/.exec(html) || [])[1] || '';
