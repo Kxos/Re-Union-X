@@ -3,11 +3,11 @@
 // box (gold callout, status row, «Rebuilt values» closed with its category colour bands), the «Original notice» card and the
 // layout of an original notice (every sentence unchanged, only laid out). Pure HTML / CSS, ES5-safe, no player or master access.
 'use strict';
-const { esc, niceDay, icon } = require('./special-pages');
+const { esc, niceDay, icon, NARROW_CSS } = require('./special-pages');
 const { scrub: scrubNotice, OMIT_LINE: OMIT } = require('./make-raid-notices');
 
 const PAGE_HEAD = (title, css) => '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-  + `<title>${esc(title)}</title><style>${css}</style></head>`;
+  + `<title>${esc(title)}</title><style>${css}${NARROW_CSS}</style></head>`; // NARROW_CSS last: the phone-portrait layout (special-pages.js)
 // a status pill (special-pages PILL_CSS colours): class s-<c>, an icon key or none, the text (html)
 const pill = (c, k, text) => `<span class="s s-${c}">${k ? icon(k) : ''}${text}</span>`;
 const backBar = (href) => `<div class="bar"><a class="back" href="${href}">BACK<span></span></a></div>`;

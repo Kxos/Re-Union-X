@@ -587,7 +587,7 @@ function catalogPage(index, ctx = {}) {
     .replace('__PILL__', JSON.stringify({ kept: pillJs('kept'), can: pillJs('can') }))
     .replace('__RANK__', () => RANK_JS).replace('__MATCH__', () => MATCH_JS);
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-    + `<title>Special Catalog</title><style>${CSS}</style></head><body>`
+    + `<title>Special Catalog</title><style>${CSS}${NARROW_CSS}</style></head><body>`
     + '<div class="hdr"><h1>Special Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
     + '<p class="n">Every Special quest of the game. Tap a quest for its versions, days and rewards. Old quests can be kept in Special, one at a time.</p>'
     + `<div class="tabs" id="tabs">${tab('all', 'All years', YEAR_SPAN, fams.length)}${GAME_YEARS.map((g, i) => (count(i) ? tab(i, g.name, g.sub, count(i)) : '')).join('')}</div><div class="tabline"></div>`
@@ -630,6 +630,48 @@ const DETAIL_CSS = 'table{width:100%;margin:6px 0 10px;border-collapse:collapse;
   + 'box-shadow:0 2px 0 #0b2a66,inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 2px #0a2a6a}'
   + '.back span{display:inline-block;margin-left:12px;width:14px;height:9px;border:3px solid #fff;border-left:0;border-radius:0 8px 8px 0;vertical-align:1px;position:relative}.back span:after{content:"";position:absolute;left:-7px;bottom:-8px;border-style:solid;border-width:6px 9px 6px 0;border-color:transparent #fff transparent transparent}'
   + 'body.hb{padding-bottom:90px}.pinmsg{position:static}';
+// Narrow screens (a phone in portrait, ~360-412 CSS px; 13-11): one shared design for the Special, Raid and Event Catalogs
+// (catalog-pages.js PAGE_HEAD appends it to every Raid / Event page). Only inside @media (max-width:700px), written last in the
+// sheet: the in-game landscape WebView (~830 px) and every wide screen keep the approved look unchanged. Section, game-year and
+// year-chip tabs: one row each, scrolled sideways; Filters: a full-width button, the sheet nearly full screen with one option per
+// line (tap targets >= 44 px); rows: stacked cards (card picture full width, title, pills, full-width buttons); detail and
+// notice pages: one column, a table that does not fit scrolls inside its own box (display:block + tbody as the table), never
+// the page. Same palette and fonts; no markup or script change.
+const NARROW_CSS = '@media (max-width:700px){'
+  + 'html{-webkit-text-size-adjust:100%}body{padding:6px 12px 40px;overflow-x:hidden}h1{font-size:21px;line-height:1.3}'
+  + '.n,.d,.sum,.rp{font-size:15px}.rp{margin-top:4px}'
+  // header: the Filters button under the title, full width (its count dot stays)
+  + '.hdr{-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:6px}.hdr h1{-webkit-flex:1 1 100%;flex:1 1 100%}'
+  + '.fbtn{-webkit-flex:1 1 100%;flex:1 1 100%;width:100%;min-height:44px;font-size:17px;border-radius:22px}'
+  // section tabs (Raid: Worldwide / Japan only), game-year tabs, year chips: one row each, scrolled sideways
+  + '.secs,.tabs,.yrs{-webkit-flex-wrap:nowrap;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;white-space:nowrap;-webkit-overflow-scrolling:touch}'
+  + '.sec{-webkit-flex:1 0 auto;flex:1 0 auto;min-width:0;min-height:44px;box-sizing:border-box;font-size:15px}'
+  + '.tab{-webkit-flex:0 0 auto;flex:0 0 auto;min-width:78px;min-height:44px;padding:5px 9px 4px}.tab b{font-size:13px}.tab small{font-size:11px}.tab .c{font-size:13px}'
+  + '.yrs{gap:6px;padding-bottom:2px}.yc{-webkit-flex:0 0 auto;flex:0 0 auto;min-height:44px;font-size:15px;padding:4px 14px}'
+  + '.tag{font-size:15px;line-height:2}.tag a{width:30px;line-height:28px;border-radius:14px}.clear{display:inline-block;padding:8px 2px}'
+  // rows: stacked cards; the whole card still opens the page (the «›» is dropped: the card is the link)
+  + '.row,.card,.cr{display:block;padding:12px 10px 12px 12px}.row .go,.cr .go{display:none}'
+  + '.im,.th{display:block;width:100%;max-width:100%}.im img,.th img{width:100%;height:auto}.nc{width:100%}'
+  + '.info,.cr .info{display:block;margin-top:8px;line-height:1.45}.nm,.cr .nm{display:block;font-size:17px;white-space:normal}.row .s,.s{font-size:14px;white-space:normal}'
+  + '.pk,.pk.jk{display:block;box-sizing:border-box;width:100%;min-height:44px;padding:9px 14px;margin-top:10px;text-align:center;font-size:16px;line-height:1.5}'
+  + '.ml{font-size:14px;padding-top:14px}.chs{gap:6px}.ch{font-size:13.5px;line-height:2}'
+  // Filters sheet: nearly full screen, one option per line, Show / Reset kept in view at its foot
+  + '.sheet{left:6px;right:6px;top:8px;max-height:calc(100% - 16px);padding:10px 12px 0}'
+  + '.shd b{font-size:19px}.x{width:44px;height:44px;font-size:18px}.sheet h4{font-size:14px;margin:14px 0 6px}'
+  + '.search{padding:4px 12px}.search input{min-height:36px;font-size:17px}.hint{font-size:14px}'
+  + '.opts{display:block}.opts .o{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:0 0 6px;padding:9px 14px;border-radius:10px;text-align:left;font-size:16px}'
+  + '.foot{position:-webkit-sticky;position:sticky;bottom:0;background:#0b3d5c;margin:10px -12px 0;padding:8px 12px 10px;border-top:1px solid #2f6f93}'
+  + '.ok{min-height:44px;font-size:16px}.reset{display:inline-block;padding:12px 6px;font-size:15px}'
+  // detail and notice pages: one column; the boxes' blocks one under the other
+  + '.rcd,.rg{-webkit-flex:1 1 100%;flex:1 1 100%;min-width:0;margin-left:4px;margin-right:4px}'
+  + '.rbt{float:none;display:inline-block;margin:4px 0 0 1.1em}.sbl a{display:block;text-align:center;margin:8px 0 0;padding:9px 14px;font-size:15.5px}'
+  + '.why,.sb .why{font-size:15px}.ver{padding:8px 10px}.mem{padding:6px 0}'
+  + 'table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
+  + 'table>tbody{display:table;width:100%;border-collapse:inherit;border-spacing:inherit;table-layout:inherit}'
+  + 'th,td{padding:5px 7px}.tt{font-size:14px}.tt td,.tt th{white-space:normal!important}.tt td.r,.tt small{overflow-wrap:break-word}'
+  + '.onc .ns{padding:10px 12px 12px}.onc>h2.och{padding:8px 12px 7px}.och .ocd{margin-left:6px}'
+  + '.back{padding:9px 26px 10px}'
+  + '}';
 const FULL_DAY = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 function detailPage(index, evStageId, ctx = {}) {
   const data = pageData(index, ctx);
@@ -679,7 +721,7 @@ function detailPage(index, evStageId, ctx = {}) {
     + v.map((en) => `${v.length > 1 ? `<h3>${esc(en.name)}</h3>` : ''}${quests(en)}`).join('') + '</details>').join('');
   const back = ctx.fromCatalog ? `<div class="bar"><a class="back" href="/web/special/catalog#q${Number(evStageId)}">BACK<span></span></a></div>` : '';
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-    + `<title>${esc(f.title)}</title><style>${CSS}${DETAIL_CSS}</style></head><body${back ? ' class="hb"' : ''}>`
+    + `<title>${esc(f.title)}</title><style>${CSS}${DETAIL_CSS}${NARROW_CSS}</style></head><body${back ? ' class="hb"' : ''}>`
     + `<h1>${esc(f.title)}</h1><img class="banner" width="640" height="140" src="${special.imgPath(head.evStageId)}" alt="">`
     + `${best.pill}<div id="pinmsg" class="pinmsg"></div>`
     + `<h2>Version${versions.length > 1 ? 's' : ''}</h2>${versions.map(block).join('')}`
@@ -689,4 +731,4 @@ function detailPage(index, evStageId, ctx = {}) {
 
 // CSS, DETAIL_CSS, esc, niceDay, monthYear, icon: shared with the Raid Catalog pages (server/raid-pages.js), which follow this style
 module.exports = { gameYearOf, GAME_YEARS, YEAR_SPAN, entryYears, SHOW_SETS, catalogPage, detailPage, familiesOf, buildNames, typesOf, SPECIAL_ICON_KEYS, RANK_JS, khuxRank, MATCH_JS, khuxMatch,
-  CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, CROWN, PROG_OPTS, progCls };
+  CSS, DETAIL_CSS, NARROW_CSS, esc, niceDay, monthYear, icon, CROWN, PROG_OPTS, progCls };
