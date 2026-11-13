@@ -16,18 +16,18 @@ const page = (body) => '<!doctype html><html><head><meta charset="utf-8">'
 
 function agreementPage() {
   const sections = [
-    ['About this server', [
-      'This is a private, non-commercial restoration server for KINGDOM HEARTS Union χ[Cross], made so that the game can still be played after the end of the official service.',
+    ['About Re-Union X', [
+      'Re-Union X is a non-commercial fan restoration of KINGDOM HEARTS Union χ[Cross] that works completely offline, made so that the game can still be played after the end of the official service. The small server the game talks to runs on your own phone or computer: nothing goes online.',
       'It is not operated, endorsed or supported by SQUARE ENIX or Disney. KINGDOM HEARTS and all characters, images, music and texts of the game belong to their respective owners.']],
     ['Your data', [
-      'Your progress is saved only on the computer that runs this server. Nothing is sent to SQUARE ENIX or to any other service.',
+      'Your progress is saved only on the phone or computer that runs the game. Nothing is sent to SQUARE ENIX or to any other service.',
       'Backing up the save file is your responsibility: deleting it erases your progress.']],
     ['Purchases', [
       'There are no real-money purchases. Jewels, Medals and items come only from quests, missions, presents and events of this server.']],
     ['No warranty', [
       'The server is provided as it is, without any warranty. Some features of the original game may be missing or behave differently.']],
   ];
-  return page('<h1>User Agreement</h1><p class="n">KINGDOM HEARTS Union χ[Cross] restoration server</p>'
+  return page('<h1>User Agreement</h1><p class="n">KINGDOM HEARTS Union χ[Cross] offline restoration</p>'
     + sections.map(([h, ps]) => `<h2>&#9632; ${esc(h)}</h2>` + ps.map((p) => `<p>${esc(p)}</p>`).join('')).join(''));
 }
 
