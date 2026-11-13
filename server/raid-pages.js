@@ -285,11 +285,11 @@ function catalogPage(index, ctx = {}) {
     + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
     + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Boss, board or reward name" autocomplete="off"></div>'
     + '<div class="hint">Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Mythril).</div>'
-    + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS, undefined, secAttr('type'))}</div>`
-    + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS, undefined, secAttr('tier'))}</div>`
     + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`
     + `<h4>PROGRESS</h4><div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`
     + `<h4>RAID BOARDS</h4><div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`
+    + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS, undefined, secAttr('type'))}</div>`
+    + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS, undefined, secAttr('tier'))}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(ww.length, 'result')}</button></div></div>`
     + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${js}</script></body></html>`;
 }
