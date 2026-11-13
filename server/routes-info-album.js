@@ -250,7 +250,9 @@ const DIFFERENCES_BODY = [
   '## Medals',
   'A few Spirit parts without original graphics are replaced by a similar part.',
   'The "Medal STR +N" and "Medal DEF +N" effects of Special Attacks and Supernovas are rebuilt from their descriptions, because the original values are lost.',
-  'The **full artwork** of a Medal (the **Art** button in its details) is the original picture of the 55 Medals that had one. It is shown only on Medals whose own picture is part of that artwork: every star of those families, the SN++ reissues with the same picture (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art**) and their boosted copies (which of them showed the button in the original is not known). Medals with a different picture, such as **SN++ - Terra, Ven, Aqua**, have no Art button. Some other Medals whose picture is part of one of these artworks show it too, although the original game data gives them no artwork (**reconstructed**): **Illustrated Aqua** (A, SN, SN+), **Illustrated Xemnas**, **Illustrated Sora B**, **Illustrated Terra B**, **Illustrated Donald B**, **Illustrated Goofy**, **Illustrated Marluxia [EX]**, **Illustrated Xion [EX]**, **KH II Kairi [EX+]**, **Supernova HD Terra, HD Ventus and HD Aqua** and the SN++ **Illustrated Xemnas**, **Illus. Marluxia**, **Illustrated Zexion** and **Master Xehanort**.',
+  'The **Art** button in a Medal\'s details shows the original **full artwork** of the 55 Medals that had one: on every star of those families, on the SN++ reissues with the same picture (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art**) and on their boosted copies.',
+  'Medals with a different picture, such as **SN++ - Terra, Ven, Aqua**, have no Art button.',
+  '**Reconstructed**: these Medals are part of an artwork and show it, although the original data gave them none: Illustrated Aqua (A, SN, SN+), Illustrated Xemnas, Sora B, Terra B, Donald B, Goofy, Marluxia [EX], Xion [EX], KH II Kairi [EX+], Supernova HD Terra, HD Ventus and HD Aqua, and the SN++ Illustrated Xemnas, Illus. Marluxia, Illustrated Zexion and Master Xehanort.',
   '## Raid Boards',
   'The **Sora & Moogle B** Medal (JP 5th anniversary, a Raid Board reward) is **reconstructed** from its description: used in a Level Up it adds 100 STR and 100 DEF, like Chip and Dale.',
   'The Raid Board cell listed as a **6★ Fantasia Mickey A** gives the **5★ Fantasia Mickey A**: no 6★ version of that Medal is known, and the board pairs it with Magic Brooms, which evolve the 5★.',
@@ -266,14 +268,17 @@ const DIFFERENCES_BODY = [
   'Trait Medals are back: a deal that guaranteed a Trait Medal gives it (all 313 Trait Medals, matched to their Medals from the community wiki).',
   'Boosted Medals: the chance of a boosted version on deals that offered one is reconstructed (5% per eligible Medal). Guaranteed max-level Skills are given only for Skills that exist in this restoration.',
   'Boosted stats on deals that did not state them are reconstructed (+1000 STR, +1000 DEF), and bonus support Medals earned through a guarantee arrive in your Presents.',
-  '## Seasonal banners and pinned banner',
+  '## Seasonal and kept banners',
   'Seasonal banners follow fixed dates of the real calendar, and the Shop shows the most recent unlocked edition of each season, from the first time you log in inside its window. In the original game each edition ran on its own dates.',
   'The banner you keep in the Shop with **Keep in the Shop** did not exist in the original game.',
   'Limited Missions that give Platinum Tickets or Draw Tickets appear only after a banner that uses them is unlocked.',
   'Draw Points from selling Medals start only when the Story reaches the first Draw Points Deal, and they never expire (see the Draw Points notice).',
   '## Purchases',
   'There are no purchases: Jewels and items come from quests, missions and presents.',
-  'Spirit Training slots that were bought in the original game open in other ways (**not original**): slot 2 ("Purchase Weekly Jewels") opens while you have the **VIP benefit** of the Weekly Missions, until it ends; slot 4 ("Purchase Jewel Box E") opens when you complete **all the monthly Limited Missions** (the month\'s Lux campaign), for the rest of that month and the whole next month, although its label says "Valid until the end of the month". Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.',
+  'Spirit Training slots that were bought in the original game open in other ways (**not original**):',
+  'Slot 2 ("Purchase Weekly Jewels"): open while you have the **VIP benefit** of the Weekly Missions.',
+  'Slot 4 ("Purchase Jewel Box E"): open once you complete **all the monthly Limited Missions** (the month\'s Lux campaign), for the rest of that month and the whole next one, although its label says "Valid until the end of the month".',
+  'Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.',
 ];
 
 // The server's own rules in short (user 13-11: players did not understand the weekly/monthly refreshes, the banner
@@ -760,13 +765,15 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     return out + close();
   };
   const rows = notices.map((n, i) => `<a class="row${n.pinned === 1 ? ' pin' : n.pinned ? ' sub' : ''}" href="#n${i}" onclick="show(${i});return false">`
-    + `<span class="d">${n.pinned === 1 ? '&#9733;' : n.pinned ? '&#8627;' : esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
-    + `<span class="x">${esc(n.title)}</span><span class="a"></span></a>`).join('');
+    + (n.pinned === 1 ? `<span class="d">&#9733;</span><span class="x"><span class="cap">${esc(n.tag)}</span>${esc(n.title)}</span>`
+      : n.pinned ? `<span class="d">&#8627;</span><span class="x">${esc(n.title)}</span><span class="go">OPEN</span>`
+        : `<span class="d">${esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span><span class="x">${esc(n.title)}</span>`)
+    + '<span class="a"></span></a>').join('');
   // #<slug of the title> in the address opens that notice (e.g. /web/notices#raid-bosses from the raid notice pages, raid-pages.js
   // ruleBox); its BACK then goes back to the page that linked it
   const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const details = notices.map((n, i) => `<div class="det${n.pinned === 1 ? ' pin' : ''}" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
-    + `<span class="d">${n.pinned ? '' : esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body, n.pinned === 1)}`
+  const details = notices.map((n, i) => `<div class="det${n.pinned === 1 ? ' pin' : n.pinned ? ' compact' : ''}" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+    + `<span class="d">${n.pinned ? '' : esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body, Boolean(n.pinned))}`
     + '<div class="bar"><a class="back" href="#" onclick="show(-1);return false">BACK<span></span></a></div></div>').join('');
   return '<!doctype html><html><head><meta charset="utf-8">'
     + '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -785,21 +792,26 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + 'li:before{content:"";position:absolute;left:4px;top:19px;width:7px;height:7px;border-radius:50%;background:#2fd0e8}'
     + '.k{color:#ffae3b;font-weight:bold}'
     // pinned notice: gold row at the top of the list, its page as cards
-    + '.row.pin{background:linear-gradient(#a8740a,#7a5205);border:2px solid #ffd65a;border-radius:8px;margin:6px 6px 8px;'
-    + 'padding:16px 10px;box-shadow:0 0 12px rgba(255,200,60,.4),inset 0 1px 0 rgba(255,255,255,.3)}'
-    + '.row.pin .d{color:#ffe680;font-size:26px;text-align:center;text-shadow:0 1px 2px #000}'
-    + '.row.pin .x{font-size:21px;font-weight:bold;color:#fff;letter-spacing:.5px;text-shadow:0 2px 0 #3a2600,0 0 6px rgba(0,0,0,.7)}'
-    + '.row.pin .t{background:#fff3c4!important;color:#6b4300;font-weight:bold;box-shadow:0 1px 0 #3a2600}'
+    + '.row.pin{background:linear-gradient(#a8740a,#7a5205);border:2px solid #ffd65a;border-radius:10px;margin:6px 6px 0;'
+    + 'padding:12px 10px;box-shadow:0 0 12px rgba(255,200,60,.4),inset 0 1px 0 rgba(255,255,255,.3)}'
+    + '.row.pin .d{flex:none;width:44px;color:#ffe680;font-size:28px;text-align:center;text-shadow:0 1px 2px #000}'
+    + '.row.pin .x{font-size:21px;font-weight:bold;color:#fff;text-shadow:0 2px 0 #3a2600,0 0 6px rgba(0,0,0,.6)}'
+    + '.cap{display:block;font-size:12px;font-weight:bold;letter-spacing:3px;color:#ffe680;text-shadow:none;margin-bottom:2px}'
     + '.row.pin .a{border-color:transparent transparent transparent #ffe680}'
-    + '.row.sub{margin:-4px 6px 8px 34px;padding:9px 10px;border:1px solid #b8860b;border-top:0;border-radius:0 0 8px 8px;background:#24525f}'
-    + '.row.sub .d{color:#ffd65a;font-size:20px;text-align:center}.row.sub .t{font-size:12px;padding:3px 0;color:#fff}'
-    + '.row.sub .x{font-size:17px;color:#fff;text-shadow:0 1px 1px #000}'
-    + '.row.pin .x,.row.sub .x{white-space:normal;overflow:visible;line-height:1.25}.row.pin .t,.row.sub .t{flex:none}'
-    + '@media(max-width:700px){.row.pin{flex-wrap:wrap}.row.pin .a{margin-left:auto}.row.pin .x{order:3;flex:1 0 100%;padding:10px 4px 0;font-size:22px}}'
+    + '.row.sub{margin:0 6px 10px 26px;padding:8px 10px;border:1px solid #b8860b;border-top:0;border-radius:0 0 10px 10px;background:#204b58}'
+    + '.row.sub .d{flex:none;width:28px;color:#ffd65a;font-size:18px;text-align:center}'
+    + '.row.sub .x{font-size:16px;color:#f3e6b8}'
+    + '.go{flex:none;margin-left:8px;padding:4px 14px 5px;border-radius:8px;border:2px solid #9fd4ff;color:#fff;font:italic bold 14px sans-serif;'
+    + 'letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);box-shadow:0 2px 0 #0b2a66,inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 2px #0a2a6a}'
+    + '.row.sub .a{display:none}.row.sub:active .go{transform:translateY(2px);box-shadow:none}'
+    + '.row.pin .x,.row.sub .x{white-space:normal;overflow:visible;line-height:1.25}'
+    + '@media(max-width:600px){.row.pin .x{font-size:19px}.row.pin .d{width:34px;font-size:24px}}'
     + '.det.pin h2{color:#ffd65a;border-bottom-color:#b8860b}.det.pin h2:before{background:#ffd65a}'
     + '.lead{background:#123f5e;border-left:4px solid #ffd65a;padding:10px 14px;border-radius:4px}'
     + '.card{background:#0f3d5c;border:1px solid #2a76a0;border-radius:10px;padding:2px 14px 6px;margin:0 0 14px;box-shadow:0 2px 6px rgba(0,0,0,.35)}'
     + '.card h3{margin:12px 0 4px}.card h3:before{display:none}.card li:last-child{border-bottom:0}'
+    + '.compact{font-size:16px;line-height:1.5}.compact h2{font-size:20px}.compact .card{padding:0 12px 4px;margin-bottom:10px}'
+    + '.compact .card h3{font-size:17px;margin:10px 0 2px}.compact li{padding:5px 0 5px 18px}.compact li:before{top:13px;width:6px;height:6px}'
     + '.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;background:linear-gradient(rgba(6,26,42,0),rgba(6,26,42,.92) 35%)}'
     + '.back{display:inline-block;padding:7px 26px 8px;border-radius:10px;border:2px solid #9fd4ff;color:#fff;text-decoration:none;'
     + 'font:italic bold 20px sans-serif;letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);'

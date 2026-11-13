@@ -135,7 +135,11 @@ A few Spirit parts without original graphics are replaced by a similar part.
 
 The "Medal STR +N" and "Medal DEF +N" effects of Special Attacks and Supernovas are rebuilt from their descriptions, because the original values are lost.
 
-The **full artwork** of a Medal (the **Art** button in its details) is the original picture of the 55 Medals that had one. It is shown only on Medals whose own picture is part of that artwork: every star of those families, the SN++ reissues with the same picture (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art**) and their boosted copies (which of them showed the button in the original is not known). Medals with a different picture, such as **SN++ - Terra, Ven, Aqua**, have no Art button. Some other Medals whose picture is part of one of these artworks show it too, although the original game data gives them no artwork (**reconstructed**): **Illustrated Aqua** (A, SN, SN+), **Illustrated Xemnas**, **Illustrated Sora B**, **Illustrated Terra B**, **Illustrated Donald B**, **Illustrated Goofy**, **Illustrated Marluxia [EX]**, **Illustrated Xion [EX]**, **KH II Kairi [EX+]**, **Supernova HD Terra, HD Ventus and HD Aqua** and the SN++ **Illustrated Xemnas**, **Illus. Marluxia**, **Illustrated Zexion** and **Master Xehanort**.
+The **Art** button in a Medal's details shows the original **full artwork** of the 55 Medals that had one: on every star of those families, on the SN++ reissues with the same picture (**Key Art #3**, **Key Art #8**, **Axel Art**, **Roxas Art**) and on their boosted copies.
+
+Medals with a different picture, such as **SN++ - Terra, Ven, Aqua**, have no Art button.
+
+**Reconstructed**: these Medals are part of an artwork and show it, although the original data gave them none: Illustrated Aqua (A, SN, SN+), Illustrated Xemnas, Sora B, Terra B, Donald B, Goofy, Marluxia [EX], Xion [EX], KH II Kairi [EX+], Supernova HD Terra, HD Ventus and HD Aqua, and the SN++ Illustrated Xemnas, Illus. Marluxia, Illustrated Zexion and Master Xehanort.
 
 ### Raid Boards
 
@@ -167,7 +171,7 @@ Boosted Medals: the chance of a boosted version on deals that offered one is rec
 
 Boosted stats on deals that did not state them are reconstructed (+1000 STR, +1000 DEF), and bonus support Medals earned through a guarantee arrive in your Presents.
 
-### Seasonal banners and pinned banner
+### Seasonal and kept banners
 
 Seasonal banners follow fixed dates of the real calendar, and the Shop shows the most recent unlocked edition of each season, from the first time you log in inside its window. In the original game each edition ran on its own dates.
 
@@ -181,7 +185,13 @@ Draw Points from selling Medals start only when the Story reaches the first Draw
 
 There are no purchases: Jewels and items come from quests, missions and presents.
 
-Spirit Training slots that were bought in the original game open in other ways (**not original**): slot 2 ("Purchase Weekly Jewels") opens while you have the **VIP benefit** of the Weekly Missions, until it ends; slot 4 ("Purchase Jewel Box E") opens when you complete **all the monthly Limited Missions** (the month's Lux campaign), for the rest of that month and the whole next month, although its label says "Valid until the end of the month". Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.
+Spirit Training slots that were bought in the original game open in other ways (**not original**):
+
+Slot 2 ("Purchase Weekly Jewels"): open while you have the **VIP benefit** of the Weekly Missions.
+
+Slot 4 ("Purchase Jewel Box E"): open once you complete **all the monthly Limited Missions** (the month's Lux campaign), for the rest of that month and the whole next one, although its label says "Valid until the end of the month".
+
+Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.
 
 ## Events
 

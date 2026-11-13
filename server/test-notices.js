@@ -9,7 +9,7 @@ let p = n.noticesPage(U(2026, 10, 16, 15));
 check(p.includes('About game data updates'), 'titolo base');
 check(!p.includes('Game data updated today'), 'non e il giorno dell aggiornamento');
 check(p.includes('Next update: in 2 days 17 hours'), 'venerdi 15:00 -> 2 giorni 17 ore');
-const pos = (s) => p.indexOf(`<span class="x">${s}</span>`);
+const pos = (s) => p.indexOf(`>${s}</span>`); // row titles (a pinned row has a caption inside its title span)
 check(pos('Differences from the original game') >= 0 && pos('Differences from the original game') < pos('Differences in detail')
   && pos('Differences in detail') < pos('About game data updates') && pos('About game data updates') < pos('Missions'),
   'order: the pinned rules, their details, then data updates and the rest');
