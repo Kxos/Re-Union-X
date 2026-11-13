@@ -21,16 +21,6 @@
    "date": "10/16"
   },
   {
-   "title": "Differences in detail",
-   "hash": "fac0708ea20a0fa4",
-   "date": "10/16",
-   "thread": "1570692897777520645",
-   "ids": [
-    "1570692897777520645",
-    "1570692902802165781"
-   ]
-  },
-  {
    "title": "About game data updates",
    "hash": "ae22d089427e75ae",
    "thread": "1569381127523926180",
@@ -254,6 +244,16 @@
     "1570692927745818727"
    ],
    "date": "11/10"
+  },
+  {
+   "title": "Differences in detail",
+   "hash": "ccf6d37fb88fdf0e",
+   "date": "10/16",
+   "thread": "1570692897777520645",
+   "ids": [
+    "1570692897777520645",
+    "1570692902802165781"
+   ]
   },
   {
    "title": "Differences from the original game",
