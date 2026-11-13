@@ -1149,6 +1149,29 @@ if not args.check:
     json.dump(_se, open(os.path.join(REPORT, 'sound_effects.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(jp_sound_effects.summary(_se) + (' [--check]' if args.check else ''))
 
+# ---- musica delle missioni (13-11-2026) ------------------------------------------------------
+# Il client suona audio/%09d.akb di bgmField / bgmBattle / bgmBoss di ogni riga di server/master_data/stage.json (il master
+# servito: rigenerarlo prima di questa build). Gli id che nessuna risorsa serve (indici serviti, righe audio/ di
+# originals.tsv, gia' scritti qui) si copiano dal JP 4.3.1 col loro text/audio/<nome> (es. 501006041 FF5_bigbridge e
+# 501006042 FF6_dancingmad delle missioni evento originali). Rapporto in <report>/stage_bgm.json.
+_stage_json = os.path.join(HERE, '..', '..', 'server', 'master_data', 'stage.json')
+if os.path.exists(_stage_json):
+    _orig_audio = {l.split('\t')[0] for l in open(os.path.join(HERE, 'originals.tsv'), encoding='utf-8')
+                   if l.startswith('audio/')}
+    _sb = jp_sound_effects.stage_bgm_plan(json.load(open(_stage_json, encoding='utf-8')),
+                                          _served_all | _orig_audio | set(writes),
+                                          jp_sound_effects.latest(os.path.join(JP_ROOT, 'text', 'audio')),
+                                          jp_sound_effects.latest(os.path.join(JP_ROOT, 'audio')))
+    for _name, _src in sorted(list(_sb['add'].items()) + list(_sb['texts'].items())):
+        writes.setdefault(_name, ('jp', _src, None))
+    if not args.check:
+        json.dump(_sb, open(os.path.join(REPORT, 'stage_bgm.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    print('musica delle missioni: %d AKB dal JP (%s), %d testi text/audio%s' % (
+        len(_sb['ids']), ', '.join(map(str, _sb['ids'])) or '-', len(_sb['texts']),
+        ('; ATTENZIONE, in nessuna fonte: %s' % ', '.join(map(str, _sb['missing_jp']))) if _sb['missing_jp'] else ''))
+else:
+    print('musica delle missioni: ATTENZIONE, %s assente: nessuna musica aggiunta' % _stage_json)
+
 
 def out_path(name):
     return os.path.join(OUT if name.startswith(('lwf/', 'img/', 'audio/', 'text/')) else pub_out, *name.split('/'))

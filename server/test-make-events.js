@@ -1569,6 +1569,20 @@ const tests = {
     assert.strictEqual(me.ordinalName('Plain name', range, 742133), 'Plain name');
     assert.strictEqual(me.ordinalName('X - %d/3', null, 742133), 'X - %d/3');
   },
+  // original music (13-11-2026): the record's q.bgm, else the overlay by donor stage id (or donorStageOfLaterRun), over the story row's
+  event_quest_music() {
+    const recs = records();
+    recs[0].quests[1].bgm = { field: 501006041, battle: 501006041, boss: 501006042 };
+    const out = me.buildEvents(recs, CONFIG, master(), undefined, undefined, null, null, { bgm: { quests: { 700001: { bgm: [501000510, 501000520, 501002040] } } } });
+    const music = (donor) => { const q = out.index.entries.flatMap((e) => e.quests).find((x) => x.donorStageId === donor);
+      const r = out.stage.find((s) => s.stageId === q.stageId); return [r.bgmField, r.bgmBattle, r.bgmBoss]; };
+    assert.deepStrictEqual(music(700001), [501000510, 501000520, 501002040], 'overlay by donor stage id');
+    assert.deepStrictEqual(music(700002), [501006041, 501006041, 501006042], 'record q.bgm');
+    assert.deepStrictEqual(music(700010), [12, 22, 32], 'no music data: the story row of world 2');
+    assert.deepStrictEqual(me.questMusic({ donorStageOfLaterRun: 360000 }, { 360000: { bgm: [1, 2, 3] } }), { bgmField: 1, bgmBattle: 2, bgmBoss: 3 });
+    assert.deepStrictEqual(me.questMusic({ stageId: 5 }, {}), {});
+    assert.throws(() => me.questMusic({ stageId: 5 }, { 5: { bgm: [1, 0, 3] } }), /three sound ids/);
+  },
   // the id ranges: a run that needs more numbers than the range holds stops with the range and the count
   id_range_overflow() {
     const cfg = { ...CONFIG, stageMax: CONFIG.stageBase + 2 };

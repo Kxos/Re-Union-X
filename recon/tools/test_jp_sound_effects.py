@@ -201,6 +201,25 @@ with tempfile.TemporaryDirectory() as t:
     check(p['ids'] == [509000390, 509000740] and set(p['texts']) == {'text/audio/ui2_se_000074'},
           'collect con i serviti: %r %r' % (p['ids'], p['texts']))
 
+# --- stage music (13-11-2026): ids of the stage table missing from the served set, copied from the JP with their text/audio
+with tempfile.TemporaryDirectory() as t:
+    jt = {}
+    for n, txt in (('FF5_bigbridge', '501006041'), ('FF6_dancingmad', '501006042 '), ('dw_bgm_000001', '501000110'),
+                   ('ed_bgm_000003', '501000730')):
+        scrivi(os.path.join(t, 'text', n), txt)
+        jt[n] = os.path.join(t, 'text', n)
+    ja = {'%09d.akb' % i: os.path.join(t, 'a%d' % i) for i in (501006041, 501006042, 501000110)}
+    rows = [{'bgmField': 501000110, 'bgmBattle': 501000110, 'bgmBoss': 501006041},
+            {'bgmField': 501006042, 'bgmBattle': 0, 'bgmBoss': 501000730}, {'bgmField': None}]
+    have = {'audio/501000110.akb', 'text/audio/dw_bgm_000001', 'text/audio/FF6_dancingmad'}
+    p = m.stage_bgm_plan(rows, have, jt, ja)
+    check(p['ids'] == [501006041, 501006042] and set(p['add']) == {'audio/501006041.akb', 'audio/501006042.akb'},
+          'stage_bgm_plan: the two missing ids %r' % p['ids'])
+    check(set(p['texts']) == {'text/audio/FF5_bigbridge'}, 'stage_bgm_plan: only the text not served %r' % p['texts'])
+    check(p['missing_jp'] == [501000730], 'stage_bgm_plan: id in no source %r' % p['missing_jp'])
+    check(m.stage_bgm_plan(rows, have | {'audio/501006041.akb', 'audio/501006042.akb', 'audio/501000730.akb'}, jt, ja)['add'] == {},
+          'stage_bgm_plan: nothing when all served')
+
 # --- radice JP vera: i due suoni muti di I-152 ci sono
 if os.path.isdir(m.JP_ROOT):
     a = m.latest(os.path.join(m.JP_ROOT, 'audio'))

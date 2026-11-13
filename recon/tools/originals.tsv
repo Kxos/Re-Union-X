@@ -908,6 +908,8 @@ lwf/map/hole_rain/	b16,jp
 #     Corridor of Darkness (491-500), 501000630 musica dei capi (bgmBoss) di 426-487
 audio/501005002.akb	b16,jp
 audio/501000630.akb	b16
+#     13-11-2026: 501000730 ed_bgm_000003, boss music of the Enchanted Dominion story quests in the original master (only in the 2016 pack)
+audio/501000730.akb	b16
 
 # 40. Transizioni fra le parti delle missioni nei mondi di Ralph (I-009, D-C): righe world 11-14 NL/HD/CS/SR
 #     (server/make-story-oltre.js) -> img/wipe/wipe_<worldId>.png (worldId dal prefisso della stanza):

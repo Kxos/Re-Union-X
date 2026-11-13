@@ -53,6 +53,10 @@
 // another record (applyDatesOf); reward types 18 / 19 are paid as avatar parts (rewardTypeAliases); unionQuests mark the Union of
 // a quest (index quest `union`); stagesOf lists another record's built quests on this record's card; a record's completionReward
 // joins the bonus list (mergeCompletion, per Union with questUnion); catalogName renames the Event Catalog row.
+// Music (13-11-2026): the copied story row carries the music of its world; the original music of an event quest (the donor stage
+// row's bgmField / bgmBattle / bgmBoss, which the client plays as audio/<id>.akb) replaces it: q.bgm {field, battle, boss} of the
+// record, else the private overlay event_bgm.json (opts.bgm / KHUX_EVENT_BGM / next to community_bonus.json) {quests: {"<donor
+// stage id>": {bgm: [field, battle, boss]}}} by the quest's stageId (or donorStageOfLaterRun); neither: the story row's music.
 // Wired in make-game-tables.js after make-raid. KHUX_EVENTS=0 turns it off; without KHUX_EVENT_SRC it warns and writes nothing.
 //
 //   node server/make-events.js [master folder]
@@ -714,9 +718,20 @@ function mergeCompletion(bonus, records, selected) {
 // of import_event_stages.py), boardSets (null: no event board; else the board sets {sets} of KHUX_EVENT_BOARDS)
 // -> {evStage, stage, reward, sphere, sphereArray, sphereMasu, poi, maps, ids, boardReport, index: {entries, reasons, boardSets}}
 // opts: {dramas} the drama ids available in our resources (a list or a Set; checked against quizDramas)
+// the original music of an event quest over the story row's (see the header): {} when neither the record nor the overlay has it
+function questMusic(q, over) {
+  const own = q.bgm ? [q.bgm.field, q.bgm.battle, q.bgm.boss] : null;
+  const sid = Number.isInteger(q.stageId) ? q.stageId : q.donorStageOfLaterRun;
+  const m = own || ((over[String(sid)] || {}).bgm) || null;
+  if (!m) return {};
+  if (m.length !== 3 || !m.every((x) => Number.isInteger(x) && x > 0)) throw new Error(`events: music of stage ${sid} is not three sound ids: ${JSON.stringify(m)}`);
+  return { bgmField: m[0], bgmBattle: m[1], bgmBoss: m[2] };
+}
+
 function buildEvents(records0, config, master, ids, anchors = {}, maps = null, boardSets = null, opts = {}) {
   const records = applyDatesOf(records0);
   const dramas = opts.dramas ? new Set(opts.dramas) : null;
+  const bgmOver = (opts.bgm && opts.bgm.quests) || {};
   checkRanges(master, config);
   const { ids: allIds, anchors: allAnchors } = allocateIds(records, ids, config, anchors);
   // board sets: census id -> set key (sets[].censusIds); every board numbered (append-only), rows kept for the sets handed out
@@ -1084,7 +1099,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         disableContinue: r.disableContinue || 0, addLevel: q.addLevel || 0, holdKeyblade: r.holdKeyblade || 0, hardmodeRequire: r.hardmodeRequire || 0,
         hardmodeName: r.hardmodeName || 'strDummy', hardmodeComparison: r.hardmodeComparison === undefined ? 1 : r.hardmodeComparison, hardmodeNum: r.hardmodeNum || 0,
         validClearGetTitle: 0, clearGetTitle: 0, validClearGetSphere: 0, clearGetSphere: 0, resetClearGet: 0, ...firstClearOf(q), resetSubMission: 0,
-        ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0 });
+        ...questSubs(q, key), combinedSubmissionFlag: q.combined ? 1 : 0, raidBoss: 0, ...questMusic(q0, bgmOver) });
       if (hasStage(q0) && !builtQuests.has(q0.stageId)) builtQuests.set(q0.stageId, { stageId, censusId: rec.censusId, sig, setKey: entry.boardSetKey || null, item });
       markServed(stageId);
     }
@@ -1428,7 +1443,15 @@ function patch(masterDir, opts = {}) {
     if (!data) console.warn(`events: no community bonus data (${file}): no community-goal bonus`);
     bonus = data ? data.events || [] : [];
   }
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas, bonus });
+  // the original music of the event quests (private overlay, see the header): opts.bgm, else KHUX_EVENT_BGM, else event_bgm.json
+  // next to community_bonus.json; none: every event quest keeps its story row's music
+  let bgm = opts.bgm;
+  if (bgm === undefined && !opts.records) {
+    const file = process.env.KHUX_EVENT_BGM || path.join(path.dirname(anchorsPathOf(process.env.KHUX_EVENT_SRC)), '..', 'event_bgm.json');
+    bgm = readJson(file, null);
+    if (!bgm) console.warn(`events: no event music overlay (${file}): event quests keep the music of their story row`);
+  }
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas, bonus, bgm });
   const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward,
     sphere: out.sphere, sphereArray: out.sphereArray, sphereMasu: out.sphereMasu };
   const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));
@@ -1480,5 +1503,5 @@ function patch(masterDir, opts = {}) {
 
 if (require.main === module) patch(process.argv[2] || path.join(__dirname, 'master_data'));
 
-module.exports = { buildEvents, ordinalName, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, mapRestoreLabels, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
+module.exports = { buildEvents, questMusic, ordinalName, patch, readRecords, anchorsPathOf, REASONS, allocateIds, allocateRows, labelIds, mapRestoreLabels, daysOf, swapEnemies, dropRows, GENERATED_LABELS, NOT_SERVED,
   applyDatesOf, aliasRewardTypes, genMapOf, mergeCompletion, loadMaps, UNION_IDS };

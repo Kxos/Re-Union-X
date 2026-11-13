@@ -35,7 +35,8 @@
 // varianti 18300-18304), es. 544 -> 10092 Candy Apple / 93 Poison Apple, 555 -> 10211 Darklings: per quelle righe gli
 // obiettivi (e i loro premi) sono quelli della wiki, che coincidono con lo stage; il resto della riga resta 1.1.3.
 // Musica per missione 556-979 (I-198, 21-10): bgmField/bgmBattle/bgmBoss da reference\world_schema\oltre525\bgm_per_quest.json
-// (fonte obbligatoria, KHUX_BGM_OLTRE; 423 missioni, tutte meno la 978), ricavata da khwiki «Forum:Notes 29 (Project Music:
+// (fonte obbligatoria, KHUX_BGM_OLTRE; 424 missioni, 978 compresa). Dal 13-11-2026 192 righe (978 compresa) sono quelle del
+// master WW ~2021 donato (ReLux Team, riga stage della missione, confidenza high); le altre erano gia' uguali. Prima: ricavata da khwiki «Forum:Notes 29 (Project Music:
 // Where songs play) - KeybladeSpyMaster» (tabelle dei capi di Union X per missione) incrociata coi master 1-555 (tema
 // dell'area della prima stanza); ogni riga porta l'evidenza e la confidenza. Vale sulla regola del mondo (WORLD_BGM / riga
 // di riferimento), che resta solo per le missioni assenti dal file. Es. 979 «The Key» -> BBS_73_TheKey 501006057 nelle tre
@@ -60,7 +61,8 @@ const WIKI_WORLD = { 'Daybreak Town': 1, 'Dwarf Woodlands': 2, Wonderland: 3, Ag
 const WORLD_THUMB = { 7: 10000, 8: 0, 11: 0, 12: 20000, 13: 100, 14: 0 };
 // musica dei mondi senza righe 1-525 [campo, battaglia, capo]: id dei testi JP 4.3.1 text/audio/<nome>,
 // AKB serviti (names_v4.tsv). Campo/battaglia = tracce _000001/_000002 del mondo come nelle 1-525 (dw 110/120, ...);
-// capo = dw_bgm_000003 (501000130) come tutti i mondi salvo BC (ed_bgm_000003 501000730 non c'e' in nessuna risorsa).
+// capo = dw_bgm_000003 (501000130) come tutti i mondi salvo BC (ed_bgm_000003 501000730: dal 13-11 servito dal 2016,
+// originals.tsv sezione 39, e citato dalle righe ED di bgm_per_quest.json).
 // CD: bbs_cd_F/bbs_cd_B (Castle of Dreams di BBS, nessun cd_bgm); CS: central_station, unica traccia del mondo, anche
 // in battaglia (ricostruzione).
 const WORLD_BGM = { 7: [501006005, 501006006, 501000130], 8: [501000710, 501000720, 501000130],
@@ -312,9 +314,10 @@ function buildRows(stageRows, sources) {
       const raw = wikiRaw[title] || '';
       const worldId = WIKI_WORLD[rawField(raw, 'world')] || 1;
       const ref = refByWorld.get(worldId) || prev;
+      const cm = bgm[n] ? [bgm[n].bgmField, bgm[n].bgmBattle, bgm[n].bgmBoss] : [ref.bgmField, ref.bgmBattle, ref.bgmBoss];
       row = { stageId: CUTSCENE_STAGE, id: n, name: rawField(raw, 'nadesc') || title.replace(/^Quest \d+: /, ''), mapName: '',
         useAp: 0, chapterId: Math.floor(CUTSCENE_STAGE / 1000), worldId, thumbId: ref.thumbId || 0, onlyDrama: 1,
-        validSubmission: 0, raidBoss: ref.raidBoss || 0, bgmField: ref.bgmField || 0, bgmBattle: ref.bgmBattle || 0, bgmBoss: ref.bgmBoss || 0 };
+        validSubmission: 0, raidBoss: ref.raidBoss || 0, bgmField: cm[0] || 0, bgmBattle: cm[1] || 0, bgmBoss: cm[2] || 0 };
       const clear = [];
       if (num(rawField(raw, 'najewel'))) clear.push([2, 0, num(rawField(raw, 'najewel'))]);
       const med = ctxBase.medalId(rawField(raw, 'namedal'));

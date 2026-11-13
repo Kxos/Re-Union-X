@@ -138,6 +138,38 @@ def plan(lwf_sounds, served_text, gen_text, jp_text, have, jp_audio):
                 missing_jp=dict(sorted(missing.items())), unresolved={k: sorted(set(v)) for k, v in sorted(unresolved.items())})
 
 
+BGM_COLS = ('bgmField', 'bgmBattle', 'bgmBoss')
+
+
+def stage_bgm_plan(stage_rows, have, jp_text, jp_audio):
+    """Music of the served stage table (13-11-2026): the client plays audio/%09d.akb of a row's bgmField / bgmBattle /
+    bgmBoss. Every id cited there that `have` (served index + other packs + originals.tsv) lacks is copied from the JP root,
+    with the text/audio/<name> entries whose text is that id (when not served).
+    stage_rows  rows of master stage.json; have  available resource names
+    jp_text     {name: path} JP text/audio; jp_audio {'%09d.akb': path}
+    -> dict(add={audio/...: src}, texts={text/audio/...: src}, ids, missing_jp=[ids neither available nor in the JP])"""
+    want = sorted({r.get(k) for r in stage_rows for k in BGM_COLS if isinstance(r.get(k), int) and r.get(k) > 0})
+    need = [i for i in want if akb_name(i) not in have]
+    add, missing = {}, []
+    for i in need:
+        src = jp_audio.get('%09d.akb' % i)
+        if src:
+            add[akb_name(i)] = src
+        else:
+            missing.append(i)
+    texts = {}
+    if add:
+        ids = {int(k[6:15]) for k in add}
+        for n in sorted(jp_text):
+            if 'text/audio/' + n in have:
+                continue
+            with open(jp_text[n], 'rb') as fh:
+                sid = resolve(n, read_text(fh.read()))
+            if sid in ids:
+                texts['text/audio/' + n] = jp_text[n]
+    return dict(add=dict(sorted(add.items())), texts=texts, ids=sorted(int(k[6:15]) for k in add), missing_jp=missing)
+
+
 # ---- risorse servite ------------------------------------------------------------------------
 class Served:
     """Lettura per nome dalle risorse servite (indice nome<TAB>offset, pezzi d0000.. concatenati)."""
