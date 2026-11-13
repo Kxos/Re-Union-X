@@ -932,8 +932,8 @@ function catalogPage(banners, ctx) {
     + '<h4>FIND A MEDAL</h4><div class="search">🔍<input type="search" id="fq" placeholder="Medal name" autocomplete="off"></div>'
     + '<div class="hint" id="fh">Shows the banners where this Medal can be drawn.</div>'
     + (ctx.spirit ? `<h4>BANNER TYPE</h4><div class="opts" data-g="kind">${opts(KIND_OPTS)}</div>` : '')
+    + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>` // SHOW before PAID WITH (user 13-11)
     + `<h4>PAID WITH</h4><div class="opts" data-g="pay">${opts(PAY_OPTS)}</div>`
-    + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v}`))}</div>`
     + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${nb}</button></div></div>`
     + `<script>${PIN_JS}</script><script>${js}</script>`, '', '<button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button>');
 }
