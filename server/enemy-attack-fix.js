@@ -22,12 +22,13 @@ const ORIG = process.env.KHUX_ORIG_ENEMY_ATTACK || 'D:\\Progetto_Restauro_KH_UX\
 const NAMES = process.env.KHUX_NAMES || 'D:\\Progetto_Restauro_KH_UX\\resource_data\\names_v4.tsv';
 const TSV = path.join(__dirname, '..', 'recon', 'tools', 'originals.tsv');
 
-// effetti di colpo serviti (WW o importati)
+// effetti di colpo serviti (WW o importati). Only the first column (the served path): 13-11, matching anywhere in the line
+// also counted effects whose files are only the SOURCE of other originals.tsv rows (1053, 2154, 2186 were cited unserved)
 function servedHitEffects(files = [NAMES, TSV]) {
   const out = new Set();
   for (const f of files) {
     if (!fs.existsSync(f)) continue;
-    for (const m of fs.readFileSync(f, 'utf8').matchAll(/lwf\/character\/enemy\/hit_effect_fla\/eff_(\d+)\//g)) out.add(Number(m[1]));
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/^lwf\/character\/enemy\/hit_effect_fla\/eff_(\d+)\//gm)) out.add(Number(m[1]));
   }
   return out;
 }
