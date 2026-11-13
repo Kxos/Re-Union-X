@@ -33,6 +33,56 @@ function rowOf(html, id) {
   const start = html.lastIndexOf('<div class="row', i), end = html.indexOf('<div class="row', i);
   return html.slice(start, end < 0 ? html.length : end);
 }
+// A minimal DOM of the catalogue page for its year-tab and filter script (run in vm, ES5 as in the WebView): the rows and month
+// labels of #rows, the tabs with their counts, the chips of the Filters sheet, the ids the script reads. apply(f) drives the
+// sheet as a player does (Filters, Reset, a chip per group, FIND, «Show N results»); shown() = the evStageIds of the rows shown.
+function fakePage(raw, hash = '') {
+  const html = pages.expandCatalog(raw);
+  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map((m) => [m[1], m[2]]));
+  const mk = (tag = '<x>') => {
+    const e = { attrs: attrsOf(tag), textContent: '', innerHTML: '', value: '', style: {}, children: [], parentNode: null, q: {}, qa: {} };
+    e.className = e.attrs.class || '';
+    e.getAttribute = (k) => (k in e.attrs ? e.attrs[k] : null);
+    e.setAttribute = (k, v) => { e.attrs[k] = String(v); };
+    e.querySelector = (sel) => e.q[sel] || null;
+    e.querySelectorAll = (sel) => e.qa[sel] || [];
+    return e;
+  };
+  const rowsHtml = html.slice(html.indexOf('<div id="rows">'), html.indexOf('<div id="pinmsg"'));
+  const kids = [...rowsHtml.matchAll(/<div class="(?:row [^"]*|ml)"[^>]*>/g)].map((m) => { const e = mk(m[0]); e.q['.mt'] = mk('<div class="mt">'); return e; });
+  const byId = {};
+  for (const id of ['sum', 'fdot', 'none', 'fbtn', 'fx', 'dim', 'fq', 'freset', 'fok']) byId[id] = mk(`<x id="${id}">`);
+  byId.rows = mk('<div id="rows">');
+  byId.rows.children = kids;
+  for (const k of kids) if (k.attrs.id) byId[k.attrs.id] = k;
+  byId.tabs = mk(/<div class="tabs"[^>]*>/.exec(html)[0]);
+  byId.tabs.qa['.tab'] = [...html.matchAll(/<button type="button" class="tab[^"]*" data-p="\w+">/g)].map((m) => { const t = mk(m[0]); t.q['.c'] = mk(); t.parentNode = byId.tabs; return t; });
+  const boxes = [...html.matchAll(/<div class="opts" data-g="(\w+)">([\s\S]*?)<\/div>/g)].map((m) => {
+    const box = mk(`<div class="opts" data-g="${m[1]}">`);
+    box.children = [...m[2].matchAll(/<button type="button" class="o[^"]*" data-v="[^"]*"[^>]*>/g)].map((c) => { const o = mk(c[0]); o.parentNode = box; return o; });
+    return box;
+  });
+  let loads = 0;
+  const doc = { body: { className: '' }, getElementById: (id) => byId[id] || null, querySelectorAll: (sel) => (sel === '.sheet .opts' ? boxes : []) };
+  const win = {};
+  const src = /<script>(\(function\(\)\{\/\* year tabs and filters \*\/[\s\S]*?)<\/script>/.exec(raw);
+  assert.ok(src, 'filter script');
+  require('vm').runInNewContext(src[1], { document: doc, location: { hash }, window: win, kxImgs: () => { loads++; } });
+  const box = (g) => boxes.find((b) => b.attrs['data-g'] === g);
+  const chip = (g, v) => box(g).children.find((o) => o.attrs['data-v'] === v);
+  const apply = (f) => {
+    byId.fbtn.onclick();
+    byId.freset.onclick({ preventDefault() {} });
+    for (const g of ['show', 'prog', 'type']) if (f[g]) box(g).onclick({ target: chip(g, f[g]) });
+    if (f.q) { byId.fq.value = f.q; byId.fq.oninput.call(byId.fq); }
+    const fok = byId.fok.textContent;
+    byId.fok.onclick();
+    return fok;
+  };
+  const shown = () => kids.filter((k) => /(^| )row /.test(k.className) && !/ hide/.test(k.className)).map((k) => Number(k.attrs['data-eid']));
+  const tab = (p) => byId.tabs.onclick({ target: byId.tabs.qa['.tab'].find((t) => t.attrs['data-p'] === p) });
+  return { html, kids, byId, boxes, chip, apply, shown, tab, win, loads: () => loads };
+}
 const NOTICE_LINE = 'Fixture line of an event notice, never in the repository.';
 const DOC = () => ({ rows: { 'E-0': { noticeIds: [9001] } }, notices: { 9001: { title: 'March Fun notice', date: '2019-02-28', time: '07:00', category: 'EVENT',
   body: ['● March Fun', NOTICE_LINE, '・ a list line', 'Potion x 3'] } } });
@@ -184,7 +234,7 @@ const tests = {
     assert.ok(!html.includes('id="q29979"') && !html.includes('New Coins Notice'), 'the informative notice is not listed');
     assert.ok(rowOf(html, 29909).includes('Not restored yet'), 'an unserved playable event stays');
     assert.ok(rowOf(html, 29942), 'a coin event with its card stays');
-    assert.ok(html.includes('5 events'), 'not counted');
+    assert.ok(/data-p="all"><b>All years<\/b><small>[^<]*<\/small><span class="c">5<\/span>/.test(html), 'not counted');
     assert.strictEqual(pages.detailPage(ix, 29979, ctx({ eventBoard: () => ({ id: 7001, name: 'B', done: false, finish: '', cells: [] }) })), null, 'no page');
     // the boards stay reachable through the playable event of the set
     ix.entries[0].boardSet = 'S1';
@@ -267,26 +317,128 @@ const tests = {
     assert.strictEqual(rowOf(html, 29903).match(/data-p="(\d)"/)[1], '3');
     // the page script: rows built first, then the tab filter, then the cards of the shown rows only
     assert.ok(!/kxImgs\(\);<\/script>/.test(raw.split('id="kxrows"')[1].split('</script>')[1] + '</script>'), 'no card load before the tab filter');
-    // run the tab script on stub rows: only the rows of the open tab are shown, the month label of a hidden month is hidden
-    const m = /<script>(\(function\(\)\{\/\* year tabs \*\/[\s\S]*?)<\/script>/.exec(raw);
-    assert.ok(m, 'tab script');
-    const el = (cls, attrs = {}) => ({ className: cls, getAttribute: (a) => (a in attrs ? String(attrs[a]) : null), parentNode: null });
-    const kids = [el('ml', { 'data-m': '2018-06' }), el('row can', { 'data-p': 2, 'data-eid': 29907, id: 'q29907' }), el('ml', { 'data-m': '2019-05' }),
-      el('row off', { 'data-p': 3, 'data-eid': 29903, id: 'q29903' })];
-    const tabEls = ['all', '2', '3'].map((p) => el('tab', { 'data-p': p }));
-    const tabsEl = { getAttribute: (a) => (a === 'data-def' ? '3' : null), querySelectorAll: () => tabEls, onclick: null };
-    let loads = 0;
-    const doc = { getElementById: (id) => (id === 'tabs' ? tabsEl : id === 'rows' ? { children: kids } : null) };
-    require('vm').runInNewContext(m[1], { document: doc, location: { hash: '' }, window: { kxImgs: () => { loads++; } }, kxImgs: () => { loads++; } });
-    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [true, true, false, false]);
-    assert.ok(loads >= 1, 'cards of the open tab requested after the filter');
-    assert.deepStrictEqual(tabEls.map((t) => / on/.test(t.className)), [false, false, true]);
-    tabsEl.onclick({ target: tabEls[0] });
-    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [false, false, false, false], 'All years shows every row');
-    tabsEl.onclick({ target: tabEls[1] });
-    assert.deepStrictEqual(kids.map((k) => / hide/.test(k.className)), [false, false, true, true]);
+    // run the tab and filter script on the page: only the rows of the open tab are shown, the month label of a hidden month is hidden
+    const fp = fakePage(raw), labels = () => fp.kids.filter((k) => k.className.startsWith('ml')).map((k) => [k.attrs['data-m'], !/ hide/.test(k.className)]);
+    assert.deepStrictEqual(fp.shown(), [29903]);
+    assert.deepStrictEqual(labels(), [['2018-06', false], ['2019-03', false], ['2019-04', false], ['2019-05', true]]);
+    assert.ok(fp.loads() >= 1, 'cards of the open tab requested after the filter');
+    assert.deepStrictEqual(fp.byId.tabs.qa['.tab'].map((t) => / on/.test(t.className)), [false, false, true]);
+    fp.tab('all');
+    assert.strictEqual(fp.shown().length, 6, 'All years shows every row');
+    fp.tab('2');
+    assert.deepStrictEqual(fp.shown(), [29907, 29900, 29909, 29901, 29908]);
+    assert.ok(/^<span class="n1">5 events<\/span> in <b>Year 3<\/b> · no filters$/.test(fp.byId.sum.innerHTML), fp.byId.sum.innerHTML);
     // a keep / remove keeps a hidden row hidden (ROWS_JS setRow)
     assert.ok(/el\.className='row '\+pc\[0\]\+\(\/ hide\/\.test\(el\.className\)\?' hide':''\)/.test(raw), 'setRow keeps the tab filter');
+  },
+  // Filters (user 13-11: «filters like the Raid Catalog»): the «⚙ Filters» button and the sheet with FIND, SHOW, PROGRESS, TYPE in
+  // the Raid Catalog's order; TYPE lists only the kinds of the index; every row carries data-type / data-done / data-search
+  catalog_filter_sheet() {
+    const ix = INDEX();
+    ix.entries[1].type = 'GEM';
+    ix.entries[2].type = 'QUIZ';
+    const raw = pages.catalogPage(ix, ctx()), html = pages.expandCatalog(raw);
+    assert.ok(raw.includes('<div class="hdr"><h1>Event Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'));
+    const sheet = html.slice(html.indexOf('<div class="sheet" id="sheet"'), html.indexOf('<div id="pinmsg"'));
+    assert.deepStrictEqual([...sheet.matchAll(/<h4>([^<]+)<\/h4>/g)].map((m) => m[1]), ['FIND', 'SHOW', 'PROGRESS', 'TYPE']);
+    assert.ok(sheet.includes('placeholder="Event, quest or reward name"') && /<div class="hint">Matches the start of words/.test(sheet));
+    const group = (g) => [...((new RegExp(`<div class="opts" data-g="${g}">([\\s\\S]*?)</div>`).exec(sheet) || [])[1] || '').matchAll(/data-v="([^"]+)"[^>]*>(?:<img[^>]*>)?([^<]+)</g)].map((m) => [m[1], m[2]]);
+    assert.deepStrictEqual(group('show'), [['all', 'All events'], ['now', 'In Events now'], ['can', 'Can be kept now'], ['kept', 'Kept'], ['later', 'Later in the Story'], ['removed', 'Not restored yet']]);
+    assert.deepStrictEqual(group('prog'), [['all', 'All'], ['done', 'Completed'], ['todo', 'Incomplete']]);
+    // only the kinds in the index (E-0 and E-9 have no type: Event Quests), in the order of the list
+    assert.deepStrictEqual(group('type'), [['all', 'All'], ['EQ', 'Event Quests'], ['GEM', 'Gem Quests'], ['QUIZ', 'Quizzes']]);
+    assert.ok(/<div class="foot"><a href="#" class="reset" id="freset">Reset filters<\/a><button type="button" class="ok" id="fok">Show 1 result<\/button><\/div>/.test(sheet), 'results of the open tab');
+    assert.ok(raw.includes('<div class="sum" id="sum">') && raw.includes('<div id="none" class="none" style="display:none"></div>'));
+    for (const e of ix.entries) {
+      const r = rowOf(html, e.evStageId);
+      assert.ok(new RegExp(`data-type="${e.type || 'EQ'}" data-done="[01]" data-search="[^"]+">`).test(r), `data attributes of ${e.censusId}`);
+      assert.ok(r.includes('<div class="mt"></div>'), 'the «Matches:» line');
+    }
+    // the narrow layout of the shared catalogues applies (NARROW_CSS: full-width button, one chip per row)
+    assert.ok(raw.includes('@media (max-width:700px)') && raw.includes('.fbtn{-webkit-flex:1 1 100%'));
+    for (const m of raw.matchAll(/<script>([\s\S]*?)<\/script>/g)) new Function(m[1]); // eslint-disable-line no-new-func
+  },
+  // FIND: event and quest names (served or not), the type, the Event Board names and rewards (without amounts and stat cells) and
+  // the objective rewards of the served quests (ctx.questRewards), each once; PROGRESS: every served quest with all its objectives
+  // done (the crown), an event with no served quest is never completed (the Raid Catalog's rule: incomplete)
+  catalog_filter_data() {
+    const ix = INDEX();
+    ix.entries[0].boardSet = 'S1';
+    ix.boardSets = { S1: { boardIds: [7001, 7002], chains: {}, censusIds: ['E-0'] } };
+    const boards = { 7001: { id: 7001, name: 'Spooky Board', done: false, finish: 'Pumpkin Hat', cells: [{ n: 1, cost: 5, reward: 'Mythril Shard x3', done: false }, { n: 2, cost: 5, reward: 'Max HP +5', done: false }] } };
+    let calls = 0;
+    const c = ctx({ eventBoard: (id) => { calls++; return boards[id] || null; }, questRewards: (id) => (id === 4009904 ? ['Dewey', 'Jewels', 'Mythril Shard'] : id === 4009905 ? ['Hidden Reward'] : []),
+      stageDone: (id) => id === 4009904 || id === 4009910 });
+    const html = catalog(ix, c), search = (id) => (/data-search="([^"]*)"/.exec(rowOf(html, id)) || [])[1].split(' | ');
+    // a numbered series (Quest 4009904, Quest 4009905) counts once by its name without the number
+    assert.deepStrictEqual(search(29900), ['March Fun', 'Quest', 'Event Quests', 'Spooky Board', 'Mythril Shard', 'Pumpkin Hat', 'Dewey', 'Jewels']);
+    assert.ok(!search(29900).includes('Hidden Reward'), 'only the rewards of the served quests');
+    assert.strictEqual(calls, 2, 'each board asked once');
+    assert.deepStrictEqual(search(29909), ['Lost Fun', 'Quest 4009910', 'Event Quests']);
+    const ix3 = INDEX();
+    ix3.entries[1].quests = ['Organization XIII No. 11 Marluxia I', 'Organization XIII No. 11 Marluxia XIII', 'Coco Challenge 1/10', 'Coco Challenge 10/10', 'The Hidden Menace: Advanced #2',
+      'The Hidden Menace: Advanced #3', 'Mickey 90th Anniversary Quiz'].map((name, k) => quest(4009930 + k, { name }));
+    assert.deepStrictEqual(catalog(ix3, ctx()).match(/id="q29901"[^>]*data-search="([^"]*)"/)[1].split(' | '),
+      ['April Fun', 'Organization XIII No. 11 Marluxia', 'Coco Challenge', 'The Hidden Menace: Advanced', 'Mickey 90th Anniversary Quiz', 'Event Quests']);
+    const done = (id) => (/data-done="(\d)"/.exec(rowOf(html, id)) || [])[1];
+    // E-0: its one served quest done (the unserved one does not count); E-9: no served quest -> not completed even if its stage is
+    assert.deepStrictEqual([29900, 29901, 29903, 29909].map(done), ['1', '0', '0', '0']);
+    assert.ok(rowOf(html, 29900).includes('class="ic cw"') && !rowOf(html, 29909).includes('class="ic cw"'), 'the crown of a completed event');
+    // the catalogue name and the census name are both found
+    const ix2 = INDEX();
+    ix2.entries[1].catalogName = 'Spring Party';
+    assert.deepStrictEqual(catalog(ix2, ctx()).match(/id="q29901"[^>]*data-search="([^"]*)"/)[1].split(' | ').slice(0, 2), ['Spring Party', 'April Fun']);
+  },
+  // the filters at work in the page script: SHOW (now + kept), PROGRESS, TYPE, FIND with «Matches:», the summary chips, the
+  // counts of the tabs and of «Show N results», the empty-state line, Clear all; a keep re-renders (kxRender)
+  catalog_filter_script() {
+    const ix = INDEX();
+    ix.entries[2].type = 'QUIZ';
+    ix.entries.push({ censusId: 'E-7', evStageId: 29907, name: 'Old Fun', start: '2018-06-01', end: '2018-06-07', stageIds: [4009907], available: true, labels: [], noticeIds: [], quests: [quest(4009907)] });
+    const raw = pages.catalogPage(ix, ctx({ kept: 'E-7', stageDone: (id) => id === 4009904, questRewards: (id) => (id === 4009901 ? ['Dewey'] : []) }));
+    const fp = fakePage(raw), sum = () => fp.byId.sum.innerHTML;
+    fp.tab('all');
+    assert.deepStrictEqual(fp.shown(), [29907, 29900, 29909, 29901, 29903]);
+    assert.strictEqual(fp.apply({ show: 'now' }), 'Show 2 results');
+    assert.deepStrictEqual(fp.shown(), [29907, 29901], 'In Events now: the event of the week and the kept one');
+    assert.ok(sum().startsWith('<span class="n1">2 events</span> match your filters: <span class="tag">') && sum().includes('In Events now') && sum().includes('Clear all'));
+    assert.strictEqual(fp.byId.fdot.textContent, 1);
+    assert.deepStrictEqual(fp.byId.tabs.qa['.tab'].map((t) => [t.attrs['data-p'], t.q['.c'].textContent]), [['all', 2], ['2', 2], ['3', 0]]);
+    fp.apply({ show: 'kept' });
+    assert.deepStrictEqual(fp.shown(), [29907]);
+    fp.apply({ show: 'removed' });
+    assert.deepStrictEqual(fp.shown(), [29909]);
+    fp.apply({ prog: 'done' });
+    assert.deepStrictEqual(fp.shown(), [29900]);
+    assert.ok(sum().includes('Completed'));
+    fp.apply({ prog: 'todo' });
+    assert.deepStrictEqual(fp.shown(), [29907, 29909, 29901, 29903], 'an event with no served quest is incomplete');
+    fp.apply({ type: 'QUIZ' });
+    assert.deepStrictEqual(fp.shown(), [29903]);
+    fp.apply({ q: 'dew' });
+    assert.deepStrictEqual(fp.shown(), [29901], 'a quest reward');
+    const mt = fp.byId.q29901.q['.mt'];
+    assert.deepStrictEqual([mt.textContent, mt.style.display], ['Matches: Dewey', 'block'], 'shown over the .mt{display:none} of the CSS');
+    assert.ok(sum().includes('Find: &quot;dew&quot;'));
+    fp.apply({ q: 'quest 4009903' });
+    assert.deepStrictEqual(fp.shown(), [29903], 'a quest name');
+    fp.apply({ type: 'QUIZ', prog: 'done' });
+    assert.deepStrictEqual(fp.shown(), []);
+    assert.deepStrictEqual([fp.byId.none.textContent, fp.byId.none.style.display], ['No completed events match your filters', '']);
+    assert.ok(fp.kids.filter((k) => k.className.startsWith('ml')).every((k) => / hide/.test(k.className)), 'no month label without rows');
+    fp.byId.sum.onclick.call(fp.byId.sum, { target: { getAttribute: (a) => (a === 'data-x' ? 'all' : null) }, preventDefault() {} });
+    assert.strictEqual(fp.shown().length, 5, 'Clear all');
+    assert.ok(sum().endsWith(' · no filters'));
+    // a keep (ROWS_JS kxRow) changes data-show, then renders the filters again
+    fp.apply({ show: 'kept' });
+    fp.byId.q29907.attrs['data-show'] = 'can';
+    fp.byId.q29900.attrs['data-show'] = 'kept';
+    fp.win.kxRender();
+    assert.deepStrictEqual(fp.shown(), [29900]);
+    assert.ok(/if\(window\.kxRender\)kxRender\(\);\};/.test(raw), 'kxRow renders the filters');
+    // BACK from a details page: #q<id> opens the year of that row
+    const back = fakePage(raw, '#q29900');
+    assert.ok(back.shown().includes(29900));
   },
   // Booster rewards (boosterLater): a served quest with a Booster says it comes with the Boosters; the new reasons in plain words
   booster_and_new_reasons() {

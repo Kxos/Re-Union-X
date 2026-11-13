@@ -27,6 +27,22 @@ const keepJs = (base, noun) => `var KX_KEEP=${JSON.stringify(KEEP_LABEL)},KX_REM
   + `else kxSay(box,"pinmsg err","Could not change Events","This ${noun} cannot be kept.");};`
   + 'x.onerror=function(){kxSay(box,"pinmsg err","Could not reach the server","Try again.");};x.send("");return false;}';
 
+// The Filters of a catalogue (Raid Catalog 03-11, Event Catalog 13-11: «filters like the Raid Catalog»): the «⚙ Filters» button of
+// the header, the chips of a group and the sheet (FIND with its hint, the groups, Reset / «Show N results»). Styles: special-pages
+// CSS (.fbtn, .sheet, .opts .o) and NARROW_CSS. An option is [value, label, icon key]; the first one of a group is on.
+const FILTER_BUTTON = '<button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button>';
+const optLabel = ([, l, k]) => (k ? icon(k) : '') + esc(l);
+const filterOpts = (list, cls = () => '', sa = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}"${sa(o[0])}>${optLabel(o)}</button>`).join('');
+// the labels of the summary chips, {value: html} without «All»
+const optLabels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
+// groups: [[title, html of the chips with their .opts box]]; n: the results before any filter
+const filterSheet = ({ placeholder, hint, groups, n }) => '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
+  + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
+  + `<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="${esc(placeholder)}" autocomplete="off"></div>`
+  + `<div class="hint">${esc(hint)}</div>`
+  + groups.map(([title, html]) => `<h4>${title}</h4>${html}`).join('')
+  + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${n} result${n === 1 ? '' : 's'}</button></div></div>`;
+
 // The AP / Bonus Time rule of this server (I-228, raid-windows.js costRule weekdayWeekend; user 06-11): a callout on the detail page
 // and at the top of every original notice page, whose AP costs, Bonus Time hours and opening times are the original game's.
 // Callout (user 06-11, graphics): a gold-framed box with a title (Raid Coin icon) and a «NOT ORIGINAL» tag, two side-by-side blocks
@@ -259,4 +275,4 @@ const UNPACK_JS = 'function kxImgs(){var a=document.querySelectorAll("#rows .row
   + 'o.push(r[6]+d.t[r[0]].replace(/\u0001([sdneyt])/g,function(x,k){if(k==="s"){var s=[],j;for(j=0;j<r[1].length;j++)s.push(d.w[r[1][j]]);return s.join(" | ");}return k==="d"?r[2]:k==="n"?r[3]:k==="e"?r[4]:k==="t"?r[7]:r[5];}));}'
   + 'document.getElementById("rows").innerHTML=o.join("");})();';
 module.exports = { PAGE_HEAD, pill, backBar, KEEP_LABEL, REMOVE_LABEL, keepButton, keepJs, RULE_CSS, SRV_CSS, FOLD_CSS, ONC_CSS, NOTICE_CSS, rebuiltValues, srvFrame,
-  noticeCard, parseNotice, noticeBlocks, packCatalog, expandCatalog, UNPACK_JS };
+  noticeCard, parseNotice, noticeBlocks, packCatalog, expandCatalog, UNPACK_JS, FILTER_BUTTON, optLabel, filterOpts, optLabels, filterSheet };

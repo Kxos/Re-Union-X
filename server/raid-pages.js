@@ -18,7 +18,7 @@ const { CSS: SPECIAL_CSS, DETAIL_CSS, esc, niceDay, monthYear, icon, MATCH_JS, k
 const parts = require('./catalog-pages');
 const { PAGE_HEAD, pill, keepJs, RULE_CSS, SRV_CSS, FOLD_CSS, NOTICE_CSS, rebuiltValues, srvFrame, noticeCard, parseNotice, noticeBlocks } = parts;
 // packed catalogue rows (task 3, 06-11; shared with the Event Catalog since Events Part 4): catalog-pages.js
-const { packCatalog, expandCatalog, UNPACK_JS } = parts;
+const { packCatalog, expandCatalog, UNPACK_JS, FILTER_BUTTON, optLabel, filterOpts, optLabels, filterSheet } = parts;
 
 const FAMILY_LABEL = { weekly: 'Weekly Raid', 'radiant reward': 'Radiant Reward Raid', 'weekly (pre-series raid event)': 'Raid Event (before the Weekly Raids)',
   // the event raids of 2016-2018 (Task 10)
@@ -43,7 +43,6 @@ const TIER_OPTS = [['all', 'All'], ['beginner', 'Beginner', 'tbeg'], ['intermedi
 const SHOW_OPTS = [['all', 'All raids'], ['now', 'In Events now', 'now'], ['can', 'Can be kept now', 'pin'], ['kept', 'Kept', 'pin'], ['later', 'Later in the Story', 'later'],
   ['removed', 'Not restored yet', 'removed']];
 const SHOW_SETS = { now: ['now', 'kept'] };
-const optLabel = ([, l, k]) => (k ? icon(k) : '') + esc(l);
 // PROGRESS (user 03-11): every playable tier of the week (available; a tier not restored cannot be played) with all its
 // objectives done (ctx.stageDone, the crown rule); no playable tier = incomplete
 const doneOf = (row, ctx) => {
@@ -254,7 +253,7 @@ function catalogPage(index, ctx = {}) {
   const tiersOf = (r) => r.entries.map((e) => String(e.tier).toLowerCase());
   const has = { type: (v, list) => list.some((r) => typeOf(r) === v), tier: (v, list) => list.some((r) => tiersOf(r).includes(v)) };
   const secAttr = (g) => (v) => (v === 'all' || !has[g] ? '' : ` data-sec="${SECTIONS.map(([k]) => k).filter((k) => has[g](v, bySec[k])).join(' ')}"`);
-  const opts = (list, cls = () => '', sa = () => '') => list.map((o, i) => `<button type="button" class="o${cls(o[0])}${i ? '' : ' on'}" data-v="${o[0]}"${sa(o[0])}>${optLabel(o)}</button>`).join('');
+  const opts = filterOpts;
   const secTab = ([k, name, ic]) => `<button type="button" class="sec${k === 'ww' ? ' on' : ''}" data-sec="${k}">${icon(ic)}<span>${esc(name)}</span><span class="sn">${bySec[k].length}</span></button>`;
   // the Japan only intro (user 06-11), in the style of the rule callout (.rc): one short line per rule, with the catalogues' icons
   const jpIntro = `<div class="rc rcl hide" id="jpi"><div class="rch">${icon('jp')}Raids of the Japanese version<span class="ng">NOT ORIGINAL</span></div>`
@@ -264,13 +263,13 @@ function catalogPage(index, ctx = {}) {
     + `<span>${icon('replaced')}<b>One kept raid for both sections</b>: keeping a Japanese raid releases the kept worldwide raid, and the other way round.</span>`
     + `<span>${icon('bdone')}Reconstructed banners and Raid Boards are marked on their pages; the translations are ours.</span>`
     + `<p class="rcf">See the ${RULE_LINK}</p></div>`;
-  const labels = (list) => JSON.stringify(Object.fromEntries(list.slice(1).map((o) => [o[0], optLabel(o)])));
+  const labels = optLabels;
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   const js = JS.replace('__PN__', JSON.stringify(Object.fromEntries(GAME_YEARS.map((g, i) => [i, g.name]))))
     .replace('__TYPE__', labels(TYPE_OPTS)).replace('__TIER__', labels(TIER_OPTS)).replace('__SHOW__', labels(SHOW_OPTS)).replace('__PROG__', labels(PROG_OPTS)).replace('__BD__', JSON.stringify(Object.fromEntries(BOARD_OPTS.slice(1).map((o) => [o[0], `Raid Boards: ${optLabel(o)}`])))).replace('__SHOWSET__', JSON.stringify(SHOW_SETS))
     .replace('__PILL__', JSON.stringify({ kept: PILLS.kept, can: PILLS.can })).replace('__MATCH__', () => MATCH_JS);
   return PAGE_HEAD('Raid Catalog', CSS + RULE_CSS + SEC_CSS) + '<body>'
-    + '<div class="hdr"><h1>Raid Catalog</h1><button type="button" class="fbtn" id="fbtn">⚙ Filters<span class="dot" id="fdot"></span></button></div>'
+    + `<div class="hdr"><h1>Raid Catalog</h1>${FILTER_BUTTON}</div>`
     + `<p class="n">Every raid week of the game, by date. Tap a raid for its bosses, tiers and Raid Boards.${bySec.jp.length ? ' Two sections: <b>Worldwide</b> and <b>Japan only</b>.' : ''} A past raid can be kept in the Events tab, one at a time. The Raid Catalog is an addition of this server.</p>`
     // no Japan-only raid served (raid_config.json jpRaids.served false, user 06-11): the section tabs and the intro stay in the DOM, hidden
     + `<div class="secs${bySec.jp.length ? '' : ' hide'}" id="secs">${SECTIONS.map(secTab).join('')}</div>${jpIntro}`
@@ -281,16 +280,12 @@ function catalogPage(index, ctx = {}) {
     + '<div id="none" class="none" style="display:none"></div>'
     + `<div id="rows" data-defy="${defYear}" data-defy-jp="${defOf(bySec.jp)}">${packed.length ? '' : '<p class="n">No raids.</p>'}</div>`
     + (packed.length ? `<script id="kxrows" type="application/json">${data}</script><script>${UNPACK_JS}</script>` : '')
-    + '<div class="ov" id="dim"></div><div class="sheet" id="sheet" role="dialog" aria-label="Filters">'
-    + '<div class="shd"><b>Filters</b><button type="button" class="x" id="fx" aria-label="Close">✕</button></div>'
-    + '<h4>FIND</h4><div class="search"><input type="search" id="fq" placeholder="Boss, board or reward name" autocomplete="off"></div>'
-    + '<div class="hint">Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Mythril).</div>'
-    + `<h4>SHOW</h4><div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`
-    + `<h4>PROGRESS</h4><div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`
-    + `<h4>RAID BOARDS</h4><div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`
-    + `<h4>TYPE</h4><div class="opts" data-g="type">${opts(TYPE_OPTS, undefined, secAttr('type'))}</div>`
-    + `<h4>TIER</h4><div class="opts" data-g="tier">${opts(TIER_OPTS, undefined, secAttr('tier'))}</div>`
-    + `<div class="foot"><a href="#" class="reset" id="freset">Reset filters</a><button type="button" class="ok" id="fok">Show ${plural(ww.length, 'result')}</button></div></div>`
+    + filterSheet({ placeholder: 'Boss, board or reward name', hint: 'Matches the start of words in boss names and in the Raid Board rewards (e.g. Behemoth, Sora, Mythril).', n: ww.length,
+      groups: [['SHOW', `<div class="opts" data-g="show">${opts(SHOW_OPTS, (v) => (v === 'all' ? '' : ` st-${v === 'removed' ? 'removed' : v}`))}</div>`],
+        ['PROGRESS', `<div class="opts" data-g="prog">${opts(PROG_OPTS, progCls)}</div>`],
+        ['RAID BOARDS', `<div class="opts" data-g="bd">${opts(BOARD_OPTS, boardCls)}</div>`],
+        ['TYPE', `<div class="opts" data-g="type">${opts(TYPE_OPTS, undefined, secAttr('type'))}</div>`],
+        ['TIER', `<div class="opts" data-g="tier">${opts(TIER_OPTS, undefined, secAttr('tier'))}</div>`]] })
     + `<div id="pinmsg" class="pinmsg"></div><script>${KEEP_JS}</script><script>${js}</script></body></html>`;
 }
 

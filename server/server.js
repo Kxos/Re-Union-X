@@ -4827,6 +4827,19 @@ function eventBoardCells(boardId) {
   const cells = nodes.map((n) => ({ n, cost: masu.spherePoint[n - 1] || 0, reward: text(n - 1), done: unlocked.includes(n) }));
   return { id, name: board.boardName || `Board ${id}`, cells, finish: text(22), done: nodes.length > 0 && nodes.every((n) => unlocked.includes(n)) };
 }
+// FIND of the Event Catalog (13-11, filters like the Raid Catalog): the names of the objective rewards of a quest (stage
+// submissionRewardType / submissionItemId), named as the board rewards; the stage rows are indexed once per page (lazily: only
+// the catalogue asks), a quest without a row or without a named reward gives [].
+const QUEST_REWARD_NAMES = { 15: 'Event Coins', 26: 'Skip Ticket', 28: 'Skip Ticket+', 40: 'Platinum Ticket' };
+function eventQuestRewardLookup() {
+  let stages = null;
+  return (stageId) => {
+    stages ??= new Map(masterRows('stage').map((r) => [r.stageId, r]));
+    const st = stages.get(Number(stageId)), ix = raidBoardIndex();
+    if (!st) return [];
+    return [...new Set((st.submissionRewardType || []).map((t, i) => (t ? boardRewardName(ix, t, st.submissionItemId?.[i]) || QUEST_REWARD_NAMES[t] || '' : '')).filter(Boolean))];
+  };
+}
 // RAID BOARDS filter of the Raid Catalog (user 03-11): a Raid Board is complete when every node is unlocked in player.raidSphere,
 // the rule of the board screen (status 3 of userSphereData), whether it is handed out now or not (its progress is kept for good);
 // a board never handed out or not served by the master is not complete.
@@ -4875,7 +4888,7 @@ function respondRaidWeb(res, url) {
 const eventPageCtx = (fromCatalog = false) => ({ ...eventRoutes().catalogCtx(), imgVersion: routesEvents.EVENT_IMG_VERSION, fromCatalog,
   unlockQuestOf: (row) => special.unlockQuest(gachaCatalog().story, { campaign: { start: row.start }, periods: [] }, special.PERIODS),
   stageDone: (id) => catalogStageDone(id), hasNotice: (censusId) => !!eventNotices()?.rows?.[censusId],
-  eventBoard: eventBoardCells, eventCoins: (setKey) => Number((player.eventCoins || {})[setKey]) || 0 });
+  eventBoard: eventBoardCells, eventCoins: (setKey) => Number((player.eventCoins || {})[setKey]) || 0, questRewards: eventQuestRewardLookup() });
 // GET /web/event/catalog (Details of the Event Catalog banner; a kept event the index lost is cleared first), /web/event/event/
 // <evStageId> (details page; ?from=catalog: BACK), /web/event/notice/<evStageId> (Details of an event card: its original
 // notice, ?from=event: BACK; always a page, «not available» without it), /web/event/img/v<N>/<evStageId>[-kept].png (the card;
