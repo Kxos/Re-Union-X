@@ -801,6 +801,7 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + '.row.sub{margin:0 6px 10px 26px;padding:8px 10px;border:1px solid #b8860b;border-top:0;border-radius:0 0 10px 10px;background:#204b58}'
     + '.row.sub .d{flex:none;width:28px;color:#ffd65a;font-size:18px;text-align:center}'
     + '.row.sub .x{font-size:16px;color:#f3e6b8}'
+    + '.row.sub .a{border-color:transparent transparent transparent #d4a017}' // secondary gold arrow (user 13-11)
     + '.row.pin .x,.row.sub .x{white-space:normal;overflow:visible;line-height:1.25}'
     + '@media(max-width:600px){.row.pin .x{font-size:19px}.row.pin .d{width:34px;font-size:24px}}'
     + '.det.pin h2{color:#ffd65a;border-bottom-color:#b8860b}.det.pin h2:before{background:#ffd65a}'
