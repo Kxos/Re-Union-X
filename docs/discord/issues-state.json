@@ -494,9 +494,9 @@
   "I-269": {
    "thread": "1570491120809414667",
    "msg": "1570491120809414667",
-   "group": "OPEN",
-   "hash": "8d88f9e76321b078",
-   "name": "I-269 · Avatar: the player character holds the keyblade in a pose the tester never saw"
+   "group": "CLOSED",
+   "hash": "69762ffc6da0a042",
+   "name": "I-269 · Keyblade pose of the player character"
   },
   "I-270": {
    "thread": "1570491682242166948",
@@ -511,6 +511,13 @@
    "group": "IN PROGRESS",
    "hash": "b81a0ed51fd51e59",
    "name": "I-271 · «Defeat X» objectives on enemies the quest map does not have"
+  },
+  "I-272": {
+   "thread": "1570719415039696967",
+   "msg": "1570719415039696967",
+   "group": "OPEN",
+   "hash": "c8d8d5995fdd90ae",
+   "name": "I-272 · Keyblade: cannot be raised to +10"
   }
  }
 }
