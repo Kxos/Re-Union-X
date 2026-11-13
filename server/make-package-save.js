@@ -29,7 +29,18 @@ function merge(max, proud) {
 // menu (the party chat works since I-210, 25-10); the first-party jewel bonus stays available
 delete max.party;
   delete max.partyFirstRewardDone;
+  clearKept(max);
   return max;
+}
+
+// The bench's own Catalog choices stay on the bench: no banner or Spirit deal kept in the Shop, no raid or event kept in
+// the Events tab, no quest kept in Special (the player keeps their own from the Catalogs)
+function clearKept(p) {
+  if (p.gacha) { delete p.gacha.pinned; delete p.gacha.pinnedPet; }
+  if (p.raid) p.raid.kept = null;
+  if (p.events) p.events.kept = null;
+  if (p.special) delete p.special.pinned;
+  return p;
 }
 
 // The game refuses every quest when the medals exceed the storage (max 3000 slots): the max-power save has
