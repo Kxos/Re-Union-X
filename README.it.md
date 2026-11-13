@@ -139,6 +139,9 @@ Questo restauro si regge sul lavoro di chi ha conservato e documentato il gioco 
     ci ha dato un'istantanea tarda del master worldwide: calendario, righe delle quest e dei nemici degli eventi
     2018-2021 (Org XIII, The Keyblade War, eventi sfida) e il riferimento per stagioni e tabelloni del Coliseum,
     Union Cross, PvP, classifiche, tabelloni degli eventi e Booster.
+  - Il ReLux Team ci ha anche condiviso, con il suo permesso, il suo indice delle grafiche dei nemici: nomina il record
+    originale di ogni texture dei nemici, cosi' animazioni, attacchi speciali ed effetti di colpo dei nemici sono ora
+    ricostruiti esattamente come li disegnava il gioco.
 - **SmellyOctopus** ([YouTube](https://www.youtube.com/@SmellyOctopus)) — grazie per aver insegnato a tanti di noi a
   essere giocatori F2P consapevoli e per averci tenuto compagnia all'epoca con video pieni di gioia. Quei video di
   KHUX oggi ci aiutano moltissimo come riferimento e fonte di informazioni per il restauro.

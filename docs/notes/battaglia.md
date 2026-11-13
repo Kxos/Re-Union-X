@@ -640,5 +640,14 @@ For the April 2019 pilot 65 enemy ids (54 names) were missing from our master.
   `extra_donors_events2.tsv` (`make_jp_enemies.py --events2`, whole animations with override priority; rescaled and blank
   pieces at exactly the declared size), std-dead whole dead for 1568/1570/1572/1573/96, 2009 in `ally_families.json`, 185
   shown as 184 (`make-event-enemies.js DISPLAY_AS`). Details: [events.md](events.md), «Event enemy models and SP Chip & Dale».
+- **Exact animations (13-11, user-approved on the rendered review)**: the JP 4.3.1 dump lost its dedup stub records (a
+  4-byte entry = «same data as record N»); the enemy graphics index donated by the ReLux Team names the record of every
+  texture, so each animation can be rebuilt exactly: the JP file of the same name when identical (`exact-jp`), else the
+  pixel-identical JP dump file (`exact-twin`), else the decoded record (`exact-relux`, `exact-lwf-relux`; container `relux`
+  = `D:\Progetto_Restauro_KH_UX\raid_loc\relux`, outside every repository). `recon/tools/extra_donors_exact.tsv`, read by
+  `make_jp_enemies.py --exact` before every other table (events2 included), whole animations, files at their stored size.
+  653 animations of 205 families; 547 built (the 106 of the 20 families no master row uses wait for a row). Hit effects: the
+  same rules in `originals.tsv` section 53. Pack order: the generated pack (originals.tsv) comes after enemy_gen and the
+  merge is last-wins, so an originals.tsv path would win; no enemy_gen path is also written by originals.tsv (checked).
 - **Deviations**: 56 event attack rows name a hit effect we do not serve (27 effects, all in the JP data): they keep the
   template's effect, as every attack row does (`enemy-attack-fix.js`). `move` is a copy of `wait` where the JP data has none.

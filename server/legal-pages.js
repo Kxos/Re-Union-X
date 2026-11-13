@@ -118,7 +118,7 @@ function creditsPage() {
     + '<h2>With the help of</h2>'
     + row('Roboloid & Ultimadei', 'The KHUχ database: *Medal data, multipliers and special attack conditions*.')
     + row('KHUX Wiki & KH Wiki', '*Quests, Medals, special attacks and events* used as references.')
-    + row('ReLux Team', 'Research on the game\'s *events, raids, Union Cross and campaigns*, the archive of the official notices and player-made calculators. Lead developer *LuxHollow*: a steady support to this project.')
+    + row('ReLux Team', 'Research on the game\'s *events, raids, Union Cross and campaigns*, the archive of the official notices, player-made calculators and the *index of the enemy graphics* that rebuilt the enemy animations exactly. Lead developer *LuxHollow*: a steady support to this project.')
     + row('SmellyOctopus', 'Thank you for teaching so many of us to *play free-to-play wisely*, and for keeping us company back then with *videos full of joy*. Those videos are now *a huge help* as references for the restoration.')
     + row('Testers', 'They played every new piece of the restoration before anyone else and *reported what broke*, so that everyone else would find it working. Thank you!', 't',
       `<div class="names">${TESTERS.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`)

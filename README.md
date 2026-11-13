@@ -139,6 +139,9 @@ This restoration stands on the work of people who preserved and documented the g
     worldwide master snapshot: the schedule, quest and enemy rows of the 2018-2021 events (Org XIII, The Keyblade
     War, challenge events), and the reference for Coliseum seasons and boards, Union Cross, PvP, rankings, event
     boards and Boosters.
+  - The ReLux Team also shared, with their permission, their index of the enemy graphics: it names the original record
+    of every enemy texture, so the enemy animations, special attacks and hit effects are now rebuilt exactly as the
+    game drew them.
 - **SmellyOctopus** ([YouTube](https://www.youtube.com/@SmellyOctopus)) — thank you for teaching so many of us to
   play free-to-play wisely, and for keeping us company back then with videos full of joy. Those KHUX videos are now
   a huge help as references and information for the restoration.

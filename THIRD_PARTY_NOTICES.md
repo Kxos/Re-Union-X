@@ -95,6 +95,8 @@ confirmed independently from the client and re-implemented in our own code (`ser
 ### Other references
 
 - **luxenvulpies/KHUX_Medal_Website**: medal list, consulted as a reference.
+- **ReLux Team**: index of the enemy graphics, shared with their permission and kept locally; the repository holds
+  only the file names and paths it maps (`recon/tools/extra_donors_exact.tsv`, `recon/tools/originals.tsv` section 53).
 - Screenshots and videos of the original game by many players, used as visual references only (kept
   locally).
 
