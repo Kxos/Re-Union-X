@@ -666,7 +666,7 @@ const NARROW_CSS = '@media (max-width:700px){'
   + '.rcd,.rg{-webkit-flex:1 1 100%;flex:1 1 100%;min-width:0;margin-left:4px;margin-right:4px}'
   + '.rbt{float:none;display:inline-block;margin:4px 0 0 1.1em}.sbl a{display:block;text-align:center;margin:8px 0 0;padding:9px 14px;font-size:15.5px}'
   + '.why,.sb .why{font-size:15px}.ver{padding:8px 10px}.mem{padding:6px 0}'
-  + 'table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
+  + 'table{display:block;box-sizing:border-box;max-width:100%;padding:0 2px 2px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}' // padding: the scroll box clipped the outer half of the collapsed right/bottom borders
   + 'table>tbody{display:table;width:100%;border-collapse:inherit;border-spacing:inherit;table-layout:inherit}'
   + 'th,td{padding:5px 7px}.tt{font-size:14px}.tt td,.tt th{white-space:normal!important}.tt td.r,.tt small{overflow-wrap:break-word}'
   + '.onc .ns{padding:10px 12px 12px}.onc>h2.och{padding:8px 12px 7px}.och .ocd{margin-left:6px}'
