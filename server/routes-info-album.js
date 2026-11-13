@@ -766,7 +766,7 @@ function noticesPage(realMs = Date.now(), opts = {}) {
   };
   const rows = notices.map((n, i) => `<a class="row${n.pinned === 1 ? ' pin' : n.pinned ? ' sub' : ''}" href="#n${i}" onclick="show(${i});return false">`
     + (n.pinned === 1 ? `<span class="d">&#9733;</span><span class="x"><span class="cap">${esc(n.tag)}</span>${esc(n.title)}</span>`
-      : n.pinned ? `<span class="d">&#8627;</span><span class="x">${esc(n.title)}</span><span class="go">OPEN</span>`
+      : n.pinned ? `<span class="d">&#8627;</span><span class="x">${esc(n.title)}</span>`
         : `<span class="d">${esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span><span class="x">${esc(n.title)}</span>`)
     + '<span class="a"></span></a>').join('');
   // #<slug of the title> in the address opens that notice (e.g. /web/notices#raid-bosses from the raid notice pages, raid-pages.js
@@ -801,9 +801,6 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + '.row.sub{margin:0 6px 10px 26px;padding:8px 10px;border:1px solid #b8860b;border-top:0;border-radius:0 0 10px 10px;background:#204b58}'
     + '.row.sub .d{flex:none;width:28px;color:#ffd65a;font-size:18px;text-align:center}'
     + '.row.sub .x{font-size:16px;color:#f3e6b8}'
-    + '.go{flex:none;margin-left:8px;padding:4px 14px 5px;border-radius:8px;border:2px solid #9fd4ff;color:#fff;font:italic bold 14px sans-serif;'
-    + 'letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);box-shadow:0 2px 0 #0b2a66,inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 2px #0a2a6a}'
-    + '.row.sub .a{display:none}.row.sub:active .go{transform:translateY(2px);box-shadow:none}'
     + '.row.pin .x,.row.sub .x{white-space:normal;overflow:visible;line-height:1.25}'
     + '@media(max-width:600px){.row.pin .x{font-size:19px}.row.pin .d{width:34px;font-size:24px}}'
     + '.det.pin h2{color:#ffd65a;border-bottom-color:#b8860b}.det.pin h2:before{background:#ffd65a}'
