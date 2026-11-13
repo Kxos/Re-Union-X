@@ -417,7 +417,8 @@ if (enemies && fs.existsSync(namesFile)) {
     attacksAdded += atkFix.addMissing(atts, enemies);
     // righe originali (stati alterati, potenza, buff) dai dati di thethiny: enemy-attack-fix.js
     atkFix.applyEnemyAttacks(atts, atkFix.readOrig(undefined,
-      [...require('./make-event-enemies').attackRows(), ...motion.attackRows(movesSrc)]));
+      [...require('./make-event-enemies').attackRows(), ...motion.attackRows(movesSrc)]), undefined,
+      motion.motionOkAttacks(enemies, movesSrc));
     fs.writeFileSync(attPath, JSON.stringify(atts));
     // contatori e assorbimento dei nemici 526-979 (enemy-mechanics.js, I-207), con gli attacchi gia' completi
     const mech = require('./enemy-mechanics');

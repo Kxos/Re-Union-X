@@ -47,7 +47,7 @@ fs.writeFileSync(path.join(tmp, 'names.tsv'), 'lwf/character/enemy/17/atkSp/a.lw
 fs.mkdirSync(path.join(tmp, 'gen', '1565', 'atkSp'), { recursive: true });
 fs.writeFileSync(path.join(tmp, 'gen', '1565', 'atkSp', 'atkSp.lwf'), '');
 fs.mkdirSync(path.join(tmp, 'gen', '1566', 'wait'), { recursive: true });
-const models = fix.atkSpModels(path.join(tmp, 'names.tsv'), path.join(tmp, 'gen'));
+const models = fix.atkSpModels(path.join(tmp, 'names.tsv'), path.join(tmp, 'gen'), null);
 check(JSON.stringify([...models].sort((a, b) => a - b)) === '[17,1565]', `atkSpModels ${[...models]}`);
 fs.rmSync(tmp, { recursive: true, force: true });
 

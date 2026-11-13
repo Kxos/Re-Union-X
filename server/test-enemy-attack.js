@@ -17,7 +17,7 @@ check(added === 4 && mini.find((a) => a.enemyAttackId === 7)?.power === 101 && m
   `addMissing: ${added} ${JSON.stringify(mini.slice(3))}`);
 check(fix.addMissing(mini, [{ skillId: [1, 7, 8, 9], urgencySkillId: [5] }]) === 0, 'addMissing non idempotente');
 const served = fix.servedHitEffects();
-const again = fix.applyEnemyAttacks(atts, fix.readOrig(), served);
+const again = fix.applyEnemyAttacks(atts, fix.readOrig(undefined, [...require('./make-event-enemies').attackRows(), ...require('./enemy-motion-fix').attackRows(require('./enemy-motion-fix').readOriginalMoves())]), served, require('./enemy-motion-fix').motionOkAttacks(enemies, require('./enemy-motion-fix').readOriginalMoves()));
 check(again.patched === 0, `master non corretto o non idempotente: ${JSON.stringify(again)}`);
 // stati alterati come l'originale (Poison Apple «High Chance of Poison»)
 const byId = new Map(atts.map((a) => [a.enemyAttackId, a]));
@@ -26,6 +26,10 @@ check(atts.filter((a) => !(a.enemyAttackId >= 992070000 && a.enemyAttackId < 992
 // solo risorse servite: effetto di colpo servito, animazione atk1_o o atkSp
 const badHit = atts.filter((a) => !served.has(a.hitEffect)).map((a) => `${a.enemyAttackId}:${a.hitEffect}`);
 check(badHit.length === 0, `hitEffect non serviti: ${badHit.slice(0, 5).join(', ')} (${badHit.length})`);
-check(atts.every((a) => [1, 2].includes(a.attackMotion)), 'attackMotion oltre 2');
+// motion >= 3 only where every citing enemy has its atk<N>_o served (enemy-motion-fix.js motionOkAttacks: 1651030 atk3_o)
+const motion = require('./enemy-motion-fix');
+const motionOk = motion.motionOkAttacks(enemies, motion.readOriginalMoves());
+const badMotion = atts.filter((a) => ![1, 2].includes(a.attackMotion) && !motionOk.has(a.enemyAttackId)).map((a) => a.enemyAttackId);
+check(badMotion.length === 0, `attackMotion oltre 2 senza animazione servita: ${badMotion.slice(0, 5)}`);
 if (errors.length) { console.log(`ERRORI (${errors.length}):\n  ` + errors.join('\n  ')); process.exit(1); }
 console.log('OK: enemy attack');

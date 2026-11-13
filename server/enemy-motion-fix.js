@@ -15,7 +15,7 @@
 //    with attackMotion 1 (same power and effects, only the animation), id PLAIN_BASE + original id. The original attack
 //    row is never changed: other enemies with atkSp use it.
 // make-game-tables.js applies 1 after the enemy rows are complete and before the attacks, 2 after the attacks.
-// Alone (both, on server/master_data in place; idempotent; then revision +1 and relogin.ps1):
+// Alone (1, and 2 only with KHUX_ENEMY_PLAIN_SP=1, on server/master_data in place; idempotent; then revision +1 and relogin.ps1):
 //   node server/enemy-motion-fix.js [master folder]
 'use strict';
 const fs = require('fs');
@@ -59,18 +59,44 @@ function applyOriginalMoves(enemies, src) {
   return done;
 }
 
-// displayIds with a served atkSp: resource names + enemy_gen package
-function atkSpModels(namesFile = NAMES, genDir = ENEMY_GEN) {
+const ORIGINALS_TSV = path.join(__dirname, '..', 'recon', 'tools', 'originals.tsv');
+
+// served animation folders of the enemy models: Set of "<displayId>/<anim>" from the resource names, the originals
+// list (import_originals.py, e.g. section 52 Ephemer & Skuld atkSp/atk3_o) and the enemy_gen package
+function servedAnims(namesFile = NAMES, genDir = ENEMY_GEN, tsv = ORIGINALS_TSV) {
   const out = new Set();
-  if (namesFile && fs.existsSync(namesFile)) {
-    for (const m of fs.readFileSync(namesFile, 'utf8').matchAll(/^lwf\/character\/enemy\/(\d+)\/atkSp\//gm)) out.add(Number(m[1]));
+  for (const f of [namesFile, tsv]) {
+    if (!f || !fs.existsSync(f)) continue;
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/^lwf\/character\/enemy\/(\d+)\/(\w+)\//gm)) out.add(`${Number(m[1])}/${m[2]}`);
   }
   if (genDir && fs.existsSync(genDir)) {
     for (const n of fs.readdirSync(genDir)) {
-      if (/^\d+$/.test(n) && fs.existsSync(path.join(genDir, n, 'atkSp', 'atkSp.lwf'))) out.add(Number(n));
+      if (!/^\d+$/.test(n)) continue;
+      for (const a of fs.readdirSync(path.join(genDir, n))) {
+        if (fs.existsSync(path.join(genDir, n, a, `${a}.lwf`))) out.add(`${Number(n)}/${a}`);
+      }
     }
   }
   return out;
+}
+
+// displayIds with a served atkSp
+function atkSpModels(namesFile = NAMES, genDir = ENEMY_GEN, tsv = ORIGINALS_TSV) {
+  const out = new Set();
+  for (const k of servedAnims(namesFile, genDir, tsv)) if (k.endsWith('/atkSp')) out.add(Number(k.split('/')[0]));
+  return out;
+}
+
+// attack ids of the private file with attackMotion >= 3 whose atk<N>_o is served for EVERY master enemy citing them
+// (enemy-attack-fix.js keeps their motion; any other motion >= 3 falls back to 1, a missing atk<N>_o crashes)
+function motionOkAttacks(enemies, src, anims = servedAnims()) {
+  const ok = new Set();
+  for (const a of attackRows(src)) {
+    if (!(a.attackMotion >= 3)) continue;
+    const users = enemies.filter((e) => movesOf(e).includes(a.enemyAttackId));
+    if (users.length && users.every((e) => anims.has(`${e.displayId}/atk${a.attackMotion}_o`))) ok.add(a.enemyAttackId);
+  }
+  return ok;
 }
 
 const movesOf = (e) => [...(e.skillId || []), ...(e.urgencySkillId || [])];
@@ -112,7 +138,7 @@ const summary = (restored, rep) => `enemy-motion-fix: original moves ${restored.
   + `${rep.plain.length} rows (${rep.plain.join(', ')}), +${rep.added.length} attacks`;
 
 module.exports = { MOVE_KEYS, ORIGINAL_MOVES_PATH, PLAIN_BASE, plainId, readOriginalMoves, attackRows, applyOriginalMoves,
-  atkSpModels, applyMotionFix, missingMotions, summary };
+  servedAnims, atkSpModels, motionOkAttacks, applyMotionFix, missingMotions, summary };
 
 if (require.main === module) {
   const fix = require('./enemy-attack-fix');
@@ -123,8 +149,11 @@ if (require.main === module) {
   const src = readOriginalMoves();
   const restored = applyOriginalMoves(enemies, src);
   fix.addMissing(atts, enemies);
-  fix.applyEnemyAttacks(atts, fix.readOrig(undefined, [...require('./make-event-enemies').attackRows(), ...attackRows(src)]));
-  const rep = applyMotionFix(enemies, atts, atkSpModels());
+  fix.applyEnemyAttacks(atts, fix.readOrig(undefined, [...require('./make-event-enemies').attackRows(), ...attackRows(src)]),
+    undefined, motionOkAttacks(enemies, src));
+  // the safety net only on request, as in make-game-tables.js (KHUX_ENEMY_PLAIN_SP=1; 13-11: run alone it plain-copied 333 rows)
+  const plainOn = /^(1|on|true|yes)$/i.test(String(process.env.KHUX_ENEMY_PLAIN_SP || ''));
+  const rep = plainOn ? applyMotionFix(enemies, atts, atkSpModels()) : { plain: [], added: [] };
   fs.writeFileSync(ep, JSON.stringify(enemies));
   fs.writeFileSync(ap, JSON.stringify(atts));
   console.log(summary(restored, rep));

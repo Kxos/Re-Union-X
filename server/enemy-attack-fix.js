@@ -8,7 +8,7 @@
 //  - hitEffect: lwf/character/enemy/hit_effect_fla/eff_N/ solo se servita (names_v4 o originals.tsv), altrimenti
 //    resta quello di oggi;
 //  - attackMotion: 1 (atk1_o) o 2 (atkSp, che senza file ricade su wait); atk3_o e oltre senza file = crash
-// (docs/notes/battaglia.md#nemici-jp), quindi resta 1.
+// (docs/notes/battaglia.md#nemici-jp), quindi resta 1, except the ids in motionOk (folder served for every citing enemy).
 // I campi che i dati di thethiny non hanno (riflessi, upright/reverse, spEffect...) restano quelli del master.
 //
 // make-game-tables.js la applica prima di scrivere; da sola corregge server/master_data sul posto
@@ -32,7 +32,9 @@ function servedHitEffects(files = [NAMES, TSV]) {
   return out;
 }
 
-function applyEnemyAttacks(atts, origRows, served = servedHitEffects()) {
+// motionOk: attack ids whose attackMotion >= 3 is kept, because every enemy citing them has its atk<N>_o folder served
+// (enemy-motion-fix.js motionOkAttacks, 13-11: Ephemer & Skuld 1651030 = atk3_o); all others fall back to 1
+function applyEnemyAttacks(atts, origRows, served = servedHitEffects(), motionOk = new Set()) {
   const stats = { patched: 0, same: 0, hitKept: 0, motionKept: 0 };
   const orig = new Map(origRows.map((r) => [r.enemyAttackId, r]));
   for (const a of atts) {
@@ -40,7 +42,7 @@ function applyEnemyAttacks(atts, origRows, served = servedHitEffects()) {
     if (!o) continue;
     const want = { ...o };
     if (!served.has(o.hitEffect)) { want.hitEffect = a.hitEffect; stats.hitKept++; }
-    if (![1, 2].includes(o.attackMotion)) { want.attackMotion = 1; stats.motionKept++; }
+    if (![1, 2].includes(o.attackMotion) && !motionOk.has(o.enemyAttackId)) { want.attackMotion = 1; stats.motionKept++; }
     if (Object.keys(want).every((k) => JSON.stringify(a[k]) === JSON.stringify(want[k]))) stats.same++;
     else { Object.assign(a, want); stats.patched++; }
   }
