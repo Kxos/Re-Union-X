@@ -364,15 +364,15 @@
   },
   "1639": {
    "name": "Nimble Reaper",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1598": {
    "name": "Loudmouth Parade",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1035": {
    "name": "Hocus Pocus",
@@ -394,15 +394,15 @@
   },
   "1643": {
    "name": "Upright Warlock",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 6 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1621": {
    "name": "Gummi Dragon",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1623": {
    "name": "Savage Vanguard Ω",
@@ -412,15 +412,15 @@
   },
   "1638": {
    "name": "Vile Reaper",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1575": {
    "name": "Mysterious Sir",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 4 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1031": {
    "name": "Submarine Carp",
@@ -430,15 +430,15 @@
   },
   "1574": {
    "name": "Weapon Master",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 4 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1644": {
    "name": "Reversed Warlock",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 3 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1529": {
    "name": "Metal Giant",
@@ -448,9 +448,9 @@
   },
   "95": {
    "name": "Circus Balloon",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 2 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html",
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)",
    "no_b2016": true,
    "no_b2016_why": "the 2016 package folder 95 and the plain JP 4.3.1 pictures are another creature (purple serpent with a flower head, as for 96); the JP revisions .0024-.0025xxxx are the Circus Balloon (stale_plain)"
   },
@@ -462,9 +462,9 @@
   },
   "1601": {
    "name": "Jewel Princess",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 1 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "135": {
    "name": "Living Bone",
@@ -474,15 +474,15 @@
   },
   "1583": {
    "name": "Raccoon Dog Rookie",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "1584": {
    "name": "Raccoon Dog Soldier",
-   "model": "missing",
-   "approved": false,
-   "review": "pending (Events Part 4 Task 3, 08-11): challenge quests 2018-04..2021, 7 enemy ids; rendered review tmp/events_enemies/review/challenge/index.html"
+   "model": "new",
+   "approved": true,
+   "review": "user-approved 13-11 (rendered exact animations of tmp/enemy_exact, I-250): built whole from extra_donors_exact.tsv (enemy graphics index donated by the ReLux Team)"
   },
   "156": {
    "name": "Raging Reindeer",

@@ -177,6 +177,24 @@ if os.path.isdir(xd.ROOTS['events2'][0]) and os.path.isdir(xd.ROOTS['jp501'][0])
 if rc and os.path.isdir(xd.ROOTS['recolour'][0]):
     miss = [k for k in rc if not xd.lookup(rc, k)]
     check(not miss, 'sorgenti assenti in jp_recoloured.tsv: %d (%s)' % (len(miss), miss[:3]))
+# user-approved EXACT animations (extra_donors_exact.tsv, 13-11, ReLux Team index): EXACT_RULES only, never in another
+# table; every animation has its LWF row; the index records (exact-relux, exact-lwf-relux) come from the relux container,
+# the JP files and twins from jp431; the 12 I-250 models are in it
+xa = xd.load(xd.EXACT_TABLE, rules=set(xd.EXACT_RULES))
+check(len(xa) > 25000, 'extra_donors_exact.tsv: %d rows' % len(xa))
+check(not {v[2] for v in list(ex.values()) + list(wh.values()) + list(rc.values()) + list(ev2.values())} & set(xd.EXACT_RULES),
+      'exact rules in another table')
+xa_anims = {k.rsplit('/', 1)[0] for k in xa}
+check(all(d + '/' + d.rsplit('/', 1)[1] + '.lwf' in xa for d in xa_anims), 'exact animation without its LWF row')
+check(all((v[0] == 'relux') == (v[2] in ('exact-relux', 'exact-lwf-relux')) and v[0] in ('relux', 'jp431')
+          for v in xa.values()), 'exact rows: relux container only for the index records')
+check({95, 1574, 1575, 1583, 1584, 1598, 1601, 1621, 1638, 1639, 1643, 1644} <= {int(k.split('/')[3]) for k in xa},
+      'exact table without the 12 I-250 models')
+check(all(xd.category(r) == c for r, c in (('exact-jp', 1), ('exact-twin', 2), ('exact-relux', 1), ('exact-lwf-relux', 1))),
+      'exact categories')
+if os.path.isdir(xd.ROOTS['relux'][0]) and os.path.isdir(xd.ROOTS['jp431'][0]):
+    miss = [k for k in xa if not xd.lookup(xa, k)]
+    check(not miss, 'sources missing in extra_donors_exact.tsv: %d (%s)' % (len(miss), miss[:3]))
 
 if errori:
     print('ERRORI (%d)' % len(errori))

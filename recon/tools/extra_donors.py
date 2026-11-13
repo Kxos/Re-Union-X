@@ -54,6 +54,14 @@ WHOLE_RULES = ('whole-dr-twin', 'whole-ww-index', 'whole-same-pose', 'whole-same
 EVENTS2_TABLE = os.path.join(HERE, 'extra_donors_events2.tsv')
 EVENTS2_RULES = ('events2-jp', 'events2-copy', 'events2-recon', 'events2-cand', 'events2-rescale', 'events2-blank',
                  'events2-tint')
+# EXACT enemy animations (13-11-2026, user-approved on the rendered review of tmp\\enemy_exact): every texture is the record
+# of that name in the enemy graphics index donated by the ReLux Team (read-only, local). make_jp_enemies.py --exact takes
+# such an animation WHOLE from this table, before every other source, extra_donors_events2.tsv included (the exact version
+# replaces earlier approved reconstructions). Rules EXACT_RULES: exact-jp = the JP 4.3.1 file of the same name (identical to
+# the record), exact-twin = the pixel-identical JP 4.3.1 dump file the index names, exact-relux / exact-lwf-relux = the
+# record itself (texture / LWF), container relux (outside the repo, raid_loc\\relux; also the `loc` source of originals.tsv)
+EXACT_TABLE = os.path.join(HERE, 'extra_donors_exact.tsv')
+EXACT_RULES = ('exact-jp', 'exact-twin', 'exact-relux', 'exact-lwf-relux')
 D = r'D:\Progetto_Restauro_KH_UX'
 import sys  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # with python -I the script folder is not on sys.path
@@ -71,6 +79,9 @@ ROOTS = {
     # Events Part 2 (07-11): rescaled copies (exact declared size), blank pieces of the accepted partial models and
     # frozen copies of generated files (raid_gen, enemy_x) written by events2_export.py; extra_donors_events2.tsv only
     'events2': [os.path.join(D, 'enemy_gen_src', 'events2')],
+    # records of the donated enemy graphics index with no JP 4.3.1 twin (13-11, extra_donors_exact.tsv only): decoded
+    # copies staged outside every git repository; make_jp_enemies.py --src-root relux=<folder> overrides it
+    'relux': [os.path.join(D, 'raid_loc', 'relux')],
 }
 RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'donor&order': 2, 'twinfam': 2,
          'whole-dr-twin': 2, 'content-anchor': 2, 'bracket': 2, 'dedup-order': 2, 'recolour': 4, 'recolour-whole': 4,
@@ -106,7 +117,10 @@ RULES = {'exact501': 1, 'lwfmatch+anchors': 2, 'unique': 2, 'align&donor': 2, 'd
          'events2-blank': 3,
          # events2-tint (08-11, Round 11, user-approved declared deviation): a cat 3 piece recoloured to match the
          # original footage (1585 Lexaeus atkSp flames, frozen copy in events2/copy/r11_tint), category 4 like recolour
-         'events2-tint': 4}
+         'events2-tint': 4,
+         # extra_donors_exact.tsv only (13-11, user-approved exact animations): the file of the same name or the
+         # record itself = category 1; the pixel-identical twin elsewhere in the dump = category 2 (an original copy)
+         'exact-jp': 1, 'exact-twin': 2, 'exact-relux': 1, 'exact-lwf-relux': 1}
 
 
 def category(rule):

@@ -101,9 +101,26 @@ with open(EV2, 'w', encoding='utf-8') as fh:
              _E + '1953/wait/wait_a.png\tevents2:copy/big.png\tevents2-copy\t10x10\tLIB\n' +
              # 1955: a rescaled copy off by 1 px -> refused (exact size only)
              _E + '1955/wait/wait.lwf\tjp431:' + _E + '1955/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
-             _E + '1955/wait/wait_a.png\tevents2:rescale/1955/wait/wait_a.png\tevents2-rescale\t10x10\tRUN\n')
+             _E + '1955/wait/wait_a.png\tevents2:rescale/1955/wait/wait_a.png\tevents2-rescale\t10x10\tRUN\n' +
+             # 1962: also in the exact table (13-11), which wins
+             _E + '1962/wait/wait.lwf\tjp431:' + _E + '1962/wait/wait.lwf\tevents2-jp\t0x0\tjp\n' +
+             _E + '1962/wait/wait_a.png\tevents2:copy/a.png\tevents2-copy\t10x10\tALIGN\n')
+# 13-11: the user-approved EXACT animations (extra_donors_exact.tsv, ReLux Team index): whole animations read BEFORE the
+# events2 table; container relux = the index records with no JP twin (outside the repo), every file at its stored size
+BOX['relux'] = os.path.join(TMP, 'relux')
+EXA = os.path.join(TMP, 'exact.tsv')
+with open(EXA, 'w', encoding='utf-8') as fh:
+    fh.write('# test\n' +
+             # 1962 is also in the events2 table: the exact rows win (exact-twin = category 2, relux record = category 1)
+             _E + '1962/wait/wait.lwf\tjp431:' + _E + '1962/wait/wait.lwf\texact-jp\t0x0\tlwf\n' +
+             _E + '1962/wait/wait_a.png\tjp431:lwf/drama/77/77_a.png\texact-twin\t10x10\ttwin\n' +
+             # 1960: LWF from the index only, a texture record stored at another size than declared (accepted as stored)
+             _E + '1960/atkSp/atkSp.lwf\trelux:' + _E + '1960/atkSp/atkSp.lwf\texact-lwf-relux\t0x0\tlwf\n' +
+             _E + '1960/atkSp/atkSp_a.png\trelux:' + _E + '1960/atkSp/atkSp_a.png\texact-relux\t10x10\trelux only\n' +
+             # 1961: a texture of the LWF without a row -> incomplete, no fallback to the family's own JP file
+             _E + '1961/wait/wait.lwf\tjp431:' + _E + '1961/wait/wait.lwf\texact-jp\t0x0\tlwf\n')
 sys.argv = [sys.argv[0], '--jp', JP, '--jp-root', ROOT, '--donors', DON, '--recon', REC, '--b2016', B16, '--out', os.path.join(TMP, 'out'),
-            '--extra', XTR, '--recolour', COL, '--dedup', DDP, '--whole', WHL, '--events2', EV2] + \
+            '--extra', XTR, '--recolour', COL, '--dedup', DDP, '--whole', WHL, '--events2', EV2, '--exact', EXA] + \
     ['--src-root=%s=%s' % kv for kv in BOX.items()]
 sys.path.insert(0, HERE)
 import make_jp_enemies as m  # noqa: E402
@@ -444,6 +461,47 @@ try:
                                                              ('events2-cand', 3), ('events2-rescale', 3), ('events2-blank', 3))),
           'events2 categories')
     check(not {v[2] for v in m.EXTRA.values()} & set(m.extra_donors.EVENTS2_RULES), 'events2 rules only in the events2 table')
+
+    # exact table (13-11, extra_donors_exact.tsv, --exact): wins over events2 and over the JP files
+    def rx(rel, data):
+        q = os.path.join(BOX['relux'], *rel.split('/'))
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        with open(q, 'wb') as fh:
+            fh.write(data)
+        return q
+    tw = os.path.join(ROOT, 'lwf', 'drama', '77', '77_a.png')
+    os.makedirs(os.path.dirname(tw), exist_ok=True)
+    with open(tw, 'wb') as fh:
+        fh.write(png(10, 10))
+    put('1962/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+    put('1962/wait/wait_a.png', png(10, 10))
+    body('1962')
+    r, todo = m.plan_enemy(1962)
+    check(r['status'] == 'completo' and r['anims']['wait']['status'] == 'exact' and r['category'] == 2
+          and todo.get('lwf/character/enemy/1962/wait/wait_a.png') == tw and not r.get('events2')
+          and r.get('exact') == {'wait': {'exact-jp': 1, 'exact-twin': 1}},
+          'exact: the table wins over events2 and the JP file, category 2 (%s)' % r)
+    check(todo.get('lwf/character/enemy/1962/move/wait_a.png') == tw, 'exact: move from wait keeps the table file')
+    put('1960/wait/wait.lwf', lwf('wait_a.png'))
+    put('1960/wait/wait_a.png', b'W')
+    body('1960')
+    ql = rx(_E + '1960/atkSp/atkSp.lwf', real_lwf(**{'atkSp_a.png': (10, 10)}))
+    qa = rx(_E + '1960/atkSp/atkSp_a.png', png(20, 20))
+    r, todo = m.plan_enemy(1960)
+    check(r['status'] == 'completo' and r['anims'].get('atkSp', {}).get('status') == 'exact' and r['category'] == 1
+          and todo.get('lwf/character/enemy/1960/atkSp/atkSp.lwf') == ql
+          and todo.get('lwf/character/enemy/1960/atkSp/atkSp_a.png') == qa,
+          'exact: optional atkSp only in the table, relux container, stored size accepted (%s)' % r)
+    put('1961/wait/wait.lwf', real_lwf(**{'wait_a.png': (10, 10)}))
+    put('1961/wait/wait_a.png', png(10, 10))
+    body('1961')
+    r, todo = m.plan_enemy(1961)
+    check(r['status'] == 'incompleto' and r['anims']['wait']['status'] == 'incompleta' and not todo,
+          'exact: a texture without a row -> incomplete, no fallback (%s)' % r)
+    check(all(m.extra_donors.category(x) == c for x, c in (('exact-jp', 1), ('exact-twin', 2), ('exact-relux', 1),
+                                                             ('exact-lwf-relux', 1))), 'exact categories')
+    check(not {v[2] for v in list(m.EXTRA.values()) + list(m.EV2.values())} & set(m.extra_donors.EXACT_RULES),
+          'exact rules only in the exact table')
 
     # alleati ospiti (I-199, ally_families.json): wait + atk1_o bastano; move, knockback e dead copiati da wait.
     # Solo per le famiglie alleate: lo stesso nemico con un altro displayId resta incompleto

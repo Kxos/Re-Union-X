@@ -59,6 +59,12 @@ events2-cand, events2-rescale and events2-blank (3; rescaled and blank pieces on
 animation rules in report.json (`events2`, `events2_complete`). Whole standard dead where none exists: rule std-dead of
 extra_donors_whole.tsv (category 3).
 
+EXACT animations (13-11-2026; recon/tools/extra_donors_exact.tsv, `--exact ''` excludes it): the user-approved exact models
+rebuilt from the enemy graphics index donated by the ReLux Team. Same whole-animation rule as events2 and read BEFORE it (the
+exact version replaces earlier approved reconstructions of the same animation); rules exact-jp, exact-relux,
+exact-lwf-relux (category 1) and exact-twin (2), every file at its stored size (the record of that name, as the JP files);
+container relux outside the repo (`--src-root relux=<folder>`). Report: `exact` per family, `exact_complete`.
+
 Effetti di comparsa: lwf/character/enemy/show_effect_fla/show_effect<N>/ per gli showSwf originali
 (external\\thethiny\\enemy_dec.json) non serviti, stesse regole (completi o niente).
 
@@ -115,10 +121,13 @@ ap.add_argument('--dedup', default=None,
 ap.add_argument('--events2', default=None,
                 help="approved event models, whole animations with override priority (default "
                      "recon/tools/extra_donors_events2.tsv, events2_export.py; '' = none)")
+ap.add_argument('--exact', default=None,
+                help="user-approved EXACT animations, whole with override priority over every table, events2 included "
+                     "(default recon/tools/extra_donors_exact.tsv; '' = none)")
 ap.add_argument('--recolour', default=None,
                 help="texture ricolorate da un gemello (default recon/tools/jp_recoloured.tsv; '' = nessuna)")
 ap.add_argument('--src-root', action='append', default=[], metavar='CONTENITORE=CARTELLA',
-                help='radice di un contenitore di extra_donors.py (jp501, ww501, b2016, jp431, recolour); ripetibile')
+                help='radice di un contenitore di extra_donors.py (jp501, ww501, b2016, jp431, recolour, events2, relux); ripetibile')
 ap.add_argument('--b2016', default=private_tools.local_path('ref_work', 'bundle2016', 'files', 'lwf', 'character', 'enemy'))
 ap.add_argument('--index', action='append')
 ap.add_argument('--master', default=os.path.join(REPO, 'server', 'master_data'))
@@ -149,7 +158,7 @@ import extra_donors  # noqa: E402
 EXTRA = extra_donors.load(extra_donors.TABLE if a.extra is None else a.extra,
                           rules=set(extra_donors.RULES) - {'recolour', 'recolour-whole', 'dedup-override', 'dedup-rescale',
                                                            'dedup-wwrecord-override', 'std-dead'}
-                          - set(extra_donors.EVENTS2_RULES))
+                          - set(extra_donors.EVENTS2_RULES) - set(extra_donors.EXACT_RULES))
 # original copies found by content (deep_donors.py: rules content-anchor and bracket, category 2); extra_donors.tsv
 # wins on the same rows
 EXTRA = dict(extra_donors.load(extra_donors.DEEP_TABLE if a.deep is None else a.deep,
@@ -162,6 +171,9 @@ EXTRA = dict(extra_donors.load(extra_donors.WHOLE_TABLE if a.whole is None else 
 # whose LWF has a row is taken WHOLE from this table, before every other source (override priority: the table is the
 # exact recipe of the rendered model the user approved); a texture without a usable row leaves it incomplete
 EV2 = extra_donors.load(extra_donors.EVENTS2_TABLE if a.events2 is None else a.events2, rules=set(extra_donors.EVENTS2_RULES))
+# 13-11: the user-approved EXACT animations (extra_donors_exact.tsv, ReLux Team index): the same whole-animation rule, read
+# before EV2 (an animation in both comes from this table)
+EXACT = extra_donors.load(extra_donors.EXACT_TABLE if a.exact is None else a.exact, rules=set(extra_donors.EXACT_RULES))
 # original copies matched by texture-table order (dedup_match.py proposal, user-approved rows; dedup_export.py):
 # category 2, read last among the copies (never overrides a file or a row of the tables above), except the rows with
 # rule dedup-override (user's decision 23-10, 1636 wait only): those win over every other source for that exact path
@@ -373,6 +385,35 @@ def fill_tex(pre, anim, t, jp, jp_all, dims):
 
 
 EV2_USED = {}   # '<root_rel>/<anim>' -> {rule: rows} of the animations taken from the events2 table (report.json)
+EXACT_USED = {}  # the same for the exact table
+
+
+def plan_exact(pre, lw):
+    """Animation of the user-approved EXACT table (extra_donors_exact.tsv, 13-11) -> as plan_events2, status 'exact'; None
+    when the table has no row for its LWF. Whole from the table: the LWF row and one row per texture of its texture table,
+    every file at its stored size (the index record of that name); a missing row or file leaves the animation incomplete,
+    never another source mixed in."""
+    if (pre + lw) not in EXACT:
+        return None
+    lp = extra_donors.lookup(EXACT, pre + lw, ROOTS)
+    if not lp:
+        return 'incompleta', None, 'exact: LWF source missing (%s)' % EXACT[pre + lw][1], None, {}
+    dims = tex_dims(lp)
+    names = sorted(dims) if dims is not None else refs_of(lp)
+    todo, cat, used, bad = {pre + lw: lp}, extra_donors.category(EXACT[pre + lw][2]), {EXACT[pre + lw][2]: 1}, []
+    for t in names:
+        v = EXACT.get(pre + t)
+        p = extra_donors.lookup(EXACT, pre + t, ROOTS) if v else None
+        if not p:
+            bad.append(t)
+            continue
+        todo[pre + t] = p
+        used[v[2]] = used.get(v[2], 0) + 1
+        cat = max(cat, extra_donors.category(v[2]))
+    if bad:
+        return 'incompleta', None, 'exact: %d of %d textures without a usable row' % (len(bad), len(names)), None, used
+    return 'exact', todo, 'exact: approved exact model (%s)' % ', '.join(
+        '%d %s' % (n, k) for k, n in sorted(used.items())), cat, used
 
 
 def plan_events2(pre, lw):
@@ -416,6 +457,12 @@ def plan_anim(root_rel, anim, jp_all):
     jp_all: {anim: listing JP} dello stesso nemico (per le texture scartate come doppioni).
     categoria (regola dell'utente, extra_donors.py): 1 file diretti, 2 copie originali, 3 ricostruite, 4 ricolorate;
     la peggiore fra le texture."""
+    ex = plan_exact('%s/%s/%s/' % (ENEMY, root_rel, anim), anim + '.lwf')
+    if ex is not None:
+        st, files, note, cat, used = ex
+        if files:
+            EXACT_USED['%s/%s' % (root_rel, anim)] = used
+        return st, files, note, cat
     ev = plan_events2('%s/%s/%s/' % (ENEMY, root_rel, anim), anim + '.lwf')
     if ev is not None:
         st, files, note, cat, used = ev
@@ -522,6 +569,7 @@ def plan_enemy(d):
     anims = set(jp_all) | (set(f for f in os.listdir(bd) if os.path.isdir(os.path.join(bd, f))) if os.path.isdir(bd) else set())
     ev_pre = '%s/%s/' % (ENEMY, rel)
     anims |= {k[len(ev_pre):].split('/')[0] for k in EV2 if k.startswith(ev_pre)}   # animations of the events2 table
+    anims |= {k[len(ev_pre):].split('/')[0] for k in EXACT if k.startswith(ev_pre)}  # and of the exact table
     r = {'displayId': d, 'sources': [s for s, p in (('jp', jd), ('2016', bd)) if os.path.isdir(p)], 'anims': {}}
     todo = {}
     fatal = []
@@ -539,6 +587,8 @@ def plan_enemy(d):
             cat = max(cat, c)
             if st == 'events2':
                 r.setdefault('events2', {})[an] = EV2_USED.get('%s/%s' % (rel, an), {})
+            if st == 'exact':
+                r.setdefault('exact', {})[an] = EXACT_USED.get('%s/%s' % (rel, an), {})
         elif an in mandatory:
             fatal.append(an)
     # da wait: move per tutti, knockback e dead solo per gli alleati (stessi file: le texture tengono il nome wait_*,
@@ -753,6 +803,11 @@ def main():
            'events2_complete': [r['displayId'] for r in ok if r.get('events2')],
            'events2_incomplete': [r['displayId'] for r in bad if any(v.get('note', '').startswith('events2')
                                                                      for v in r['anims'].values())],
+           # user-approved exact animations of extra_donors_exact.tsv (13-11)
+           'exact_complete': [r['displayId'] for r in ok if r.get('exact')],
+           'exact_incomplete': [r['displayId'] for r in bad if any(v.get('note', '').startswith('exact')
+                                                                   for v in r['anims'].values())],
+           'exact_animations': sum(len(r.get('exact', {})) for r in ok),
            'shows': show_res, 'results': results}
     os.makedirs(a.out, exist_ok=True)
     json.dump(rep, open(os.path.join(a.out, 'report.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
