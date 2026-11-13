@@ -170,6 +170,15 @@ const tests = {
     for (const m of out.maps) for (const e of m.enemies) assert.ok(ids.has(e.enemyId), `enemy ${e.enemyId} of stage ${m.stageId}`);
     assert.strictEqual(out.maps.length, out.stage.length);
   },
+  // the wiki's «<br>» in an objective text becomes a space (the client prints the tag literally)
+  objective_text_br() {
+    const recs = records();
+    recs[0].quests[0].objectives[0] = objective(10, 'Use 5 or less Medals<br>(No borrowed Medals)', { type: 2, id: 0, num: 1 });
+    const out = build(recs);
+    const names = out.stage.flatMap((s) => s.submissionName);
+    assert.ok(names.includes('Use 5 or less Medals (No borrowed Medals)'), names.join(' | '));
+    assert.ok(!names.some((n) => /<br/i.test(n)));
+  },
   missing_enemy_skips_quest() {
     const recs = records();
     recs[0].quests[1] = quest(700002, 2, [501, 777]);

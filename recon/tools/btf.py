@@ -21,7 +21,7 @@ def info(d):
     if d[:4] != b'\x89BTF':
         return None
     cw, ch, ox, oy, w, h = struct.unpack_from('<6H', d, 0x16)
-    return dict(type=d[0x10], canvas=(cw, ch), offset=(ox, oy), size=(w, h))
+    return dict(type=d[0x10], canvas=(cw, ch), offset=(ox, oy), size=(w, h), half=d[0x11] == 4)
 
 
 def decode(d):
@@ -32,17 +32,22 @@ def decode(d):
         raise ValueError('non BTF')
     w, h = i['size']
     canvas = Image.new('RGBA', i['canvas'] if all(i['canvas']) else (max(w, 1), max(h, 1)))
+    # +0x11 == 4: pixels stored at half size (ceil(w/2) x ceil(h/2)), stretched by the client to the declared
+    # size (371 enemy textures of the ReLux EN pack, e.g. the 1638/1639 lantern glow; 13-11)
+    sw, sh = ((w + 1) // 2, (h + 1) // 2) if i['half'] else (w, h)
     if i['type'] == 8:
         raw = zlib.decompressobj().decompress(d[0x26:])
-        im = Image.frombytes('RGBA', (w, h), raw[:w * h * 4])
+        im = Image.frombytes('RGBA', (sw, sh), raw[:sw * sh * 4])
     elif i['type'] in (1, 9):
         n = struct.unpack_from('<H', d, 0x22)[0]
         raw = d[0x28:] if i['type'] == 1 else zlib.decompressobj().decompress(d[0x28:])
         pal = [tuple(raw[k * 4:k * 4 + 4]) for k in range(n)]
-        im = Image.new('RGBA', (w, h))
-        im.putdata([pal[b] if b < n else (0, 0, 0, 0) for b in raw[n * 4:n * 4 + w * h]])
+        im = Image.new('RGBA', (sw, sh))
+        im.putdata([pal[b] if b < n else (0, 0, 0, 0) for b in raw[n * 4:n * 4 + sw * sh]])
     else:
         return canvas
+    if i['half']:
+        im = Image.merge('RGBA', [c.resize((w, h), Image.BILINEAR) for c in im.split()])   # premultiplied
     canvas.paste(_unpremultiply(im), i['offset'])
     return canvas
 
@@ -72,7 +77,7 @@ def decode_premultiplied(d):
     copy original pixels unchanged (no un-/re-premultiply rounding). Other types fall back to decode()."""
     from PIL import Image
     i = info(d)
-    if i is None or i['type'] != 8:
+    if i is None or i['type'] != 8 or i['half']:
         return _premultiply(decode(d))
     w, h = i['size']
     canvas = Image.new('RGBA', i['canvas'] if all(i['canvas']) else (max(w, 1), max(h, 1)))

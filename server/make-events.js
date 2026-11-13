@@ -296,13 +296,16 @@ const mapKeyOf = (q) => {
 const enemyIdsOf = (q) => [...new Set([...(q.enemies || []).map((e) => e.id), ...(q.targets || []).map((t) => t.id),
   ...(q.objectives || []).filter((o) => o.idType === 1).map((o) => o.id)])];
 
+// Objective text as the client shows it: the wiki writes «<br>» before «(No borrowed Medals)», which the client prints
+// literally (user, 13-11: Critical Event objectives); the original rows put a space there
+const objText = (s) => (typeof s === 'string' ? s.replace(/\s*<br\s*\/?>\s*/gi, ' ') : s);
 // Objectives of the record, in the submission field layout of the stage table
 function questSubs(q, where) {
   const list = q.objectives || [];
   if (list.length > 3) throw new Error(`events: ${where}: ${list.length} objectives`);
   const each = (f) => list.map(f);
   const rw = (o) => o.reward || {};
-  return { validSubmission: list.length, submissionRequire: each((o) => o.code), submissionName: each((o) => o.text), submissionDataType: each((o) => o.dataType),
+  return { validSubmission: list.length, submissionRequire: each((o) => o.code), submissionName: each((o) => objText(o.text)), submissionDataType: each((o) => o.dataType),
     submissionIdType: each((o) => o.idType), submissionId: each((o) => o.id), submissionNum: each((o) => o.num), submissionRewardType: each((o) => rw(o).type || 0),
     submissionItemId: each((o) => rw(o).id || 0), submissionSkillType: each(() => 0), submissionSkillId: each(() => 0), submissionSkillLv: each(() => 0),
     submissionItemNum: each((o) => rw(o).num || 0) };
