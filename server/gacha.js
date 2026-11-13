@@ -408,6 +408,15 @@ const firstPrice = (b) => ((b.prices || []).length ? Math.max(0, b.prices[0]) : 
 // Stile delle pagine originali (reference\shop_odds_details\NOTE.md: notice 46003 da Wayback e screenshot di Draw
 // Odds): fondo #043654, testo bianco spaziato, titoli «■» azzurri #00d4ed, frasi chiave arancio/giallo, tabelle con
 // bordi bianchi e intestazione #365e76, sezioni gialle «6★Medals» con «↑PAGE TOP», nomi colorati per attributo.
+// Narrow screens (phones in portrait, <= 700 CSS px): the in-game landscape WebView (~830 px) never matches, so the approved
+// wide look is unchanged. Shared narrow design of the catalogue pages: single column, body text >= 15 px, tap targets
+// >= 44 px, buttons full width, tables kept inside the page width (cells wrap), Medal lists in 2 columns.
+const PAGE_NARROW_CSS = '@media (max-width:700px){body{padding:6px 12px 40px;overflow-wrap:break-word}h1{font-size:21px;line-height:1.35}'
+  + '.s{font-size:15px;line-height:1.6;padding:2px 12px}.b.now,.b.pinned{padding-left:10px}'
+  + '.btn{display:block;box-sizing:border-box;width:100%;min-height:44px;padding:9px 14px;text-align:center;line-height:1.3}'
+  + 'table{width:100%;font-size:15px;table-layout:auto}th,td{padding:4px 4px;overflow-wrap:break-word}th{overflow-wrap:normal}'
+  + '.ml{columns:2;column-gap:14px}.why{padding:6px 10px}.top a{display:inline-block;padding:8px 0}'
+  + '.pinmsg{font-size:19px}.back{padding:9px 26px 10px}}';
 // side: HTML accanto al titolo, a destra (pulsante «⚙ Filters» del Catalog)
 function page(title, body, cls = '', side = '') {
   return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -436,7 +445,7 @@ function page(title, body, cls = '', side = '') {
     + '.btn[data-on="0"]{border-color:#ffb0b0;background:linear-gradient(#ff5a5a,#d81e2e 55%,#9c1020)}' // «Remove from the Shop» rosso come OK, diverso dal «Keep» arancio (utente 26-10)
     + '.pinmsg{display:none;border:3px solid #5cd94a;background:#0d4a2a;border-radius:10px;padding:10px 14px;margin:10px 0;text-align:center;font:bold 22px/1.3 sans-serif;color:#fff;box-shadow:0 0 12px rgba(92,217,74,.5)}'
     + '.pinmsg small{display:block;font:15px/1.4 sans-serif;color:#e6f5ea;margin-top:5px}.pinmsg.off{border-color:#ffa500;background:#5a3a08;box-shadow:0 0 12px rgba(255,165,0,.5)}.pinmsg.err{border-color:#ff4a74;background:#5a1224;box-shadow:none}'
-    + '.top{text-align:right;font-size:15px}.box{border:2px solid #ffcd4a;padding:6px 10px;margin:8px 0}</style></head><body' + (cls ? ` class="${cls}"` : '') + '>'
+    + '.top{text-align:right;font-size:15px}.box{border:2px solid #ffcd4a;padding:6px 10px;margin:8px 0}' + PAGE_NARROW_CSS + '</style></head><body' + (cls ? ` class="${cls}"` : '') + '>'
     + `${side ? `<div class="hdr"><h1>${esc(title)}</h1>${side}</div>` : `<h1>${esc(title)}</h1>`}${body}</body></html>`;
 }
 
@@ -790,7 +799,25 @@ const CATALOG_CSS = 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-wi
   + '.o{border:1px solid #5d8aa6;border-radius:16px;padding:3px 12px;font:14px sans-serif;color:#d9e6ee;background:#083048;cursor:pointer}'
   + '.o.on{background:#00a6bb;border-color:#7beaf7;color:#fff;font-weight:bold}.o.st-now.on{background:#2e9e3e;border-color:#7be08a}'
   + '.o.st-unl.on{background:#1a6fa8;border-color:#62a7ff}.o.st-lock.on{background:#5a6470;border-color:#9aa4ae}'
-  + '.foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.ok{padding:6px 20px}.ok:disabled{opacity:.6;cursor:default}.reset{color:#b9cfdc;font-size:14px}';
+  + '.foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.ok{padding:6px 20px}.ok:disabled{opacity:.6;cursor:default}.reset{color:#b9cfdc;font-size:14px}'
+  // narrow screens (<= 700 px, see PAGE_NARROW_CSS): full-width Filters button under the title, year tabs in one row that
+  // scrolls sideways, filter options in one column, banner rows as stacked cards (picture, name, state, full-width button)
+  + '@media (max-width:700px){.hdr{flex-wrap:wrap;gap:4px 10px}.hdr h1{flex:1 1 auto}'
+  + '.hdr .fbtn{flex:1 1 100%;min-height:46px;font-size:17px;border-radius:12px;margin:2px 0 6px}.dot{font-size:15px}'
+  + '.gy{font-size:15px}.tabs{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;font-size:0;padding-bottom:2px}'
+  + '.tab{display:inline-block;vertical-align:bottom;min-width:92px;min-height:50px;margin-right:3px;padding:5px 9px;white-space:nowrap}'
+  + '.tab b{font-size:15px}.tab small{font-size:12px}.tab .c{font-size:14px}'
+  + '.sum{font-size:15px}.tag{font-size:15px;line-height:2}.tag a{width:28px;line-height:28px;margin-left:6px}.clear{display:inline-block;font-size:15px;padding:6px 2px}'
+  + '.cat .b{display:block;background:#06314c;border:1px solid #2f5d78;border-radius:10px;padding:8px 10px 12px;margin:0 0 12px}'
+  + '.cat .b.now{border-left:5px solid #2e9e3e}.cat .b.pinned{border-left:5px solid #b8860b}'
+  + '.cat .im{display:block;max-width:none}.cat .im img{width:100%;height:auto;max-width:none}.cat .info{margin-top:6px;line-height:1.45}'
+  + '.cat .nm{display:block;font-size:18px}.cat .n,.cat .pay{font-size:15px}.cat .s{font-size:15px;margin:6px 0 0}'
+  + '.pk{display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:8px;font-size:16px;padding:8px 12px}'
+  + '.cat .pinmsg{font-size:17px}.cat .pinmsg small{font-size:15px}'
+  + '.sheet{left:6px;right:6px;top:6px;max-height:calc(100% - 12px);padding:10px 12px 14px}.shd b{font-size:20px}.x{width:44px;height:44px;font-size:18px}'
+  + '.sheet h4{font-size:15px;margin:14px 0 6px}.hint{font-size:15px}.search{padding:2px 12px;min-height:44px}.search input{font-size:17px;padding:10px 6px}'
+  + '.opts{display:block}.o{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:0 0 6px;padding:8px 14px;border-radius:10px;font-size:16px;text-align:left}'
+  + '.foot{flex-direction:column-reverse;align-items:stretch;gap:2px;position:sticky;bottom:-14px;background:#0b3d5c;padding:8px 0 2px;margin-top:10px}.ok{min-height:48px;font-size:17px;border-radius:12px}.reset{display:block;text-align:center;font-size:15px;padding:12px 0}}';
 // Filtro tutto lato pagina (ES5, nessuno script esterno). cur = filtri applicati, dr = bozza del pannello (la X la
 // scarta, «Show N banners» la applica). Ricerca per medaglia: /web/gacha/search?q= (encodeURIComponent: un «+» crudo
 // diventerebbe uno spazio) con 300 ms di attesa dopo l'ultimo tasto e «Searching…» finche' non risponde; risultati in

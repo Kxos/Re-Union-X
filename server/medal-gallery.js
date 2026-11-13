@@ -266,7 +266,9 @@ const ENTRY_CSS = '.mgx{display:flex;align-items:center;gap:12px;margin:6px 0 12
   + '.mgx:active{background:#0b4466}.mgp{flex:0 0 auto;display:flex;align-items:flex-end;gap:4px}.mgp img{display:block;margin:0;max-width:none;border-radius:4px}'
   + '.mgp .ar{width:44px;height:66px;box-shadow:0 1px 4px rgba(0,0,0,.6)}.mgp .md{width:64px;height:64px}'
   + '.mgt{flex:1 1 auto;min-width:0;line-height:1.35}.mgt b{display:block;font-size:19px;color:#fff;letter-spacing:.5px}.mgt small{display:block;font-size:13.5px;color:#cfe4f0}'
-  + '.mgb{flex:0 0 auto;border:0;color:#fff;background:linear-gradient(#f08a3a,#d4541c);border-radius:18px;padding:5px 14px;font:bold 15px sans-serif;box-shadow:0 2px 0 #8a3510;white-space:nowrap}';
+  + '.mgb{flex:0 0 auto;border:0;color:#fff;background:linear-gradient(#f08a3a,#d4541c);border-radius:18px;padding:5px 14px;font:bold 15px sans-serif;box-shadow:0 2px 0 #8a3510;white-space:nowrap}'
+  // narrow screens (<= 700 px, phones in portrait; gacha.js PAGE_NARROW_CSS): pictures and text side by side, «Open» full width below
+  + '@media (max-width:700px){.mgx{flex-wrap:wrap;gap:10px}.mgt{flex:1 1 160px}.mgt small{font-size:15px}.mgb{flex:1 1 100%;box-sizing:border-box;min-height:44px;line-height:34px;text-align:center;font-size:17px;border-radius:12px}}';
 const ENTRY_HREF = '/web/medals/gallery?from=catalog';
 function entryHtml() {
   return `<a class="mgx" href="${ENTRY_HREF}"><span class="mgp"><img class="md" width="64" height="64" src="${medalImg(PREVIEW.thumbId)}" alt="">`
