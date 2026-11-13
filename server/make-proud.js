@@ -209,13 +209,25 @@ function proudEnemyId(rows, name, inMap = new Set()) {
   return ids.find((id) => inMap.has(id)) || ids[0] || 0;
 }
 
+// Wiki Proud objective naming an enemy the (shared story) map does not have: the wiki swapped names (Cannoned Camel for
+// Cannon Gun, Wizard for Wyvern, Armored Archer for Armored Knight, Large Armor for Armored Archer: I-271, checked on
+// videos of Proud Q401 2017 «Defeat the Cannon Gun within 1 turn» and Q311 2017-07-22 «Defeat the Wyvern within 1
+// turn»). Take the enemy of the story objective with the same requirement, else the first story enemy objective in the map.
+function storyEnemyFor(st, req, inMap) {
+  const objs = [];
+  for (let i = 0; i < (st.validSubmission || 0); i++) {
+    if (st.submissionIdType[i] === 1 && inMap.has(st.submissionId[i])) objs.push([st.submissionRequire[i], st.submissionId[i]]);
+  }
+  return ((objs.find(([r]) => r === req) || objs[0]) || [])[1] || 0;
+}
+
 // stageRows: tabella stage (storia kind 1 con id 1-979); proud: parseWiki(); sources: medal, keyblade, title, enemy,
 // stagePoi (nemici della mappa: «Defeat the X» col nemico che c'e' davvero), original (riga 1001010)
 function buildRows(stageRows, proud, sources = {}) {
   const { medals = [], keyblades = [], titles = [], enemies = [], skills = [], stagePoi = {}, original = null, codes = CODES } = sources;
   let own = null;
   const ownEnemyRows = () => own || (own = require('./make-event-enemies').withoutEventRows(enemies, sources.eventIds));
-  const report = { stopgapObjectives: [], missingRewards: [], unmappedConditions: [], uncodedConditions: [], missingStory: [],
+  const report = { stopgapObjectives: [], wikiEnemyFixed: [],missingRewards: [], unmappedConditions: [], uncodedConditions: [], missingStory: [],
     missingKeyblade: [], noCondition: [] };
   const story = new Map(stageRows.filter((r) => r.stageKind === 1 && r.stageId < 100000 && r.id >= FIRST && r.id <= LAST).map((r) => [r.id, r]));
   const baseKb = new Map(keyblades.filter((k) => !k.lv).map((k) => [k.name, k.keybladeId]));
@@ -261,6 +273,10 @@ function buildRows(stageRows, proud, sources = {}) {
     for (const [i, o] of q.objectives.slice(0, 3).entries()) {
       let c = proudObjective(o.text, ctx);
       if (!c) { report.stopgapObjectives.push([n, i + 1, o.text]); c = { name: clean(o.text), req: 10, dt: 1, it: 0, id: 0, n: 0 }; }
+      else if (c.it === 1 && c.id && inMap.size && !inMap.has(c.id)) {
+        const id = storyEnemyFor(st, c.req, inMap);
+        if (id) { report.wikiEnemyFixed.push([n, i + 1, c.id, id]); c = { ...c, id }; }
+      }
       let rw = objectiveReward(o, { medalId });
       if (!rw) { report.missingRewards.push([n, i + 1, o.reward]); rw = [0, 0, 0]; }
       subs.push([c, rw]);
@@ -314,7 +330,7 @@ function patch(masterDir, src) {
   fs.writeFileSync(file, JSON.stringify([...stages, ...rows]));
   const rep = rows.report;
   console.log(`proud: ${rows.length} missioni Proud (${original ? '1001010 originale' : '1001010 generata'}); `
-    + `${rep.stopgapObjectives.length} obiettivi tappabuchi, ${rep.missingRewards.length} premi non ricavati, `
+    + `${rep.stopgapObjectives.length} obiettivi tappabuchi, ${rep.wikiEnemyFixed.length} nemici della wiki assenti dalla mappa -> nemico della storia, ${rep.missingRewards.length} premi non ricavati, `
     + `${rep.unmappedConditions.length} condizioni non riconosciute, ${rep.uncodedConditions.length} senza codice, `
     + `${rep.missingKeyblade.length} keyblade non trovati, senza condizione: ${rep.noCondition.join(', ') || 'nessuna'}, ${rep.missingStory.length} senza riga di storia`);
   return rows.length;
