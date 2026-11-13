@@ -242,7 +242,7 @@ const seasonLines = () => SEASONS.map((x) => (SEASON_LABEL[x.key] || x.key) + ':
 // Ogni funzione che differisce dall'originale ha una notizia (docs/notes/home_profilo.md#notices-album)
 const DIFFERENCES_BODY = [
   '## Game and progress',
-  'This is a private restoration of KINGDOM HEARTS Union χ[Cross]. Your progress is saved only on this restoration server.',
+  'Re-Union X is a fan restoration of KINGDOM HEARTS Union χ[Cross] that works **completely offline**: the small server the game talks to runs on your own phone or computer, nothing goes online, and your progress is saved only there.',
   'The in-game date is set between 2016 and 2021 so that the original game keeps working. Missions reset at the real times shown in their countdowns.',
   'Completed missions that you did not collect before they end are sent to your Presents.',
   'The maximum LV is **999**, as in the original game from January 2021. The Lux needed for each level up to LV 304 is original; from LV 305 it is **reconstructed** from players’ videos of 2018-2021, because the original values are lost.',
@@ -285,7 +285,7 @@ const DIFFERENCES_BODY = [
 // rotation, the raid rules): always the FIRST row of the list whatever the dates (pinned), drawn as a gold row, its page
 // split into one card per topic. The long list of reconstructed details stays in «Differences in detail».
 const RULES_NOTICE = { date: '11/13', tag: 'READ FIRST', title: 'Differences from the original game', pinned: 1,
-  body: ['Re-Union X is a fan restoration: there are **no other players** and **nothing is sold**. Some rules of the original game had to change. Here they are in short; each topic has its own notice with every detail.',
+  body: ['Re-Union X is a fan restoration that works **completely offline**: there are **no other players** and **nothing is sold**. Some rules of the original game had to change. Here they are in short; each topic has its own notice with every detail.',
     '## 📅 Your Story is your calendar',
     'Each part of the Story matches a period of the original game (2016-2021).',
     'The **Shop**, **Raids**, **Events** and **Special Quests** show **one week** of that period at a time.',
