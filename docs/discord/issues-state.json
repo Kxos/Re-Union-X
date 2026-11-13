@@ -504,6 +504,13 @@
    "group": "OPEN",
    "hash": "00d493815759f9d6",
    "name": "I-270 · Album: a medal's detail shows its abilities under the picture instead of its description"
+  },
+  "I-271": {
+   "thread": "1570718340802945045",
+   "msg": "1570718340802945045",
+   "group": "IN PROGRESS",
+   "hash": "b81a0ed51fd51e59",
+   "name": "I-271 · «Defeat X» objectives on enemies the quest map does not have"
   }
  }
 }
