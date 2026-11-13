@@ -10,14 +10,16 @@ check(p.includes('About game data updates'), 'titolo base');
 check(!p.includes('Game data updated today'), 'non e il giorno dell aggiornamento');
 check(p.includes('Next update: in 2 days 17 hours'), 'venerdi 15:00 -> 2 giorni 17 ore');
 const pos = (s) => p.indexOf(`<span class="x">${s}</span>`);
-check(pos('Differences from the original game') >= 0 && pos('Differences from the original game') < pos('About game data updates')
-  && pos('About game data updates') < pos('Differences in detail') && pos('Differences in detail') < pos('Missions'),
-  'order: the pinned rules first, then data updates, the details, then the rest');
+check(pos('Differences from the original game') >= 0 && pos('Differences from the original game') < pos('Differences in detail')
+  && pos('Differences in detail') < pos('About game data updates') && pos('About game data updates') < pos('Missions'),
+  'order: the pinned rules, their details, then data updates and the rest');
 // the pinned rules notice: first row whatever the dates, gold row, one card per topic, short (user 13-11)
 check(p.indexOf('<a class="row pin" href="#n0"') >= 0, 'rules notice is row 0 with the gold style');
-{ const r = n.NOTICES.find((x) => x.pinned);
+{ const r = n.NOTICES.find((x) => x.pinned === 1);
   check(r && r.title === 'Differences from the original game', 'pinned notice is the rules one');
-  check(r && n.NOTICES.filter((x) => x.pinned).length === 1, 'only one pinned notice');
+  check(r && n.NOTICES.filter((x) => x.pinned === 1).length === 1, 'only one main pinned notice');
+  check(p.indexOf('<a class="row sub" href="#n1"') >= 0 && pos('Differences in detail') < pos('About game data updates'),
+    'Differences in detail always second, quieter row');
   check(r && r.body.filter((l) => l.startsWith('## ')).length >= 6, 'rules split into topics');
   check(r && r.body.every((l) => l.length <= 260), 'rules lines stay short');
   check(p.includes('<div class="card"><h3>'), 'topics drawn as cards'); }

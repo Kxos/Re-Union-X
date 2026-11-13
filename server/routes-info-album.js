@@ -279,7 +279,7 @@ const DIFFERENCES_BODY = [
 // The server's own rules in short (user 13-11: players did not understand the weekly/monthly refreshes, the banner
 // rotation, the raid rules): always the FIRST row of the list whatever the dates (pinned), drawn as a gold row, its page
 // split into one card per topic. The long list of reconstructed details stays in «Differences in detail».
-const RULES_NOTICE = { date: '11/13', tag: 'READ FIRST', title: 'Differences from the original game', pinned: true,
+const RULES_NOTICE = { date: '11/13', tag: 'READ FIRST', title: 'Differences from the original game', pinned: 1,
   body: ['Re-Union X is a fan restoration: there are **no other players** and **nothing is sold**. Some rules of the original game had to change. Here they are in short; each topic has its own notice with every detail.',
     '## 📅 Your Story is your calendar',
     'Each part of the Story matches a period of the original game (2016-2021).',
@@ -639,7 +639,8 @@ const NOTICES = [
       'Combo skills marked "& GA 0", "& GA 1" and "& GA 2" make the special attack cost 0, 1 or 2 gauges; when the skill is checked is our estimate, as no original value was found.',
       'Scrooge Medals from the **Skills to Thrill** deals and from the VIP! Skill quest come with the skill shown on their banner, at max level. Other new Scrooge Medals get a skill picked by rarity, because the original skill depended on where the Scrooge came from. Scrooges you already own keep their skill.'] },
   RULES_NOTICE,
-  { date: '10/16', tag: 'INFORMATION', title: 'Differences in detail',
+  // always right under the rules notice (pinned 2, user 13-11), drawn as a quieter row
+  { date: '10/16', tag: 'DETAILS', title: 'Differences in detail', pinned: 2,
     body: DIFFERENCES_BODY },
   { date: '10/16', tag: 'INFORMATION', title: 'Missions',
     body: ['Open the **scroll** under your avatar on the home screen to see your Beginner, Daily, Weekly and Limited Missions, then tap **Receive** to collect the rewards.',
@@ -705,7 +706,7 @@ const NOTICES = [
     body: ['Equipping a Supernova Medal lets you unleash its powerful Supernova once per quest: tap the button under the special attack gauge during your turn.',
       'To unlock or raise the Supernova of a Medal, use Evolve with five identical Dual Meow Wow Medals; the base Medal must be at its max level.'] },
 ];
-const TAG_COLOR = { 'READ FIRST': '#d4a017', EVENT: '#36c9d6', CAMPAIGN: '#8a3fc4', UPDATE: '#9fb85a', IMPORTANT: '#e0405a', INFORMATION: '#3f7fd0' };
+const TAG_COLOR = { 'READ FIRST': '#d4a017', DETAILS: '#7a6a3a', EVENT: '#36c9d6', CAMPAIGN: '#8a3fc4', UPDATE: '#9fb85a', IMPORTANT: '#e0405a', INFORMATION: '#3f7fd0' };
 
 const webBase = (sessionBase) => sessionBase.replace(/^https:/, 'http:');   // https: la WebView rifiuta il certificato
 const noticesUrl = (sessionBase) => `${webBase(sessionBase)}/web/notices`;
@@ -734,9 +735,10 @@ const WEB_FOOT = '<div class="foot">Re-Union X &middot; a fan restoration of Kin
 // fondo blu notte, testo spaziato, titoletti col quadratino, parole chiave in arancione, BACK blu in basso).
 // Testo delle notizie: «## Titolo» = sezione (le righe sotto diventano un elenco puntato), «**parola**» = evidenziata.
 // newest first, like the original list (dates are «MM/DD» of the same year); same date: the order of NOTICES
-// a pinned notice (RULES_NOTICE) always comes first, whatever its date
+// pinned notices come first whatever their date, by rank (1 = RULES_NOTICE, 2 = Differences in detail), then newest first
+const pinRank = (n) => n.pinned || Infinity;
 const byDate = (list) => list.map((n, i) => [n, i])
-  .sort(([a, i], [b, j]) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.date.localeCompare(a.date) || i - j).map(([n]) => n);
+  .sort(([a, i], [b, j]) => (pinRank(a) - pinRank(b) || 0) || b.date.localeCompare(a.date) || i - j).map(([n]) => n);
 
 // opts.web: static copy for the project site (docs/notices/, export-notices.js): opts.notices instead of the live list,
 // no timing beacon, a «Notices» frame like the in-game popup, centered, and #nN in the address opens notice N
@@ -757,14 +759,14 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     }
     return out + close();
   };
-  const rows = notices.map((n, i) => `<a class="row${n.pinned ? ' pin' : ''}" href="#n${i}" onclick="show(${i});return false">`
-    + `<span class="d">${n.pinned ? '&#9733;' : esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+  const rows = notices.map((n, i) => `<a class="row${n.pinned === 1 ? ' pin' : n.pinned ? ' sub' : ''}" href="#n${i}" onclick="show(${i});return false">`
+    + `<span class="d">${n.pinned === 1 ? '&#9733;' : n.pinned ? '&#8627;' : esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
     + `<span class="x">${esc(n.title)}</span><span class="a"></span></a>`).join('');
   // #<slug of the title> in the address opens that notice (e.g. /web/notices#raid-bosses from the raid notice pages, raid-pages.js
   // ruleBox); its BACK then goes back to the page that linked it
   const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const details = notices.map((n, i) => `<div class="det${n.pinned ? ' pin' : ''}" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
-    + `<span class="d">${n.pinned ? '' : esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body, n.pinned)}`
+  const details = notices.map((n, i) => `<div class="det${n.pinned === 1 ? ' pin' : ''}" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+    + `<span class="d">${n.pinned ? '' : esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body, n.pinned === 1)}`
     + '<div class="bar"><a class="back" href="#" onclick="show(-1);return false">BACK<span></span></a></div></div>').join('');
   return '<!doctype html><html><head><meta charset="utf-8">'
     + '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -787,6 +789,8 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + 'padding:16px 10px;box-shadow:0 0 12px rgba(255,200,60,.45),inset 0 1px 0 rgba(255,255,255,.35);font-weight:bold;text-shadow:0 1px 2px #3a2600}'
     + '.row.pin .d{color:#fff3b0;font-size:26px;text-align:center}.row.pin .x{font-size:20px;color:#fff8d8}'
     + '.row.pin .a{border-color:transparent transparent transparent #fff3b0}'
+    + '.row.sub{margin:-4px 6px 8px 34px;padding:8px 10px;border:1px solid #8a6a1c;border-top:0;border-radius:0 0 8px 8px;background:#1d4654;font-size:16px;color:#e8dcb0}'
+    + '.row.sub .d{color:#d4a017;font-size:20px;text-align:center}.row.sub .t{font-size:12px;padding:3px 0}'
     + '.det.pin h2{color:#ffd65a;border-bottom-color:#b8860b}.det.pin h2:before{background:#ffd65a}'
     + '.lead{background:#123f5e;border-left:4px solid #ffd65a;padding:10px 14px;border-radius:4px}'
     + '.card{background:#0f3d5c;border:1px solid #2a76a0;border-radius:10px;padding:2px 14px 6px;margin:0 0 14px;box-shadow:0 2px 6px rgba(0,0,0,.35)}'
