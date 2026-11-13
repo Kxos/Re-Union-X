@@ -10,17 +10,26 @@ check(p.includes('About game data updates'), 'titolo base');
 check(!p.includes('Game data updated today'), 'non e il giorno dell aggiornamento');
 check(p.includes('Next update: in 2 days 17 hours'), 'venerdi 15:00 -> 2 giorni 17 ore');
 const pos = (s) => p.indexOf(`<span class="x">${s}</span>`);
-check(pos('About game data updates') >= 0 && pos('About game data updates') < pos('Differences from the original game')
-  && pos('Differences from the original game') < pos('Missions'), 'ordine: dati aggiornati, differenze, poi il resto');
+check(pos('Differences from the original game') >= 0 && pos('Differences from the original game') < pos('About game data updates')
+  && pos('About game data updates') < pos('Differences in detail') && pos('Differences in detail') < pos('Missions'),
+  'order: the pinned rules first, then data updates, the details, then the rest');
+// the pinned rules notice: first row whatever the dates, gold row, one card per topic, short (user 13-11)
+check(p.indexOf('<a class="row pin" href="#n0"') >= 0, 'rules notice is row 0 with the gold style');
+{ const r = n.NOTICES.find((x) => x.pinned);
+  check(r && r.title === 'Differences from the original game', 'pinned notice is the rules one');
+  check(r && n.NOTICES.filter((x) => x.pinned).length === 1, 'only one pinned notice');
+  check(r && r.body.filter((l) => l.startsWith('## ')).length >= 6, 'rules split into topics');
+  check(r && r.body.every((l) => l.length <= 260), 'rules lines stay short');
+  check(p.includes('<div class="card"><h3>'), 'topics drawn as cards'); }
 // since 22-10 the list is newest first (byDate): Shop (10/20) comes before Missions (10/16)
 check(pos('Shop') < pos('Missions'), 'newest first: Shop (10/20) before Missions (10/16)');
 check(n.NOTICES.some((x) => x.title === 'Missions' && /joins the rotation only once your Story reaches the date/.test(x.body.join(' '))), 'Missions: campagne con medaglia legate alla storia');
 check(n.NOTICES.some((x) => x.title === 'Missions' && /are given once/.test(x.body.join(' ')) && /did not finish in time come back/.test(x.body.join(' '))), 'Missions: premi unici una volta sola');
-check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /draw rates are reconstructed/.test(x.body.join(' '))), 'probabilita nelle differenze');
+check(n.NOTICES.some((x) => x.title === 'Differences in detail' && /draw rates are reconstructed/.test(x.body.join(' '))), 'probabilita nelle differenze');
 // the Raid Catalog label «Not restored yet» (raids Part 2 Task 9) is quoted in the Raid Bosses notice: the only allowed hit
 check(p.includes('Not restored yet') && !p.replace(/Not restored yet/g, '').includes('restored'), 'niente elenchi di modifiche');
 check(p.includes('Differences from the original game') && p.includes('Limited Missions rotate'), 'notizia differenze');
-check(p.includes('<a class="row" href="#n0"') && p.includes('id="d0"'), 'struttura elenco');
+check(p.includes('<a class="row pin" href="#n0"') && p.includes('id="d0"'), 'struttura elenco');
 
 p = n.noticesPage(U(2026, 10, 19, 9));
 check(p.includes('Game data updated today'), 'lunedi 09:00 -> aggiornato oggi');
@@ -40,12 +49,12 @@ check(p.includes('Next update: in less than an hour'), 'meno di un ora');
   const t = ms ? ms.body.join(' ') : '';
   check(ms && /reconstructed/.test(t) && /163/.test(t) && /Skill EXP/.test(t) && /every Medal in your deck/.test(t), 'notizia Medal skills');
 }
-check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /no purchases/.test(x.body.join(' '))), 'acquisti nelle differenze');
-check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && ((t) => /## Raid Boards/.test(t) && /Sora & Moogle B/.test(t)
+check(n.NOTICES.some((x) => x.title === 'Differences in detail' && /no purchases/.test(x.body.join(' '))), 'acquisti nelle differenze');
+check(n.NOTICES.some((x) => x.title === 'Differences in detail' && ((t) => /## Raid Boards/.test(t) && /Sora & Moogle B/.test(t)
   && /6★ Fantasia Mickey A\*\* gives the \*\*5★/.test(t) && /Starlight Ears\*\* and \*\*Dazzling Disco\*\* Spirit parts \(Raid Board rewards\) each have one \*\*reconstructed\*\* texture/.test(t))(x.body.join('\n'))), 'Raid Boards nelle differenze');
-check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && /maximum LV is \*\*999\*\*/.test(x.body.join(' ')) && /from LV 305 it is \*\*reconstructed\*\*/.test(x.body.join(' '))), 'livelli Lux ricostruiti nelle differenze');
+check(n.NOTICES.some((x) => x.title === 'Differences in detail' && /maximum LV is \*\*999\*\*/.test(x.body.join(' ')) && /from LV 305 it is \*\*reconstructed\*\*/.test(x.body.join(' '))), 'livelli Lux ricostruiti nelle differenze');
 {
-  const diff = n.NOTICES.find((x) => x.title === 'Differences from the original game').body;
+  const diff = n.NOTICES.find((x) => x.title === 'Differences in detail').body;
   const shop = n.NOTICES.find((x) => x.title === 'Shop').body;
   for (const s of ['Shop draw rates are reconstructed where the original game did not publish them (Medal rarities, guarantees and Skill rates are original): Draw Odds and each banner\'s Details say so.',
     'Bonus items of a draw (Magic Mirror, Gems...) arrive in your Presents.',
@@ -103,7 +112,7 @@ check(n.NOTICES.some((x) => x.title === 'Differences from the original game' && 
   check(/from the first time you log in inside the window/.test(all) && /until the first login after it ends/.test(all), 'Shop: le stagionali appaiono dal primo login dentro la finestra');
   check(/steps aside until the season ends/.test(all), 'Shop: precedenza delle valute stagionali');
   check(/GAME YEAR/.test(all) && /Filters/.test(all) && /Find a Medal/.test(all) && /Paid with/.test(all) && /Show/.test(all), 'Shop: filtri del Catalog');
-  const diff = n.NOTICES.find((x) => x.title === 'Differences from the original game').body;
+  const diff = n.NOTICES.find((x) => x.title === 'Differences in detail').body;
   check(/unless they use different special tickets/.test(all) && /only the first one in the list above shows/.test(all), 'Shop: stagioni con valute diverse');
   check(/the seasonal banner wins, then the kept banner, then the weekly rotation/.test(all) && /for example Spooky Cookies, Moogle Points or Holiday Draw Tickets/.test(all), 'Shop: precedenza delle valute');
   check(diff.some((s) => /fixed dates of the real calendar/.test(s) && /most recent unlocked edition/.test(s)), 'differenze: stagionali');

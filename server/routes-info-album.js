@@ -276,6 +276,45 @@ const DIFFERENCES_BODY = [
   'Spirit Training slots that were bought in the original game open in other ways (**not original**): slot 2 ("Purchase Weekly Jewels") opens while you have the **VIP benefit** of the Weekly Missions, until it ends; slot 4 ("Purchase Jewel Box E") opens when you complete **all the monthly Limited Missions** (the month\'s Lux campaign), for the rest of that month and the whole next month, although its label says "Valid until the end of the month". Slot 3 keeps its original rule: 5 draws from 10-Medal Deals paid with Jewels (not Free Deals or Ticket Draws) open it for 3 days.',
 ];
 
+// The server's own rules in short (user 13-11: players did not understand the weekly/monthly refreshes, the banner
+// rotation, the raid rules): always the FIRST row of the list whatever the dates (pinned), drawn as a gold row, its page
+// split into one card per topic. The long list of reconstructed details stays in «Differences in detail».
+const RULES_NOTICE = { date: '11/13', tag: 'READ FIRST', title: 'Differences from the original game', pinned: true,
+  body: ['Re-Union X is a fan restoration: there are **no other players** and **nothing is sold**. Some rules of the original game had to change. Here they are in short; each topic has its own notice with every detail.',
+    '## 📅 Your Story is your calendar',
+    'Each part of the Story matches a period of the original game (2016-2021).',
+    'The **Shop**, **Raids**, **Events** and **Special Quests** show **one week** of that period at a time.',
+    'Every **Monday** they move on to the next week. After the last week of the period they start again from the first, so nothing is lost.',
+    'Clear more **Story Quests** to reach the next period and its new banners, raids and events.',
+    '**Seasonal banners** (New Year, Halloween, Holidays...) follow the **real calendar** instead.',
+    '## 🔄 Resets (UTC)',
+    '**Every day at 08:00**: Daily Missions, Login Bonus, the free draw of the day.',
+    '**Every Monday at 08:00**: Weekly Missions and the new week of the Shop, Raids, Events and Special Quests. The game downloads updated data: the first loading takes longer.',
+    '**On the 1st of each month at 08:00**: the monthly Lux campaign and a data download. Raid Boss levels go back to **LV 1** at the start of the 1st (00:00 Pacific time).',
+    '## 📌 Catalogs: keep one of each',
+    'Shop, Special, Raids and Events each have a **Catalog** as their first banner: tap **Details** to see everything of the original game.',
+    'From a Catalog you can **keep one** past banner, quest, raid or event: it stays available **every week**. Keeping another one replaces it.',
+    'Only things from a period your Story has already passed can be kept. **Leave and re-enter** the screen to see it.',
+    '## ⚔️ Raids',
+    'Raids are **solo** for now. A boss you do not defeat **keeps the damage** you dealt until you beat it or it escapes.',
+    '**Monday to Friday**: raids cost their original AP. **Saturday and Sunday** (Pacific time): **0 AP** and **Bonus Time all day** with **double Lux**.',
+    'Every raid is open **all day**. A boss gains **1 level** per defeat, up to LV 99. A kept raid has a level of its own, from LV 1.',
+    '## 🎉 Events',
+    'Events that lasted only hours are open for their **whole original day**.',
+    '**Event Coins never expire**. Event quests never bring a Raid Boss.',
+    '## 💎 Shop and Jewels',
+    'No purchases: **Jewels** come from quests, missions, the Login Bonus and Presents.',
+    'All **Free Deals** share **one free draw a day**.',
+    'Draw rates that the original game never published are **reconstructed**: each banner\'s Details say so.',
+    '## 👑 VIP',
+    'VIP is no longer a paid pass: complete **all the Weekly Missions** of a week to get it for the rest of that week and the whole next one.',
+    'For now it **cannot be earned**: the Weekly Missions include Union Cross, which is not back yet.',
+    '## 🎁 Nothing is lost',
+    'Campaign rewards start when your Story reaches them and **never end**.',
+    '**Event Coins** and **Draw Points** never expire. Mission rewards you forgot to collect go to your **Presents**.',
+    '## 🧩 Reconstructed parts',
+    'Where the original data or graphics are lost, they are rebuilt and marked **reconstructed** in the notices. The full list is in **Differences in detail**.'] };
+
 // Notizia fissa sugli aggiornamenti dei dati (lunedi' e giorno 1, 08:00 UTC): il conto alla rovescia
 // e' calcolato dal server sull'ora reale, perche' l'orologio del dispositivo e' fermo al 2021.
 // Per aggiungere una frase (es. download interrotti) basta una riga in updateBody().
@@ -444,7 +483,7 @@ const NOTICES = [
   { date: '11/06', tag: 'INFORMATION', title: 'Medal Gallery',
     body: ['The **Medal Gallery** is **not original**: it is an addition of this server, because the Sort/Filter of the Medal List cannot get new filters. Open it from the Shop: the **Banner Catalog** banner, **Details**, then the **Medal Gallery** box under the title.',
       '**BGM Medals** lists the Medals with their own music, which plays in the Medal\'s details and on the Home screen when the Medal is shared, with the name of the track. Tap a Medal and then **Play the music** to hear it in the gallery. The music of the game keeps playing underneath, because the gallery cannot pause it: to hear the track alone, lower **BGM** in **Other > Settings** and raise it again afterwards.Their Supernova versions play the music of their Medal (**not original**). Track names come from the community wiki; where the sound file matched to a Medal is not verified, the gallery says so.',
-      '**Full Art** lists the Medals with the **Art** button in their details, under their artwork; tap the artwork to see it larger. Medals marked **Reconstructed** show an artwork that their own picture is part of, although the original game data gave them none (see the Differences from the original game notice).',
+      '**Full Art** lists the Medals with the **Art** button in their details, under their artwork; tap the artwork to see it larger. Medals marked **Reconstructed** show an artwork that their own picture is part of, although the original game data gave them none (see the Differences in detail notice).',
       'Medals with practically the same picture (for example the SN, SN+ and SN++ versions of a Medal) are shown once, with the others on a **Variants** line.',
       'Each Medal shows its picture, its stars, its attribute and whether you own it; the **Filters** find Medals by name, owned or not owned and attribute.'] },
   // costo 999 delle medaglie di supporto (I-211, support-medal-cost.js, decisione dell'utente 26-10)
@@ -599,7 +638,8 @@ const NOTICES = [
       'After each mission, the Skill EXP of the battle goes to every Medal in your deck that has a skill. The original rule is not known, so this one is **reconstructed**.',
       'Combo skills marked "& GA 0", "& GA 1" and "& GA 2" make the special attack cost 0, 1 or 2 gauges; when the skill is checked is our estimate, as no original value was found.',
       'Scrooge Medals from the **Skills to Thrill** deals and from the VIP! Skill quest come with the skill shown on their banner, at max level. Other new Scrooge Medals get a skill picked by rarity, because the original skill depended on where the Scrooge came from. Scrooges you already own keep their skill.'] },
-  { date: '10/16', tag: 'INFORMATION', title: 'Differences from the original game',
+  RULES_NOTICE,
+  { date: '10/16', tag: 'INFORMATION', title: 'Differences in detail',
     body: DIFFERENCES_BODY },
   { date: '10/16', tag: 'INFORMATION', title: 'Missions',
     body: ['Open the **scroll** under your avatar on the home screen to see your Beginner, Daily, Weekly and Limited Missions, then tap **Receive** to collect the rewards.',
@@ -665,7 +705,7 @@ const NOTICES = [
     body: ['Equipping a Supernova Medal lets you unleash its powerful Supernova once per quest: tap the button under the special attack gauge during your turn.',
       'To unlock or raise the Supernova of a Medal, use Evolve with five identical Dual Meow Wow Medals; the base Medal must be at its max level.'] },
 ];
-const TAG_COLOR = { EVENT: '#36c9d6', CAMPAIGN: '#8a3fc4', UPDATE: '#9fb85a', IMPORTANT: '#e0405a', INFORMATION: '#3f7fd0' };
+const TAG_COLOR = { 'READ FIRST': '#d4a017', EVENT: '#36c9d6', CAMPAIGN: '#8a3fc4', UPDATE: '#9fb85a', IMPORTANT: '#e0405a', INFORMATION: '#3f7fd0' };
 
 const webBase = (sessionBase) => sessionBase.replace(/^https:/, 'http:');   // https: la WebView rifiuta il certificato
 const noticesUrl = (sessionBase) => `${webBase(sessionBase)}/web/notices`;
@@ -694,7 +734,9 @@ const WEB_FOOT = '<div class="foot">Re-Union X &middot; a fan restoration of Kin
 // fondo blu notte, testo spaziato, titoletti col quadratino, parole chiave in arancione, BACK blu in basso).
 // Testo delle notizie: «## Titolo» = sezione (le righe sotto diventano un elenco puntato), «**parola**» = evidenziata.
 // newest first, like the original list (dates are «MM/DD» of the same year); same date: the order of NOTICES
-const byDate = (list) => list.map((n, i) => [n, i]).sort(([a, i], [b, j]) => b.date.localeCompare(a.date) || i - j).map(([n]) => n);
+// a pinned notice (RULES_NOTICE) always comes first, whatever its date
+const byDate = (list) => list.map((n, i) => [n, i])
+  .sort(([a, i], [b, j]) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.date.localeCompare(a.date) || i - j).map(([n]) => n);
 
 // opts.web: static copy for the project site (docs/notices/, export-notices.js): opts.notices instead of the live list,
 // no timing beacon, a «Notices» frame like the in-game popup, centered, and #nN in the address opens notice N
@@ -702,25 +744,27 @@ function noticesPage(realMs = Date.now(), opts = {}) {
   const notices = byDate(opts.notices || [updateNotice(realMs), ...NOTICES]);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b class="k">$1</b>');
-  const bodyHtml = (body) => {
+  // cards: every «## » section in a box of its own (pinned notice), the lines before the first one as the lead
+  const bodyHtml = (body, cards = false) => {
     let out = '', list = false;
+    const close = () => (list ? '</ul>' + (cards ? '</div>' : '') : '');
     for (const line of body) {
       if (line.startsWith('## ')) {
-        if (list) out += '</ul>';
-        out += `<h3>${esc(line.slice(3))}</h3><ul>`;
+        out += close();
+        out += `${cards ? '<div class="card">' : ''}<h3>${esc(line.slice(3))}</h3><ul>`;
         list = true;
-      } else out += list ? `<li>${rich(line)}</li>` : `<p>${rich(line)}</p>`;
+      } else out += list ? `<li>${rich(line)}</li>` : `<p${cards ? ' class="lead"' : ''}>${rich(line)}</p>`;
     }
-    return out + (list ? '</ul>' : '');
+    return out + close();
   };
-  const rows = notices.map((n, i) => `<a class="row" href="#n${i}" onclick="show(${i});return false">`
-    + `<span class="d">${esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+  const rows = notices.map((n, i) => `<a class="row${n.pinned ? ' pin' : ''}" href="#n${i}" onclick="show(${i});return false">`
+    + `<span class="d">${n.pinned ? '&#9733;' : esc(n.date)}</span><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
     + `<span class="x">${esc(n.title)}</span><span class="a"></span></a>`).join('');
   // #<slug of the title> in the address opens that notice (e.g. /web/notices#raid-bosses from the raid notice pages, raid-pages.js
   // ruleBox); its BACK then goes back to the page that linked it
   const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const details = notices.map((n, i) => `<div class="det" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
-    + `<span class="d">${esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body)}`
+  const details = notices.map((n, i) => `<div class="det${n.pinned ? ' pin' : ''}" id="d${i}" data-s="${slug(n.title)}"><div class="meta"><span class="t" style="background:${TAG_COLOR[n.tag] || '#3f7fd0'}">${esc(n.tag)}</span>`
+    + `<span class="d">${n.pinned ? '' : esc(n.date)}</span></div><h2>${esc(n.title)}</h2>${bodyHtml(n.body, n.pinned)}`
     + '<div class="bar"><a class="back" href="#" onclick="show(-1);return false">BACK<span></span></a></div></div>').join('');
   return '<!doctype html><html><head><meta charset="utf-8">'
     + '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -731,13 +775,22 @@ function noticesPage(realMs = Date.now(), opts = {}) {
     + 'box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.18)}'
     + '.x{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.a{margin-left:10px;width:0;height:0;border-style:solid;border-width:8px 0 8px 13px;border-color:transparent transparent transparent #e8242c}'
     + '.det{display:none;min-height:100vh;box-sizing:border-box;background:#0d3350;padding:14px 22px 96px;line-height:1.85}'
-    + '.meta{display:flex;align-items:center;color:#9fc3d6;font-size:15px}.meta .t{width:auto;padding:3px 12px}'
+    + '.meta{display:flex;align-items:center;color:#9fc3d6;font-size:15px}.meta .t{width:auto;padding:3px 12px;color:#fff}'
     + 'h2{color:#5fe0f0;font-size:21px;margin:10px 0 14px;padding-bottom:8px;border-bottom:2px solid #1e5f80}'
     + 'h2:before,h3:before{content:"";display:inline-block;width:14px;height:14px;background:#2fd0e8;margin-right:10px;vertical-align:1px}'
     + 'h3{color:#5fe0f0;font-size:18px;margin:22px 0 6px}p{color:#eef4f7;margin:0 0 14px}'
     + 'ul{margin:0 0 6px;padding:0 0 0 4px;list-style:none}li{position:relative;padding:6px 0 6px 22px;border-bottom:1px solid #1a4a68;color:#eef4f7}'
     + 'li:before{content:"";position:absolute;left:4px;top:19px;width:7px;height:7px;border-radius:50%;background:#2fd0e8}'
     + '.k{color:#ffae3b;font-weight:bold}'
+    // pinned notice: gold row at the top of the list, its page as cards
+    + '.row.pin{background:linear-gradient(90deg,#6b4a0c,#b8860b 45%,#7a560e);border:2px solid #ffd65a;border-radius:8px;margin:6px 6px 8px;'
+    + 'padding:16px 10px;box-shadow:0 0 12px rgba(255,200,60,.45),inset 0 1px 0 rgba(255,255,255,.35);font-weight:bold;text-shadow:0 1px 2px #3a2600}'
+    + '.row.pin .d{color:#fff3b0;font-size:26px;text-align:center}.row.pin .x{font-size:20px;color:#fff8d8}'
+    + '.row.pin .a{border-color:transparent transparent transparent #fff3b0}'
+    + '.det.pin h2{color:#ffd65a;border-bottom-color:#b8860b}.det.pin h2:before{background:#ffd65a}'
+    + '.lead{background:#123f5e;border-left:4px solid #ffd65a;padding:10px 14px;border-radius:4px}'
+    + '.card{background:#0f3d5c;border:1px solid #2a76a0;border-radius:10px;padding:2px 14px 6px;margin:0 0 14px;box-shadow:0 2px 6px rgba(0,0,0,.35)}'
+    + '.card h3{margin:12px 0 4px}.card h3:before{display:none}.card li:last-child{border-bottom:0}'
     + '.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;background:linear-gradient(rgba(6,26,42,0),rgba(6,26,42,.92) 35%)}'
     + '.back{display:inline-block;padding:7px 26px 8px;border-radius:10px;border:2px solid #9fd4ff;color:#fff;text-decoration:none;'
     + 'font:italic bold 20px sans-serif;letter-spacing:1px;background:linear-gradient(#5aa8ff,#2556c8 55%,#1b3f9c);'
