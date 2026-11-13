@@ -780,7 +780,7 @@ const CATALOG_CSS = 'img.ic{display:inline-block;width:1.3em;height:1.3em;max-wi
   + '.tab.on{background:linear-gradient(#25c4d8,#0a8fa3);color:#e9fbff}.tabline{height:3px;background:#0a8fa3;margin-bottom:8px}'
   + '.sum{background:#06283e;border-radius:6px;padding:6px 10px;margin:0 0 6px;font-size:15px;line-height:1.7}.sum .n1{color:#ffa500;font-weight:bold}'
   + '.tag{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:14px;padding:0 4px 0 10px;margin:3px 4px 0 0;font-size:14px;line-height:1.6}'
-  + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px}'
+  + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px;color:#5fe0f0;font-weight:bold}'
   + '.cat .b{display:flex;gap:12px;align-items:center;padding-top:8px;padding-bottom:8px;border-bottom:1px solid #2f5d78}.cat .b.hide{display:none}'
   + '.cat .im{flex:0 0 46%;max-width:300px}.cat .im img{margin:0;border-radius:4px}.cat .info{flex:1;min-width:0;line-height:1.4}'
   + '.cat .nm{color:#fff;font-weight:bold;text-decoration:none}.cat .n,.cat .pay{font-size:14px}.pay{color:#ffcd4a}.cat .s{font-size:13px;margin:3px 0 0}'

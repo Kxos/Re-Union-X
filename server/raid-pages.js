@@ -161,7 +161,7 @@ if(cur.bd!=='all')h+=' '+tag('bd',LAB.bd[cur.bd]);
 if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;if(window.kxImgs)kxImgs();$('fdot').textContent=f?f:'';
-for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
+for(i=0;i<rows.length;i++){r=rows[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'block':'none';}
 var none=$('none');var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'raids'+(cur.bd==='done'?' with completed Raid Boards':cur.bd==='todo'?' with Raid Boards to complete':'');none.textContent=n?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=n?'none':'';mark();}
 // the section and year in the address (#jp.2017): the WebView's own back key comes back to them, not only the BACK button
 function mark(){var hh='#'+cur.sec+(yr!=='all'?'.'+yr:'');if(location.hash===hh||!history.replaceState)return;try{history.replaceState(null,'',hh);}catch(e){}}

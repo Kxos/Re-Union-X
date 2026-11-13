@@ -75,7 +75,7 @@ const CSS = 'body{margin:0;background:#043654;color:#fff;font:17px/1.6 sans-seri
   + '.tab.on{background:linear-gradient(#25c4d8,#0a8fa3);color:#e9fbff}.tabline{height:3px;background:#0a8fa3;margin-bottom:8px}'
   + '.sum{background:#06283e;border-radius:6px;padding:6px 10px;margin:0 0 6px;font-size:15px;line-height:1.7}.sum .n1{color:#ffa500;font-weight:bold}'
   + '.tag{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:14px;padding:0 4px 0 10px;margin:3px 4px 0 0;font-size:14px;line-height:1.6}'
-  + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px}'
+  + '.tag a{display:inline-block;background:#043654;border-radius:10px;width:20px;text-align:center;margin-left:5px;color:#fff;text-decoration:none}.clear{font-size:14px;margin-left:3px;color:#5fe0f0;font-weight:bold}'
   + '.hide{display:none!important}' // !important: .row (display:flex) comes later in the sheet and won (bench rev 221)
   // every card / campaign row: the same 5px side bar (colour by status, like the Shop's .b.now / .b.pinned) and the same
   // padding; banner at half size (640x140 -> 320x70), the text wraps under it on a narrow phone
@@ -383,7 +383,7 @@ if(cur.q)h+=' '+tag('q','Find: &quot;'+esc(cur.q)+'&quot;');
 h+=' <a href="#" class="clear" data-x="all">Clear all</a>';}
 $('sum').innerHTML=h;$('fdot').textContent=f?f:'';
 // why a row matched (only while searching), and a message when nothing does
-for(i=0;i<items.length;i++){r=items[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'':'none';}
+for(i=0;i<items.length;i++){r=items[i];if(!r.mt)continue;var w=cur.q&&r.el.className.indexOf(' hide')<0?hits(r,cur.q,3):[];r.mt.textContent=w.length?'Matches: '+w.join(', '):'';r.mt.style.display=w.length?'block':'none';}
 var none=$('none'),any=n+k;var wq=(cur.prog==='done'?'completed ':cur.prog==='todo'?'incomplete ':'')+'quests';none.textContent=any?'':(cur.q?'No '+wq+' match "'+cur.q+'"':'No '+wq+' match your filters');none.style.display=any?'none':'';}
 // status changes (pin / unpin): the member's status, then the row shows its best member (bar and status line)
 function paint(r){var b=-1,o=0,j,k;for(j=0;j<r.ids.length;j++){k=khuxRank(r.ss[j],r.mc[j]);if(b<0||k<b){b=k;o=j;}}
