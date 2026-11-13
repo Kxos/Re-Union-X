@@ -266,8 +266,18 @@ function buildRows(stageRows, sources) {
   };
 
   // obiettivi della wiki (al massimo 3) -> [[codici, premio]]; ctx col bersaglio dello stage JP (oltre525.json)
+  // a wiki «Defeat X» names an enemy: the id of the stage's own enemy with that name when there is one (tester report 13-11:
+  // the base id of the name, e.g. Blue Gummi Saucer 190211592, is not the variant the JP map places, 1909011592, and the
+  // client counts objectives by id), otherwise the base id as before
+  const enemyName = enemies ? new Map(enemies.map((e) => [e.enemyId, e.name])) : new Map();
+  const stageEnemyId = (stageId, name) => {
+    if (!stagePoi) return 0;
+    const ids = [...stageEnemyIds(stageId)].filter((id) => enemyName.get(id) === name).sort((a, b) => a - b);
+    return ids[0] || 0;
+  };
   const wikiSubs = (n, q, mis, raw) => {
     const ctx = { ...ctxBase, target: mis.stage.target_id || 0, targetName: mis.target || q.target || '',
+      enemyId: (name) => stageEnemyId(mis.stage.stageId, name) || ctxBase.enemyId(name),
       raw: { titles: [...raw.matchAll(/\|naotitle\d?=([^\n|]*)/g)].map((m) => m[1].trim()),
         img: [1, 2, 3].map((k) => rawField(raw, `naobjbonus${k}img`)) },
       header: headers ? headers[mis.stage.stageId] || null : null };
