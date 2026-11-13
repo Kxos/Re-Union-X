@@ -410,7 +410,7 @@ and `make-nova-rows.js`, which read the catalogue; `make-banners.js` reads catal
 ```powershell
 python recon/tools/make_banner_catalog.py                    # server/game_data/gacha_catalog.json
 python recon/tools/make_banner_images.py --mode palette      # server/game_data/gacha_img/<id>.png
-$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'; node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # boosted and Nova at the end
+$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='0'; node server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json   # boosted and Nova at the end
 Remove-Item Env:KHUX_MEDALS_ALL, Env:KHUX_WORLDTOUR          # do not leave them in the PowerShell session
 node server/make-banners.js                                  # drawMedalType: strip, validComment, warrant
 .\tools\ldplayer\session\relogin.ps1 -Tag x -Revision <BASE+1>   # today BASE 123 -> 124, also in the 4 session scripts
@@ -420,8 +420,8 @@ Only if the client's LWFs or images change: `build-resources.ps1 -Version <N+1>`
 [HANDOFF](../../HANDOFF.md#restarting)), then `update-resources.ps1 -Revision <BASE>`.
 
 Variables of `make-game-tables.js` (read in the script, lines 148-215 and 616-690): `KHUX_MEDALS_ALL=1` (without it: 522
-normal medals instead of 2,107, 3,233 rows with the boosted ones; with them the boosted and Nova rows disappear); `KHUX_WORLDTOUR=1` (rows 991001-991008 of the world
-tours: without it, `stage.json` loses them, because the script redoes it every time from `stage_base.json`); `KHUX_STORY_MAX`
+normal medals instead of 2,107, 3,233 rows with the boosted ones; with them the boosted and Nova rows disappear); `KHUX_WORLDTOUR=0` (since 13 Nov 2026 the
+master in use has no world tours: with `=1` the rows 991001-991008 come back after Quest 979, bench tests only); `KHUX_STORY_MAX`
 (default 525, the one in use: thethiny's rows; quests 526-979 are added by `make-story-oltre.js` in the same run). `KHUX_TOURS_V2=1` must **not** be set to rebuild the master in use: it adds 57
 992xxx rows of the v2 tours (`stage.json` from 535 to 592 rows), which are set aside, only for tests of the original components
 (user's decision, journal fino-al-2026-10-16): the command with `KHUX_TOURS_V2` in

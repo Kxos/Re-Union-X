@@ -2680,6 +2680,8 @@ function respondStageClear(res, req) {
     weeklyLux(lux);
   }
   const cleared = Array.isArray(req?.clearMissionIds) ? [...req.clearMissionIds] : [];
+  // objective counters of the client (the request log cuts the body at 400 characters): «<require>_<index>» -> value
+  if (req?.conditions) console.log(`[stage] ${stageId} clear: missions ${JSON.stringify(cleared)} conditions ${JSON.stringify(req.conditions)}`);
   (stage?.submissionRequire || []).forEach((kind, i) => {
     if (kind === 29 && lux >= (stage.submissionNum?.[i] ?? Infinity) && !cleared.includes(i + 1)) cleared.push(i + 1);
   });

@@ -322,7 +322,7 @@ ISSUES I-072. Tests and images in `D:\Progetto_Restauro_KH_UX\reference\world_li
 | 991007 | Castle of Dreams | 2 | Castle: Ballroom |
 | 991008 | Enchanted Dominion | 17 | Tower Room |
 
-- Master: `KHUX_WORLDTOUR=1` in `make-game-tables.js` adds the rows 991001-991008 (copies of
+- **Removed from the master in use on 13 Nov 2026** (user: only the original quests; the tours showed after Quest 979): build with `KHUX_WORLDTOUR=0`. Bench only: `KHUX_WORLDTOUR=1` in `make-game-tables.js` adds the rows 991001-991008 (copies of
   1050 like the zoo ones, `id` 9101-9108, name «Tour <mondo>», world/thumbnail/music from the first quest
   of the world, AP 0). They are started like the zoo ones: `server/save/smoke.json` `{"stageId": 991001}` -> the Story
   list shows only that quest; `{"stageIds": [991001, ..., 991008]}` shows all the tours
@@ -540,7 +540,7 @@ that one. Objectives are counted by the client per `submissionId` (each objectiv
 the target enemy within 2 turns» are 7 «Complete within 2 turns» (same reward, in the Notices). 1.1.3 objectives of 542-544,
 546, 548-552, 555 (enemy outside the JP stage) replaced with those of the wiki (`make-story-oltre.js`, ruling of the
 controller). Master redone with
-`KHUX_MEDALS_ALL=1 KHUX_WORLDTOUR=1 KHUX_STAGE_POI_EXTRA=<stage_gen\orig_stages\stage_poi_orig.json>;<stage_gen\orig_stages_oltre\stage_poi_oltre.json> node server/make-game-tables.js <wiki\medals.json>`
+`KHUX_MEDALS_ALL=1 KHUX_WORLDTOUR=0 KHUX_STAGE_POI_EXTRA=<stage_gen\orig_stages\stage_poi_orig.json>;<stage_gen\orig_stages_oltre\stage_poi_oltre.json> node server/make-game-tables.js <wiki\medals.json>`
 (+454 stages, +4 world, +312 enemy, +96 reward; -37 boosted rows left over from an old catalog, no references) and
 `stage_poi_oltre.json` merged into `server/game_data/stage_poi.json` (457 stages, 1041 in all).
 

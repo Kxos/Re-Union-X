@@ -19,7 +19,7 @@ The plan below is applied. Tests without the client:
   Quest 34 no guilt; with Quest 34 guilt 9200 and Burst +1; Mirror x2 +200; Chip x10 / Dale / Cid
   10 x3 -> STR +1000, DEF +150, cost -20; guilt 10000 -> Burst +5; Mickey & Brooms 2 -> 3 dots).
 
-The master must be regenerated (`$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'; node
+The master must be regenerated (`$env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='0'; node
 server\make-game-tables.js D:\Progetto_Restauro_KH_UX\wiki\medals.json`) and the revision raised.
 Differences from the previous master (tried on a copy): `medal` +300948, +300913, 1,517
 `minCost` (6★/7★), 90085 evolvable; `burst` 1,677 rows with `maxEnhanceCount` and powers per

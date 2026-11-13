@@ -26,14 +26,15 @@ if (!src) {
   console.error('uso: node server/make-game-tables.js <valori medaglie.json>');
   process.exit(1);
 }
-// The master in use is built with KHUX_MEDALS_ALL=1 and KHUX_WORLDTOUR=1 (docs/notes/shop.md, «Variables of
+// The master in use is built with KHUX_MEDALS_ALL=1 and KHUX_WORLDTOUR=0 (docs/notes/shop.md, «Variables of
 // make-game-tables.js»). Without them the run writes a 522-medal master and then stops half way in make-special
 // (the weekly VIP rewards name medals that only the full set has), leaving master_data half rebuilt (2 Nov).
-// So both must be stated: '1' for the master in use, '0' only for a deliberate reduced build.
+// So both must be stated. KHUX_MEDALS_ALL: '1' for the master in use. KHUX_WORLDTOUR: '0' since 13 Nov 2026 (user: only
+// the original quests in the list, the test tours 991001-991008 after Quest 979 are gone); '1' only for a bench test.
 const unset = ['KHUX_MEDALS_ALL', 'KHUX_WORLDTOUR'].filter((k) => !['0', '1'].includes(process.env[k]));
 if (unset.length) {
   console.error(`make-game-tables: set ${unset.join(' and ')} first (nothing written). Master in use:\n` +
-    `  $env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='1'; node server\\make-game-tables.js ${src}\n` +
+    `  $env:KHUX_MEDALS_ALL='1'; $env:KHUX_WORLDTOUR='0'; node server\\make-game-tables.js ${src}\n` +
     `(KHUX_TOURS_V2 stays unset for the master in use; '0' = a deliberate reduced build)`);
   process.exit(1);
 }
