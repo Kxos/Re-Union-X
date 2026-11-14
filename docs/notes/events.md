@@ -1143,3 +1143,41 @@ mechanism is the one benched on Vexen XII and Larxene XI).
   Metal Giant sparks claims removed; I-250 enemies back).
 - Lessons: a map generator change needs a bench walk (guarded exits, zero arena polygon); a renamed/reused donor row needs its
   own id range (2140000000 + donor id); never rerun `build_event_enemies.py` (add rows with `add_run_row.py`).
+
+## Boosters: client behaviour (Events Part 6, Task 1, 14 November 2026)
+
+Study of the 4.3.1 client (private notes, nothing of the client in the repo) and a bench test with three hand-made test rows of
+the `emblem` table, served for one session only (the test rows and the temporary server change were not committed). **The client
+applies the Booster bonus by itself: the server only serves the `emblem` rows and the owned ids in `emblemIds`.**
+
+- **Row.** 16 fields, all required (a missing one drops the row). `category` 1 = keyblade Booster, 2 = Medal Booster.
+  `endTime` uses the usual `YYYY-MM-DD HH:MM:SS` form. An owned id without its row, or a reward of type 34 without its row, is
+  read without a check: every served id needs its row.
+- **Medal Booster** (`category` 2). `source` 0 = every Medal, else one of the Medal's `source` codes (the Booster groups of the
+  Medal table). `attribute` 0 = all, 3 / 4 / 5 = Power / Speed / Magic, 6 / 7 = Upright / Reversed. `upperParam` in hundredths
+  of a percent (+25% = 2500). It raises the **special attack**: the Medal Details page shows the cyan plate «+N%» (sum of the
+  matching Boosters). It does not change a normal attack.
+- **Keyblade Booster** (`category` 1). `keybladeCategory` = the keyblade family (`keyblade.category`, Lady Luck 301), `slot1..5`
+  the slots it covers, `attribute` 2 = all-attribute match, `upperParam` in ten-thousandths of the slot multiplier (+2.00 = 20000).
+  It is added to the slot multiplier, shown on the Equipment screen, and raises every attack of that slot.
+- **Boosters list** (Profile, «Boosters»): one cell per owned id (icon, name, description, NEW, «Expires N days» countdown from
+  `endTime`). The client never removes an expired Booster nor its bonus: **the server expires them** by leaving their ids out of
+  `emblemIds`. The client merges the lists it receives without duplicates: send each id once (copies of a Booster stack only as
+  different ids, as in the original data).
+- **Responses carrying `emblemIds`:** `PUT /emblem/list` (at login and when the list opens), stage clear, sphere update, present
+  receive, mission receive, Moogle Shop buy, advertisement, PvP start.
+
+Bench (save `boost0`, master revision 319, test rows: «P Booster +25%» Medal / Power, «Booster Upright +10%» Medal / Upright,
+«Lady Luck Booster +2.00» keyblade / Lady Luck all-attribute match slots 1-5):
+
+| Check | Result | Frame |
+|---|---|---|
+| Boosters list | 3 cells, NEW, «Expires 13 days»; icon a placeholder (the `Emblem_*` pictures are not in the WW resources: Task 6) | `t6s_dialog` |
+| Power Upright Medal (SN+ Illustrated Cloud) | plate «+35%» (25 + 10: different Boosters add up) | `t6s_plate_p` |
+| Speed Upright Medal (SN+ Illustrated Riku) | plate «+10%» | `t6s_plate_su` |
+| Speed Reversed Medal (SP Xion) | no plate | `t6s_plate_s` |
+| Lady Luck +60 slots | ×6.300 / 6.400 / 7.000 / 7.500 / 7.800 with, ×4.300 / 4.400 / 5.000 / 5.500 / 5.800 without (+2.00 each; Treasure Trove unchanged) | `t6s_kb_on`, `t6s_kb_off` |
+| Same normal attack, slot 1, Training Grounds | 320,9xx with, 218,158 without (x1.47 = 6.3 / 4.3); second hit about 87 thousand in both | `t6s_dmg_on`, `t6s_dmg_off` |
+
+Still to check in the build task: a special attack with a Medal Booster (damage), the type 34 reward in an objective and on a
+board cell, whether reopening the list drops a Booster expired meanwhile, and the «7★» Boosters (no rarity field: held).
