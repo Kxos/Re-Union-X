@@ -1067,11 +1067,19 @@ per line. Now:
   strip with icon and date, gold section headings, game tables);
 - the tables of the original notices are back in every notice page (Shop, Raid, Event): `server/notice-tables.js` puts each
   table back where its cells are in the text (one line `MARK + JSON`, drawn by `noticeBlocks`), after the player rankings are
-  scrubbed, so no ranking can come back. Tables: private `reference
-otice_tables
-otice_tables.json`, made by
-  `tmp
-otice_tablesuild.py` from the notice pages saved by the ReLux Team (2,301 tables of 1,483 notices); the notice
+  scrubbed, so no ranking can come back. Tables: private `reference\notice_tables\notice_tables.json`, made by
+  `tmp\notice_tables\build.py` from the notice pages saved by the ReLux Team (2,301 tables of 1,483 notices); the notice
   builders (`make-shop-notices.js`, `make-raid-notices.js`, `make-event-notices.js`) apply them. Placed today: 635 tables in the
   Shop notices, 289 in the Raid notices, 223 in the Event notices; not placed: tables whose cells are not in the text
   (rankings, results added by later updates). Test `server/test-notice-tables.js`.
+
+Same day, later (user: «CLOSE» lines and loose numbers such as «1 - 7» in the notices):
+- the match ignores spaces: the notice texts and the saved pages space the same cells differently (`[ Maximum STR :  30050 ]`
+  / `[Maximum STR: 30050]`), so 19 more tables are placed (Shop 646, Raid 290, Event 231); the Gauge and Tier of those Medal
+  tables showed as loose numbers;
+- the Medal table of a notice with no saved page (73736, SN++ - MoM Kairi B) is rebuilt from its lines in the original layout
+  (`notice-tables.js medalTables`: header Medal / Special Attack / Gauge / Tier / Damage*, name over two rows, Supernova across
+  three columns); no loose number is left in any notice;
+- `▼ Show Tier 9 Medals ▼` … `▲ CLOSE ▲` (the web page's show/hide buttons) is a closed section to tap open, as on the
+  original page (`noticeBlocks`, like the raid notices' `▽ … ▽ / △CLOSE△`); `▲ Return to TOP` (a link to the top of the web
+  page) is dropped.

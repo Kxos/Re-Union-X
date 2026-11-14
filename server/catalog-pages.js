@@ -186,7 +186,11 @@ const RANGE = '\\d{1,2}:\\d\\d(\\s*[ap]\\.?m\\.?)?\\s*(-|–|~|to)\\s*\\d{1,2}:\
 const PT_LINE = /^(.*\S)\s*\(PT\)$/, UTC_LINE = /^(.*\S)\s*\(UTC\)$/, HOURS = new RegExp(`^${RANGE}(\\s*→\\s*${RANGE})?$`, 'i');
 // «Name x N» (one item: not «A x 1, B x 1»)
 const REWARD = /^[・•]?\s*((?:(?![xX×]\s*\d).)+?)(?:\s+[xX]|\s*×)\s*(\d{1,3}(?:,\d{3})+|\d+)$/;
-const LIST = /^(?:[・•]|[●◆](?=\s*\d))\s*/, NOTE = /^[*＊※]/, OPEN = /^▽\s*(.*?)\s*▽$/, CLOSE = /^△\s*CLOSE\s*△$/i;
+const LIST = /^(?:[・•]|[●◆](?=\s*\d))\s*/, NOTE = /^[*＊※]/, OPEN = /^▽\s*(.*?)\s*▽$/, CLOSE = /^[△▲]\s*CLOSE\s*[△▲]$/i;
+// the Shop notices fold with filled triangles: «▼ Show Tier 9 Medals ▼» … «▲ CLOSE ▲» (closed on the original page; 14-11, user:
+// the CLOSE lines showed as text). A «▼ … ▼» line is a fold only when a CLOSE follows before the next one.
+const SHOW = /^▼\s*(?:Show\s+)?(.*?)\s*▼$/;
+const foldEnd = (lines, i) => { for (let j = i + 1; j < lines.length; j++) { if (CLOSE.test(lines[j])) return j; if (SHOW.test(lines[j]) || OPEN.test(lines[j])) return -1; } return -1; };
 // the lines of one section -> html (every line escaped; the markers are layout and are dropped, * notes keep theirs)
 // a table of the original notice (notice-tables.js line): header cells, spans and line breaks as on the original page
 function noticeTable(t) {
@@ -206,8 +210,12 @@ function noticeBlocks(lines) {
       while (j < lines.length && !CLOSE.test(lines[j])) j++;
       h += `<details class="fold"><summary>${esc(m[1])}</summary>${noticeBlocks(lines.slice(i + 1, j))}</details>`;
       i = j;
-    } else if (CLOSE.test(l)) {
-      // a stray close marker: layout only
+    } else if ((m = SHOW.exec(l)) && foldEnd(lines, i) > 0) {
+      const j = foldEnd(lines, i);
+      h += `<details class="fold"><summary>${esc(m[1])}</summary>${noticeBlocks(lines.slice(i + 1, j))}</details>`;
+      i = j;
+    } else if (CLOSE.test(l) || /^▲\s*Return to TOP$/i.test(l)) {
+      // a stray close marker, a link back to the top of the web page: layout only
     } else if (l === OMIT) {
       h += `<p class="om">${esc(l)}</p>`;
     } else if (/^[■●◆](?!\s*\d)/.test(l)) {

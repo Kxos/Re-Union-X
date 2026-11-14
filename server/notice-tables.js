@@ -27,24 +27,30 @@ function load(file = FILE) {
 // the cell lines of a table, in reading order (empty cells give none)
 const cellLines = (table) => table.flatMap((row) => row.flatMap((c) => (c.t || []).map(norm).filter(Boolean)));
 
-// body: [lines]; tables: [table] -> {body, placed, missed}. Tables are placed in order, each after the previous one. A line may
-// hold several cells separated by tabs (some pages put a row on one line): the match runs on the tab-split cells and must start
-// and end on whole lines.
+// body: [lines]; tables: [table] -> {body, placed, missed}. Tables are placed in order, each after the previous one. The match
+// runs on the text without its spaces (the notice texts and the saved pages space the same cells differently: «[ Maximum STR :
+// 30050 ]» / «[Maximum STR: 30050]», a row on one line with tabs on some pages) and must start and end on whole lines.
+const key = (x) => norm(x).replace(/\s+/g, '');
 function applyTables(body, tables) {
   let out = (body || []).slice();
   let placed = 0, missed = 0, fromLine = 0;
   for (const t of tables || []) {
-    const seq = cellLines(t);
-    if (seq.length < 2) { missed++; continue; }
-    const tok = [];
-    out.forEach((l, li) => { if (li < fromLine || isTable(l)) return; const parts = String(l).split(/\t+/).map(norm).filter(Boolean);
-      parts.forEach((x, k) => tok.push({ x, li, first: k === 0, last: k === parts.length - 1 })); });
+    const cells = cellLines(t);
+    if (cells.length < 2) { missed++; continue; }
+    const want = cells.map(key).join('');
+    let text = '';
+    const startAt = new Map(), endAt = new Map();
+    out.forEach((l, li) => {
+      if (li < fromLine) return;
+      if (isTable(l)) { text += '\u0000'; return; } // a table already placed: a match never runs across it
+      const k = key(l);
+      if (!k) return;
+      if (!startAt.has(text.length)) startAt.set(text.length, li);
+      text += k; endAt.set(text.length, li);
+    });
     let hit = null;
-    for (let i = 0; i + seq.length <= tok.length && !hit; i++) {
-      if (!tok[i].first) continue;
-      let k = 0;
-      while (k < seq.length && tok[i + k].x === seq[k]) k++;
-      if (k === seq.length && tok[i + k - 1].last) hit = [tok[i].li, tok[i + k - 1].li];
+    for (let p = text.indexOf(want); p >= 0 && !hit; p = text.indexOf(want, p + 1)) {
+      if (startAt.has(p) && endAt.has(p + want.length)) hit = [startAt.get(p), endAt.get(p + want.length)];
     }
     if (!hit) { missed++; continue; }
     out.splice(hit[0], hit[1] - hit[0] + 1, MARK + JSON.stringify(t));
@@ -53,12 +59,49 @@ function applyTables(body, tables) {
   return { body: out, placed, missed };
 }
 
-// the tables of one notice id, applied (the builders' entry point)
+// The Medal table of the Shop notices when its saved page is missing (14-11, user: Gauge and Tier showed as loose numbers): the
+// header «Medal / Special Attack / Gauge / Tier / Damage*», then per Medal its name lines, the Special Attack lines, the Gauge,
+// the Tier, the «×» Damage, and optionally «Supernova» + its lines + its «×» Damage. Laid out as the original pages draw it
+// (name over two rows, Supernova across three columns). Anything off this shape leaves the lines unchanged.
+const HEAD = ['Medal', 'Special Attack', 'Gauge', 'Tier', 'Damage*'];
+const NUM = /^\d{1,2}$/, DMG = /^[×x]\s*\d/;
+function medalTables(body) {
+  const out = body.slice();
+  let placed = 0;
+  for (let i = 0; i + HEAD.length <= out.length; i++) {
+    if (!HEAD.every((h, k) => norm(out[i + k]) === h)) continue;
+    const rows = [HEAD.map((h) => ({ t: [h], h: 1 }))];
+    let j = i + HEAD.length;
+    for (;;) {
+      // name lines (up to the «[Target…» line), special attack lines, gauge, tier, damage
+      let a = j; while (a < out.length && !/^\[Target/i.test(norm(out[a])) && a - j < 3) a++;
+      let g = a; while (g < out.length && !NUM.test(norm(out[g])) && g - a < 4) g++;
+      if (a === j || g === a || !NUM.test(norm(out[g])) || !NUM.test(norm(out[g + 1] || '')) || !DMG.test(norm(out[g + 2] || ''))) break;
+      const lines = (x, y) => out.slice(x, y).map(norm);
+      const r = [{ t: lines(j, a) }, { t: lines(a, g) }, { t: [norm(out[g])] }, { t: [norm(out[g + 1])] }, { t: [norm(out[g + 2])] }];
+      j = g + 3;
+      let sn = null;
+      if (norm(out[j]) === 'Supernova') {
+        let e = j + 1; while (e < out.length && !DMG.test(norm(out[e])) && e - j < 4) e++;
+        if (e < out.length && DMG.test(norm(out[e]))) { sn = [{ t: lines(j, e), cs: 3 }, { t: [norm(out[e])] }]; j = e + 1; }
+      }
+      if (sn) { r[0].rs = 2; rows.push(r, sn); } else rows.push(r);
+    }
+    if (rows.length < 2) continue;
+    out.splice(i, j - i, MARK + JSON.stringify(rows));
+    placed++;
+  }
+  return { body: out, placed };
+}
+
+// the tables of one notice id, applied (the builders' entry point): the saved page's tables, then the Medal tables still as lines
 function withTables(id, body, file) {
   const t = load(file)[String(id)];
-  return t ? applyTables(body, t) : { body, placed: 0, missed: 0 };
+  const r = t ? applyTables(body, t) : { body, placed: 0, missed: 0 };
+  const m = medalTables(r.body);
+  return { body: m.body, placed: r.placed + m.placed, missed: r.missed };
 }
 
 const tableOf = (line) => { try { return JSON.parse(line.slice(MARK.length)); } catch { return null; } };
 
-module.exports = { MARK, FILE, load, applyTables, withTables, isTable, tableOf, cellLines, norm };
+module.exports = { MARK, FILE, load, applyTables, medalTables, withTables, isTable, tableOf, cellLines, norm };

@@ -19,6 +19,23 @@ const tests = {
     const r = nt.applyTables(['Rarity\t\tMedal', 'SUPER RARE\tSP Roxas', 'RARE\t\t\tCinderella'], [T]);
     assert.strictEqual(r.placed, 1); assert.strictEqual(r.body.length, 1);
   },
+  // the same cells spaced differently by the notice text and the saved page (14-11, user: Gauge/Tier left as loose numbers)
+  spacing_differences_match() {
+    const t = [[cell('Medal', 1), cell('Gauge', 1), cell('Tier', 1)], [{ t: ['SN - Terra (7★)', '[Maximum STR: 30050]'] }, cell('1'), cell('9')]];
+    const r = nt.applyTables(['Medal', 'Gauge', 'Tier', 'SN - Terra   (7★)', '[ Maximum STR :  30050 ]', '1', '9', 'After'], [t]);
+    assert.strictEqual(r.placed, 1); assert.deepStrictEqual(r.body.slice(1), ['After']);
+  },
+  // a Medal table with no saved page is rebuilt from its lines (name over two rows, Supernova across three columns)
+  medal_table_without_page() {
+    const body = ['Intro', 'Medal', 'Special Attack', 'Gauge', 'Tier', 'Damage*', 'SN++ - Kairi (7★)', '[Maximum STR:53023 ]',
+      '[Target: All] 2 turns: Medal STR +7000.', '3', '10', '× 89.04', 'Supernova', '[Target: All] 3 turns: SP ATK B +320%.',
+      'Triggers before slot 1 is activated when defending in PVP.', '× 250.00', '* Damage multiplier note.'];
+    const r = nt.medalTables(body);
+    assert.strictEqual(r.placed, 1); assert.deepStrictEqual([r.body[0], r.body[2]], ['Intro', '* Damage multiplier note.']);
+    const t = nt.tableOf(r.body[1]);
+    assert.strictEqual(t.length, 3); assert.strictEqual(t[1][0].rs, 2); assert.deepStrictEqual(t[1][2].t, ['3']); assert.strictEqual(t[2][0].cs, 3);
+    assert.deepStrictEqual(nt.medalTables(['Medal', 'Special Attack', 'Gauge', 'Tier', 'Damage*', 'text']).body.length, 6);
+  },
   // cells not all in the text (a ranking the scrub removed, a later update): nothing changes
   missing_cells_leave_the_text() {
     const body = ['Rarity', 'Medal', 'SUPER RARE', 'SP Roxas'];
