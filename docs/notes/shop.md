@@ -1058,3 +1058,20 @@ has an **«Original notice»** part, built the same way as the raid notices ([ra
 - **To serve**: `node server/make-shop-notices.js` (already run 06-11 on this machine), then restart the server (new
   routes in `server.js`). No master change. Bench: Details of B0009, B0392, B0002 and an INCOMPLETE row; «Read the
   original notice ›» and BACK, from the Catalog and from a Shop plate.
+
+## Original notices: game card and original tables (14 November 2026)
+
+User 14-11: the original notices in the Details pages looked unlike the rest of the game, and their tables arrived as one cell
+per line. Now:
+- the Shop notice page uses the «Original notice» card of the Event and Raid Catalogs (`catalog-pages.js noticeCard`: header
+  strip with icon and date, gold section headings, game tables);
+- the tables of the original notices are back in every notice page (Shop, Raid, Event): `server/notice-tables.js` puts each
+  table back where its cells are in the text (one line `MARK + JSON`, drawn by `noticeBlocks`), after the player rankings are
+  scrubbed, so no ranking can come back. Tables: private `reference
+otice_tables
+otice_tables.json`, made by
+  `tmp
+otice_tablesuild.py` from the notice pages saved by the ReLux Team (2,301 tables of 1,483 notices); the notice
+  builders (`make-shop-notices.js`, `make-raid-notices.js`, `make-event-notices.js`) apply them. Placed today: 635 tables in the
+  Shop notices, 289 in the Raid notices, 223 in the Event notices; not placed: tables whose cells are not in the text
+  (rankings, results added by later updates). Test `server/test-notice-tables.js`.

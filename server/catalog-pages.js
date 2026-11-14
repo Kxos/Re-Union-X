@@ -5,6 +5,7 @@
 'use strict';
 const { esc, niceDay, icon, NARROW_CSS } = require('./special-pages');
 const { scrub: scrubNotice, OMIT_LINE: OMIT } = require('./make-raid-notices');
+const noticeTables = require('./notice-tables');
 
 const PAGE_HEAD = (title, css) => '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
   + `<title>${esc(title)}</title><style>${css}${NARROW_CSS}</style></head>`; // NARROW_CSS last: the phone-portrait layout (special-pages.js)
@@ -136,7 +137,7 @@ const ONC_CSS = '.onc{border:1px solid #2f6f93;border-radius:10px;background:#06
   + '.onc .ns tr:last-child>:first-child{border-bottom-left-radius:7px}.onc .ns tr:last-child>:last-child{border-bottom-right-radius:7px}'
   + '.onc .ns .rw td.q{color:#ffcd4a;font-weight:bold}.onc .ns .rw th:last-child{width:28%}.onc .ns .rw td.q{width:auto}'
   + '.onc details.fold{background:#0a3a58;border-color:#2f6f93;padding:2px 12px}.onc details.fold>summary{font-weight:bold}';
-const NOTICE_CSS = RULE_CSS + '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
+const NOTICE_CSS = RULE_CSS + '.ntw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0 14px}.ntw table.ntb{margin:0;min-width:100%}.ntb th,.ntb td{vertical-align:middle}.ntb th{white-space:normal;text-align:center}' + '.dt{margin:2px 0 10px}.chip{display:inline-block;background:#0d5f86;border:1px solid #39a7cf;border-radius:12px;padding:0 10px;margin:0 6px 4px 0;font-size:13px;line-height:1.7;color:#fff}'
   + '.chip.d{background:#06283e;border-color:#ffcd4a;color:#ffcd4a}'
   + '.ns{border-left:5px solid #5d8aa6;background:#06283e;border-radius:0 8px 8px 0;padding:6px 12px 8px;margin:10px 0;font-size:16px;line-height:1.55;overflow-wrap:break-word}'
   + '.ns.raid{border-left-color:#ffcd4a}.ns h2{margin:4px 0 4px}.ns.raid h2{color:#ffcd4a}.ns h3{font-size:16px;margin:12px 0 2px}.ns h4{color:#00d4ed;font-size:15px;margin:10px 0 2px}'
@@ -187,12 +188,20 @@ const PT_LINE = /^(.*\S)\s*\(PT\)$/, UTC_LINE = /^(.*\S)\s*\(UTC\)$/, HOURS = ne
 const REWARD = /^[・•]?\s*((?:(?![xX×]\s*\d).)+?)(?:\s+[xX]|\s*×)\s*(\d{1,3}(?:,\d{3})+|\d+)$/;
 const LIST = /^(?:[・•]|[●◆](?=\s*\d))\s*/, NOTE = /^[*＊※]/, OPEN = /^▽\s*(.*?)\s*▽$/, CLOSE = /^△\s*CLOSE\s*△$/i;
 // the lines of one section -> html (every line escaped; the markers are layout and are dropped, * notes keep theirs)
+// a table of the original notice (notice-tables.js line): header cells, spans and line breaks as on the original page
+function noticeTable(t) {
+  const cell = (c) => { const tag = c.h ? 'th' : 'td'; return `<${tag}${c.cs > 1 ? ` colspan="${Number(c.cs)}"` : ''}${c.rs > 1 ? ` rowspan="${Number(c.rs)}"` : ''}>${(c.t || []).map(esc).join('<br>')}</${tag}>`; };
+  return `<div class="ntw"><table class="ntb">${t.map((r) => `<tr>${r.map(cell).join('')}</tr>`).join('')}</table></div>`;
+}
 function noticeBlocks(lines) {
   let h = '';
   for (let i = 0; i < lines.length; i++) {
     const l = lines[i];
     let m;
-    if ((m = OPEN.exec(l))) {
+    if (noticeTables.isTable(l)) {
+      const t = noticeTables.tableOf(l);
+      if (t) h += noticeTable(t);
+    } else if ((m = OPEN.exec(l))) {
       let j = i + 1;
       while (j < lines.length && !CLOSE.test(lines[j])) j++;
       h += `<details class="fold"><summary>${esc(m[1])}</summary>${noticeBlocks(lines.slice(i + 1, j))}</details>`;

@@ -25,6 +25,8 @@
 //
 //   node server/make-raid-notices.js [--report <file.tsv>]     (after it: make-raid / make-game-tables, then a master revision)
 'use strict';
+// tables of the original notices put back after the rankings are scrubbed (notice-tables.js, 14-11)
+const tables = require('./notice-tables');
 
 const fs = require('fs');
 const path = require('path');
@@ -114,7 +116,7 @@ function build({ census, noticeText }) {
   const notice = (id) => {
     if (!parsed.has(id)) {
       const n = noticeText[id] === undefined ? null : parseNotice(noticeText[id]);
-      if (n) { const s = scrub(n.body); n.body = s.body; if (s.removed) scrubbed.add(id); }
+      if (n) { const s = scrub(n.body); n.body = tables.withTables(id, s.body).body; if (s.removed) scrubbed.add(id); }
       parsed.set(id, n);
     }
     return parsed.get(id);

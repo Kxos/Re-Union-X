@@ -12,6 +12,8 @@
 //
 //   node server/make-event-notices.js      (after make-events.js; no master revision needed)
 'use strict';
+// tables of the original notices put back after the rankings are scrubbed (notice-tables.js, 14-11)
+const tables = require('./notice-tables');
 
 const fs = require('fs');
 const path = require('path');
@@ -29,7 +31,7 @@ function build({ entries, noticeText }) {
     for (const id of e.noticeIds || []) {
       if (!(id in notices)) {
         const n = noticeText[id] === undefined ? null : parseNotice(noticeText[id]);
-        if (n) { const s = scrub(n.body); n.body = s.body; if (s.removed) scrubbed.push(id); }
+        if (n) { const s = scrub(n.body); n.body = tables.withTables(id, s.body).body; if (s.removed) scrubbed.push(id); }
         notices[id] = n;
       }
       if (notices[id]) ids.push(id); else missing.push({ censusId: e.censusId, noticeId: id });

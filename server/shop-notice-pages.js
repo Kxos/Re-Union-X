@@ -10,11 +10,13 @@
 
 const { page, esc } = require('./gacha');
 const raidPages = require('./raid-pages');
+// the «Original notice» card of the Event and Raid Catalogs (game style: header strip, gold headings, game tables), 14-11
+const catalogPages = require('./catalog-pages');
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const day = (iso) => (/^\d{4}-\d\d-\d\d/.test(String(iso || '')) ? `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}, ${iso.slice(0, 4)}` : '');
 const CSS = '<style>' + raidPages.NOTICE_CSS + 'ul.ow{list-style:none;padding:0;margin:4px 0 10px}ul.ow li{padding:6px 0;border-bottom:1px solid #2f5d78}ul.ow a{color:#9fd4ff}'
-  + '.why.off{border-color:#e8641c}.why .nw{color:#ffcd4a;font-weight:bold}.nt{font-weight:bold}h1+.dt{margin-top:0}</style>';
+  + '.onc>h2.och{display:flex;align-items:center;flex-wrap:wrap}.onc>h2.och .ic{flex:none}.why.off{border-color:#e8641c}.why .nw{color:#ffcd4a;font-weight:bold}.nt{font-weight:bold}h1+.dt{margin-top:0}</style>';
 const CONFIDENCE = { low: 'This notice is related to the banner but may not describe this exact deal: no notice naming it was found.' };
 const qs = (n, fromCatalog) => [n ? `n=${n}` : '', fromCatalog ? 'from=catalog' : ''].filter(Boolean).join('&');
 const noticeHref = (b, n, fromCatalog) => { const q = qs(n, fromCatalog); return `/web/gacha/notice/${b.drawMedalTypeId}${q ? `?${q}` : ''}`; };
@@ -57,9 +59,9 @@ function noticePage(banner, doc, noticeId, ctx = {}) {
     const others = ids.filter((x) => x !== id && doc.notices[x]).map((x) => `<li><a href="${noticeHref(banner, x === hit.noticeId ? null : x, ctx.fromCatalog)}">${esc(doc.notices[x].title)} (${esc(day(doc.notices[x].date))}) ›</a></li>`).join('');
     const back = `<div class="bar"><a class="back" href="/web/gacha/detail/${banner.drawMedalTypeId}${ctx.fromCatalog ? '?from=catalog' : ''}">BACK<span></span></a></div>`;
     return page(n.title, `${CSS}<img src="/web/gacha/img/${banner.drawMedalTypeId}.png" alt="">`
-      + `<p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}<span class="chip d">${esc(day(n.date))}${n.time ? ` · ${esc(n.time)} UTC` : ''}</span></p>`
+      + `<p class="dt">${n.category ? `<span class="chip">${esc(n.category)}</span>` : ''}${n.time ? `<span class="chip d">${esc(n.time)} UTC</span>` : ''}</p>`
       + (CONFIDENCE[hit.confidence] && id === hit.noticeId ? `<div class="why off">${esc(CONFIDENCE[hit.confidence])}</div>` : '')
-      + body
+      + catalogPages.noticeCard('medal', n.date, body)
       + '<div class="srv"><h2>On this server</h2><p>The text above is the original notice, unchanged (page boilerplate left out). '
       + `It may announce other deals or events of the same days too. This banner: «${esc(banner.name)}». This server follows your Story instead of the calendar: `
       + 'the dates in the notice are those of the original game, and the banner opens when your Story reaches them. Draw rates and Medals that this server '
