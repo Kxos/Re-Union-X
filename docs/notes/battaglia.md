@@ -651,5 +651,9 @@ For the April 2019 pilot 65 enemy ids (54 names) were missing from our master.
   653 animations of 205 families; 547 built (the 106 of the 20 families no master row uses wait for a row). Hit effects: the
   same rules in `originals.tsv` section 53. Pack order: the generated pack (originals.tsv) comes after enemy_gen and the
   merge is last-wins, so an originals.tsv path would win; no enemy_gen path is also written by originals.tsv (checked).
-- **Deviations**: 56 event attack rows name a hit effect we do not serve (27 effects, all in the JP data): they keep the
-  template's effect, as every attack row does (`enemy-attack-fix.js`). `move` is a copy of `wait` where the JP data has none.
+- **Hit effects of the served attacks, section 54 (14-11, user report: the Sephiroth slot-5 counter of «Defeat Sephiroth!»
+  showed only its pose)**: section 53 covered the effects cited by thethiny's rows and the I-250 rows; the event attack rows
+  (private event_enemies.json) and the original moves cited 152 more (1,001 attack rows kept the template effect). All 152
+  built exactly with the 53 rules (152 JP LWFs, 1,673 JP textures, 2,659 twins, 1 ReLux-only record of eff_2092), user-approved
+  on the rendered review `tmp\enemy_exacteview54.html` (`scripts\section54.py`, `page54.py`, jobs `jobs54.json`). Now no served
+  attack cites an unserved effect. Revision 318, resources 120 (incremental). `move` is a copy of `wait` where the JP data has none.

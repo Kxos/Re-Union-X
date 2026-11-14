@@ -698,7 +698,7 @@ const NOTICES = [
       'Medals without a Special Attack Bonus level (below 6★) give 15 points (**reconstructed**: the original value is not documented).'] },
   { date: '10/20', tag: 'IMPORTANT', title: 'Enemy attacks',
     body: ['Enemies use their **original attacks** again: power, targets, boosts and healing as in the original game. Enemies such as Poison Apple, Neoshadow, Creeper Plant or Ice Plant can **poison**, put to **sleep** or **paralyze** you again (Esuna of your Spirit cures it). Before, every enemy used one of three simple attacks, so some battles may now be harder.',
-      'The hit effect of some enemy attacks is not in the game data: those attacks show a standard hit effect (**reconstructed**).'] },
+      'Every enemy attack shows its **original hit effect**. Many of these effects were incomplete in the surviving game files: since November 14, 2026 they are built exactly from the original pictures, named by the index of the enemy graphics the **ReLux Team** shared with their permission (before, those attacks showed a standard hit effect).'] },
   { date: '10/20', tag: 'INFORMATION', title: 'Special Attack animations',
     body: ['Special Attacks use their **original animations** again, and the number of hits you see is always the one written on the Medal ("Deals 13 hits" = 13 hits). The total damage does not change.',
       'For about 700 Special Attacks the original animation is known: it is used as it was. Some later Medals (for example "Ars Solum EX") use the animation of the original attack with the same name.',
