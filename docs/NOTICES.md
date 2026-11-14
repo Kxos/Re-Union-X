@@ -201,13 +201,13 @@ The **Event Quests** are back: the limited-time events of the original game, wit
 
 Events follow your Story like the Shop: each week shows the events whose original dates fall in the matching week of the original game. An event that ran for three weeks is listed in each of those weeks.
 
-Today **343 events** are served, with **2777 of their 3570 quests** (439 events are in the data so far, from November 2016 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
+Today **349 events** are served, with **2843 of their 3570 quests** (439 events are in the data so far, from November 2016 to February 2021). The others follow in later updates: the **Event Catalog** lists every event and, for each quest not served yet, the reason (a map or an enemy whose original files are still missing). A quest whose enemy is missing is not served: no other enemy stands in for it.
 
 ### Challenge events
 
-The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **219 events** of 2018 to 2021 are served, with **1705 of their 2340 quests** (by year: 2018: 46 events, 533 quests; 2019: 47 events, 413 quests; 2020: 111 events, 695 quests; 2021: 15 events, 64 quests). The Event Catalog lists the others with the reason they are not here yet.
+The **challenge and battle events** are back (Defeat events, Big Bonus Challenges, daily quests, time trials, **Keyblade Challenges** and **quizzes**): today **225 events** of 2018 to 2021 are served, with **1771 of their 2340 quests** (by year: 2018: 46 events, 533 quests; 2019: 49 events, 426 quests; 2020: 113 events, 726 quests; 2021: 17 events, 86 quests). The Event Catalog lists the others with the reason they are not here yet.
 
-**Surprise events** and **Time Missions** are back: today 52 Surprise events and 6 Time Missions events (**169 quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.
+**Surprise events** and **Time Missions** are back: today 52 Surprise events and 6 Time Missions events (**172 quests**). As in the original game, each Surprise event is open for **one whole day** (12:00 a.m. to 11:59 p.m. Pacific time, on the real weekday of that day in your Story week) and is gone the next day. In the original game each target of a Time Missions event appeared only at four set hours a day; here every quest of a Time Missions event is open for its **whole original day** (**not original**), and the event lists all its quests on each of its days.
 
 **Community goals.** Some events of 2020 gave every player who cleared **all their objectives** a bonus whose size depended on how many players around the world did it, announced afterwards in a result notice. Here, when you clear every objective of such an event (a kept event of the Event Catalog too), you get **once** the bonus the original event reached, in your **Presents**: the count was of all the players of the time and is not redone for you alone (**not original**). The original results: Summon Rush! (732 players: 740 Jewels), Defeat Savage Vanguard (7,237 players: Power Gem x30, Speed Gem x30, Magic Gem x30), Defeat Sephiroth! (8,529 players: Power Gem x30, Speed Gem x30, Magic Gem x30), Dragon Maleficent Battle Event (7,701 players: Draw Ticket x10, Power Gem x30, Speed Gem x30, Magic Gem x30), Mean Maiden Battle Event (its «Defeat the Mean Maiden» quests; 3,931 players: Power Gem x30, Speed Gem x30, Magic Gem x30), Defeat Flame Core Battle Event (4,370 players: Power Gem x30, Speed Gem x30, Magic Gem x30) and Heartless Battle Event (4,026 players: Power Gem x30, Speed Gem x30, Magic Gem x30).
 
@@ -224,6 +224,18 @@ The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **M
 Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.
 
 The quest lists of the events whose Event Boards are not served yet show no **Event Boards** button (**not original**): see **Event coins and boards** below.
+
+### Org XIII events
+
+The **Organization XIII events** are back: today **31 events** are served, with **439 of their 492 quests** (the monthly XIII Events of 2016-17: 213 of 242 quests; the NEW XIII Events of 2018-19: 171 of 186 quests; Challenge Organization XIII of 2020: 30 of 38 quests; The Keyblade War part 3: 25 of 26 quests).
+
+The monthly **XIII Events** of November 2016 to December 2017 have **no surviving quest record**: their quests are **rebuilt** from the community wiki and from the Japanese tables of their 13 stages (levels, enemies, objectives and rewards). 177 of them are played on the **original Japanese map** of the same quest, found by its content (the same enemies, counts, target and rooms). For the other 36 no original map survives in any source we hold: their map is **reconstructed** in the quest's original room, with the enemies and the target recorded on the community wiki (**not original**); 14 of them spanned several areas, which are rebuilt in their order and joined by exits.
+
+The **NEW XIII Events** of 2018-19, the **Organization XIII SP Challenge** and **Challenge Organization XIII** (2020) use their **original quest records**: maps, enemies, objectives and rewards as in the original game. Where a small part of a map was missing from the surviving files, it is completed from the copy the game shared between quests or from another quest of the same event, as the Event Catalog notes.
+
+**The Keyblade War** part 3, **The Ultimate Test**, is back **for each Union**: in the original each Union played its own version of these quests, and only one version survives in the game data, so the versions of the other Unions are **rebuilt** from it with the target of their own map. You see only your own Union's version, and only it counts for the **Keyblade War Challenge Campaign** reward (see **Community goals** above).
+
+The other 53 quests of these events wait in the **Event Catalog**, each with the reason it is not here yet.
 
 ### Opening hours
 
@@ -251,7 +263,9 @@ The enemies of many event quests had no complete graphics in the surviving game 
 
 Most of their pieces are original pictures found elsewhere in the game files: in another animation of the same enemy, in its raid version, in a story scene or in the game's attack effects. Some pieces are **reconstructed**: an existing picture of the same size chosen by rule and checked against videos of the original game, a piece of a twin enemy, or an original picture resized to its slot.
 
-The flames of **Lexaeus**' special attack are **recoloured orange** (**not original**): the original orange flames were lost, so the surviving green ones are tinted to match videos of the original game. The spores of **Ribbitoad**'s special attack are a pink dot from another original effect (**reconstructed**). One thin web thread of **Wicked Spider**'s attack is still missing and is left out (**not original**).
+Since November 13, 2026 many of these animations are built **exactly as the game drew them**: the **ReLux Team** shared, with their permission, their index of the enemy graphics, which names the original picture of every piece. Each animation the index covers in full now uses those original pictures and replaces the earlier rebuilt version: for example the special attacks of most **Organization XIII** members (the flames of **Lexaeus** are no longer recoloured), of **Ribbitoad, Leviathan, Demon Tide** and **Metal Giant**, and many attacks, hits and defeats of the other enemies.
+
+One thin web thread of **Wicked Spider**'s special attack is still missing and is left out (**not original**).
 
 **Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).
 
@@ -259,9 +273,9 @@ The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is 
 
 The challenge events bring **15 more** enemies rebuilt in the same way and checked on their animations: **Ifrit, Leviathan, Demon Tide, Savage Vanguard, Savage Vanguard Ω, Hocus Pocus, Brilliant Opera, Sorcerous Reaper, Submarine Carp, Metal Giant, Festive Fireworks, Living Bone, Raging Reindeer, Bag O' Gifts** and **Jack in the Box**. A few pieces of Ifrit's attacks come from the **Ifrit of Dark Road**, the same creature (**reconstructed**).
 
-Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.
+The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are complete: those of Leviathan and Metal Giant are built exactly from the original pictures, and **Jack in the Box**'s fireballs come from the raid version of the same boss.
 
-The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are complete: **Jack in the Box**'s fireballs come from the raid version of the same boss; **Metal Giant**'s sparks use the spark picture of a particle effect the original game shares across many attacks, because its own picture was lost (**reconstructed**); the small water glints at the foot of **Leviathan**'s waterspout are not drawn, because that picture exists in no surviving copy of the game (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.
+The **12 enemies** the challenge events still lacked are back too, built exactly from the original pictures in the same way and approved on their animations: **Nimble Reaper, Loudmouth Parade, Upright Warlock, Gummi Dragon, Vile Reaper, Mysterious Sir, Weapon Master, Reversed Warlock, Circus Balloon, Jewel Princess, Raccoon Dog Rookie** and **Raccoon Dog Soldier**, and the quests that waited for them are served. Nine of them never move in the original files, so their walking pose is their standing pose (**reconstructed**). Their check in battle is still going on: please report anything that looks wrong.
 
 ### Event coins and boards
 
@@ -775,13 +789,13 @@ Every enemy and every ally now shows its own original look; where pieces were mi
 
 Some enemies show their original look, but a few small graphic details that were lost (for example their **shadow**) are reconstructed from the same enemy or from a standard one.
 
-A few pieces of Trickmaster, Shipwreck Shark (the water-slash arcs of its attack) and Luna Bandit survive only at a larger size, in other game files that show the same art: they are shown as **downscaled copies** of that original art (reconstructed).
+A few pieces of Trickmaster survive only at a larger size, in other game files that show the same art: they are shown as **downscaled copies** of that original art (reconstructed). The attacks of Shipwreck Shark (the water-slash arcs) and Luna Bandit, which had such copies too, are now built exactly from the original pictures (see **Enemy graphics** in the Events notice).
 
 Barrier Master, Pot Spider, Apricot Opera, Margoyle and Guard Armor Ω show again their original look, recovered from later versions of the game files or from other places where the same enemy appears (raids, cutscenes).
 
-Chill Ripper, Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for Chill Ripper it comes from its twin enemy of Dark Road, for the two Gummi Saucers from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies. The defeat animations of Red Gearbit and Blue Gearbit (from the Green Gearbit, the same model) and of one Cy-Bug (from the other Cy-Bugs of the same size) are **reconstructed** the same way.
+Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for the two Gummi Saucers it comes from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies. The defeat animations of Red Gearbit and Blue Gearbit (from the Green Gearbit, the same model) are **reconstructed** the same way. **Chill Ripper** and one **Cy-Bug**, whose defeat animations were reconstructed before, now show their own, built exactly from the original pictures.
 
-Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer, Blitz Spear and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed).
+Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed). **Blitz Spear**, recoloured the same way before, is now built exactly from the original pictures.
 
 ### Allies and other characters
 

@@ -336,8 +336,62 @@ check(p.includes('a&lt;b&gt;&quot;&amp;') && !p.includes('<script>alert') && p.i
     `Events: solo ricompensa fissa ${l5.slice(l5.indexOf('Community'), l5.indexOf('Community') + 400)}`);
   const ev = n.NOTICES.find((x) => x.title === 'Events');
   const t = ev ? ev.body.join(' ') : '';
-  check(t.includes("Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.")
-    && /Ifrit/.test(t) && /Jack in the Box/.test(t) && /## Challenge events/.test(t), 'Events: nemici della parte 4 e riquadro dei tentacoli');
+  // 13-11-2026 exact import (extra_donors_exact.tsv): the atkSp of Lexaeus, Ribbitoad, Demon Tide, Leviathan, Metal Giant is exact,
+  // so their old reconstruction notes are gone; Wicked Spider (atkSp not exact) keeps its missing thread; the 12 I-250 models are back
+  check(!/repeats one frame of its tentacle/.test(t) && !/recoloured orange/.test(t) && !/pink dot/.test(t) && !/water glints/.test(t)
+    && !/Twelve more enemies of the challenge events are still missing/.test(t) && /web thread of \*\*Wicked Spider\*\*/.test(t)
+    && /ReLux Team/.test(t) && /Raccoon Dog Soldier/.test(t)
+    && /Ifrit/.test(t) && /Jack in the Box/.test(t) && /## Challenge events/.test(t), 'Events: nemici della parte 4 e animazioni esatte del 13-11');
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+{
+  // Events Part 5 Task 7: the «Org XIII events» section, counts by group (event_config.json orgxiiiCensus) from events.json
+  const fs = require('fs'), os = require('os'), path = require('path');
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'event_config.json'), 'utf8'));
+  const groups = cfg.orgxiiiCensus;
+  check(groups && ['hole', 'new', 'challenge', 'keybladeWar'].every((k) => Array.isArray(groups[k]) && groups[k].length), 'Org XIII: gruppi in event_config.json');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'khux-evx-'));
+  const q = (served, labels = []) => ({ served, labels });
+  const fx = { entries: [
+    { censusId: groups.hole[0], type: 'STORY', start: '2016-11-13', available: true, labels: [], quests: [q(true, ['jpTwinMap']), q(true, ['wikiRoom']), q(true, ['wikiRoom', 'wikiAreas']), q(false)] },
+    { censusId: groups.hole[1], type: 'STORY', start: '2017-12-13', available: true, labels: [], quests: [q(true)] },
+    { censusId: groups.new[0], type: 'STORY', start: '2018-04-13', available: true, labels: [], quests: [q(true, ['mapPartRebuilt']), q(true)] },
+    { censusId: groups.new[1], type: 'STORY', start: '2018-05-13', available: false, labels: [], quests: [q(false)] },
+    { censusId: groups.challenge[0], type: 'STORY', start: '2020-04-19', available: true, labels: [], quests: [q(true), q(false)] },
+    { censusId: groups.keybladeWar[0], type: 'STORY', start: '2019-10-04', available: true, labels: [], quests: [q(true, ['unionTwin']), q(false)] },
+    { censusId: 'X', type: 'EQ', start: '2019-01-01', available: true, labels: [], quests: [q(true)] }], boardSets: {} };
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  const f = n.eventNoticeFacts(path.join(dir, 'events.json'));
+  const o = f && f.orgxiii;
+  check(o && o.hole.events === 2 && o.hole.served === 4 && o.hole.quests === 5 && o.hole.rebuilt === 2 && o.hole.areas === 1
+    && o.new.events === 1 && o.new.served === 2 && o.new.quests === 3 && o.challenge.served === 1 && o.keybladeWar.served === 1,
+    `Org XIII: fatti ${JSON.stringify(o)}`);
+  const l = n.eventOrgxiiiLines(f).join(' ');
+  check(/## Org XIII events/.test(l) && l.includes('**5 events**') && l.includes('**8 of their 12 quests**')
+    && l.includes('2016-17: 4 of 5 quests') && l.includes('2018-19: 2 of 3 quests') && l.includes('2020: 1 of 2 quests') && l.includes('part 3: 1 of 2 quests')
+    && l.includes('November 2016 to December 2017') && l.includes('2 of them are played on the **original Japanese map**')
+    && l.includes('For the other 2 no original map') && l.includes('1 of them spanned several areas') && /\*\*reconstructed\*\*/.test(l) && /\*\*not original\*\*/.test(l)
+    && /for each Union/.test(l) && l.includes('The other 4 quests of these events wait') && !/restored/i.test(l), `Org XIII: righe ${l.slice(0, 600)}`);
+  // no Keyblade War served: no Union line
+  fx.entries.find((e) => e.censusId === groups.keybladeWar[0]).quests = [q(false)];
+  fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(fx));
+  check(!/for each Union/.test(n.eventOrgxiiiLines(n.eventNoticeFacts(path.join(dir, 'events.json'))).join(' ')), 'Org XIII: niente riga della Keyblade War senza missioni servite');
+  fs.rmSync(dir, { recursive: true, force: true });
+  // the live notice: counts from the served events.json, every label of a served Org XIII quest has its text and is printed
+  const live = n.eventNoticeFacts();
+  if (live && live.orgxiii) {
+    const ev = n.NOTICES.find((x) => x.title === 'Events'), t = ev ? ev.body.join(' ') : '';
+    const lo = live.orgxiii, sum = (k) => Object.values(lo).reduce((s, x) => s + x[k], 0);
+    check(/## Org XIII events/.test(t) && t.includes(`**${sum('served')} of their ${sum('quests')} quests**`)
+      && t.includes(`2016-17: ${lo.hole.served} of ${lo.hole.quests} quests`) && t.includes(`2018-19: ${lo.new.served} of ${lo.new.quests} quests`),
+      'Org XIII: conteggi della notizia da events.json');
+    const why = cfg.reconstructedWhy || {};
+    for (const g of Object.values(lo)) for (const lb of g.labels) {
+      check(why[lb], `Org XIII: etichetta ${lb} senza testo in reconstructedWhy`);
+      if (why[lb]) check(t.includes(why[lb]), `Org XIII: etichetta ${lb} non stampata`);
+    }
+    check(!/restored/i.test(n.eventOrgxiiiLines(live).join(' ')), 'Org XIII: niente «restored»');
+  }
   fs.rmSync(dir, { recursive: true, force: true });
 }
 // every inline script of the Notices page must compile, in-game popup and site copy alike (06-11: a missing «;» after the

@@ -103,8 +103,20 @@ function eventNoticeFacts(file = process.env.KHUX_EVENT_INDEX || path.join(__dir
     ...(e.communityBonus.questPrefix ? { quests: e.communityBonus.questPrefix } : {}), ...(e.communityBonus.kind === 'completion' ? { fixed: true } : {}) });
   challenge.bonus = { paid: withBonus.filter((e) => e.available && e.communityBonus.ready).map(bonusOf),
     waiting: withBonus.filter((e) => e.available && e.communityBonus.waiting).map(bonusOf) };
+  // Events Part 5 Task 7: the Organization XIII events by group (event_config.json orgxiiiCensus): served events and quests;
+  // for the data-hole runs, the served quests on a reconstructed map (labels wikiRoom / wikiAreas) and on several areas
+  const groups = cfg.orgxiiiCensus || {};
+  const groupOf = (k) => {
+    const ids = new Set(groups[k] || []), ev = all.filter((e) => ids.has(e.censusId)), q = ev.flatMap((e) => e.quests || []);
+    const sv = q.filter((x) => x.served), st = ev.map((e) => e.start).filter(Boolean).sort();
+    return { events: ev.filter((e) => e.available).length, served: sv.length, quests: q.length, from: st[0] || null, to: st[st.length - 1] || null,
+      rebuilt: sv.filter((x) => (x.labels || []).some((l) => l === 'wikiRoom' || l === 'wikiAreas')).length,
+      areas: sv.filter((x) => (x.labels || []).includes('wikiAreas')).length,
+      labels: [...new Set(sv.flatMap((x) => x.labels || []))] };
+  };
+  const orgxiii = Object.keys(groups).length ? Object.fromEntries(Object.keys(groups).map((k) => [k, groupOf(k)])) : null;
   return { records: all.length, events: on.length, served: quests.filter((q) => q.served).length, quests: quests.length,
-    first: starts[0] || null, last: starts[starts.length - 1] || null, coins, challenge,
+    first: starts[0] || null, last: starts[starts.length - 1] || null, coins, challenge, orgxiii,
     labels: [...used].filter((l) => why[l]).map((l) => ({ id: l, text: why[l] })) };
 }
 // Events Part 4 Task 6: the census types of the challenge events, and the quiz board plan (sources of the boards)
@@ -141,6 +153,30 @@ function communityBonusLine(b) {
     + (paid.length ? ` The original results: ${nameList(paid)}.` : '')
     + (waiting.length ? ` ${nameList(waiting.map((x) => x.name))} ${waiting.length === 1 ? 'waits' : 'wait'} for the original result: no bonus until it is found.` : '')
     + (done.length ? ` ${counted.length || waiting.length ? 'Other events' : 'Some events'} gave a **fixed reward** to every player who completed all their challenges, whatever the number of players: as in the original, clearing every objective gives you that reward **once**, in your **Presents** (a kept event of the Event Catalog too): ${nameList(done)}.` : '');
+}
+// Events Part 5 Task 7: the Organization XIII events (event_config.json orgxiiiCensus), counts from events.json
+function eventOrgxiiiLines(f) {
+  const o = f && f.orgxiii;
+  if (!o) return [];
+  const g = (k) => o[k] || { events: 0, served: 0, quests: 0, rebuilt: 0, areas: 0 };
+  const hole = g('hole'), nw = g('new'), ch = g('challenge'), kw = g('keybladeWar');
+  const all = [hole, nw, ch, kw];
+  const events = all.reduce((n, x) => n + x.events, 0), served = all.reduce((n, x) => n + x.served, 0), quests = all.reduce((n, x) => n + x.quests, 0);
+  const of = (x) => `${x.served} of ${x.quests} quests`;
+  const span = hole.from && hole.to ? `${usMonth(hole.from)} to ${usMonth(hole.to)}` : 'November 2016 to December 2017';
+  const out = ['## Org XIII events'];
+  if (!served) return [...out, 'The **Organization XIII events** are listed in the Event Catalog; none of their quests is served yet.'];
+  out.push(`The **Organization XIII events** are back: today **${events} events** are served, with **${served} of their ${quests} quests** (the monthly XIII Events of 2016-17: ${of(hole)}; the NEW XIII Events of 2018-19: ${of(nw)}; Challenge Organization XIII of 2020: ${of(ch)}; The Keyblade War part 3: ${of(kw)}).`);
+  if (hole.served) {
+    const jp = hole.served - hole.rebuilt;
+    out.push(`The monthly **XIII Events** of ${span} have **no surviving quest record**: their quests are **rebuilt** from the community wiki and from the Japanese tables of their 13 stages (levels, enemies, objectives and rewards). ${jp} of them are played on the **original Japanese map** of the same quest, found by its content (the same enemies, counts, target and rooms).`
+      + (hole.rebuilt ? ` For the other ${hole.rebuilt} no original map survives in any source we hold: their map is **reconstructed** in the quest's original room, with the enemies and the target recorded on the community wiki (**not original**)${hole.areas ? `; ${hole.areas} of them spanned several areas, which are rebuilt in their order and joined by exits` : ''}.` : ''));
+  }
+  out.push('The **NEW XIII Events** of 2018-19, the **Organization XIII SP Challenge** and **Challenge Organization XIII** (2020) use their **original quest records**: maps, enemies, objectives and rewards as in the original game. Where a small part of a map was missing from the surviving files, it is completed from the copy the game shared between quests or from another quest of the same event, as the Event Catalog notes.');
+  if (kw.served) out.push(`**The Keyblade War** part 3, **The Ultimate Test**, is back **for each Union**: in the original each Union played its own version of these quests, and only one version survives in the game data, so the versions of the other Unions are **rebuilt** from it with the target of their own map. You see only your own Union's version, and only it counts for the **Keyblade War Challenge Campaign** reward (see **Community goals** above).`);
+  const held = quests - served;
+  if (held) out.push(`The other ${held} quests of these events wait in the **Event Catalog**, each with the reason it is not here yet.`);
+  return out;
 }
 function eventCoinLines(f) {
   const c = f && f.coins;
@@ -460,6 +496,7 @@ const NOTICES = [
       'The **Gem Quests** are back: the **Weekly Gem Quests** of 2017 and 2018, the **Monthly Gem Quests**, the **Gem Drop** and **Daily Gem** events, each one with its own card and dates. Where an original quest record did not survive, the quest is rebuilt from the community wiki and from the same quest of a later run (marked in the Event Catalog). The **Gem Boards** were played on the Avatar Boards and come with the Event Boards in a later update; their notices had no banner, so the Event Catalog shows **No card in the original** for them.',
       'Quests that must be played with one Keyblade open their start screen with the Keyblade locked and the quest **rules** at the right. That screen uses the **Japanese version** of its panels (**not original**: the worldwide ones are not in the surviving game data), so the rules box reads **RULE** instead of **CONDITION** and the **Cannot change** plate is red instead of orange.',
       'The quest lists of the events whose Event Boards are not served yet show no **Event Boards** button (**not original**): see **Event coins and boards** below.',
+      ...eventOrgxiiiLines(eventNoticeFacts()),
       '## Opening hours',
       'An event that was open for only a few minutes or hours in the original game is open here for its **whole original day** (**not original**): it is listed on the real weekday (Pacific time) of that day, all day. An event with one quest a day lists **all its quests for its whole period** (**not original** where the original opened them one a day).',
       '## Event Catalog',
@@ -473,13 +510,16 @@ const NOTICES = [
       '## Enemy graphics',
       'The enemies of many event quests had no complete graphics in the surviving game files. **37 of them** are rebuilt from the game\'s own files and were checked against the original look, with their special attacks: the twelve members of **Organization XIII**, **Queen Bee Ω, Assault Dragon, Titan, Ramuh, Behemoth Ω, Trickmaster Ω, Adventurer, Savage Spider, Scourge Spider, Wicked Spider, Malicious Spider, Driller Mole, Ribbitoad, Poisonous Pretender, Paralysis Pretender, False Master, Rush Ghost, Shred Ghost, Trick Ghost, White Mushroom, Rare Truffle, Nightmare Chirithy, Cloudy Sunrise, Circus Clown** and the **Keyblade wielder** who fights beside you against the Iron Giant.',
       'Most of their pieces are original pictures found elsewhere in the game files: in another animation of the same enemy, in its raid version, in a story scene or in the game\'s attack effects. Some pieces are **reconstructed**: an existing picture of the same size chosen by rule and checked against videos of the original game, a piece of a twin enemy, or an original picture resized to its slot.',
-      'The flames of **Lexaeus**\' special attack are **recoloured orange** (**not original**): the original orange flames were lost, so the surviving green ones are tinted to match videos of the original game. The spores of **Ribbitoad**\'s special attack are a pink dot from another original effect (**reconstructed**). One thin web thread of **Wicked Spider**\'s attack is still missing and is left out (**not original**).',
+      // 13-11-2026 exact import (docs/notes/battaglia.md «Exact animations», recon/tools/extra_donors_exact.tsv, override priority)
+      'Since November 13, 2026 many of these animations are built **exactly as the game drew them**: the **ReLux Team** shared, with their permission, their index of the enemy graphics, which names the original picture of every piece. Each animation the index covers in full now uses those original pictures and replaces the earlier rebuilt version: for example the special attacks of most **Organization XIII** members (the flames of **Lexaeus** are no longer recoloured), of **Ribbitoad, Leviathan, Demon Tide** and **Metal Giant**, and many attacks, hits and defeats of the other enemies.',
+      'One thin web thread of **Wicked Spider**\'s special attack is still missing and is left out (**not original**).',
       '**Rush Ghost, Trick Ghost, White Mushroom** and **Rare Truffle** have no surviving defeat animation: they vanish in the **standard Heartless smoke cloud** (**reconstructed**). **Circus Clown** uses the same smoke cloud, as in the oldest game files. **Enraged Elk** has no graphics of its own in any surviving file: it uses the look of the **Enraged Elk of the Story Quests**, the same creature (**not original**).',
       'The **Sparkler** of «Event Coins Galore Returns Once Again!» (August 2019) is rebuilt in the same way from the game\'s own files, special attack included. Two parts are **reconstructed**: it vanishes in the **Shadow\'s smoke cloud** (its own defeat animation did not survive), and its ground shadow is the **standard one** (its own file is an empty stub).',
       // Events Part 4 Task 3 / 6 (user approvals 10-11, review rounds 1-2)
       'The challenge events bring **15 more** enemies rebuilt in the same way and checked on their animations: **Ifrit, Leviathan, Demon Tide, Savage Vanguard, Savage Vanguard Ω, Hocus Pocus, Brilliant Opera, Sorcerous Reaper, Submarine Carp, Metal Giant, Festive Fireworks, Living Bone, Raging Reindeer, Bag O\' Gifts** and **Jack in the Box**. A few pieces of Ifrit\'s attacks come from the **Ifrit of Dark Road**, the same creature (**reconstructed**).',
-      "Demon Tide's special attack repeats one frame of its tentacle animation, because the original picture of that frame was lost.",
-      'The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are complete: **Jack in the Box**\'s fireballs come from the raid version of the same boss; **Metal Giant**\'s sparks use the spark picture of a particle effect the original game shares across many attacks, because its own picture was lost (**reconstructed**); the small water glints at the foot of **Leviathan**\'s waterspout are not drawn, because that picture exists in no surviving copy of the game (**not original**). Twelve more enemies of the challenge events are still missing, and their quests wait for them.',
+      'The special attacks of **Leviathan, Metal Giant** and **Jack in the Box** are complete: those of Leviathan and Metal Giant are built exactly from the original pictures, and **Jack in the Box**\'s fireballs come from the raid version of the same boss.',
+      // I-250 (13-11 evening): the 12 missing challenge models built exactly and approved on the rendered review; phone test pending
+      'The **12 enemies** the challenge events still lacked are back too, built exactly from the original pictures in the same way and approved on their animations: **Nimble Reaper, Loudmouth Parade, Upright Warlock, Gummi Dragon, Vile Reaper, Mysterious Sir, Weapon Master, Reversed Warlock, Circus Balloon, Jewel Princess, Raccoon Dog Rookie** and **Raccoon Dog Soldier**, and the quests that waited for them are served. Nine of them never move in the original files, so their walking pose is their standing pose (**reconstructed**). Their check in battle is still going on: please report anything that looks wrong.',
       ...eventCoinLines(eventNoticeFacts()),
       '## SP Chip & Dale',
       'The **SP Chip & Dale** 6★ Medal (+1,000 STR and DEF as Enhancement material), a reward of some event quests, is back. Its data comes from the community wiki; its picture is the community render of the original Medal (**reconstructed**: the original file was not found).',
@@ -615,10 +655,10 @@ const NOTICES = [
       '## Enemy look',
       'Every enemy and every ally now shows its own original look; where pieces were missing they are completed as described above.',
       'Some enemies show their original look, but a few small graphic details that were lost (for example their **shadow**) are reconstructed from the same enemy or from a standard one.',
-      'A few pieces of Trickmaster, Shipwreck Shark (the water-slash arcs of its attack) and Luna Bandit survive only at a larger size, in other game files that show the same art: they are shown as **downscaled copies** of that original art (reconstructed).',
+      'A few pieces of Trickmaster survive only at a larger size, in other game files that show the same art: they are shown as **downscaled copies** of that original art (reconstructed). The attacks of Shipwreck Shark (the water-slash arcs) and Luna Bandit, which had such copies too, are now built exactly from the original pictures (see **Enemy graphics** in the Events notice).',
       'Barrier Master, Pot Spider, Apricot Opera, Margoyle and Guard Armor Ω show again their original look, recovered from later versions of the game files or from other places where the same enemy appears (raids, cutscenes).',
-      'Chill Ripper, Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for Chill Ripper it comes from its twin enemy of Dark Road, for the two Gummi Saucers from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies. The defeat animations of Red Gearbit and Blue Gearbit (from the Green Gearbit, the same model) and of one Cy-Bug (from the other Cy-Bugs of the same size) are **reconstructed** the same way.',
-      'Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer, Blitz Spear and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed).',
+      'Red Gummi Saucer, Blue Gummi Saucer and Ring-A-Ding show their original look; only their defeat animation (a puff of smoke) is **reconstructed**: for the two Gummi Saucers it comes from the Green Gummi Saucer, and Ring-A-Ding uses the standard one shared by most enemies. The defeat animations of Red Gearbit and Blue Gearbit (from the Green Gearbit, the same model) are **reconstructed** the same way. **Chill Ripper** and one **Cy-Bug**, whose defeat animations were reconstructed before, now show their own, built exactly from the original pictures.',
+      'Eliminator, Emerald Sonata, Poison Archer, Paralysis Archer and Wight Knight had only part of their original graphics left: the missing pieces come from their twin enemy of Dark Road, which has the same model, with the colours matched to the surviving original pieces (**recoloured look**, reconstructed). **Blitz Spear**, recoloured the same way before, is now built exactly from the original pictures.',
       '## Allies and other characters',
       'In some quests a character fights **at your side** (Hercules, Aladdin, Mog, Phillip, Ephemer, Calhoun, Ralph, the Union leaders and other Keyblade wielders): as in the original game, they join the battle against the boss, attack after your turn and cannot be targeted. Their attacks are the original ally attacks.',
       'The allies show their original look; their original files have no hit or defeat animation, which an ally never uses, so those show the standing pose (**reconstructed**). All the Ralph allies share the same pieces, as in the original files.',
@@ -856,4 +896,4 @@ function albumData(owned, medalRows, maxGuilt) {
   };
 }
 
-module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines, eventNoticeFacts, eventChallengeLines };
+module.exports = { NOTICES, byDate, updateBody, noticesUrl, informationList, informationPopup, noticesPage, albumData, raidNoticeFacts, raidNoticeLines, raidJpLines, eventNoticeFacts, eventChallengeLines, eventOrgxiiiLines };
