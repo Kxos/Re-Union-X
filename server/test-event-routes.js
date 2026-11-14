@@ -39,6 +39,19 @@ function world(opts = {}) {
 }
 
 const tests = {
+  // a built Booster (type 34, Events Part 6): objective and first-clear item go to grantBooster with their source key, once;
+  // a replay pays nothing, never a grantItem
+  booster_objective_once() {
+    const w = world();
+    const got = [];
+    w.tables.stage[0] = stageRow(S1, { submissionRewardType: [34, 15, 3], submissionItemId: [1811007, 0, 90011], validClearGetItem: 1, clearGetItemType: [34], clearGetItemId: [1809001], clearGetItemNum: [1] });
+    w.ev = routesEvents({ ...w.opts, grantBooster: (id, from) => { got.push([id, from]); return true; } });
+    w.ev.onStageClear(S1, [1]);
+    assert.deepStrictEqual(got, [[1809001, { stageId: S1, objective: 0, slot: 0 }], [1811007, { stageId: S1, objective: 1 }]]);
+    assert.ok(!w.grants.some((g) => g.type === 34) && !w.objectives.some((o) => o.type === 34), 'never paid as an item');
+    w.ev.onStageClear(S1, [1]);
+    assert.strictEqual(got.length, 2, 'replay: no second grant');
+  },
   list_shape() {
     const w = world();
     const list = w.ev.events();

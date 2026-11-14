@@ -213,7 +213,9 @@ const weeksOf = (doc, families = FAMILIES) => ((doc || {}).weeks || []).filter((
 // labels (census id -> reconstructed labels: boardPath, boardSet, boardCost, boardCells), boardIds,
 // report: {unmatched: [{board, n, kind, reward, why, weeks}], corrected: [...], dropped: [board ids with no cell left], bytes}}. Throws on a name that matches
 // no item and is not declared in config.unmatched (with the whole list), and on a completion reward that matches nothing.
-function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null, families = FAMILIES, type = TYPE, idBase = BOARD_BASE, idMax = BOARD_MAX }) {
+// boosters: game_data/boosters.json (Events Part 6): a cell naming a built Booster pays it (rewardSelect 34), each cell of that name
+// its own copy (byName ids, lowest first: user 14-11, label boosterIdByName), so the copies add up as in the original
+function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds = null, families = FAMILIES, type = TYPE, idBase = BOARD_BASE, idMax = BOARD_MAX, boosters = null }) {
   const boardIds = allocateBoardIds(doc, ids, families, idBase, idMax);
   const idx = itemIndex(master);
   const fixes = parseBoardCorrections(correctionsMd);
@@ -232,12 +234,20 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
   };
   const out = { sphereRows: [], arrayRows: [], masuRows: [], art: [], byCensus: {}, labels: {}, boardIds, report: { unmatched: [], corrected: [], dropped: [], bytes: 0 } };
   const unknown = new Map(), unmatched = new Map(), built = new Map();
+  const boosterNext = new Map(); // Booster name -> next copy to hand out
 
   // one resolved layout per board id: cells with their items, dropped cells, completion
   const resolve = (b) => {
     if (built.has(b.id)) return built.get(b.id);
     const cells = [], dropped = [];
     for (const c of cellsOf(b, fixes)) {
+      const bIds = boosters && boosters.byName && boosters.byName[c.reward];
+      if (bIds && (boosterNext.get(c.reward) || 0) < bIds.length) {
+        const k = boosterNext.get(c.reward) || 0;
+        boosterNext.set(c.reward, k + 1);
+        cells.push({ ...c, item: { sel: 34, id: bIds[k], value: 1 }, booster: true });
+        continue;
+      }
       const alias = aliases[c.reward] && aliases[c.reward].item;
       const m = matchReward(idx, c.kind, alias || c.reward, num(c.qty) || 1);
       if (!m.why) { cells.push({ ...c, item: m, ...(alias ? { alias } : {}) }); continue; }
@@ -272,6 +282,7 @@ function buildBoards({ doc, correctionsMd, master, ids, config = {}, censusIds =
       if (r.dropped.length) labels.add('boardCells');
       if (r.cells.some((c) => c.alias)) labels.add('boardAlias');
       if (r.cells.some((c) => texture.has(c.reward))) labels.add('boardTexture');
+      if (r.cells.some((c) => c.booster)) labels.add('boosterIdByName');
       for (const d of r.dropped) {
         const k = `${d.board}/${d.n}`;
         if (!unmatched.has(k)) unmatched.set(k, { ...d, weeks: 0 });

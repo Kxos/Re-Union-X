@@ -73,7 +73,7 @@ const STAGE_KIND = 2;
 const RAID_SPECIAL = [970000, 989999], EGGCOGNITO = 100;
 const NOT_SERVED = 'not served yet';
 // labels this generator sets (the record labels come through labelPhrases)
-const GENERATED_LABELS = ['wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
+const GENERATED_LABELS = ['boosterEffect', 'wholeDay', 'communityBonus', 'completionReward', 'dramaOff', 'eventCoins', 'wwEnemy', 'wikiAp', 'boardsLater', 'noCoinSource', 'boosterLater', 'noBoardSet', 'quizBoard',
   'quizBoardFootage', 'quizBoardScreenshot', 'wikiRoom', 'jpTwinMap', 'levelShifted', 'mapPartShared', 'mapHeaderRebuilt', 'roomTilesRebuilt', 'mapPartRebuilt', 'seriesLayoutTwin', 'jpReplayLayoutTwin', 'wikiAreas'];
 // the labels a quizDramas entry may give its board (Part 4 Task 6): rebuilt from the khuxwiki text (quizBoard, the default of
 // reconstructed true), redrawn from footage of the original (quizBoardFootage), taken from a screenshot of the original
@@ -410,26 +410,41 @@ function itemResolver(master) {
   };
 }
 // Payable reward types of the config (Part 4 Task 4): {types, drop, booster} or null (no type check)
-const payableOf = (config) => (config.payableTypes ? { types: new Set(config.payableTypes), drop: new Set(config.payableDropTypes || config.payableTypes),
-  booster: Number.isInteger(config.boosterType) ? config.boosterType : BOOSTER_TYPE } : null);
+// built: the emblem ids of the built Boosters (game_data/boosters.json, Part 6): such a Booster is paid as a type-34 reward
+const payableOf = (config, built = null) => (config.payableTypes ? { types: new Set(config.payableTypes), drop: new Set(config.payableDropTypes || config.payableTypes),
+  booster: Number.isInteger(config.boosterType) ? config.boosterType : BOOSTER_TYPE, built: built || new Set() } : null);
 // copy of the quest with our item ids in its first-clear items, objective rewards and drop rows (resolve null: ids kept). payable
 // (payableOf): a Booster (reward.booster, objective.booster or the booster type) is taken out of the copy, its objective pays
 // nothing here (reward null: type 0 in the stage row), and listed in boosters [{objective (0: first clear, with slot), emblemName}] for
 // player.pendingBoosters (Part 6 grants it); any other type outside payable.types (objectives, first clear) or payable.drop (drop
 // and chest rows) is listed in unknownTypes: the caller holds the quest, so the type never reaches a row of the client.
+// Part 6: a Booster whose emblem id is built (payable.built) stays a type-34 reward with that id (not resolved: the id is the
+// emblem row's), listed in built; only the unbuilt ones go to boosters (boosterLater / boosterOnly).
 function remapItems(q, resolve, payable = null) {
-  const missing = [], boosters = [], unknown = [];
+  const missing = [], boosters = [], unknown = [], built = [];
   const res = resolve || ((d) => d);
   const c = JSON.parse(JSON.stringify(q));
   const isBooster = (d, o) => !!((o && o.booster) || (d && (d.booster || (payable && d.type === payable.booster))));
   const nameOf = (d, o) => ((o && o.booster) || (d && d.booster) || {}).name || (d && d.name) || 'Booster';
+  const builtId = (d, o) => { const id = Number((((o && o.booster) || (d && d.booster) || {}).emblemId) || (d && d.type === BOOSTER_TYPE && d.id) || 0); return payable && payable.built.has(id) ? id : 0; };
   const check = (d, set, where) => { if (payable && d && d.type && !set.has(d.type)) unknown.push(`${where} type ${d.type}`); };
   c.firstClear = (c.firstClear || []).filter((x, slot) => {
     if (!payable || !isBooster(x)) return true;
+    if (builtId(x)) return true;
     boosters.push({ objective: 0, slot, emblemName: nameOf(x) }); // slot: its position among the first-clear items (two stay two)
     return false;
-  }).map((x) => { check(x, payable && payable.types, 'first-clear item'); return res(x, missing); });
+  }).map((x, slot) => {
+    const bid = payable && isBooster(x) ? builtId(x) : 0;
+    if (bid) { built.push({ objective: 0, emblemId: bid }); return { type: BOOSTER_TYPE, id: bid, num: 1 }; }
+    check(x, payable && payable.types, 'first-clear item'); return res(x, missing);
+  });
   c.objectives = (c.objectives || []).map((o, i) => {
+    if (payable && isBooster(o.reward, o) && builtId(o.reward, o)) {
+      const bid = builtId(o.reward, o);
+      built.push({ objective: i + 1, emblemId: bid });
+      const { booster, ...rest } = o;
+      return { ...rest, reward: { type: BOOSTER_TYPE, id: bid, num: 1 } };
+    }
     if (payable && isBooster(o.reward, o)) {
       boosters.push({ objective: i + 1, emblemName: nameOf(o.reward, o) });
       const { booster, ...rest } = o;
@@ -444,7 +459,7 @@ function remapItems(q, resolve, payable = null) {
     c.drops.enemies = rows(c.drops.enemies, 'drop row');
     c.drops.chests = rows(c.drops.chests, 'chest row');
   }
-  return { q: c, missing: [...new Set(missing)], boosters, unknownTypes: [...new Set(unknown)] };
+  return { q: c, missing: [...new Set(missing)], boosters, built, unknownTypes: [...new Set(unknown)] };
 }
 // what makes two records' quests the same quest (Part 4 Task 4, map_key_shared_quest): everything the stage row and the map are
 // built from, not the name, window or labels
@@ -758,7 +773,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
       }
     }
   }
-  const eb = boardSets ? eventBoards.buildEventBoards({ sets, master, ids: allIds }) : null;
+  const eb = boardSets ? eventBoards.buildEventBoards({ sets, master, ids: allIds, boosters: opts.builtBoosters || null }) : null;
   if (eb) allIds.boards = eb.ids.boards;
   const builtBoards = (k) => ((eb && eb.bySet[k]) || []);
   const enemies = new Set((master.enemy || []).map((e) => e.enemyId));
@@ -772,7 +787,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
   for (const s of master.stage || []) byMap.set(s.stageBinId || s.stageId, s);
   const selected = selector(config);
   const resolveItem = itemResolver(master);
-  const payable = payableOf(config);
+  const payable = payableOf(config, opts.builtBoosters ? new Set([...opts.builtBoosters].map(Number)) : null);
   const quizTypes = new Set(config.quizTypes || ['QUIZ']);
   const builtQuests = new Map(); // donor stage id -> {stageId, censusId, sig}: the same quest in a later record is served by that row
   const reasonText = config.reasonText || {};
@@ -989,6 +1004,7 @@ function buildEvents(records0, config, master, ids, anchors = {}, maps = null, b
         if (!entry.stageIds.includes(sid)) entry.stageIds.push(sid);
         apMin = apMin === null ? q.ap : Math.min(apMin, q.ap);
         if (paid.boosters.length) { item.boosters = paid.boosters.map((x) => ({ ...x })); item.labels.push('boosterLater'); }
+        if (paid.built.length) { item.boosterRewards = paid.built.map((x) => ({ ...x })); item.labels.push('boosterEffect'); }
         if (quizDrama && quizDrama.label) item.labels.push(quizDrama.label);
         item.labels.forEach((l) => { labels.add(l); used.add(l); });
         const offIds = quizDrama ? [] : dr.beforeIds || [];
@@ -1451,7 +1467,9 @@ function patch(masterDir, opts = {}) {
     bgm = readJson(file, null);
     if (!bgm) console.warn(`events: no event music overlay (${file}): event quests keep the music of their story row`);
   }
-  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas, bonus, bgm });
+  // the built Boosters (make-emblems.js, Part 6): game_data/boosters.json byId; none: every Booster stays boosterLater / boosterOnly
+  const builtBoosters = opts.builtBoosters || Object.keys(readJson(path.join(__dirname, 'game_data', 'boosters.json'), { byId: {} }).byId || {}).map(Number);
+  const out = buildEvents(records, config, master, readIds(idsFile), readJson(anchorsFile, {}), maps, boardSets, { dramas, bonus, bgm, builtBoosters });
   const added = { stage: out.stage, evStage: [...(out.catalogEvStage ? [out.catalogEvStage] : []), ...out.evStage], reward: out.reward,
     sphere: out.sphere, sphereArray: out.sphereArray, sphereMasu: out.sphereMasu };
   const clashR = out.reward.find((r) => master.reward.some((m) => m.rewardId === r.rewardId));

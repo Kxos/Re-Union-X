@@ -140,6 +140,17 @@ test('ids_range_checked', () => {
 });
 
 let fail = 0;
+// Events Part 6: a built Booster (its emblem id in boosters) is a type-34 cell; not built, the board still waits
+test('booster_cell_built_or_waiting', () => {
+  const s = sets(); s[0].boards[1].cells[1] = { ...s[0].boards[1].cells[1], rewardId: 900001, name: '6★ Fixture Medal' };
+  const r = eb.buildEventBoards({ sets: s, master, ids: {}, boosters: [9900] });
+  const m = r.masuRows.find((x) => x.rewardSelect.includes(34));
+  assert.ok(m, 'the Booster cell is served'); assert.strictEqual(m.rewardId[m.rewardSelect.indexOf(34)], 9900);
+  assert.strictEqual(m.rewardValue[m.rewardSelect.indexOf(34)], 1);
+  const w = eb.buildEventBoards({ sets: sets(), master, ids: {} });
+  assert.ok(!w.masuRows.some((x) => x.rewardSelect.includes(34)), 'unbuilt: no type-34 cell reaches the client');
+});
+
 for (const [n, f] of tests) { try { f(); console.log('ok   ' + n); } catch (e) { fail++; console.log('FAIL ' + n + ': ' + e.message); } }
 console.log(fail ? `test-event-boards: ${fail} failed` : `test-event-boards: ${tests.length} ok`);
 process.exit(fail ? 1 : 0);

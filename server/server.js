@@ -2926,6 +2926,8 @@ function grantSphereReward(masu, i) {
   else if (sel === 19 || sel === 20 || sel === 23) player.avatarParts = [...new Set([...(player.avatarParts || []), id])];
   else if (sel === 2) grantItem(2, 0, val);
   else if (sel === 5 || sel === 7 || sel === 33 || sel === 41) grantItem(sel, id, val);
+  // a Booster cell (Event or Raid Board, Events Part 6): once per board cell, ever (boosters.js)
+  else if (sel === 34) playerBoosters().grant(id, { board: masu.sphereBoardId, cell: i });
   else console.log(`  [sphere] premio rewardSelect ${sel} (id ${id}) non gestito`);
 }
 
@@ -4752,6 +4754,8 @@ function eventRoutes() {
     canPay: (type) => type !== 33 || PET_ENABLED,
     // the community-goal bonus of an event (routes-events.js, user rule 10-11-2026): into the Presents, once per event
     addPresent: (type, id, num, comment) => addPresent(type, id, num, comment),
+    // a built Booster (type 34, Events Part 6): once per quest objective or first-clear item, ever (boosters.js)
+    grantBooster: (emblemId, from) => playerBoosters().grant(emblemId, from),
   });
 }
 // Event Coins and Event Boards (type 4, routes-event-boards.js): the sets of events.json boardSets, available while a feeder

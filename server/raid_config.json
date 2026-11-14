@@ -287,6 +287,7 @@
     "boardSet": "Which boards ran this week is inferred: the board names are sourced, the layout of that week is not (2021-03-01 to 2021-06-29 and the one-day event of 2020-11-01).",
     "boardCost": "A board cost corrected from the wiki: Halloween Board 2019, cell 17 reads 700 on the wiki, but the page total and the cost ladder need 1,600 (inferred).",
     "boardCells": "Some cells of this week's boards are missing: their reward has no item here, so the cell is left off rather than replaced.",
+    "boosterIdByName": "A Booster cell of this week's boards is named by the wiki but not which of its identical original copies it paid: each cell pays a different copy, so they add up as in the original. The Booster's effect is rebuilt from its original description.",
     "boardTexture": "A Spirit part of this week's boards (Starlight Ears, Dazzling Disco) is drawn with one reconstructed texture: the original is lost (a small sparkle, a tiny dot).",
     "boardAlias": "A board reward named differently on the wiki is matched to another item: 6★ Fantasia Mickey A is given as the 5★ Fantasia Mickey A (no 6★ exists).",
     "jp": "Japan-only raid (census JP row, I-232): served only in the Raid Catalog, never as a raid of the week (spec Answer 3); one tier, its boss, dates and HP from the JP sources (wikiwiki.jp, khux-guides digests of the JP notices).",

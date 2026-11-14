@@ -1714,6 +1714,18 @@ const tests = {
     assert.strictEqual(new Set(all.sphereRows.map((r) => r.sphereBoardId)).size, all.sphereRows.length);
     for (const a of all.arrayRows) walkOrder(a);
   },
+  // Events Part 6: with the built Boosters, the HD Vanitas (EX+) cells of the April 2018 board pay three different copies (type 34)
+  raid_booster_cells_back() {
+    const recFile = process.env.KHUX_BOOSTERS || 'D:\\Progetto_Restauro_KH_UX\\tmp\\events\\boosters\\boosters.json';
+    const real = realInputs();
+    if (!real || !fs.existsSync(recFile)) { console.log('  (raid Booster cells skipped: no private sources or Booster records)'); return; }
+    const { index } = require('./make-emblems').makeEmblems(JSON.parse(fs.readFileSync(recFile, 'utf8')));
+    const cells34 = (out) => out.masuRows.flatMap((m) => m.rewardSelect.map((s, i) => (s === 34 ? m.rewardId[i] : null)).filter((x) => x !== null));
+    const out = mr.buildRaid({ ...real, boosters: index });
+    const vanitas = index.byName['Booster [HD Vanitas (EX+)] +5%'] || [];
+    assert.deepStrictEqual([...new Set(cells34(out).filter((x) => vanitas.includes(x)))].sort((a, b) => a - b), vanitas.slice(0, 3), 'three different copies');
+    assert.deepStrictEqual(cells34(mr.buildRaid({ ...real, boosters: null })), [], 'no records: no type-34 cell');
+  },
   all_rows_build() {
     // Task 8: the shipped config builds every WW row with week data, no filter
     assert.ok(!('onlyCensusIds' in REAL_CONFIG), 'raid_config.json has no onlyCensusIds');

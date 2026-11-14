@@ -39,7 +39,8 @@ const EVENT_TYPE = CONFIG.eventType; // eventType of an index entry without one 
 const STAGE_FIRST = CONFIG.stageBase, STAGE_LAST = CONFIG.stageMax; // stage ids of the event quests
 const COIN_TYPE = 15; // Event Coins: into the entry's board set (addEventCoins)
 
-function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, canPay = null, addPresent = null, webBase, log = console.log }) {
+const BOOSTER_TYPE = 34; // a Booster reward (master emblem; Events Part 6, boosters.js)
+function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, realNow, serverTimeAt, clock, stageState, grantItem, grantObjective, addEventCoins = null, canPay = null, addPresent = null, grantBooster = null, webBase, log = console.log }) {
   // read-only view of player.events (an older save has none: nothing kept, nothing cleared); state() creates it to write
   const view = () => player.events || { kept: null, cleared: {} };
   const state = () => {
@@ -142,6 +143,8 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       for (const b of boosters.filter((x) => x.objective === 0)) recordBooster(id, b);
       for (let i = 0; i < (row.validClearGetItem || 0); i++) {
         const type = row.clearGetItemType[i];
+        // a built Booster (type 34, Part 6): boosters.js grants it once for this item (same key as a Booster recorded before)
+        if (type === BOOSTER_TYPE && grantBooster) { grantBooster(row.clearGetItemId[i], { stageId: id, objective: 0, slot: i }); continue; }
         if (!payable(type, row.clearGetItemId[i])) { recordPending(id, 0, i, type, row.clearGetItemId[i], row.clearGetItemNum[i]); continue; }
         pay(type, 'first-clear item', () => grantItem(type, row.clearGetItemId[i], row.clearGetItemNum[i]), row.clearGetItemNum[i]);
       }
@@ -155,6 +158,7 @@ function routesEvents({ player, savePlayer, masterRows, eventIndex, storyWeek, r
       const b = boosters.find((x) => x.objective === n);
       if (b) { recordBooster(id, b); continue; }
       const t = row.submissionRewardType?.[n - 1];
+      if (t === BOOSTER_TYPE && grantBooster) { grantBooster(row.submissionItemId[n - 1], { stageId: id, objective: n }); continue; }
       if (!payable(t, row.submissionItemId?.[n - 1])) { recordPending(id, n, 0, t, row.submissionItemId[n - 1], row.submissionItemNum?.[n - 1]); continue; }
       pay(row.submissionRewardType?.[n - 1], `objective ${n}`, () => grantObjective(row, n), row.submissionItemNum?.[n - 1]);
     }

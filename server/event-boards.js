@@ -28,7 +28,8 @@ const rareOf = (name) => { const m = /^(\d+)\s*★\s*(.+)$/.exec(String(name || 
 // {sel, id, value} or {why}; ix: itemIndex(master) plus id sets
 function matchDonor(ix, c) {
   const sel = c.rewardSelect, value = c.num || 1;
-  if (sel === 34) return { why: 'Booster: not implemented yet (Part 6)' };
+  // a Booster (Events Part 6): its emblem id when built (game_data/boosters.json, ix.boosters), else the cell waits
+  if (sel === 34) return ix.boosters && ix.boosters.has(Number(c.rewardId)) ? { sel, id: Number(c.rewardId), value: 1 } : { why: 'Booster: not built (Part 6 records)' };
   if (sel === 2) return { sel, id: 0, value };
   if (sel === 3) {
     const n = rareOf(c.name);
@@ -69,11 +70,12 @@ function allocate(sets, ids) {
 }
 
 // -> {sphereRows, arrayRows, masuRows, art, bySet, chains, ids: {boards}, report: {unmatched, skipped}}
-function buildEventBoards({ sets, master, ids }) {
+function buildEventBoards({ sets, master, ids, boosters = null }) {
   const boards = allocate(sets, ids);
   const idx = rb.itemIndex(master);
   const ix = { idx, material: new Set((master.material || []).map((r) => r.materialId)), title: new Set((master.title || []).map((r) => r.titleId)),
-    avatar: new Set((master.avatarParts || []).map((r) => r.avatarPartsId)), pet: new Set((master.petParts || []).map((r) => r.petPartsId)) };
+    avatar: new Set((master.avatarParts || []).map((r) => r.avatarPartsId)), pet: new Set((master.petParts || []).map((r) => r.petPartsId)),
+    boosters: boosters ? new Set([...boosters].map(Number)) : null };
   const out = { sphereRows: [], arrayRows: [], masuRows: [], art: [], bySet: {}, chains: {}, ids: { ...(ids || {}), boards }, report: { unmatched: [], skipped: [] } };
   for (const s of sets) {
     const idOf = (donor) => ID_BASE + boards[`${s.setKey}/${donor}`];

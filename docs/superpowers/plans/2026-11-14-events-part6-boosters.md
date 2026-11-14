@@ -202,7 +202,7 @@ Task 2 decisions (user, 14 November 2026): (a) group Boosters: the served medal 
 **Interfaces:**
 - Consumes: `game_data/boosters.json` (Task 3), `boosters.grant` (Task 4).
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `booster_type34_in_row`: a built Booster objective is type 34 with its `emblemId` in the stage row; label `boosterEffect`.
   - `booster_only_served`: the EV-1217 shape (only Boosters) is served when built, still `boosterOnly` when unbuilt.
   - `booster_objective_once` (test-event-routes): first clear grants, a replay grants nothing.
@@ -211,9 +211,9 @@ Task 2 decisions (user, 14 November 2026): (a) group Boosters: the served medal 
   - `held_set_served_with_kept_coins`: a set held in Part 3 is built, its balance is the kept one, Board 2 locked until Board 1 completes.
   - `raid_booster_cells_back` (test-make-raid): `boards.unmatched` holds only the JP-only items; the HD Vanitas board has its 3 Booster cells.
   - `unbuilt_booster_still_held`: a board with an unbuilt Booster cell stays held with its chained board.
-- [ ] **Step 2:** Run the files. Expected: the new tests fail, the old ones pass.
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Run `node server/test-make-events.js`, `test-event-routes.js`, `test-event-pages.js`, `test-event-boards.js`, `test-event-board-routes.js`, `test-event-calendar.js`, `test-make-raid.js`, `test-notices.js`, `test-boosters.js`, `test-make-emblems.js`. Expected: OK, the 8 known failures unchanged. Commit.
+- [x] **Step 2:** Run the files. Expected: the new tests fail, the old ones pass.
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Run `node server/test-make-events.js`, `test-event-routes.js`, `test-event-pages.js`, `test-event-boards.js`, `test-event-board-routes.js`, `test-event-calendar.js`, `test-make-raid.js`, `test-notices.js`, `test-boosters.js`, `test-make-emblems.js`. Expected: OK, the 8 known failures unchanged. Commit.
 
 ### Task 6: Booster icons (user gate)
 

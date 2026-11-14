@@ -291,7 +291,7 @@ function catalogPage(index, ctx = {}) {
 const RECON_LABEL = { atk: 'ATK', def: 'DEF', partHp: 'HP of the weak points', upMinutes: 'time limit', useAp: 'AP of a further attempt', coinOdds: 'Raid Coin odds',
   lux: 'Lux', moves: 'moves', hp: 'boss HP (from the tier tables)', hp_step: 'the week of an HP change', atk_curve: 'ATK below the level cap',
   attribute: 'attribute (from the boss colour)', background: 'fight background', boardAlias: 'a Raid Board reward name', boardPath: 'the order of the Raid Board cells',
-  boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week',
+  boosterIdByName: 'which copy of a Booster a board cell paid', boardTexture: 'a Spirit part texture', boardCost: 'a Raid Board cell cost', boardSet: 'which Raid Boards ran this week',
   boardArt: 'a Raid Board card picture (cut from a screenshot)', boardNoArt: 'a Raid Board card picture (missing)', boardArtWiki: 'a Raid Board card picture (from the Japanese wiki)',
   // the labels of the event raids (Task 10)
   rareOdds: 'odds of the rare boss', boardGender: 'both gender boards open', weekendTimer: 'weekend time limit', questObjectives: 'quest objectives',

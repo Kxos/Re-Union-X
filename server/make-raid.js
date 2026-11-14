@@ -883,7 +883,7 @@ function storyRefs(stages) {
   return { story, byWorld, of: (w) => byWorld.get(w) || story[story.length - 1] };
 }
 
-function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null }) {
+function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, master, models, config, ids, notices = null, boosters: boosterIndex }) {
   checkRanges(master);
   census = applyJpCensus(census, config.jpCensus); // corrections of the JP rows (jpCensus), before anything reads the census
   if (config.jpRaids && config.jpRaids.served === false) census = { ...census, rows: (census.rows || []).map((r) => (isJpRow(r) ? { ...r, jpOff: true } : r)) };
@@ -1278,7 +1278,10 @@ function buildRaid({ census, values, rewards, orig2016, boards, eventRewards, ma
   // Raid Boards (raid-boards.js): one set per census row with a raid, shared by its tiers
   if (boards) {
     const { doc, ev } = boardDocOf(boards, census, eventRewards, config.jpBoards);
-    const b = raidBoards.buildBoards({ doc, correctionsMd: (rewards || {}).correctionsMd, master, ids: numbers, config: config.boards || {}, censusIds: withRaid, families: BOARD_FAMILIES });
+    // the built Boosters (make-emblems.js, Events Part 6): their cells pay them; none: the cells stay declared in boards.unmatched
+    let boosters = boosterIndex !== undefined ? boosterIndex : null;
+    if (boosterIndex === undefined) { try { boosters = JSON.parse(fs.readFileSync(path.join(__dirname, 'game_data', 'boosters.json'), 'utf8')); } catch { /* no records on this machine */ } }
+    const b = raidBoards.buildBoards({ doc, correctionsMd: (rewards || {}).correctionsMd, master, ids: numbers, config: config.boards || {}, censusIds: withRaid, families: BOARD_FAMILIES, boosters });
     Object.assign(out, { sphereRows: b.sphereRows, arrayRows: b.arrayRows, masuRows: b.masuRows, boardArt: b.art });
     out.ids = { ...out.ids, boards: b.boardIds };
     out.report.boards = { ...b.report, count: b.sphereRows.length };
