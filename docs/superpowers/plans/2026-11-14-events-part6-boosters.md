@@ -81,6 +81,11 @@ Private evidence (local only, facts only in the repo): `D:\Progetto_Restauro_KH_
 **User decisions (14 November 2026).** All eight calls are approved. Before Task 1, the original Booster data is searched in
 every source we hold (private `tmp\eventsoosters\SOURCES_SEARCH.md`): original rows with real effect values would replace
 call 4 (effects rebuilt from descriptions) for the Boosters they cover.
+Search result (14-11): no source holds an original `Emblem` row with effect values (the donated 640 rows are the only
+ones; every effect field 0). Evidence of the encoding for Task 1: `medal.source` (int[3], `validSource`) carries Booster-group
+codes by month (e.g. 181101 Mickey, 190530 Sora & Stitch, 191001 Graveyard), likely the value of `Emblem.source`;
+`keyblade.category` has one id per keyblade Booster family, likely `keybladeCategory`; the `emblemIds` parser keeps
+duplicates; the JP Emblem panel shows a countdown from `endTime`.
 
 1. **The client applies the bonus.** The server sends rows and ids, the client computes the damage, the Medal Details plate and the dialog. Task 1 proves it on the bench with one hand-made row before anything else is built; if the client ignores it, the part stops and the user decides.
 2. **Expiry under the story-week calendar.** Proposal: each Booster lasts, from the moment it is obtained, as many days as its original span: original expiry minus the original start of the event (or board window) that paid it. A Booster from a story-week event then behaves almost as in the original (P Booster +25% of 2017-11-09: 21 days), and one from a kept event is not dead on arrival. Declared: in the original a Booster obtained late in its event lasted less. The «Expires» date the client shows is the per-player `endTime` of the served row (`clock.fakeString`, as mission `endDate`).
