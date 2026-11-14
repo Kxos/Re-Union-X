@@ -1181,3 +1181,35 @@ Bench (save `boost0`, master revision 319, test rows: «P Booster +25%» Medal /
 
 Still to check in the build task: a special attack with a Medal Booster (damage), the type 34 reward in an objective and on a
 board cell, whether reopening the list drops a Booster expired meanwhile, and the «7★» Boosters (no rarity field: held).
+
+## Boosters (Events Part 6, Tasks 2-7, 14 November 2026)
+
+- **Records** (private builder `tmp\eventsoostersuild_boosters.py`, user gate 14-11): 288 Boosters paid by served sources, 0 held:
+  19 from event quests (EV-0556, EV-0624, EV-1217), 265 Event Board cells (2018-10, 2019-02, 2019-04, 2019-06, 2019-10,
+  2019-12), 4 Raid Board cells (HD Vanitas (EX+) +5% x3, Final Form Sora +5%). Effects from the donor descriptions (label
+  `boosterEffect`); expiry from the event's notice (260; always the end of the event's month) or the event's window (28, label
+  `boosterExpiryWindow`); the span from the start of the event to that expiry is how long a Booster lasts from when it is obtained
+  (8 to 32 days). Raid cells named only by the wiki take distinct donor copies, lowest id first (label `boosterIdByName`, user 14-11).
+- **Group Boosters**: the served medal rows get the donor Booster-group codes after their series code (`make-emblems.js`, user
+  14-11): 126 medal rows (Mickey 181101, Sora & Peter Pan 190201, Sora & Chip & Dale 190322, Sora & Stitch 190530, Graveyard 191001).
+- **Server**: `make-emblems.js` (rows, `game_data/boosters.json`, group codes), `boosters.js` (owned, once per source, same id
+  renews, expiry by leaving the id out, pending Boosters granted at login), type 34 paid from quests (`routes-events.js`), Event Boards
+  (`event-boards.js`) and Raid Boards (`raid-boards.js`) through `grantSphereReward`.
+- **Icons**: `originals.tsv` section 55 (24 JP 4.3.1, imageId 30 and 52 from a community archive copy, user 14-11).
+- **Master 321 / resources 121**: changed only emblem, medal, stage (4 rows with a type-34 reward), evStage and the three sphere
+  tables; 2,843 quests as before. Event Board sets handed out: 11 (were 6). EV-1217 «Get Yourself a Booster» is no longer held for its
+  Boosters but for its map (`mapUnusable`, not imported); the 2019-02 set is not handed out (no entry of it served as a board event).
+
+Bench (instance 0, saves `boostold` = org20lx with a pending Booster [Mickey] +25% and EV-0556 kept, `boostexp` = the same, played
+past the expiry):
+
+| Check | Result | Frame |
+|---|---|---|
+| Login with a Booster recorded before Part 6 | granted once, log line; list shows its icon and «Expires 13 days» | `t6p_dialog` |
+| Group Booster on a Mickey medal (SN++ - KH II King Mickey) | plate «+25%» | `t6p_plate_mickey` |
+| Same on another medal (SN+ - Illustrated Cloud) | no plate | `t6p_plate_other` |
+| EV-0556 1/10 objective 1 (type 34) | the Treasure Trove Booster icon in the objectives popup | `t6p_05` |
+| Real clock past the expiry (`-RealNow 2026-11-29`) | «No current boosters.» | `t6p_expired` |
+
+Still to play on the bench: the EV-0556 objectives (all together) for the grant at the clear, a 2019-12 board Booster cell, the
+Gear Golem raid board cells, and the damage of a special attack with a Medal Booster.
