@@ -1527,7 +1527,8 @@ const tests = {
     assert.deepStrictEqual([e.name, e.catalogName], ['Event E-C', 'Challenge Organization XIII Pt.1']);
     const pages = require('./event-pages');
     const html = pages.expandCatalog ? pages.expandCatalog(pages.catalogPage(out.index, {})) : pages.catalogPage(out.index, {});
-    assert.ok(html.includes('Challenge Organization XIII Pt.1') && !html.includes('Event E-C'), 'catalogue row');
+    // the row shows the catalogue name; the record name stays only among the FIND search words (Filters, 13-11)
+    assert.ok(html.includes('Challenge Organization XIII Pt.1') && !/>Event E-C</.test(html), 'catalogue row');
   },
   // The Keyblade War part 3 (EV-0941): unionQuests give each quest its Union (index quest `union`), stagesOf lists the other
   // record's built quests on its card (sharedWith), the record's completionReward joins the bonus list (merged with the private
