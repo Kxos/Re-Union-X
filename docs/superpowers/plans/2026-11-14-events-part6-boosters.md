@@ -123,11 +123,11 @@ duplicates; the JP Emblem panel shows a countdown from `endTime`.
 - Create (private): `D:\Progetto_Restauro_KH_UX\tmp\events\boosters\spike\FINDINGS.md`, the Ghidra outputs beside it.
 - Modify: `docs/notes/events.md` (new section «Boosters: client behaviour (Part 6, Task 1)», behaviour only).
 
-- [ ] **Step 1:** In the private Ghidra project of the WW 4.3.1 client, find the readers of the `Emblem` master fields (vtable in `recon/ghidra/out/ww431/master_vtables.json`) and of `emblemIds`, with `khux_refs.py` / `khux_decomp_at.py`. Record in `FINDINGS.md`, per field: what the battle, the Medal Details plate and the Boosters dialog do with it; whether `endTime` is compared with the server time; whether duplicates in `emblemIds` add up; whether the bonus applies to the special attack or to all damage.
-- [ ] **Step 2:** Bench, master revision +1 with a test-only overlay of 3 hand-made rows (a P row by the Step 1 encoding, an Upright row, a keyblade row), not committed, and a save `boost0` with their ids in `emblemIds`.
+- [x] **Step 1:** In the private Ghidra project of the WW 4.3.1 client, find the readers of the `Emblem` master fields (vtable in `recon/ghidra/out/ww431/master_vtables.json`) and of `emblemIds`, with `khux_refs.py` / `khux_decomp_at.py`. Record in `FINDINGS.md`, per field: what the battle, the Medal Details plate and the Boosters dialog do with it; whether `endTime` is compared with the server time; whether duplicates in `emblemIds` add up; whether the bonus applies to the special attack or to all damage.
+- [x] **Step 2:** Bench, master revision +1 with a test-only overlay of 3 hand-made rows (a P row by the Step 1 encoding, an Upright row, a keyblade row), not committed, and a save `boost0` with their ids in `emblemIds`.
   - Expected frames `D:\Progetto_Restauro_KH_UX\screenshots\t6s_*.png`: the dialog with name, description and «Expires»; the cyan «+N%» plate on a P medal and none on an S medal; the same special attack on the same enemy with and without the row (damage numbers).
   - Also a stage row objective of type 34 and a type-4 board cell of type 34: popup, clear screen, board popup.
-- [ ] **Step 3:** Write the behaviour in `docs/notes/events.md`. **Show the user** `FINDINGS.md`, the frames and the eight builder's calls; wait. If the client does not apply the bonus, stop here.
+- [x] **Step 3:** Write the behaviour in `docs/notes/events.md`. **Show the user** `FINDINGS.md`, the frames and the eight builder's calls; wait. If the client does not apply the bonus, stop here.
 
 ### Task 2: Booster records (private)
 
