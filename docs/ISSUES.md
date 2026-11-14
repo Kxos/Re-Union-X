@@ -2,14 +2,14 @@
 
 One row per issue. Technical details live in `docs/notes/<area>.md` (Detail column),
 the history in `docs/journal/`. IDs (I-001, I-002, ...) are stable and **never reused**:
-a new issue takes the number after the last one used (last: **I-270**).
+a new issue takes the number after the last one used (last: **I-273**).
 
 Statuses: **IN PROGRESS** (an agent or the session is working on it) · **OPEN** · **TO VERIFY**
 (fix in the code, never seen on the bench) · **CLOSED** (fixed and tested on the bench) ·
 **ON HOLD** (deliberately postponed, still open) ·
 **OBSOLETE** (no longer relevant, closed). Proof = commit (hash) or date.
 
-Last revision: 13 November 2026.
+Last revision: 14 November 2026.
 
 ## Open
 
@@ -144,6 +144,7 @@ Last revision: 13 November 2026.
 
 | ID | Area | Title | Proof |
 |---|---|---|---|
+| I-273 | Battle | **Crash when the player's turn starts paralyzed** (tester report 14-11, Galaxy Tab S8, Quest 344 «Race Back to the Coliseum Pt. 2»: the two CAUTION Bad Dogs strike first, paralyze, «PLAYER TURN», the game closes, every time). Root cause: the WW master ships `badstatus` empty; at the start of a paralyzed turn the client reads the Paralysis row and dereferences a null pointer (SIGSEGV fault addr 0x10, no request to the server). Hidden until then because enemies paralyze only since I-181 and the bench Spirit's Esuna always cured it first. Fix: `server/badstatus-fix.js` copies the 8 original rows (Poison, Virus, Sleep, Paralysis x player/enemy) from thethiny's data, applied by `make-game-tables.js`; test `test-badstatus-fix.js`; master revision 317. **Benched 14-11** (save `q344`, Spirit off, revision 317): paralyzed player turn, Bad Dog defeated, no crash; same quest crashed 2/2 with revision 316 | 14-11 bench |
 | I-269 | Avatar | **Keyblade pose of the player character** (tester report 12-11, «not sure if this is a bug»): **false positive**, the pose is the original one (user 13-11) | 13-11 |
 | I-266 | Shop | **Tutorial: the guided Shop step points to a normal banner and the new player is stuck** (tester report 12-11). The guide looks for the drawType 5 plate of the original masters («Jewel Draw» id 10, single draw, 300 Jewels; we served only drawType 1). Now served while the tutorial window is open (story before quest 34, until drawn once), **second** in the list right after the Banner Catalog (the guide's arrow always points at the second plate: first in the list, the arrow was on the Catalog, A54 12-11; second, it is on the Jewel Draw), guaranteeing KH II King Mickey 3★ (user 12-11; the original draw table is not preserved); master revision 308 `server/gacha.js` TUTORIAL_BANNER, `server/test-tutorial-draw.js` | A54 12-11: arrow on the Jewel Draw, draw gave KH II King Mickey, 4e500e38 |
 | I-265 | Avatar | **Avatar Boards: the Filter button crashes the game** (tester report 12-11, always; reproduced 12-11: the layout loader on a missing `SphereBoard_Filter_ver120`, as I-127). The JP 4.3.1 original is imported (`jp_coco_layouts.txt`), resources 113 [risorse_layout](notes/risorse_layout.md#jp-originali) | A54 12-11: resources 113, Filter opens, female filter 59/118, no crash |

@@ -316,6 +316,8 @@ The fields absent from thethiny's data (reflections, upright/reverse, spEffect) 
 39 attacks with a status (e.g. 9301 «High Chance of Poison» of the Poison Apple, poison 10000), used by
 Flower Rider, Possessor, Loudmouth, Neoshadow, Creeper/Fire/Ice Plant, White Rose, Bad Dog, Stinging Bee...
 
+**Status ailment table (I-273, 14-11).** The WW master also ships `badstatus` empty. When the player's turn starts while paralyzed the client reads the Paralysis row (121/122) and crashes on a null pointer; poison and sleep read the same table. `server/badstatus-fix.js` copies the 8 original rows from thethiny's data (101-104 Poison/Virus, 111-112 Sleep, 121-122 Paralysis; target 0 / 1, power) and `make-game-tables.js` applies it. To reproduce a status on the bench, turn the Spirit off (`relogin.ps1 -NoPet`) or empty its gear: Esuna cures the status before the turn starts.
+
 <a id="cornice-avatar"></a>
 ## Avatar frame in the HUD (I-125, 14-10)
 

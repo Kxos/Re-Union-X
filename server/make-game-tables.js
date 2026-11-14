@@ -433,6 +433,8 @@ if (enemies && fs.existsSync(namesFile)) {
       `; rows with a special attack their model lacks: ${motion.missingMotions(enemies, atts, atkSp).length}`);
     fs.writeFileSync(attPath, JSON.stringify(atts)); // con le righe nuove delle mosse a 0
   }
+  // status ailment rows (the WW master has none: paralysis on the player crashed the client, I-273): badstatus-fix.js
+  console.log('badstatus-fix:', JSON.stringify(require('./badstatus-fix').fixFolder(OUT)));
   // effetto di comparsa: lwf/character/enemy/show_effect_fla/show_effect<showSwf>/ (nelle
   // risorse 1-4, 100, 501-506, 1000). Se manca (es. 5, 8, 15, 103) il campo va in crash
   // all'avvio della missione (missioni zoo): quello dello Shadow (show, showSwf, frame)
