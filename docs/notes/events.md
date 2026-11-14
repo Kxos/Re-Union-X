@@ -1211,5 +1211,20 @@ past the expiry):
 | EV-0556 1/10 objective 1 (type 34) | the Treasure Trove Booster icon in the objectives popup | `t6p_05` |
 | Real clock past the expiry (`-RealNow 2026-11-29`) | «No current boosters.» | `t6p_expired` |
 
-Still to play on the bench: the EV-0556 objectives (all together) for the grant at the clear, a 2019-12 board Booster cell, the
-Gear Golem raid board cells, and the damage of a special attack with a Medal Booster.
+Played by Claude on the bench (user 14-11, saves `boostold` with EV-0624 kept, `boostbd` = + EV-0973 kept and 20,000 test Event
+Coins in the 2019-12 set, `boostrd` = + WW-E38970-1 kept and 50,000 test Raid Coins; test balances only on these bench saves):
+
+| Check | Result | Frame |
+|---|---|---|
+| EV-0624 5/15, objective 1 «Defeat the target enemy within 1 turn» (Mickey Booster icon on the objective) | cleared: `Booster [Mickey] +5%` (1811009) granted once, key `{stageId 4001669, objective 1}` | `t6b_15` |
+| Same quest replayed, all objectives again | no grant | log |
+| Boosters list after the clear (same session) | two Mickey Boosters; the new one shows «13 days» at once (session-span endTime) | `t6b_dialog2` |
+| 2019-12 «Starlight Booster» Event Board, cell 1 (100 coins) | popup «Unlocked Starlight Booster +0.10!» with its original icon; granted once, key `{board 4000053, cell 18}`, 32 days | `t6b_30` |
+| Starlight +60 slot 1 after it | x4.300 (x4.200 before: +0.10) | `t6b_38` |
+| Gear Golem board «Booster [HD Vanitas (EX+)] 4/16/18», Unlock All | three copies granted (1804001-1804003, keys cells 16-18), 16 days | log |
+| SP Xion (Speed Reversed) | plate «+15%» (3 x 5%); Upright medals no plate | `t6b_plate_rev3` |
+| Boosters list with six | every icon shown, the community-archive icon 30 included | `t6b_dialog3` |
+
+Noted: the 2019-12 Event Board cards have no picture (blank cards; board art of that set not served, a separate issue). The EV-0556
+1/10 objectives (all together, 5 chests in 5 rooms) were not completed by bench automation; the special-attack damage with a Medal
+Booster was not measured (automated taps did not trigger a special attack): the client study and the plates cover it.
