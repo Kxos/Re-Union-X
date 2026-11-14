@@ -87,6 +87,8 @@ codes by month (e.g. 181101 Mickey, 190530 Sora & Stitch, 191001 Graveyard), lik
 `keyblade.category` has one id per keyblade Booster family, likely `keybladeCategory`; the `emblemIds` parser keeps
 duplicates; the JP Emblem panel shows a countdown from `endTime`.
 
+Task 2 decisions (user, 14 November 2026): (a) group Boosters: the served medal rows get the donor medal master's Booster-group codes (medal.source entries after the first, matched by medal name; entry 0 unchanged), so the client finds the group's medals; (b) the raid board Booster cells known only by name take distinct donor ids of that name, lowest first (label boosterIdByName).
+
 1. **The client applies the bonus.** The server sends rows and ids, the client computes the damage, the Medal Details plate and the dialog. Task 1 proves it on the bench with one hand-made row before anything else is built; if the client ignores it, the part stops and the user decides.
 2. **Expiry under the story-week calendar.** Proposal: each Booster lasts, from the moment it is obtained, as many days as its original span: original expiry minus the original start of the event (or board window) that paid it. A Booster from a story-week event then behaves almost as in the original (P Booster +25% of 2017-11-09: 21 days), and one from a kept event is not dead on arrival. Declared: in the original a Booster obtained late in its event lasted less. The «Expires» date the client shows is the per-player `endTime` of the served row (`clock.fakeString`, as mission `endDate`).
    - Rejected: (a) the expiry mapped onto the story calendar (a Booster from a kept past event would arrive already expired); (b) never expiring like the event coins (years of Boosters would stack without end).
@@ -153,14 +155,14 @@ duplicates; the JP Emblem panel shows a countdown from `endTime`.
 **Interfaces:**
 - Produces `makeEmblems(boosters) -> {rows, index}`; `game_data/boosters.json` `{byName: {name: emblemId}, byId: {emblemId: {name, spanDays, labels}}}`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `row_fields_from_effect`: a P +25% record gives a row with the 16 client fields in order and the Task 1 encoding.
   - `unbuilt_not_written`: an `unbuilt` name has no row and no index entry.
   - `span_days`: start 2017-11-09, expiry 2017-11-30 gives `spanDays` 21.
   - `served_end_time_per_player` (test-master-clock style): an owned Booster's served `endTime` equals `clock.fakeString(until, offset)`.
-- [ ] **Step 2:** Run `node server/test-make-emblems.js`. Expected: FAIL (module missing).
-- [ ] **Step 3:** Implement. Rows sorted by `sortId`; no row without a record.
-- [ ] **Step 4:** Run it and `node server/test-master-clock.js`. Expected: OK. Commit.
+- [x] **Step 2:** Run `node server/test-make-emblems.js`. Expected: FAIL (module missing).
+- [x] **Step 3:** Implement. Rows sorted by `sortId`; no row without a record.
+- [x] **Step 4:** Run it and `node server/test-master-clock.js`. Expected: OK. Commit.
 
 ### Task 4: `server/boosters.js`: ownership, expiry, `emblemIds`
 
@@ -174,7 +176,7 @@ duplicates; the JP Emblem panel shows a countdown from `endTime`.
 - `boosters({player, index, realNow, log}) -> {grant(emblemId, from) -> bool, activeIds(realMs) -> [emblemId], untilOf(emblemId) -> ms|null, payPending() -> n, list(userId) -> {emblemIds}}`.
 - State: `player.boosters = [{emblemId, from: {stageId, objective, slot} | {board, cell} | {pending: true}, at, until}]`; absent in older saves = none; reading never writes the save.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `grant_active_now`: a grant at t gives the id in `activeIds(t)` and `until = t + spanDays`.
   - `expired_not_sent`: `activeIds(until + 1)` is empty.
   - `expired_never_regranted`: `grant` of the same `from` after expiry returns false.
@@ -183,9 +185,9 @@ duplicates; the JP Emblem panel shows a countdown from `endTime`.
   - `pending_unbuilt_kept`: a pending name not in the index stays.
   - `emblem_list_other_profile_empty`: `list(2)` gives `{emblemIds: []}`.
   - `old_save_no_write`: a save without `boosters` lists nothing and is not written.
-- [ ] **Step 2:** Run `node server/test-boosters.js`. Expected: FAIL.
-- [ ] **Step 3:** Implement; replace every `emblemIds: []` in `server.js` (today three: `respondStageClear`, `inventoryBlocks`, `respondMoogleshopBuy`) and the schema-answered ones with `boosters.activeIds(now)`.
-- [ ] **Step 4:** Run `test-boosters.js`, `test-event-routes.js`, `test-master-clock.js`. Expected: OK, the 8 known failures unchanged. Commit.
+- [x] **Step 2:** Run `node server/test-boosters.js`. Expected: FAIL.
+- [x] **Step 3:** Implement; replace every `emblemIds: []` in `server.js` (today three: `respondStageClear`, `inventoryBlocks`, `respondMoogleshopBuy`) and the schema-answered ones with `boosters.activeIds(now)`.
+- [x] **Step 4:** Run `test-boosters.js`, `test-event-routes.js`, `test-master-clock.js`. Expected: OK, the 8 known failures unchanged. Commit.
 
 ### Task 5: Pay Boosters from quests and boards
 

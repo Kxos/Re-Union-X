@@ -932,6 +932,10 @@ const TABLES = path.join(__dirname, 'tables');
 for (const f of fs.existsSync(TABLES) ? fs.readdirSync(TABLES) : []) {
   if (f.endsWith('.json')) fs.copyFileSync(path.join(TABLES, f), path.join(OUT, f));
 }
+// Boosters (Events Part 6 Task 3): master emblem rows, game_data/boosters.json and the medal Booster-group codes from the private
+// Booster records (KHUX_BOOSTERS, make-emblems.js); after every medal patch (the records name the final medal ids) and before
+// make-raid / make-events, which pay Boosters through game_data/boosters.json
+require('./make-emblems').patch(OUT);
 // Raids: stage rows 980000-989999, evStage 8001+, raidEnemy 2000000+, raidSetting 30000+, raidReward, Raid Boards (sphere 3000000+), game_data/raids.json and
 // raid_maps.json from server/raid_config.json, raid_stats.json and the private sources (make-raid.js). KHUX_RAID=0 turns it off.
 // After the copy of server/tables: the Raid Boards are appended to the sphere tables copied from there

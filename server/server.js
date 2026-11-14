@@ -48,6 +48,21 @@ const gachaData = require('./gacha-data');
 const gacha = require('./gacha');
 const shopNoticePages = require('./shop-notice-pages'); // original notices of the Shop banners (Details)
 const homePlaza = require('./home-plaza');
+const boostersMod = require('./boosters'); // Boosters the player owns (Events Part 6, boosters.js)
+const makeEmblems = require('./make-emblems');
+// game_data/boosters.json (make-emblems.js): the built Boosters {byId, byName}, read again when the file changes
+let boosterIndexCache = null;
+function boosterIndex() {
+  const f = path.join(__dirname, 'game_data', 'boosters.json');
+  try {
+    const m = fs.statSync(f).mtimeMs;
+    if (!boosterIndexCache || boosterIndexCache.m !== m) boosterIndexCache = { m, data: JSON.parse(fs.readFileSync(f, 'utf8')) };
+    return boosterIndexCache.data;
+  } catch { return { byId: {}, byName: {} }; }
+}
+const playerBoosters = () => boostersMod.boosters({ player, index: boosterIndex(), realNow, log: (l) => console.log(l) });
+// emblemIds of every response that carries it: the Boosters not expired (the client never drops an expired one itself)
+const activeEmblemIds = () => playerBoosters().activeIds();
 const campaignGifts = require('./campaign-gifts'); // conditional Present campaigns (I-234)
 const gachaSeasons = require('./gacha-seasons');
 const petDraw = require('./pet-draw');
@@ -401,6 +416,8 @@ function respondLogin(res) {
   // event quest rewards kept because they could not be given (a Spirit part with the pet off, routes-events.js): paid once now if possible
   try { if (player.created && eventRoutes().payPending()) console.log('[event] kept rewards paid at login'); } catch (e) { console.log(`[event] payPending: ${e.message}`); }
   // community-goal bonuses due on a save complete before they existed (routes-events.js payBonuses): once per event
+  // Boosters recorded before Part 6 (player.pendingBoosters): granted once now with a full span (boosters.js payPending)
+  try { if (player.created && playerBoosters().payPending()) console.log('[booster] pending Boosters granted at login'); } catch (e) { console.log(`[booster] payPending: ${e.message}`); }
   try { if (player.created && eventRoutes().payBonuses()) console.log('[event] community goal bonus paid at login'); } catch (e) { console.log(`[event] payBonuses: ${e.message}`); }
   if (player.created) savePlayer();
   const body = {
@@ -632,6 +649,12 @@ function servedMasterRows(name, realMs) {
   }
   // moogleshop: le offerte a tempo (display 1, «N days left») scadono ogni lunedi' come le Weekly, in ora finta
   // (make-moogleshop.js fissava endDate alla generazione: «2137 days left», I-021)
+  // emblem (Boosters): an owned Booster shows the player's own expiry («Expires N days»), in fake time like the mission endDate
+  if (name === 'emblem') {
+    const off = clockOffset();
+    const idx = boosterIndex().byId || {};
+    return makeEmblems.servedRows(rows, playerBoosters().activeUntil(realMs), (ms) => clock.fakeString(ms, off), realMs, (id) => (idx[id] || {}).spanDays);
+  }
   if (name === 'moogleshop') {
     const end = clock.fakeString(clock.weekStartOf(clock.weekIndex(realMs) + 1), clock.twinOffset(realMs));
     return rows.map((r) => (r.display ? { ...r, endDate: end } : r));
@@ -1092,6 +1115,8 @@ function schemaResponse(apiPath) {
       o[keys[keys.length - 1]] = entry.values && p in entry.values ? entry.values[p] : defaultFor(entry.fields[p]);
     }
   }
+  // the owned Boosters in every schema-answered response that carries the list (advertisement, mission receive ...)
+  if ('emblemIds' in body) body.emblemIds = activeEmblemIds();
   return body;
 }
 
@@ -2728,7 +2753,7 @@ function respondStageClear(res, req) {
     // stage normale: anche pet.userPetParts[] ed
     // (emblemIds[]), entrambi obbligatori (senza: «200 ERROR :116»)
     pet: { userPetParts: PET_ENABLED ? pet().ownedParts() : [] },
-    emblemIds: [],
+    emblemIds: activeEmblemIds(),
     // poi, tutti obbligatori e in quest'ordine, l'inventario aggiornato:
     // userMaterials, userMedals, userSkills, userTitles, userKeyblades,
     // userDecks, userAvatarParts, subslot, infine getLux
@@ -3001,7 +3026,7 @@ function inventoryBlocks(now, snap = null) {
     userAvatarParts: userAvatarPartsData(),
     userTitles: userTitlesData(),
     pet: { userPetParts: PET_ENABLED ? pet().ownedParts() : [] },
-    emblemIds: [],
+    emblemIds: activeEmblemIds(),
     subslotMaxNum: kbEvo().subslotMaxNum(),
     userKeybladeSubslots: userKeybladeSubslotsData(),
     ...guiltBurst().lists(), // guiltBurstFirst/MaxUserMedalIds
@@ -4154,7 +4179,7 @@ function respondMoogleshopBuy(res, body) {
     userMedals: inv.userMedals,
     userSkills: inv.userSkills,
     userMaterials: inv.userMaterials,
-    emblemIds: [],
+    emblemIds: activeEmblemIds(),
     ...guiltBurst().lists(), // guiltBurstFirst/MaxUserMedalIds
   });
 }
@@ -5487,6 +5512,8 @@ function handler(scheme) {
       if (kind === 'bootstrap') return respondBootstrap(res);
       if (kind && kind.startsWith('multi')) return multi().respond(kind, res, entry.bodyDecoded);
 
+      // PUT /emblem/list (188, login chain and the profile «Boosters» list): the owned Boosters; another player's profile: none
+      if (req.url.split('?')[0].toLowerCase() === '/emblem/list') return send(res, 200, { ret: ret(), ...playerBoosters().list((entry.bodyDecoded || {}).userId) });
       const generated = schemaResponse(req.url.split('?')[0]);
       if (generated) return send(res, 200, generated);
 
