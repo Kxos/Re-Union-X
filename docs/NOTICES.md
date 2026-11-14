@@ -227,7 +227,7 @@ The quest lists of the events whose Event Boards are not served yet show no **Ev
 
 ### Org XIII events
 
-The **Organization XIII events** are back: today **31 events** are served, with **439 of their 492 quests** (the monthly XIII Events of 2016-17: 213 of 242 quests; the NEW XIII Events of 2018-19: 171 of 186 quests; Challenge Organization XIII of 2020: 30 of 38 quests; The Keyblade War part 3: 25 of 26 quests).
+The **Organization XIII events** are back: today **32 events** are served, with **451 of their 504 quests** (the monthly XIII Events of 2016-17: 213 of 242 quests; the NEW XIII Events of 2018-19: 183 of 198 quests; Challenge Organization XIII of 2020: 30 of 38 quests; The Keyblade War part 3: 25 of 26 quests).
 
 The monthly **XIII Events** of November 2016 to December 2017 have **no surviving quest record**: their quests are **rebuilt** from the community wiki and from the Japanese tables of their 13 stages (levels, enemies, objectives and rewards). 177 of them are played on the **original Japanese map** of the same quest, found by its content (the same enemies, counts, target and rooms). For the other 36 no original map survives in any source we hold: their map is **reconstructed** in the quest's original room, with the enemies and the target recorded on the community wiki (**not original**); 14 of them spanned several areas, which are rebuilt in their order and joined by exits.
 

@@ -227,10 +227,10 @@
  },
  "keptTabNote": "Where the KEPT EVENT tab of make_special_banners.py --section event goes on a card: left (default) or right, by evStageId (user 10-11: all at the left, the Quiz card 20004 too).",
  "keptTab": {},
- "orgxiiiCensusNote": "Events Part 5 Task 7: the census ids of the Organization XIII events, by group, for the «Org XIII events» section of the Events notice (routes-info-album.js eventNoticeFacts counts their served events and quests in events.json). hole = the monthly XIII Events of 2016-11..2017-12 (data hole: no surviving quest record, rebuilt from khuxwiki and the JP 13-stage tables); new = the NEW XIII Events of 2018-19, the XIII SP Challenge and the second notices (original records); challenge = Challenge Organization XIII (2020); keybladeWar = The Keyblade War part 3 «The Ultimate Test» per Union (parts 1-2, EV-0913 / EV-0929, are a story notice and gem quests, counted with the Gem quests).",
+ "orgxiiiCensusNote": "Events Part 5 Task 7: the census ids of the Organization XIII events, by group, for the «Org XIII events» section of the Events notice (routes-info-album.js eventNoticeFacts counts their served events and quests in events.json). hole = the monthly XIII Events of 2016-11..2017-12 (data hole: no surviving quest record, rebuilt from khuxwiki and the JP 13-stage tables); new = the NEW XIII Events of 2018-19, the XIII SP Challenge, the Final Challenge of April 2019 (EV-0781, the Part 1 pilot) and the second notices (original records); challenge = Challenge Organization XIII (2020); keybladeWar = The Keyblade War part 3 «The Ultimate Test» per Union (parts 1-2, EV-0913 / EV-0929, are a story notice and gem quests, counted with the Gem quests).",
  "orgxiiiCensus": {
   "hole": ["EV-0081", "EV-0097", "EV-0122", "EV-0139", "EV-0156", "EV-0182", "EV-0202", "EV-0219", "EV-0232", "EV-0248", "EV-0270", "EV-0295", "EV-0333", "EV-0340", "EV-0346"],
-  "new": ["EV-0441", "EV-0467", "EV-0488", "EV-0512", "EV-0536", "EV-0561", "EV-0570", "EV-0592", "EV-0621", "EV-0622", "EV-0647", "EV-0648", "EV-0678", "EV-0679", "EV-0714", "EV-0741"],
+  "new": ["EV-0441", "EV-0467", "EV-0488", "EV-0512", "EV-0536", "EV-0561", "EV-0570", "EV-0592", "EV-0621", "EV-0622", "EV-0647", "EV-0648", "EV-0678", "EV-0679", "EV-0714", "EV-0741", "EV-0781"],
   "challenge": ["EV-1103", "EV-1273"],
   "keybladeWar": ["EV-0941"]
  }

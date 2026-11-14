@@ -1118,3 +1118,28 @@ TARGET label (enemy id 10000 + base), same-name normal enemies wander too; in La
 target arrow. Time objectives were not judged (the hand-driven bench is far slower than a player).
 Still to check: CAUTION with a weaker deck, Marluxia targets (attribute icon, Lux per hit), the hpFromFootage gauges of
 Vexen III, Larxene I/IV/VIII and the Daily XIII quests.
+
+### Battle checks of 14 November 2026 (master rev 317 / resources 119)
+
+After the exact enemy graphics (13-11), the original quest music (13-11) and the status ailment table (I-273), on save `org20lx`
+(= `org20` with EV-0097 kept):
+- Larxene I (EV-0097, JP twin map, hpFromFootage Shadows Lv 25): field, battles, target, «Complete within 5 battles» x2 paid
+  (Huey, 20 Jewels: the record lists the objective twice, as the wiki), drops; no crash.
+- Challenge Organization XIII, No. XII Larxene 1/12 (Lv 500): exact atk1_o / atkSp / wait / dead; recorded with an empty Keyblade
+  (`tmp\p5bench\lx.mp4`): counter slash and lightning special drawn complete. The white squares of her defeat are the
+  original 21x24 white bitmap (pixel-identical to Xigbar 1607 dead, exact-twin): part of the Org XIII dead animation (user 14-11).
+- Time Missions SP card 22459 now drawn (the black heart of 11-11 is gone).
+Not judged: the hpFromFootage gauges of Larxene IV/VIII, Vexen III, Daily XIII (a max deck kills them in one hit; the
+mechanism is the one benched on Vexen XII and Larxene XI).
+
+## Part 5 summary (Org XIII events and The Keyblade War, 14 November 2026)
+
+- Served: 32 Org XIII events / 451 of 504 quests (monthly XIII Events 2016-17 rebuilt from khuxwiki + JP 13-stage tables: 213/242,
+  177 on the JP map of the same quest, 36 on reconstructed maps, 14 multi-area; NEW XIII 2018-19, SP Challenge, Final Challenge:
+  183/198; Challenge Organization XIII 2020: 30/38), The Keyblade War part 3 per Union 25/26. All events: 349 / 2,843 of 3,570.
+- Held: enemyAmbiguous 19, enemyMissing 2, mapUnusable 32 (reasons in the Event Catalog).
+- Notice «Events», section «Org XIII events» (counts from events.json, groups in `event_config.json` `orgxiiiCensus`);
+  its enemy-graphics paragraphs follow the exact import (the Lexaeus tint, Ribbitoad dot, Demon Tide frame, Leviathan glints,
+  Metal Giant sparks claims removed; I-250 enemies back).
+- Lessons: a map generator change needs a bench walk (guarded exits, zero arena polygon); a renamed/reused donor row needs its
+  own id range (2140000000 + donor id); never rerun `build_event_enemies.py` (add rows with `add_run_row.py`).
