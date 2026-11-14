@@ -220,8 +220,8 @@ Task 2 decisions (user, 14 November 2026): (a) group Boosters: the served medal 
 **Files:**
 - Modify: `tools/ldplayer/session/build-resources.ps1` (copy the JP `img/ui/emblem/Emblem_<imageId>.png` of the built rows into the generated pack).
 
-- [ ] **Step 1:** List the `imageId` values of the built rows; find each JP 4.3.1 file. Build `tmp\events\boosters\icons.html` (icon, name, description, imageId).
-- [ ] **Step 2:** **Show the user**; wait. A missing icon is asked about (Builder's call 8). Commit.
+- [x] **Step 1:** List the `imageId` values of the built rows; find each JP 4.3.1 file. Build `tmp\events\boosters\icons.html` (icon, name, description, imageId).
+- [x] **Step 2:** **Show the user**; wait. A missing icon is asked about (Builder's call 8). Commit.
 
 ### Task 7: Serve, resources, bench
 

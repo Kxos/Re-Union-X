@@ -21610,3 +21610,33 @@ lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38
 lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38383e383972033332e706e67.png	jp	=lwf/character/enemy/1604/atkSp/atkSp_e38393e38383e38388e3839ee38383e383972034342e706e67.png	# dedup twin (pixel-identical; ReLux index)
 lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38383e383972031362e706e67.png	jp	=lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38383e3839720372e706e67.png	# dedup twin (pixel-identical; ReLux index)
 lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38383e383972032312e706e67.png	jp	=lwf/character/enemy/hit_effect_fla/eff_2222/eff_2222_e38393e38383e38388e3839ee38383e383972031372e706e67.png	# dedup twin (pixel-identical; ReLux index)
+
+# 55. Booster icons (Events Part 6, Task 6, user 14-11): img/ui/emblem/Emblem_<imageId>.png of the served Booster rows (master
+#     emblem, make-emblems.js), shown in the profile «Boosters» list and as a type-34 reward. The WW resources lack them: the JP
+#     4.3.1 files; imageId 30 and 52 are not in the JP data: a community archive copy of the original icon (private, in --loc).
+img/ui/emblem/Emblem_1.png	jp
+img/ui/emblem/Emblem_2.png	jp
+img/ui/emblem/Emblem_3.png	jp
+img/ui/emblem/Emblem_4.png	jp
+img/ui/emblem/Emblem_5.png	jp
+img/ui/emblem/Emblem_6.png	jp
+img/ui/emblem/Emblem_7.png	jp
+img/ui/emblem/Emblem_8.png	jp
+img/ui/emblem/Emblem_11.png	jp
+img/ui/emblem/Emblem_15.png	jp
+img/ui/emblem/Emblem_27.png	jp
+img/ui/emblem/Emblem_28.png	jp
+img/ui/emblem/Emblem_30.png	loc	=img/ui/emblem/Emblem_30.png	# original icon, community archive copy (not in JP 4.3.1)
+img/ui/emblem/Emblem_31.png	jp
+img/ui/emblem/Emblem_32.png	jp
+img/ui/emblem/Emblem_33.png	jp
+img/ui/emblem/Emblem_34.png	jp
+img/ui/emblem/Emblem_42.png	jp
+img/ui/emblem/Emblem_43.png	jp
+img/ui/emblem/Emblem_44.png	jp
+img/ui/emblem/Emblem_46.png	jp
+img/ui/emblem/Emblem_47.png	jp
+img/ui/emblem/Emblem_48.png	jp
+img/ui/emblem/Emblem_49.png	jp
+img/ui/emblem/Emblem_50.png	jp
+img/ui/emblem/Emblem_52.png	loc	=img/ui/emblem/Emblem_52.png	# original icon, community archive copy (not in JP 4.3.1)
