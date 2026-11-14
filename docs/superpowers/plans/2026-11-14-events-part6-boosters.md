@@ -78,6 +78,10 @@ Private evidence (local only, facts only in the repo): `D:\Progetto_Restauro_KH_
 
 ## Builder's calls (to confirm at review)
 
+**User decisions (14 November 2026).** All eight calls are approved. Before Task 1, the original Booster data is searched in
+every source we hold (private `tmp\eventsoosters\SOURCES_SEARCH.md`): original rows with real effect values would replace
+call 4 (effects rebuilt from descriptions) for the Boosters they cover.
+
 1. **The client applies the bonus.** The server sends rows and ids, the client computes the damage, the Medal Details plate and the dialog. Task 1 proves it on the bench with one hand-made row before anything else is built; if the client ignores it, the part stops and the user decides.
 2. **Expiry under the story-week calendar.** Proposal: each Booster lasts, from the moment it is obtained, as many days as its original span: original expiry minus the original start of the event (or board window) that paid it. A Booster from a story-week event then behaves almost as in the original (P Booster +25% of 2017-11-09: 21 days), and one from a kept event is not dead on arrival. Declared: in the original a Booster obtained late in its event lasted less. The «Expires» date the client shows is the per-player `endTime` of the served row (`clock.fakeString`, as mission `endDate`).
    - Rejected: (a) the expiry mapped onto the story calendar (a Booster from a kept past event would arrive already expired); (b) never expiring like the event coins (years of Boosters would stack without end).
